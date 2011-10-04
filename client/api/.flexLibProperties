@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="false" useMultiPlatformConfig="false" version="1">
+  <includeClasses>
+    <classEntry path="com.flashphoner.Logger"/>
+    <classEntry path="com.flashphoner.api.Call"/>
+    <classEntry path="com.flashphoner.api.CallCommand"/>
+    <classEntry path="com.flashphoner.api.CallEvent"/>
+    <classEntry path="com.flashphoner.api.CallServerProxy"/>
+    <classEntry path="com.flashphoner.api.Flash_API"/>
+    <classEntry path="com.flashphoner.api.InstantMessage"/>
+    <classEntry path="com.flashphoner.api.MainCommand"/>
+    <classEntry path="com.flashphoner.api.MainEvent"/>
+    <classEntry path="com.flashphoner.api.MessageCommand"/>
+    <classEntry path="com.flashphoner.api.MessageEvent"/>
+    <classEntry path="com.flashphoner.api.PhoneCallback"/>
+    <classEntry path="com.flashphoner.api.PhoneController"/>
+    <classEntry path="com.flashphoner.api.PhoneModel"/>
+    <classEntry path="com.flashphoner.api.PhoneServerProxy"/>
+    <classEntry path="com.flashphoner.api.data.ErrorCodes"/>
+    <classEntry path="com.flashphoner.api.data.ModelLocator"/>
+    <classEntry path="com.flashphoner.api.data.PhoneConfig"/>
+    <classEntry path="com.flashphoner.api.interfaces.API"/>
+    <classEntry path="com.flashphoner.api.interfaces.APINotify"/>
+    <classEntry path="com.flashphoner.api.js.APINotifyJS"/>
+    <classEntry path="com.flashphoner.api.management.PhoneSpeaker"/>
+    <classEntry path="com.flashphoner.api.SoundControl"/>
+    <classEntry path="com.flashphoner.api.management.VideoControl"/>
+  </includeClasses>
+  <includeResources>
+    <resourceEntry destPath="sounds/HANGUP.mp3" sourcePath="sounds/HANGUP.mp3"/>
+    <resourceEntry destPath="sounds/CALL_OUT.mp3" sourcePath="sounds/CALL_OUT.mp3"/>
+    <resourceEntry destPath="sounds/BUSY.mp3" sourcePath="sounds/BUSY.mp3"/>
+    <resourceEntry destPath="sounds/REGISTER.mp3" sourcePath="sounds/REGISTER.mp3"/>
+    <resourceEntry destPath="sounds/CALL_IN.mp3" sourcePath="sounds/CALL_IN.mp3"/>
+  </includeResources>
+  <namespaceManifests/>
+</flexLibProperties>

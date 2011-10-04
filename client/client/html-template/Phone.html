@@ -1,0 +1,93 @@
+<!--
+MIT License: http://www.opensource.org/licenses/mit-license.php
+
+Copyright (c) 2011 Flashphoner
+All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Flash phone</title>
+<script src='swfobject.js'>
+</script>
+<script>
+var flashphoner;
+function sendDtmf(dtmf){
+	var result = flashphoner.sendDtmf(dtmf);
+	var msg = "sendDtmf result: "+result;
+	trace(msg);		
+}
+	
+function positionStatus(e){	
+	flashphoner = e.ref;
+}
+	
+function trace(str){
+	document.getElementById('console').innerHTML = document.getElementById('console').innerHTML +'\n'+ str;	
+}
+var params = {};
+params.menu = "true";
+params.swliveconnect = "true";
+params.allowfullscreen = "true";
+params.allowscriptaccess = "always";
+var attributes = {};
+var flashvars={}
+flashvars.config="flashphoner.xml";
+//flashvars.token="q1zaw2xse3cd";
+if (swfobject.hasFlashPlayerVersion("10.0.12")) {
+	swfobject.embedSWF("phone.swf", "flashphone", "220", "290", "10.0.12", "expressInstall.swf", flashvars, params,attributes,positionStatus);
+} else if (swfobject.hasFlashPlayerVersion("7.0")) {
+	//please download adobe flash player 10
+} else {
+	//please download adobe flash player 10	
+}
+</script>		
+</head>
+
+<body bgcolor="#ffffff" style="margin-top:5px;margin-left:5px">
+  <div id="flashphone">
+	 <a href="http://www.adobe.com/go/getflashplayer">
+	 	<img border="0" src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" />
+	 </a>
+  </div>
+
+<!--
+<p>DTMF JS</p>
+<p>
+<input type="button" onclick="sendDtmf('0')" value="0"/>
+<input type="button" onclick="sendDtmf('1')" value="1"/>
+<input type="button" onclick="sendDtmf('2')" value="2"/>
+<input type="button" onclick="sendDtmf('3')" value="3"/>
+<input type="button" onclick="sendDtmf('4')" value="4"/>
+<input type="button" onclick="sendDtmf('5')" value="5"/>
+<input type="button" onclick="sendDtmf('6')" value="6"/>
+<input type="button" onclick="sendDtmf('7')" value="7"/>
+<input type="button" onclick="sendDtmf('8')" value="8"/>
+<input type="button" onclick="sendDtmf('9')" value="9"/>
+<input type="button" onclick="sendDtmf('*')" value="*"/>
+<input type="button" onclick="sendDtmf('#')" value="#"/>
+<input type="button" onclick="sendDtmf('A')" value="A"/>
+<input type="button" onclick="sendDtmf('B')" value="B"/>
+<input type="button" onclick="sendDtmf('C')" value="C"/>
+<input type="button" onclick="sendDtmf('D')" value="D"/>
+</p>
+<p>Console output</p>
+<textarea id="console" cols="50" rows="10"></textarea>
+-->
+</body>
+</html>

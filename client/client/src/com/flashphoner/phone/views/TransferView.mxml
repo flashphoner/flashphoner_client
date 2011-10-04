@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2011 Flashphoner
+All rights reserved. This Code and the accompanying materials
+are made available under the terms of the GNU Public License v2.0
+which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+Contributors:
+    Flashphoner - initial API and implementation
+
+This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+-->
+<mx:Panel 
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="220" height="123" layout="absolute" isPopUp="true" cornerRadius="0" borderColor="#9D9D9D" borderStyle="solid" borderThickness="1" backgroundColor="#FFFFFF" backgroundAlpha="1.0">
+	<mx:Script>
+		<![CDATA[
+			import com.flashphoner.api.Call;
+			
+			import mx.core.Application;
+			import mx.managers.PopUpManager;
+			[Bindable]
+			public var call:Call;
+			
+			private var infoView:InfoView = new InfoView();			
+			
+			private function onClickOk():void{
+				if (call.transfer(transferTarget.text) == 0){
+					PopUpManager.removePopUp(this);
+				}else{
+					infoView.text = "Sip login or phone number is wrong";
+					PopUpManager.addPopUp(infoView,DisplayObject(Application.application),true);
+					PopUpManager.centerPopUp(infoView);
+					return;
+				}
+			}
+			private function close():void{
+				if (call.state == Call.STATE_HOLD){
+					call.setStatusHold(false);	
+				}				
+				PopUpManager.removePopUp(this);
+				
+			}
+		]]>
+	</mx:Script>
+	<mx:Text y="14"  width="198" text="Redirect this call to:" height="26" textAlign="center" color="#000000" fontSize="16" horizontalCenter="0"/>
+	<mx:Button y="86" label="Cancel" click="close()" fontWeight="bold" fontSize="16" width="114" height="24" x="10"/>
+	<mx:Button y="86" label="Ok" click="onClickOk()" fontWeight="bold" fontSize="16" width="76" height="24" horizontalCenter="61"/>
+	<mx:TextInput id="transferTarget" color="#5A5A5A" width="198" height="30" cornerRadius="3" borderStyle="solid" borderColor="#B7BABC" themeColor="#B7BABC" fontFamily="Arial" fontSize="20" backgroundColor="#DEEEFF" borderThickness="1" x="10" y="46"/>
+	
+</mx:Panel>

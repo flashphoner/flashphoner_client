@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2011 Flashphoner
+All rights reserved. This Code and the accompanying materials
+are made available under the terms of the GNU Public License v2.0
+which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+Contributors:
+    Flashphoner - initial API and implementation
+
+This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+-->
+<mx:Button label="{buttonText}" fontWeight="normal" color="#FBF9F9" borderColor="#009800" 
+	themeColor="#009800" fillAlphas="[1.0, 1.0]" fillColors="[#39AF39, #109F10, #45D045, #17C917]" fontSize="18"
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	width="195" height="38" creationComplete="init()" cornerRadius="0">
+	<mx:Style source="styles/style.css"/>
+	<mx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.flashphoner.Logger;
+			import com.flashphoner.api.Flash_API;
+			import com.flashphoner.api.SoundControl;
+			import com.flashphoner.phone.DataPhone;
+			
+			import flash.utils.setTimeout;
+			
+			import mx.controls.Alert;
+			import mx.core.Application;
+			import mx.managers.PopUpManager;			
+			
+			private var flashAPI:Flash_API = DataPhone.getInstance().flash_API;
+			private var cleanButton:Button;		
+			private var delayTimer:Timer;
+			
+			private var infoView:InfoView = new InfoView();
+			private var accessView:AccessView = new AccessView();
+			[Bindable]
+			public var calleeNumber:String;
+
+			private var buttonText:String = "Call";
+			
+			public var toHangupAdditional:Function; 
+			public var toCallAdditional:Function;
+			
+			private var timer:Timer = new Timer(1000,1);
+			private var timerChangeStatus:Timer = new Timer(500,0);
+									
+			private function init():void{
+				this.label=buttonText;
+				this.addEventListener(MouseEvent.CLICK,callHandler);
+			}
+			
+			public function callHandler(event:MouseEvent = null):void{
+				if (!flashAPI.modelLocator.logged){
+					phone(Application.application).onOpenSipAccountView();
+					return;
+				}
+				if ((calleeNumber==null)||(calleeNumber.length==0)){
+					infoView.text = "Enter phone number or sip address";
+					PopUpManager.addPopUp(infoView,DisplayObject(Application.application),true);
+					PopUpManager.centerPopUp(infoView);
+					return;
+				}
+				if (flashAPI.isMuted() == 1) {
+					if (!timerChangeStatus.running){
+						timerChangeStatus.addEventListener(TimerEvent.TIMER, onChangeStatus);
+						timerChangeStatus.start();
+					}
+					viewAccessMessage();
+				} else if (flashAPI.isMuted() == -1){
+					var result:int = flashAPI.call(calleeNumber,flashAPI.modelLocator.visibleName);
+					if (result == 0) {
+						delaythisEnabled(3000);
+					} else {
+						infoView.text = "Callee number is wrong";
+						PopUpManager.addPopUp(infoView,DisplayObject(Application.application),true);
+						PopUpManager.centerPopUp(infoView);
+						return;
+					}
+				} else {
+					infoView.text = "Microphone is not plugged in";
+					PopUpManager.addPopUp(infoView,DisplayObject(Application.application),true);
+					PopUpManager.centerPopUp(infoView);
+					return;					
+				}        
+			}
+			
+			private function viewAccessMessage():void{
+				PopUpManager.addPopUp(accessView,DisplayObject(Application.application),true);
+				PopUpManager.centerPopUp(accessView);
+				flashAPI.soundControl.getMicrophone().setLoopBack(true);
+				timer.addEventListener(TimerEvent.TIMER, timerTick);
+				timer.start();
+			}
+			
+			private function timerTick(event:TimerEvent){
+				flashAPI.soundControl.getMicrophone().setLoopBack(false);
+			}
+			
+			private function onChangeStatus(event:TimerEvent){
+				if (flashAPI.isMuted() == -1){
+					PopUpManager.removePopUp(accessView); 
+					timerChangeStatus.stop();
+					callHandler();
+				}
+			}			
+			
+			
+			private function delaythisEnabled(delay:int):void{
+				Logger.info("PhoneView.delayCallButtonEnabled() "+delay);
+				if (delayTimer!=null){
+					Logger.info("delay timer stop");
+					delayTimer.stop();
+					delayTimer.delay=delay;									
+				} else {
+					Logger.info("create delay timer");
+					delayTimer = new Timer(delay,1);
+					delayTimer.addEventListener(TimerEvent.TIMER,timerHandler);					
+				}
+				delayTimer.start();
+			}
+			
+			private function timerHandler(event:TimerEvent):void{
+				Logger.info("timerHandler fire");
+				this.enabled = true;
+			}			
+		]]>
+	</mx:Script>
+</mx:Button>

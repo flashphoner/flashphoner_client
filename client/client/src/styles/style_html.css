@@ -1,0 +1,682 @@
+/*
+Copyright (c) 2011 Flashphoner
+All rights reserved. This Code and the accompanying materials
+are made available under the terms of the GNU Public License v2.0
+which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+Contributors:
+    Flashphoner - initial API and implementation
+
+This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+*/
+body {
+	font: 12px Arial;
+}
+img {
+	border: 0;
+}
+button::-moz-focus-inner,   
+input[type="reset"]::-moz-focus-inner,   
+input[type="button"]::-moz-focus-inner,   
+input[type="submit"]::-moz-focus-inner,   
+input[type="file"] > input[type="button"]::-moz-focus-inner {
+	border: none;
+}
+#jsSWFDiv, #phoneDiv, #loginDiv, #incomingDiv, #infoDiv, #connectingDiv, #settingsDiv {
+	position: absolute;
+}
+/* -------- Background ------- */
+#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, .login_link, #transferDiv, #incomingDiv, #newChat {
+	background: #fff;
+}
+#phoneDiv {
+	background: #fff;
+}
+/* ---------- Border ------------ */
+#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, #transferDiv, #incomingDiv, #video_requestUnmuteDiv  {
+	border-width: 2px 5px 5px\0/; /*only for ie8*/
+	border-style: solid\0/; /*only for ie8*/
+	border-color: #ddd\0/; /*only for ie8*/
+}
+#connectingDiv, #infoDiv {
+	border-width: 5px\0/; /*only for ie8*/
+}
+/* ---------- Shadow ---------- */
+#settingsDiv, #transferDiv, #infoDiv, #loginDiv, #connectingDiv, #video_requestUnmuteDiv, #incomingDiv, #chatDiv
+ {
+	box-shadow: 0 0 10px black;
+	box-shadow: 0 0 10px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0 0 10px rgba(0,0,0,0.5);
+/* Firefox */
+	-webkit-box-shadow: 0 0 10px rgba(0,0,0,0.5);
+/* Safari, Chrome */
+}
+
+/* ----------------------------- */
+textarea, text, input {
+	outline: none;
+	-moz-appearance: none;
+}
+input::-webkit-input-placeholder {
+	color: #ccc;
+	font: 14px Arial;
+}
+#calleeText {
+	padding-left: 1px;
+}
+#jsSWFDiv {
+  height: 138px;
+}
+#phoneDiv {
+	left: 30px;
+	height: 240px;
+	width: 147px;
+	padding: 10px;
+	position: relative;
+}
+#versionOfProduct {
+	position: absolute;
+	top: 134px;
+	right: 17px;
+	font: 8px Arial;
+	color: #bbb;
+}
+/* ---------------- Buttons ---------------- */
+.closeButton {
+	background: url(../assets/close.png);
+	right: 3px;
+	opacity: 0.7;
+	position: absolute;
+	top: 3px;
+	width: 14px;
+	height: 14px;
+}
+#cameraButtonInCallee {
+	background: url(../assets/camera.png);
+	position: absolute;
+	top: 125px;
+	left: 39px;
+	width: 20px;
+	height: 20px;	
+}
+#cameraButton {
+	background: url(../assets/camera.png);
+	position: absolute;
+	top: 96px;
+	left: 29px;
+	width: 20px;
+	height: 20px;
+}
+#micButton {
+	background: url(../assets/mic.png);
+	position: absolute;
+	top: 95px;
+	left: 53px;
+	width: 20px;
+	height: 20px;
+}
+#soundButton {
+	background: url(../assets/sound.png);
+	position: absolute;
+	top: 95px;
+	left: 75px;
+	width: 20px;
+	height: 20px;
+}
+.iconButton {
+	width: 16px;
+	height: 16px;
+	float: left;
+	-moz-opacity: 0.6;
+	-khtml-opacity: 0.6;
+	opacity: 0.6;
+}
+.iconButton:hover {
+	-moz-opacity: 1;
+	-khtml-opacity: 1;
+	opacity: 1;
+}
+.transferButton, .holdButton {
+	position: absolute;
+	top: 97px;
+	width: 14px;
+	height: 14px;
+}
+.closeButton {
+	background: url(../assets/close.png);
+	right: 3px;
+}
+.transferButton {
+	background: url(../assets/transfer.png);
+	right: 7px;
+}
+.holdButton {
+	background: url(../assets/hold.png);
+	right: 27px;
+	visibility:hidden;
+}
+.holdImage {
+	position: absolute;
+	background: url(../assets/hold_big.png);
+	right: 55px;
+	top: 57px;
+	width: 30px;
+	height: 30px;
+	visibility: hidden;
+}
+/* ----------------------------------------- */
+/* ------------- ��������� �������� ------------ */
+.bar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 20px;
+	background-color: #ddd;
+	cursor: move;
+	font: 12px Arial;
+	font-weight: bolder;
+	color: #999;
+	text-shadow: #fff 0px 1px;
+	line-height: 20px;
+	text-align: left;
+}
+/* ----------------------------------- */
+/* ------------- Settings ------------ */
+#settingsDiv {
+	top: 80px;
+	left: 5px;
+	height: 113px;
+	width: 230px;
+	padding-top: 20px;
+	visibility: hidden;
+	background: url(../assets/mic_settings_background.png);
+}
+#settingsButton {
+	position: absolute;
+  	top: 126px;
+	left: 15px;
+	background: url(../assets/mic_settings.png);
+}
+#settingsButtonInCallView {
+	position: absolute;
+  	top: 98px;
+	left: 5px;
+	background: url(../assets/mic_settings.png);
+}
+/* -------------------------------------- */
+
+/* ----------------- Incoming call view ---------------- */
+#incomingDiv {
+	top: 110px;
+	left: 5px;
+	height: 72px;
+	width: 215px;
+	border: 1px solid #bbb;
+	padding: 5px;
+	padding-top: 25px;
+	font: 16px Arial;
+	text-align: center;
+	color: #aaa;
+	visibility: hidden;
+}
+#answerButton, #hangupButton {
+	width: 80px;
+	height: 22px;
+	color: white;
+	position: absolute;
+	top: 70px;
+}
+#answerButton {
+	background-color: #009900;
+	left: 28px;
+}
+#hangupButton {
+	background-color: #cc0000;
+	right: 27px;
+}
+#callerField {
+	font-weight: bold;
+	color: #000;
+}
+/* ------------------ Connecting ------------------------ */
+#connectingDiv {
+	top: 120px;
+	left: 10px;
+	height: 30px;
+	width: 200px;
+	padding: 10px;
+	float: left;
+	visibility: hidden;
+	font: 16px Arial;
+	color: #aaa;
+	text-align: center;
+	line-height: 30px;
+	-moz-opacity: 0.95;
+/* Mozilla 1.6 */
+	-khtml-opacity: 0.95;
+/* Konqueror 3.1, Safari 1.1 */
+	opacity: 0.95;
+/* CSS3 - Mozilla 1.7b +, Firefox 0.9 +, Safari 1.2+, Opera 9+ */
+}
+#connectingText {
+}
+/* ------------------ Info ------------------------ */
+#infoDiv {
+	top: 120px;
+	left: 10px;
+	height: 30px;
+	width: 200px;
+	padding: 10px;
+	float: left;
+	visibility: hidden;
+	font: 16px Arial;
+	color: #aaa;
+	text-align: center;
+	line-height: 30px;
+	-moz-opacity: 0.95;
+	/* Mozilla 1.6 */
+	-khtml-opacity: 0.95;
+	/* Konqueror 3.1, Safari 1.1 */
+	opacity: 0.95;
+	/* CSS3 - Mozilla 1.7b +, Firefox 0.9 +, Safari 1.2+, Opera 9+ */
+}
+#infoText {
+}
+/* ------------------------------------------------------ */
+#loggedUserDiv {
+	font: 12px Arial;
+	width: 48%;
+	height: 14px;
+	float: left;
+	text-align: left;
+	color: #777;
+}
+/* ------------ Video + Security settings view -------------- */
+#video_requestUnmuteDiv {
+	position: absolute;
+	top: 50px;
+	left: 20px;
+	overflow: hidden;
+	padding-top: 20px;
+
+}
+.videoDiv {
+	visibility: visible;
+	width: 215px;
+	height: 180px;
+	background-color: #000;
+}
+.securityDiv {
+	visibility: visible;
+	width: 215px;
+	height: 178px;
+	background-color: #fff;
+	padding-top: 20px;
+	border: 1px solid #ccc;
+}
+.closed {
+	width: 1px !important;
+	height: 1px !important;
+	visibility: hidden;
+}
+/*
+we use '.init' class to make div size 1x1 basically
+Because Firefox can`t operate with swf object located in
+div with zero size. 
+*/
+.init {
+	width: 1px;
+	height: 1px;
+	visibility: hidden;
+}
+
+#sendVideo {
+	width: 100px;
+	position: absolute;
+	bottom: 5px;
+	left: 10px;
+}
+#requestUnmuteText {
+	position: absolute;
+	text-align: center;
+	width: 100%;
+	font-weight: bolder;
+}
+#closeButton_video_requestUnmuteDiv{
+	background: url(../assets/close.png);
+	right: 3px;
+	opacity: 0.7;
+	position: absolute;
+	top: 3px;
+	width: 14px;
+	height: 14px;
+}
+/* -------------------------------------- */
+/* ------------ Transfer view -------------- */
+#transferDiv {
+	width: 200px;
+	height: 86px;
+	position: absolute;
+	top: 90px;
+	left: 20px;
+	text-align: center;
+	font: bold 16px Arial;
+	padding: 10px;
+	padding-top: 30px;
+	visibility: hidden;
+}
+#transferDivInput {
+	width: 180px;
+	margin-bottom: 20px;
+}
+#transferDivButton {
+	width: 80px;
+	margin: 0 6px 0 16px;
+}
+/* -------------------------------------- */
+/* ------ Call view-------- */
+.callDiv {
+	width: 142px;
+	height: 118px;
+	position: absolute;
+	top: 34px;
+	left: 48px;
+	float: left;
+	background: #333;
+	border: 1px solid #B7BABC;
+	color: #eee;
+	font: 22px Arial;
+	visibility: hidden;
+}
+.caller {
+	float: left;
+	position: absolute;
+	top: 35px;
+	text-align: center;
+	width: 100%;
+}
+#callState {
+	color: #ddd;
+	position: relative;
+	top: 64px;
+	font-size: 12px;
+	text-align: center;
+}
+/* ------------------------- */
+/* ------ Chat view -------- */
+#chatDiv {
+	width: 320px;
+	position: absolute;
+	top: 250px;
+	left: 20px;
+	visibility: hidden;
+	background-color: #ddd;
+}
+.chatBox {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	border: 1px solid #ddd;
+	background: #fff;
+}
+.chatTextarea {
+	border: 0;
+	width: 305px;
+	height: 200px;
+	margin: 5px;
+	resize: none;
+	overflow: auto;
+	word-wrap: break-word;
+}
+.messageInput {
+	margin: 4px;
+	width: 238px;
+	float: left;
+}
+.messageSend {
+	margin-top: 3px;
+	width: 60px;
+	margin-right: 3px;
+}
+.myNick, .yourNick {
+	color: #ccc;
+	font-weight: bold;
+	padding-top: 7px;
+}
+.yourNick {
+	color: #91c8ff;
+}
+#tabul {
+	padding: 0;
+	margin: 0;
+	margin-left: 50px;
+	padding: 0;
+	z-index: 10;
+	background-color: #ddd;
+
+}
+#tabul li {
+	display: inline;
+	cursor: pointer;
+	max-width: 200px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.ntabs {
+	background: #ddd;
+	margin-right: -1px;
+	font-size: 11px;
+	font-weight: bold;
+	color: #333;
+	padding: 4px 2px 2px 6px;
+	position: relative;
+	max-width: 200px;
+	text-overflow: ellipsis;
+}
+.add {
+	padding: 3px 5px;
+}
+.ctab {
+	background: #fff;
+	position: relative;
+	border-bottom-color: #fff;
+}
+.close {
+	text-decoration: none;
+	color: #bbb;
+	font-size: 16px;
+	padding: 0 4px;
+}
+.close:hover {
+	color: #333;
+}
+#tabcontent {
+	z-index: -10;
+	position: relative;
+	top: -1px;
+	border-top: none;
+	height: 240px;
+}
+/* ---------------------------------------------------- */
+.button {
+	background: #dcdcdc;
+	width: 46px;
+	height: 22px;
+	float: left;
+	margin: 0px 3px 3px 0;
+	text-align: center;
+	font: bold 14px Arial;
+	line-height: 19px;
+	border: solid 1px #ddd; 
+  border-style: outset;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	outline: none;
+}
+.call_button, .chat_button {
+	width: 81px;
+	background-color: #009800;
+	float: left;
+	height: 30px;
+	font: 20px Arial;
+	color: #fff;
+	text-align: center;
+	line-height: 30px;
+	border: 1px outset;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	cursor: default;
+	margin-bottom: 3px;
+}
+.chat_button {
+	width: 60px;
+	background-color: #5555dd;
+	margin-right: 3px;
+}
+/* -------------- Log in ------------- */
+.login_link {
+	width: 42px;
+	height: 14px;
+	text-decoration: underline;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	cursor: pointer;
+	float: left;
+	border: none;
+	padding: 0;
+	color: #bbb;
+	text-align: left;
+	background: none;
+	font: 11px Arial;
+}
+#loginDiv {
+	top: 75px;
+	left: 5px;
+	height: 130px;
+	width: 200px;
+	padding: 20px;
+	padding-top: 25px;
+	float: left;
+	visibility: hidden;
+}
+#loginMainButton {
+	position: absolute;
+	top: 10px;
+	right: 6px;
+}
+#loginButton {
+	margin: 10px 0 0 15px;
+	width: 80px;
+}
+/* -------------------------------------- */
+/* --------- Console ------------*/
+#console {
+	position: absolute;
+	top: 35px;
+	left: 250px;	
+	height: 300px;
+  width: 700px;
+	float: left;
+	background-color: #333;
+	font: 14px Courier;
+	color: #eee; 
+	padding: 10px;
+  overflow: auto;
+	word-wrap: break-word;
+}
+/* -------------------------------- */
+.phone_screen_1 {
+	width: 141px;
+	background: #deeeff;
+	float: left;
+	margin: 2px 0 0 0;
+	font: 22px Arial;
+	border: 1px solid #b7babc;
+	border-bottom: none;
+	color: #5a5a5a;
+	outline: none;
+	line-height: 22px;
+}
+.phone_screen_2 {
+	width: 142px;
+	height: 90px;
+	background: #deeeff;
+	float: left;
+	margin: 0 0 2px 0;
+	font: 22px Arial;
+	border: 1px solid #b7babc;
+	border-top: none;
+	color: #5a5a5a;
+	outline: none;
+}
+.login_label {
+	float: left;
+	width: 100px;
+	height: 22px;
+	line-height: 22px;
+}
+.login_input {
+	float: left;
+	width: 100px;
+	height: 22px;
+}
+
+.login_input input{
+	width: 100px;
+}
+/* ---- Additional styles ---- */
+#auto_login_token {
+	width: 0;
+	height: 0;
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+/* -------------- Z indexes -------------*/
+/*#phoneDiv {
+	z-index: 12;
+}
+*/
+#incomingDiv {
+	z-index: 14;
+}
+#connectingDiv {
+	z-index: 15;
+}
+#infoDiv {
+	z-index: 30;
+}
+#jsSWFDiv {
+	z-index: 100;
+}
+#settingsDiv {
+	z-index: 17;
+}
+#messageDiv {
+	z-index: 18;
+}
+/*.callDiv {
+	z-index: 13;
+}
+*/
+#chatDiv {
+	z-index: 21;
+}
+#loginDiv {
+	z-index: 19;
+}
+#video_requestUnmuteDiv {
+	z-index: 20;
+}
+#transferDiv {
+	z-index: 22;
+}
+.closeButton {
+	z-index: 101;
+}

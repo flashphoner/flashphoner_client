@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2011 Flashphoner
+All rights reserved. This Code and the accompanying materials
+are made available under the terms of the GNU Public License v2.0
+which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+Contributors:
+    Flashphoner - initial API and implementation
+
+This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+-->
+<views:DragPanel xmlns:ctrl="com.flashphoner.*"
+				 xmlns:views="com.flashphoner.phone.views.*"
+		  xmlns:mx="http://www.adobe.com/2006/mxml" 
+		  width="160" height="235" 
+		  layout="absolute" 
+		  borderStyle="solid" 
+		  cornerRadius="0" 
+		  borderThickness="1" 
+		  borderColor="#9D9D9D" 
+		  verticalScrollPolicy="off"
+		  horizontalScrollPolicy="off">
+	
+	<mx:Script>
+		   	<![CDATA[
+				import com.flashphoner.util.HashMap;
+				
+				import flashx.textLayout.operations.InsertInlineGraphicOperation;
+				
+				import mx.containers.VBox;
+				import mx.controls.Button;
+				import mx.controls.Label;
+				import mx.managers.PopUpManager;
+			   
+			   		public var numChild:Number = 0;
+					private var tabsMap:HashMap = new HashMap();
+			   
+			   		public function addTab(userName:String):InstantMessageChatView {
+						userName = userName.toLowerCase();
+						var imcv:InstantMessageChatView;
+						if (tabsMap.containsKey(userName)){
+							imcv = tabsMap.getValue(userName);
+						}else{
+							imcv = new InstantMessageChatView();
+							imcv.init(userName);
+							tn.addChild(imcv);
+							tabsMap.put(userName,imcv);							
+						}
+						return imcv;
+					}
+				
+					public function size():int{
+						return tabsMap.size();
+					}
+						
+			   
+			   		private function removeTab():void {
+				   		if(tn.numChildren > 0){
+			   				numChild --;
+			   				tn.removeChildAt(numChild);
+			   			}
+			   		}
+				
+					public function close():void{
+						PopUpManager.removePopUp(this);
+					}			
+				
+					private function sendInstantMessage():void{
+						(InstantMessageChatView(tn.selectedChild)).sendInstantMessage();
+					}
+				
+					public function pushMessage(messageObject:Object){
+						var userNameFrom:String = messageObject["from"].toLowerCase();
+						var userNameTo:String = messageObject["to"].toLowerCase();
+						var imcv:InstantMessageChatView;
+						if (tabsMap.containsKey(userNameTo)){
+							imcv = tabsMap.getValue(userNameTo);
+						} else if (tabsMap.containsKey(userNameFrom)){
+								imcv = tabsMap.getValue(userNameFrom);
+						}else{
+							imcv = addTab(userNameFrom);
+						}
+						imcv.pushMessage(messageObject);
+						
+						tn.selectedChild = imcv;
+					}
+			   ]]>
+		   </mx:Script>
+	<mx:TabNavigator id="tn"  width="160" height="235" borderStyle="none" />
+	
+	<mx:Button id="sendButton" x="0" y="0" width="54" height="24" label="Send"
+			   borderColor="#009800" click="sendInstantMessage();" color="#FFFFFF" cornerRadius="3"
+			   fillAlphas="[1.0, 1.0]" fillColors="[#39AF39, #109F10, #45D045, #17C917]"
+			   fontFamily="Arial" fontSize="16" fontStyle="normal" fontWeight="bold"
+			   textDecoration="none" themeColor="#009800" visible="false"/>
+	<mx:Button id="closeButton" x="140" y="2" width="16" height="16" label="X" click="close();"
+			   color="#FFFFFF" styleName="close"/>
+	<!--  
+	width="20" 
+	height="20"  
+	borderColor="#FF0000"
+	color="#FFFFFF" 
+	cornerRadius="10" 
+	fontSize="12" 
+	fontStyle="normal"
+	fontWeight="bold" 
+	themeColor="#FF0000"
+	-->
+	
+</views:DragPanel>

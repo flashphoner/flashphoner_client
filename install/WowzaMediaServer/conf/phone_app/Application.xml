@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><Root>
+	<Application>
+		<!-- Uncomment to set application level timeout values
+		<ApplicationTimeout>60000</ApplicationTimeout>
+		<PingTimeout>12000</PingTimeout>
+		<ValidationFrequency>8000</ValidationFrequency>
+		<MaximumPendingWriteBytes>0</MaximumPendingWriteBytes>
+		<MaximumSetBufferTime>60000</MaximumSetBufferTime>
+		<MaximumStorageDirDepth>25</MaximumStorageDirDepth>
+		-->
+		<Connections>
+			<AutoAccept>false</AutoAccept>
+			<AllowDomains/>
+		</Connections>
+		<!--
+			StorageDir path variables
+			
+			${com.wowza.wms.AppHome} - Application home directory
+			${com.wowza.wms.ConfigHome} - Configuration home directory
+			${com.wowza.wms.context.VHost} - Virtual host name
+			${com.wowza.wms.context.VHostConfigHome} - Virtual host config directory
+			${com.wowza.wms.context.Application} - Application name
+			${com.wowza.wms.context.ApplicationInstance} - Application instance name
+			
+		-->
+		<Streams>
+			<StreamType>phone_rtmp_to_voip</StreamType>
+			<StorageDir>${com.wowza.wms.context.VHostConfigHome}/content</StorageDir>
+			<KeyDir>${com.wowza.wms.context.VHostConfigHome}/keys</KeyDir>
+			<LiveStreamPacketizers/>			
+			<Properties>
+				<!-- Properties defined here will override any properties defined in conf/Streams.xml for any streams types loaded by this application -->
+				<!--
+				<Property>
+					<Name></Name>
+					<Value></Value>
+				</Property>
+				-->
+			</Properties>
+		</Streams>
+		<SharedObjects>
+			<StorageDir/>
+		</SharedObjects>
+		<Client>
+			<IdleFrequency>-1</IdleFrequency>
+			<Access>
+				<StreamReadAccess>*</StreamReadAccess>
+				<StreamWriteAccess>*</StreamWriteAccess>
+				<StreamAudioSampleAccess/>
+				<StreamVideoSampleAccess/>
+				<SharedObjectReadAccess>*</SharedObjectReadAccess>
+				<SharedObjectWriteAccess>*</SharedObjectWriteAccess>
+			</Access>
+		</Client>
+		<RTP>
+			<!-- RTP/Authentication/[type]Methods defined in Authentication.xml. Default setup includes; none, basic, digest -->
+			<Authentication>
+				<PublishMethod>digest</PublishMethod>
+				<PlayMethod>digest</PlayMethod>
+			</Authentication>
+			<!-- RTP/AVSyncMethod. Valid values are: senderreport, systemclock, rtptimecode -->
+			<AVSyncMethod>senderreport</AVSyncMethod>
+			<MaxRTCPWaitTime>12000</MaxRTCPWaitTime>
+			<Properties>
+				<!-- Properties defined here will override any properties defined in conf/RTP.xml for any depacketizers loaded by this application -->
+				<!--
+				<Property>
+					<Name></Name>
+					<Value></Value>
+				</Property>
+				-->
+			</Properties>
+		</RTP>
+		<MediaCaster>
+			<Properties>
+				<!-- Properties defined here will override any properties defined in conf/MediaCasters.xml for any MediaCasters loaded by this applications -->
+				<!--
+				<Property>
+					<Name></Name>
+					<Value></Value>
+				</Property>
+				-->
+			</Properties>
+		</MediaCaster>
+		<MediaReader>
+			<Properties>
+				<!-- Properties defined here will override any properties defined in conf/MediaReaders.xml for any MediaReaders loaded by this applications -->
+				<!--
+				<Property>
+					<Name></Name>
+					<Value></Value>
+				</Property>
+				-->
+			</Properties>
+		</MediaReader>
+		<LiveStreamPacketizer>
+			<Properties>
+				<!-- Properties defined here will override any properties defined in conf/LiveStreamPacketizers.xml for any LiveStreamPacketizers loaded by this applications -->
+				<!--
+				<Property>
+					<Name></Name>
+					<Value></Value>
+				</Property>
+				-->
+			</Properties>
+		</LiveStreamPacketizer>
+		<HTTPStreamer>
+			<Properties>
+				<!-- Properties defined here will override any properties defined in conf/HTTPStreamers.xml for any HTTPStreamer loaded by this applications -->
+				<!--
+				<Property>
+					<Name></Name>
+					<Value></Value>
+				</Property>
+				-->
+			</Properties>
+		</HTTPStreamer>
+		<Repeater>
+			<OriginURL/>
+			<QueryString/>
+		</Repeater> 
+		<Modules>
+			<Module>
+				<Name>base</Name>
+				<Description>Base</Description>
+				<Class>com.wowza.wms.module.ModuleCore</Class>
+			</Module>
+			<Module>
+				<Name>properties</Name>
+				<Description>Properties</Description>
+				<Class>com.wowza.wms.module.ModuleProperties</Class>
+			</Module>
+			<Module>
+				<Name>logging</Name>
+				<Description>Client Logging</Description>
+				<Class>com.wowza.wms.module.ModuleClientLogging</Class>
+			</Module>
+			<Module>
+				<Name>flvplayback</Name>
+				<Description>FLVPlayback</Description>
+				<Class>com.wowza.wms.module.ModuleFLVPlayback</Class>
+			</Module>
+            <Module>
+				<Name>phone_app</Name>
+				<Description>phone_app</Description>
+				<Class>com.flashphoner.phone_app.PhoneApp</Class>
+			</Module> 
+		</Modules>
+		<Properties>
+			<!-- Create sip accounts pool for phone_app demo application -->
+			<Property>				
+			</Property>		
+			
+		</Properties>
+	</Application>
+</Root>

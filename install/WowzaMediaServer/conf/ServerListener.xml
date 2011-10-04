@@ -1,0 +1,3 @@
+<ServerListener>
+    <BaseClass>com.flashphoner.phone_app.PhoneServerListener</BaseClass>
+</ServerListener>
