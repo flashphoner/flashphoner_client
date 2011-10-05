@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!--
+MIT License: http://www.opensource.org/licenses/mit-license.php
+
+Copyright (c) 2011 Flashphoner
+All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<!-- JQuery --> 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.js" type="text/javascript"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.15/jquery-ui.js" type="text/javascript"></script>
+<!-- ****** -->
+
+<!-- Styles -->
+<link rel="stylesheet" type="text/css" href="styles/trackbar.css" />
+<link rel="stylesheet" type="text/css" href="styles/style_c2c_js.css" />
+<link rel="stylesheet" type="text/css" href="styles/style_jquery_ui_1.8.15.css" />
+<!-- ****** -->
+
+<!-- Other scripts -->
+<script type="text/javascript" src="swfobject.js"></script>
+<script type="text/javascript" src="js/StaticData.js"></script>
+<script type="text/javascript" src="js/trackbar.js"></script>
+<script type="text/javascript" src="js/flashLoader.js"></script>
+<!-- ************* -->
+<title>Phone</title>
+</head>
+<body>
+
+<!-- Structure
+
+1. c2cDiv (Main view)
+    - caller
+    - call state
+    - mic/sound buttons
+    - dialpad
+                   
+2. video_requestUnmuteDiv (video will chown as background)
+    2.1. 'Request unmute' case - shown in the beggining
+    - Label "You are talking to xxxxxx. Click Allow to he could hear you"
+    - Flash with security panel
+    2.2. 'Video' case 
+    - Video 
+
+3. connectingDiv
+    - System messages
+    
+4. chatDiv
+    - Chat
+    
+5. settingsDiv
+    - Mic/sound settings         
+-->
+
+<div id="c2cDiv">
+      
+      <input id="auto_login_token" type="submit" value=""/> 
+       
+      <!--
+      <input class="chat_button" id="chatButton" type="submit" value="Chat" />
+      <input class="call_button" id="callButton" type="submit" value="Call" />
+      --
+      <div id="dialPad">
+      <input class="button numberButton" type="submit" value="1" />
+      <input class="button numberButton" type="submit" value="2" />
+      <input class="button numberButton" type="submit" value="3" />
+      <input class="button numberButton" type="submit" value="4" />
+      <input class="button numberButton" type="submit" value="5" />
+      <input class="button numberButton" type="submit" value="6" />
+      <input class="button numberButton" type="submit" value="7" />
+      <input class="button numberButton" type="submit" value="8" />
+      <input class="button numberButton" type="submit" value="9" />
+      <input class="button numberButton" type="submit" value="*" />
+      <input class="button numberButton" type="submit" value="0" />
+      <input class="button numberButton" type="submit" value="#" />
+	    </div>
+	    -->
+  
+      <div id="caller" class="caller">Support</div> 
+      <div id="callState">...calling...</div>
+      
+	    <div id="cameraButtonC2c" class="iconButton"></div>
+      <div id="micButtonC2c" class="iconButton"></div>
+      <div id="soundButtonC2c" class="iconButton"></div>  
+      <div id="hangupButtonC2c" class="iconButton"></div>
+      <div id="dialpadButtonC2c" class="iconButton"></div>
+  
+  	  <div id="versionOfProduct"></div>
+</div>
+<!-- *********** -->
+
+<div id="requestUnmute">
+  You are calling to <b>support</b>.
+  Please click "Allow" to continue
+</div>
+
+<!-- Connecting view -->
+<div id="connectingDiv">
+  <div id="connectingText">Connecting...</div>
+</div>
+<!-- **************** -->
+
+<!-- Video + RequestUnmuted view -->
+<div id="video_requestUnmuteDiv" class="init">
+  <div id="requestUnmuteText">
+  You are calling to <b>support</b>.
+  Please click "Allow" to continue
+  </div>
+  <div id="closeButton_video_requestUnmuteDiv"></div>
+
+  <div id="jsSWFDiv">
+    <a href="http://www.adobe.com/go/getflashplayer">
+		  <img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player"/>
+	  </a>
+  </div>
+  
+  <input type="button" class="button" id="sendVideo" value="Send video" />
+</div>
+<!-- *************************** -->
+
+<!-- Settings view -->
+<div id="settingsDiv">
+  <div class="bar">&nbsp;&nbsp;Settings</div>
+	<br />
+	<script type="text/javascript">
+		trackbar.getObject('micVolume').init({
+			onMove : function() {
+				micVolume = this.leftValue;	
+			},
+			dual : false, // two intervals
+			width : 150, // px
+			leftValue : 50, // unit of value
+			rightLimit : 100, // unit of value
+			rightValue : 0 // unit of value
+		});
+	</script>
+
+	<script type="text/javascript">
+		trackbar.getObject('speakerVolume').init({
+			onMove : function() {
+				speakerVolume = this.leftValue;	
+			},
+			dual : false, // two intervals
+			width : 150, // px
+			leftValue : 50, // unit of value
+			rightLimit : 100, // unit of value
+			rightValue : 0 // unit of value
+		});
+	</script>
+	
+  <input id="saveMicSettings" class="button" type="submit" value="Save" style="margin: 13px 0 0 85px; width: 60px;" />
+	<div class="closeButton"></div>
+	
+	
+</div>
+<!-- ************* -->
+
+<div id="chatDiv">
+</div>
+
+</body>
+</html>

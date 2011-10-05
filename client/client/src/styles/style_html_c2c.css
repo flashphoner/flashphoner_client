@@ -1,0 +1,96 @@
+/**
+ * Here we importing phone styles which also used for click2call
+ * Please be carefull and adjust path to this css.
+ */
+
+	@import url("style_html.css");
+	
+#c2cDiv {
+	position: absolute;
+	height: 240px;
+	width: 320px;
+	/*padding: 10px;*/
+	position: relative;
+	background: #444;
+	/*visibility: hidden;*/
+}
+
+#dialPad {
+	width: 81px;
+	height: 69px;
+	bottom: 0px;
+	right: 0px;
+	position: absolute;
+}
+
+/**
+ * TODO: change it to request_unmuteDiv
+ */
+ 
+#requestUnmute {
+	height: 220px;
+	width: 300px;
+	background-color: #444;
+	color: #ddd;
+	font: 30px Arial;
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 10px;
+	visibility: hidden;
+}
+
+.caller {
+	position: absolute;
+	top: 65px;
+	font: 50px Arial;
+	color: #fff;
+}
+
+#callState {
+	position: absolute;
+	width: 100%;
+	text-align: center;
+	top: 125px;
+	font: 30px Arial;
+	color: #777;
+}
+
+/* Buttons */
+
+.iconButton {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+}
+
+#cameraButtonC2c {
+	background: url(../assets/c2c_camera.png);
+	top: 198px; 
+  left: 96px;
+  width: none;
+  height: none;
+}
+#micButtonC2c {
+	background: url(../assets/c2c_mic.png);
+	top: 195px; 
+  left: 47px;
+}
+#soundButtonC2c {
+	background: url(../assets/c2c_sound.png);
+	top: 196px; 
+  left: 6px;
+}  
+#dialpadButtonC2c {
+	background: url(../assets/c2c_dialpad.png);
+	bottom: 7px; 
+  right: 10px;
+}
+
+#hangupButtonC2c {
+	background: url(../assets/c2c_hangup.png) no-repeat;
+	top: 203px; 
+  left: 151px;
+  width: 80px;
+}
+
