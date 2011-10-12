@@ -54,7 +54,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 					initTimer.stop();
 					DataPhone.getInstance().viewController.hideConnectingView();
 				} else {
-					initTimer = new Timer(1000);
+					initTimer = new Timer(500);
 					initTimer.addEventListener(TimerEvent.TIMER,checkState);
 					DataPhone.getInstance().viewController.showConnectingView();
 				}
@@ -85,8 +85,9 @@ This code and accompanying materials also available under LGPL and MPL license f
 			
 			private function checkState(event:TimerEvent = null):void{
 				if (flash_API.isInitialized()){
-					dropTimer();
-					
+					Logger.info("FlashAPI has been initialized");
+					flash_API.initMedia();
+					dropTimer();					
 				}
 			}
 			

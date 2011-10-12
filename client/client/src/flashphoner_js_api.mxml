@@ -26,6 +26,8 @@ This code and accompanying materials also available under LGPL and MPL license f
 			import com.flashphoner.api.js.APINotifyJS;
 			import com.flashphoner.api.management.PhoneSpeaker;
 			
+			import flash.utils.setTimeout;
+			
 			import mx.binding.utils.BindingUtils;
 			import mx.controls.Alert;
 			import mx.managers.PopUpManager;
@@ -48,6 +50,18 @@ This code and accompanying materials also available under LGPL and MPL license f
 				ExternalInterface.addCallback("viewAccessMessage",viewAccessMessage);
 				ExternalInterface.addCallback("changeRelationMyVideo",changeRelationMyVideo);
 				videoPartner.addEventListener(Event.RESIZE,onResize);
+				setTimeout(wait,500);
+			}
+			
+			private function wait():void{				
+				if (flashAPI.isInitialized()){
+					Logger.info("FlashAPI has been initialized");
+					flashAPI.initMedia();
+					ExternalInterface.call("notifyFlashReady");
+				} else{
+					Logger.info("Waiting flashAPI initialization...");
+					setTimeout(wait,500);
+				}
 			}
 			
 			private function onResize(event:Event){

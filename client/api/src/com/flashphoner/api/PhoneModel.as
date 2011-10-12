@@ -31,7 +31,7 @@ package com.flashphoner.api
 	 * Model object
 	 * **/	
 	[Bindable]
-	internal class PhoneModel implements IModelLocator 
+	public class PhoneModel implements IModelLocator 
 	{	
 		private static var phoneModel:PhoneModel;
 		
@@ -131,6 +131,10 @@ package com.flashphoner.api
 					if (xml.buffer_time != null && xml.buffer_time != ""){
 						PhoneConfig.BUFFER_TIME = int(xml.buffer_time);
 					}
+					if (xml.audio_codec != null && xml.audio_codec != ""){
+						PhoneConfig.AUDIO_CODEC = xml.audio_codec;
+					}
+					Logger.info("audio codec: "+PhoneConfig.AUDIO_CODEC);
 					
 			        if (xml.ring_sound != null && xml.ring_sound != ""){
 			        	SoundControl.RING_SOUND = xml.ring_sound;
@@ -149,9 +153,9 @@ package com.flashphoner.api
 			    else
 			    {
 			        Logger.info("Can not load xml settings. Default settings will be used.");
-			    }
-				ExternalInterface.call("notifyFlashReady");
-			    initialized = true;
+			    }				
+			    initialized = true;	
+				
 			} 
 
 		

@@ -22,6 +22,7 @@ package com.flashphoner.api
 	import flash.media.SoundTransform;
 	import flash.net.URLRequest;
 	import flash.system.Capabilities;
+	import com.flashphoner.Logger;
 	
 	public class SoundControl
 	{
@@ -71,6 +72,7 @@ package com.flashphoner.api
 		public function SoundControl(flash_API:Flash_API)
 		{
 			this.flash_API = flash_API;
+			Logger.info("Use enchenced mic: "+PhoneConfig.USE_ENHANCED_MIC);
 			if (PhoneConfig.USE_ENHANCED_MIC){
 				if (Capabilities.language.indexOf("en") >= 0){
 					mic = Microphone.getEnhancedMicrophone();
@@ -84,15 +86,7 @@ package com.flashphoner.api
 				mic = Microphone.getMicrophone();
 			}
 			if (mic != null){
-				mic.codec = SoundCodec.SPEEX;
-				mic.framesPerPacket = 1;
-				mic.rate = 16;
-				mic.gain = 50;
-				mic.encodeQuality = 6;
-				mic.soundTransform = new SoundTransform(1,0);			
-				mic.setLoopBack(false);			
-				mic.setSilenceLevel(0,3600000);
-				mic.setUseEchoSuppression(true);
+				initMic(mic,50,false);
 			}
 			
 			updateSounds();
@@ -181,7 +175,7 @@ package com.flashphoner.api
 		 * @param gain volume of microphone(-1 - if not change volume)
 		 **/
 		public function changeMicrophone(index:int,isLoopback:Boolean,gain:Number = -1):void{
-			var oldGain:int = this.mic.gain;
+			
 			var microphone:Microphone;
 			if (PhoneConfig.USE_ENHANCED_MIC){
 				if (Capabilities.language.indexOf("en") >= 0){
@@ -196,20 +190,8 @@ package com.flashphoner.api
 
 			if (microphone != null){
 				this.mic = microphone;
-				if (this.mic != null){
-					mic.codec = SoundCodec.SPEEX;
-					mic.framesPerPacket = 1;
-					mic.rate = 16;
-					if (gain != -1){
-						mic.gain = gain;
-					}else{
-						mic.gain = oldGain;
-					}
-					mic.encodeQuality = 6;
-					mic.soundTransform = new SoundTransform(1,0);			
-					mic.setLoopBack(isLoopback);			
-					mic.setSilenceLevel(0,3600000);
-					mic.setUseEchoSuppression(true);
+				if (this.mic != null){	
+					initMic(mic,gain,isLoopback);
 				}
 			}
 		}
@@ -219,7 +201,38 @@ package com.flashphoner.api
 		 **/
 		public function getMicrophone():Microphone{
 			return mic;
-		}		
+		}
+		
+		private function initMic(mic:Microphone, gain:int=50, loopback:Boolean=false):void{
+			var logMsg:String = "Init mic: codec: "+PhoneConfig.AUDIO_CODEC+" gain: "+50+" loopback: "+loopback;
+			Logger.info(logMsg);
+			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				apiNotify.addLogMessage(logMsg);
+			}			
+			if (PhoneConfig.AUDIO_CODEC=="speex"){
+				mic.codec = SoundCodec.SPEEX;
+				mic.framesPerPacket = 1;
+				mic.rate = 16;
+				mic.encodeQuality = 6;
+			}else if (PhoneConfig.AUDIO_CODEC=="ulaw"){
+				mic.codec = SoundCodec.PCMU;
+				mic.framesPerPacket = 2;
+				mic.rate = 8;
+			}else if (PhoneConfig.AUDIO_CODEC=="alaw"){
+				mic.codec = SoundCodec.PCMA;
+				mic.framesPerPacket = 2;
+				mic.rate = 8;
+			}
+			
+			if (gain != -1){
+				mic.gain = gain;
+			}
+			
+			mic.soundTransform = new SoundTransform(1,0);			
+			mic.setLoopBack(loopback);			
+			mic.setSilenceLevel(0,3600000);
+			mic.setUseEchoSuppression(true);
+		}
 		
 
 	}

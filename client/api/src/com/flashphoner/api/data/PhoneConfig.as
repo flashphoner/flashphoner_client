@@ -75,6 +75,8 @@ package com.flashphoner.api.data
 		 **/		
 		public static var VERSION_OF_SERVER:String = "1.0.5.X";
 		
+		public static var AUDIO_CODEC:String = "speex";
+		
 		/**
 		 * Current version of Flashphoner product
 		 **/		

@@ -35,6 +35,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package com.flashphoner.api
 {
+	import com.flashphoner.Logger;
 	import com.flashphoner.api.data.ErrorCodes;
 	import com.flashphoner.api.data.ModelLocator;
 	import com.flashphoner.api.data.PhoneConfig;
@@ -130,8 +131,12 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("getVersion",getVersion);
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
-			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);
+			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
 			
+		}
+		
+		public function initMedia():void{
+			Logger.info("Init media...");
 			soundControl = new SoundControl(this);
 			videoControl = new VideoControl();
 		}
