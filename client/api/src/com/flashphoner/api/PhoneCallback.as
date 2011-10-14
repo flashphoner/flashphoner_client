@@ -86,8 +86,8 @@ package com.flashphoner.api
 		}
 		
 		public function sessionProgress(_call:Object,_sipObject:Object):void{
-			/*var call:Call = process(_call);
-			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.SESSION_PROGRESS,call));*/
+			var call:Call = process(_call);
+			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.SESSION_PROGRESS,call));
 		}
 		
 		public function talk(_call:Object,_sipObject:Object):void{
