@@ -122,30 +122,30 @@ package com.flashphoner.api
 			        var regRequired:String = xml.register_required; 
 			        PhoneConfig.REGISTER_REQUIRED = (regRequired == "true");
 
-					if (xml.video_width != null && xml.video_width != ""){
+					if (xml.video_width != null && xml.video_width.toString() != ""){
 						PhoneConfig.VIDEO_WIDTH = int(xml.video_width);
 					}
-					if (xml.video_height != null && xml.video_height != ""){
+					if (xml.video_height != null && xml.video_height.toString() != ""){
 						PhoneConfig.VIDEO_HEIGHT = int(xml.video_height);
 					}
-					if (xml.buffer_time != null && xml.buffer_time != ""){
+					if (xml.buffer_time != null && xml.buffer_time.toString() != ""){
 						PhoneConfig.BUFFER_TIME = int(xml.buffer_time);
 					}
-					if (xml.audio_codec != null && xml.audio_codec != ""){
+					if (xml.audio_codec != null && xml.audio_codec.toString() != ""){						
 						PhoneConfig.AUDIO_CODEC = xml.audio_codec;
 					}
 					Logger.info("audio codec: "+PhoneConfig.AUDIO_CODEC);
 					
-			        if (xml.ring_sound != null && xml.ring_sound != ""){
+			        if (xml.ring_sound != null && xml.ring_sound.toString() != ""){
 			        	SoundControl.RING_SOUND = xml.ring_sound;
 			        }
-			        if (xml.busy_sound != null && xml.busy_sound != ""){
+			        if (xml.busy_sound != null && xml.busy_sound.toString() != ""){
 			        	SoundControl.BUSY_SOUND = xml.busy_sound;
 			        }
-			        if (xml.register_sound != null && xml.register_sound != ""){
+			        if (xml.register_sound != null && xml.register_sound.toString() != ""){
 				        SoundControl.REGISTER_SOUND = xml.register_sound;
 			        }
-			        if (xml.finish_sound != null && xml.finish_sound != ""){
+			        if (xml.finish_sound != null && xml.finish_sound.toString() != ""){
 				        SoundControl.FINISH_SOUND = xml.finish_sound;
 			        }
 			        SoundControl.updateSounds();
