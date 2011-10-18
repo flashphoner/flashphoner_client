@@ -15,6 +15,7 @@ package com.flashphoner.phone_app;
 import com.flashphoner.sdk.rtmp.AbstractRtmpClient;
 import com.flashphoner.sdk.rtmp.Config;
 import com.flashphoner.sdk.rtmp.IConfig;
+import com.flashphoner.sdk.rtmp.RtmpClientConfig;
 import com.flashphoner.sdk.sip.SipHeader;
 import com.flashphoner.sdk.softphone.ISoftphoneCall;
 import com.flashphoner.sdk.softphone.InstantMessage;
@@ -135,6 +136,14 @@ public class RtmpClient extends AbstractRtmpClient {
      */
     public RtmpClient(String login, String authenticationName, String pwd, IClient client, String sipProviderAddress, int sipProviderPort, String visibleName, boolean regRequired, String appName, String mode) {
         super(login, authenticationName, pwd, client, sipProviderAddress, sipProviderPort, visibleName, regRequired, appName, mode);
+    }
+
+    /**
+     * @param rtmpClientConfig config contains all parameters for the instance creation
+     * @param iClient 
+     */
+    public RtmpClient(RtmpClientConfig rtmpClientConfig, IClient iClient) {
+        super(rtmpClientConfig, iClient);
     }
 
     /**

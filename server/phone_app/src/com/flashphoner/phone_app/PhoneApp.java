@@ -12,10 +12,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 */
 package com.flashphoner.phone_app;
 
-import com.flashphoner.sdk.rtmp.Config;
-import com.flashphoner.sdk.rtmp.IRtmpClient;
-import com.flashphoner.sdk.rtmp.IRtmpClientsCollection;
-import com.flashphoner.sdk.rtmp.IRtmpClientsCollectionSupport;
+import com.flashphoner.sdk.rtmp.*;
 import com.flashphoner.sdk.softphone.*;
 import com.flashphoner.sdk.softphone.exception.CrossCallException;
 import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
@@ -94,6 +91,19 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             client.acceptConnection();
             return;
         }
+
+        /**
+         * Example: {Obj[]: app: "phone_app", flashVer: "WIN 11,0,1,152", swfUrl: "http://87.226.225.62/120/flashphoner_client/flashphoner_js_api.swf", tcUrl: "rtmp://87.226.225.62:1935/phone_app", fpad: false, capabilities: 239.0, audioCodecs: 3575.0, videoCodecs: 252.0, videoFunction: 1.0, pageUrl: "http://87.226.225.62/120/flashphoner_client/PhoneJS.html", objectEncoding: 0.0}
+         */
+        AMFDataObj obj2 = params.getObject(2);
+
+        String flashVer = obj2.getString("flashVer");
+        String[] splat = flashVer.split("\\s");
+        String os = splat[0];//WIN
+        String version = splat[1];//11,0,1,152
+        String[] splat2 = version.split(",");
+        int majorMinorVersion = Integer.parseInt(splat2[0] + splat2[1]);//110
+        Logger.logger.info("majorMinorVersion: " + majorMinorVersion);
 
         AMFDataObj obj = params.getObject(PARAM1);
 
@@ -222,7 +232,23 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         Logger.logger.info(4, "sipProviderAddress - " + sipProviderAddress);
         Logger.logger.info(4, "outboundProxy - " + outboundProxy);
 
-        rtmpClient = new RtmpClient(login, authenticationName, password, client, sipProviderAddress, sipProviderPort, visibleName, regRequired, APPLICATION_NAME, Config.MODE_FLASHPHONER, width, height, supportedResolutions);
+        RtmpClientConfig config = new RtmpClientConfig();
+        config.setLogin(login);
+        config.setAuthenticationName(authenticationName);
+        config.setPassword(password);
+        config.setSipProviderAddress(sipProviderAddress);
+        config.setSipProviderPort(sipProviderPort);
+        config.setVisibleName(visibleName);
+        config.setRegRequired(regRequired);
+        config.setApplicationName(APPLICATION_NAME);
+        config.setMode(Config.MODE_FLASHPHONER);
+        config.setWidth(width);
+        config.setHeight(height);
+        config.setSupportedResolutions(supportedResolutions);
+
+        Logger.logger.info(config.toString());
+
+        rtmpClient = new RtmpClient(config, client);
 
         AMFDataObj amfDataObj = new AMFDataObj();
         amfDataObj.put("login", rtmpClient.getLogin());
