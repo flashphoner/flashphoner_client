@@ -26,8 +26,10 @@ package com.flashphoner.api
 		public static const DISCONNECT:String = "DISCONNECT";
 		public static const MESSAGE_ACCEPTED:String = "MESSAGE_ACCEPTED";
 		public static const VIDEO_FORMAT_CHANGED:String = "VIDEO_FORMAT_CHANGED";
+		public static const AUDIO_CODEC_CHANGED_EVENT:String = "AUDIO_CODEC_CHANGED_EVENT";
 		
-		public var flashAPI:Flash_API;	
+		public var flashAPI:Flash_API;
+		public var obj:Object;
 		
 		public function MainEvent(type:String, flashAPI:Flash_API):void
 		{

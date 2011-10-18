@@ -37,8 +37,7 @@ package com.flashphoner.api
 			Logger.info("PhoneCommand.execute() event.type "+event.type);
 			
 			var flashAPI:Flash_API = (event as MainEvent).flashAPI;
-			var modelLocator:ModelLocator = flashAPI.modelLocator;
-			
+			var modelLocator:ModelLocator = flashAPI.modelLocator;		
 			
 			if (event.type == MainEvent.CONNECTED){				
 				if (!PhoneConfig.REGISTER_REQUIRED){				
@@ -62,6 +61,10 @@ package com.flashphoner.api
 				flashAPI.calls = new ArrayCollection();
 			}		
 			
+			if (event.type == MainEvent.AUDIO_CODEC_CHANGED_EVENT){
+				var codec:Object = (event as MainEvent).obj;
+				flashAPI.soundControl.changeAudioCodec(codec);
+			}
 			
 		}
 	}

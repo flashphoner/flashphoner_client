@@ -140,7 +140,7 @@ public class RtmpClient extends AbstractRtmpClient {
 
     /**
      * @param rtmpClientConfig config contains all parameters for the instance creation
-     * @param iClient 
+     * @param iClient
      */
     public RtmpClient(RtmpClientConfig rtmpClientConfig, IClient iClient) {
         super(rtmpClientConfig, iClient);
@@ -427,5 +427,16 @@ public class RtmpClient extends AbstractRtmpClient {
         messageObj.put("contentType", instantMessage.getContentType());
         messageObj.put("state", instantMessage.getState());
         getClient().call("notifyMessage", null, messageObj);
+    }
+
+    //speex, pcma, pcmu
+
+    public void notifyAudioCodec(String audioCodec) {
+        Logger.logger.info(4, "RtmpClient.notifyAudioCodec() " + audioCodec);
+        AMFDataObj codecObj = new AMFDataObj();
+        codecObj.put("name", audioCodec.toLowerCase());
+        if (getClient() != null) {
+            getClient().call("notifyAudioCodec", null, codecObj);
+        }
     }
 }

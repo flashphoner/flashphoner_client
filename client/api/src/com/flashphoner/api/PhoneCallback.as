@@ -187,7 +187,14 @@ package com.flashphoner.api
 		public function notifyMessage(messageObj:Object):void {
 			Logger.info("Message has been accepted by other participant");
 			CairngormEventDispatcher.getInstance().dispatchEvent(new MessageEvent(MessageEvent.MESSAGE_EVENT,messageObj,flash_API));		
-		}		
+		}
+		
+		public function notifyAudioCodec(codec:Object):void {
+			Logger.info("notifyAudioCodec: "+codec);
+			var event:MainEvent = new MainEvent(MainEvent.AUDIO_CODEC_CHANGED_EVENT,flash_API);
+			event.obj = codec;
+			CairngormEventDispatcher.getInstance().dispatchEvent(event);		
+		}	
 		
 	}
 }

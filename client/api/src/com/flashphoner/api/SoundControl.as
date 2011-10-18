@@ -12,6 +12,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 */
 package com.flashphoner.api
 {
+	import com.flashphoner.Logger;
 	import com.flashphoner.api.data.PhoneConfig;
 	import com.flashphoner.api.interfaces.APINotify;
 	
@@ -22,7 +23,6 @@ package com.flashphoner.api
 	import flash.media.SoundTransform;
 	import flash.net.URLRequest;
 	import flash.system.Capabilities;
-	import com.flashphoner.Logger;
 	
 	public class SoundControl
 	{
@@ -208,21 +208,9 @@ package com.flashphoner.api
 			Logger.info(logMsg);
 			for each (var apiNotify:APINotify in flash_API.apiNotifys){
 				apiNotify.addLogMessage(logMsg);
-			}			
-			if (PhoneConfig.AUDIO_CODEC=="speex"){
-				mic.codec = SoundCodec.SPEEX;
-				mic.framesPerPacket = 1;
-				mic.rate = 16;
-				mic.encodeQuality = 6;
-			}else if (PhoneConfig.AUDIO_CODEC=="ulaw"){
-				mic.codec = SoundCodec.PCMU;
-				mic.framesPerPacket = 2;
-				mic.rate = 8;
-			}else if (PhoneConfig.AUDIO_CODEC=="alaw"){
-				mic.codec = SoundCodec.PCMA;
-				mic.framesPerPacket = 2;
-				mic.rate = 8;
-			}
+			}	
+			
+			changeCodec(PhoneConfig.AUDIO_CODEC);
 			
 			if (gain != -1){
 				mic.gain = gain;
@@ -232,6 +220,30 @@ package com.flashphoner.api
 			mic.setLoopBack(loopback);			
 			mic.setSilenceLevel(0,3600000);
 			mic.setUseEchoSuppression(true);
+		}
+		
+		public function changeAudioCodec(codec:Object):void{			
+			var codecName:String = codec.name;
+			Logger.info("changeAudioCodec: "+codecName);
+			changeCodec(codecName);
+		}
+		
+		private function changeCodec(name:String):void{
+			Logger.info("changeCodec: "+name);
+			if (name=="speex"){
+				mic.codec = SoundCodec.SPEEX;
+				mic.framesPerPacket = 1;
+				mic.rate = 16;
+				mic.encodeQuality = 6;
+			}else if (name=="ulaw" || name=="pcmu" ){
+				mic.codec = SoundCodec.PCMU;
+				mic.framesPerPacket = 2;
+				mic.rate = 8;
+			}else if (name=="alaw" || name=="pcma" ){
+				mic.codec = SoundCodec.PCMA;
+				mic.framesPerPacket = 2;
+				mic.rate = 8;
+			}
 		}
 		
 
