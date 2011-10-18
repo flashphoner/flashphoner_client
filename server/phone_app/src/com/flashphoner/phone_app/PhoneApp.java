@@ -245,6 +245,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         config.setWidth(width);
         config.setHeight(height);
         config.setSupportedResolutions(supportedResolutions);
+        config.setMajorMinorPlayerVersion(majorMinorVersion);
 
         Logger.logger.info(config.toString());
 
