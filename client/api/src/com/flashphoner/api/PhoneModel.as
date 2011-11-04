@@ -128,9 +128,6 @@ package com.flashphoner.api
 					if (xml.video_height != null && xml.video_height.toString() != ""){
 						PhoneConfig.VIDEO_HEIGHT = int(xml.video_height);
 					}
-					if (xml.buffer_time != null && xml.buffer_time.toString() != ""){
-						PhoneConfig.BUFFER_TIME = int(xml.buffer_time);
-					}
 					if (xml.audio_codec != null && xml.audio_codec.toString() != ""){						
 						PhoneConfig.AUDIO_CODEC = xml.audio_codec;
 					}
