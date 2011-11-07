@@ -338,6 +338,19 @@ package com.flashphoner.api
 		}
 		
 		/**
+		 * Authentication on sip provider server on "flashphoner" mode with url swf
+		 **/		
+		public function loginByURL():void{
+			ExternalInterface.call("notifyRegisterRequired",PhoneConfig.REGISTER_REQUIRED);
+			if (PhoneConfig.REGISTER_REQUIRED){
+				upRegisteredTimer();
+				startRegisterTimer();
+			}
+			videoControl.init();
+			phoneServerProxy.loginByURL();
+		}		
+		
+		/**
 		  * Authentication on sip provider server on "click2call" mode
 		  * Data of user will be on server in file 'flashphoner.properties'
 		  **/
@@ -398,6 +411,15 @@ package com.flashphoner.api
 			return 0;
 		}
 		
+		/**
+		 * Create new call by URL
+		 * @param isVideoCall video call?(true/false)
+		 **/ 		
+		public function callByURL(isVideoCall:Boolean = true):int{
+			phoneServerProxy.callByURL(isVideoCall);
+			return 0;
+		}
+			
 		/**
 		 * Unhold all existed calls
 		 **/ 

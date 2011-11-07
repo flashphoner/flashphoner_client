@@ -1,10 +1,36 @@
-/**
- * Here we importing phone styles which also used for click2call
- * Please be carefull and adjust path to this css.
- */
+/*
+Copyright (c) 2011 Flashphoner
+All rights reserved. This Code and the accompanying materials
+are made available under the terms of the GNU Public License v2.0
+which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-	@import url("style_html.css");
-	
+Contributors:
+Flashphoner - initial API and implementation
+
+This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+*/
+body {
+	font: 12px Arial;
+}
+img {
+	border: 0;
+}
+button::-moz-focus-inner,   
+input[type="reset"]::-moz-focus-inner,   
+input[type="button"]::-moz-focus-inner,   
+input[type="submit"]::-moz-focus-inner,   
+input[type="file"] > input[type="button"]::-moz-focus-inner {
+	border: none;
+}
+#jsSWFDiv, #phoneDiv, #loginDiv, #incomingDiv, #infoDiv, #connectingDiv, #settingsDiv {
+	position: absolute;
+}
+/* -------- Background ------- */
+#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, .login_link, #transferDiv, #incomingDiv, #newChat {
+	background: #fff;
+}
+
 #c2cDiv {
 	position: absolute;
 	height: 240px;
@@ -45,6 +71,9 @@
 	top: 65px;
 	font: 50px Arial;
 	color: #fff;
+	float: left;
+	text-align: center;
+	width: 100%;
 }
 
 #callState {
@@ -64,33 +93,311 @@
   height: 30px;
 }
 
-#cameraButtonC2c {
+#cameraButton {
 	background: url(../assets/c2c_camera.png);
 	top: 198px; 
-  left: 96px;
-  width: none;
-  height: none;
+  	left: 96px;
+  	width: 30px;
+  	height: 30px;
 }
-#micButtonC2c {
+#micButton {
 	background: url(../assets/c2c_mic.png);
 	top: 195px; 
-  left: 47px;
+  	left: 47px;
+	width: 30px;
+	height: 30px;
 }
-#soundButtonC2c {
+#soundButton {
 	background: url(../assets/c2c_sound.png);
 	top: 196px; 
-  left: 6px;
+  	left: 6px;
+	width: 30px;
+	height: 30px;
 }  
-#dialpadButtonC2c {
+
+#dialpadButton {
 	background: url(../assets/c2c_dialpad.png);
 	bottom: 7px; 
-  right: 10px;
+  	right: 10px;
+	width: 30px;
+	height: 30px;
 }
 
-#hangupButtonC2c {
+#hangupButton {
 	background: url(../assets/c2c_hangup.png) no-repeat;
 	top: 203px; 
-  left: 151px;
-  width: 80px;
+  	left: 151px;
+	width: 50px;
+	height: 21px;
+
 }
+
+/* ---------- Border ------------ */
+#settingsDiv, #infoDiv, #connectingDiv, #video_requestUnmuteDiv  {
+	border-width: 2px 5px 5px\0/; /*only for ie8*/
+	border-style: solid\0/; /*only for ie8*/
+	border-color: #ddd\0/; /*only for ie8*/
+}
+#connectingDiv, #infoDiv {
+	border-width: 5px\0/; /*only for ie8*/
+}
+/* ---------- Shadow ---------- */
+#settingsDiv, #infoDiv, #connectingDiv, #video_requestUnmuteDiv
+{
+	box-shadow: 0 0 10px black;
+	box-shadow: 0 0 10px rgba(0,0,0,0.5);
+	-moz-box-shadow: 0 0 10px rgba(0,0,0,0.5);
+	/* Firefox */
+	-webkit-box-shadow: 0 0 10px rgba(0,0,0,0.5);
+	/* Safari, Chrome */
+}
+
+/* ----------------------------- */
+textarea, text, input {
+	outline: none;
+	-moz-appearance: none;
+}
+input::-webkit-input-placeholder {
+	color: #ccc;
+	font: 14px Arial;
+}
+#calleeText {
+	padding-left: 1px;
+}
+#jsSWFDiv {
+	height: 138px;
+}
+#phoneDiv {
+	left: 30px;
+	height: 240px;
+	width: 147px;
+	padding: 10px;
+	position: relative;
+}
+#versionOfProduct {
+	position: absolute;
+	top: 134px;
+	right: 17px;
+	font: 8px Arial;
+	color: #bbb;
+}
+/* ---------------- Buttons ---------------- */
+.closeButton {
+	background: url(../assets/close.png);
+	right: 3px;
+	opacity: 0.7;
+	position: absolute;
+	top: 3px;
+	width: 14px;
+	height: 14px;
+}
+.iconButton {
+	width: 16px;
+	height: 16px;
+	float: left;
+	-moz-opacity: 0.6;
+	-khtml-opacity: 0.6;
+	opacity: 0.6;
+}
+.iconButton:hover {
+	-moz-opacity: 1;
+	-khtml-opacity: 1;
+	opacity: 1;
+}
+
+.closeButton {
+	background: url(../assets/close.png);
+	right: 3px;
+}
+/* ----------------------------------------- */
+/* ------------- ��������� �������� ------------ */
+.bar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 20px;
+	background-color: #ddd;
+	cursor: move;
+	font: 12px Arial;
+	font-weight: bolder;
+	color: #999;
+	text-shadow: #fff 0px 1px;
+	line-height: 20px;
+	text-align: left;
+}
+/* ----------------------------------- */
+/* ------------- Settings ------------ */
+#settingsDiv {
+	top: 80px;
+	left: 5px;
+	height: 113px;
+	width: 230px;
+	padding-top: 20px;
+	visibility: hidden;
+	background: url(../assets/mic_settings_background.png);
+}
+#settingsButton {
+	position: absolute;
+	top: 126px;
+	left: 15px;
+	background: url(../assets/mic_settings.png);
+}
+/* -------------------------------------- */
+
+/* ------------------ Connecting ------------------------ */
+#connectingDiv {
+	top: 120px;
+	left: 10px;
+	height: 30px;
+	width: 200px;
+	padding: 10px;
+	float: left;
+	visibility: hidden;
+	font: 16px Arial;
+	color: #aaa;
+	text-align: center;
+	line-height: 30px;
+	-moz-opacity: 0.95;
+	/* Mozilla 1.6 */
+	-khtml-opacity: 0.95;
+	/* Konqueror 3.1, Safari 1.1 */
+	opacity: 0.95;
+	/* CSS3 - Mozilla 1.7b +, Firefox 0.9 +, Safari 1.2+, Opera 9+ */
+}
+#connectingText {
+}
+/* ------------------ Info ------------------------ */
+#infoDiv {
+	top: 120px;
+	left: 10px;
+	height: 30px;
+	width: 200px;
+	padding: 10px;
+	float: left;
+	visibility: hidden;
+	font: 16px Arial;
+	color: #aaa;
+	text-align: center;
+	line-height: 30px;
+	-moz-opacity: 0.95;
+	/* Mozilla 1.6 */
+	-khtml-opacity: 0.95;
+	/* Konqueror 3.1, Safari 1.1 */
+	opacity: 0.95;
+	/* CSS3 - Mozilla 1.7b +, Firefox 0.9 +, Safari 1.2+, Opera 9+ */
+}
+#infoText {
+}
+/* ------------ Video + Security settings view -------------- */
+#video_requestUnmuteDiv {
+	position: absolute;
+	top: 30px;
+	left: 60px;
+	overflow: hidden;
+	padding-top: 20px;
+	
+}
+.videoDiv {
+	visibility: visible;
+	width: 215px;
+	height: 180px;
+	background-color: #000;
+}
+.securityDiv {
+	visibility: visible;
+	width: 215px;
+	height: 178px;
+	background-color: #fff;
+	padding-top: 20px;
+	border: 1px solid #ccc;
+}
+.closed {
+	width: 1px !important;
+	height: 1px !important;
+	visibility: hidden;
+}
+
+
+.init {
+	width: 1px;
+	height: 1px;
+	visibility: hidden;
+}
+
+#sendVideo {
+	width: 100px;
+	position: absolute;
+	bottom: 5px;
+	left: 10px;
+}
+#requestUnmuteText {
+	position: absolute;
+	text-align: center;
+	width: 100%;
+	font-weight: bolder;
+}
+#closeButton_video_requestUnmuteDiv{
+	background: url(../assets/close.png);
+	right: 3px;
+	opacity: 0.7;
+	position: absolute;
+	top: 3px;
+	width: 14px;
+	height: 14px;
+}
+/* ---------------------------------------------------- */
+.button {
+	background: #dcdcdc;
+	width: 46px;
+	height: 22px;
+	float: left;
+	margin: 0px 3px 3px 0;
+	text-align: center;
+	font: bold 14px Arial;
+	line-height: 19px;
+	border: solid 1px #ddd; 
+	border-style: outset;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	outline: none;
+}
+/* -------------------------------------- */
+/* --------- Console ------------*/
+#console {
+	position: absolute;
+	top: 10px;
+	left: 330px;	
+	height: 300px;
+	width: 700px;
+	float: left;
+	background-color: #333;
+	font: 14px Courier;
+	color: #eee; 
+	padding: 10px;
+	overflow: auto;
+	word-wrap: break-word;
+}
+/* -------------- Z indexes -------------*/
+
+#connectingDiv {
+	z-index: 15;
+}
+#infoDiv {
+	z-index: 30;
+}
+#jsSWFDiv {
+	z-index: 100;
+}
+#settingsDiv {
+	z-index: 17;
+}
+#video_requestUnmuteDiv {
+	z-index: 20;
+}
+.closeButton {
+	z-index: 101;
+}
+
 

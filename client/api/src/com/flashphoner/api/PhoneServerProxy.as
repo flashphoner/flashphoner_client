@@ -103,10 +103,24 @@ package com.flashphoner.api
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 		}		
+
+		public function loginByURL():void{
+			var modelLocator:ModelLocator = flash_API.modelLocator;
+			var obj:Object = new Object();
+			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
+			modelLocator.mode="flashphoner";
+			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
+			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
+		}	
 		
 		public function call(visibleName:String,callee:String,isVideoCall:Boolean):void{
 			Logger.info("PhoneServerProxy.call()");
 			nc.call("call",responder,visibleName,callee,isVideoCall);
+		}
+		
+		public function callByURL(isVideoCall:Boolean):void{
+			Logger.info("PhoneServerProxy.call()");
+			nc.call("callByURL",responder, isVideoCall);
 		}		
 		
 		public function disconnect():void {

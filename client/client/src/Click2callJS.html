@@ -23,7 +23,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 
 <!-- Styles -->
 <link rel="stylesheet" type="text/css" href="styles/trackbar.css" />
-<link rel="stylesheet" type="text/css" href="styles/style_c2c_js.css" />
+<link rel="stylesheet" type="text/css" href="styles/style_html_c2c.css" />
 <link rel="stylesheet" type="text/css" href="styles/style_jquery_ui_1.8.15.css" />
 <!-- ****** -->
 
@@ -31,6 +31,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 <script type="text/javascript" src="swfobject.js"></script>
 <script type="text/javascript" src="js/StaticData.js"></script>
 <script type="text/javascript" src="js/trackbar.js"></script>
+<script type="text/javascript" src="js/Click2Call.js"></script>
 <script type="text/javascript" src="js/flashLoader.js"></script>
 <!-- ************* -->
 <title>Phone</title>
@@ -55,17 +56,12 @@ This code and accompanying materials also available under LGPL and MPL license f
 3. connectingDiv
     - System messages
     
-4. chatDiv
-    - Chat
-    
-5. settingsDiv
+4. settingsDiv
     - Mic/sound settings         
 -->
 
 <div id="c2cDiv">
       
-      <input id="auto_login_token" type="submit" value=""/> 
-       
       <!--
       <input class="chat_button" id="chatButton" type="submit" value="Chat" />
       <input class="call_button" id="callButton" type="submit" value="Call" />
@@ -89,11 +85,11 @@ This code and accompanying materials also available under LGPL and MPL license f
       <div id="caller" class="caller">Support</div> 
       <div id="callState">...calling...</div>
       
-	    <div id="cameraButtonC2c" class="iconButton"></div>
-      <div id="micButtonC2c" class="iconButton"></div>
-      <div id="soundButtonC2c" class="iconButton"></div>  
-      <div id="hangupButtonC2c" class="iconButton"></div>
-      <div id="dialpadButtonC2c" class="iconButton"></div>
+	    <div id="cameraButton" class="iconButton"></div>
+      <div id="micButton" class="iconButton"></div>
+      <div id="soundButton" class="iconButton"></div>  
+      <div id="hangupButton" class="iconButton"></div>
+      <div id="dialpadButton" class="iconButton"></div>
   
   	  <div id="versionOfProduct"></div>
 </div>
@@ -112,6 +108,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 
 <!-- Video + RequestUnmuted view -->
 <div id="video_requestUnmuteDiv" class="init">
+	<div class="bar">&nbsp;&nbsp;Security panel</div>
   <div id="requestUnmuteText">
   You are calling to <b>support</b>.
   Please click "Allow" to continue
@@ -165,8 +162,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 </div>
 <!-- ************* -->
 
-<div id="chatDiv">
+<div id="console">
 </div>
-
 </body>
 </html>
