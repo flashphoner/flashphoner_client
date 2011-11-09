@@ -373,7 +373,6 @@ package com.flashphoner.api
 			if (PhoneConfig.CHECK_VALIDATION_CALLEE){
 				var reg:RegExp = /[a-zа-яё]/i;
 				if (callee != null && callee != ""){
-					if (modelLocator.mode == "flashphoner"){
 						if ((callee.indexOf("sip:") == 0)){
 							if (callee.indexOf("@") == -1 || callee.indexOf("@") == callee.length-1){
 								return 1;
@@ -389,13 +388,6 @@ package com.flashphoner.api
 								callee = "sip:"+callee+"@"+modelLocator.sipProviderAddress+":"+modelLocator.sipProviderPort;
 							}
 						}
-					}else{
-						return 1;
-					}
-				}else{
-					if (modelLocator.mode != "click2call"){
-						return 1;
-					}
 				}
 			}
 			if (visibleName != null){

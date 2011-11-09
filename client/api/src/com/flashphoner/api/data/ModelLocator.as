@@ -42,9 +42,5 @@ package com.flashphoner.api.data
 		 * Logged user on sip provider or no
 		 */
 		public var logged:Boolean = false;
-		/**
-		 * Mode of connection ("phone"/"click2call")
-		 **/
-		public var mode:String = "phone";
 	}
 }

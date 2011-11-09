@@ -241,7 +241,6 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         config.setVisibleName(visibleName);
         config.setRegRequired(regRequired);
         config.setApplicationName(APPLICATION_NAME);
-        config.setMode(Config.MODE_FLASHPHONER);
         config.setWidth(width);
         config.setHeight(height);
         config.setSupportedResolutions(supportedResolutions);
@@ -385,12 +384,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String visibleName = params.getString(PARAM1);
         Boolean isVideoCall = params.getBoolean(PARAM3);
 
-        String callee;
-        if (rtmpClient.getMode().equals(Config.MODE_CLICK2CALL)) {
-            callee = Config.getInstance().getProperty("callee");
-        } else {
-            callee = params.getString(PARAM2);
-        }
+        String callee = Config.getInstance().getProperty("callee");
 
         if ((caller == null) || (caller.length() == 0)) {
             caller = rtmpClient.getLogin();

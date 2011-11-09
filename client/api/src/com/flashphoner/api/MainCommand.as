@@ -46,9 +46,7 @@ package com.flashphoner.api
 			}
 			if (event.type == MainEvent.REGISTERED){
 				
-				if (modelLocator.mode != "click2call"){
-					SoundControl.playRegisterSound();
-				}
+				SoundControl.playRegisterSound();
 				modelLocator.logged = true;		
 				flashAPI.dropRegisteredTimer();
 			}	

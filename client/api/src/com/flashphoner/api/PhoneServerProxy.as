@@ -66,10 +66,7 @@ package com.flashphoner.api
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
 			if (username == null && password == null){
-				obj.mode = "click2call";
-				modelLocator.mode="click2call";
 			}else{
-				modelLocator.mode="flashphoner";
 				if (username.indexOf("sip:") != 0 || username.indexOf("@") < 4){
 					return 1;
 				}	
@@ -81,7 +78,6 @@ package com.flashphoner.api
 					obj.authenticationName = authenticationName; 
 				}
 				obj.password = password;
-				obj.mode = "flashphoner";
 				obj.width = PhoneConfig.VIDEO_WIDTH;
 				obj.height = PhoneConfig.VIDEO_HEIGHT;
 				obj.sipProviderAddress = username.substring(username.indexOf("@")+1,username.indexOf(":"));
@@ -99,7 +95,6 @@ package com.flashphoner.api
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
 			obj.token = token;
-			modelLocator.mode="flashphoner";
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 		}		
@@ -108,7 +103,10 @@ package com.flashphoner.api
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
-			modelLocator.mode="flashphoner";
+			obj.width = PhoneConfig.VIDEO_WIDTH;
+			obj.height = PhoneConfig.VIDEO_HEIGHT;
+			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
+			
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 		}	
