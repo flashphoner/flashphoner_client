@@ -14,7 +14,8 @@
 <flashphoner>
 	<rtmp_server>rtmp://192.168.1.5:1935</rtmp_server>
 	<register_required>true</register_required>
-	<application>phone_app</application>
+	<phone_application>phone_app</phone_application>
+	<c2c_application>c2c_app</c2c_application>
 	<video_width>176</video_width>
 	<video_height>144</video_height>
 	<check_validation_callee>true</check_validation_callee>

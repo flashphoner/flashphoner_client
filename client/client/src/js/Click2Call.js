@@ -211,7 +211,7 @@ function notifyFlashReady() {
 	trace("notifyFlashReady");
 	getElement('versionOfProduct').innerHTML = getVersion();
 	closeConnectingView();
-    loginByURL();
+    //loginByURL();
 }
 
 function notifyRegisterRequired(registerR) {

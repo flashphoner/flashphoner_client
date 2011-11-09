@@ -28,8 +28,13 @@ package com.flashphoner.api.data
 		/**
 		 * Name of application in Wowza Media Server
 		 **/
-		public static var APP_NAME:String ="flashphoner_app";
+		public static var PHONE_APP_NAME:String ="phone_app";
 		
+		/**
+		 * Name of application in Wowza Media Server
+		 **/
+		public static var C2C_APP_NAME:String ="c2c_app";
+
 		/**
 		 * Width of outgoing video
 		 **/

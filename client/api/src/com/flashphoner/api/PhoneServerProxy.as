@@ -86,7 +86,7 @@ package com.flashphoner.api
 			}
 			obj.visibleName = modelLocator.visibleName;
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);	
-			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
+			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.PHONE_APP_NAME,obj);
 			return 0;			
 		}
 		
@@ -96,19 +96,18 @@ package com.flashphoner.api
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
 			obj.token = token;
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
-			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
+			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.PHONE_APP_NAME,obj);
 		}		
 
 		public function loginByURL():void{
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
-			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
 			obj.width = PhoneConfig.VIDEO_WIDTH;
 			obj.height = PhoneConfig.VIDEO_HEIGHT;
 			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
 			
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
-			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
+			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.C2C_APP_NAME,obj);
 		}	
 		
 		public function call(visibleName:String,callee:String,isVideoCall:Boolean):void{

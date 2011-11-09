@@ -10,10 +10,13 @@ Contributors:
 
 This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 */
-package com.flashphoner.phone_app;
+package com.flashphoner.c2c_app;
 
 import com.flashphoner.sdk.rtmp.*;
-import com.flashphoner.sdk.softphone.*;
+import com.flashphoner.sdk.softphone.ErrorCodes;
+import com.flashphoner.sdk.softphone.ISoftphone;
+import com.flashphoner.sdk.softphone.ISoftphoneCall;
+import com.flashphoner.sdk.softphone.Logger;
 import com.flashphoner.sdk.softphone.exception.CrossCallException;
 import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
 import com.flashphoner.sdk.softphone.exception.PortsBusyException;
@@ -40,14 +43,14 @@ import java.net.URLConnection;
  * Main application class. Default wowza application: flashphoner_app used this class as base. See config <code>conf/flashphoner_app/Application.xml</code>.<br/>
  * FlashPhonerApp handles connects disconnects and serves commands invoked by flash-client.<br/>
  * Flash client uses <code>NetConnection.connect()</code>, <code>NetConnection.call()</code> client-methods.<br/>
- * PhoneApp supports one modes <i>flashphoner</i>.<br/>
+ * C2CApp supports one modes <i>flashphoner</i>.<br/>
  */
-public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnApp, IRtmpClientsCollectionSupport {
+public class C2CApp extends ModuleBase implements IModuleOnConnect, IModuleOnApp, IRtmpClientsCollectionSupport {
 
     /**
      * Wowza application name. If your use own application name, you should change it here
      */
-    public static final String APPLICATION_NAME = "phone_app";
+    public static final String APPLICATION_NAME = "c2c_app";
 
     /**
      * Application instance. Default instance used.
@@ -85,7 +88,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
      */
     public void onConnect(IClient client, RequestFunction requestFunction, AMFDataList params) {
 
-        Logger.logger.info(4, "PhoneApp.onConnect() " + params);
+        Logger.logger.info(4, "C2CApp.onConnect() " + params);
 
         if (!isDefaultInstance(client)) {
             client.acceptConnection();
@@ -97,6 +100,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
          */
         AMFDataObj obj2 = params.getObject(2);
 
+        String swfUrl = obj2.getString("swfUrl");
         String flashVer = obj2.getString("flashVer");
         String[] splat = flashVer.split("\\s");
         String os = splat[0];//WIN
@@ -117,116 +121,88 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         int height = obj.getInt("height");
         String supportedResolutions = obj.getString("supportedResolutions");
 
-        String visibleName = obj.getString("visibleName");
-        assert visibleName != null;
-
-        boolean regRequired = obj.getBoolean("registerRequired");
+        boolean regRequired = true;
 
         IRtmpClient rtmpClient;
-        String token = obj.getString("token");
         String sipProviderAddress;
         String outboundProxy = Config.getInstance().getProperty("outbound_proxy");
-        String auto_login_url = Config.getInstance().getProperty("auto_login_url");
-        String authenticationName = obj.getString("authenticationName");
+        String c2c_auth_url = Config.getInstance().getProperty("c2c_auth_url");
         String login;
         String password;
         int sipProviderPort;
-        if (token == null) {
-            login = obj.getString("login");
-            assert login != null;
+        if (c2c_auth_url == null) {
+            Logger.logger.error("ERROR - Property c2c_auth_url - '" + c2c_auth_url + "' does not exits in flashphoner.properties");
+            client.rejectConnection();
+            return;
+        }
+        URL url;
+        StringBuilder response = new StringBuilder();
+        try {
+            url = new URL("http://" + c2c_auth_url + "?swfUrl=" + swfUrl);
+            URLConnection conn = url.openConnection();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
-            password = obj.getString("password");
-            assert password != null;
+            String line;
+            while ((line = rd.readLine()) != null) {
+                response.append(line);
+            }
+            rd.close();
+            Logger.logger.info("response from auth server - " + response.toString());
+        } catch (MalformedURLException e) {
+            Logger.logger.error("ERROR - '" + c2c_auth_url + "' is wrong;" + e);
+            client.rejectConnection();
+            return;
+        } catch (IOException e) {
+            Logger.logger.error("ERROR - '" + c2c_auth_url + "' is wrong;" + e);
+            client.rejectConnection();
+            return;
+        }
+        Document dom;
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            InputStream in = new ByteArrayInputStream(response.toString().getBytes("UTF-8"));
+            dom = db.parse(in);
+        } catch (Exception e) {
+            Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;" + e);
+            client.rejectConnection();
+            return;
+        }
 
-            if (outboundProxy == null || "".equals(outboundProxy)) {
-                sipProviderAddress = obj.getString("sipProviderAddress");
-            } else {
-                sipProviderAddress = outboundProxy;
-            }
-            if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
-                client.rejectConnection();
-                return;
-            }
+        Element el = dom.getDocumentElement();
+
+        String temp = el.getAttribute("auth");
+        if (!(temp == null || "".equals(temp))) {
+            regRequired = Boolean.parseBoolean(temp);
+        }
+
+        login = el.getAttribute("sip_login");
+        if (login == null || "".equals(login)) {
+            Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
+        }
+        password = el.getAttribute("sip_password");
+        if (password == null || "".equals(password)) {
+            Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
+        }
+        if (outboundProxy == null || "".equals(outboundProxy)) {
+            sipProviderAddress = el.getAttribute("sip_server");
+        } else {
+            sipProviderAddress = outboundProxy;
+        }
+        if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
+            Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
+            client.rejectConnection();
+            return;
+        }
+
+        String sipProviderPortString = el.getAttribute("sip_port");
+        if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
+            sipProviderPort = 5060;
+        } else {
             try {
-                sipProviderPort = Integer.parseInt(obj.getString("sipProviderPort"));
+                sipProviderPort = Integer.parseInt(sipProviderPortString);
             } catch (NumberFormatException ex) {
                 sipProviderPort = 5060;
-            }
-        } else {
-            if (auto_login_url == null) {
-                Logger.logger.error("ERROR - Property auto_login_url - '" + auto_login_url + "' does not exits in flashphoner.properties");
-                client.rejectConnection();
-                return;
-            }
-            URL url;
-            StringBuilder response = new StringBuilder();
-            try {
-                url = new URL("http://" + auto_login_url + "?token=" + token);
-                URLConnection conn = url.openConnection();
-                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    response.append(line);
-                }
-                rd.close();
-                Logger.logger.info("response from auth server - " + response.toString());
-            } catch (MalformedURLException e) {
-                Logger.logger.error("ERROR - '" + auto_login_url + "' is wrong;" + e);
-                client.rejectConnection();
-                return;
-            } catch (IOException e) {
-                Logger.logger.error("ERROR - '" + auto_login_url + "' is wrong;" + e);
-                client.rejectConnection();
-                return;
-            }
-            Document dom;
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            try {
-                DocumentBuilder db = dbf.newDocumentBuilder();
-                InputStream in = new ByteArrayInputStream(response.toString().getBytes("UTF-8"));
-                dom = db.parse(in);
-            } catch (Exception e) {
-                Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;" + e);
-                client.rejectConnection();
-                return;
-            }
-
-            Element el = dom.getDocumentElement();
-
-            String temp = el.getAttribute("auth");
-            if (!(temp == null || "".equals(temp))) {
-                regRequired = Boolean.parseBoolean(temp);
-            }
-
-            login = el.getAttribute("sip_login");
-            if (login == null || "".equals(login)) {
-                Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
-            }
-            password = el.getAttribute("sip_password");
-            if (password == null || "".equals(password)) {
-                Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
-            }
-            if (outboundProxy == null || "".equals(outboundProxy)) {
-                sipProviderAddress = el.getAttribute("sip_server");
-            } else {
-                sipProviderAddress = outboundProxy;
-            }
-            if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
-                Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
-                client.rejectConnection();
-                return;
-            }
-
-            String sipProviderPortString = el.getAttribute("sip_port");
-            if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
-                sipProviderPort = 5060;
-            } else {
-                try {
-                    sipProviderPort = Integer.parseInt(sipProviderPortString);
-                } catch (NumberFormatException ex) {
-                    sipProviderPort = 5060;
-                }
             }
         }
         Logger.logger.info(4, "sipProviderAddress - " + sipProviderAddress);
@@ -234,11 +210,11 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         RtmpClientConfig config = new RtmpClientConfig();
         config.setLogin(login);
-        config.setAuthenticationName(authenticationName);
+        config.setAuthenticationName(login);
         config.setPassword(password);
         config.setSipProviderAddress(sipProviderAddress);
         config.setSipProviderPort(sipProviderPort);
-        config.setVisibleName(visibleName);
+        config.setVisibleName("c2c_user");
         config.setRegRequired(regRequired);
         config.setApplicationName(APPLICATION_NAME);
         config.setWidth(width);
@@ -248,7 +224,9 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         Logger.logger.info(config.toString());
 
-        rtmpClient = new RtmpClient(config, client);
+        rtmpClient = new C2CRtmpClient(config, client);
+
+        ((C2CRtmpClient)rtmpClient).setCallee(el.getAttribute("sip_callee"));
 
         AMFDataObj amfDataObj = new AMFDataObj();
         amfDataObj.put("login", rtmpClient.getLogin());
@@ -260,7 +238,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         getRtmpClients().add(rtmpClient);
 
-        Logger.logger.info(4, "PhoneApp.getRtmpClients() " + getRtmpClients());
+        Logger.logger.info(4, "C2CApp.getRtmpClients() " + getRtmpClients());
 
         client.acceptConnection();
 
@@ -282,7 +260,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         IRtmpClient rtmpClientByClient = getRtmpClients().findByClient(client);
         if (rtmpClientByClient != null) {
-            Logger.logger.info(4, "Shutdown RtmpClient: " + rtmpClientByClient.getLogin());
+            Logger.logger.info(4, "Shutdown C2CRtmpClient: " + rtmpClientByClient.getLogin());
             IRtmpClient rtmpClient = getRtmpClients().remove(rtmpClientByClient);
             ISoftphone softphone = rtmpClient.getSoftphone();
             if (softphone != null) {
@@ -380,23 +358,18 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         Logger.logger.info(4, "call " + params);
         IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
 
-        String caller = rtmpClient.getLogin();
-        String visibleName = params.getString(PARAM1);
         Boolean isVideoCall = params.getBoolean(PARAM3);
 
-        String callee = Config.getInstance().getProperty("callee");
+        String callee = ((C2CRtmpClient)rtmpClient).getCallee();
 
-        if ((caller == null) || (caller.length() == 0)) {
-            caller = rtmpClient.getLogin();
-        }
+        String caller = rtmpClient.getLogin();
+
         if (callee == null || "".equals(callee)) {
             rtmpClient.fail(ErrorCodes.USER_NOT_AVAILABLE, null);
             return;
         }
 
-        if ((visibleName == null) || (visibleName.length() == 0)) {
-            visibleName = rtmpClient.getLogin();
-        }
+        String visibleName = rtmpClient.getLogin();
 
         ISoftphoneCall call;
 
@@ -424,26 +397,6 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
     }
 
     /**
-     * Answer incoming call, PARAM1 - callId, PARAM2 - isVideoCall.<br/>
-     * See <code>NetConnection.call("answer")</code> in flash-client.
-     *
-     * @param client
-     * @param requestFunction
-     * @param params
-     */
-    public void answer(IClient client, RequestFunction requestFunction, AMFDataList params) {
-        Logger.logger.info(4, "answer " + params);
-        String callId = params.getString(PARAM1);
-        Boolean isVideoCall = params.getBoolean(PARAM2);
-        IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
-        try {
-            rtmpClient.answer(callId, isVideoCall);
-        } catch (SoftphoneException e) {
-            Logger.logger.error("Can not answer the call", e);
-        }
-    }
-
-    /**
      * Updates call session to video.<br/>
      * PARAM1 - callId.<br/>
      * See <code>NetConnection.call("updateCallToVideo")</code> in flash-client.
@@ -460,50 +413,6 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             rtmpClient.updateCallToVideo(callId);
         } catch (SoftphoneException e) {
             Logger.logger.error("Can not update call to video", e);
-        }
-    }
-
-    /**
-     * Transfer call.<br/>
-     * PARAM1 - callId.<br/>
-     * PARAM2 - callee.<br/>
-     * See <code>NetConnection.call("transfer")</code> in flash-client.
-     *
-     * @param client
-     * @param requestFunction
-     * @param params
-     */
-    public void transfer(IClient client, RequestFunction requestFunction, AMFDataList params) {
-        Logger.logger.info(4, "transfer " + params);
-        String callId = params.getString(PARAM1);
-        String callee = params.getString(PARAM2);
-        IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
-        try {
-            rtmpClient.transfer(callId, callee);
-        } catch (SoftphoneException e) {
-            Logger.logger.error("Can not transfer call", e);
-        }
-    }
-
-    /**
-     * Transfer call.<br/>
-     * PARAM1 - callId.<br/>
-     * PARAM2 - isHold.<br/>
-     * See <code>NetConnection.call("hold")</code> in flash-client.
-     *
-     * @param client
-     * @param requestFunction
-     * @param params
-     */
-    public void hold(IClient client, RequestFunction requestFunction, AMFDataList params) {
-        Logger.logger.info(4, "hold " + params);
-        String callId = params.getString(PARAM1);
-        Boolean isHold = params.getBoolean(PARAM2);
-        IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
-        try {
-            rtmpClient.hold(callId, isHold);
-        } catch (SoftphoneException e) {
-            Logger.logger.error("Can not hold call", e);
         }
     }
 
@@ -526,22 +435,4 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             Logger.logger.error("Can not hangup call", e);
         }
     }
-
-    public void sendInstantMessage(IClient client, RequestFunction requestFunction, AMFDataList params) {
-        IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
-
-        AMFDataObj obj = params.getObject(PARAM1);
-
-        InstantMessage instantMessage = new InstantMessage();
-        instantMessage.setBody(obj.getString("body"));
-        instantMessage.setContentType(obj.getString("contentType"));
-        instantMessage.setTo(obj.getString("to"));
-
-        try {
-            rtmpClient.sendInstantMessage(instantMessage);
-        } catch (SoftphoneException e) {
-            Logger.logger.error("Can not send instant message", e);
-        }
-    }
-
 }
