@@ -93,10 +93,11 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         }
 
         /**
-         * Example: {Obj[]: app: "c2c_app", flashVer: "WIN 11,0,1,152", swfUrl: "http://87.226.225.62/120/flashphoner_client/flashphoner_js_api.swf", tcUrl: "rtmp://87.226.225.62:1935/c2c_app", fpad: false, capabilities: 239.0, audioCodecs: 3575.0, videoCodecs: 252.0, videoFunction: 1.0, pageUrl: "http://87.226.225.62/120/flashphoner_client/PhoneJS.html", objectEncoding: 0.0}
+         * Example: {Obj[]: app: "phone_app", flashVer: "WIN 11,0,1,152", swfUrl: "http://87.226.225.62/120/flashphoner_client/flashphoner_js_api.swf", tcUrl: "rtmp://87.226.225.62:1935/phone_app", fpad: false, capabilities: 239.0, audioCodecs: 3575.0, videoCodecs: 252.0, videoFunction: 1.0, pageUrl: "http://87.226.225.62/120/flashphoner_client/PhoneJS.html", objectEncoding: 0.0}
          */
         AMFDataObj obj2 = params.getObject(2);
 
+        String swfUrl = obj2.getString("swfUrl");
         String flashVer = obj2.getString("flashVer");
         String[] splat = flashVer.split("\\s");
         String os = splat[0];//WIN
@@ -126,18 +127,12 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String token = obj.getString("token");
         String sipProviderAddress;
         String outboundProxy = Config.getInstance().getProperty("outbound_proxy");
-        String auto_login_url = Config.getInstance().getProperty("auto_login_url");
+        String auto_login_url = ClientConfig.getInstance().getProperty("auto_login_url");
         String authenticationName = obj.getString("authenticationName");
-        String login;
-        String password;
+        String login = obj.getString("login");
+        String password = obj.getString("password");
         int sipProviderPort;
-        if (token == null) {
-            login = obj.getString("login");
-            assert login != null;
-
-            password = obj.getString("password");
-            assert password != null;
-
+        if (login != null && password != null) {
             if (outboundProxy == null || "".equals(outboundProxy)) {
                 sipProviderAddress = obj.getString("sipProviderAddress");
             } else {
@@ -154,22 +149,31 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             }
         } else {
             if (auto_login_url == null) {
-                Logger.logger.error("ERROR - Property auto_login_url - '" + auto_login_url + "' does not exits in flashphoner.properties");
+                Logger.logger.error("ERROR - Property auto_login_url - '" + auto_login_url + "' does not exits in flashphoner-client.properties");
                 client.rejectConnection();
                 return;
             }
             URL url;
             StringBuilder response = new StringBuilder();
             try {
-                url = new URL("http://" + auto_login_url + "?token=" + token);
-                URLConnection conn = url.openConnection();
-                BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+                File file = new File(auto_login_url);
+                BufferedReader bufferedReader;
+                if (file.exists()) {
+                    bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+                } else {
+                    url = new URL(auto_login_url + "?token=" + token + "&swfUrl=" + swfUrl);
+                    URLConnection conn = url.openConnection();
+                    bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+                }
 
                 String line;
-                while ((line = rd.readLine()) != null) {
+                while ((line = bufferedReader.readLine()) != null) {
                     response.append(line);
                 }
-                rd.close();
+                bufferedReader.close();
+
                 Logger.logger.info("response from auth server - " + response.toString());
             } catch (MalformedURLException e) {
                 Logger.logger.error("ERROR - '" + auto_login_url + "' is wrong;" + e);
@@ -245,6 +249,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         config.setHeight(height);
         config.setSupportedResolutions(supportedResolutions);
         config.setMajorMinorPlayerVersion(majorMinorVersion);
+        config.setSwfUrl(swfUrl);
 
         Logger.logger.info(config.toString());
 
@@ -382,12 +387,12 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         String caller = rtmpClient.getLogin();
         String visibleName = params.getString(PARAM1);
+        String callee = params.getString(PARAM2);
         Boolean isVideoCall = params.getBoolean(PARAM3);
+        String token = params.getString(PARAM4);
 
-        String callee = Config.getInstance().getProperty("callee");
-
-        if ((caller == null) || (caller.length() == 0)) {
-            caller = rtmpClient.getLogin();
+        if (token != null) {
+            callee = getCalleeByToken(token, rtmpClient.getRtmpClientConfig().getSwfUrl());
         }
         if (callee == null || "".equals(callee)) {
             rtmpClient.fail(ErrorCodes.USER_NOT_AVAILABLE, null);
@@ -421,6 +426,41 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         }
 
         ModuleBase.sendResult(client, params, call.toAMFDataObj());
+    }
+
+    private String getCalleeByToken(String token, String swfUrl) {
+        String getCalleUrl = ClientConfig.getInstance().getProperty("get_callee_url");
+        if (getCalleUrl == null) {
+            Logger.logger.error("ERROR - Property get_callee_url - '" + getCalleUrl + "' does not exits in flashphoner-client.properties");
+            return null;
+        }
+        URL url;
+        StringBuilder response = new StringBuilder();
+        try {
+            File file = new File(getCalleUrl);
+            BufferedReader bufferedReader;
+            if (file.exists()) {
+                bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            } else {
+                url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl);
+                URLConnection conn = url.openConnection();
+                bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            }
+
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                response.append(line);
+            }
+            bufferedReader.close();
+            Logger.logger.info("response from get_callee_url - " + response.toString());
+            return response.toString();
+        } catch (MalformedURLException e) {
+            Logger.logger.error("ERROR - '" + getCalleUrl + "' is wrong;" + e);
+            return null;
+        } catch (IOException e) {
+            Logger.logger.error("ERROR - '" + getCalleUrl + "' is wrong;" + e);
+            return null;
+        }
     }
 
     /**

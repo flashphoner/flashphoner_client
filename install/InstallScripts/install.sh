@@ -5,7 +5,6 @@ PRODUCT="flashphoner_client"
 VERSION=`cat ./flashphoner_client.version`
 SUPPORT_URL="http://flashphoner.com"
 PRODUCT_APP_JAR=tbs-phone-app.jar
-C2C_APP_JAR=tbs-c2c-app.jar
 
 echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
 echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
@@ -218,25 +217,19 @@ STREAMS_XML=$WOWZA_HOME/conf/Streams.xml
 
 
 SERVER_LISTENER="$INSTALLER_DIR/server/WowzaMediaServer/conf/ServerListener.xml"
-PHONE_RTMP2VOIP_STREAM="$INSTALLER_DIR/server/WowzaMediaServer/conf/PhoneRtmp2VoipStream.xml"
-C2C_RTMP2VOIP_STREAM="$INSTALLER_DIR/server/WowzaMediaServer/conf/C2CRtmp2VoipStream.xml"
+RTMP2VOIP_STREAM="$INSTALLER_DIR/server/WowzaMediaServer/conf/Rtmp2VoipStream.xml"
 
 SERVER_LISTENER_XPATH="/Root/Server/ServerListeners/ServerListener[BaseClass=\"com.flashphoner.phone_app.PhoneServerListener\"]"
 SERVER_LISTENERS_XPATH="Root/Server/ServerListeners"
 
-PHONE_RTMP2VOIP_STREAM_XPATH="/Root/Streams/Stream[Name=\"phone_rtmp_to_voip\"]"
-C2C_RTMP2VOIP_STREAM_XPATH="/Root/Streams/Stream[Name=\"c2c_rtmp_to_voip\"]"
-
+RTMP2VOIP_STREAM_XPATH="/Root/Streams/Stream[Name=\"phone_rtmp_to_voip\"]"
 STREAMS_XPATH="/Root/Streams"
 
 java -cp $WOWZA_HOME/bin/tbs-flashphoner-configurator.jar  com.flashphoner.configurator.xpath.XPath removeNode $SERVER_XML null $SERVER_LISTENER_XPATH null
 java -cp $WOWZA_HOME/bin/tbs-flashphoner-configurator.jar  com.flashphoner.configurator.xpath.XPath addNodeFromFile $SERVER_XML $SERVER_LISTENER $SERVER_LISTENER_XPATH $SERVER_LISTENERS_XPATH
 
-java -cp $WOWZA_HOME/bin/tbs-flashphoner-configurator.jar  com.flashphoner.configurator.xpath.XPath removeNode $STREAMS_XML null $PHONE_RTMP2VOIP_STREAM_XPATH null
-java -cp $WOWZA_HOME/bin/tbs-flashphoner-configurator.jar  com.flashphoner.configurator.xpath.XPath addNodeFromFile $STREAMS_XML $PHONE_RTMP2VOIP_STREAM $PHONE_RTMP2VOIP_STREAM_XPATH $STREAMS_XPATH
-
-java -cp $WOWZA_HOME/bin/tbs-flashphoner-configurator.jar  com.flashphoner.configurator.xpath.XPath removeNode $STREAMS_XML null $C2C_RTMP2VOIP_STREAM_XPATH null
-java -cp $WOWZA_HOME/bin/tbs-flashphoner-configurator.jar  com.flashphoner.configurator.xpath.XPath addNodeFromFile $STREAMS_XML $C2C_RTMP2VOIP_STREAM $C2C_RTMP2VOIP_STREAM_XPATH $STREAMS_XPATH
+java -cp $WOWZA_HOME/bin/tbs-flashphoner-configurator.jar  com.flashphoner.configurator.xpath.XPath removeNode $STREAMS_XML null $RTMP2VOIP_STREAM_XPATH null
+java -cp $WOWZA_HOME/bin/tbs-flashphoner-configurator.jar  com.flashphoner.configurator.xpath.XPath addNodeFromFile $STREAMS_XML $RTMP2VOIP_STREAM $RTMP2VOIP_STREAM_XPATH $STREAMS_XPATH
 
 echo "- Wowza configuring completed."
 echo ""
@@ -272,19 +265,6 @@ cp -rf $C3 $WOWZA_HOME/conf
 cp -f $C7 $WOWZA_HOME/lib
 echo "$WOWZA_HOME/$C7" >> $INST_LOG
 
-
-C1=applications/c2c_app
-C3=conf/c2c_app
-C7=lib/$C2C_APP_JAR
-
-cp -rf $C1 $WOWZA_HOME/applications
-echo "$WOWZA_HOME/$C1" > $INST_LOG
-
-cp -rf $C3 $WOWZA_HOME/conf
-
-cp -f $C7 $WOWZA_HOME/lib
-echo "$WOWZA_HOME/$C7" >> $INST_LOG
-
 PRODUCT_UNINSTALLER=$WOWZA_HOME/bin/$PRODUCT-uninstall.sh
 cp -f $C11 $PRODUCT_UNINSTALLER
 echo "$PRODUCT_UNINSTALLER" >> $INST_LOG
@@ -296,6 +276,22 @@ echo "$VERSION" > $PRODUCT_VERSION_FILE
 echo "- Copying completed."
 echo ""
 
+PRODUCT_CONFIG=$WOWZA_HOME/conf/flashphoner-client.properties
+
+echo "#Config for client" > $PRODUCT_CONFIG
+echo "# get_callee_url            - Url or path to file for get callee for call" >> $PRODUCT_CONFIG
+echo "# auto_login_url            - Url or path to file for authorize by token" >> $PRODUCT_CONFIG
+
+echo "" >> $PRODUCT_CONFIG
+echo "get_callee_url              =" >> $PRODUCT_CONFIG
+echo "auto_login_url              =" >> $PRODUCT_CONFIG
+
+echo "- Configuration complete. Your configuration parameters:"
+echo ""
+cat $PRODUCT_CONFIG
+echo ""
+echo "- You can edit it here - $WOWZA_HOME/conf/flashphoner-client.properties"
+echo ""
 cd $INSTALLER_DIR
 CLIENT_PATH=''
 function get_path_client(){

@@ -45,8 +45,6 @@ package com.flashphoner.api
 				}						
 			}
 			if (event.type == MainEvent.REGISTERED){
-				
-				SoundControl.playRegisterSound();
 				modelLocator.logged = true;		
 				flashAPI.dropRegisteredTimer();
 			}	

@@ -111,8 +111,7 @@ package com.flashphoner.api
 					}
 			        
 			        PhoneConfig.SERVER_URL = xml.rtmp_server;
-			        PhoneConfig.PHONE_APP_NAME = xml.phone_application;
-					PhoneConfig.C2C_APP_NAME = xml.c2c_application;
+			        PhoneConfig.APP_NAME = xml.application;
 					var check_validation_callee:String = xml.check_validation_callee;
 					PhoneConfig.CHECK_VALIDATION_CALLEE = (check_validation_callee == "true");
 					
