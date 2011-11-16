@@ -422,32 +422,26 @@ function getElement(str) {
 
 function toHangupState() {
     trace("toHangupState");
-    getElement('hangupButton').innerHTML = "Hangup";
+    $('#callButton').html('Hangup').addClass('hangup').removeClass('call');
     disableCallButton();
 }
 
 function toCallState() {
     trace("toCallState");
-    getElement('hangupButton').innerHTML = "Call";
+    $('#callButton').html('Call').addClass('call').removeClass('hangup');
     disableCallButton();
 }
 
 function disableCallButton() {
     trace("disableCallButton");
-    var button = $('#hangupButton');
-
-    button.css('background', 'gray').prop('disabled', true);
+    var button = $('#callButton');
+    
+    $('#callButton').addClass('disabled');
+    window.setTimeout(enableCallButton, 3000);
 
     function enableCallButton() {
-        button.prop('disabled', false);
-        if (button.innerHTML == 'Call') {
-            button.css('background', '#090');
-        } else {
-            button.css('background', '#c00');
-        }
+      $('#callButton').removeClass('disabled');
     }
-
-    window.setTimeout(enableCallButton, 3000);
 }
 
 /* ----- VIDEO ----- */
@@ -510,22 +504,21 @@ function close(element) {
 $(function() {
 
     
-    $(".button:not(.dialButton, .call, .hangup)").click(function() {
-      if ($(this).hasClass('pressed')) {
-        $('#dialPad').removeClass('visible');
-        $(this).removeClass('pressed');
-      } else {
-        $('#dialPad').addClass('visible');
-        $(this).addClass('pressed');
-      }
+    // All buttons except .call and .hangup stay in press state until double click
+    $(".button:not(.dialButton, .call, .hangup, .disabled)").click(function() {
+      $(this).toggleClass('pressed');
     });
-    
+
+    // All dial buttons and call/hangup go unpressed after mouseup 
     $('.dialButton, .call, .hangup').mousedown(function() {
-      $(this).addClass('pressed');
+      if (!$(this).hasClass('disabled')) {$(this).addClass('pressed');}
     }).mouseup(function() {
+      $(this).removeClass('pressed');
+    }).mouseover (function() {
       $(this).removeClass('pressed');
     });
 
+    // dialpad button opens dialpad
     $("#dialpadButton").click(function() {
       if ($(this).hasClass('pressed')) {
         $('#dialPad').show();
@@ -534,6 +527,7 @@ $(function() {
       }
     });
     
+    // mic button opens mic slider
     $("#micButton").click(function() {
       if ($(this).hasClass('pressed')) {
         $('#micSlider').show();
@@ -542,6 +536,7 @@ $(function() {
       }
     });    
     
+    // sound button opens sound slider
     $("#soundButton").click(function() {
       if ($(this).hasClass('pressed')) {
         $('#speakerSlider').show();
@@ -550,14 +545,13 @@ $(function() {
       }
     });
 
-
-    //Bind click on different buttons
+    // call button make call or hangup
     $("#callButton").click(function() {
-        if ($("#callButton").val() == 'Call') {
-            call();
-        } else {
-            hangup(currentCall.id);
-        }
+      if ($(this).html() == 'Call') {
+        call();
+      } else {
+        hangup(currentCall.id);
+      }
     });
 
 

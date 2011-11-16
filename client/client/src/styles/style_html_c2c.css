@@ -129,8 +129,12 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 	border-bottom-color: #666;
 	box-shadow: inset 0px 1px 6px #111;
 	height: 25px;
-	line-height: 27px;
+	line-height: 29px;
 }
+.disabled {
+  opacity: 0.5;
+}
+
 #micButton {
 	left: 6px;
 }
