@@ -82,7 +82,7 @@ package com.flashphoner.api
 			PhoneModel.getInstance();
 			ExternalInterface.addCallback("getParameters",getParameters);
 			ExternalInterface.addCallback("login",login);
-			ExternalInterface.addCallback("loginWithToken",loginWithToken);
+			ExternalInterface.addCallback("loginByToken",loginByToken);
 			ExternalInterface.addCallback("logoff",logoff);
 			ExternalInterface.addCallback("getInfoAboutMe",getInfoAboutMe);			
 			ExternalInterface.addCallback("sendMessage",sendMessage);
@@ -327,14 +327,14 @@ package com.flashphoner.api
 		 * @param token Token for auth server
 		 * @param password Password for user
 		 **/		
-		public function loginWithToken(token:String = null):void{
+		public function loginByToken(token:String = null):void{
 			ExternalInterface.call("notifyRegisterRequired",PhoneConfig.REGISTER_REQUIRED);
 			if (PhoneConfig.REGISTER_REQUIRED){
 				upRegisteredTimer();
 				startRegisterTimer();
 			}
 			videoControl.init();
-			phoneServerProxy.loginWithToken(token);
+			phoneServerProxy.loginByToken(token);
 		}
 		
 		/**

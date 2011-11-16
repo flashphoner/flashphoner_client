@@ -276,21 +276,21 @@ echo "$VERSION" > $PRODUCT_VERSION_FILE
 echo "- Copying completed."
 echo ""
 
-PRODUCT_CONFIG=$WOWZA_HOME/conf/flashphoner-client.properties
+PRODUCT_CONFIG=$WOWZA_HOME/conf/phone_app/flashphoner-client.properties
 
 echo "#Config for client" > $PRODUCT_CONFIG
 echo "# get_callee_url            - Url or path to file for get callee for call" >> $PRODUCT_CONFIG
 echo "# auto_login_url            - Url or path to file for authorize by token" >> $PRODUCT_CONFIG
 
 echo "" >> $PRODUCT_CONFIG
-echo "get_callee_url              =" >> $PRODUCT_CONFIG
-echo "auto_login_url              =" >> $PRODUCT_CONFIG
+echo "get_callee_url              =$WOWZA_HOME/conf/phone_app/callee.xml" >> $PRODUCT_CONFIG
+echo "auto_login_url              =$WOWZA_HOME/conf/phone_app/account.xml" >> $PRODUCT_CONFIG
 
 echo "- Configuration complete. Your configuration parameters:"
 echo ""
 cat $PRODUCT_CONFIG
 echo ""
-echo "- You can edit it here - $WOWZA_HOME/conf/flashphoner-client.properties"
+echo "- You can edit it here - $WOWZA_HOME/conf/phone_app/flashphoner-client.properties"
 echo ""
 cd $INSTALLER_DIR
 CLIENT_PATH=''

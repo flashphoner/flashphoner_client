@@ -73,9 +73,9 @@ $(document).ready(function() {
 });
 
 
-function loginByURL() {
-    trace("loginByURL;");
-    var result = loginByURL();
+function loginByToken(token) {
+    trace("loginByToken; token = "+token);
+    var result = flashphoner.loginByToken(token);
 }
 
 function getInfoAboutMe() {
@@ -88,18 +88,16 @@ function logoff() {
     flashphoner.logoff();
 }
 
-function call() {
-    trace("call");
+function callByToken(token) {
+    trace("callByToken; token = "+token);
     if (isLogged) {
         if (isMuted() == 1) {
-            intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);call();}', 500);
+            intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);callByToken(null);}', 500);
             requestUnmute();
         } else if (isMuted() == -1){
-            var result = flashphoner.callByURL();
+            var result = flashphoner.callByToken(token);
             if (result == 0) {
                 toHangupState();
-            } else {
-                openConnectingView("Callee number is wrong", 3000);
             }
     	} else {
     		openConnectingView("Microphone is not plugged in", 3000);
@@ -211,7 +209,7 @@ function notifyFlashReady() {
 	trace("notifyFlashReady");
 	getElement('versionOfProduct').innerHTML = getVersion();
 	closeConnectingView();
-    //loginByURL();
+	loginByToken(null);
 }
 
 function notifyRegisterRequired(registerR) {
@@ -230,7 +228,7 @@ function notifyConnected() {
     trace("notifyConnected");
     if (!registerRequired) {
         isLogged = true;
-        closeConnectingView();
+        callByToken(null);
     }
 }
 
@@ -238,7 +236,7 @@ function notifyRegistered() {
     trace("notifyRegistered");
     if (registerRequired) {
         isLogged = true;
-        closeConnectingView();
+        callByToken(null);
     }
 }
 
@@ -247,21 +245,18 @@ function notifyBalance(balance) {
 
 function notify(call) {
     trace("notify: callId " + call.id + " --- " + call.anotherSideUser);
-    if (currentCall.id == call.id) { //if we have some call now and notify is about exactly our call
+    if (currentCall.id == call.id) {
         currentCall = call;
         if (call.state == STATE_FINISH) {
-            // if that hangup during transfer procedure?
             if (holdedCall != null) {
-                currentCall = holdedCall; //holded call become current
-                holdedCall = null; //make variable null
+                currentCall = holdedCall;
+                holdedCall = null;
                 createCallView(currentCall);
             } else {
-                closeIncomingView();
                 closeVideoView();
                 toCallState();
             }
             getElement('sendVideo').value = "Send video";
-            // or this just usual hangup during the call
         } else if (call.state == STATE_HOLD) {
             $('#callState').html('...Call on hold...');
             enableHoldButton();
@@ -398,13 +393,13 @@ function closeConnectingView() {
 }
 
 function openInfoView(str, timeout, height) {
-    trace("openInfoView: message - " + str + "; timeout - " + timeout);
-   	if (timeout != 0) {
+    trace("TODO openInfoView: message - " + str + "; timeout - " + timeout);
+   	/*if (timeout != 0) {
         window.setTimeout("closeInfoView();", timeout);
     }
    	getElement('infoDiv').style.visibility = "visible";
    	getElement('infoDiv').style.height = height+"px";
-    getElement('infoText').innerHTML = str;
+    getElement('infoText').innerHTML = str;*/
 }
 
 function closeInfoView() {
@@ -423,6 +418,36 @@ function closeSettingsView() {
 
 function getElement(str) {
     return document.getElementById(str);
+}
+
+function toHangupState() {
+    trace("toHangupState");
+    getElement('hangupButton').innerHTML = "Hangup";
+    disableCallButton();
+}
+
+function toCallState() {
+    trace("toCallState");
+    getElement('hangupButton').innerHTML = "Call";
+    disableCallButton();
+}
+
+function disableCallButton() {
+    trace("disableCallButton");
+    var button = $('#hangupButton');
+
+    button.css('background', 'gray').prop('disabled', true);
+
+    function enableCallButton() {
+        button.prop('disabled', false);
+        if (button.innerHTML == 'Call') {
+            button.css('background', '#090');
+        } else {
+            button.css('background', '#c00');
+        }
+    }
+
+    window.setTimeout(enableCallButton, 3000);
 }
 
 /* ----- VIDEO ----- */
@@ -462,23 +487,18 @@ function closeVideoView() {
  */
 function requestUnmute() {
     trace("requestUnmute");
-
-    $('#video_requestUnmuteDiv').removeClass().addClass('securityDiv');
-    $('#closeButton_video_requestUnmuteDiv').css('visibility', 'hidden');
-    $('#sendVideo').css('visibility', 'hidden');
-    $('#requestUnmuteText').show();
-
-    getElement('jsSWFDiv').style.width = "214";
-    getElement('jsSWFDiv').style.height = "138";
-    getElement('jsSWFDiv').style.top = "35px";
+    $('.back').show();
+    $('.request').show();
+    $('#flash').removeClass('init').addClass('security');
 
     viewAccessMessage();
 }
 
 function closeRequestUnmute() {
     trace("closeRequestUnmute");
-    $('#video_requestUnmuteDiv').removeClass().addClass('closed');
-    getElement('jsSWFDiv').style.top = "20px";
+    $('.back').hide();
+    $('.request').hide();
+    $('#flash').addClass('init').removeClass('security');
 }
 /* ------------------------- */
 
@@ -529,36 +549,6 @@ $(function() {
         $('#speakerSlider').hide();
       }
     });
-
-    //??? ?????? ?????????? ?????????????? ?????? ????? ???????? ??????
-    $("#testCall").click(function() {
-      // ??????? ?? ?????????? ?????? ? ????????? ???????
-      $('.back').show();
-      $('.request').show();
-      $('#flash').removeClass('init').addClass('security');
-      // ???? ???? ??????? ???. ????? ?? ????? ?????????????.
-      // flashphoner.showSecurityPanel();
-    });
-
-    //??? ?????? ?????????? ??????? Allow
-    $("#allow").click(function() {
-      // ?? ??? ????????? ? ???????? ???????
-      $('.back').hide();
-      $('.request').hide();
-      $('#flash').addClass('init').removeClass('security');
-      // ?????? ???? ???? ?? ??????, ????? ?????????????, ???? ????? ??????
-      // flashphoner.call();
-    });    
-
-
-
-
-
-
-
-
-
-
 
 
     //Bind click on different buttons

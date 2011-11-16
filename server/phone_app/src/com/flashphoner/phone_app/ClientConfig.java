@@ -61,7 +61,7 @@ public class ClientConfig implements IConfig {
         String wowzaHome = Config.WOWZA_HOME;
         props = new Properties();
         try {
-            props.load(new FileInputStream(wowzaHome + "/conf/flashphoner-client.properties"));
+            props.load(new FileInputStream(wowzaHome + "/conf/phone_app/flashphoner-client.properties"));
         } catch (Exception e) {
             Logger.logger.error("Error flashphoner-client.properties init", e);
         }

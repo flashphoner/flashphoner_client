@@ -87,7 +87,7 @@ package com.flashphoner.api
 			return 0;			
 		}
 		
-		public function loginWithToken(token:String = null):void{
+		public function loginByToken(token:String = null):void{
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
