@@ -65,7 +65,7 @@ function trace(str) {
 
 $(document).ready(function() {
     if (playerIsRight()) {
-    	openConnectingView("Loading...", 0);
+    	openConnectingView("...loading...", 0);
     }else{
     	openConnectingView("You have old flash player", 0);
 		trace("Download flash player from: http://get.adobe.com/flashplayer/");
@@ -171,12 +171,12 @@ function changeMicStatus() {
     trace("changeMicStatus");
     var micButton = getElement('micButton');
     if (isMutedMicButton == false) {
-        micButton.style.background = "url(assets/mic_crossed.png)";
+        /*micButton.style.background = "url(assets/mic_crossed.png)";*/
         micVolume = getMicVolume();
         flashphoner.setMicVolume(0);
         isMutedMicButton = true;
     } else {
-        micButton.style.background = "url(assets/mic.png)";
+        /*micButton.style.background = "url(assets/mic.png)";*/
         flashphoner.setMicVolume(micVolume);
         isMutedMicButton = false;
     }
@@ -186,12 +186,12 @@ function changeSpeakerStatus() {
     trace("changeSpeakerStatus");
     var soundButton = getElement('soundButton');
     if (isMutedSpeakerButton == false) {
-        soundButton.style.background = "url(assets/sound_crossed.png)";
+        /*soundButton.style.background = "url(assets/sound_crossed.png)";*/
         speakerVolume = getVolume();
         flashphoner.setVolume(0);
         isMutedSpeakerButton = true;
     } else {
-        soundButton.style.background = "url(assets/sound.png)";
+        /*soundButton.style.background = "url(assets/sound.png)";*/
         flashphoner.setVolume(speakerVolume);
         isMutedSpeakerButton = false;
     }
@@ -486,10 +486,80 @@ function closeRequestUnmute() {
 function close(element) {
     element.css('visibility', 'hidden');
 }
-
-
 /* --------------------- On document load we do... ------------------ */
 $(function() {
+
+    
+    $(".button:not(.dialButton, .call, .hangup)").click(function() {
+      if ($(this).hasClass('pressed')) {
+        $('#dialPad').removeClass('visible');
+        $(this).removeClass('pressed');
+      } else {
+        $('#dialPad').addClass('visible');
+        $(this).addClass('pressed');
+      }
+    });
+    
+    $('.dialButton, .call, .hangup').mousedown(function() {
+      $(this).addClass('pressed');
+    }).mouseup(function() {
+      $(this).removeClass('pressed');
+    });
+
+    $("#dialpadButton").click(function() {
+      if ($(this).hasClass('pressed')) {
+        $('#dialPad').show();
+      } else {
+        $('#dialPad').hide();
+      }
+    });
+    
+    $("#micButton").click(function() {
+      if ($(this).hasClass('pressed')) {
+        $('#micSlider').show();
+      } else {
+        $('#micSlider').hide();
+      }
+    });    
+    
+    $("#soundButton").click(function() {
+      if ($(this).hasClass('pressed')) {
+        $('#speakerSlider').show();
+      } else {
+        $('#speakerSlider').hide();
+      }
+    });
+
+    //??? ?????? ?????????? ?????????????? ?????? ????? ???????? ??????
+    $("#testCall").click(function() {
+      // ??????? ?? ?????????? ?????? ? ????????? ???????
+      $('.back').show();
+      $('.request').show();
+      $('#flash').removeClass('init').addClass('security');
+      // ???? ???? ??????? ???. ????? ?? ????? ?????????????.
+      // flashphoner.showSecurityPanel();
+    });
+
+    //??? ?????? ?????????? ??????? Allow
+    $("#allow").click(function() {
+      // ?? ??? ????????? ? ???????? ???????
+      $('.back').hide();
+      $('.request').hide();
+      $('#flash').addClass('init').removeClass('security');
+      // ?????? ???? ???? ?? ??????, ????? ?????????????, ???? ????? ??????
+      // flashphoner.call();
+    });    
+
+
+
+
+
+
+
+
+
+
+
 
     //Bind click on different buttons
     $("#callButton").click(function() {
@@ -499,6 +569,7 @@ $(function() {
             hangup(currentCall.id);
         }
     });
+
 
     $("#settingsButton").click(function() {
       openSettingsView();
@@ -551,6 +622,7 @@ $(function() {
     });
 
     // this function set changing in button styles when you press any button
+    /*
     $(".button").mousedown(
         function() {
             $(this).css('border-style', 'inset');
@@ -560,10 +632,37 @@ $(function() {
         }).mouseout(function() {
             $(this).css('border-style', 'outset');
         });
-
+    */
     // this functions resize flash when you resize video window
     $('#video_requestUnmuteDiv').resize(function() {
         $('#jsSWFDiv').height($(this).height() - 40);
     });
 
+    
+		$("#micSlider").slider({
+			orientation: "vertical",
+			range: "min",
+			min: 0,
+			max: 100,
+      value: 60,
+			slide: function(event, ui) {
+        flashphoner.setVolume(micVolume);
+      }
+		});
+	
+	  $("#speakerSlider").slider({
+			orientation: "vertical",
+			range: "min",
+			min: 0,
+			max: 100,
+			value: 60,
+      slide: function(event, ui) {  
+        flashphoner.setVolume(speakerVolume);      
+      }
+		});
+
 });
+
+
+
+	
