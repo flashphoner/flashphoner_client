@@ -113,7 +113,7 @@ function hangup(callId) {
 }
 
 function sendDTMF(callId, dtmf) {
-    trace("sendDTMF; callId - " + callId + "; dtmf - " + dtmf);
+    trace("sendDTMF: callId - " + callId + "; dtmf - " + dtmf);
     flashphoner.sendDTMF(callId, dtmf);
 }
 
@@ -509,7 +509,7 @@ $(function() {
       $(this).toggleClass('pressed');
     });
 
-    // All dial buttons and call/hangup go unpressed after mouseup 
+    // All dial buttons and call/hangup go unpressed after mouseup. Except if it disabled mode. 
     $('.dialButton, .call, .hangup').mousedown(function() {
       if (!$(this).hasClass('disabled')) {$(this).addClass('pressed');}
     }).mouseup(function() {
@@ -526,6 +526,12 @@ $(function() {
         $('#dialPad').hide();
       }
     });
+    
+    // dialButtons sends DTMF signals
+    $(".dialButton").click(function() {
+      //sendDTMF(currentCall.id, $(this).html());
+      $('.dialScreen').append($(this).html());
+    });    
     
     // mic button opens mic slider
     $("#micButton").click(function() {
@@ -545,7 +551,7 @@ $(function() {
       }
     });
 
-    // call button make call or hangup
+    // call button makes call or hangup
     $("#callButton").click(function() {
       if ($(this).html() == 'Call') {
         call();
@@ -553,6 +559,45 @@ $(function() {
         hangup(currentCall.id);
       }
     });
+
+    // Mic slider set mic volume when you slide it
+		$("#micSlider").slider({
+			orientation: "vertical",
+			range: "min",
+			min: 0,
+			max: 100,
+      value: 60,
+			slide: function(event, ui) {
+        flashphoner.setMicVolume(ui.value);
+      }
+		});
+	
+	  // Speaker slider set speaker volume when you slide it
+	  $("#speakerSlider").slider({
+			orientation: "vertical",
+			range: "min",
+			min: 0,
+			max: 100,
+			value: 60,
+      slide: function(event, ui) {  
+        flashphoner.setVolume(ui.value);      
+      }
+		});
+
+    $("#cameraButton").click(function() {
+      openVideoView();
+    });
+
+
+
+
+
+
+
+
+
+
+
 
 
     $("#settingsButton").click(function() {
@@ -578,10 +623,11 @@ $(function() {
     $("#soundButton").click(function() {
       changeSpeakerStatus();
     });
-
+    /* -------- DEPRECATED ------
     $("#cameraButton").click(function() {
       openVideoView();
     });
+    */
 
     $("#closeButton_video_requestUnmuteDiv").click(function() {
       closeVideoView();
@@ -605,45 +651,14 @@ $(function() {
         }
     });
 
-    // this function set changing in button styles when you press any button
-    /*
-    $(".button").mousedown(
-        function() {
-            $(this).css('border-style', 'inset');
-        }).mouseup(
-        function() {
-            $(this).css('border-style', 'outset');
-        }).mouseout(function() {
-            $(this).css('border-style', 'outset');
-        });
-    */
+
     // this functions resize flash when you resize video window
     $('#video_requestUnmuteDiv').resize(function() {
         $('#jsSWFDiv').height($(this).height() - 40);
     });
 
     
-		$("#micSlider").slider({
-			orientation: "vertical",
-			range: "min",
-			min: 0,
-			max: 100,
-      value: 60,
-			slide: function(event, ui) {
-        flashphoner.setVolume(micVolume);
-      }
-		});
-	
-	  $("#speakerSlider").slider({
-			orientation: "vertical",
-			range: "min",
-			min: 0,
-			max: 100,
-			value: 60,
-      slide: function(event, ui) {  
-        flashphoner.setVolume(speakerVolume);      
-      }
-		});
+
 
 });
 

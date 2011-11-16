@@ -198,6 +198,7 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 	font: bolder 18px Arial;
 	background-color: #000;
 	border-radius: 4px;
+	overflow: hidden;
 }
 /* ----------------------------- */
 
@@ -246,20 +247,6 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#555555', endColorstr='#444444') !important;
 }
 
-/* --- TODO --- */
-#testCall {
-width: 80px;
-border-radius: 12px;
-}
-
-#allow {
-width: 80px;
-border-radius: 12px;
-}
-
-
-
-
 /* --------------- Flash ---------------- */
 
 #flash {
@@ -287,6 +274,21 @@ border-radius: 12px;
 	height: 1px;
 	visibility: hidden;
 }	
+/* screen for showing both videos - my and interlocutor */
+.video {
+  width: ;
+  height: ;
+}
+
+/* screen only for my video */
+.myVideo {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  top: 0px;
+  right: 40px; 
+  background: #666;
+}
 
 /* ------------- Request ------------ */
 .request {
