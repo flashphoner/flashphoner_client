@@ -34,7 +34,6 @@ var flashphoner;
 
 // One call become two calls during TRANSFER case
 // there is why we need at least two kinds of calls here
-var holdedCall = null;
 var currentCall = null;
 var callee = '';
 var callerLogin = '';
@@ -65,7 +64,7 @@ function trace(str) {
 
 $(document).ready(function() {
     if (playerIsRight()) {
-    	openConnectingView("...loading...", 0);
+    	openConnectingView("...Loading...", 0);
     }else{
     	openConnectingView("You have old flash player", 0);
 		trace("Download flash player from: http://get.adobe.com/flashplayer/");
@@ -103,7 +102,7 @@ function callByToken(token) {
     		openConnectingView("Microphone is not plugged in", 3000);
     	}        
     } else {
-        loginByURL();
+        loginByToken(null);
     }
 }
 
@@ -156,43 +155,6 @@ function getMicVolume() {
 function getVolume() {
     trace("getVolume");
     return flashphoner.getVolume();
-}
-
-function saveMicSettings() {
-    trace("saveMicSettings");
-    flashphoner.setVolume(speakerVolume);
-    flashphoner.setMicVolume(micVolume);
-    closeSettingsView();
-}
-
-function changeMicStatus() {
-    trace("changeMicStatus");
-    var micButton = getElement('micButton');
-    if (isMutedMicButton == false) {
-        /*micButton.style.background = "url(assets/mic_crossed.png)";*/
-        micVolume = getMicVolume();
-        flashphoner.setMicVolume(0);
-        isMutedMicButton = true;
-    } else {
-        /*micButton.style.background = "url(assets/mic.png)";*/
-        flashphoner.setMicVolume(micVolume);
-        isMutedMicButton = false;
-    }
-}
-
-function changeSpeakerStatus() {
-    trace("changeSpeakerStatus");
-    var soundButton = getElement('soundButton');
-    if (isMutedSpeakerButton == false) {
-        /*soundButton.style.background = "url(assets/sound_crossed.png)";*/
-        speakerVolume = getVolume();
-        flashphoner.setVolume(0);
-        isMutedSpeakerButton = true;
-    } else {
-        /*soundButton.style.background = "url(assets/sound.png)";*/
-        flashphoner.setVolume(speakerVolume);
-        isMutedSpeakerButton = false;
-    }
 }
 
 function getVersion() {
@@ -248,32 +210,19 @@ function notify(call) {
     if (currentCall.id == call.id) {
         currentCall = call;
         if (call.state == STATE_FINISH) {
-            if (holdedCall != null) {
-                currentCall = holdedCall;
-                holdedCall = null;
-                createCallView(currentCall);
-            } else {
-                closeVideoView();
-                toCallState();
-            }
-            getElement('sendVideo').value = "Send video";
+            closeVideoView();
+            $('#callState').html('...Finished...');
+            toCallState();
         } else if (call.state == STATE_HOLD) {
-            $('#callState').html('...Call on hold...');
-            enableHoldButton();
+            $('#callState').html('...Holded...');
         } else if (call.state == STATE_TALK) {
             if (call.isVideoCall) {
                 openVideoView();
             }
             $('#callState').html('...Talking...');
-            enableHoldButton();
         } else if (call.state == STATE_RING) {
             $('#callState').html('...Ringing...');
         }
-    } else if (holdedCall.id == call.id) {
-        if (call.state == STATE_FINISH) {
-            holdedCall = null;
-        }
-        enableHoldButton();
     }
 }
 
@@ -287,34 +236,18 @@ function notifyError(error) {
 
     trace("notifyError: error " + error);
 
-    if (error == CONNECTION_ERROR) {
-        openInfoView("Connection fail", 3000,30);
-    } else if (error == AUTHENTICATION_FAIL) {
-        openInfoView("Register fail", 3000,30);
+    if (error == CONNECTION_ERROR || error == TOO_MANY_REGISTER_ATTEMPTS || 
+    	error == LICENSE_RESTRICTION || error==LICENSE_NOT_FOUND ||
+    	error == REGISTER_EXPIRE || error == MEDIA_PORTS_BUSY) {
+        openInfoView("Connection error, try later", 3000);
+    } else if (error == AUTHENTICATION_FAIL  || error == SIP_PORTS_BUSY ||
+    	error == WRONG_SIPPROVIDER_ADDRESS) {
+        openInfoView("Connection error, try later", 3000);
         window.setTimeout("logoff();", 3000);
     } else if (error == USER_NOT_AVAILABLE) {
-        openInfoView("Callee not found!", 3000,30);
-    } else if (error == TOO_MANY_REGISTER_ATTEMPTS) {
-        openInfoView("Connection error", 3000,30);
-        toLoggedOffState();
-    } else if (error == LICENSE_RESTRICTION) {
-        openInfoView("License restriction", 3000,30);
-	} else if (error==LICENSE_NOT_FOUND){
-		openInfoView("Please set the license key. You can get it here - www.flashphoner.com/license.", 5000,90);
+        openInfoView("Support is offline", 3000);
     } else if (error == INTERNAL_SIP_ERROR) {
-        openInfoView("Unknown error", 3000,30);
-    } else if (error == REGISTER_EXPIRE) {
-        openInfoView("Check SIP account settings", 3000,30);
-    } else if (error == SIP_PORTS_BUSY) {
-        openInfoView("All sip ports are busy", 3000,30);
-        connectingViewBeClosed = true;
-        window.setTimeout("logoff();", 3000);
-    } else if (error == MEDIA_PORTS_BUSY) {
-        openInfoView("All media ports are busy", 3000,30);
-    } else if (error == WRONG_SIPPROVIDER_ADDRESS) {
-        openInfoView("Wrong sip provider address", 3000,30);
-        connectingViewBeClosed = true;
-        window.setTimeout("logoff();", 3000);
+        openInfoView("Unknown error", 3000);
     }
     closeConnectingView();
     toCallState();
@@ -347,21 +280,10 @@ function notifyMessage(messageObject) {
 
 function notifyAddCall(call) {
     trace("notifyAddCall; callId - " + call.id + ", another side - " + call.anotherSideUser);
-
-    if (currentCall != null && call.incoming == true) {
+    if (call.incoming == true) {
         hangup(call.id);
-    } else if (currentCall != null && call.incoming == false) {
-        setStatusHold(currentCall.id, true);
-        holdedCall = currentCall;
-        currentCall = call;
-        createCallView(currentCall);
     } else {
         currentCall = call;
-        createCallView(currentCall);
-        if (call.incoming == true){
-        	openIncomingView(call);
-        	toHangupState();
-       	}
     }
 }
 
@@ -392,14 +314,11 @@ function closeConnectingView() {
     getElement('connectingDiv').style.visibility = "hidden";
 }
 
-function openInfoView(str, timeout, height) {
-    trace("TODO openInfoView: message - " + str + "; timeout - " + timeout);
-   	/*if (timeout != 0) {
-        window.setTimeout("closeInfoView();", timeout);
+function openInfoView(str, timeout) {
+   	if (timeout != 0) {
+        window.setTimeout("$('#callState').html('...Finished...');", timeout);
     }
-   	getElement('infoDiv').style.visibility = "visible";
-   	getElement('infoDiv').style.height = height+"px";
-    getElement('infoText').innerHTML = str;*/
+	$('#callState').html(str);
 }
 
 function closeInfoView() {
@@ -529,8 +448,15 @@ $(function() {
     
     // dialButtons sends DTMF signals
     $(".dialButton").click(function() {
-      //sendDTMF(currentCall.id, $(this).html());
-      $('.dialScreen').append($(this).html());
+    	if (currentCall != null && currentCall.state == STATE_TALK) {
+      		sendDTMF(currentCall.id, $(this).html());
+      		var dialScreenText = $('.dialScreen').html();
+      		if (dialScreenText.length > 10){
+      			$('.dialScreen').html(dialScreenText.substr(1) + $(this).html());
+      		}else{
+      			$('.dialScreen').append($(this).html());
+      		}
+    	}
     });    
     
     // mic button opens mic slider
@@ -554,7 +480,7 @@ $(function() {
     // call button makes call or hangup
     $("#callButton").click(function() {
       if ($(this).html() == 'Call') {
-        call();
+        callByToken(null);
       } else {
         hangup(currentCall.id);
       }
@@ -587,18 +513,6 @@ $(function() {
     $("#cameraButton").click(function() {
       openVideoView();
     });
-
-
-
-
-
-
-
-
-
-
-
-
 
     $("#settingsButton").click(function() {
       openSettingsView();
@@ -641,16 +555,6 @@ $(function() {
     $("#settingsDiv").draggable({handle: '.bar', stack:"#settingsDiv"});
     $("#video_requestUnmuteDiv").draggable({handle: '.bar', stack:"#video_requestUnmuteDiv"});
     $("#video_requestUnmuteDiv").resizable({ minHeight: 180, minWidth: 215, aspectRatio: true});
-
-    //Bind click on number buttons
-    $(".numberButton").click(function() {
-        if (currentCall != null && currentCall.state == STATE_TALK) {
-            sendDTMF(currentCall.id, $(this).val());
-        } else if (currentCall == null) {
-            $("#calleeText").val($("#calleeText").val() + $(this).val());
-        }
-    });
-
 
     // this functions resize flash when you resize video window
     $('#video_requestUnmuteDiv').resize(function() {
