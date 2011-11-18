@@ -313,10 +313,6 @@ package com.flashphoner.api
 		 * @param password Password for user
 		 **/
 		public function login(username:String,password:String,authenticationName:String = null):int{
-			if (PhoneConfig.REGISTER_REQUIRED){
-				upRegisteredTimer();
-				startRegisterTimer();
-			}
 			videoControl.init();
 			return phoneServerProxy.login(username,password,authenticationName);							
 		}
@@ -327,10 +323,6 @@ package com.flashphoner.api
 		 * @param password Password for user
 		 **/		
 		public function loginByToken(token:String = null):void{
-			if (PhoneConfig.REGISTER_REQUIRED){
-				upRegisteredTimer();
-				startRegisterTimer();
-			}
 			videoControl.init();
 			phoneServerProxy.loginByToken(token);
 		}
