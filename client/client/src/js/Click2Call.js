@@ -48,7 +48,7 @@ var intervalId = -1;
 var isMutedMicButton = false;
 var isMutedSpeakerButton = false;
 var proportion = 0;
-
+var proportionStreamer = 0;
 function trace(str) {
     var console = $("#console");
     var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37); // is console scrolled down? or may be you are reading previous messages.
@@ -200,7 +200,7 @@ function notifyRegistered() {
         isLogged = true;
         callByToken(null);
     }
-}
+}                                                       
 
 function notifyBalance(balance) {
 }
@@ -210,6 +210,7 @@ function notify(call) {
     if (currentCall.id == call.id) {
         currentCall = call;
         if (call.state == STATE_FINISH) {
+            proportion = 0;
             closeVideoView();
             $('#callState').html('...Finished...');
             toCallState();
@@ -217,7 +218,7 @@ function notify(call) {
             $('#callState').html('...Holded...');
         } else if (call.state == STATE_TALK) {
             if (call.isVideoCall) {
-                openVideoView();
+                openVideoView('big');
             }
             $('#callState').html('...Talking...');
         } else if (call.state == STATE_RING) {
@@ -256,22 +257,32 @@ function notifyError(error) {
 function notifyVideoFormat(call) {
     trace("notifyVideoFormat: call.id = " + call.id);
 
+    // proportionStreamer allow us change proportion of small video window (myself preview video)
     if (call.streamerVideoWidth != 0) {
         proportionStreamer = call.streamerVideoHeight / call.streamerVideoWidth;
         if (proportionStreamer != 0) {
+            /** here we change size of small myself preview video window in the swf from the js code. 
+             * To be precise we cnahge only height, width is fixed and equal to 34% of big video.
+             */ 
             changeRelationMyVideo(proportionStreamer);
         }
     }
 
-    if (!call.playerVideoHeight == 0) { //that mean if user really send me video
+    if (!call.playerVideoHeight == 0) { //that mean other side really send us video
         proportion = call.playerVideoHeight / call.playerVideoWidth; //set proportion of video picture, else it will be = 0
+        trace('proportion = '+proportion);
     }
+    
+    
 
+    
+    /*
     if ($('div').is('.videoDiv') && proportion != 0) { //if video window opened and other side send video
         var newHeight = $('.videoDiv').width() * proportion + 40;
         $('.videoDiv').height(newHeight); //we resize video window for new proportion
         $('#jsSWFDiv').height(newHeight - 40); //and resize flash for new video window
     }
+    */
 }
 
 function notifyMessage(messageObject) {
@@ -365,23 +376,25 @@ function disableCallButton() {
 
 /* ----- VIDEO ----- */
 
-function openVideoView() {
+function openVideoView(size) {
     trace("openVideoView");
+    viewVideo();
+    $('#cameraButton').addClass('pressed');
     if (isMuted() == -1){
-        viewVideo();
-        $('#video_requestUnmuteDiv').removeClass().addClass('videoDiv');
-        $('#closeButton_video_requestUnmuteDiv').css('visibility', 'visible');
 
-        $('#sendVideo').css('visibility', 'visible');
-        $('#requestUnmuteText').hide();
-        $('#video_requestUnmuteDiv .bar').html('&nbsp;&nbsp;Video');
+      if (size == 'small') {
 
-        if (proportion != 0) {
-            //$('.videoDiv #video_requestUnmuteDiv').height($(this).width() * proportion);
-        	var newHeight = $('.videoDiv').width() * proportion + 40;
-        	$('.videoDiv').height(newHeight); //we resize video window for new proportion
-        	$('#jsSWFDiv').height(newHeight - 40); //and resize flash for new video window            
-        }
+        $('#flash').removeClass('init').addClass('videoMy');
+        $('#jsSWFDiv').height(240).width(320);
+        
+      } else if ((size == 'big')&&(proportion != 0)) { // sometimes voip servers send video with null sizes. Here we defend from such cases
+          $('#flash').removeClass('init').addClass('video');
+          var newHeight = 320 * proportion;
+          $('.video').height(newHeight);
+          $('#jsSWFDiv').height(newHeight).width(320);
+          $('#c2c').height(newHeight+40);
+      }    
+        
     } else {
         requestUnmute();
         intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId); openVideoView();}', 500);
@@ -390,8 +403,11 @@ function openVideoView() {
 
 function closeVideoView() {
     trace("closeVideoView");
-    $('#video_requestUnmuteDiv').removeClass().addClass('closed');
+    $('#flash').removeClass().removeAttr('style').addClass('init');
+    $('#c2c').removeAttr('style'); //TODO remove this from here because sometimes we close videoview when call is not finished
 }
+
+
 
 /* 
  This functions need to show window with the Adobe security panel when
@@ -403,7 +419,6 @@ function requestUnmute() {
     $('.back').show();
     $('.request').show();
     $('#flash').removeClass('init').addClass('security');
-
     viewAccessMessage();
 }
 
@@ -463,8 +478,10 @@ $(function() {
     $("#micButton").click(function() {
       if ($(this).hasClass('pressed')) {
         $('#micSlider').show();
+        $('#micBack').show();
       } else {
         $('#micSlider').hide();
+        $('#micBack').hide();
       }
     });    
     
@@ -472,13 +489,15 @@ $(function() {
     $("#soundButton").click(function() {
       if ($(this).hasClass('pressed')) {
         $('#speakerSlider').show();
+        $('#speakerBack').show();
       } else {
         $('#speakerSlider').hide();
+        $('#speakerBack').hide();
       }
     });
 
     // call button makes call or hangup
-    $("#callButton").click(function() {
+    $("#callButton:not(.disabled)").click(function() {
       if ($(this).html() == 'Call') {
         callByToken(null);
       } else {
@@ -510,9 +529,38 @@ $(function() {
       }
 		});
 
+
+    // Camera button opens video window.
+    // Depends on situation it can be both video or just my video
+    
+    
     $("#cameraButton").click(function() {
-      openVideoView();
+      if ($(this).hasClass('pressed')) {
+        if(proportion != 0){
+          openVideoView('big');
+        } else {
+          openVideoView('small');
+        }
+      } else {
+        closeVideoView();
+      }
+    });    
+    
+    
+    /*$("[id = 'cameraButton'][class != 'button pressed']").click(function() {
+      if(proportion != 0){
+        openVideoView('big');
+      } else {
+        openVideoView('small');
+      }
     });
+
+    $("[id = 'cameraButton'][class = 'button pressed']").click(function() {
+      closeVideoView();
+    });
+    */
+        
+    
 
     $("#settingsButton").click(function() {
       openSettingsView();

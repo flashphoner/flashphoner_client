@@ -38,18 +38,21 @@ This code and accompanying materials also available under LGPL and MPL license f
 </head>
 <body>
 
-<div id="c2cDiv">     
-  <div id="caller" class="caller">Support</div>       
-  <div id="callState">...Calling...</div>                
-  <div id="soundButton" class="button"></div>         
-  <div id="callButton" class="button hangup">Hangup</div>         
-  <div id="dialpadButton" class="button"></div> 	       
-  <div id="cameraButton" class="button"></div>         
-  <div id="micButton" class="button"></div>     	     
-  <div id="versionOfProduct"></div>
+<div id="c2c">     
   
-  <!-- ************** Dialpad ************ -->  
-  <div class="dialPad" id="dialPad">  
+  <div id="caller" class="caller">Support</div>       
+  <div id="callState"></div>                
+  
+  <div id="buttonsPanel">
+    <div id="soundButton" class="button"></div>         
+    <div id="callButton" class="button hangup">Hangup</div>         
+    <div id="dialpadButton" class="button"></div> 	       
+    <div id="cameraButton" class="button"></div>         
+    <div id="micButton" class="button"></div>     	     
+    <div id="versionOfProduct"></div>
+  
+    <!-- ************** Dialpad ************ -->  
+    <div class="dialPad" id="dialPad">  
     <div class="dialScreen"></div>  
     <div class="dialButtonLine">   
       <div class="button dialButton" id="1b">1</div>    
@@ -71,30 +74,24 @@ This code and accompanying materials also available under LGPL and MPL license f
       <div class="button dialButton" id="0b">0</div>    
       <div class="button dialButton" id="hash">#</div>  
     </div>
-  </div>  
+    </div>  
          
-  <!-- **************** Slider ***************** --> 
-  <div id="micSlider"></div>
-  <div id="speakerSlider"></div>
+    <!-- **************** Slider ***************** --> 
+    <div id="micSlider"></div>
+    <div id="speakerSlider"></div>
+    <div id="micBack"></div>
+    <div id="speakerBack"></div>
   
-
-         
-</div>
-
-
-
+  </div>
 <!-- ****** Request ***** -->
-
 <div class="back"></div>
 <div class="request">
   Click "Allow" to continue
 </div>
-
-
 <!-- **************** -->
 
 
-<!-- Flash -->
+<!-- ***** Flash ******* -->
 <div id="flash" class="init">
   <div id="jsSWFDiv">
     <a href="http://www.adobe.com/go/getflashplayer">
@@ -104,6 +101,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 </div>
 <!-- **************** -->
 
+<div id="sendVideoButton" class="button dialButton">Send video</div>
 
 
 <!-- Connecting view -->
@@ -111,6 +109,12 @@ This code and accompanying materials also available under LGPL and MPL license f
   <div id="connectingText">Connecting...</div>
 </div>
 <!-- **************** -->
+         
+</div>
+
+
+
+
 
 <!-- Video + RequestUnmuted view -->
 <!-- <input type="button" class="button" id="sendVideo" value="Send video" /> -->
