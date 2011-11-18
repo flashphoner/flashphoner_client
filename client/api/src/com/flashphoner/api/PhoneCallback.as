@@ -20,6 +20,7 @@ package com.flashphoner.api
 	import com.flashphoner.api.data.PhoneConfig;
 	import com.flashphoner.api.interfaces.APINotify;
 	
+	import flash.external.ExternalInterface;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
 
@@ -51,6 +52,12 @@ package com.flashphoner.api
 			modelLocator.sipProviderAddress = resObj.sipProviderAddress;
 			modelLocator.sipProviderPort = resObj.sipProviderPort;
 			
+			PhoneConfig.REGISTER_REQUIRED = resObj.regRequired;
+			ExternalInterface.call("notifyRegisterRequired",PhoneConfig.REGISTER_REQUIRED);
+			if (PhoneConfig.REGISTER_REQUIRED){
+				flash_API.upRegisteredTimer();
+				flash_API.startRegisterTimer();
+			}
 		}
 		
 		public function fail(errorCode:String,_sipObject:Object):void{

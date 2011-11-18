@@ -65,26 +65,6 @@ public class ClientConfig implements IConfig {
         } catch (Exception e) {
             Logger.logger.error("Error flashphoner-client.properties init", e);
         }
-
-        List<String> errorMessages = new ConfigValidator(props).validateProperties();
-        if (!errorMessages.isEmpty()) {
-
-            StringBuffer sb = new StringBuffer();
-            sb.append("\n");
-            sb.append("*************************\n");
-            sb.append("FLASHPHONER PANIC!\n");
-            int i = 0;
-            for (String errorMessage : errorMessages) {
-                i++;
-                sb.append("*** " + i + ". " + errorMessage + "\n");
-            }
-            sb.append("*** Config flashphoner-client.properties is invalid.\n");
-            sb.append("*** Please fix errors and restart the server.\n");
-            sb.append("*************************\n");
-            Logger.logger.error(sb.toString());
-        } else {
-            Logger.logger.info("Flashphoner client config validated success");
-        }
     }
 
     /**

@@ -88,7 +88,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         Logger.logger.info(4, "PhoneApp.onConnect() " + params);
 
         if (!isDefaultInstance(client)) {
-            client.acceptConnection();
+            client.rejectConnection();
             return;
         }
 
@@ -98,6 +98,23 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         AMFDataObj obj2 = params.getObject(2);
 
         String swfUrl = obj2.getString("swfUrl");
+        String allowDomainsString = ClientConfig.getInstance().getProperty("allow_domains");
+        if (allowDomainsString != null && !"".equals(allowDomainsString)){
+            String[] allowDomains = allowDomainsString.split(",");
+            Boolean isAllowDomain = false;
+            for (String allowDomain:allowDomains){
+                int index = swfUrl.indexOf(allowDomain);
+                if ( index >= 0 && index < 7){
+                    isAllowDomain = true;
+                }
+            }
+            if (!isAllowDomain){
+                Logger.logger.info(4,"THIS DOMAIN IS NOT ALLOWED!!!");
+                client.rejectConnection();
+                client.setShutdownClient(true);
+                return;
+            }
+        }
         String flashVer = obj2.getString("flashVer");
         String[] splat = flashVer.split("\\s");
         String os = splat[0];//WIN
@@ -109,8 +126,9 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         AMFDataObj obj = params.getObject(PARAM1);
 
         if (obj == null) {
-            client.acceptConnection();
             Logger.logger.info(4, "Connect's parameters are NULL");
+            client.rejectConnection();
+            client.setShutdownClient(true);
             return;
         }
 
@@ -151,6 +169,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             if (auto_login_url == null) {
                 Logger.logger.error("ERROR - Property auto_login_url - '" + auto_login_url + "' does not exits in flashphoner-client.properties");
                 client.rejectConnection();
+                client.setShutdownClient(true);
                 return;
             }
             URL url;
@@ -178,10 +197,12 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             } catch (MalformedURLException e) {
                 Logger.logger.error("ERROR - '" + auto_login_url + "' is wrong;" + e);
                 client.rejectConnection();
+                client.setShutdownClient(true);
                 return;
             } catch (IOException e) {
                 Logger.logger.error("ERROR - '" + auto_login_url + "' is wrong;" + e);
                 client.rejectConnection();
+                client.setShutdownClient(true);
                 return;
             }
             Document dom;
@@ -193,6 +214,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             } catch (Exception e) {
                 Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;" + e);
                 client.rejectConnection();
+                client.setShutdownClient(true);
                 return;
             }
 
@@ -211,6 +233,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             if (password == null || "".equals(password)) {
                 Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
             }
+
             if (outboundProxy == null || "".equals(outboundProxy)) {
                 sipProviderAddress = el.getAttribute("sip_server");
             } else {
@@ -219,6 +242,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
                 Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
                 client.rejectConnection();
+                client.setShutdownClient(true);
                 return;
             }
 
@@ -257,10 +281,13 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         AMFDataObj amfDataObj = new AMFDataObj();
         amfDataObj.put("login", rtmpClient.getLogin());
-        amfDataObj.put("authenticationName", rtmpClient.getAuthenticationName());
+        if (rtmpClient.getAuthenticationName() != null){
+            amfDataObj.put("authenticationName", rtmpClient.getAuthenticationName());
+        }
         amfDataObj.put("password", rtmpClient.getPassword());
         amfDataObj.put("sipProviderAddress", rtmpClient.getSipProviderAddress());
         amfDataObj.put("sipProviderPort", rtmpClient.getSipProviderPort());
+        amfDataObj.put("regRequired", regRequired);
         client.call("getUserData", null, amfDataObj);
 
         getRtmpClients().add(rtmpClient);
@@ -392,7 +419,9 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String token = params.getString(PARAM4);
 
         if (token != null) {
-            callee = getCalleeByToken(token, rtmpClient.getRtmpClientConfig().getSwfUrl());
+            String[] data = getCalleeByToken(token, rtmpClient.getRtmpClientConfig().getSwfUrl());
+            callee = data[0];
+            visibleName = data[1];
         }
         if (callee == null || "".equals(callee)) {
             rtmpClient.fail(ErrorCodes.USER_NOT_AVAILABLE, null);
@@ -428,13 +457,14 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         ModuleBase.sendResult(client, params, call.toAMFDataObj());
     }
 
-    private String getCalleeByToken(String token, String swfUrl) {
+    private String[] getCalleeByToken(String token, String swfUrl) {
         String getCalleUrl = ClientConfig.getInstance().getProperty("get_callee_url");
         if (getCalleUrl == null) {
             Logger.logger.error("ERROR - Property get_callee_url - '" + getCalleUrl + "' does not exits in flashphoner-client.properties");
             return null;
         }
         URL url;
+
         StringBuilder response = new StringBuilder();
         try {
             File file = new File(getCalleUrl);
@@ -453,7 +483,31 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             }
             bufferedReader.close();
             Logger.logger.info("response from get_callee_url - " + response.toString());
-            return response.toString();
+
+            Document dom;
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            try {
+                DocumentBuilder db = dbf.newDocumentBuilder();
+                InputStream in = new ByteArrayInputStream(response.toString().getBytes("UTF-8"));
+                dom = db.parse(in);
+            } catch (Exception e) {
+                Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;" + e);
+                return null;
+            }
+
+            Element el = dom.getDocumentElement();
+
+            String[] data = new String[2];
+            String temp = el.getAttribute("account");
+            if (!(temp == null || "".equals(temp))) {
+                data[0]= temp;
+            }
+            temp = el.getAttribute("visibleName");
+            if (!(temp == null || "".equals(temp))) {
+                data[1]= temp;
+            }
+
+            return data;
         } catch (MalformedURLException e) {
             Logger.logger.error("ERROR - '" + getCalleUrl + "' is wrong;" + e);
             return null;

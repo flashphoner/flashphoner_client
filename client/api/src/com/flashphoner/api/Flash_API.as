@@ -313,7 +313,6 @@ package com.flashphoner.api
 		 * @param password Password for user
 		 **/
 		public function login(username:String,password:String,authenticationName:String = null):int{
-			ExternalInterface.call("notifyRegisterRequired",PhoneConfig.REGISTER_REQUIRED);
 			if (PhoneConfig.REGISTER_REQUIRED){
 				upRegisteredTimer();
 				startRegisterTimer();
@@ -328,7 +327,6 @@ package com.flashphoner.api
 		 * @param password Password for user
 		 **/		
 		public function loginByToken(token:String = null):void{
-			ExternalInterface.call("notifyRegisterRequired",PhoneConfig.REGISTER_REQUIRED);
 			if (PhoneConfig.REGISTER_REQUIRED){
 				upRegisteredTimer();
 				startRegisterTimer();
