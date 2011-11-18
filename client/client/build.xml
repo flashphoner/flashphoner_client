@@ -88,6 +88,7 @@
         </copy>        	
 
     	<copy file="${basedir}/src/PhoneJS.html" todir="${DEPLOY_DIR}"/>    	
+    	<copy file="${basedir}/src/Click2callJS.html" todir="${DEPLOY_DIR}"/>    	
 	<copy file="${basedir}/src/PhoneJS-autologin-loadtest.html" todir="${DEPLOY_DIR}"/>    	
 
 	<mkdir dir="${DEPLOY_DIR}/js"/>
