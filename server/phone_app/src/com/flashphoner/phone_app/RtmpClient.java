@@ -28,6 +28,7 @@ import com.wowza.wms.logging.WMSLogger;
 import com.wowza.wms.logging.WMSLoggerFactory;
 
 import javax.sip.RequestEvent;
+import java.util.Map;
 import java.util.Timer;
 
 /**
@@ -302,6 +303,23 @@ public class RtmpClient extends AbstractRtmpClient {
         return call;
     }
 
+    /**
+     * Creates outgoing call
+     *
+     * @param caller      login, which initiates this call
+     * @param callee      login, which callable, call's target
+     * @param visibleName visible name of caller, which may be displayed on SIP endpoint screen
+     * @param isVideoCall is this call with video support
+     * @param inviteParameters additional parameters for INVITE-request
+     * @return ISoftphoneCall
+     * @throws SoftphoneException
+     */
+    public ISoftphoneCall call(final String caller, final String callee, final String visibleName, final Boolean isVideoCall, Map<String, String> inviteParameters) throws SoftphoneException, LicenseRestictionException {
+        Logger.logger.info(4, "RtmpClient.call() " + callee);
+        ISoftphoneCall call = getSoftphone().call(caller, callee, visibleName, isVideoCall, inviteParameters);
+        streamStart(login, call.getId());
+        return call;
+    }
     /**
      * Answer incoming call
      *
