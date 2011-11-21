@@ -98,14 +98,14 @@ package com.flashphoner.api
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 		}		
 		
-		public function call(visibleName:String, callee:String, isVideoCall:Boolean):void{
+		public function call(callee:String, visibleName:String, isVideoCall:Boolean, inviteParameters:Object):void{
 			Logger.info("PhoneServerProxy.call()");
-			nc.call("call", responder, visibleName, callee, isVideoCall);
+			nc.call("call", responder, callee, visibleName, isVideoCall, null, inviteParameters);
 		}
 		
-		public function callByToken(visibleName:String, isVideoCall:Boolean, token:String = null):void{
+		public function callByToken(token:String, isVideoCall:Boolean, inviteParameters:Object):void{
 			Logger.info("PhoneServerProxy.callByToken()");
-			nc.call("call",responder, visibleName, null, isVideoCall, token);
+			nc.call("call",responder, null, null, isVideoCall, token,inviteParameters);
 		}		
 		
 		public function disconnect():void {

@@ -35,6 +35,8 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Main application class. Default wowza application: flashphoner_app used this class as base. See config <code>conf/flashphoner_app/Application.xml</code>.<br/>
@@ -413,10 +415,21 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
 
         String caller = rtmpClient.getLogin();
-        String visibleName = params.getString(PARAM1);
-        String callee = params.getString(PARAM2);
+        String callee = params.getString(PARAM1);
+        String visibleName = params.getString(PARAM2);
         Boolean isVideoCall = params.getBoolean(PARAM3);
         String token = params.getString(PARAM4);
+        AMFDataObj inviteParametersObj = params.getObject(PARAM5);
+
+        Map<String,String> inviteParameters = null;
+        if (inviteParametersObj != null && inviteParametersObj.size() > 0){
+            inviteParameters = new HashMap<String,String>();
+            for (Object temp : inviteParametersObj.getKeys()){
+                String key = (String)temp;
+                inviteParameters.put(key,inviteParametersObj.getString(key));
+            }
+
+        }
 
         if (token != null) {
             String[] data = getCalleeByToken(token, rtmpClient.getRtmpClientConfig().getSwfUrl());
@@ -436,7 +449,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         try {
 
-            call = rtmpClient.call(caller, callee, visibleName, isVideoCall);
+            call = rtmpClient.call(caller, callee, visibleName, isVideoCall, inviteParameters);
 
         } catch (LicenseRestictionException e) {
             Logger.logger.info(4, e.getMessage());

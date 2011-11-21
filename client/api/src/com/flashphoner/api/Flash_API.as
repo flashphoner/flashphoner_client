@@ -333,7 +333,7 @@ package com.flashphoner.api
 		 * @param visibleName name of logged user wich target user see
 		 * @param isVideoCall video call?(true/false)
 		 **/ 
-		public function call(callee:String, visibleName:String, isVideoCall:Boolean = true):int{
+		public function call(callee:String, visibleName:String, isVideoCall:Boolean = true, inviteParameters:Object = null):int{
 			if (PhoneConfig.CHECK_VALIDATION_CALLEE){
 				var reg:RegExp = /[a-zа-яё]/i;
 				if (callee != null && callee != ""){
@@ -365,7 +365,7 @@ package com.flashphoner.api
 					tempCall.setStatusHold(true);
 				}
 			}
-			phoneServerProxy.call(visibleName,callee,isVideoCall);
+			phoneServerProxy.call(callee,visibleName, isVideoCall,inviteParameters);
 			return 0;
 		}
 		
@@ -373,8 +373,8 @@ package com.flashphoner.api
 		 * Create new call by URL
 		 * @param isVideoCall video call?(true/false)
 		 **/ 		
-		public function callByToken(token:String, isVideoCall:Boolean = true):int{
-			phoneServerProxy.callByToken(token,isVideoCall);
+		public function callByToken(token:String, isVideoCall:Boolean = true, inviteParameters:Object = null):int{
+			phoneServerProxy.callByToken(token,isVideoCall, inviteParameters);
 			return 0;
 		}
 			
