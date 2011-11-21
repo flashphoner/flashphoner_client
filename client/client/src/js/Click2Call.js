@@ -8,28 +8,9 @@ http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 Contributors:
     Flashphoner - initial API and implementation
 
-This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. 
+Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 */
-/*
- id:String;
- state:String;
- iHolded:Boolean = false;
- sip_state:String;
- callee:String;
- caller:String;
- visibleNameCallee:String;
- visibleNameCaller:String;
- playerVideoHeight:int;
- playerVideoWidth:int;
- streamerVideoHeight:int;
- streamerVideoWidth:int;
- timeOfCall:int = 0;
- timer:Timer;
- anotherSideUser:String;
- incoming:Boolean = false;
- isVideoCall:Boolean = false;
- */
-
 var flashphoner;
 
 // One call become two calls during TRANSFER case
@@ -121,15 +102,20 @@ function isMuted() {
     return isMute;
 }
 
+// TODO change img to background
 function sendVideoChangeState() {
     trace("sendVideoChangeState;");
-    var sendVideoButton = getElement('sendVideo');
-    if (sendVideoButton.value == 'Send video') {
-        sendVideoButton.value = "Stop video";
-        flashphoner.setSendVideo(true);
-    } else {
-        sendVideoButton.value = "Send video";
+    var sendVideoButton = $('.sendVideoButton');
+    var sendVideoButtonImage = $('#sendVideoButtonImage'); 
+    
+    if (sendVideoButton.hasClass('on')) {
+        sendVideoButton.toggleClass('on');
+        sendVideoButtonImage.attr('src','assets/c2c_play.png')
         flashphoner.setSendVideo(false);
+    } else {
+        sendVideoButton.toggleClass('on');
+        sendVideoButtonImage.attr('src','assets/c2c_pause.png')
+        flashphoner.setSendVideo(true);
     }
 }
 
@@ -210,9 +196,9 @@ function notify(call) {
     if (currentCall.id == call.id) {
         currentCall = call;
         if (call.state == STATE_FINISH) {
-            proportion = 0;
+            proportion = 0; 
             closeVideoView();
-            $('#callState').html('...Finished...');
+            $('#callState').html('Finished');
             toCallState();
         } else if (call.state == STATE_HOLD) {
             $('#callState').html('...Holded...');
@@ -261,8 +247,8 @@ function notifyVideoFormat(call) {
     if (call.streamerVideoWidth != 0) {
         proportionStreamer = call.streamerVideoHeight / call.streamerVideoWidth;
         if (proportionStreamer != 0) {
-            /** here we change size of small myself preview video window in the swf from the js code. 
-             * To be precise we cnahge only height, width is fixed and equal to 34% of big video.
+            /** Here we change size of small myself preview video window in the swf from the js code. 
+             * To be precise we cnahge only height, width is fixed and equal to 20% of big video.
              */ 
             changeRelationMyVideo(proportionStreamer);
         }
@@ -272,17 +258,6 @@ function notifyVideoFormat(call) {
         proportion = call.playerVideoHeight / call.playerVideoWidth; //set proportion of video picture, else it will be = 0
         trace('proportion = '+proportion);
     }
-    
-    
-
-    
-    /*
-    if ($('div').is('.videoDiv') && proportion != 0) { //if video window opened and other side send video
-        var newHeight = $('.videoDiv').width() * proportion + 40;
-        $('.videoDiv').height(newHeight); //we resize video window for new proportion
-        $('#jsSWFDiv').height(newHeight - 40); //and resize flash for new video window
-    }
-    */
 }
 
 function notifyMessage(messageObject) {
@@ -403,9 +378,16 @@ function openVideoView(size) {
 
 function closeVideoView() {
     trace("closeVideoView");
+    // turn flash div back to init size
     $('#flash').removeClass().removeAttr('style').addClass('init');
+    // turn c2c div back to init size  
     $('#c2c').removeAttr('style'); //TODO remove this from here because sometimes we close videoview when call is not finished
-}
+    // hide send video button
+    $('.sendVideoButton').hide();
+    // unpressed camerabutton
+    $('#cameraButton').removeClass('pressed');
+}   
+
 
 
 
@@ -498,10 +480,12 @@ $(function() {
 
     // call button makes call or hangup
     $("#callButton:not(.disabled)").click(function() {
-      if ($(this).html() == 'Call') {
-        callByToken(null);
-      } else {
-        hangup(currentCall.id);
+      if (! $(this).hasClass('disabled')) {
+        if ($(this).html() == 'Call') {
+          callByToken(null);
+        } else {
+          hangup(currentCall.id);
+        }
       }
     });
 
@@ -532,65 +516,34 @@ $(function() {
 
     // Camera button opens video window.
     // Depends on situation it can be both video or just my video
-    
-    
     $("#cameraButton").click(function() {
       if ($(this).hasClass('pressed')) {
+        $('.sendVideoButton').show();
         if(proportion != 0){
           openVideoView('big');
         } else {
           openVideoView('small');
         }
       } else {
+        $('.sendVideoButton').hide();
         closeVideoView();
+        
       }
     });    
     
-    
-    /*$("[id = 'cameraButton'][class != 'button pressed']").click(function() {
-      if(proportion != 0){
-        openVideoView('big');
-      } else {
-        openVideoView('small');
-      }
-    });
-
-    $("[id = 'cameraButton'][class = 'button pressed']").click(function() {
-      closeVideoView();
-    });
-    */
-        
-    
-
-    $("#settingsButton").click(function() {
-      openSettingsView();
-    });
-    
-    $("#canselLoginDiv").click(function() {
-      closeLoginView();
-    });
-
-    $("#sendVideo").click(function() {
+    // bind effects to click on send video button
+    // and toggle video on/off by clicking
+    $('.sendVideoButton').mousedown(function() {
+      $(this).addClass('sendVideoButtonPressed');
+    }).mouseup(function() {
+      $(this).removeClass('sendVideoButtonPressed');    
+    }).mouseover(function() {
+      $(this).removeClass('sendVideoButtonPressed');    
+    }).click(function() {
       sendVideoChangeState();
     });
 
-    $("#saveMicSettings").click(function() {
-      saveMicSettings();
-    });
-
-    $("#micButton").click(function() {
-      changeMicStatus();
-    });
-
-    $("#soundButton").click(function() {
-      changeSpeakerStatus();
-    });
-    /* -------- DEPRECATED ------
-    $("#cameraButton").click(function() {
-      openVideoView();
-    });
-    */
-
+    /* -- DEPRECATED --
     $("#closeButton_video_requestUnmuteDiv").click(function() {
       closeVideoView();
     });
@@ -608,6 +561,7 @@ $(function() {
     $('#video_requestUnmuteDiv').resize(function() {
         $('#jsSWFDiv').height($(this).height() - 40);
     });
+    */
 
     
 

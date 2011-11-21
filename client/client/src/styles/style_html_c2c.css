@@ -229,33 +229,34 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 #micBack, #speakerBack {
   /* TODO replace sliders within sliderbackground*/
   position: absolute;
-  top: -102px; 
-  width: 30px;
-  height: 104px;
+  bottom: 38px; 
+  width: 27px;
+  height: 102px;
 	background: -webkit-gradient(linear, left top, left bottom, from(#555), to(#444));
 	background: -moz-linear-gradient(top, #555, #444);
 	background: -o-linear-gradient(top, #555, #444);
 	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#555555', endColorstr='#444444');
-	box-shadow: 0px 0px 10px #000, inset 0px 1px 0px #777;
+	box-shadow: inset 0px 1px 0px #777, /*0px 1px 0px #555,*/ 0px 2px 10px #000;
   display: none;
-  border-radius: 15px;
+  border-radius: 4px;
+  border: 1px solid #111;
 }
 #micBack {
-  left: 12px;
+  left: 11px;
 }
 
 #speakerBack {
-  left: 56px;
+  left: 54px;
 }
 
 #micSlider {
-	left: 22px;
+	left: 21px;
 }
 #speakerSlider {
-	left: 66px;
+	left: 64px;
 }
 .ui-slider-vertical {
-	width: 6px !important;
+	width: 7px !important;
 	height: 80px !important;
 	border: 1px solid #222 !important;
 	background-color: #555 !important;
@@ -343,12 +344,28 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
   
 }
 
-#sendVideoButton {
-	width: 100px;
+.sendVideoButton {
+  width: 30px;
+  height: 30px;
 	position: absolute;
-	top: 25px;
-	left: 210px;
+	top: 17px;
+	left: 265px;
+  opacity: 0.7;
 	display: none;
+}
+
+
+
+.sendVideoButtonPressed {
+  width: 20px;
+  height: 20px;
+	top: 22px;
+	left: 270px;
+}
+
+.sendVideoButton img {
+  width: 100%;
+  height: 100%;
 }
 
 
@@ -692,22 +709,28 @@ z-index: 5;
 z-index: 6;
 }
 */
-.button {
-z-index: 6;
-} 
 
 #micBack, #speakerBack {
-z-index: 7;
+z-index: 6;
 }
+
+.button, #buttonsPanel {
+z-index: 7;
+} 
 
 #micSlider, #speakerSlider, #dialPad {
 z-index: 8;
 }
-.request {
+
+.sendVideoButton, #sendVideoButtonImage {
 z-index: 9;
 }
-.security {
+
+.request {
 z-index: 10;
+}
+.security {
+z-index: 11;
 } 
 
 
