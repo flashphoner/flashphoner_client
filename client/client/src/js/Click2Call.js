@@ -161,7 +161,8 @@ function addLogMessage(message) {
 
 function notifyFlashReady() {
 	trace("notifyFlashReady");
-	getElement('versionOfProduct').innerHTML = getVersion();
+	$('versionOfProduct').html(getVersion());
+	trace(getVersion());
 	closeConnectingView();
 	loginByToken(null);
   $("#micSlider").slider("option","value",getMicVolume());	

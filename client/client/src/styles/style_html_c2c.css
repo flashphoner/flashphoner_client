@@ -483,11 +483,12 @@ input::-webkit-input-placeholder {
 }
 #versionOfProduct {
 	position: absolute;
-	top: 134px;
-	right: 17px;
-	font: 8px Arial;
-	color: #bbb;
-	visibility: hidden;
+	top: -197px;
+	left: 3px;
+	/*font: 20px Arial;*/
+	color: #111;
+	/*visibility: hidden;*/
+  text-shadow: #777 0px 1px; 
 }
 /* ---------------- Buttons ---------------- */
 .closeButton {
@@ -498,6 +499,7 @@ input::-webkit-input-placeholder {
 	top: 3px;
 	width: 14px;
 	height: 14px;
+
 }
 /*
 .iconButton {
