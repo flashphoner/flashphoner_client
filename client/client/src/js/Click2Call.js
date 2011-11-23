@@ -518,7 +518,6 @@ $(function() {
       }
 		});
 
-
     // Camera button opens video window.
     // Depends on situation it can be both video or just my video
     $("#cameraButton").click(function() {
@@ -532,7 +531,6 @@ $(function() {
       } else {
         $('.sendVideoButton').hide();
         closeVideoView();
-        
       }
     });    
     
@@ -547,30 +545,6 @@ $(function() {
     }).click(function() {
       sendVideoChangeState();
     });
-
-    /* -- DEPRECATED --
-    $("#closeButton_video_requestUnmuteDiv").click(function() {
-      closeVideoView();
-    });
-
-    $(".closeButton").click(function() {
-      close($(this).parent());
-    });
-
-    //enable drag and resize objects
-    $("#settingsDiv").draggable({handle: '.bar', stack:"#settingsDiv"});
-    $("#video_requestUnmuteDiv").draggable({handle: '.bar', stack:"#video_requestUnmuteDiv"});
-    $("#video_requestUnmuteDiv").resizable({ minHeight: 180, minWidth: 215, aspectRatio: true});
-
-    // this functions resize flash when you resize video window
-    $('#video_requestUnmuteDiv').resize(function() {
-        $('#jsSWFDiv').height($(this).height() - 40);
-    });
-    */
-
-    
-
-
 });
 
 
