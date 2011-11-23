@@ -178,11 +178,15 @@ package com.flashphoner.api
 				call.anotherSideUser = _call.callee;
 			}
 			call.visibleNameCallee = _call.visibleNameCallee;
-			call.visibleNameCallee = call.visibleNameCallee.replace("<","");
-			call.visibleNameCallee = call.visibleNameCallee.replace(">","");
+			if (call.visibleNameCallee != null){
+				call.visibleNameCallee = call.visibleNameCallee.replace("<","");
+				call.visibleNameCallee = call.visibleNameCallee.replace(">","");
+			}
 			call.visibleNameCaller = _call.visibleNameCaller;
-			call.visibleNameCaller = call.visibleNameCaller.replace("<","");
-			call.visibleNameCallee = call.visibleNameCallee.replace(">","");
+			if (call.visibleNameCaller != null){
+				call.visibleNameCaller = call.visibleNameCaller.replace("<","");
+				call.visibleNameCaller = call.visibleNameCaller.replace(">","");
+			}
 			call.state = _call.state;
 			call.sip_state = _call.sip_state;
 			call.playerVideoHeight = _call.playerVideoHeight;
