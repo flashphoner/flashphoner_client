@@ -199,6 +199,7 @@ function notifyRegistered() {
 function notifyBalance(balance) {
 }
 
+// This functions invoked every time when call state changed
 function notify(call) {
     trace("notify: callId " + call.id + " --- " + call.anotherSideUser);
     if (currentCall.id == call.id) {
@@ -389,7 +390,7 @@ function closeVideoView() {
     // turn flash div back to init size
     $('#flash').removeClass().removeAttr('style').addClass('init');
     // turn c2c div back to init size  
-    $('#c2c').removeAttr('style'); //TODO remove this from here because sometimes we close videoview when call is not finished
+    $('#c2c').height(240);
     // hide send video button
     $('.sendVideoButton').hide();
     // unpressed camerabutton
