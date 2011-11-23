@@ -279,13 +279,13 @@ echo ""
 PRODUCT_CONFIG=$WOWZA_HOME/conf/phone_app/flashphoner-client.properties
 
 echo "#Config for client" > $PRODUCT_CONFIG
-echo "# get_callee_url            - Url or path to file for get callee for call" >> $PRODUCT_CONFIG
-echo "# auto_login_url            - Url or path to file for authorize by token" >> $PRODUCT_CONFIG
+echo "# get_callee_url            - Url or path to file for get callee for call. Example: $WOWZA_HOME/conf/phone_app/callee.xml" >> $PRODUCT_CONFIG
+echo "# auto_login_url            - Url or path to file for authorize by token. Example: $WOWZA_HOME/conf/phone_app/account.xml" >> $PRODUCT_CONFIG
 echo "# allow_domains             - Domains that allowed access (They must be separeted by comma)" >> $PRODUCT_CONFIG
 
 echo "" >> $PRODUCT_CONFIG
-echo "get_callee_url              =$WOWZA_HOME/conf/phone_app/callee.xml" >> $PRODUCT_CONFIG
-echo "auto_login_url              =$WOWZA_HOME/conf/phone_app/account.xml" >> $PRODUCT_CONFIG
+echo "get_callee_url              =" >> $PRODUCT_CONFIG
+echo "auto_login_url              =" >> $PRODUCT_CONFIG
 echo "allow_domains               =" >> $PRODUCT_CONFIG
 
 echo "- Configuration complete. Your configuration parameters:"
