@@ -36,6 +36,7 @@ var testInviteParameter = new Object;
 testInviteParameter['param1'] = "value1";
 testInviteParameter['param2'] = "value2";
 
+// trace log to the console in the demo page
 function trace(str) {
     var console = $("#console");
     var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37); // is console scrolled down? or may be you are reading previous messages.
@@ -162,7 +163,6 @@ function addLogMessage(message) {
 function notifyFlashReady() {
 	trace("notifyFlashReady");
 	$('versionOfProduct').html(getVersion());
-	trace(getVersion());
 	closeConnectingView();
 	loginByToken(null);
   $("#micSlider").slider("option","value",getMicVolume());	
@@ -205,18 +205,22 @@ function notify(call) {
     trace("notify: callId " + call.id + " --- " + call.anotherSideUser);
     if (currentCall.id == call.id) {
         currentCall = call;
+        // if we finish the call
         if (call.state == STATE_FINISH) {
             proportion = 0; 
             closeVideoView();
             $('#callState').html('Finished');
             toCallState();
+        // if call is holded
         } else if (call.state == STATE_HOLD) {
             $('#callState').html('...Holded...');
+        // or if call is started talk
         } else if (call.state == STATE_TALK) {
             if (call.isVideoCall) {
                 openVideoView('big');
             }
             $('#callState').html('...Talking...');
+        // or if we just ringing    
         } else if (call.state == STATE_RING) {
             $('#callState').html('...Ringing...');
         }
@@ -365,13 +369,18 @@ function openVideoView(size) {
     trace("openVideoView");
     viewVideo();
     $('#cameraButton').addClass('pressed');
+    // if we already give access to devices when trying to open video view
     if (isMuted() == -1){
 
+      // show send my video button
+      $('.sendVideoButton').show();
+      
+      // if we need show only myself video (when other side dont send us video)
       if (size == 'small') {
-
         $('#flash').removeClass('init').addClass('videoMy');
         $('#jsSWFDiv').height(240).width(320);
         
+      // or if we need show both videos - ourselves and partner`s 
       } else if ((size == 'big')&&(proportion != 0)) { // sometimes voip servers send video with null sizes. Here we defend from such cases
           $('#flash').removeClass('init').addClass('video');
           var newHeight = 320 * proportion;
@@ -380,6 +389,7 @@ function openVideoView(size) {
           $('#c2c').height(newHeight+40);
       }    
         
+    // or if we did not access the devices yet
     } else {
         requestUnmute();
         intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId); openVideoView();}', 500);
@@ -397,9 +407,6 @@ function closeVideoView() {
     // unpressed camerabutton
     $('#cameraButton').removeClass('pressed');
 }   
-
-
-
 
 /* 
  This functions need to show window with the Adobe security panel when

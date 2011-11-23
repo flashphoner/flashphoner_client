@@ -483,7 +483,7 @@ input::-webkit-input-placeholder {
 }
 #versionOfProduct {
 	position: absolute;
-	top: -197px;
+	top: 2px;
 	left: 3px;
 	/*font: 20px Arial;*/
 	color: #111;
@@ -701,6 +701,10 @@ input::-webkit-input-placeholder {
 /*#c2c {
 z-index: 1;
 } */
+
+#versionOfProduct {
+z-index: 4;
+}
 
 .video, .videoMy {
 z-index: 5;
