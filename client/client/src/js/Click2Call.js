@@ -205,8 +205,9 @@ function notify(call) {
     if (currentCall.id == call.id) {
         currentCall = call;
         if (currentCall.visibleNameCallee != null){
-        	if (currentCall.visibleNameCallee.length > 8){
-        		currentCall.visibleNameCallee = currentCall.visibleNameCallee.substr(0,8);
+        	if (currentCall.visibleNameCallee.length > 11){
+        		$('#caller').css('font-size', 20);
+        		$('#caller').css('top', 95);
         	}
         	$('#caller').html(currentCall.visibleNameCallee);
         } else {
@@ -277,6 +278,11 @@ function notifyVideoFormat(call) {
     if (!call.playerVideoHeight == 0) { //that mean other side really send us video
         proportion = call.playerVideoHeight / call.playerVideoWidth; //set proportion of video picture, else it will be = 0
         trace('proportion = '+proportion);
+        var newHeight = 320 * proportion;
+        $('.video').height(newHeight);
+        $('#jsSWFDiv').height(newHeight).width(320);
+        $('#c2c').height(newHeight+40);
+        
     }
 }
 
@@ -359,7 +365,7 @@ function disableCallButton() {
 /* ----- VIDEO ----- */
 
 function openVideoView(size) {
-    trace("openVideoView");
+    trace("openVideoView; size - "+size);
     viewVideo();
     $('#cameraButton').addClass('pressed');
     // if we already give access to devices when trying to open video view
@@ -369,18 +375,21 @@ function openVideoView(size) {
       $('.sendVideoButton').show();
       
       // if we need show only myself video (when other side dont send us video)
-      if (size == 'small') {
-        $('#flash').removeClass('init').addClass('videoMy');
-        $('#jsSWFDiv').height(240).width(320);
-        
       // or if we need show both videos - ourselves and partner`s 
-      } else if ((size == 'big')&&(proportion != 0)) { // sometimes voip servers send video with null sizes. Here we defend from such cases
+      if ((size == 'big')&&(proportion != 0)) { // sometimes voip servers send video with null sizes. Here we defend from such cases
           $('#flash').removeClass('init').addClass('video');
           var newHeight = 320 * proportion;
           $('.video').height(newHeight);
           $('#jsSWFDiv').height(newHeight).width(320);
           $('#c2c').height(newHeight+40);
-      }    
+      } else if (size == 'small') {
+        $('#flash').removeClass('init').addClass('videoMy');
+        $('#jsSWFDiv').height(240).width(320);
+      } else {
+      	$('#flash').removeClass('init').addClass('video');
+        $('#jsSWFDiv').height(240).width(320);
+      	
+      }
         
     // or if we did not access the devices yet
     } else {
