@@ -164,6 +164,8 @@ function notifyFlashReady() {
 	getElement('versionOfProduct').innerHTML = getVersion();
 	closeConnectingView();
 	loginByToken(null);
+  $("#micSlider").slider("option","value",getMicVolume());	
+  $("#speakerSlider").slider("option","value",getVolume());
 }
 
 function notifyRegisterRequired(registerR) {
