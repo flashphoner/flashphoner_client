@@ -30,6 +30,7 @@ var isMutedMicButton = false;
 var isMutedSpeakerButton = false;
 var proportion = 0;
 var proportionStreamer = 0;
+var callToken = "";
 
 var testInviteParameter = new Object;
 testInviteParameter['param1'] = "value1";
@@ -77,7 +78,7 @@ function callByToken(token) {
     trace("callByToken; token = "+token);
     if (isLogged) {
         if (isMuted() == 1) {
-            intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);callByToken(null);}', 500);
+            intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);callByToken(callToken);}', 500);
             requestUnmute();
         } else if (isMuted() == -1){
             var result = flashphoner.callByToken(token, true, testInviteParameter);
@@ -181,7 +182,7 @@ function notifyConnected() {
     trace("notifyConnected");
     if (!registerRequired) {
         isLogged = true;
-        callByToken(null);
+        callByToken(callToken);
     }
 }
 
@@ -189,7 +190,7 @@ function notifyRegistered() {
     trace("notifyRegistered");
     if (registerRequired) {
         isLogged = true;
-        callByToken(null);
+        callByToken(callToken);
     }
 }                                                       
 
@@ -487,7 +488,7 @@ $(function() {
     $("#callButton:not(.disabled)").click(function() {
       if (! $(this).hasClass('disabled')) {
         if ($(this).html() == 'Call') {
-          callByToken(null);
+          callByToken(callToken);
         } else {
           hangup(currentCall.id);
         }

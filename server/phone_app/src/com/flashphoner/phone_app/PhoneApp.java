@@ -431,7 +431,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         }
 
-        if (token != null) {
+        if (token != null && !"null".equals(token)) {
             String[] data = getCalleeByToken(token, rtmpClient.getRtmpClientConfig().getSwfUrl());
             callee = data[0];
             visibleName = data[1];
@@ -485,9 +485,9 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             if (file.exists()) {
                 bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             } else {
-                url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl);
-                URLConnection conn = url.openConnection();
-                bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl);
+                    URLConnection conn = url.openConnection();
+                    bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             }
 
             String line;
