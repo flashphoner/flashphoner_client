@@ -579,6 +579,7 @@ package com.flashphoner.api
 			call.id = _call.id;
 			call.state = _call.state;
 			call.incoming=false;
+			call.callee = _call.callee;
 			call.anotherSideUser = _call.callee;
 			addCall(call);
 		}

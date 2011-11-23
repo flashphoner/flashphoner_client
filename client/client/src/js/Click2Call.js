@@ -23,7 +23,6 @@ var isLogged = false;
 
 var micVolume = 100;
 var speakerVolume = 100;
-var connectingViewBeClosed = false;
 var traceEnabled = true;
 var intervalId = -1;
 var isMutedMicButton = false;
@@ -52,9 +51,9 @@ function trace(str) {
 
 $(document).ready(function() {
     if (playerIsRight()) {
-    	openConnectingView("...Loading...", 0);
+    	$('#callState').html('...Loading...');
     }else{
-    	openConnectingView("You have old flash player", 0);
+    	$('#callState').html('You have old flash player');
 		trace("Download flash player from: http://get.adobe.com/flashplayer/");
     }
 });
@@ -87,7 +86,7 @@ function callByToken(token) {
                 toHangupState();
             }
     	} else {
-    		openConnectingView("Microphone is not plugged in", 3000);
+    		openInfoView("Microphone is not plugged in", 3000);
     	}        
     } else {
         loginByToken(null);
@@ -163,7 +162,7 @@ function addLogMessage(message) {
 function notifyFlashReady() {
 	trace("notifyFlashReady");
 	$('versionOfProduct').html(getVersion());
-	closeConnectingView();
+	$('#callState').html('...Calling...');
 	loginByToken(null);
   $("#micSlider").slider("option","value",getMicVolume());	
   $("#speakerSlider").slider("option","value",getVolume());
@@ -205,6 +204,14 @@ function notify(call) {
     trace("notify: callId " + call.id + " --- " + call.anotherSideUser);
     if (currentCall.id == call.id) {
         currentCall = call;
+        if (currentCall.visibleNameCallee != null){
+        	if (currentCall.visibleNameCallee.length > 8){
+        		currentCall.visibleNameCallee = currentCall.visibleNameCallee.substr(0,8);
+        	}
+        	$('#caller').html(currentCall.visibleNameCallee);
+        } else {
+        	$('#caller').html(currentCall.callee);
+        }
         // if we finish the call
         if (call.state == STATE_FINISH) {
             proportion = 0; 
@@ -250,7 +257,6 @@ function notifyError(error) {
     } else if (error == INTERNAL_SIP_ERROR) {
         openInfoView("Unknown error", 3000);
     }
-    closeConnectingView();
     toCallState();
 }
 
@@ -284,6 +290,7 @@ function notifyAddCall(call) {
         hangup(call.id);
     } else {
         currentCall = call;
+       	$('#caller').html(currentCall.anotherSideUser);
     }
 }
 
@@ -299,20 +306,6 @@ function notifyVersion(version){
 	getElement('versionOfProduct').innerHTML = version;
 }
 /* ----------------------------------------------------------------------- */
-
-function openConnectingView(str, timeout) {
-    trace("openConnectingView: message - " + str + "; timeout - " + timeout);
-   	if (timeout != 0) {
-        window.setTimeout("closeConnectingView();", timeout);
-    }
-   	getElement('connectingDiv').style.visibility = "visible";
-    getElement('connectingText').innerHTML = str;
-}
-
-function closeConnectingView() {
-    trace("closeConnectingView");
-    getElement('connectingDiv').style.visibility = "hidden";
-}
 
 function openInfoView(str, timeout) {
    	if (timeout != 0) {
