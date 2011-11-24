@@ -138,8 +138,6 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         int height = obj.getInt("height");
         String supportedResolutions = obj.getString("supportedResolutions");
 
-        String visibleName = obj.getString("visibleName");
-        assert visibleName != null;
 
         boolean regRequired = obj.getBoolean("registerRequired");
 
@@ -151,6 +149,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String authenticationName = obj.getString("authenticationName");
         String login = obj.getString("login");
         String password = obj.getString("password");
+        String visibleName = obj.getString("visibleName");
         int sipProviderPort;
         if (login != null && password != null) {
             if (outboundProxy == null || "".equals(outboundProxy)) {
@@ -236,6 +235,8 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
                 Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
             }
 
+            visibleName = el.getAttribute("visible_name");
+
             if (outboundProxy == null || "".equals(outboundProxy)) {
                 sipProviderAddress = el.getAttribute("sip_server");
             } else {
@@ -261,6 +262,10 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         }
         Logger.logger.info(4, "sipProviderAddress - " + sipProviderAddress);
         Logger.logger.info(4, "outboundProxy - " + outboundProxy);
+
+        if (visibleName == null || "".equals(visibleName)) {
+            visibleName = login;
+        }
 
         RtmpClientConfig config = new RtmpClientConfig();
         config.setLogin(login);
@@ -434,7 +439,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         if (token != null && !"null".equals(token)) {
             String[] data = getCalleeByToken(token, rtmpClient.getRtmpClientConfig().getSwfUrl());
             callee = data[0];
-            visibleName = data[1];
+            visibleName = rtmpClient.getVisibleName();
         }
         if (callee == null || "".equals(callee)) {
             rtmpClient.fail(ErrorCodes.USER_NOT_AVAILABLE, null);
@@ -510,16 +515,11 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
             Element el = dom.getDocumentElement();
 
-            String[] data = new String[2];
+            String[] data = new String[1];
             String temp = el.getAttribute("account");
             if (!(temp == null || "".equals(temp))) {
                 data[0]= temp;
             }
-            temp = el.getAttribute("visibleName");
-            if (!(temp == null || "".equals(temp))) {
-                data[1]= temp;
-            }
-
             return data;
         } catch (MalformedURLException e) {
             Logger.logger.error("ERROR - '" + getCalleUrl + "' is wrong;" + e);
