@@ -20,7 +20,6 @@ package com.flashphoner.api
 	import com.flashphoner.api.interfaces.API;
 	import com.flashphoner.api.interfaces.APINotify;
 	import com.flashphoner.api.js.APINotifyJS;
-	import com.flashphoner.api.management.PhoneSpeaker;
 	import com.flashphoner.api.management.VideoControl;
 	
 	import flash.events.TimerEvent;

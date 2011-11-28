@@ -18,6 +18,7 @@ import com.flashphoner.sdk.softphone.exception.CrossCallException;
 import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
 import com.flashphoner.sdk.softphone.exception.PortsBusyException;
 import com.flashphoner.sdk.softphone.exception.SoftphoneException;
+import com.wowza.wms.amf.AMFData;
 import com.wowza.wms.amf.AMFDataList;
 import com.wowza.wms.amf.AMFDataObj;
 import com.wowza.wms.application.IApplicationInstance;
@@ -101,17 +102,17 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         String swfUrl = obj2.getString("swfUrl");
         String allowDomainsString = ClientConfig.getInstance().getProperty("allow_domains");
-        if (allowDomainsString != null && !"".equals(allowDomainsString)){
+        if (allowDomainsString != null && !"".equals(allowDomainsString)) {
             String[] allowDomains = allowDomainsString.split(",");
             Boolean isAllowDomain = false;
-            for (String allowDomain:allowDomains){
+            for (String allowDomain : allowDomains) {
                 int index = swfUrl.indexOf(allowDomain);
-                if ( index >= 0 && index < 7){
+                if (index >= 0 && index < 7) {
                     isAllowDomain = true;
                 }
             }
-            if (!isAllowDomain){
-                Logger.logger.info(4,"THIS DOMAIN IS NOT ALLOWED!!!");
+            if (!isAllowDomain) {
+                Logger.logger.info(4, "THIS DOMAIN IS NOT ALLOWED!!!");
                 client.rejectConnection();
                 client.setShutdownClient(true);
                 return;
@@ -288,7 +289,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         AMFDataObj amfDataObj = new AMFDataObj();
         amfDataObj.put("login", rtmpClient.getLogin());
-        if (rtmpClient.getAuthenticationName() != null){
+        if (rtmpClient.getAuthenticationName() != null) {
             amfDataObj.put("authenticationName", rtmpClient.getAuthenticationName());
         }
         amfDataObj.put("password", rtmpClient.getPassword());
@@ -424,16 +425,19 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String visibleName = params.getString(PARAM2);
         Boolean isVideoCall = params.getBoolean(PARAM3);
         String token = params.getString(PARAM4);
-        AMFDataObj inviteParametersObj = params.getObject(PARAM5);
+        AMFData inviteParametersObj = params.get(PARAM5);
 
-        Map<String,String> inviteParameters = null;
-        if (inviteParametersObj != null && inviteParametersObj.size() > 0){
-            inviteParameters = new HashMap<String,String>();
-            for (Object temp : inviteParametersObj.getKeys()){
-                String key = (String)temp;
-                inviteParameters.put(key,inviteParametersObj.getString(key));
+        Map<String, String> inviteParameters = null;
+        if (inviteParametersObj != null && (inviteParametersObj instanceof AMFDataObj)) {
+            AMFDataObj inviteParametersDataObj = (AMFDataObj) inviteParametersObj;
+            if (inviteParametersDataObj.size() > 0) {
+                inviteParameters = new HashMap<String, String>();
+                for (Object temp : inviteParametersDataObj.getKeys()) {
+                    String key = (String) temp;
+                    inviteParameters.put(key, inviteParametersDataObj.getString(key));
+                }
+
             }
-
         }
 
         if (token != null && !"null".equals(token)) {
@@ -490,9 +494,9 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             if (file.exists()) {
                 bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             } else {
-                    url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl);
-                    URLConnection conn = url.openConnection();
-                    bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl);
+                URLConnection conn = url.openConnection();
+                bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             }
 
             String line;
@@ -518,7 +522,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             String[] data = new String[1];
             String temp = el.getAttribute("account");
             if (!(temp == null || "".equals(temp))) {
-                data[0]= temp;
+                data[0] = temp;
             }
             return data;
         } catch (MalformedURLException e) {

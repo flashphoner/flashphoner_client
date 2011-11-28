@@ -81,7 +81,7 @@ function callByToken(token) {
             intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);callByToken(callToken);}', 500);
             requestUnmute();
         } else if (isMuted() == -1){
-            var result = flashphoner.callByToken(token, true, testInviteParameter);
+            var result = flashphoner.callByToken(token, false, testInviteParameter);
             if (result == 0) {
                 toHangupState();
             }
@@ -224,9 +224,6 @@ function notify(call) {
             $('#callState').html('...Holded...');
         // or if call is started talk
         } else if (call.state == STATE_TALK) {
-            if (call.isVideoCall) {
-                openVideoView('big');
-            }
             $('#callState').html('...Talking...');
         // or if we just ringing    
         } else if (call.state == STATE_RING) {
@@ -284,6 +281,15 @@ function notifyVideoFormat(call) {
         $('#c2c').height(newHeight+40);
         
     }
+}
+
+function notifyOpenVideoView(isViewed){
+	trace("notifyOpenVideoView: isViewed = " + isViewed);
+	if (isViewed){
+		openVideoView('big');
+	}else{
+		closeVideoView();
+	}
 }
 
 function notifyMessage(messageObject) {
@@ -394,7 +400,7 @@ function openVideoView(size) {
     // or if we did not access the devices yet
     } else {
         requestUnmute();
-        intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId); openVideoView();}', 500);
+        intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId); openVideoView("small");}', 500);
     }
 }
 

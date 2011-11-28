@@ -56,6 +56,10 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyVideoFormat",call);
 		}
 		
+		public function notifyOpenVideoView(isViewed:Boolean):void{
+			ExternalInterface.call("notifyOpenVideoView",isViewed);
+		}
+		
 		public function notifyMessage(messageObject:Object):void{
 			ExternalInterface.call("notifyMessage",messageObject);
 		}

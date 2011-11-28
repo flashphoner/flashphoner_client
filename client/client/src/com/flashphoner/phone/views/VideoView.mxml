@@ -21,7 +21,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 		<![CDATA[
 			import com.flashphoner.api.Call;
 			import com.flashphoner.api.Flash_API;
-			import com.flashphoner.api.management.PhoneSpeaker;
+			import com.flashphoner.api.PhoneSpeaker;
 			import com.flashphoner.api.management.VideoControl;
 			import com.flashphoner.phone.DataPhone;
 			

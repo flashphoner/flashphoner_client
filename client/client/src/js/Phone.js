@@ -344,9 +344,6 @@ function notify(call) {
             $('#callState').html('...Call on hold...');
             enableHoldButton();
         } else if (call.state == STATE_TALK) {
-            if (call.isVideoCall) {
-                openVideoView();
-            }
             $('#callState').html('...Talking...');
             enableHoldButton();
         } else if (call.state == STATE_RING) {
@@ -444,6 +441,15 @@ function notifyVideoFormat(call) {
         $('.videoDiv').height(newHeight); //we resize video window for new proportion
         $('#jsSWFDiv').height(newHeight - 40); //and resize flash for new video window
     }
+}
+
+function notifyOpenVideoView(isViewed){
+	trace("notifyOpenVideoView: isViewed = " + isViewed);
+	if (isViewed){
+		openVideoView();
+	}else{
+		closeVideoView();
+	}
 }
 
 function notifyMessage(messageObject) {

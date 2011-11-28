@@ -110,6 +110,14 @@ package com.flashphoner.phone
 		public function notifyVideoFormat(call:Call,_sipObject:Object = null):void{
 		}
 		
+		public function notifyOpenVideoView(isViewed:Boolean):void{
+			if (isViewed){
+				phone(Application.application).onOpenVideoView();
+			}else{
+				phone(Application.application).videoView.onCloseClick();				
+			}
+		}
+		
 		public function notifyMessage(messageObject:Object):void {
 			DataPhone.getInstance().viewController.pushMessageToInstantMessageChatView(messageObject);			
 		}	
