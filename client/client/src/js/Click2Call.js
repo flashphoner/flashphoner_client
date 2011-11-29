@@ -36,16 +36,41 @@ testInviteParameter['param1'] = "value1";
 testInviteParameter['param2'] = "value2";
 
 // trace log to the console in the demo page
-function trace(str) {
-    var console = $("#console");
-    var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37); // is console scrolled down? or may be you are reading previous messages.
+function trace(funcName, param1, param2, param3) {
 
+    var today = new Date();
+    // get hours, minutes and seconds
+    var hh = today.getHours(); 
+    var mm = today.getMinutes();
+    var ss = today.getSeconds();
+    
+    // Add '0' if it < 10 to see 14.08.06 instead of 14.6.8
+    hh = hh == 0 ? '00' : hh < 10 ? '0' + hh : hh;
+    mm = mm == 0 ? '00' : mm < 10 ? '0' + mm : mm;
+    ss = ss == 0 ? '00' : ss < 10 ? '0' + ss : ss;
+    
+    // set time 
+    var time = hh + ':' + mm + ':' + ss;
+     
+    var div1 = div2 = ''; 
+     
+    var console = $("#console");
+    // Check if console is scrolled down? Or may be you are reading previous messages.
+    var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37); 
+
+    // Check if we set params and set it ????? instead of 'undefined' if not, also set dividers equal to ', ' 
+    if (typeof param1 == 'undefined') {param1 = '';}
+    if (typeof param2 == 'undefined') {param2 = '';} else {var div1 = ', ';}
+    if (typeof param3 == 'undefined') {param3 = '';} else {var div2 = ', ';} 
+    
+    // Print message to console
     if (traceEnabled) {
-        console.append(str + '<br>');
+        console.append('<grey>' + time + ' - '  + '</grey>' + funcName + '<grey>' + '(' + param1 + div1 + param2 + div2 + param3 + ')' + '</grey>' + '<br>');
     }
 
+    //Autoscroll cosole if you are not reading previous messages
     if (isScrolled < 1) {
-        console[0].scrollTop = console[0].scrollHeight; //autoscroll if you are not reading previous messages
+        console[0].scrollTop = console[0].scrollHeight; 
     }
 }
 
@@ -60,7 +85,7 @@ $(document).ready(function() {
 
 
 function loginByToken(token) {
-    trace("loginByToken; token = "+token);
+    trace("loginByToken", token);
     var result = flashphoner.loginByToken(token);
 }
 
@@ -75,7 +100,7 @@ function logoff() {
 }
 
 function callByToken(token) {
-    trace("callByToken; token = "+token);
+    trace("callByToken", token);
     if (isLogged) {
         if (isMuted() == 1) {
             intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);callByToken(callToken);}', 500);
@@ -94,12 +119,12 @@ function callByToken(token) {
 }
 
 function hangup(callId) {
-    trace("hangup; callId - " + callId);
+    trace("hangup", callId);
     flashphoner.hangup(callId);
 }
 
 function sendDTMF(callId, dtmf) {
-    trace("sendDTMF: callId - " + callId + "; dtmf - " + dtmf);
+    trace("sendDTMF", callId, dtmf);
     flashphoner.sendDTMF(callId, dtmf);
 }
 
@@ -110,7 +135,7 @@ function isMuted() {
 
 // TODO change img to background
 function sendVideoChangeState() {
-    trace("sendVideoChangeState;");
+    trace("sendVideoChangeState");
     var sendVideoButton = $('.sendVideoButton');
     var sendVideoButtonImage = $('#sendVideoButtonImage'); 
     
@@ -126,17 +151,17 @@ function sendVideoChangeState() {
 }
 
 function viewVideo() {
-    trace("viewVideo;");
-    flashphoner.viewVideo();
+    trace("viewVideo");
+    flashphoner.viewVideo();   
 }
 
 function viewAccessMessage() {
-    trace("viewAccessMessage;");
+    trace("viewAccessMessage");
     flashphoner.viewAccessMessage();
 }
 
 function changeRelationMyVideo(relation) {
-    trace("changeRelationMyVideo;relation - " + relation);
+    trace("changeRelationMyVideo", relation);
     flashphoner.changeRelationMyVideo(relation);
 }
 
@@ -150,13 +175,13 @@ function getVolume() {
 }
 
 function getVersion() {
-    trace("getVersion;");
+    trace("getVersion");
     return flashphoner.getVersion();
 }
 /* ------------------ Notify functions ----------------- */
 
 function addLogMessage(message) {
-    trace(message);
+    trace('addLogMessage', message);
 }
 
 function notifyFlashReady() {
@@ -201,7 +226,7 @@ function notifyBalance(balance) {
 
 // This functions invoked every time when call state changed
 function notify(call) {
-    trace("notify: callId " + call.id + " --- " + call.anotherSideUser);
+    trace('notify', call.id, call.anotherSideUser);
     if (currentCall.id == call.id) {
         currentCall = call;
         if (currentCall.visibleNameCallee != null){
@@ -243,7 +268,7 @@ function notifyCost(cost) {
 
 function notifyError(error) {
 
-    trace("notifyError: error " + error);
+    trace("notifyError", error);
 
     if (error == CONNECTION_ERROR || error == TOO_MANY_REGISTER_ATTEMPTS || 
     	error == LICENSE_RESTRICTION || error==LICENSE_NOT_FOUND ||
@@ -262,7 +287,7 @@ function notifyError(error) {
 }
 
 function notifyVideoFormat(call) {
-    trace("notifyVideoFormat: call.id = " + call.id);
+    trace("notifyVideoFormat", call.id);
 
     // proportionStreamer allow us change proportion of small video window (myself preview video)
     if (call.streamerVideoWidth != 0) {
@@ -277,21 +302,19 @@ function notifyVideoFormat(call) {
 
     if (!call.playerVideoHeight == 0) { //that mean other side really send us video
         proportion = call.playerVideoHeight / call.playerVideoWidth; //set proportion of video picture, else it will be = 0
-        trace('proportion = '+proportion);
         var newHeight = 320 * proportion;
         $('.video').height(newHeight);
         $('#jsSWFDiv').height(newHeight).width(320);
         $('#c2c').height(newHeight+40);
-        
     }
 }
 
 function notifyMessage(messageObject) {
-    trace('notifyMessage: ' + messageObject.from + ': ' + messageObject.body);
+    trace('notifyMessage', messageObject.from, messageObject.body);
 }
 
 function notifyAddCall(call) {
-    trace("notifyAddCall; callId - " + call.id + ", another side - " + call.anotherSideUser);
+    trace("notifyAddCall", call.id, call.anotherSideUser);
     if (call.incoming == true) {
         hangup(call.id);
     } else {
@@ -301,7 +324,7 @@ function notifyAddCall(call) {
 }
 
 function notifyRemoveCall(call) {
-    trace("notifyRemoveCall: callId " + call.id);
+    trace("notifyRemoveCall", call.id);
     if (currentCall != null && currentCall.id == call.id) {
         currentCall = null;
         removeCallView(call)
@@ -365,7 +388,7 @@ function disableCallButton() {
 /* ----- VIDEO ----- */
 
 function openVideoView(size) {
-    trace("openVideoView; size - "+size);
+    trace("openVideoView", size);
     viewVideo();
     $('#cameraButton').addClass('pressed');
     // if we already give access to devices when trying to open video view
@@ -435,6 +458,14 @@ function closeRequestUnmute() {
 function close(element) {
     element.css('visibility', 'hidden');
 }
+
+/* TODO make good auto trace                       
+function getFnName(fn) {
+  return fn.toString().match(/function ([^(]*)\(/)[1];
+}
+*/
+
+
 /* --------------------- On document load we do... ------------------ */
 $(function() {
 

@@ -664,7 +664,7 @@ input::-webkit-input-placeholder {
 	position: absolute;
 	top: 10px;
 	left: 330px;	
-	height: 300px;
+	height: 700px;
 	width: 700px;
 	float: left;
 	background-color: #333;
@@ -674,6 +674,7 @@ input::-webkit-input-placeholder {
 	overflow: auto;
 	word-wrap: break-word;
 	/*visibility: hidden;*/
+	line-height: 18px;
 }
 /* -------------- Z indexes -------------*/
 
@@ -745,4 +746,7 @@ z-index: 11;
 
 }
 
-
+ 
+grey {
+color: #888;
+}
