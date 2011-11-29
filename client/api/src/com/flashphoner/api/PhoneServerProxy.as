@@ -18,7 +18,6 @@ package com.flashphoner.api
 	import com.flashphoner.api.data.ModelLocator;
 	import com.flashphoner.api.data.PhoneConfig;
 	import com.flashphoner.api.interfaces.APINotify;
-	import com.flashphoner.api.management.PhoneSpeaker;
 	import com.flashphoner.api.management.VideoControl;
 	
 	import flash.events.*;
@@ -58,7 +57,7 @@ package com.flashphoner.api
 			nc = new NetConnection();
 			nc.objectEncoding = flash.net.ObjectEncoding.AMF0;
 			nc.client = new PhoneCallback(flash_API);
-			phoneSpeaker = new PhoneSpeaker(nc);
+			phoneSpeaker = new PhoneSpeaker(nc,flash_API);
 		}
 		
 		public function login(username:String, password:String, authenticationName:String = null):int{			

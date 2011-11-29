@@ -10,11 +10,12 @@ Contributors:
 
 This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 */
-package com.flashphoner.api.management
+package com.flashphoner.api
 {
 		
 	import com.flashphoner.Logger;
 	import com.flashphoner.api.data.PhoneConfig;
+	import com.flashphoner.api.interfaces.APINotify;
 	
 	import flash.events.*;
 	import flash.media.*;
@@ -22,7 +23,6 @@ package com.flashphoner.api.management
 	import flash.net.NetStream;
 	
 	import mx.core.UIComponent;
-	import com.flashphoner.api.SoundControl;
 	
 	/**
 	 * Phone speaker and video window implementation
@@ -47,12 +47,16 @@ package com.flashphoner.api.management
 		private var streamNameAudio:String;
 		private var streamNameVideo:String;
 		
+		
+		private var flashAPI:Flash_API;
+		
 		/**
 		 * Construstor to create video object
 		 * @param netConnection connection for playing audio and video
 		 **/
-		public function PhoneSpeaker(netConnection:NetConnection):void
+		public function PhoneSpeaker(netConnection:NetConnection, flashAPI:Flash_API):void
 		{
+			this.flashAPI = flashAPI;
 			this.netConnection = netConnection;
 			video = new Video();
 			addChild(video);			
@@ -91,12 +95,19 @@ package com.flashphoner.api.management
 					
 			if (infoObject.info.code == "NetStream.Play.Start"){
 				playingVideo = true;
+				for each (var apiNotify:APINotify in flashAPI.apiNotifys){
+					apiNotify.notifyOpenVideoView(true);
+				}			
+
 				SoundControl.stopRingSound();
 			}		
 					
 			else if (infoObject.info.code == "NetStream.Play.StreamNotFound" || infoObject.info.code == "NetStream.Play.Failed"||infoObject.info.code == "NetStream.Play.Stop"){
 				Logger.info("incomingVideoStream.nsVideoOnStatus() "+infoObject.info.description);
 				playingVideo = false;
+				for each (var apiNotify:APINotify in flashAPI.apiNotifys){
+					apiNotify.notifyOpenVideoView(false);
+				}			
 			}
 				
 		}

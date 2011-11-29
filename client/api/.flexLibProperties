@@ -22,7 +22,7 @@
     <classEntry path="com.flashphoner.api.interfaces.API"/>
     <classEntry path="com.flashphoner.api.interfaces.APINotify"/>
     <classEntry path="com.flashphoner.api.js.APINotifyJS"/>
-    <classEntry path="com.flashphoner.api.management.PhoneSpeaker"/>
+    <classEntry path="com.flashphoner.api.PhoneSpeaker"/>
     <classEntry path="com.flashphoner.api.SoundControl"/>
     <classEntry path="com.flashphoner.api.management.VideoControl"/>
   </includeClasses>

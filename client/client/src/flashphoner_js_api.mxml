@@ -25,7 +25,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			import com.flashphoner.api.SoundControl;
 			import com.flashphoner.api.data.PhoneConfig;
 			import com.flashphoner.api.js.APINotifyJS;
-			import com.flashphoner.api.management.PhoneSpeaker;
+			import com.flashphoner.api.PhoneSpeaker;
 			
 			import flash.utils.setTimeout;
 			
