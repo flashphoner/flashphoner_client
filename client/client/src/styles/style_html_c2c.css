@@ -276,13 +276,6 @@ background: #fff;
 	top: 0px;
 	right: 0px;
 }
-/*.video {
-	width: 215px;
-	height: 180px;
-	background-color: #000;
-	visibility: visible;
-}
-*/
 .security {
 	position: absolute;
 	top: 60px;
@@ -305,6 +298,7 @@ background: #fff;
 	position: absolute;
 	top: 0;
 	right: 0;
+	
 }
 /* screen only for my video */
 .videoMy {
@@ -313,12 +307,9 @@ background: #fff;
 	height: 60px;
 	top: 0px;
 	right: 0px;
-	/*background: #666;
-*/
-	/*box-shadow: 0px 0px 5px #111;
-*/
+	/*background: #666;*/
+	/*box-shadow: 0px 0px 5px #111;*/
 	border: 1px solid #222;
-	border-radius: 0 6px 0 0;
 }
 .sendVideoButton {
 	width: 30px;

@@ -302,7 +302,7 @@ function notifyVideoFormat(call) {
         var newHeight = 320 * proportion;
         $('.video').height(newHeight);
         $('#jsSWFDiv').height(newHeight).width(320);
-        $('#c2c').height(newHeight+40);
+        //$('#c2c').height(newHeight+40);
     }
 }
 
