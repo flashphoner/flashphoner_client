@@ -64,7 +64,7 @@ package com.flashphoner.api.data
 		 **/
 		public static const MEDIA_PORTS_BUSY:String = "MEDIA_PORTS_BUSY";
 		/**
-		 * flashphoner server can not connect with sip povider server.
+		 * flashphoner server can not connect with sip provider server.
 		 **/ 
 		public static const WRONG_SIPPROVIDER_ADDRESS:String = "WRONG_SIPPROVIDER_ADDRESS";
 	}

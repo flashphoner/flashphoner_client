@@ -152,6 +152,16 @@ function sendVideoChangeState() {
     }
 }
 
+function initSendVideoButton(){
+    var sendVideoButton = $('.sendVideoButton');
+    var sendVideoButtonImage = $('#sendVideoButtonImage');
+    if (sendVideoButton.hasClass('on')) {
+        sendVideoButton.toggleClass('on');
+        sendVideoButtonImage.attr('src','assets/c2c_play.png')
+        flashphoner.setSendVideo(false);    	
+    }	
+}
+
 function viewVideo() {
     trace("viewVideo");
     flashphoner.viewVideo();   
@@ -203,7 +213,8 @@ function notifyCloseConnection() {
     toCallState();
     isLogged = false;
     closeVideoView();
-    getElement('sendVideo').value = "Send video";
+    initSendVideoButton();
+    $('#callState').html('Finished');
 }
 
 function notifyConnected() {
@@ -243,6 +254,7 @@ function notify(call) {
         if (call.state == STATE_FINISH) {
             proportion = 0; 
             closeVideoView();
+            initSendVideoButton();
             $('#callState').html('Finished');
             toCallState();
         // if call is holded
