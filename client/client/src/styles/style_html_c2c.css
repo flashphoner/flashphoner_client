@@ -153,6 +153,33 @@ background: #fff;
 }
 #hangupButton {
 }
+#callMeButton1, #callMeButton2, #callMeButton3 {
+  top: 340px;
+  left: 75px;
+  width: 180px;
+}
+
+#callMeButton2 {
+  top: 380px;
+}
+
+#callMeButton3 {
+  top: 420px;
+} 
+
+#aboutCallMe {
+	font: 14px Courier;
+	color: #eee;
+	position: absolute;
+	top: 460px;
+	left: 13px;
+	width: 326px;
+}
+
+#c2c-test {
+width: 200px;
+height: 200px;
+}
 /* ---------- Dialpad ---------- */
 .dialPad {
 	position: absolute;
@@ -564,11 +591,6 @@ input::-webkit-input-placeholder {
 	height: 14px;
 }
 /* ---------------------------------------------------- */
-#console1 {
-	position: absolute;
-	top: 10px;
-	left: 340px;
-}
 /*.button {
 	background: #dcdcdc;
 	width: 46px;
