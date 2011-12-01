@@ -475,6 +475,8 @@ function getFnName(fn) {
 /* --------------------- On document load we do... ------------------ */
 $(function() {
 
+    // load c2c interface in frame c2c-test for showing in popup
+    // $('#c2c-test').load('Click2callJS.html', alert('done'));
     
     // All buttons except .call and .hangup stay in press state until double click
     $(".button:not(.dialButton, .call, .hangup, .disabled)").click(function() {
@@ -544,6 +546,20 @@ $(function() {
         }
       }
     });
+
+
+    // call me  button opens new window with click2call
+    $("#callMeButton1:not(.disabled)").click(function() {
+      window.open('click2call-test-1.html','_blank','width=340,height=260,resizable=no,toolbar=no,menubar=no,location=no,status=no,scrollbar=no')
+    });     
+
+    $("#callMeButton2:not(.disabled)").click(function() {
+      window.open('click2call-test-2.html','_blank','width=340,height=260,resizable=no,toolbar=no,menubar=no,location=no,status=no,scrollbar=no')
+    });     
+
+    $("#callMeButton3:not(.disabled)").click(function() {
+      window.open('click2call-test-3.html','_blank','width=340,height=260,resizable=no,toolbar=no,menubar=no,location=no,status=no,scrollbar=no')
+    });     
 
     // Mic slider set mic volume when you slide it
 		$("#micSlider").slider({
