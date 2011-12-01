@@ -101,6 +101,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         AMFDataObj obj2 = params.getObject(2);
 
         String swfUrl = obj2.getString("swfUrl");
+        String pageUrl = obj2.getString("pageUrl");
         String allowDomainsString = ClientConfig.getInstance().getProperty("allow_domains");
         if (allowDomainsString != null && !"".equals(allowDomainsString)) {
             String[] allowDomains = allowDomainsString.split(",");
@@ -183,7 +184,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
                 if (file.exists()) {
                     bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
                 } else {
-                    url = new URL(auto_login_url + "?token=" + token + "&swfUrl=" + swfUrl);
+                    url = new URL(auto_login_url + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl="+pageUrl);
                     URLConnection conn = url.openConnection();
                     bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
@@ -287,6 +288,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         config.setSupportedResolutions(supportedResolutions);
         config.setMajorMinorPlayerVersion(majorMinorVersion);
         config.setSwfUrl(swfUrl);
+        config.setPageUrl(pageUrl);
 
         Logger.logger.info(config.toString());
 
@@ -446,7 +448,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         }
 
         if (token != null && !"null".equals(token)) {
-            String[] data = getCalleeByToken(token, rtmpClient.getRtmpClientConfig().getSwfUrl());
+            String[] data = getCalleeByToken(token, rtmpClient.getRtmpClientConfig().getSwfUrl(), rtmpClient.getRtmpClientConfig().getPageUrl());
             callee = data[0];
             visibleName = rtmpClient.getVisibleName();
         }
@@ -484,7 +486,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         ModuleBase.sendResult(client, params, call.toAMFDataObj());
     }
 
-    private String[] getCalleeByToken(String token, String swfUrl) {
+    private String[] getCalleeByToken(String token, String swfUrl, String pageUrl) {
         String getCalleUrl = ClientConfig.getInstance().getProperty("get_callee_url");
         if (getCalleUrl == null) {
             Logger.logger.error("ERROR - Property get_callee_url - '" + getCalleUrl + "' does not exits in flashphoner-client.properties");
@@ -499,7 +501,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             if (file.exists()) {
                 bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             } else {
-                url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl);
+                url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl="+pageUrl);
                 URLConnection conn = url.openConnection();
                 bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             }
