@@ -89,7 +89,11 @@
 
     	<copy file="${basedir}/src/PhoneJS.html" todir="${DEPLOY_DIR}"/>    	
     	<copy file="${basedir}/src/Click2callJS.html" todir="${DEPLOY_DIR}"/>    	
-	<copy file="${basedir}/src/PhoneJS-autologin-loadtest.html" todir="${DEPLOY_DIR}"/>    	
+    	<copy file="${basedir}/src/click2call-test-1.html" todir="${DEPLOY_DIR}"/>
+    	<copy file="${basedir}/src/click2call-test-2.html" todir="${DEPLOY_DIR}"/>
+    	<copy file="${basedir}/src/click2call-test-3.html" todir="${DEPLOY_DIR}"/>	
+    	
+		<copy file="${basedir}/src/PhoneJS-autologin-loadtest.html" todir="${DEPLOY_DIR}"/>    	
 
 	<mkdir dir="${DEPLOY_DIR}/js"/>
 	
