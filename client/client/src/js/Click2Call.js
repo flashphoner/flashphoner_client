@@ -86,6 +86,7 @@ $(document).ready(function() {
 
 function loginByToken(token) {
     trace("loginByToken", token);
+    $('#callState').html('...Calling...');
     var result = flashphoner.loginByToken(token);
 }
 
@@ -108,6 +109,7 @@ function callByToken(token) {
         } else if (isMuted() == -1){
             var result = flashphoner.callByToken(token, false, testInviteParameter);
             if (result == 0) {
+            	$('#callState').html('...Calling...');
                 toHangupState();
             }
     	} else {
@@ -150,6 +152,16 @@ function sendVideoChangeState() {
     }
 }
 
+function initSendVideoButton(){
+    var sendVideoButton = $('.sendVideoButton');
+    var sendVideoButtonImage = $('#sendVideoButtonImage');
+    if (sendVideoButton.hasClass('on')) {
+        sendVideoButton.toggleClass('on');
+        sendVideoButtonImage.attr('src','assets/c2c_play.png')
+        flashphoner.setSendVideo(false);    	
+    }	
+}
+
 function viewVideo() {
     trace("viewVideo");
     flashphoner.viewVideo();   
@@ -187,7 +199,6 @@ function addLogMessage(message) {
 function notifyFlashReady() {
 	trace("notifyFlashReady");
 	$('versionOfProduct').html(getVersion());
-	$('#callState').html('...Calling...');
 	loginByToken(null);
   $("#micSlider").slider("option","value",getMicVolume());	
   $("#speakerSlider").slider("option","value",getVolume());
@@ -202,7 +213,8 @@ function notifyCloseConnection() {
     toCallState();
     isLogged = false;
     closeVideoView();
-    getElement('sendVideo').value = "Send video";
+    initSendVideoButton();
+    $('#callState').html('Finished');
 }
 
 function notifyConnected() {
@@ -242,6 +254,7 @@ function notify(call) {
         if (call.state == STATE_FINISH) {
             proportion = 0; 
             closeVideoView();
+            initSendVideoButton();
             $('#callState').html('Finished');
             toCallState();
         // if call is holded

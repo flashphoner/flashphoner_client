@@ -227,6 +227,11 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
                 regRequired = Boolean.parseBoolean(temp);
             }
 
+            temp = el.getAttribute("sip_auth_name");
+            if (!(temp == null || "".equals(temp))) {
+                authenticationName = temp;
+            }
+
             login = el.getAttribute("sip_login");
             if (login == null || "".equals(login)) {
                 Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
