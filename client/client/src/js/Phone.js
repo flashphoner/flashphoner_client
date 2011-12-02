@@ -119,7 +119,7 @@ function call() {
             intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);call();}', 500);
             requestUnmute();
         } else if (isMuted() == -1){
-            var result = flashphoner.call(getElement('calleeText').value, 'Caller', true, testInviteParameter);
+            var result = flashphoner.call(getElement('calleeText').value, 'Caller', false, testInviteParameter);
             if (result == 0) {
                 toHangupState();
             } else {
