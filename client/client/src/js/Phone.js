@@ -285,6 +285,7 @@ function notifyRegisterRequired(registerR) {
 
 function notifyCloseConnection() {
     trace("notifyCloseConnection");
+	currentCall = null;    
     toLogOffState();
     toCallState();
     isLogged = false;
