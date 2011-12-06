@@ -24,7 +24,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			import com.flashphoner.Logger;
 			import com.flashphoner.api.Flash_API;
 			import com.flashphoner.api.data.PhoneConfig;
-			import com.flashphoner.api.management.PhoneSpeaker;
+			import com.flashphoner.api.PhoneSpeaker;
 			import com.flashphoner.api.SoundControl;
 			import com.flashphoner.phone.APINotifyPhone;
 			import com.flashphoner.phone.DataPhone;
@@ -76,7 +76,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 					}       			
 					if (token != null && token.length > 0){
 						DataPhone.getInstance().viewController.showConnectingView();
-						DataPhone.getInstance().flash_API.loginWithToken(token);
+						DataPhone.getInstance().flash_API.loginByToken(token);
 					}else{
 						DataPhone.getInstance().viewController.hideConnectingView();
 					}					
@@ -127,7 +127,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 					}       			
 					if (token != null && token.length > 0){
 						DataPhone.getInstance().viewController.showConnectingView();
-						DataPhone.getInstance().flash_API.loginWithToken(token);
+						DataPhone.getInstance().flash_API.loginByToken(token);
 					}else{
 						PopUpManager.addPopUp(DataPhone.getInstance().sipAccountView,this);
 						PopUpManager.centerPopUp(DataPhone.getInstance().sipAccountView);

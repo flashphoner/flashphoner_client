@@ -18,7 +18,6 @@ package com.flashphoner.api
 	import com.flashphoner.api.data.ModelLocator;
 	import com.flashphoner.api.data.PhoneConfig;
 	import com.flashphoner.api.interfaces.APINotify;
-	import com.flashphoner.api.management.PhoneSpeaker;
 	import com.flashphoner.api.management.VideoControl;
 	
 	import flash.events.*;
@@ -58,55 +57,54 @@ package com.flashphoner.api
 			nc = new NetConnection();
 			nc.objectEncoding = flash.net.ObjectEncoding.AMF0;
 			nc.client = new PhoneCallback(flash_API);
-			phoneSpeaker = new PhoneSpeaker(nc);
+			phoneSpeaker = new PhoneSpeaker(nc,flash_API);
 		}
 		
-		public function login(username:String = null, password:String = null, authenticationName:String = null):int{			
+		public function login(username:String, password:String, authenticationName:String = null):int{			
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
-			if (username == null && password == null){
-				obj.mode = "click2call";
-				modelLocator.mode="click2call";
+			if (username.indexOf("sip:") != 0 || username.indexOf("@") < 4){
+				return 1;
+			}	
+			username = username.substring(4);
+			obj.login = username.substring(0,username.indexOf("@"));
+			if (authenticationName == null || authenticationName == ""){
+				obj.authenticationName = username.substring(0,username.indexOf("@"));
 			}else{
-				modelLocator.mode="flashphoner";
-				if (username.indexOf("sip:") != 0 || username.indexOf("@") < 4){
-					return 1;
-				}	
-				username = username.substring(4);
-				obj.login = username.substring(0,username.indexOf("@"));
-				if (authenticationName == null || authenticationName == ""){
-					obj.authenticationName = username.substring(0,username.indexOf("@"));
-				}else{
-					obj.authenticationName = authenticationName; 
-				}
-				obj.password = password;
-				obj.mode = "flashphoner";
-				obj.width = PhoneConfig.VIDEO_WIDTH;
-				obj.height = PhoneConfig.VIDEO_HEIGHT;
-				obj.sipProviderAddress = username.substring(username.indexOf("@")+1,username.indexOf(":"));
-				obj.sipProviderPort = username.substring(username.indexOf(":")+1);
-				obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
+				obj.authenticationName = authenticationName; 
 			}
+			obj.password = password;
+			obj.width = PhoneConfig.VIDEO_WIDTH;
+			obj.height = PhoneConfig.VIDEO_HEIGHT;
+			obj.sipProviderAddress = username.substring(username.indexOf("@")+1,username.indexOf(":"));
+			obj.sipProviderPort = username.substring(username.indexOf(":")+1);
+			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
 			obj.visibleName = modelLocator.visibleName;
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);	
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 			return 0;			
 		}
 		
-		public function loginWithToken(token:String):void{
+		public function loginByToken(token:String = null):void{
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
 			obj.token = token;
-			modelLocator.mode="flashphoner";
+			obj.width = PhoneConfig.VIDEO_WIDTH;
+			obj.height = PhoneConfig.VIDEO_HEIGHT;			
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 		}		
 		
-		public function call(visibleName:String,callee:String,isVideoCall:Boolean):void{
+		public function call(callee:String, visibleName:String, isVideoCall:Boolean, inviteParameters:Object):void{
 			Logger.info("PhoneServerProxy.call()");
-			nc.call("call",responder,visibleName,callee,isVideoCall);
+			nc.call("call", responder, callee, visibleName, isVideoCall, null, inviteParameters);
+		}
+		
+		public function callByToken(token:String, isVideoCall:Boolean, inviteParameters:Object):void{
+			Logger.info("PhoneServerProxy.callByToken()");
+			nc.call("call",responder, null, null, isVideoCall, token,inviteParameters);
 		}		
 		
 		public function disconnect():void {

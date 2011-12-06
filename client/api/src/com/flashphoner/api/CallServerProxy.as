@@ -91,12 +91,15 @@ package com.flashphoner.api
 			if (outStream == null){
 				return;
 			}
-			if (sendVideo && flashCall != null && !flashCall.isVideoCall){
+			if (PhoneConfig.VIDEO_ENABLED && sendVideo && flashCall != null){
+				if (!flashCall.isVideoSended){
+					nc.call("updateCallToVideo",null,flashCall.id);
+				}
+				flashCall.isVideoSended = true;
+				outStream.attachCamera(flashCall.flash_API.videoControl.getCam());
 				nc.call("updateCallToVideo",null,flashCall.id);
 			}
-			if (PhoneConfig.VIDEO_ENABLED && sendVideo){
-				outStream.attachCamera(flashCall.flash_API.videoControl.getCam());
-			}
+			
 			if (!sendVideo){
 				outStream.attachCamera(null);
 			}		

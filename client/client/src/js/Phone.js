@@ -50,6 +50,10 @@ var isMutedMicButton = false;
 var isMutedSpeakerButton = false;
 var proportion = 0;
 
+var testInviteParameter = new Object;
+testInviteParameter['param1'] = "value1";
+testInviteParameter['param2'] = "value2";
+
 function trace(str) {
     var console = $("#console");
     var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37); // is console scrolled down? or may be you are reading previous messages.
@@ -115,7 +119,7 @@ function call() {
             intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);call();}', 500);
             requestUnmute();
         } else if (isMuted() == -1){
-            var result = flashphoner.call(getElement('calleeText').value, 'Caller');
+            var result = flashphoner.call(getElement('calleeText').value, 'Caller', false, testInviteParameter);
             if (result == 0) {
                 toHangupState();
             } else {
@@ -281,6 +285,7 @@ function notifyRegisterRequired(registerR) {
 
 function notifyCloseConnection() {
     trace("notifyCloseConnection");
+	currentCall = null;    
     toLogOffState();
     toCallState();
     isLogged = false;
@@ -340,9 +345,6 @@ function notify(call) {
             $('#callState').html('...Call on hold...');
             enableHoldButton();
         } else if (call.state == STATE_TALK) {
-            if (call.isVideoCall) {
-                openVideoView();
-            }
             $('#callState').html('...Talking...');
             enableHoldButton();
         } else if (call.state == STATE_RING) {
@@ -440,6 +442,15 @@ function notifyVideoFormat(call) {
         $('.videoDiv').height(newHeight); //we resize video window for new proportion
         $('#jsSWFDiv').height(newHeight - 40); //and resize flash for new video window
     }
+}
+
+function notifyOpenVideoView(isViewed){
+	trace("notifyOpenVideoView: isViewed = " + isViewed);
+	if (isViewed){
+		openVideoView();
+	}else{
+		closeVideoView();
+	}
 }
 
 function notifyMessage(messageObject) {

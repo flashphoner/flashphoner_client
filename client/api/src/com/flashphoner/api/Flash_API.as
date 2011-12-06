@@ -20,7 +20,6 @@ package com.flashphoner.api
 	import com.flashphoner.api.interfaces.API;
 	import com.flashphoner.api.interfaces.APINotify;
 	import com.flashphoner.api.js.APINotifyJS;
-	import com.flashphoner.api.management.PhoneSpeaker;
 	import com.flashphoner.api.management.VideoControl;
 	
 	import flash.events.TimerEvent;
@@ -82,12 +81,12 @@ package com.flashphoner.api
 			PhoneModel.getInstance();
 			ExternalInterface.addCallback("getParameters",getParameters);
 			ExternalInterface.addCallback("login",login);
-			ExternalInterface.addCallback("loginWithToken",loginWithToken);
-			ExternalInterface.addCallback("loginClick2Call",loginClick2Call);
+			ExternalInterface.addCallback("loginByToken",loginByToken);
 			ExternalInterface.addCallback("logoff",logoff);
 			ExternalInterface.addCallback("getInfoAboutMe",getInfoAboutMe);			
 			ExternalInterface.addCallback("sendMessage",sendMessage);
 			ExternalInterface.addCallback("call",call);
+			ExternalInterface.addCallback("callByToken",callByToken);
 			ExternalInterface.addCallback("hangup",hangup);
 			ExternalInterface.addCallback("answer",answer);
 			ExternalInterface.addCallback("sendDTMF",sendDTMF);
@@ -313,11 +312,6 @@ package com.flashphoner.api
 		 * @param password Password for user
 		 **/
 		public function login(username:String,password:String,authenticationName:String = null):int{
-			ExternalInterface.call("notifyRegisterRequired",PhoneConfig.REGISTER_REQUIRED);
-			if (PhoneConfig.REGISTER_REQUIRED){
-				upRegisteredTimer();
-				startRegisterTimer();
-			}
 			videoControl.init();
 			return phoneServerProxy.login(username,password,authenticationName);							
 		}
@@ -327,27 +321,9 @@ package com.flashphoner.api
 		 * @param token Token for auth server
 		 * @param password Password for user
 		 **/		
-		public function loginWithToken(token:String):void{
-			ExternalInterface.call("notifyRegisterRequired",PhoneConfig.REGISTER_REQUIRED);
-			if (PhoneConfig.REGISTER_REQUIRED){
-				upRegisteredTimer();
-				startRegisterTimer();
-			}
+		public function loginByToken(token:String = null):void{
 			videoControl.init();
-			phoneServerProxy.loginWithToken(token);
-		}
-		
-		/**
-		  * Authentication on sip provider server on "click2call" mode
-		  * Data of user will be on server in file 'flashphoner.properties'
-		  **/
-		public function loginClick2Call():void{
-			ExternalInterface.call("notifyRegisterRequired",PhoneConfig.REGISTER_REQUIRED);
-			if (PhoneConfig.REGISTER_REQUIRED){
-				upRegisteredTimer();
-				startRegisterTimer();
-			}
-			phoneServerProxy.login();							
+			phoneServerProxy.loginByToken(token);
 		}
 		
 		/**
@@ -356,11 +332,10 @@ package com.flashphoner.api
 		 * @param visibleName name of logged user wich target user see
 		 * @param isVideoCall video call?(true/false)
 		 **/ 
-		public function call(callee:String, visibleName:String, isVideoCall:Boolean = true):int{
+		public function call(callee:String, visibleName:String, isVideoCall:Boolean = false, inviteParameters:Object = null):int{
 			if (PhoneConfig.CHECK_VALIDATION_CALLEE){
 				var reg:RegExp = /[a-zа-яё]/i;
 				if (callee != null && callee != ""){
-					if (modelLocator.mode == "flashphoner"){
 						if ((callee.indexOf("sip:") == 0)){
 							if (callee.indexOf("@") == -1 || callee.indexOf("@") == callee.length-1){
 								return 1;
@@ -376,13 +351,8 @@ package com.flashphoner.api
 								callee = "sip:"+callee+"@"+modelLocator.sipProviderAddress+":"+modelLocator.sipProviderPort;
 							}
 						}
-					}else{
-						return 1;
-					}
 				}else{
-					if (modelLocator.mode != "click2call"){
-						return 1;
-					}
+					return 1;
 				}
 			}
 			if (visibleName != null){
@@ -394,10 +364,19 @@ package com.flashphoner.api
 					tempCall.setStatusHold(true);
 				}
 			}
-			phoneServerProxy.call(visibleName,callee,isVideoCall);
+			phoneServerProxy.call(callee,visibleName, isVideoCall,inviteParameters);
 			return 0;
 		}
 		
+		/**
+		 * Create new call by URL
+		 * @param isVideoCall video call?(true/false)
+		 **/ 		
+		public function callByToken(token:String, isVideoCall:Boolean = true, inviteParameters:Object = null):int{
+			phoneServerProxy.callByToken(token,isVideoCall, inviteParameters);
+			return 0;
+		}
+			
 		/**
 		 * Unhold all existed calls
 		 **/ 
@@ -599,6 +578,7 @@ package com.flashphoner.api
 			call.id = _call.id;
 			call.state = _call.state;
 			call.incoming=false;
+			call.callee = _call.callee;
 			call.anotherSideUser = _call.callee;
 			addCall(call);
 		}

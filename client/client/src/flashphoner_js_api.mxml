@@ -11,10 +11,11 @@ Contributors:
 
 This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 -->
-<mx:Application 
-	xmlns:mx="http://www.adobe.com/2006/mxml"
-	xmlns:ctrl="com.flashphoner.api.communication.*" 
-	xmlns:mainPhone="com.flashphoner.mainphone.views.*" creationComplete="onCreationComlete()" layout="absolute" backgroundAlpha="0.0">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:ctrl="com.flashphoner.api.communication.*"
+				xmlns:mainPhone="com.flashphoner.mainphone.views.*"
+				backgroundAlpha="0.0" creationComplete="onCreationComlete()" fontFamily="Verdana"
+				layout="absolute">
     <mx:Style source="styles/style.css"/>
     <mx:Script>
         <![CDATA[
@@ -24,7 +25,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			import com.flashphoner.api.SoundControl;
 			import com.flashphoner.api.data.PhoneConfig;
 			import com.flashphoner.api.js.APINotifyJS;
-			import com.flashphoner.api.management.PhoneSpeaker;
+			import com.flashphoner.api.PhoneSpeaker;
 			
 			import flash.utils.setTimeout;
 			
@@ -70,7 +71,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			
 			public function viewVideo():void{
 				videoMy.attachCamera(flashAPI.videoControl.getCam());
-				messageAccess.visible = false;
+				//messageAccess.visible = false;
 				videoPartner.visible = true;
 				videoMy.visible = true;
 			}			
@@ -81,7 +82,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 					timer.addEventListener(TimerEvent.TIMER, timerTick);
 					timer.start();
 				}
-				messageAccess.visible = true;
+				//messageAccess.visible = true;
 				videoPartner.visible = false;
 				videoMy.visible = false;
 			}
@@ -100,8 +101,13 @@ This code and accompanying materials also available under LGPL and MPL license f
 			
         ]]>       
     </mx:Script>
+	<!--
 	<mx:TextArea id="messageAccess" editable="false" text="To do that, you should allow the camera and microphone. Open Security Panel and allow access to devices." width="185" height="96" fontSize="12" textAlign="center" x="10" y="13" borderThickness="0"/>
-	<mx:Button click="openSettingsPanel()" label="Open Security Panel" width="122" height="26" fontSize="12" textAlign="center" x="45" y="100"/>
+	-->
+	<mx:Button x="45" y="100" width="122" height="26" label="Open panel" borderColor="#000000"
+			   click="openSettingsPanel()" color="#CCCCCC" cornerRadius="4" fillAlphas="[1.0, 1.0]"
+			   fillColors="[#444444, #555555]" fontFamily="Georgia" fontSize="12" textAlign="center"/>
 	<mx:Canvas id="videoPartner" visible="false" width="100%" height="100%" x="0" backgroundColor="black" y="0"/>
-	<mx:VideoDisplay id="videoMy" visible="false" width="34%" height="{videoMy.width*relationMyVideo}" x="0" bottom="0"/>
+	<mx:VideoDisplay id="videoMy" visible="false" right="0" top="0" width="25%"
+					 height="{videoMy.width*relationMyVideo}"/>
 </mx:Application>

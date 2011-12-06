@@ -98,6 +98,8 @@ package com.flashphoner.api
 		 **/
 		public var isVideoCall:Boolean = false;
 		
+		public var isVideoSended:Boolean = false;
+		
 		private var callServerProxy:CallServerProxy;
 		
 		internal var flash_API:Flash_API;
