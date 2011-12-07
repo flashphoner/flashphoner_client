@@ -210,6 +210,7 @@ function notifyRegisterRequired(registerR) {
 
 function notifyCloseConnection() {
     trace("notifyCloseConnection");
+	currentCall = null;
     toCallState();
     isLogged = false;
     closeVideoView();
@@ -346,7 +347,6 @@ function notifyRemoveCall(call) {
     trace("notifyRemoveCall", call.id);
     if (currentCall != null && currentCall.id == call.id) {
         currentCall = null;
-        removeCallView(call)
     }
 }
 

@@ -332,7 +332,7 @@ package com.flashphoner.api
 		 * @param visibleName name of logged user wich target user see
 		 * @param isVideoCall video call?(true/false)
 		 **/ 
-		public function call(callee:String, visibleName:String, isVideoCall:Boolean = true, inviteParameters:Object = null):int{
+		public function call(callee:String, visibleName:String, isVideoCall:Boolean = false, inviteParameters:Object = null):int{
 			if (PhoneConfig.CHECK_VALIDATION_CALLEE){
 				var reg:RegExp = /[a-zа-яё]/i;
 				if (callee != null && callee != ""){
