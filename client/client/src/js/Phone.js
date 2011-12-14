@@ -460,12 +460,12 @@ function notifyMessage(messageObject) {
     //if (messageObject.from == $('#loggedUserDiv').html()) {
     if (messageObject.from == callerLogin) { //check if it outcoming or incoming message
         createChat(messageObject.to.toLowerCase());
-        var chatTextarea = $('#chat' + messageObject.to.toLowerCase() + ' .chatTextarea'); //set current textarea for
+        var chatTextarea = $('#chat' + encodeId(messageObject.to.toLowerCase()) + ' .chatTextarea'); //set current textarea for
         var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
         chatTextarea.append('<div class=myNick>' + messageObject.from + '</div>' + messageObject.body + '<br>'); //add message to chat
     } else {
         createChat(messageObject.from.toLowerCase());
-        var chatTextarea = $('#chat' + messageObject.from.toLowerCase() + ' .chatTextarea'); //set current textarea
+        var chatTextarea = $('#chat' + encodeId(messageObject.from.toLowerCase()) + ' .chatTextarea'); //set current textarea
         var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
         chatTextarea.append('<div class=yourNick>' + messageObject.from + '</div>' + messageObject.body + '<br>'); //add message to chat
     }
@@ -748,6 +748,16 @@ function closeTransferView() {
 
 /* ------------- Additional interface functions --------- */
 
+//returns id
+function encodeId(calleeName){
+    return calleeName.replace(":","abcdefgh");
+}
+
+//returns calleName
+function decodeId(calleeNameId){
+   return calleeNameId.replace("abcdefgh",":");
+}
+
 // Functions createChat creates chat with the callee. 
 // It contains all chat window functionality including send message function 
 
@@ -755,9 +765,9 @@ function createChat(calleeName) {
 
     //var closetab = '<a href="" id="close' + calleeName + '" class="close">&times;</a>';
     //$("#tabul").append('<li id="tab' + calleeName + '" class="ntabs">' + calleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
-
-    if (!$('li').is('#tab' + calleeName)) {
-        var closetab = '<a href="" id="close' + calleeName + '" class="close">&times;</a>';
+    
+    if (!$('li').is('#tab' + encodeId(calleeName))) {
+        var closetab = '<a href="" id="close' + encodeId(calleeName) + '" class="close">&times;</a>';
         var shortCalleeName = calleeName;
 
         // We will cut too long calleeNames to place it within chat tab
@@ -766,22 +776,22 @@ function createChat(calleeName) {
         }
 
 
-        $("#tabul").append('<li id="tab' + calleeName + '" class="ntabs"> ' + shortCalleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
+        $("#tabul").append('<li id="tab' + encodeId(calleeName) + '" class="ntabs"> ' + shortCalleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
 
 
-        $('#tabcontent').append('<div class=chatBox id=chat' + calleeName + '>') //add chatBox
-        $('#chat' + calleeName).append('<div class=chatTextarea></div>')//add text area for chat messages
+        $('#tabcontent').append('<div class=chatBox id=chat' + encodeId(calleeName) + '>') //add chatBox
+        $('#chat' + encodeId(calleeName)).append('<div class=chatTextarea></div>')//add text area for chat messages
             .append('<input class=messageInput type=textarea>')//add input field
             .append('<input class=messageSend type=button value=Send>'); //add send button
 
         $("#tabul li").removeClass("ctab"); //remove select from all tabs
-        $("#tab" + calleeName).addClass("ctab"); //select new tab
+        $("#tab" + encodeId(calleeName)).addClass("ctab"); //select new tab
         $(".chatBox").hide(); //hide all chatBoxes
-        $("#chat" + calleeName).show(); //show new chatBox
+        $("#chat" + encodeId(calleeName)).show(); //show new chatBox
 
         // Bind send message on click Enter in message inout field
 
-        $('#chat' + calleeName + ' .messageInput').keydown(function(event) {
+        $('#chat' + encodeId(calleeName) + ' .messageInput').keydown(function(event) {
             if (event.keyCode == '13') {
                 //trace($(this).next().val());
                 $(this).next().click(); // click on sendMessage button
@@ -791,26 +801,27 @@ function createChat(calleeName) {
         });
 
         // Bind send message function
-        $('#chat' + calleeName + ' .messageSend').click(function() {
+        $('#chat' + encodeId(calleeName) + ' .messageSend').click(function() {
             var calleeName = $(this).parent().attr('id').substr(4); //parse id of current chatBox, take away chat word from the beginning
+	    calleeName = decodeId(calleeName);
             var messageText = $(this).prev().val(); //parse text from input
             sendMessage(calleeName, messageText, 'text/plain'); //send message
             $(this).prev().val(''); //clear message input
         });
 
         // Bind selecting tab
-        $("#tab" + calleeName).bind("click", function() {
+        $("#tab" + encodeId(calleeName)).bind("click", function() {
             $("#tabul li").removeClass("ctab"); //hide all tabs
-            $("#tab" + calleeName).addClass("ctab"); //select clicked tab
+            $("#tab" + encodeId(calleeName)).addClass("ctab"); //select clicked tab
             $(".chatBox").hide(); //chide all chatBoxes
-            $("#chat" + calleeName).show(); //show new chatBox
+            $("#chat" + encodeId(calleeName)).show(); //show new chatBox
         });
 
         // Bind closing tab on click 
-        $("#close" + calleeName).click(function() {
+        $("#close" + encodeId(calleeName)).click(function() {
             //close this tab
             $(this).parent().hide();
-            $("#chat" + calleeName).hide();
+            $("#chat" + encodeId(calleeName)).hide();
 
             var prevVisibleTab = $(this).parent().prevAll().filter(':visible').filter(':first'); //set prev visible tab
             var nextVisibleTab = $(this).parent().nextAll().filter(':visible').filter(':first'); //set next visible tab
@@ -834,10 +845,10 @@ function createChat(calleeName) {
         });
     } else {
         $("#tabul li").removeClass("ctab"); //remove select from all tabs
-        $("#tab" + calleeName).show(); //show our tab
-        $("#tab" + calleeName).addClass("ctab"); //select our tab
+        $("#tab" + encodeId(calleeName)).show(); //show our tab
+        $("#tab" + encodeId(calleeName)).addClass("ctab"); //select our tab
         $(".chatBox").hide(); //hide all chatboxes
-        $("#chat" + calleeName).show(); //show our chatBox
+        $("#chat" + encodeId(calleeName)).show(); //show our chatBox
 
     }
 
