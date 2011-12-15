@@ -750,12 +750,12 @@ function closeTransferView() {
 
 //returns id
 function encodeId(calleeName){
-    return calleeName.replace(":","abcdefgh");
+    return calleeName.replace(":","abcdefgh").replace("@","ijklmn").replace(".","opqrstu");
 }
 
 //returns calleName
 function decodeId(calleeNameId){
-   return calleeNameId.replace("abcdefgh",":");
+   return calleeNameId.replace("abcdefgh",":").replace("ijklmn","@").replace("opqrstu",".");
 }
 
 // Functions createChat creates chat with the callee. 
