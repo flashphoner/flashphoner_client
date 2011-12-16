@@ -85,7 +85,7 @@ echo "- $JVM_ARCH_DIGIT bit architecture detected successfully."
 echo ""
 
 echo "DETECTING hardware platform..."
-HW_PLATFORM=`uname -i`
+HW_PLATFORM=`uname -m`
 HW_PLATFORM_DIGIT=`echo $HW_PLATFORM | sed 's/\(.*\)\(64\)\(.*\)/\2/'`
 if [ "$HW_PLATFORM_DIGIT" != "64" ]; then
     HW_PLATFORM_DIGIT="32"
