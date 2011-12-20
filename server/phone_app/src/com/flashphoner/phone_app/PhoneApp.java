@@ -27,6 +27,7 @@ import com.wowza.wms.module.IModuleOnApp;
 import com.wowza.wms.module.IModuleOnConnect;
 import com.wowza.wms.module.ModuleBase;
 import com.wowza.wms.request.RequestFunction;
+import gov.nist.javax.sip.SIPConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -162,7 +163,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             try {
                 sipProviderPort = Integer.parseInt(obj.getString("sipProviderPort"));
             } catch (NumberFormatException ex) {
-                sipProviderPort = 5060;
+                sipProviderPort = SIPConstants.DEFAULT_PORT;
             }
         } else {
             if (auto_login_url == null) {
@@ -251,12 +252,12 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
             String sipProviderPortString = el.getAttribute("sip_port");
             if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
-                sipProviderPort = 5060;
+                sipProviderPort = SIPConstants.DEFAULT_PORT;
             } else {
                 try {
                     sipProviderPort = Integer.parseInt(sipProviderPortString);
                 } catch (NumberFormatException ex) {
-                    sipProviderPort = 5060;
+                    sipProviderPort = SIPConstants.DEFAULT_PORT;
                 }
             }
         }
