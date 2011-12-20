@@ -458,16 +458,21 @@ function notifyMessage(messageObject) {
     openChatView();
 
     //if (messageObject.from == $('#loggedUserDiv').html()) {
+    var messageContent = messageObject.body;
+    if (messageObject.contentType=="message/cpim"){
+	messageContent = messageObject.cpimContent;
+    }
+    
     if (messageObject.from == callerLogin) { //check if it outcoming or incoming message
         createChat(messageObject.to.toLowerCase());
         var chatTextarea = $('#chat' + encodeId(messageObject.to.toLowerCase()) + ' .chatTextarea'); //set current textarea for
         var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
-        chatTextarea.append('<div class=myNick>' + messageObject.from + '</div>' + messageObject.body + '<br>'); //add message to chat
+        chatTextarea.append('<div class=myNick>' + messageObject.from + '</div>' + messageContent + '<br>'); //add message to chat
     } else {
         createChat(messageObject.from.toLowerCase());
         var chatTextarea = $('#chat' + encodeId(messageObject.from.toLowerCase()) + ' .chatTextarea'); //set current textarea
         var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
-        chatTextarea.append('<div class=yourNick>' + messageObject.from + '</div>' + messageObject.body + '<br>'); //add message to chat
+        chatTextarea.append('<div class=yourNick>' + messageObject.from + '</div>' + messageContent + '<br>'); //add message to chat
     }
 
     if (isScrolled == 1) {
@@ -805,7 +810,7 @@ function createChat(calleeName) {
             var calleeName = $(this).parent().attr('id').substr(4); //parse id of current chatBox, take away chat word from the beginning
 	    calleeName = decodeId(calleeName);
             var messageText = $(this).prev().val(); //parse text from input
-            sendMessage(calleeName, messageText, 'text/plain'); //send message
+            sendMessage(calleeName, messageText, 'message/cpim'); //send message
             $(this).prev().val(''); //clear message input
         });
 
