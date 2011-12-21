@@ -169,7 +169,6 @@ public class RtmpClient extends AbstractRtmpClient {
      */
     public void incommingCall(ISoftphoneCall call) {
         Logger.logger.info(4, "RtmpClient.incommingCall() " + call.getId());
-        streamStart(login, call.getId());
     }
 
 
