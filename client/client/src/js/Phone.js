@@ -54,6 +54,13 @@ var testInviteParameter = new Object;
 testInviteParameter['param1'] = "value1";
 testInviteParameter['param2'] = "value2";
 
+var MAGIC_SEQUENCE_COLON="aBcDeFgH_COLON";
+var MAGIC_SEQUENCE_SEMICOLON="aBcDeFgH_SEMICOLON";
+var MAGIC_SEQUENCE_AT="aBcDeFgH_AT";
+var MAGIC_SEQUENCE_DOT="aBcDeFgH_DOT";
+var MAGIC_SEQUENCE_COMMA="aBcDeFgH_COMMA";
+var MAGIC_SEQUENCE_EQ="aBcDeFgH_EQ";
+
 function trace(str) {
     var console = $("#console");
     var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37); // is console scrolled down? or may be you are reading previous messages.
@@ -133,9 +140,9 @@ function call() {
     }
 }
 
-function sendMessage(to, body, contentType) {
+function sendMessage(to, recipients, body, contentType) {
     trace("sendMessage; to - " + to + "; body - " + body);
-    flashphoner.sendMessage(to, body, contentType);
+    flashphoner.sendMessage(to, recipients, body, contentType);
 }
 
 
@@ -455,17 +462,21 @@ function notifyOpenVideoView(isViewed){
 
 function notifyMessage(messageObject) {
     trace('notifyMessage: ' + messageObject.from + ': ' + messageObject.body);
-    openChatView();
-
-    //if (messageObject.from == $('#loggedUserDiv').html()) {
-    var messageContent = messageObject.body;
-    if (messageObject.contentType=="message/cpim"){
-	messageContent = messageObject.cpimContent;
-    }
+    openChatView();        
     
+    var messageTo = messageObject.to.toLowerCase();
+    if ((messageObject.recipients!=null)&&(messageObject.recipients.length!=0)){
+	messageTo = messageTo+";"+messageObject.recipients;
+    }
+
+    var messageContent = messageObject.body;
+    if (messageObject.state=="FAILED"){
+	messageContent = "The message has not been sent: "+messageContent;    
+    }
+        
     if (messageObject.from == callerLogin) { //check if it outcoming or incoming message
-        createChat(messageObject.to.toLowerCase());
-        var chatTextarea = $('#chat' + encodeId(messageObject.to.toLowerCase()) + ' .chatTextarea'); //set current textarea for
+        createChat(messageTo);
+        var chatTextarea = $('#chat' + encodeId(messageTo) + ' .chatTextarea'); //set current textarea for
         var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
         chatTextarea.append('<div class=myNick>' + messageObject.from + '</div>' + messageContent + '<br>'); //add message to chat
     } else {
@@ -755,12 +766,12 @@ function closeTransferView() {
 
 //returns id
 function encodeId(calleeName){
-    return calleeName.replace(":","abcdefgh").replace("@","ijklmn").replace(".","opqrstu");
+    return String(calleeName).replace(/:/g,MAGIC_SEQUENCE_COLON).replace(/@/g,MAGIC_SEQUENCE_AT).replace(/\./g,MAGIC_SEQUENCE_DOT).replace(/,/g,MAGIC_SEQUENCE_COMMA).replace(/=/g,MAGIC_SEQUENCE_EQ).replace(/;/g,MAGIC_SEQUENCE_SEMICOLON);
 }
 
 //returns calleName
 function decodeId(calleeNameId){
-   return calleeNameId.replace("abcdefgh",":").replace("ijklmn","@").replace("opqrstu",".");
+   return String(calleeNameId).replace(new RegExp(MAGIC_SEQUENCE_COLON,'g'),":").replace(new RegExp(MAGIC_SEQUENCE_AT,'g'),"@").replace(new RegExp(MAGIC_SEQUENCE_DOT,'g'),".").replace(new RegExp(MAGIC_SEQUENCE_COMMA,'g'),",").replace(new RegExp(MAGIC_SEQUENCE_EQ,'g'),"=").replace(new RegExp(MAGIC_SEQUENCE_SEMICOLON,'g'),";");
 }
 
 // Functions createChat creates chat with the callee. 
@@ -810,7 +821,18 @@ function createChat(calleeName) {
             var calleeName = $(this).parent().attr('id').substr(4); //parse id of current chatBox, take away chat word from the beginning
 	    calleeName = decodeId(calleeName);
             var messageText = $(this).prev().val(); //parse text from input
-            sendMessage(calleeName, messageText, 'message/cpim'); //send message
+            var semicolonIndex = calleeName.indexOf(";");
+	    var recipients;
+	    //multipart mixed support
+	    if (semicolonIndex!=-1){
+		var splat = calleeName.split(";");
+		//example adhoc;tel:12345,tel:5678
+		//adhoc
+		calleeName = splat[0];
+		//tel:12345,tel:5678
+		recipients = splat[1];
+	    }
+	    sendMessage(calleeName, recipients, messageText, 'multipart/mixed'); //send message
             $(this).prev().val(''); //clear message input
         });
 
