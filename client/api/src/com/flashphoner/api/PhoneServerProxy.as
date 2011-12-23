@@ -95,6 +95,7 @@ package com.flashphoner.api
 			obj.height = PhoneConfig.VIDEO_HEIGHT;			
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
+			Logger.info("PhoneServerProxy.loginByToken: "+token);
 		}		
 		
 		public function call(callee:String, visibleName:String, isVideoCall:Boolean, inviteParameters:Object):void{
@@ -150,7 +151,10 @@ package com.flashphoner.api
 		public function sendInstantMessage(instantMessage:InstantMessage):void{
 			
 			var instantMessageObj:Object = new Object();
+			instantMessageObj.id=instantMessage.id;
+			instantMessageObj.from = instantMessage.from;
 			instantMessageObj.to=instantMessage.to;
+			instantMessageObj.recipients=instantMessage.recipients;
 			instantMessageObj.body=instantMessage.body;
 			instantMessageObj.contentType=instantMessage.contentType;
 			

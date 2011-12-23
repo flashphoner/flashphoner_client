@@ -24,6 +24,7 @@ package com.flashphoner.api
 	import flash.utils.*;
 	
 	import mx.collections.ArrayCollection;
+	import mx.messaging.errors.MessagingError;
 	
 	internal class MessageCommand implements ICommand
 	{				
@@ -39,13 +40,31 @@ package com.flashphoner.api
 			var flashAPI:Flash_API = (event as MessageEvent).flashAPI;					
 			var messageObject:Object = (event as MessageEvent).messageObj;
 			
+			if (messageObject.state=="ACCEPTED" || messageObject.state=="FAILED"){
+				//existing message				
+				var instantMessage:InstantMessage = flashAPI.findMessageById(messageObject.id);
+				if (instantMessage==null){
+					Logger.error("Message not found by id: "+messageObject.id);
+				}else{
+					//update remote state
+					instantMessage.state = messageObject.state;
+					flashAPI.removeMessage(instantMessage);
+					notify(instantMessage,flashAPI,event);					
+				}
+			}else if (messageObject.state=="RECEIVED"){
+				//new incoming message
+				notify(messageObject,flashAPI,event);
+			}	
+			
+			
+		}
+		
+		private function notify(messageObject:Object, flashAPI:Flash_API, event:CairngormEvent):void{
 			if (event.type == MessageEvent.MESSAGE_EVENT){
 				for each (var apiNotify:APINotify in flashAPI.apiNotifys){
 					apiNotify.notifyMessage(messageObject);
 				}
-			}	
-			
-			
+			}		
 		}
 	}
 }

@@ -19,6 +19,7 @@ import com.flashphoner.sdk.rtmp.RtmpClientConfig;
 import com.flashphoner.sdk.sip.SipHeader;
 import com.flashphoner.sdk.softphone.ISoftphoneCall;
 import com.flashphoner.sdk.softphone.InstantMessage;
+import com.flashphoner.sdk.softphone.InstantMessageState;
 import com.flashphoner.sdk.softphone.Logger;
 import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
 import com.flashphoner.sdk.softphone.exception.SoftphoneException;
@@ -439,20 +440,23 @@ public class RtmpClient extends AbstractRtmpClient {
 
     public void notifyMessage(InstantMessage instantMessage) {
         Logger.logger.info("rtmpClient notifyMessage: " + instantMessage);
+
         AMFDataObj messageObj = new AMFDataObj();
-        messageObj.put("from", instantMessage.getFrom());
-        messageObj.put("to", instantMessage.getTo());
-        messageObj.put("body", instantMessage.getBody());
-        messageObj.put("contentType", instantMessage.getContentType());
+
         messageObj.put("state", instantMessage.getState());
-        if (instantMessage.getContentType().equalsIgnoreCase("message/cpim")) {
-            if (instantMessage.getCpimHeaders() != null) {
-                messageObj.put("cpimHeaders", instantMessage.getCpimHeaders());
+
+        if (InstantMessageState.RECEIVED.equals(instantMessage.getState())) {
+            messageObj.put("from", instantMessage.getFrom());
+            messageObj.put("to", instantMessage.getTo());
+            messageObj.put("contentType", instantMessage.getContentType());
+            messageObj.put("body", instantMessage.getBody());
+        } else {
+            if (instantMessage.getId() != null) {
+                messageObj.put("id", instantMessage.getId());
             }
-            if (instantMessage.getCpimContent() != null) {
-                messageObj.put("cpimContent", instantMessage.getCpimContent());
-            }
+
         }
+
         getClient().call("notifyMessage", null, messageObj);
     }
 
