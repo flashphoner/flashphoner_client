@@ -19,10 +19,16 @@ package com.flashphoner.api
 		{
 		}
 		
+		public var id:String;
+		
+		public var from:String;
+		
 		/**
 		 * Target of the message
 		 **/
 		public var to:String;
+		
+		public var recipients:String;
 		
 		/**
 		 * Content of the message
@@ -33,5 +39,7 @@ package com.flashphoner.api
 		 * Type of content
 		 **/
 		public var contentType:String;
+		
+		public var state:String;
 	}
 }

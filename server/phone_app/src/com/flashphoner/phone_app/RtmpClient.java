@@ -19,6 +19,7 @@ import com.flashphoner.sdk.rtmp.RtmpClientConfig;
 import com.flashphoner.sdk.sip.SipHeader;
 import com.flashphoner.sdk.softphone.ISoftphoneCall;
 import com.flashphoner.sdk.softphone.InstantMessage;
+import com.flashphoner.sdk.softphone.InstantMessageState;
 import com.flashphoner.sdk.softphone.Logger;
 import com.wowza.wms.amf.AMFDataObj;
 import com.wowza.wms.client.IClient;
@@ -280,6 +281,114 @@ public class RtmpClient extends AbstractRtmpClient {
     }
 
     /**
+     * Creates outgoing call
+     *
+     * @param caller      login, which initiates this call
+     * @param callee      login, which callable, call's target
+     * @param visibleName visible name of caller, which may be displayed on SIP endpoint screen
+     * @param isVideoCall is this call with video support
+     * @return ISoftphoneCall
+     * @throws SoftphoneException
+     */
+    public ISoftphoneCall call(final String caller, final String callee, final String visibleName, final Boolean isVideoCall) throws SoftphoneException, LicenseRestictionException {
+        Logger.logger.info(4, "RtmpClient.call() " + callee);
+        ISoftphoneCall call = getSoftphone().call(caller, callee, visibleName, isVideoCall);
+        streamStart(login, call.getId());
+        return call;
+    }
+
+    /**
+     * Creates outgoing call
+     *
+     * @param caller           login, which initiates this call
+     * @param callee           login, which callable, call's target
+     * @param visibleName      visible name of caller, which may be displayed on SIP endpoint screen
+     * @param isVideoCall      is this call with video support
+     * @param inviteParameters additional parameters for INVITE-request
+     * @return ISoftphoneCall
+     * @throws SoftphoneException
+     */
+    public ISoftphoneCall call(final String caller, final String callee, final String visibleName, final Boolean isVideoCall, Map<String, String> inviteParameters) throws SoftphoneException, LicenseRestictionException {
+        Logger.logger.info(4, "RtmpClient.call() " + callee);
+        ISoftphoneCall call = getSoftphone().call(caller, callee, visibleName, isVideoCall);
+        streamStart(login, call.getId());
+        return call;
+    }
+
+    /**
+     * Answer incoming call
+     *
+     * @param callId      SIP callId which call is answered
+     * @param isVideoCall is video supported for this answer
+     * @throws SoftphoneException
+     */
+    public void answer(final String callId, final Boolean isVideoCall) throws SoftphoneException {
+        Logger.logger.info(4, "RtmpClient.answer() " + callId);
+        getSoftphone().answer(callId, isVideoCall);
+    }
+
+    /**
+     * Update call session to video
+     *
+     * @param callId SIP callId which call is updated
+     * @throws SoftphoneException
+     */
+    public void updateCallToVideo(final String callId) throws SoftphoneException {
+        Logger.logger.info(4, "RtmpClient.updateCallToVideo() " + callId);
+        getSoftphone().updateCallToVideo(callId);
+    }
+
+
+    /**
+     * Hangup by callId
+     *
+     * @param callId SIP callId which call is hanguped
+     * @throws SoftphoneException
+     */
+    public void hangup(final String callId) throws SoftphoneException {
+        Logger.logger.info(4, "RtmpClient.hangup() " + callId);
+        getSoftphone().hangup(callId);
+        streamAudioStop(callId);
+        streamVideoStop(callId);
+    }
+
+    /**
+     * Transfer by callId and callee
+     *
+     * @param callId SIP callId which call is transferred
+     * @param callee
+     * @throws SoftphoneException
+     */
+    public void transfer(final String callId, final String callee) throws SoftphoneException {
+        Logger.logger.info(4, "RtmpClient.transfer() " + callId);
+        getSoftphone().transfer(callId, callee);
+    }
+
+    /**
+     * Hold by callId and isHold
+     *
+     * @param callId SIP callId which call is holded
+     * @param isHold
+     * @throws SoftphoneException
+     */
+    public void hold(final String callId, final Boolean isHold) throws SoftphoneException {
+        Logger.logger.info(4, "RtmpClient.hold() " + callId + "; holding - " + isHold);
+        getSoftphone().hold(callId, isHold);
+    }
+
+    /**
+     * Send DTMF
+     *
+     * @param callId SIP callId for which call DTMF is sended
+     * @param dtmf
+     * @throws SoftphoneException
+     */
+    public void sendDtmf(final String callId, final String dtmf) throws SoftphoneException {
+        Logger.logger.info(4, "RtmpClient.sendDtmf() " + dtmf);
+        getSoftphone().sendDtmf(callId, dtmf);
+    }
+
+    /**
      * Notifies flash-client about fail
      *
      * @param errorCode
@@ -324,12 +433,23 @@ public class RtmpClient extends AbstractRtmpClient {
 
     public void notifyMessage(InstantMessage instantMessage) {
         Logger.logger.info("rtmpClient notifyMessage: " + instantMessage);
+
         AMFDataObj messageObj = new AMFDataObj();
-        messageObj.put("from", instantMessage.getFrom());
-        messageObj.put("to", instantMessage.getTo());
-        messageObj.put("body", instantMessage.getBody());
-        messageObj.put("contentType", instantMessage.getContentType());
+
         messageObj.put("state", instantMessage.getState());
+
+        if (InstantMessageState.RECEIVED.equals(instantMessage.getState())) {
+            messageObj.put("from", instantMessage.getFrom());
+            messageObj.put("to", instantMessage.getTo());
+            messageObj.put("contentType", instantMessage.getContentType());
+            messageObj.put("body", instantMessage.getBody());
+        } else {
+            if (instantMessage.getId() != null) {
+                messageObj.put("id", instantMessage.getId());
+            }
+
+        }
+
         getClient().call("notifyMessage", null, messageObj);
     }
 

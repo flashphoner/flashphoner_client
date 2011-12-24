@@ -31,10 +31,16 @@ package com.flashphoner.api
 	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
+	import mx.collections.ArrayList;
+	import mx.messaging.errors.MessagingError;
+	import mx.utils.UIDUtil;
 
 	[Bindable]
 	public class Flash_API
-	{
+	{		
+		
+		private var messages:ArrayCollection;
+		
 		private var registeredTimer:Timer;
 		/**
 		 * @private
@@ -107,6 +113,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("getCookie",getCookie);
 			ExternalInterface.addCallback("getVersion",getVersion);
 			calls = new ArrayCollection();
+			messages = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
 			
@@ -322,6 +329,7 @@ package com.flashphoner.api
 		 * @param password Password for user
 		 **/		
 		public function loginByToken(token:String = null):void{
+			Logger.info("loginByToken: "+token);
 			videoControl.init();
 			phoneServerProxy.loginByToken(token);
 		}
@@ -589,12 +597,48 @@ package com.flashphoner.api
 		 * @param body content of the message
 		 * @param contentType type of content
 		 **/
-		public function sendMessage(to:String, body:String, contentType:String):void{
+		public function sendMessage(to:String, recipients:String, body:String, contentType:String):void{
 			var instantMessage:InstantMessage = new InstantMessage();
+			instantMessage.recipients = recipients;
 			instantMessage.body = body;
+			instantMessage.from = modelLocator.login; 
 			instantMessage.to = to;
 			instantMessage.contentType = contentType;
+			//Add message into the internal collection
+			instantMessage.id = UIDUtil.createUID();
+			messages.addItem(instantMessage);
+			//startMessageExpiredTimer
+			startExpirationTimer(instantMessage);
 			this.phoneServerProxy.sendInstantMessage(instantMessage);
+		}
+		
+		private function startExpirationTimer(msg:InstantMessage):void {
+			var timer:Timer = new MessageExpireTimer(msg,30000,0);			 
+			timer.addEventListener(TimerEvent.TIMER, startExpirationTimerFire);			
+			timer.start();
+		}
+		
+		public function findMessageById(id:String):InstantMessage{
+			
+			for (var i:int=0; i<messages.length; i++){
+				var instantMessage:InstantMessage = InstantMessage(messages.getItemAt(i));
+				if ((InstantMessage!=null)&&(instantMessage.id==id)){
+					return instantMessage;
+				}				
+			}
+			return null;
+		}
+		
+		public function removeMessage(instantMessage:InstantMessage):void{
+			var index:int = messages.getItemIndex(instantMessage);
+			if (index!=-1){
+				messages.removeItemAt(index);
+			}
+		}
+		
+		private function startExpirationTimerFire(event:TimerEvent):void{			
+			var messageExpireTimer:MessageExpireTimer = event.target as MessageExpireTimer;
+			removeMessage(messageExpireTimer.message);
 		}
 
 		/**
