@@ -15,6 +15,7 @@ Write us support@flashphoner.com with any questions.
 
 body {
 	font: 12px Arial;
+	margin: 0px;
 }
 img {
 	border: 0;
@@ -104,23 +105,24 @@ input::-webkit-input-placeholder {
   height: 138px;
 }
 #phoneDiv {
-	left: 30px;
-	height: 240px;
+	left: 60px;
+	top: 20px;
+	height: 282px;
 	width: 153px;
-	padding: 10px;
+	/*padding: 10px;*/
 	position: relative;
 }
 #versionOfProduct {
-	top: 134px;
-	right: 17px;
+	top: 125px;
+	right: 2px;
 	font: 8px Arial;
-	color: #bbb;
+	color: #aaa;
 }
 #controlPanel {
   width: 152px;
   height: 20px;
-  top: 6px;
-  left: 10px;
+  top: -4px;
+  left: 0px;
   border: 1px solid #bbb;
   box-shadow: /*0px 1px 0px #fff, */inset 0px 1px 0px #fff;
 }
@@ -237,8 +239,8 @@ input::-webkit-input-placeholder {
 
 /* ----------------- Incoming call view ---------------- */
 #incomingDiv {
-	top: 110px;
-	left: 5px;
+	top: 86px;
+	left: -36px;
 	height: 82px;
 	width: 215px;
 	border: 1px solid #bbb;
@@ -269,8 +271,8 @@ input::-webkit-input-placeholder {
 }
 /* ------------------ Connecting ------------------------ */
 #connectingDiv {
-	top: 120px;
-	left: 10px;
+	top: 105px;
+	left: -33px;
 	height: 30px;
 	width: 200px;
 	padding: 10px;
@@ -285,8 +287,8 @@ input::-webkit-input-placeholder {
 }
 /* ------------------ Info ------------------------ */
 #infoDiv {
-	top: 120px;
-	left: 10px;
+	top: 105px;
+	left: -33px;
 	height: 30px;
 	width: 200px;
 	padding: 10px;
@@ -333,8 +335,8 @@ input::-webkit-input-placeholder {
   display: none;
 }
 #loginDiv {
-	top: 75px;
-	left: 5px;
+	top: 46px;
+	left: -45px;
 	height: 142px;
 	width: 200px;
 	padding: 20px;
@@ -363,8 +365,8 @@ input::-webkit-input-placeholder {
 }
 /* ------------ Video + Security settings view -------------- */
 #video_requestUnmuteDiv {
-	top: 50px;
-	left: 20px;
+	top: 35px;
+	left: -36px;
 	overflow: hidden;
 	padding-top: 20px;
 
@@ -421,8 +423,8 @@ div with zero size.
 #transfer {
 	width: 200px;
 	height: 94px;
-	top: 90px;
-	left: 20px;
+	top: 68px;
+	left: -35px;
 	text-align: center;
 	font: bold 16px Arial;
 	padding: 10px;
@@ -446,8 +448,8 @@ div with zero size.
 .callDiv {
 	width: 152px;
 	height: 118px;
-	top: 36px;
-	left: 49px;
+	top: 18px;
+	left: 1px;
 	float: left;
 	background: #333;
 	/*border: 1px solid #B7BABC;*/
@@ -472,8 +474,8 @@ div with zero size.
 /* ------ Chat view -------- */
 #chatDiv {
 	width: 320px;
-	top: 250px;
-	left: 20px;
+	top: 28px;
+	left: -47px;
 	visibility: hidden;
 }
 .chatBox {
@@ -663,8 +665,6 @@ div with zero size.
 	margin-bottom: 3px;
 }
 
-
-
 /* ----------- Slider -------------- */
 #micSlider, #speakerSlider {
 	top: 10px;
@@ -736,9 +736,9 @@ div with zero size.
 /* -------------------------------------- */
 /* --------- Console ------------*/
 #console {
-	top: 35px;
-	left: 250px;	
-	height: 300px;
+	top: 20px;
+	left: 240px;	
+	height: 262px;
   width: 700px;
 	float: left;
 	background-color: #333;
