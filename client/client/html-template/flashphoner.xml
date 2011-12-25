@@ -12,7 +12,7 @@
   This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 -->
 <flashphoner>
-	<rtmp_server>rtmp://192.168.1.5:1935</rtmp_server>
+	<rtmp_server>rtmp://87.226.225.59:1935</rtmp_server>
 	<register_required>true</register_required>
 	<application>phone_app</application>
 	<video_width>176</video_width>
