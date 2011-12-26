@@ -51,8 +51,8 @@ var isMutedSpeakerButton = false;
 var proportion = 0;
 
 var testInviteParameter = new Object;
-testInviteParameter['param1'] = "value1";
-testInviteParameter['param2'] = "value2";
+//testInviteParameter['param1'] = "value1";
+//testInviteParameter['param2'] = "value2";
 
 var MAGIC_SEQUENCE_COLON="aBcDeFgH_COLON";
 var MAGIC_SEQUENCE_SEMICOLON="aBcDeFgH_SEMICOLON";

@@ -12,6 +12,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 */
 package com.flashphoner.phone_app;
 
+import com.flashphoner.sdk.media.SdpState;
 import com.flashphoner.sdk.rtmp.*;
 import com.flashphoner.sdk.softphone.*;
 import com.flashphoner.sdk.softphone.exception.CrossCallException;
@@ -184,7 +185,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
                 if (file.exists()) {
                     bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
                 } else {
-                    url = new URL(auto_login_url + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl="+pageUrl);
+                    url = new URL(auto_login_url + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl=" + pageUrl);
                     URLConnection conn = url.openConnection();
                     bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
@@ -408,7 +409,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         if ((dtmf != null) && (dtmf.length() != 0)) {
             IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
             try {
-                rtmpClient.sendDtmf(callId, dtmf);
+                rtmpClient.getSoftphone().sendDtmf(callId, dtmf);
             } catch (SoftphoneException e) {
                 Logger.logger.error("Can not send DTMF", e);
             }
@@ -464,9 +465,18 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         ISoftphoneCall call;
 
         try {
-
-            call = rtmpClient.call(caller, callee, visibleName, isVideoCall, inviteParameters);
-
+            SdpState sdpStateA = null, sdpStateV = null, sdpStateM = null;
+            if (callee.contains("Deferred")) {
+                sdpStateM = SdpState.recvonly;
+            } else {
+                sdpStateA = SdpState.sendrecv;
+                if (isVideoCall) {
+                    sdpStateV = SdpState.sendrecv;
+                } else {
+                    sdpStateV = SdpState.recvonly;
+                }
+            }
+            call = rtmpClient.getSoftphone().call(caller, callee, visibleName, sdpStateA, sdpStateV, sdpStateM, inviteParameters);
         } catch (LicenseRestictionException e) {
             Logger.logger.info(4, e.getMessage());
             return;
@@ -501,7 +511,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             if (file.exists()) {
                 bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             } else {
-                url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl="+pageUrl);
+                url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl=" + pageUrl);
                 URLConnection conn = url.openConnection();
                 bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             }
@@ -555,7 +565,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         Boolean isVideoCall = params.getBoolean(PARAM2);
         IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
         try {
-            rtmpClient.answer(callId, isVideoCall);
+            rtmpClient.getSoftphone().answer(callId, isVideoCall);
         } catch (SoftphoneException e) {
             Logger.logger.error("Can not answer the call", e);
         }
@@ -575,7 +585,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String callId = params.getString(PARAM1);
         IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
         try {
-            rtmpClient.updateCallToVideo(callId);
+            rtmpClient.getSoftphone().updateCallToVideo(callId);
         } catch (SoftphoneException e) {
             Logger.logger.error("Can not update call to video", e);
         }
@@ -597,7 +607,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String callee = params.getString(PARAM2);
         IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
         try {
-            rtmpClient.transfer(callId, callee);
+            rtmpClient.getSoftphone().transfer(callId, callee);
         } catch (SoftphoneException e) {
             Logger.logger.error("Can not transfer call", e);
         }
@@ -619,7 +629,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         Boolean isHold = params.getBoolean(PARAM2);
         IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
         try {
-            rtmpClient.hold(callId, isHold);
+            rtmpClient.getSoftphone().hold(callId, isHold);
         } catch (SoftphoneException e) {
             Logger.logger.error("Can not hold call", e);
         }
@@ -639,7 +649,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String callId = params.getString(PARAM1);
         IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
         try {
-            rtmpClient.hangup(callId);
+            rtmpClient.getSoftphone().hangup(callId);
         } catch (SoftphoneException e) {
             Logger.logger.error("Can not hangup call", e);
         }
@@ -659,7 +669,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         instantMessage.setRecipients(obj.getString("recipients"));
 
         try {
-            rtmpClient.sendInstantMessage(instantMessage);
+            rtmpClient.getSoftphone().sendInstantMessage(instantMessage);
         } catch (SoftphoneException e) {
             Logger.logger.error("Can not send instant message", e);
         }
