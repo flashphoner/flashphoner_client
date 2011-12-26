@@ -111,6 +111,7 @@ input::-webkit-input-placeholder {
 	width: 153px;
 	/*padding: 10px;*/
 	position: relative;
+	font: 12px Arial !important; 
 }
 #versionOfProduct {
 	top: 125px;
@@ -380,7 +381,7 @@ input::-webkit-input-placeholder {
 	visibility: visible;
 	width: 215px;
 	height: 178px;
-	background-color: #fff;
+	background-color: #ddd;
 	padding-top: 20px;
 	border: 1px solid #ccc;
 }
