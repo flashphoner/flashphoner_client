@@ -93,10 +93,8 @@ package com.flashphoner.api
 		 * Flag on incomming call
 		 **/
 		public var incoming:Boolean = false;
-		/**
-		 * Flasg on video call
-		 **/
-		public var isVideoCall:Boolean = false;
+
+		public var isMSRP:Boolean = false;
 		
 		public var isVideoSended:Boolean = false;
 		

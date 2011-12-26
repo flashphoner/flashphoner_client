@@ -588,6 +588,11 @@ package com.flashphoner.api
 			call.incoming=false;
 			call.callee = _call.callee;
 			call.anotherSideUser = _call.callee;
+			if (_call.isMSRP == 'true'){
+				call.isMSRP = true;
+			}else{
+				call.isMSRP = false;
+			} 
 			addCall(call);
 		}
 		

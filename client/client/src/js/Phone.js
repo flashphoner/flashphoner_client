@@ -140,6 +140,11 @@ function call() {
     }
 }
 
+function deferredCall(){
+	trace("deferredCall");
+	flashphoner.call("sip:Deferred@yes.my", 'Caller');
+}
+
 function sendMessage(to, recipients, body, contentType) {
     trace("sendMessage; to - " + to + "; body - " + body);
     flashphoner.sendMessage(to, recipients, body, contentType);
@@ -314,6 +319,7 @@ function notifyConnected() {
         getElement("loggedUserDiv").innerHTML = callerLogin;
         isLogged = true;
         closeConnectingView();
+        deferredCall();
     }
 }
 
@@ -325,6 +331,7 @@ function notifyRegistered() {
         getElement("loggedUserDiv").innerHTML = callerLogin;
         isLogged = true;
         closeConnectingView();
+        deferredCall();
     }
 }
 
@@ -333,6 +340,10 @@ function notifyBalance(balance) {
 
 function notify(call) {
     trace("notify: callId " + call.id + " --- " + call.anotherSideUser);
+    if (call.isMSRP == true){
+		trace("notify; Deferred message call");
+		return;
+	}
     if (currentCall.id == call.id) { //if we have some call now and notify is about exactly our call
         currentCall = call;
         if (call.state == STATE_FINISH) {
@@ -492,8 +503,11 @@ function notifyMessage(messageObject) {
 }
 
 function notifyAddCall(call) {
-    trace("notifyAddCall; callId - " + call.id + ", another side - " + call.anotherSideUser);
-
+    trace("notifyAddCall; callId - " + call.id + ", another side - " + call.anotherSideUser+", isMSRP - "+ call.isMSRP);
+	if (call.isMSRP == true){
+		trace("notifyAddCall; Added deferred message call");
+		return;
+	}
     if (currentCall != null && call.incoming == true) {
         hangup(call.id);
     } else if (currentCall != null && call.incoming == false) {
