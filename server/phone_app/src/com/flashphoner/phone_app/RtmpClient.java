@@ -39,107 +39,6 @@ import java.util.Timer;
 public class RtmpClient extends AbstractRtmpClient {
 
     /**
-     * Create new RtmpClient instance, see AbstractRtmpClient constructor
-     *
-     * @param login
-     * @param pwd
-     * @param client
-     * @param sipProviderAddress
-     * @param sipProviderPort
-     * @param visibleName
-     * @param regRequired
-     * @param appName
-     * @param mode
-     */
-    public RtmpClient(String login, String pwd, IClient client, String sipProviderAddress, int sipProviderPort, String visibleName, boolean regRequired, String appName, String mode) {
-        super(login, pwd, client, sipProviderAddress, sipProviderPort, visibleName, regRequired, appName, mode);
-    }
-
-    public RtmpClient(String login, String pwd, IClient client, String sipProviderAddress, int sipProviderPort, String visibleName, boolean regRequired, String appName, String mode, Integer width, Integer height) {
-        super(login, pwd, client, sipProviderAddress, sipProviderPort, visibleName, regRequired, appName, mode, width, height);
-    }
-
-    public RtmpClient(String login, String pwd, IClient client, String sipProviderAddress, int sipProviderPort, String visibleName, boolean regRequired, String appName, String mode, Integer width, Integer height, String supportedResolutions) {
-        super(login, pwd, client, sipProviderAddress, sipProviderPort, visibleName, regRequired, appName, mode, width, height, supportedResolutions);
-    }
-
-    public RtmpClient(String login, String authenticationName, String pwd, IClient client, String sipProviderAddress, int sipProviderPort, String visibleName, boolean regRequired, String appName, String mode, Integer width, Integer height, String supportedResolutions) {
-        super(login, pwd, client, sipProviderAddress, sipProviderPort, visibleName, regRequired, appName, mode, width, height, supportedResolutions);
-        setAuthenticationName(authenticationName);
-    }
-
-    /**
-     * Create new RtmpClient instance, see AbstractRtmpClient constructor
-     *
-     * @param login
-     * @param pwd
-     * @param client
-     * @param regRequired
-     * @param appName
-     * @param mode
-     */
-    public RtmpClient(String login, String pwd, IClient client, boolean regRequired, String appName, String mode) {
-        super(login, pwd, client, regRequired, appName, mode);
-    }
-
-    /**
-     * Create new RtmpClient instance, see AbstractRtmpClient constructor
-     *
-     * @param login
-     * @param pwd
-     * @param client
-     * @param appName
-     * @param mode
-     */
-    public RtmpClient(final String login, final String pwd,
-                      final IClient client, final String appName, String mode) {
-        super(login, pwd, client, appName, mode);
-    }
-
-    /**
-     * Create new RtmpClient instance, see AbstractRtmpClient constructor
-     *
-     * @param login
-     * @param pwd
-     * @param regRequired
-     * @param appName
-     * @param mode
-     */
-    public RtmpClient(final String login, final String pwd,
-                      final boolean regRequired, final String appName, String mode) {
-        super(login, pwd, regRequired, appName, mode);
-    }
-
-    /**
-     * Create new RtmpClient instance, see AbstractRtmpClient constructor
-     *
-     * @param login
-     * @param pwd
-     * @param appName
-     * @param mode
-     */
-    public RtmpClient(final String login, final String pwd, final String appName, String mode) {
-        super(login, pwd, appName, mode);
-    }
-
-    /**
-     * Use this constructor as super(...) in extended classes
-     *
-     * @param login              sip login for VoIP server
-     * @param authenticationName sip authentication name
-     * @param pwd                sip password
-     * @param sipProviderAddress sip provider registrar or proxy server
-     * @param sipProviderPort    sip provider port
-     * @param visibleName        visible name of caller
-     * @param regRequired        required register on VoIP server
-     * @param appName            Woza server side application name
-     * @param mode               "flashphoner" or "click2call" mode
-     */
-    public RtmpClient(String login, String authenticationName, String pwd, IClient client, String sipProviderAddress, int sipProviderPort, String visibleName, boolean regRequired, String appName, String mode) {
-        super(login, authenticationName, pwd, client, sipProviderAddress, sipProviderPort, visibleName, regRequired, appName, mode);
-    }
-
-    /**
      * @param rtmpClientConfig config contains all parameters for the instance creation
      * @param iClient
      */
@@ -175,7 +74,7 @@ public class RtmpClient extends AbstractRtmpClient {
      */
     public void incommingCall(ISoftphoneCall call) {
         Logger.logger.info(4, "RtmpClient.incommingCall() " + call.getId());
-        streamStart(login, call.getId());
+        streamStart(rtmpClientConfig.getLogin(), call.getId());
     }
 
 
@@ -299,7 +198,7 @@ public class RtmpClient extends AbstractRtmpClient {
     public ISoftphoneCall call(final String caller, final String callee, final String visibleName, final Boolean isVideoCall) throws SoftphoneException, LicenseRestictionException {
         Logger.logger.info(4, "RtmpClient.call() " + callee);
         ISoftphoneCall call = getSoftphone().call(caller, callee, visibleName, isVideoCall);
-        streamStart(login, call.getId());
+        streamStart(rtmpClientConfig.getLogin(), call.getId());
         return call;
     }
 
@@ -317,7 +216,7 @@ public class RtmpClient extends AbstractRtmpClient {
     public ISoftphoneCall call(final String caller, final String callee, final String visibleName, final Boolean isVideoCall, Map<String, String> inviteParameters) throws SoftphoneException, LicenseRestictionException {
         Logger.logger.info(4, "RtmpClient.call() " + callee);
         ISoftphoneCall call = getSoftphone().call(caller, callee, visibleName, isVideoCall, inviteParameters);
-        streamStart(login, call.getId());
+        streamStart(rtmpClientConfig.getLogin(), call.getId());
         return call;
     }
     /**

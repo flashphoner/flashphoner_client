@@ -27,6 +27,7 @@ import com.wowza.wms.module.IModuleOnApp;
 import com.wowza.wms.module.IModuleOnConnect;
 import com.wowza.wms.module.ModuleBase;
 import com.wowza.wms.request.RequestFunction;
+import gov.nist.javax.sip.SIPConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -146,7 +147,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         IRtmpClient rtmpClient;
         String token = obj.getString("token");
         String sipProviderAddress;
-        String outboundProxy = Config.getInstance().getProperty("outbound_proxy");
+
         String auto_login_url = ClientConfig.getInstance().getProperty("auto_login_url");
         String authenticationName = obj.getString("authenticationName");
         String login = obj.getString("login");
@@ -154,11 +155,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String visibleName = obj.getString("visibleName");
         int sipProviderPort;
         if (login != null && password != null) {
-            if (outboundProxy == null || "".equals(outboundProxy)) {
-                sipProviderAddress = obj.getString("sipProviderAddress");
-            } else {
-                sipProviderAddress = outboundProxy;
-            }
+            sipProviderAddress = obj.getString("sipProviderAddress");
             if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
                 client.rejectConnection();
                 return;
@@ -166,7 +163,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             try {
                 sipProviderPort = Integer.parseInt(obj.getString("sipProviderPort"));
             } catch (NumberFormatException ex) {
-                sipProviderPort = 5060;
+                sipProviderPort = SIPConstants.DEFAULT_PORT;
             }
         } else {
             if (auto_login_url == null) {
@@ -244,11 +241,8 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
             visibleName = el.getAttribute("visible_name");
 
-            if (outboundProxy == null || "".equals(outboundProxy)) {
-                sipProviderAddress = el.getAttribute("sip_server");
-            } else {
-                sipProviderAddress = outboundProxy;
-            }
+            sipProviderAddress = el.getAttribute("sip_server");
+
             if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
                 Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
                 client.rejectConnection();
@@ -258,17 +252,16 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
             String sipProviderPortString = el.getAttribute("sip_port");
             if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
-                sipProviderPort = 5060;
+                sipProviderPort = SIPConstants.DEFAULT_PORT;
             } else {
                 try {
                     sipProviderPort = Integer.parseInt(sipProviderPortString);
                 } catch (NumberFormatException ex) {
-                    sipProviderPort = 5060;
+                    sipProviderPort = SIPConstants.DEFAULT_PORT;
                 }
             }
         }
         Logger.logger.info(4, "sipProviderAddress - " + sipProviderAddress);
-        Logger.logger.info(4, "outboundProxy - " + outboundProxy);
 
         if (visibleName == null || "".equals(visibleName)) {
             visibleName = login;
@@ -295,13 +288,13 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         rtmpClient = new RtmpClient(config, client);
 
         AMFDataObj amfDataObj = new AMFDataObj();
-        amfDataObj.put("login", rtmpClient.getLogin());
-        if (rtmpClient.getAuthenticationName() != null) {
-            amfDataObj.put("authenticationName", rtmpClient.getAuthenticationName());
+        amfDataObj.put("login", config.getLogin());
+        if (config.getAuthenticationName() != null) {
+            amfDataObj.put("authenticationName", config.getAuthenticationName());
         }
-        amfDataObj.put("password", rtmpClient.getPassword());
-        amfDataObj.put("sipProviderAddress", rtmpClient.getSipProviderAddress());
-        amfDataObj.put("sipProviderPort", rtmpClient.getSipProviderPort());
+        amfDataObj.put("password", config.getPassword());
+        amfDataObj.put("sipProviderAddress", config.getSipProviderAddress());
+        amfDataObj.put("sipProviderPort", config.getSipProviderPort());
         amfDataObj.put("regRequired", regRequired);
         client.call("getUserData", null, amfDataObj);
 
@@ -329,7 +322,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         IRtmpClient rtmpClientByClient = getRtmpClients().findByClient(client);
         if (rtmpClientByClient != null) {
-            Logger.logger.info(4, "Shutdown RtmpClient: " + rtmpClientByClient.getLogin());
+            Logger.logger.info(4, "Shutdown RtmpClient: " + rtmpClientByClient.getRtmpClientConfig().getLogin());
             IRtmpClient rtmpClient = getRtmpClients().remove(rtmpClientByClient);
             ISoftphone softphone = rtmpClient.getSoftphone();
             if (softphone != null) {
@@ -340,7 +333,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
                 }
             }
             //release sip account in pool
-            Logger.logger.info(4, "Release sip account in pool: " + rtmpClient.getLogin());
+            Logger.logger.info(4, "Release sip account in pool: " + rtmpClient.getRtmpClientConfig().getLogin());
         }
     }
 
@@ -427,7 +420,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         Logger.logger.info(4, "call " + params);
         IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
 
-        String caller = rtmpClient.getLogin();
+        String caller = rtmpClient.getRtmpClientConfig().getLogin();
         String callee = params.getString(PARAM1);
         String visibleName = params.getString(PARAM2);
         Boolean isVideoCall = params.getBoolean(PARAM3);
@@ -450,7 +443,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         if (token != null && !"null".equals(token)) {
             String[] data = getCalleeByToken(token, rtmpClient.getRtmpClientConfig().getSwfUrl(), rtmpClient.getRtmpClientConfig().getPageUrl());
             callee = data[0];
-            visibleName = rtmpClient.getVisibleName();
+            visibleName = rtmpClient.getRtmpClientConfig().getVisibleName();
         }
         if (callee == null || "".equals(callee)) {
             rtmpClient.fail(ErrorCodes.USER_NOT_AVAILABLE, null);
@@ -458,7 +451,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         }
 
         if ((visibleName == null) || (visibleName.length() == 0)) {
-            visibleName = rtmpClient.getLogin();
+            visibleName = rtmpClient.getRtmpClientConfig().getLogin();
         }
 
         ISoftphoneCall call;
