@@ -78,7 +78,8 @@ function trace(funcName, param1, param2, param3) {
     var console = $("#console");
     // Check if console is scrolled down? Or may be you are reading previous messages.
     var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37); 
-
+    
+    
     // Check if we set params and set it ????? instead of 'undefined' if not, also set dividers equal to ', ' 
     if (typeof param1 == 'undefined') {param1 = '';}
     if (typeof param2 == 'undefined') {param2 = '';} else {var div1 = ', ';}
@@ -141,13 +142,12 @@ function logoff() {
 }
 
 function call() {
-    trace("call");
+    trace("call", callee1);
     if (isLogged) {
         if (isMuted() == 1) {
             intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);call();}', 500);
             requestUnmute();
         } else if (isMuted() == -1){
-            //var result = flashphoner.call(getElement('calleeText').value, 'Caller', false, testInviteParameter);
             var result = flashphoner.call(callee1, 'Caller', false, testInviteParameter);
             if (result == 0) {
                 toHangupState();
@@ -198,7 +198,7 @@ function setStatusHold(callId, isHold) {
 
 function transfer(callId, target) {
     trace("transfer", callId, target);
-    flashphoner.transfer(callId, target);
+    flashphoner.transfer(callId,target);
 }
 
 function isMuted() {
@@ -323,7 +323,7 @@ function notifyBalance(balance) {
 }
 
 function notify(call) {
-    trace("notify", call); //: callId " + call.id + " --- " + call.anotherSideUser);
+    trace("notify", call.id, call.anotherSideUser);
     if (currentCall.id == call.id) { //if we have some call now and notify is about exactly our call
         currentCall = call;
         if (call.state == STATE_FINISH) {
@@ -364,7 +364,7 @@ function notify(call) {
 }
 
 function notifyCallbackHold(call, isHold) {
-    trace("notifyCallbackHold", call, isHold);//callId - " + call.id + "; isHold - " + isHold);
+    trace("notifyCallbackHold", call.id, isHold);
     if (currentCall != null && currentCall.id == call.id) {
         currentCall = call;
         if (call.iHolded) {
@@ -452,7 +452,7 @@ function notifyOpenVideoView(isViewed){
 }
 
 function notifyMessage(messageObject) {
-    trace('notifyMessage', messageObject);//messageObject.from + ': ' + messageObject.body);
+    trace('notifyMessage', messageObject.from, messageObject.body);
     openChatView();
 
     //if (messageObject.from == $('#callerLogin').html()) {
@@ -474,7 +474,7 @@ function notifyMessage(messageObject) {
 }
 
 function notifyAddCall(call) {
-    trace("notifyAddCall", call); // call.id, call.anotherSideUser
+    trace("notifyAddCall", call.id, call.anotherSideUser);
 
     if (currentCall != null && call.incoming == true) {
         hangup(call.id);
@@ -515,7 +515,7 @@ function removeCallView(call) {
 
 
 function notifyRemoveCall(call) {
-    trace("notifyRemoveCall", call); // call.id
+    trace("notifyRemoveCall", call.id);
     if (currentCall != null && currentCall.id == call.id) {
         currentCall = null;
         removeCallView(call)
@@ -531,15 +531,14 @@ function notifyVersion(version){
 
 function toLogState() {
     trace("toLogState");
-    $('#loginMainButton').val('Log out');
-    $("#callerLogin").show().html(callerLogin);
     $("#loginMainButton").hide();
+    $("#callerLogin").show().html(callerLogin);
 }
 
 function toLogOffState() {
     trace("toLogOffState");
-    $('#loginMainButton').val('Log in');
-    $('#callerLogin').html('');
+    $("#loginMainButton").show();
+    $('#callerLogin').hide().html('');
 }
 
 function toHangupState() {
@@ -604,7 +603,7 @@ function closeLoginView() {
 }
 
 function openConnectingView(str, timeout) {
-    trace("openConnectingView: message - " + str + "; timeout - " + timeout);
+    trace("openConnectingView", str, timeout);
    	if (timeout != 0) {
         window.setTimeout("closeConnectingView();", timeout);
     }
@@ -630,7 +629,7 @@ function closeInfoView() {
 }
 
 function openIncomingView(call) {
-    trace("openIncomingView", call)// call.caller, call.visibleNameCaller
+    trace("openIncomingView", call.caller, call.visibleNameCaller);
     $('#incomingDiv').show();
     $('#callerField').html(call.caller + " '" + call.visibleNameCaller + "'");
     
@@ -717,11 +716,6 @@ function closeCallView() {
 /* ----- TRANSFER ----- */
 function openTransferView(call) {
     trace("openTransferView");
-    $('#transferOk').click(function() {
-        transfer(currentCall.id, $('#transferInput').val());
-        closeTransferView();
-    });
-
     if (call.state != STATE_HOLD) {
         setStatusHold(call.id, true);
     }
@@ -867,7 +861,7 @@ function close(element) {
 
 /* --------------------- On document load we do... ------------------ */
 $(function() {
-
+    
     // open login view
     $("#loginMainButton").click(function() {
       openLoginView();
@@ -897,10 +891,12 @@ $(function() {
 
     //Bind click on different buttons
     $("#callButton").click(function() {
-        if ($("#callButton").html() == 'Call') {
-            call();
-        } else {
-            hangup(currentCall.id);
+        if (! $(this).hasClass('disabled')) {
+          if ($("#callButton").html() == 'Call') {
+              call();
+          } else {
+              hangup(currentCall.id);
+          }
         }
     });
 
@@ -978,7 +974,7 @@ $(function() {
 
     // this function set changing in button styles when you press any button
     $(".button").mousedown(function() {
-      $(this).addClass('pressed');
+      if (! $(this).hasClass('disabled')) {$(this).addClass('pressed');}
     }).mouseup(function() {
       $(this).removeClass('pressed');
     }).mouseout(function() {
@@ -1033,6 +1029,10 @@ $(function() {
       }
 		});
 
-
+    // Transfer ok button make transfer
+    $('#transferOk').click(function() {
+      transfer(currentCall.id, $('#transferInput').val());
+      closeTransferView();  
+    });
 
 });
