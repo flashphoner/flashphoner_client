@@ -71,7 +71,7 @@ public class RtmpClients implements IRtmpClientsCollection {
         synchronized (rtmpClients) {
             while (it.hasNext()) {
                 IRtmpClient rtmpClient = rtmpClients.get(it.next());
-                if (rtmpClient.getLogin().equals(login)) {
+                if (rtmpClient.getRtmpClientConfig().getLogin().equals(login)) {
                     return rtmpClient;
                 }
             }

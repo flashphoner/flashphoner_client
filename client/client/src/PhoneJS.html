@@ -40,35 +40,58 @@
       -->
       <input id="auto_login_token" type="submit" value=""/> 
       
-      <div id="loggedUserDiv"></div>
-      <input id="loginMainButton" class="login_link" value="Log in" type="submit"/>
-      
-      <input class="phone_screen_1" id="calleeText" value="" />
+      <div id="controlPanel">
+        <!--
+        <div class="iconButton" id="settingsButton"></div>
+        <div class="iconButton" id="cameraButtonInCallee"></div>
+        -->
+        <div id="micBack"><div id="micSlider"></div></div>
+        <div id="speakerBack"><div id="speakerSlider"></div></div>        
+
+        <div class="iconButton" id="micButton"></div>
+        <div class="iconButton" id="soundButton"></div>
+        <div class="iconButton" id="cameraButton"></div>
+
+        <div id="loginMainButton" class="button">Log in</div>
+        <div id="callerLogin"></div>
+        <div id="logoutButton" class="button">Log out</div>          
+      </div>
+
+      <input class="phone_screen_1" id="calleeText" value=""/>
       <div class="phone_screen_2"></div>  
        
-      <input class="chat_button" id="chatButton" type="submit" value="Chat" />
-      <input class="call_button" id="callButton" type="submit" value="Call" />
-      <input class="button numberButton" type="submit" value="1" />
-      <input class="button numberButton" type="submit" value="2" />
-      <input class="button numberButton" type="submit" value="3" />
-      <input class="button numberButton" type="submit" value="4" />
-      <input class="button numberButton" type="submit" value="5" />
-      <input class="button numberButton" type="submit" value="6" />
-      <input class="button numberButton" type="submit" value="7" />
-      <input class="button numberButton" type="submit" value="8" />
-      <input class="button numberButton" type="submit" value="9" />
-      <input class="button numberButton" type="submit" value="*" />
-      <input class="button numberButton" type="submit" value="0" />
-      <input class="button numberButton" type="submit" value="#" />
-	  
-      <div id="settingsButton" class="iconButton"></div>
-      <div id="cameraButtonInCallee" class="iconButton"></div>
-  
-	  <div id="versionOfProduct"></div>
-</div>
-<!-- *********** -->
+      <div class="buttonLine">
+        <div class="button chat" id="chatButton">Chat</div>
+        <div class="button call" id="callButton">Call</div>
+      </div>  
+      
+      <div class="buttonLine"> 
+        <div class="button numberButton">1</div>
+        <div class="button numberButton">2</div>
+        <div class="button numberButton">3</div>
+      </div>
+            
+      <div class="buttonLine"> 
+        <div class="button numberButton">4</div>
+        <div class="button numberButton">5</div>
+        <div class="button numberButton">6</div>
+      </div>
+            
+      <div class="buttonLine"> 
+        <div class="button numberButton">7</div>
+        <div class="button numberButton">8</div>
+        <div class="button numberButton">9</div>
+      </div>
 
-<!-- Login view -->
+      <div class="buttonLine">       
+        <div class="button numberButton">*</div>
+        <div class="button numberButton">0</div>
+        <div class="button numberButton">#</div>
+      </div>      
+      
+	  <div id="versionOfProduct"></div>
+	  
+	  <!-- Login view -->
 <div id="loginDiv">
   <div class="bar">&nbsp;&nbsp;Login</div>
   
@@ -87,20 +110,19 @@
   <div class="login_label">Port</div>
   <div class="login_input"><input type="text" id="port" /></div>
   
-  <input id="loginButton" class="button" type="submit" value="Log in" />
-  <input id="canselLoginDiv" class="button" type="submit" value="Cancel" style="width: 80px; margin: 10px 0 0 6px;" />
+  <div id="loginButton" class="button">Log in</div>
+  <div id="canselLoginDiv" class="button" style="width: 80px; margin: 10px 0 0 6px;">Cansel</div>
   <div class="closeButton"></div>
 </div>
 <!-- ************* -->
-
 
 <!-- Incoming call view -->
 <div id="incomingDiv">
   <div class="bar">&nbsp;&nbsp;Incoming call</div>  
   <div id="callerField">Caller</div>
   calls you
-  <input class="button" id="answerButton" type="submit" value="Answer" />
-  <input class="button" id="hangupButton" type="submit" value="Hangup" />
+  <div class="button call" id="answerButton">Answer</div>
+  <div class="button hangup" id="hangupButton">Hangup</div>
   <div class="closeButton"></div>
 </div>
 <!-- ******************* -->
@@ -131,51 +153,13 @@
 </div>
 <!-- *************************** -->
 
-<!-- Settings view -->
-<div id="settingsDiv">
-  <div class="bar">&nbsp;&nbsp;Settings</div>
-	<br />
-	
-  <script type="text/javascript">
-		trackbar.getObject('micVolume').init({
-			onMove : function() {
-				micVolume = this.leftValue;	
-			},
-			dual : false, // two intervals
-			width : 150, // px
-			leftValue : 50, // unit of value
-			rightLimit : 100, // unit of value
-			rightValue : 0 // unit of value
-		});
-	</script>
-
-	<script type="text/javascript">
-		trackbar.getObject('speakerVolume').init({
-			onMove : function() {
-				speakerVolume = this.leftValue;	
-			},
-			dual : false, // two intervals
-			width : 150, // px
-			leftValue : 50, // unit of value
-			rightLimit : 100, // unit of value
-			rightValue : 0 // unit of value
-		});
-	</script>
-	
-  <input id="saveMicSettings" class="button" type="submit" value="Save" style="margin: 13px 0 0 85px; width: 60px;" />
-	<div class="closeButton"></div>
-	
-	
-</div>
-<!-- ************* -->
-
 <!-- Transfer view -->
-<div id="transferDiv">
+<div id="transfer">
   <div class="bar">&nbsp;&nbsp;Transfer</div>
   Transfer this call to
-  <input id="transferDivInput" type="text" />
-  <input id="transferDivButton" class="button" type="submit" value="Ok" />
-  <input id="canselTransferView" class="button" style="width: 80px;" type="submit" value="Cancel" />
+  <input id="transferInput" type="text" />
+  <div id="transferOk" class="button">Ok</div>
+  <div id="transferCansel" class="button">Cansel</div>
   <div class="closeButton"></div>
 </div>
 <!-- ************* -->
@@ -190,20 +174,20 @@
 <!-- ********* -->
 
 <!-- Call view -->
-
 <div id="callDiv" class="callDiv">
-  <div id="settingsButtonInCallView" class="iconButton"></div>
-  <div id="cameraButton" class="iconButton"></div>
-  <div id="micButton" class="iconButton"></div>
-  <div id="soundButton" class="iconButton"></div>
-  
   <div id="caller" class="caller"></div> 
   <div id="callState"></div>
-  
   <div id="transferButton" class="transferButton"></div>
   <div id="holdButton" class="holdButton"></div>
 </div>
 <!-- ********* -->
+	  
+	  
+	  
+</div>
+<!-- *********** -->
+
+
 
 <!-- Console -->
 <div id="console">

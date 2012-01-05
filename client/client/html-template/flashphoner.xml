@@ -15,8 +15,8 @@
 	<rtmp_server>rtmp://87.226.225.59:1935</rtmp_server>
 	<register_required>true</register_required>
 	<application>phone_app</application>
-	<video_width>176</video_width>
-	<video_height>144</video_height>
+	<video_width>640</video_width>
+	<video_height>480</video_height>
 	<check_validation_callee>true</check_validation_callee>
 	<use_enhanced_mic>true</use_enhanced_mic>
 	<ring_sound></ring_sound>
