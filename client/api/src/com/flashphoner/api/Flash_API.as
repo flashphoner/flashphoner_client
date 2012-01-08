@@ -318,9 +318,9 @@ package com.flashphoner.api
 		 * @param username sip format username (example: sip:...)
 		 * @param password Password for user
 		 **/
-		public function login(username:String,password:String,authenticationName:String = null):int{
+		public function login(username:String, password:String, authenticationName:String, outboundProxy:String, port:String):int{
 			videoControl.init();
-			return phoneServerProxy.login(username,password,authenticationName);							
+			return phoneServerProxy.login(username, password, authenticationName, outboundProxy, port);							
 		}
 		
 		/**

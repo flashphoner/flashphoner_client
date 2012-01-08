@@ -12,7 +12,7 @@ Contributors:
 This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 -->
 <mx:Panel xmlns:ctrl="com.flashphoner.*" 
-	xmlns:mx="http://www.adobe.com/2006/mxml" width="220" height="206" creationComplete="init()" layout="absolute" borderStyle="solid" cornerRadius="0" borderThickness="1" borderColor="#9D9D9D">
+	xmlns:mx="http://www.adobe.com/2006/mxml" width="220" height="222" creationComplete="init()" layout="absolute" borderStyle="solid" cornerRadius="0" borderThickness="1" borderColor="#9D9D9D">
 	
 	<mx:Script>
 		<![CDATA[
@@ -31,42 +31,41 @@ This code and accompanying materials also available under LGPL and MPL license f
 
 				var flash_API:Flash_API = DataPhone.getInstance().flash_API;
 			
-				this.sipLogin.text = flash_API.getCookie("login");
-				this.sipAuthName.text = flash_API.getCookie("authName");
-				this.sipPassword.text = flash_API.getCookie("pwd");
-				this.sipProviderAddress.text = flash_API.getCookie("sipProviderAddress");
-				this.sipProviderPort.text = flash_API.getCookie("sipProviderPort");
+				this.username.text = flash_API.getCookie("username");
+				this.authName.text = flash_API.getCookie("authName");
+				this.password.text = flash_API.getCookie("pwd");
+				this.domain.text = flash_API.getCookie("domain");
+				this.outboundProxy.text = flash_API.getCookie("outboundProxy");
+				this.port.text = flash_API.getCookie("port");
 				
-				this.sipLogin.addEventListener(Event.CHANGE,changeLoginHandler);
+				this.username.addEventListener(Event.CHANGE,changeLoginHandler);
 			}
 			
 			private function changeLoginHandler(event:Event):void{
-				sipAuthName.text = sipLogin.text;
+				authName.text = username.text;
 			}
 			
 			
 			private function login(event:MouseEvent):void{
-				
-				Logger.info("SipAccountView.login() login: "+sipLogin.text+" password: "+sipPassword.text+" phoneModel.sipServer: "+sipProviderAddress.text+" phoneModel.sipProviderPort: "+sipProviderPort.text);
-				
-				if ((sipLogin.text==null)||(sipLogin.text.length==0)||(sipPassword.text==null)||(sipPassword.text.length==0)||(sipProviderAddress.text==null)||(sipProviderAddress.text.length==0)||(sipProviderPort.text==null)||(sipProviderPort.text.length==0)){
+				if ((username.text==null)||(username.text.length==0)||(password.text==null)||(password.text.length==0)||(domain.text==null)||(domain.text.length==0)||(port.text==null)||(port.text.length==0)){
 					mx.controls.Alert.show("All field are required!");
 					return;
 				}
 				
 				DataPhone.getInstance().viewController.showConnectingView();
-				if (DataPhone.getInstance().flash_API.login("sip:"+sipLogin.text+"@"+sipProviderAddress.text+":"+sipProviderPort.text, sipPassword.text, sipAuthName.text) == 0){
+				if (DataPhone.getInstance().flash_API.login("sip:"+username.text+"@"+domain.text, password.text, authName.text, outboundProxy.text, port.text) == 0){
 					save();
 				}
 			}
 			
 			private function save():void{
 				var flash_API:Flash_API = DataPhone.getInstance().flash_API;
-				flash_API.setCookie("login",sipLogin.text);
-				flash_API.setCookie("authName",sipAuthName.text);
-				flash_API.setCookie("pwd",sipPassword.text);
-				flash_API.setCookie("sipProviderAddress",sipProviderAddress.text);
-				flash_API.setCookie("sipProviderPort",sipProviderPort.text);
+				flash_API.setCookie("username",username.text);
+				flash_API.setCookie("authName",authName.text);
+				flash_API.setCookie("pwd",password.text);
+				flash_API.setCookie("domain",domain.text);
+				flash_API.setCookie("ouboundProxy",outboundProxy.text);
+				flash_API.setCookie("port",port.text);
 
 			}			
 			
@@ -77,19 +76,21 @@ This code and accompanying materials also available under LGPL and MPL license f
 		]]>
 	</mx:Script>
 	
-	<mx:TextInput id="sipLogin" x="75.95" y="11" width="138.05" text="Sip Login" fontSize="12" height="24" color="#5A5A5A" borderColor="#B7BABC" borderStyle="solid"/>
-	<mx:TextInput id="sipAuthName" x="75.95" y="39" width="138.05" text="Sip Auth Name" height="24" fontSize="12" color="#5A5A5A" borderStyle="solid"/>
-	<mx:TextInput id="sipPassword" displayAsPassword="true" x="75.95" y="67" width="138.05" text="mySipPassword" height="24" fontSize="12" color="#5A5A5A" borderStyle="solid"/>
-	<mx:TextInput id="sipProviderAddress" x="75.95" y="95" width="138.05" text="127.0.0.1" fontSize="12" height="24" color="#5A5A5A" borderStyle="solid"/>
-	<mx:TextInput id="sipProviderPort" x="75.95" y="122" width="138.05" text="5060" fontSize="12" height="24" color="#5A5A5A" borderStyle="solid"/>
+	<mx:TextInput id="username" x="75.95" y="11" width="138.05" text="Sip Login" fontSize="12" height="24" color="#5A5A5A" borderColor="#B7BABC" borderStyle="solid"/>
+	<mx:TextInput id="authName" x="75.95" y="39" width="138.05" text="Sip Auth Name" height="24" fontSize="12" color="#5A5A5A" borderStyle="solid"/>
+	<mx:TextInput id="password" x="75.95" y="67" width="138.05" text="mySipPassword" height="24" fontSize="12" color="#5A5A5A" borderStyle="solid" displayAsPassword="true"/>
+	<mx:TextInput id="domain" x="75.95" y="95" width="138.05" text="127.0.0.1" fontSize="12" height="24" color="#5A5A5A" borderStyle="solid"/>
+	<mx:TextInput id="outboundProxy" x="75.95" y="122" width="138.05" text="5060" fontSize="12" height="24" color="#5A5A5A" borderStyle="solid"/>
+	<mx:TextInput id="port" x="75.95" y="151" width="138.05" text="5060" fontSize="12" height="24" color="#5A5A5A" borderStyle="solid"/>
 	
 	<mx:Label x="10" y="14" text="Login" fontSize="12" color="#000000"/>
 	<mx:Label x="10" y="42" text="Auth Name" fontSize="12" color="#000000"/>
 	<mx:Label x="8" y="68" text="Password" fontSize="12" color="#000000"/>
-	<mx:Label x="9" y="100" text="Server" fontSize="12" color="#000000"/>
-	<mx:Label x="9" y="128" text="Port" fontSize="12" color="#000000"/>
-	<mx:Button id="loginButton" x="48" y="170" label="Login" fontSize="16" width="60" height="24" borderColor="#009800" themeColor="#009800" fillAlphas="[1.0, 1.0]" fillColors="[#39AF39, #109F10, #45D045, #17C917]" color="#FFFFFF" cornerRadius="3" fontWeight="bold"/>
-	<mx:Button x="116" y="170" label="Cancel" click="close();" fontSize="16" width="60" height="24" borderColor="#009800" themeColor="#009800" fillAlphas="[1.0, 1.0]" fillColors="[#39AF39, #109F10, #45D045, #17C917]" color="#FFFFFF" cornerRadius="3" fontWeight="bold"/>
+	<mx:Label x="9" y="100" text="Domain" fontSize="12" color="#000000"/>
+	<mx:Label x="9" y="128" text="Outbound" fontSize="12" color="#000000"/>
+	<mx:Label x="9" y="156" text="Port" fontSize="12" color="#000000"/>
+	<mx:Button id="loginButton" x="48" y="187" label="Login" fontSize="16" width="60" height="24" borderColor="#009800" themeColor="#009800" fillAlphas="[1.0, 1.0]" fillColors="[#39AF39, #109F10, #45D045, #17C917]" color="#FFFFFF" cornerRadius="3" fontWeight="bold"/>
+	<mx:Button x="116" y="187" label="Cancel" click="close();" fontSize="16" width="60" height="24" borderColor="#009800" themeColor="#009800" fillAlphas="[1.0, 1.0]" fillColors="[#39AF39, #109F10, #45D045, #17C917]" color="#FFFFFF" cornerRadius="3" fontWeight="bold"/>
 		
 		
 </mx:Panel>

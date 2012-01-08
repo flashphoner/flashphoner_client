@@ -147,24 +147,32 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         IRtmpClient rtmpClient;
         String token = obj.getString("token");
-        String sipProviderAddress;
+        String outboundProxy;
+        String domain = null;
+        int port;
 
         String auto_login_url = ClientConfig.getInstance().getProperty("auto_login_url");
         String authenticationName = obj.getString("authenticationName");
         String login = obj.getString("login");
         String password = obj.getString("password");
         String visibleName = obj.getString("visibleName");
-        int sipProviderPort;
+
         if (login != null && password != null) {
-            sipProviderAddress = obj.getString("sipProviderAddress");
-            if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
+            outboundProxy = obj.getString("outboundProxy");
+            if (outboundProxy == null || "".equals(outboundProxy)) {
                 client.rejectConnection();
                 return;
             }
+
+            domain = obj.getString("domain");
+            if (domain == null || "".equals(domain)) {
+                domain = outboundProxy;
+                return;
+            }
             try {
-                sipProviderPort = Integer.parseInt(obj.getString("sipProviderPort"));
+                port = Integer.parseInt(obj.getString("port"));
             } catch (NumberFormatException ex) {
-                sipProviderPort = SIPConstants.DEFAULT_PORT;
+                port = SIPConstants.DEFAULT_PORT;
             }
         } else {
             if (auto_login_url == null) {
@@ -221,48 +229,48 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
             Element el = dom.getDocumentElement();
 
-            String temp = el.getAttribute("auth");
+            String temp = el.getAttribute("registered");
             if (!(temp == null || "".equals(temp))) {
                 regRequired = Boolean.parseBoolean(temp);
             }
 
-            temp = el.getAttribute("sip_auth_name");
+            temp = el.getAttribute("authenticationName");
             if (!(temp == null || "".equals(temp))) {
                 authenticationName = temp;
             }
 
-            login = el.getAttribute("sip_login");
+            login = el.getAttribute("login");
             if (login == null || "".equals(login)) {
                 Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
             }
-            password = el.getAttribute("sip_password");
+            password = el.getAttribute("password");
             if (password == null || "".equals(password)) {
                 Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
             }
 
-            visibleName = el.getAttribute("visible_name");
+            visibleName = el.getAttribute("visibleName");
 
-            sipProviderAddress = el.getAttribute("sip_server");
+            outboundProxy = el.getAttribute("outboundProxy");
 
-            if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
+            if (outboundProxy == null || "".equals(outboundProxy)) {
                 Logger.logger.error("ERROR - '" + response.toString() + "' has wrong format;");
                 client.rejectConnection();
                 client.setShutdownClient(true);
                 return;
             }
 
-            String sipProviderPortString = el.getAttribute("sip_port");
-            if (sipProviderAddress == null || "".equals(sipProviderAddress)) {
-                sipProviderPort = SIPConstants.DEFAULT_PORT;
+            String portString = el.getAttribute("port");
+            if (portString == null || "".equals(portString)) {
+                port = SIPConstants.DEFAULT_PORT;
             } else {
                 try {
-                    sipProviderPort = Integer.parseInt(sipProviderPortString);
+                    port = Integer.parseInt(portString);
                 } catch (NumberFormatException ex) {
-                    sipProviderPort = SIPConstants.DEFAULT_PORT;
+                    port = SIPConstants.DEFAULT_PORT;
                 }
             }
         }
-        Logger.logger.info(4, "sipProviderAddress - " + sipProviderAddress);
+        Logger.logger.info(4, "outboundProxy - " + outboundProxy);
 
         if (visibleName == null || "".equals(visibleName)) {
             visibleName = login;
@@ -272,8 +280,10 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         config.setLogin(login);
         config.setAuthenticationName(authenticationName);
         config.setPassword(password);
-        config.setSipProviderAddress(sipProviderAddress);
-        config.setSipProviderPort(sipProviderPort);
+        config.setDomain(domain);
+        config.setOutboundProxy(outboundProxy);
+        config.setPort(port);
+
         config.setVisibleName(visibleName);
         config.setRegRequired(regRequired);
         config.setApplicationName(APPLICATION_NAME);
@@ -294,8 +304,8 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             amfDataObj.put("authenticationName", config.getAuthenticationName());
         }
         amfDataObj.put("password", config.getPassword());
-        amfDataObj.put("sipProviderAddress", config.getSipProviderAddress());
-        amfDataObj.put("sipProviderPort", config.getSipProviderPort());
+        amfDataObj.put("outboundProxy", config.getOutboundProxy());
+        amfDataObj.put("port", config.getPort());
         amfDataObj.put("regRequired", regRequired);
         client.call("getUserData", null, amfDataObj);
 
