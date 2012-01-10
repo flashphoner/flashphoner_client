@@ -316,7 +316,7 @@ function notifyVideoFormat(call) {
         var newHeight = 320 * proportion;
         $('.video').height(newHeight);
         $('#jsSWFDiv').height(newHeight).width(320);
-        //$('#c2c').height(newHeight+40);
+        //$('.c2c').height(newHeight+40);
     }
 }
 
@@ -410,7 +410,7 @@ function openVideoView(size) {
     trace("openVideoView", size);
     viewVideo();
     $('#cameraButton').addClass('pressed');
-    // if we already give access to devices when trying to open video view
+    // if we already have access to devices when trying to open video view
     if (isMuted() == -1){
 
       // show send my video button
@@ -423,7 +423,7 @@ function openVideoView(size) {
           var newHeight = 320 * proportion;
           $('.video').height(newHeight);
           $('#jsSWFDiv').height(newHeight).width(320);
-          $('#c2c').height(newHeight+40);
+          $('.c2c').height(newHeight+40);
       } else if (size == 'small') {
         $('#flash').removeClass('init').addClass('videoMy');
         $('#jsSWFDiv').height(240).width(320);
@@ -445,7 +445,7 @@ function closeVideoView() {
     // turn flash div back to init size
     $('#flash').removeClass().removeAttr('style').addClass('init');
     // turn c2c div back to init size  
-    $('#c2c').height(240);
+    $('.c2c').height(240);
     // hide send video button
     $('.sendVideoButton').hide();
     // unpressed camerabutton
@@ -560,7 +560,7 @@ $(function() {
 
     // call me  button opens new window with click2call
     $("#callMeButton1:not(.disabled)").click(function() {
-      window.open('click2call-test-1.html','_blank','width=340,height=260,resizable=no,toolbar=no,menubar=no,location=no,status=no,scrollbar=no')
+      window.open('click2call-test-1.html','_blank','width=320,height=240,resizable=no,toolbar=no,menubar=no,location=no,status=no,scrollbar=no')
     });     
 
     $("#callMeButton2:not(.disabled)").click(function() {
@@ -599,7 +599,7 @@ $(function() {
     // Depends on situation it can be both video or just my video
     $("#cameraButton").click(function() {
       if ($(this).hasClass('pressed')) {
-        $('.sendVideoButton').show();
+        //$('.sendVideoButton').show();
         if(proportion != 0){
           openVideoView('big');
         } else {

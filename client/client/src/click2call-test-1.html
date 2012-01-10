@@ -36,15 +36,16 @@ This code and accompanying materials also available under LGPL and MPL license f
 <!-- ************* -->
 <title>Click2Call</title>
 </head>
+
 <body>
 
-<div id="c2c">     
+<div class="c2c popup">     
   
   <div id="versionOfProduct"></div>
   
   <div id="caller" class="caller">Support</div>       
   <div id="callState"></div>                
-  
+                  
   <div id="buttonsPanel">
     <div id="soundButton" class="button"></div>         
     <div id="callButton" class="button hangup">Hangup</div>         
@@ -53,28 +54,20 @@ This code and accompanying materials also available under LGPL and MPL license f
     <div id="micButton" class="button"></div>     	     
   
     <!-- ************** Dialpad ************ -->  
-    <div class="dialPad" id="dialPad">  
-    <div class="dialScreen"></div>  
-    <div class="dialButtonLine">   
-      <div class="button dialButton" id="1b">1</div>    
-      <div class="button dialButton" id="2b">2</div>    
-      <div class="button dialButton" id="3b">3</div>  
-    </div>  
-    <div class="dialButtonLine">    
-      <div class="button dialButton" id="4b">4</div>    
-      <div class="button dialButton" id="5b">5</div>    
-      <div class="button dialButton" id="6b">6</div>  
-    </div>  
-    <div class="dialButtonLine">    
-      <div class="button dialButton" id="7b">7</div>    
-      <div class="button dialButton" id="8b">8</div>    
-      <div class="button dialButton" id="9b">9</div>  
-    </div>     
-    <div class="dialButtonLine">       
-      <div class="button dialButton" id="asterisk">*</div>                     
-      <div class="button dialButton" id="0b">0</div>    
-      <div class="button dialButton" id="hash">#</div>  
-    </div>
+    <div class="dialPad" id="dialPad">
+        <div class="dialScreen"></div>  
+        <div class="button dialButton" id="1b">1</div>    
+        <div class="button dialButton" id="2b">2</div>    
+        <div class="button dialButton" id="3b">3</div>
+        <div class="button dialButton" id="1b">4</div>    
+        <div class="button dialButton" id="2b">5</div>    
+        <div class="button dialButton" id="3b">6</div>
+        <div class="button dialButton" id="7b">7</div>    
+        <div class="button dialButton" id="8b">8</div>    
+        <div class="button dialButton" id="9b">9</div>  
+        <div class="button dialButton" id="asterisk">*</div>                     
+        <div class="button dialButton" id="0b">0</div>    
+        <div class="button dialButton" id="hash">#</div>     
     </div>  
          
     <!-- **************** Slider ***************** --> 
@@ -91,7 +84,6 @@ This code and accompanying materials also available under LGPL and MPL license f
 </div>
 <!-- **************** -->
 
-
 <!-- ***** Flash ******* -->
 <div id="flash" class="init">
   <div id="jsSWFDiv">
@@ -107,14 +99,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 
 </div> <!-- end of c2c -->
 
-
-<div id="console" style="display: none;"></div>
-<!-- Product version -->
-
-
-
-
-
+<div id="console" style="visibility: hidden;"></div>
 
 </body>
 </html>

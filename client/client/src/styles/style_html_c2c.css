@@ -16,7 +16,9 @@ Write us support@flashphoner.com with any questions.
 body {
 	font: 12px Arial;
 	margin: 0;
-	background-color: #555;
+	background-color: #eee;
+	overflow: hidden;
+
 }
 img {
 	border: 0;
@@ -39,29 +41,29 @@ background: #fff;
 */
 
 /* --------------  Main click2call view ------------- */
-#c2c {
-	position: absolute;
+.c2c {
 	height: 240px;
 	width: 320px;
 	position: relative;
-	background: #555;
-	border: 1px solid #111;
-	box-shadow: inset 0px 1px 0px #777, 0px 1px 0px #666;
+	background-color: #333;
+	border: 1px solid #aaa;
+	box-shadow: inset 0px 0px 30px #000;
 	top: 10px;
 	left: 10px;
-	/*
-  background: -webkit-gradient(linear, left top, left bottom, from(#666), to(#555));
-	background: -moz-linear-gradient(top, #555, #444);
-	background: -o-linear-gradient(top, #555, #444);
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#555555', endColorstr='#444444');
-  */
-	border-radius: 6px;
+  border: none;
+}
+.popup{
+  top: 0px;
+  left: 0px;
+}
+#result{
+  height: 100px;
 }
 .caller {
 	position: absolute;
 	top: 65px;
 	font: 50px Arial;
-	color: #fff;
+	color: #eee;
 	float: left;
 	text-align: center;
 	width: 100%;
@@ -72,86 +74,69 @@ background: #fff;
 	width: 100%;
 	text-align: center;
 	top: 125px;
-	font: 30px Arial;
+	font: 24px Arial;
 	color: #777;
 	text-shadow: 0 1px black;
 }
 /* ------------ Buttons ------------- */
 #buttonsPanel {
-	height: 40px;
-	/*background: #444;*/
-	border: 1px solid #111;
+	height: 36px;
+	border: 1px solid #aaa;
 	border-right: none;
 	border-left: none;
 	position: absolute;
 	bottom: -1px;
 	width: 320px;
-	box-shadow: inset 0px 1px 0px #777;
-  /*0px 1px 0px #666*/
-	background: -webkit-gradient(linear, left top, left bottom, from(#555), to(#444));
-	background: -moz-linear-gradient(top, #555, #444);
-	background: -o-linear-gradient(top, #555, #444);
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#555555', endColorstr='#444444');
-	border-radius: 0 0 6px 6px;
+	box-shadow: inset 0px 1px 0px #fff;
+	background: #ddd;
 }
 .button {
 	position: absolute;
-	width: 36px;
-	height: 24px;
-	font: 13px Lucida Grande, Lucida Sans Unicode;
-	border: 1px solid #111;
-	color: #aaa;
-	text-shadow: 0px 1px 0 #000;
-	box-shadow: 0px 1px 0px #666, inset 0px 1px 0px #777;
+	width: 42px;
+	height: 36px;
+	border: 1px solid #aaa;
+	color: #333;
+	text-shadow: 0px 1px 0 #fff;
+	box-shadow: inset 0px 1px 0px #fff;
 	text-align: center;
-	border-radius: 6px;
 	cursor: pointer;
-  /* backs */
-	background: -webkit-gradient(linear, left top, left bottom, from(#555), to(#444));
-	background: -moz-linear-gradient(top, #555, #444);
-	background: -o-linear-gradient(top, #555, #444);
-  filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#555555', endColorstr='#444444');
-  line-height: 24px;
   background-position: 55% center;
   background-repeat: no-repeat;
+  font: bold 14px Helvetica, Arial;
+  line-height: 36px;
 }
 
-
 #micButton, #cameraButton, #soundButton, #dialpadButton {
-	top: 8px;
+	top: -1px;
 }
 
 .call, .hangup {
-	border-radius: 12px;
-	color: white;
-	bottom: 7px;
-	left: 92px;
-	width: 134px;
+	bottom: -1px;
+	left: 85px;
+	width: 148px;
 }
 .call {
-	background: -webkit-gradient(linear, left top, left bottom, from(#3b3), to(#0a0));
-	background: -moz-linear-gradient(top, #3b3, #0a0);
-	background: -o-linear-gradient(top, #3b3, #0a0);
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#33bb33', endColorstr='#00aa00');
-	box-shadow: 0px 1px 0px #666, inset 0px 1px 0px #0f0;                                          
-	color: #004400;
+	box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #4DE74D;/*#0d0;*/
 	text-shadow: 0px 1px 0px #0d0;
+	background: -webkit-gradient(linear, left top, left bottom, from(#6ECF6E), to(#4DC34D));
+	background: -moz-linear-gradient(top, #6ECF6E, #4DC34D);
+	background: -o-linear-gradient(top, #6ECF6E, #4DC34D);
+	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#6ECF6E', endColorstr='#4DC34D');
+	border-left-color: #888;
 }
 .hangup {
-	background: -webkit-gradient(linear, left top, left bottom, from(#f33), to(#c00));
-	background: -moz-linear-gradient(top, #f33, #c00);
-	background: -o-linear-gradient(top, #f33, #c00);
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#ff3333', endColorstr='#cc0000');
-	box-shadow: 0px 1px 0px #666, inset 0px 1px 0px #f66;
-	color: #600;
-	text-shadow: 0px 1px 0 #f33;
+	box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #FF9494;/*#f66;*/
+	text-shadow: 0px 1px 0 #f33; 
+	background: -webkit-gradient(linear, left top, left bottom, from(#E16C6C), to(#DB4D4D));
+	background: -moz-linear-gradient(top, #E16C6C, #DB4D4D);
+	background: -o-linear-gradient(top, #E16C6C, #DB4D4D);
+	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#E16C6C', endColorstr='#DB4D4D');	
 }
 .pressed {
-	border-color: #222;
-	border-bottom-color: #666;
-	box-shadow: inset 0px 1px 6px #111;
-	height: 25px;
-	line-height: 29px;
+	border-color: #888;
+	box-shadow: inset 0px 1px 6px #333;
+	line-height: 38px;
+	background-color: #d7d7d7;
 	background-position-y: 63%;
 }
 
@@ -159,21 +144,21 @@ background: #fff;
 	opacity: 0.5;
 }
 #micButton {
-	left: 6px;
-	background-image: url('../assets/c2c_mic.png');
+	left: -1px;
+	background-image: url('../assets/c2c_mic_1.png');
 	bacground-position-x: 50%;
 }
 
 #cameraButton {
-	right: 49px;
-  background-image: url('../assets/c2c_camera.png');
+	right: 42px;
+  background-image: url('../assets/c2c_camera_1.png');
 }
 #soundButton {
-	left: 49px;
-  background-image: url('../assets/c2c_speaker.png');
+	left: 42px;
+  background-image: url('../assets/c2c_speaker_1.png');
 }
 #dialpadButton {
-	right: 6px;
+	right: -1px;
   background-image: url('../assets/c2c_dialpad.png');
 }
 #hangupButton {
@@ -206,111 +191,107 @@ width: 200px;
 height: 200px;
 }
 /* ---------- Dialpad ---------- */
-.dialPad {
-	position: absolute;
-	font: 13px Lucida Grande, Lucida Sans Unicode;
-	border: 1px solid #111;
-	color: #aaa;
-	text-shadow: 0px 1px 0 #000;
-	text-align: center;
-	border-radius: 4px;
-	cursor: pointer;
-  /* backs */
-	background: -webkit-gradient(linear, left top, left bottom, from(#555), to(#444));
-	background: -moz-linear-gradient(top, #555, #444);
-	background: -o-linear-gradient(top, #555, #444);
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#555555', endColorstr='#444444');
-	line-height: 20px;
+.dialPad{
 	width: 129px;
-	height: 152px;
-	bottom: 38px;
-	right: 6px;
-	box-shadow: 0px 0px 10px #222, inset 0px 1px 0px #777;
+	height: 177px;
+	text-align: center;
+	cursor: pointer;
+	line-height: 20px;
+  bottom: 37px;
+	right: 0px;
+	position: absolute;
+	background-color: #ddd;
 	display: none;
+	box-shadow: 0px 0px 20px #000, inset 0px 1px 0px #fff;
 }
 .dialButton {
 	position: relative;
-	margin: 3px 0 0 4px;
+	/*margin: 3px 0 0 4px;*/
 	float: left;
-	color: #ccc;
+	/*color: #ccc;*/
+	margin-right: -1px;
+	margin-bottom: -1px;
 }
 .dialButtonLine {
 	float: left;
-	height: 30px;
+	height: 36px;
 }
 .dialScreen {
-	width: 117px;
-	height: 20px;
+	width: 124px;
+	height: 26px;
 	color: white;
 	text-shadow: none;
 	float: left;
-	margin: 4px 4px 2px 4px;
 	padding: 1px 2px 0 2px;
 	text-align: right;
-	font: bolder 18px Arial;
-	background-color: #000;
-	border-radius: 4px;
+	font: bold 18px Arial;
+	background-color: #DEEEFF;
 	overflow: hidden;
+	border: 1px solid #aaa;
+	border-bottom: none;
+  box-shadow: inset 0px 1px 0px #fff;
 }
 /* ----------------------------- */
 /* ----------- Slider -------------- */
 #micSlider, #speakerSlider {
 	position: absolute;
-	top: -90px;
+	top: -108px;
 	display: none;
 }
 #micBack, #speakerBack {
 /* TODO replace sliders within sliderbackground*/
-	position: absolute;
-	bottom: 38px;
-	width: 27px;
-	height: 102px;
-	background: #555;
-	box-shadow: inset 0px 1px 0px #777, 0px 2px 10px #222;
+  position: absolute;
+	top: -124px;
+	width: 42px;
+	height: 123px;
+	background: #ddd;
 	display: none;
-	border-radius: 4px;
-	border: 1px solid #111;
+	border: 1px solid #aaa;
+	border-top: none;
 }
 #micBack {
-	left: 11px;
+	left: -1px;
 }
 #speakerBack {
-	left: 54px;
+	left: 42px;
 }
 #micSlider {
-	left: 21px;
+	left: 16px;
 }
 #speakerSlider {
-	left: 64px;
+	left: 60px;
 }
 .ui-slider-vertical {
 	width: 7px !important;
-	height: 80px !important;
-	border: 1px solid #222 !important;
-	background-color: #555 !important;
-	box-shadow: inset 0px 0px 3px #111;
+	height: 90px !important;
+  border: 1px solid #999 !important;
+	background-color: #ddd !important;
+	box-shadow: inset 0px 0px 1px #777 !important;
+
 }
 .ui-slider-handle {
-	left: -5px !important;
+	
+  left: -5px !important;
 	border-radius: 10px !important;
 	cursor: pointer !important;
-	border: 1px solid #222 !important;
-	box-shadow: 0px 0px 10px #333;
-	background: -webkit-gradient(linear, left top, left bottom, from(#777), to(#555)) !important;
-	background: -moz-linear-gradient(top, #777, #555) !important;
-	background: -o-linear-gradient(top, #777, #555) !important;
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#555555') !important;
+	border: 1px solid #888 !important;
+	box-shadow: inset 0px 1px 0px #fff, 0px 0px 1px #777;
+	background-color: #dcdcdc !important;
 }
 .ui-slider-handle:focus {
 	outline: none;
 }
 .ui-slider-range {
 	border-radius: 10px !important;
-	box-shadow: inset 2px 0px 5px #0f0;
-	background: -webkit-gradient(linear, left top, left bottom, from(#3b3), to(#0a0)) !important;
-	background: -moz-linear-gradient(top, #3b3, #0a0) !important;
-	background: -o-linear-gradient(top, #3b3, #0a0) !important;
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#33bb33', endColorstr='#00aa00') !important;
+	box-shadow: inset 2px 0px 5px #222;
+	
+  background: -webkit-gradient(linear, left top, left bottom, from(#777), to(#555)) !important;
+	background: -moz-linear-gradient(top, #777, #555) !important;
+	background: -o-linear-gradient(top, #777, #555) !important;
+	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#555555') !important;
+	left: -1px !important;
+	bottom: -1px !important;
+  border: 1px solid #222 !important;
 }
 /* --------------- Flash ---------------- */
 #flash {
@@ -379,34 +360,29 @@ height: 200px;
 }
 /* ------------- Request ------------ */
 .request {
-	/*background: #555;*/
+	background: #ddd;
 	position: absolute;
 	font: 20px Arial;
-	color: #fff;
-	text-shadow: 0 1px black;
+	color: #333;
+	text-shadow: 0 1px white;
 	top: 20px;
 	left: 20px;
 	width: 280px;
 	height: 180px;
 	text-align: center;
 	padding-top: 10px;
-	background: -webkit-gradient(linear, left top, left bottom, from(#666), to(#555));
-	background: -moz-linear-gradient(top, #666, #555);
-	background: -o-linear-gradient(top, #666, #555);
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#666666', endColorstr='#555555');
-	box-shadow: 0px 0px 10px #222, inset 0px 1px 0px #777;
-	border-radius: 4px;
+	box-shadow: 0px 0px 20px #000, inset 0px 1px 0px #fff;
 	display: none;
-	border: 1px solid #000;
+	border: 1px solid #aaa;
 }
 .back {
 	position: absolute;
 	width: 320px;
 	height: 240px;
-	opacity: 0.4;
+	opacity: 0.1;
 	top: 0px;
 	left: 0px;
-	background-color: #555;
+	background-color: #000;
 	display: none;
 }
 /* ------------- Connecting ----------- */
@@ -425,15 +401,11 @@ height: 200px;
 /* ---------- Border ------------ */
 #settingsDiv, #infoDiv, #connectingDiv, #flash {
 	border-width: 2px 5px 5px\0/;
-  /*only for ie8*/
 	border-style: solid\0/;
-  /*only for ie8*/
 	border-color: #ddd\0/;
-  /*only for ie8*/
 }
 #connectingDiv, #infoDiv {
 	border-width: 5px\0/;
-  /*only for ie8*/
 }
 /* ---------- Shadow ---------- */
 #settingsDiv, #infoDiv {
@@ -454,11 +426,6 @@ input::-webkit-input-placeholder {
 #calleeText {
 	padding-left: 1px;
 }
-/*
-#jsSWFDiv {
-	height: 138px;
-}
-*/
 #phoneDiv {
 	left: 30px;
 	height: 240px;
@@ -468,11 +435,10 @@ input::-webkit-input-placeholder {
 }
 #versionOfProduct {
 	position: absolute;
-	top: 2px;
-	left: 4px;
-	/*font: 20px Arial;*/
-	color: #111;
-	text-shadow: #777 0px 1px;
+	bottom: 37px;
+	right: 2px;
+	color: #777;
+	font-size: 9px;
 }
 /* ---------------- Buttons ---------------- */
 .closeButton {
@@ -484,15 +450,6 @@ input::-webkit-input-placeholder {
 	width: 14px;
 	height: 14px;
 }
-/*.iconButton {
-	width: 16px;
-	height: 16px;
-	float: left;
-	/*  -moz-opacity: 0.6;
-	-khtml-opacity: 0.6;
-	opacity: 0.6;
-}
-*/
 .closeButton {
 	background: url(../assets/close.png);
 	right: 3px;
@@ -546,55 +503,16 @@ input::-webkit-input-placeholder {
 	text-align: center;
 	line-height: 30px;
 	-moz-opacity: 0.95;
-/* Mozilla 1.6 */
 	-khtml-opacity: 0.95;
-/* Konqueror 3.1, Safari 1.1 */
 	opacity: 0.95;
-/* CSS3 - Mozilla 1.7b +, Firefox 0.9 +, Safari 1.2+, Opera 9+ */
 }
 #infoText {
 }
-/* ------------ Flash div -------------- */
-/*#flash {
-	position: absolute;
-	top: 30px;
-	left: 60px;
-	overflow: hidden;
-	padding-top: 20px;
-}
-.video {
-	visibility: visible;
-	width: 215px;
-	height: 180px;
-	background-color: #000;
-}
-.security {
-	visibility: visible;
-	width: 215px;
-	height: 178px;
-	background-color: #fff;
-	padding-top: 20px;
-	border: 1px solid #ccc;
-}
-*/
 .closed {
 	width: 1px !important;
 	height: 1px !important;
 	visibility: hidden;
 }
-/*.init {
-	width: 1px;
-	height: 1px;
-	visibility: hidden;
-}
-*/
-/*#sendVideo {
-	width: 100px;
-	position: absolute;
-	bottom: 5px;
-	left: 10px;
-}
-*/
 #requestUnmuteText {
 	position: absolute;
 	text-align: center;
@@ -610,24 +528,6 @@ input::-webkit-input-placeholder {
 	width: 14px;
 	height: 14px;
 }
-/* ---------------------------------------------------- */
-/*.button {
-	background: #dcdcdc;
-	width: 46px;
-	height: 22px;
-	float: left;
-	margin: 0px 3px 3px 0;
-	text-align: center;
-	font: bold 14px Arial;
-	line-height: 19px;
-	border: solid 1px #ddd;
-	border-style: outset;
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	user-select: none;
-	outline: none;
-}
-/* -------------------------------------- */
 /* --------- Console ------------*/
 #console {
 	position: absolute;
@@ -636,48 +536,20 @@ input::-webkit-input-placeholder {
 	height: 700px;
 	width: 700px;
 	float: left;
-	background-color: #555;
 	font: 14px Courier;
-	color: #eee;
+	/*color: #eee;*/
 	padding: 10px;
 	overflow: auto;
 	word-wrap: break-word;
 	line-height: 18px;
 }
 /* -------------- Z indexes -------------*/
-/*#connectingDiv {
-	z-index: 15;
-}
-#infoDiv {
-	z-index: 30;
-}
-#jsSWFDiv {
-	z-index: 100;
-}
-#settingsDiv {
-	z-index: 17;
-}
-#video_requestUnmuteDiv {
-	z-index: 20;
-}
-.closeButton {
-	z-index: 101;
-}
-*/
-/*#c2c {
-	z-index: 1;
-}
-*/
 #versionOfProduct {
 	z-index: 4;
 }
 .video, .videoMy {
 	z-index: 5;
 }
-/*#buttonsBack {
-	z-index: 6;
-}
-*/
 #micBack, #speakerBack {
 	z-index: 6;
 }
@@ -687,7 +559,7 @@ input::-webkit-input-placeholder {
 #micSlider, #speakerSlider, #dialPad {
 	z-index: 8;
 }
-.sendVideoButton, #sendVideoButtonImage {
+.sendVideoButton, #sendVideoButtonImage, .back {
 	z-index: 9;
 }
 .request {
@@ -698,6 +570,7 @@ input::-webkit-input-placeholder {
 }
 .flash {
 }
+
 grey {
-	color: #888;
+	color: #bbb;
 }

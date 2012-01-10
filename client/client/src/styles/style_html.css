@@ -618,12 +618,11 @@ div with zero size.
 	text-shadow: 0px 1px 0px #0d0;
 	background: -webkit-gradient(linear, left top, left bottom, from(#6ECF6E), to(#4DC34D));
   /*background: -webkit-gradient(linear, left top, left bottom, from(#3b3), to(#0a0));*/
-	background: -moz-linear-gradient(top, #3b3, #0a0);
-	background: -o-linear-gradient(top, #3b3, #0a0);
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#33bb33', endColorstr='#00aa00');
+	background: -moz-linear-gradient(top, #6ECF6E, #4DC34D);
+	background: -o-linear-gradient(top, #6ECF6E, #4DC34D);
+	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#6ECF6E', endColorstr='#4DC34D');
 	/*color: #004400;*/
 	border-left-color: #888;
-
 }
 .hangup {
 	box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #FF9494;/*#f66;*/
@@ -699,7 +698,7 @@ div with zero size.
 	height: 80px !important;
 	border: 1px solid #999 !important;
 	background-color: #ddd !important;
-	box-shadow: inset 0px 0px 1px #777 !important;*/
+	box-shadow: inset 0px 0px 1px #777 !important;
 }
 .ui-slider-handle {
 	left: -5px !important;
@@ -708,12 +707,6 @@ div with zero size.
 	border: 1px solid #888 !important;
 	box-shadow: inset 0px 1px 0px #fff, 0px 0px 1px #777;
 	background-color: #dcdcdc !important;
-  /*
-  background: -webkit-gradient(linear, left top, left bottom, from(#ddd), to(#ccc)) !important;
-	background: -moz-linear-gradient(top, #777, #555) !important;
-	background: -o-linear-gradient(top, #777, #555) !important;
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#555555') !important;
-	*/
 	height: 14px !important;
 	width: 14px  !important;
 	cursor: pointer !important;

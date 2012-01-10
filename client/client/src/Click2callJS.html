@@ -38,9 +38,10 @@ This code and accompanying materials also available under LGPL and MPL license f
 </head>
 <body>
 
-<div id="c2c">     
+<div class="c2c">     
   
   <div id="versionOfProduct"></div>
+  <div class="back"></div>
   
   <div id="caller" class="caller">Support</div>       
   <div id="callState"></div>                
@@ -53,28 +54,20 @@ This code and accompanying materials also available under LGPL and MPL license f
     <div id="micButton" class="button"></div>     	     
   
     <!-- ************** Dialpad ************ -->  
-    <div class="dialPad" id="dialPad">  
-    <div class="dialScreen"></div>  
-    <div class="dialButtonLine">   
-      <div class="button dialButton" id="1b">1</div>    
-      <div class="button dialButton" id="2b">2</div>    
-      <div class="button dialButton" id="3b">3</div>  
-    </div>  
-    <div class="dialButtonLine">    
-      <div class="button dialButton" id="4b">4</div>    
-      <div class="button dialButton" id="5b">5</div>    
-      <div class="button dialButton" id="6b">6</div>  
-    </div>  
-    <div class="dialButtonLine">    
-      <div class="button dialButton" id="7b">7</div>    
-      <div class="button dialButton" id="8b">8</div>    
-      <div class="button dialButton" id="9b">9</div>  
-    </div>     
-    <div class="dialButtonLine">       
-      <div class="button dialButton" id="asterisk">*</div>                     
-      <div class="button dialButton" id="0b">0</div>    
-      <div class="button dialButton" id="hash">#</div>  
-    </div>
+    <div class="dialPad" id="dialPad">
+        <div class="dialScreen"></div>  
+        <div class="button dialButton" id="1b">1</div>    
+        <div class="button dialButton" id="2b">2</div>    
+        <div class="button dialButton" id="3b">3</div>
+        <div class="button dialButton" id="1b">4</div>    
+        <div class="button dialButton" id="2b">5</div>    
+        <div class="button dialButton" id="3b">6</div>
+        <div class="button dialButton" id="7b">7</div>    
+        <div class="button dialButton" id="8b">8</div>    
+        <div class="button dialButton" id="9b">9</div>  
+        <div class="button dialButton" id="asterisk">*</div>                     
+        <div class="button dialButton" id="0b">0</div>    
+        <div class="button dialButton" id="hash">#</div>     
     </div>  
          
     <!-- **************** Slider ***************** --> 
@@ -90,7 +83,6 @@ This code and accompanying materials also available under LGPL and MPL license f
   Click "Allow" to continue
 </div>
 <!-- **************** -->
-
 
 <!-- ***** Flash ******* -->
 <div id="flash" class="init">
@@ -120,9 +112,6 @@ This buttons opens click2call in popup window.
 Please use that for testing calls to different callees depends by pageUrl parameter.
 Details <a href="http://docs.flashphoner.com/display/FP973/Click2Call">here</a>
 </div>
-
-
-
 
 </body>
 </html>

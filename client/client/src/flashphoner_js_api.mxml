@@ -104,9 +104,9 @@ This code and accompanying materials also available under LGPL and MPL license f
 	<!--
 	<mx:TextArea id="messageAccess" editable="false" text="To do that, you should allow the camera and microphone. Open Security Panel and allow access to devices." width="185" height="96" fontSize="12" textAlign="center" x="10" y="13" borderThickness="0"/>
 	-->
-	<mx:Button x="45" y="100" width="122" height="26" label="Open panel" borderColor="#000000"
-			   click="openSettingsPanel()" color="#CCCCCC" cornerRadius="4" fillAlphas="[1.0, 1.0]"
-			   fillColors="[#444444, #555555]" fontFamily="Georgia" fontSize="12" textAlign="center"/>
+	<mx:Button x="45" y="100" width="122" height="26" label="Open panel" borderColor="#CCCCCC"
+			   click="openSettingsPanel()" color="#333333" cornerRadius="0" fillAlphas="[1.0, 1.0]"
+			   fillColors="[#DDDDDD, #DDDDDD]" fontFamily="Verdana" fontSize="12" textAlign="center"/>
 	<mx:Canvas id="videoPartner" visible="false" width="100%" height="100%" x="0" backgroundColor="black" y="0"/>
 	<mx:VideoDisplay id="videoMy" visible="false" right="0" top="0" width="25%"
 					 height="{videoMy.width*relationMyVideo}"/>
