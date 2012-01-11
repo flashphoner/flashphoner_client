@@ -1000,7 +1000,7 @@ $(function() {
     //Bind click on number buttons
     $(".numberButton").click(function() {
         if (currentCall != null && currentCall.state == STATE_TALK) {
-            sendDTMF(currentCall.id, $(this).val());
+            sendDTMF(currentCall.id, $(this).html());
         } else if (currentCall == null) {
             $("#calleeText").val($("#calleeText").val() + $(this).val());
         }
