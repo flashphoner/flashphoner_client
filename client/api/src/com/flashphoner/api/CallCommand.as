@@ -41,55 +41,67 @@ package com.flashphoner.api
 			
 			if (event.type==CallEvent.TALK){
 				Logger.info("MainEvent.TALK "+call.id);
-				SoundControl.stopRingSound();				
-
 				call.startTimer();
-				call.publish();						
-				flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
-				if (PhoneConfig.VIDEO_ENABLED){
-					flashAPI.phoneServerProxy.phoneSpeaker.playVideo("VIDEO_INCOMING_"+modelLocator.login+"_"+call.id);
+				if (!call.isMSRP){
+					SoundControl.stopRingSound();
+					call.publish();						
+					flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
+					if (PhoneConfig.VIDEO_ENABLED){
+						flashAPI.phoneServerProxy.phoneSpeaker.playVideo("VIDEO_INCOMING_"+modelLocator.login+"_"+call.id);
+					}
 				}
 			}
 			
 			if (event.type==CallEvent.HOLD){
-				call.unpublish();
+				if (!call.isMSRP){				
+					call.unpublish();
+				}
 			}
 			 
 			if (event.type == CallEvent.SESSION_PROGRESS){
 				Logger.info("MainEvent.SESSION_PROGRESS");
-		 		SoundControl.stopRingSound();
+				if (!call.isMSRP){
+		 			SoundControl.stopRingSound();
 				
-				call.publish();	 		
-		 		flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
+					call.publish();	 		
+		 			flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
+				}
 		 	}
 			
 			if (event.type==CallEvent.IN){
-				SoundControl.playRingSound();
+				if (!call.isMSRP){
+					SoundControl.playRingSound();
+				}
 			}
 			
 			if (event.type ==CallEvent.OUT){
-				SoundControl.playRingSound();
+				if (!call.isMSRP){
+					SoundControl.playRingSound();
+				}
 			}
 			
 			if (event.type == MainEvent.VIDEO_FORMAT_CHANGED){
 				flashAPI.videoControl.changeFormat(call.streamerVideoWidth,call.streamerVideoHeight);
-				//flashAPI.phoneServerProxy.phoneSpeaker.changeFormat(call.playerVideoWidth,call.playerVideoHeight);
 			}			
 			
 			if (event.type == CallEvent.BUSY){
-				SoundControl.playBusySound();		
-				SoundControl.stopRingSound();														
+				if (!call.isMSRP){
+					SoundControl.playBusySound();		
+					SoundControl.stopRingSound();
+				}
 			}
 			if (event.type == CallEvent.FINISH){
-				SoundControl.playFinishSound();		
-				SoundControl.stopRingSound();														
-				
 				call.stopTimer();
-				call.unpublish();
-				flashAPI.unholdAnyCall();
 				flashAPI.removeCall(call.id);
-				flashAPI.phoneServerProxy.phoneSpeaker.stopAudio(call.id);
-				flashAPI.phoneServerProxy.phoneSpeaker.stopVideo(call.id);
+				if (!call.isMSRP){
+					SoundControl.playFinishSound();		
+					SoundControl.stopRingSound();														
+				
+					call.unpublish();
+					flashAPI.unholdAnyCall();
+					flashAPI.phoneServerProxy.phoneSpeaker.stopAudio(call.id);
+					flashAPI.phoneServerProxy.phoneSpeaker.stopVideo(call.id);
+				}
 			}				
 			
 		}

@@ -75,14 +75,14 @@ package com.flashphoner.api
 			Logger.info("Use enchenced mic: "+PhoneConfig.USE_ENHANCED_MIC);
 			if (PhoneConfig.USE_ENHANCED_MIC){
 				var flashPlayerVersion:String = Capabilities.version;
-				
+
 				var osArray:Array = flashPlayerVersion.split(' ');
 				var osType:String = osArray[0];
 				var versionArray:Array = osArray[1].split(',');
 				var majorVersion:Number = parseInt(versionArray[0]);
 				
 				if (majorVersion >= 11 || Capabilities.language.indexOf("en") >= 0){
-					mic = Microphone.getEnhancedMicrophone();
+					mic = Microphone.getEnhancedMicrophone();				
 				}else{
 					mic = Microphone.getMicrophone();
 					for each (var apiNotify:APINotify in flash_API.apiNotifys){

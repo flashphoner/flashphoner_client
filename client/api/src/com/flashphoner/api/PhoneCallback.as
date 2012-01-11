@@ -165,10 +165,10 @@ package com.flashphoner.api
 			}else{
 				call.incoming = false;
 			}
-			if (_call.isVideoCall == 'true'){
-				call.isVideoCall = true;
+			if (_call.isMSRP == 'true'){
+				call.isMSRP = true;
 			}else{
-				call.isVideoCall = false;
+				call.isMSRP = false;
 			} 
 			call.callee = _call.callee;
 			call.caller = _call.caller;

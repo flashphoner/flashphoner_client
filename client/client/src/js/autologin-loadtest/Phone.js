@@ -73,15 +73,16 @@ $(document).ready(function() {
 function login() {
     trace('login');
     connectingViewBeClosed = false;
-    var result = flashphoner.login('sip:' + $('#username').val() + '@' + $('#server').val() + ':' + $('#port').val(), $('#password').val(), $('#authname').val());
+    var result = flashphoner.login('sip:' + $('#username').val() + '@' + $('#domain').val(), $('#password').val(), $('#authname').val(), $('#outbound_proxy').val(), $('#port').val());
     closeLoginView();
     if (result == 0) {
         openConnectingView("Connecting...", 0);
         setCookie("login", $('#username').val());
         setCookie("authName", $('#authname').val());
         setCookie("pwd", $('#password').val());
-        setCookie("sipProviderAddress", $('#server').val());
-        setCookie("sipProviderPort", $('#port').val());
+        setCookie("domain", $('#domain').val());
+        setCookie("outbound_proxy", $('#outbound_proxy').val());
+        setCookie("port", $('#port').val());
     }
 }
 
@@ -593,8 +594,9 @@ function openLoginView() {
         $('#username').val(getCookie('login'));
         $('#authname').val(getCookie('authName'));
         $('#password').val(getCookie('pwd'));
-        $('#server').val(getCookie('sipProviderAddress'));
-        $('#port').val(getCookie('sipProviderPort'));
+        $('#domain').val(getCookie('domain'));
+        $('#outbound_proxy').val(getCookie('outbound_proxy'));
+        $('#port').val(getCookie('port'));
     }
 
 }

@@ -488,9 +488,6 @@ function getFnName(fn) {
 /* --------------------- On document load we do... ------------------ */
 $(function() {
 
-    // load c2c interface in frame c2c-test for showing in popup
-    // $('#c2c-test').load('Click2callJS.html', alert('done'));
-    
     // All buttons except .call and .hangup stay in press state until double click
     $(".button:not(.dialButton, .call, .hangup, .disabled)").click(function() {
       $(this).toggleClass('pressed');
