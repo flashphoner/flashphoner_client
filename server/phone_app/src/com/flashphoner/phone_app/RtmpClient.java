@@ -228,12 +228,13 @@ public class RtmpClient extends AbstractRtmpClient {
         AMFDataObj messageObj = new AMFDataObj();
 
         messageObj.put("state", instantMessage.getState());
+        messageObj.put("raw",instantMessage.getRaw());
 
         if (InstantMessageState.RECEIVED.equals(instantMessage.getState())) {
             messageObj.put("from", instantMessage.getFrom());
             messageObj.put("to", instantMessage.getTo());
             messageObj.put("contentType", instantMessage.getContentType());
-            messageObj.put("body", instantMessage.getBody());
+            messageObj.put("body", instantMessage.getBody());            
         } else {
             if (instantMessage.getId() != null) {
                 messageObj.put("id", instantMessage.getId());

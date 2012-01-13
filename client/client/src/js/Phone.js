@@ -112,6 +112,15 @@ $(document).ready(function() {
     }
 });
 
+function generateUUID(){
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = d/16 | 0;
+        return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+    });
+    return uuid;
+};
 
 function login() {
     trace("login");
@@ -174,11 +183,10 @@ function deferredCall(){
 	flashphoner.call("sip:Deferred@yes.my", 'Caller');
 }
 
-function sendMessage(to, recipients, body, contentType) {
-    trace("sendMessage", to, body, contentType);
-    flashphoner.sendMessage(to, recipients, body, contentType);
+function sendMessage(msgObject){
+	trace("sendMessage", msgObject.id, msgObject.to, msgObject.body, msgObject.contentType);
+	flashphoner.sendMessage(msgObject);
 }
-
 
 function answer(callId) {
     trace("answer", callId);
@@ -470,7 +478,8 @@ function notifyOpenVideoView(isViewed){
 }
 
 function notifyMessage(messageObject) {
-    trace('notifyMessage', messageObject.from, messageObject.body);
+    trace('notifyMessage', messageObject.id, messageObject.from, messageObject.body, messageObject.state);
+    trace("notifyMessage raw value:\n "+messageObject.raw)
     openChatView();        
     
     var messageTo = messageObject.to.toLowerCase();
@@ -828,7 +837,13 @@ function createChat(calleeName) {
 		//tel:12345,tel:5678
 		recipients = splat[1];
 	    }
-	    sendMessage(calleeName, recipients, messageText, 'multipart/mixed'); //send message
+	    var msgObject = new Object();
+	    msgObject.id = generateUUID();
+	    msgObject.to = calleeName;
+	    msgObject.recipients = recipients;
+	    msgObject.body = messageText;
+	    msgObject.contentType = "message/cpim";
+	    sendMessage(msgObject); //send message
             $(this).prev().val(''); //clear message input
         });
 

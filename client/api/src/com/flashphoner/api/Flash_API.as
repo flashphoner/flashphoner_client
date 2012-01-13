@@ -602,15 +602,15 @@ package com.flashphoner.api
 		 * @param body content of the message
 		 * @param contentType type of content
 		 **/
-		public function sendMessage(to:String, recipients:String, body:String, contentType:String):void{
+		public function sendMessage(msgObj:Object):void{
 			var instantMessage:InstantMessage = new InstantMessage();
-			instantMessage.recipients = recipients;
-			instantMessage.body = body;
+			instantMessage.recipients = msgObj.recipients;
+			instantMessage.body = msgObj.body;
 			instantMessage.from = modelLocator.login; 
-			instantMessage.to = to;
-			instantMessage.contentType = contentType;
+			instantMessage.to = msgObj.to;
+			instantMessage.contentType = msgObj.contentType;
 			//Add message into the internal collection
-			instantMessage.id = UIDUtil.createUID();
+			instantMessage.id = msgObj.id;
 			messages.addItem(instantMessage);
 			//startMessageExpiredTimer
 			startExpirationTimer(instantMessage);

@@ -41,5 +41,7 @@ package com.flashphoner.api
 		public var contentType:String;
 		
 		public var state:String;
+		
+		public var raw:String;
 	}
 }
