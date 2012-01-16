@@ -510,6 +510,20 @@ div with zero size.
 	font-weight: bold;
 	padding-top: 7px;
 }
+.msg_sent {
+	color: #9393aa;
+}
+.msg_accepted {
+	color: #1414fa;
+}
+.msg_delivered {
+	color: #3a823a;
+}
+.msg_failed {
+	color: #ff2424;
+}
+
+
 .yourNick {
 	color: #91c8ff;
 }

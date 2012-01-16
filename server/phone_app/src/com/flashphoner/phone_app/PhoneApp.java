@@ -659,12 +659,16 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
     }
 
     public void sendInstantMessage(IClient client, RequestFunction requestFunction, AMFDataList params) {
+        Logger.logger.info(4, "sendInstantMessage " + params);
         IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
 
         AMFDataObj obj = params.getObject(PARAM1);      
 
         InstantMessage instantMessage = new InstantMessage();
-        instantMessage.setId(obj.getString("id"));
+        String id = obj.getString("id");
+        if (!(id == null || "".equals(id) ||"null".equals(id))){
+            instantMessage.setId(id);
+        }
         instantMessage.setBody(obj.getString("body"));
         instantMessage.setContentType(obj.getString("contentType"));
         instantMessage.setTo(obj.getString("to"));

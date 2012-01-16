@@ -40,25 +40,24 @@ package com.flashphoner.api
 			var flashAPI:Flash_API = (event as MessageEvent).flashAPI;					
 			var messageObject:Object = (event as MessageEvent).messageObj;
 			
-			if (messageObject.state=="ACCEPTED" || messageObject.state=="FAILED" || messageObject.state=="SENT"){
+			if (messageObject.state=="RECEIVED"){
+				//new incoming message
+				notify(messageObject,flashAPI,event);
+			} else {
 				//existing message				
 				var instantMessage:InstantMessage = flashAPI.findMessageById(messageObject.id);
 				if (instantMessage==null){
 					Logger.error("Message not found by id: "+messageObject.id);
 				}else{
 					
-					if (messageObject.state=="ACCEPTED" || messageObject.state=="FAILED"){
+					if (messageObject.state !="SENT" && messageObject.state !="ACCEPTED"){
 						flashAPI.removeMessage(instantMessage);
 					}
-					
 					//update message
 					instantMessage.state = messageObject.state;
 					instantMessage.raw = messageObject.raw;					
 					notify(instantMessage,flashAPI,event);					
 				}
-			}else if (messageObject.state=="RECEIVED"){
-				//new incoming message
-				notify(messageObject,flashAPI,event);
 			}	
 			
 			
