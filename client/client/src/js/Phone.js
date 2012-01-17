@@ -479,8 +479,14 @@ function notifyOpenVideoView(isViewed){
 
 function notifyMessage(messageObject) {
     trace('notifyMessage', messageObject.id, messageObject.from, messageObject.body, messageObject.state);
-    trace("notifyMessage raw value:\n "+messageObject.raw)
+    trace("notifyMessage raw", '<br>' + messageObject.raw.replace(/\r\n|\r|\n/g,'<br>'));
     openChatView();        
+    
+    
+    //var x=document.f.t.value;
+    //var y=x.replace(/\r\n|\r|\n/g,'<br>');
+    
+    
     
     var messageTo = messageObject.to.toLowerCase();
     if ((messageObject.recipients!=null)&&(messageObject.recipients.length!=0)){
@@ -965,6 +971,7 @@ $(function() {
 
     // every time when we change callee field - we set parameter callee
     // that parameter used around the code 
+    
     $("#calleeText").keyup(function() {
       callee1 = $(this).val();
     });
@@ -1075,11 +1082,14 @@ $(function() {
         }
     });
 
-    /* Autofill Aut. name field when you fil Login field */
+    /* Autofill Aut. name field when you fil Login field/
+    comment this feature while working on IMS development
     $('#username').keyup(function() {
         $('#authname').val($(this).val());
     });
-
+    */
+    
+    
     // this functions resize flash when you resize video window
     $('#video_requestUnmuteDiv').resize(function() {
         $('#jsSWFDiv').height($(this).height() - 40);
