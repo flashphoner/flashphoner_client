@@ -13,6 +13,8 @@ This code and accompanying materials also available under LGPL and MPL license f
 package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.media.SdpState;
+import com.flashphoner.sdk.rtmp.*;
+import com.flashphoner.sdk.softphone.*;
 import com.flashphoner.sdk.softphone.exception.CrossCallException;
 import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
 import com.flashphoner.sdk.softphone.exception.PortsBusyException;
