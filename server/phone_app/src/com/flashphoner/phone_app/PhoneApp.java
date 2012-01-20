@@ -13,13 +13,11 @@ This code and accompanying materials also available under LGPL and MPL license f
 package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.media.SdpState;
-import com.flashphoner.sdk.rtmp.*;
-import com.flashphoner.sdk.softphone.*;
 import com.flashphoner.sdk.softphone.exception.CrossCallException;
 import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
 import com.flashphoner.sdk.softphone.exception.PortsBusyException;
 import com.flashphoner.sdk.softphone.exception.SoftphoneException;
-import com.flashphoner.sip.request_params.SubscribeParams;
+import com.flashphoner.sdk.sip.request_params.SubscribeParams;
 import com.wowza.wms.amf.AMFData;
 import com.wowza.wms.amf.AMFDataList;
 import com.wowza.wms.amf.AMFDataObj;
