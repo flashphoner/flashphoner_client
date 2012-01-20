@@ -114,7 +114,7 @@ $(document).ready(function() {
 
 function generateUUID(){
     var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var uuid = 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = (d + Math.random()*16)%16 | 0;
         d = d/16 | 0;
         return (c=='x' ? r : (r&0x7|0x8)).toString(16);
@@ -500,8 +500,14 @@ function notifyOpenVideoView(isViewed){
 
 function notifyMessage(messageObject) {
     trace('notifyMessage', messageObject.id, messageObject.from, messageObject.body, messageObject.state);
-    trace("notifyMessage raw value:\n "+messageObject.raw)
+    trace("notifyMessage raw", '<br>' + messageObject.raw.replace(/\r\n|\r|\n/g,'<br>'));
     openChatView();        
+    
+    
+    //var x=document.f.t.value;
+    //var y=x.replace(/\r\n|\r|\n/g,'<br>');
+    
+    
     
     var messageTo = messageObject.to.toLowerCase();
     if ((messageObject.recipients!=null)&&(messageObject.recipients.length!=0)){
@@ -509,20 +515,32 @@ function notifyMessage(messageObject) {
     }
 
     var messageContent = messageObject.body;
-    if (messageObject.state=="FAILED"){
-	messageContent = "The message has not been sent: "+messageContent;    
+    if (messageObject.state=="FAILED" || messageObject.state=="ERROR" || messageObject.state=="FORBIDDEN"){
+		messageContent = "<div class=msg_failed>"+messageContent+"</div>";
+	}else if (messageObject.state=="SENT"){
+    	messageContent = "<div class=msg_sent>"+messageContent+"</div>";
+    }else if (messageObject.state=="ACCEPTED"){
+    	messageContent = "<div class=msg_accepted>"+messageContent+"</div>";
+    }else if (messageObject.state=="DELIVERED" || messageObject.state=="RECEIVED"){
+    	messageContent = "<div class=msg_delivered>"+messageContent+"</div>";
     }
-        
+	if (messageObject.id != null){
+		divMessage = document.getElementById(messageObject.id);
+	}
     if (messageObject.from == callerLogin) { //check if it outcoming or incoming message
         createChat(messageTo);
         var chatTextarea = $('#chat' + encodeId(messageTo) + ' .chatTextarea'); //set current textarea for
         var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
-        chatTextarea.append('<div class=myNick>' + messageObject.from + '</div>' + messageContent + '<br>'); //add message to chat
+        if (divMessage != null){
+        	divMessage.innerHTML='<div  class=myNick>' + messageObject.from + '</div>' + messageContent;
+        }else{
+        	chatTextarea.append('<div id="'+messageObject.id+'"><div  class=myNick>' + messageObject.from + '</div>' + messageContent + '</div><br>'); //add message to chat
+        }
     } else {
         createChat(messageObject.from.toLowerCase());
         var chatTextarea = $('#chat' + encodeId(messageObject.from.toLowerCase()) + ' .chatTextarea'); //set current textarea
         var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
-        chatTextarea.append('<div class=yourNick>' + messageObject.from + '</div>' + messageContent + '<br>'); //add message to chat
+		chatTextarea.append('<div class=yourNick>' + messageObject.from + '</div>' + messageContent + '<br>'); //add message to chat
     }
 
     if (isScrolled == 1) {
@@ -974,6 +992,7 @@ $(function() {
 
     // every time when we change callee field - we set parameter callee
     // that parameter used around the code 
+    
     $("#calleeText").keyup(function() {
       callee1 = $(this).val();
     });
@@ -1084,11 +1103,14 @@ $(function() {
         }
     });
 
-    /* Autofill Aut. name field when you fil Login field */
+    /* Autofill Aut. name field when you fil Login field/
+    comment this feature while working on IMS development
     $('#username').keyup(function() {
         $('#authname').val($(this).val());
     });
-
+    */
+    
+    
     // this functions resize flash when you resize video window
     $('#video_requestUnmuteDiv').resize(function() {
         $('#jsSWFDiv').height($(this).height() - 40);
