@@ -19,6 +19,7 @@ import com.flashphoner.sdk.softphone.exception.CrossCallException;
 import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
 import com.flashphoner.sdk.softphone.exception.PortsBusyException;
 import com.flashphoner.sdk.softphone.exception.SoftphoneException;
+import com.flashphoner.sip.request_params.SubscribeParams;
 import com.wowza.wms.amf.AMFData;
 import com.wowza.wms.amf.AMFDataList;
 import com.wowza.wms.amf.AMFDataObj;
@@ -661,7 +662,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
     public void sendInstantMessage(IClient client, RequestFunction requestFunction, AMFDataList params) {
         IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
 
-        AMFDataObj obj = params.getObject(PARAM1);      
+        AMFDataObj obj = params.getObject(PARAM1);
 
         InstantMessage instantMessage = new InstantMessage();
         instantMessage.setId(obj.getString("id"));
@@ -677,5 +678,21 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             Logger.logger.error("Can not send instant message", e);
         }
     }
+
+    public void subscribe(IClient client, RequestFunction requestFunction, AMFDataList params) {
+        IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
+        AMFDataObj subscribeObj = params.getObject(PARAM1);
+        try {
+
+            SubscribeParams subscribeParameters = new SubscribeParams();
+            subscribeParameters.setExpires(subscribeObj.getInt("expires"));
+            subscribeParameters.setEvent(subscribeObj.getString("event"));
+
+            rtmpClient.getSoftphone().subscribe(subscribeParameters);
+        } catch (SoftphoneException e) {
+            Logger.logger.error("Can not subscribe", e);
+        }
+    }
+
 
 }

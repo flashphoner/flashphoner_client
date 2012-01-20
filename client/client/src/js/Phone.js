@@ -147,6 +147,11 @@ function loginWithToken(token) {
     openConnectingView("Connecting...", 0);
 }
 
+function subscribe(subscribeObj){
+    trace("subscribe", subscribeObj.event, subscribeObj.expires);
+    flashphoner.subscribe(subscribeObj);
+}
+
 function getInfoAboutMe() {
     trace("getInfoAboutMe");
     return flashphoner.getInfoAboutMe();
@@ -289,6 +294,18 @@ function addLogMessage(message) {
     trace(message);
 }
 
+function notifySubscribed(sipObject){
+  trace("notifySubscribed");
+  trace("sipObject: "+sipObject.type+" "+sipObject.message.code+" "+sipObject.message.reason);
+  trace("sipObject raw: "+sipObject.message.raw);
+}
+
+function notifyRfc3265(sipObject){
+  trace("notifyRfc3265");
+  trace("sipObject: "+sipObject.type+" "+sipObject.message.method+" "+sipObject.message.requestURI);
+  trace("sipObject raw: "+sipObject.message.raw);
+}
+
 function notifyFlashReady() {
 	$('#versionOfProduct').html(getVersion());
     if (flashvars.token != null) {
@@ -337,7 +354,11 @@ function notifyRegistered() {
         getElement("callerLogin").innerHTML = callerLogin;
         isLogged = true;
         closeConnectingView();
-        deferredCall();
+	var subscribeObj = new Object();
+        subscribeObj.event="reg";
+	subscribeObj.expires=3600;
+	subscribe(subscribeObj);        
+	setTimeout("deferredCall()",3000);        
     }
 }
 

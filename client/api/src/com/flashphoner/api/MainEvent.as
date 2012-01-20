@@ -23,6 +23,7 @@ package com.flashphoner.api
 	{	
 		public static const CONNECTED:String = "CONNECTED";
 		public static const REGISTERED:String = "REGISTERED";
+		public static const SUBSCRIBED:String = "SUBSCRIBED";
 		public static const DISCONNECT:String = "DISCONNECT";
 		public static const MESSAGE_ACCEPTED:String = "MESSAGE_ACCEPTED";
 		public static const VIDEO_FORMAT_CHANGED:String = "VIDEO_FORMAT_CHANGED";
