@@ -138,5 +138,13 @@ package com.flashphoner.phone
 		public function notifyVersion(version:String):void{
 			DataPhone.getInstance().version = version;
 		}
+		
+		public function notifySubscribed(_sipObject:Object):void{
+		
+		}
+		
+		public function notifyRfc3265(_sipObject:Object):void{
+			
+		}
 	}
 }

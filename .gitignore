@@ -1,2 +1,6 @@
 
 /client/output
+/client/libs/api.swc
+/client/.metadata
+/server/build
+/release

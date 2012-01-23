@@ -39,6 +39,8 @@ package com.flashphoner.api
 			
 			addCommand(MainEvent.CONNECTED,MainCommand);	
 			addCommand(MainEvent.REGISTERED,MainCommand);
+			addCommand(MainEvent.SUBSCRIBED,MainCommand);
+			
 			addCommand(MainEvent.DISCONNECT,MainCommand);
 			addCommand(MainEvent.AUDIO_CODEC_CHANGED_EVENT,MainCommand);
 			

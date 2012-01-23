@@ -80,5 +80,13 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyVersion", version);
 		}
 		
+		public function notifySubscribed(_sipObject:Object):void{
+			ExternalInterface.call("notifySubscribed",_sipObject);
+		}
+		
+		public function notifyRfc3265(_sipObject:Object):void{
+			ExternalInterface.call("notifyRfc3265",_sipObject);
+		}
+		
 	}
 }

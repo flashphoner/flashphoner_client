@@ -147,6 +147,11 @@ function loginWithToken(token) {
     openConnectingView("Connecting...", 0);
 }
 
+function subscribe(subscribeObj){
+    trace("subscribe", subscribeObj.event, subscribeObj.expires);
+    flashphoner.subscribe(subscribeObj);
+}
+
 function getInfoAboutMe() {
     trace("getInfoAboutMe");
     return flashphoner.getInfoAboutMe();
@@ -289,6 +294,18 @@ function addLogMessage(message) {
     trace(message);
 }
 
+function notifySubscribed(sipObject){
+  trace("notifySubscribed");
+  trace("sipObject: "+sipObject.type+" "+sipObject.message.code+" "+sipObject.message.reason);
+  trace("sipObject raw: "+sipObject.message.raw);
+}
+
+function notifyRfc3265(sipObject){
+  trace("notifyRfc3265");
+  trace("sipObject: "+sipObject.type+" "+sipObject.message.method+" "+sipObject.message.requestURI);
+  trace("sipObject raw: "+sipObject.message.raw);
+}
+
 function notifyFlashReady() {
 	$('#versionOfProduct').html(getVersion());
     if (flashvars.token != null) {
@@ -337,7 +354,11 @@ function notifyRegistered() {
         getElement("callerLogin").innerHTML = callerLogin;
         isLogged = true;
         closeConnectingView();
-        deferredCall();
+	var subscribeObj = new Object();
+        subscribeObj.event="reg";
+	subscribeObj.expires=3600;
+	subscribe(subscribeObj);        
+	setTimeout("deferredCall()",3000);        
     }
 }
 
@@ -479,8 +500,14 @@ function notifyOpenVideoView(isViewed){
 
 function notifyMessage(messageObject) {
     trace('notifyMessage', messageObject.id, messageObject.from, messageObject.body, messageObject.state);
-    trace("notifyMessage raw value:\n "+messageObject.raw)
+    trace("notifyMessage raw", '<br>' + messageObject.raw.replace(/\r\n|\r|\n/g,'<br>'));
     openChatView();        
+    
+    
+    //var x=document.f.t.value;
+    //var y=x.replace(/\r\n|\r|\n/g,'<br>');
+    
+    
     
     var messageTo = messageObject.to.toLowerCase();
     if ((messageObject.recipients!=null)&&(messageObject.recipients.length!=0)){
@@ -968,6 +995,7 @@ $(function() {
 
     // every time when we change callee field - we set parameter callee
     // that parameter used around the code 
+    
     $("#calleeText").keyup(function() {
       callee1 = $(this).val();
     });
@@ -1078,11 +1106,14 @@ $(function() {
         }
     });
 
-    /* Autofill Aut. name field when you fil Login field */
+    /* Autofill Aut. name field when you fil Login field/
+    comment this feature while working on IMS development
     $('#username').keyup(function() {
         $('#authname').val($(this).val());
     });
-
+    */
+    
+    
     // this functions resize flash when you resize video window
     $('#video_requestUnmuteDiv').resize(function() {
         $('#jsSWFDiv').height($(this).height() - 40);

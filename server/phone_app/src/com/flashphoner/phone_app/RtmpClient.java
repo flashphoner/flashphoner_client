@@ -12,11 +12,8 @@ This code and accompanying materials also available under LGPL and MPL license f
 */
 package com.flashphoner.phone_app;
 
-import com.flashphoner.sdk.rtmp.AbstractRtmpClient;
-import com.flashphoner.sdk.rtmp.Config;
-import com.flashphoner.sdk.rtmp.IConfig;
-import com.flashphoner.sdk.rtmp.RtmpClientConfig;
-import com.flashphoner.sdk.sip.SipHeader;
+import com.flashphoner.sdk.rtmp.*;
+import com.flashphoner.sdk.sip.SipMessageObject;
 import com.flashphoner.sdk.softphone.ISoftphoneCall;
 import com.flashphoner.sdk.softphone.InstantMessage;
 import com.flashphoner.sdk.softphone.InstantMessageState;
@@ -46,7 +43,7 @@ public class RtmpClient extends AbstractRtmpClient {
      *
      * @param sipHeader
      */
-    public void registered(SipHeader sipHeader) {
+    public void registered(SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.registered()");
         getClient().call("registered", null, sipHeader.toAMFObj());
     }
@@ -57,9 +54,13 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param balance   balance header value
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void notifyBalance(String balance, SipHeader sipHeader) {
+    public void notifyBalance(String balance, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.notifyBalance()");
-        getClient().call("notifyBalance", null, balance, sipHeader.toAMFObj());
+        try {
+            getClient().call("notifyBalance", null, balance, sipHeader.toAMFObj());
+        } catch (Exception e) {
+            Logger.logger.error("Can not notifyBalance", e);
+        }
     }
 
     /**
@@ -78,10 +79,10 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param call      ISoftphoneCall
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void ring(ISoftphoneCall call, SipHeader sipHeader) {
+    public void ring(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.ring() " + call.getId());
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         getClient().call("ring", null, call.toAMFDataObj(), sipHeader.toAMFObj());
     }
@@ -92,7 +93,7 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param call      ISoftphoneCall
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void ringing(ISoftphoneCall call, SipHeader sipHeader) {
+    public void ringing(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.ringing() " + call.getId());
     }
 
@@ -102,10 +103,10 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param call      ISoftphoneCall
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void sessionProgress(ISoftphoneCall call, SipHeader sipHeader) {
+    public void sessionProgress(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.sessionProgress()");
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         getClient().call("sessionProgress", null, call.toAMFDataObj(), sipHeader.toAMFObj());
     }
@@ -116,10 +117,10 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param call      ISoftphoneCall
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void talk(ISoftphoneCall call, SipHeader sipHeader) {
+    public void talk(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.talk() " + call.getId());
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         getClient().call("talk", null, call.toAMFDataObj(), sipHeader.toAMFObj());
     }
@@ -130,10 +131,10 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param call      ISoftphoneCall
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void notifyHold(ISoftphoneCall call, SipHeader sipHeader) {
+    public void notifyHold(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.notifyHold() " + call.getId());
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         getClient().call("hold", null, call.toAMFDataObj(), sipHeader.toAMFObj());
     }
@@ -155,10 +156,10 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param call      ISoftphoneCall
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void finish(ISoftphoneCall call, SipHeader sipHeader) {
+    public void finish(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.finish() " + call.getId());
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         streamAudioStop(call.getId());
         streamVideoStop(call.getId());
@@ -171,10 +172,10 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param call      ISoftphoneCall
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void busy(ISoftphoneCall call, SipHeader sipHeader) {
+    public void busy(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.busy() " + call.getId());
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         getClient().call("busy", null, call.toAMFDataObj(), sipHeader.toAMFObj());
     }
@@ -185,10 +186,10 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param errorCode
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void fail(String errorCode, SipHeader sipHeader) {
+    public void fail(String errorCode, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.fail() " + errorCode);
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         if (getClient() != null) {
             getClient().call("fail", null, errorCode, sipHeader.toAMFObj());
@@ -228,13 +229,13 @@ public class RtmpClient extends AbstractRtmpClient {
         AMFDataObj messageObj = new AMFDataObj();
 
         messageObj.put("state", instantMessage.getState());
-        messageObj.put("raw",instantMessage.getRaw());
+        messageObj.put("raw", instantMessage.getRaw());
 
         if (InstantMessageState.RECEIVED.equals(instantMessage.getState())) {
             messageObj.put("from", instantMessage.getFrom());
             messageObj.put("to", instantMessage.getTo());
             messageObj.put("contentType", instantMessage.getContentType());
-            messageObj.put("body", instantMessage.getBody());            
+            messageObj.put("body", instantMessage.getBody());
         } else {
             if (instantMessage.getId() != null) {
                 messageObj.put("id", instantMessage.getId());
@@ -253,6 +254,21 @@ public class RtmpClient extends AbstractRtmpClient {
         codecObj.put("name", audioCodec.toLowerCase());
         if (getClient() != null) {
             getClient().call("notifyAudioCodec", null, codecObj);
+        }
+    }
+
+
+    @Override
+    public void subscribed(SipMessageObject sipMsg) {
+        if (sipMsg != null) {
+            getClient().call("subscribed", null, sipMsg.toAMFObj());
+        }
+    }
+
+    @Override
+    public void notifyRfc3265(SipMessageObject sipMsg) {
+        if (sipMsg != null) {
+            getClient().call("notifyRfc3265", null, sipMsg.toAMFObj());
         }
     }
 }

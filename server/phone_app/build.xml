@@ -20,6 +20,7 @@
         <property name="javadoc_dir" value="${install_dir}/server-side-api"/>
 
         <property name="classpath" value=".;${lib_dir}/log4j/log4j-1.2.14.jar;${lib_dir}/wowza/wms-server.jar;${lib_dir}/wowza/wms-stream-live.jar;${lib_dir}/wowza/wms-stream-publish.jar;${lib_dir}/flashphoner/jain-sip.jar;${lib_dir}/flashphoner/tbs-flashphoner.jar"/>
+        <echo message="${classpath}"/>
 
         <property name="product-app-jar" value="tbs-phone-app.jar"/>
 

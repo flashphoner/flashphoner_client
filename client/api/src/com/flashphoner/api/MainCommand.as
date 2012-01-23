@@ -44,10 +44,15 @@ package com.flashphoner.api
 					modelLocator.logged = true;		
 				}						
 			}
+			
 			if (event.type == MainEvent.REGISTERED){
 				modelLocator.logged = true;		
 				flashAPI.dropRegisteredTimer();
-			}	
+			}
+			
+			if (event.type == MainEvent.SUBSCRIBED){
+				//do nothing
+			}
 			
 			if (event.type == MainEvent.DISCONNECT){
 				SoundControl.stopRingSound();

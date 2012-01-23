@@ -101,7 +101,12 @@ package com.flashphoner.api
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 			Logger.info("PhoneServerProxy.loginByToken: "+token);
-		}		
+		}
+		
+		public function subscribe(subscribeObj:Object):void{
+			Logger.info("PhoneServerProxy.subscribe()");
+			nc.call("subscribe",responder,subscribeObj);
+		}
 		
 		public function call(callee:String, visibleName:String, isVideoCall:Boolean, inviteParameters:Object):void{
 			Logger.info("PhoneServerProxy.call()");

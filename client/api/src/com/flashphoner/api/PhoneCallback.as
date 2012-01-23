@@ -80,6 +80,19 @@ package com.flashphoner.api
 			CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.REGISTERED,flash_API));
 		}
 		
+		public function subscribed(_sipObject:Object):void{
+			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				apiNotify.notifySubscribed(_sipObject);
+			}
+			CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.SUBSCRIBED,flash_API));
+		}
+		
+		public function notifyRfc3265(_sipObject:Object):void{
+			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				apiNotify.notifyRfc3265(_sipObject);
+			}		
+		}
+		
 		public function ring(_call:Object,_sipObject:Object):void{
 			var call:Call = process(_call);
 			for each (var apiNotify:APINotify in flash_API.apiNotifys){
