@@ -212,9 +212,9 @@ package com.flashphoner.api
 			return call;
 		}
 		
-		public function notifyMessage(messageObj:Object):void {
+		public function notifyMessage(messageObj:Object,_sipObject:Object):void {
 			Logger.info("Message has been accepted by other participant");
-			CairngormEventDispatcher.getInstance().dispatchEvent(new MessageEvent(MessageEvent.MESSAGE_EVENT,messageObj,flash_API));		
+			CairngormEventDispatcher.getInstance().dispatchEvent(new MessageEvent(MessageEvent.MESSAGE_EVENT,flash_API,messageObj,_sipObject));		
 		}
 		
 		public function notifyAudioCodec(codec:Object):void {

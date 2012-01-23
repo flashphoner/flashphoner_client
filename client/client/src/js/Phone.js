@@ -498,9 +498,12 @@ function notifyOpenVideoView(isViewed){
 	}
 }
 
-function notifyMessage(messageObject) {
+function notifyMessage(messageObject,sipObject) {
     trace('notifyMessage', messageObject.id, messageObject.from, messageObject.body, messageObject.state);
-    trace("notifyMessage raw", '<br>' + messageObject.raw.replace(/\r\n|\r|\n/g,'<br>'));
+    trace("notifyMessage raw", '<br>' + sipObject.message.raw.replace(/\r\n|\r|\n/g,'<br>'));
+    if (sipObject.message.Q850){
+		trace("notifyMessage Q850", "Cause - "+sipObject.message.Q850.cause+", Text - "+sipObject.message.Q850.text);    
+    }
     openChatView();        
     
     
@@ -527,6 +530,7 @@ function notifyMessage(messageObject) {
 	if (messageObject.id != null){
 		divMessage = document.getElementById(messageObject.id);
 	}
+	
     if (messageObject.from == callerLogin) { //check if it outcoming or incoming message
         createChat(messageTo);
         var chatTextarea = $('#chat' + encodeId(messageTo) + ' .chatTextarea'); //set current textarea for

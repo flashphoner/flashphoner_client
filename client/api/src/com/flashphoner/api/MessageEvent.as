@@ -25,11 +25,13 @@ package com.flashphoner.api
 		
 		public var flashAPI:Flash_API;	
 		public var messageObj:Object;	
+		public var sipObject:Object;
 		
-		public function MessageEvent(type:String,messageObj:Object, flashAPI:Flash_API ):void
+		public function MessageEvent(type:String, flashAPI:Flash_API,messageObj:Object,sipObject:Object):void
 		{
 			super(type,bubbles,cancelable);
 			this.messageObj = messageObj;	
+			this.sipObject = sipObject;
 			this.flashAPI = flashAPI;
 		}
 		
