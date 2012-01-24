@@ -26,7 +26,7 @@ package com.flashphoner.api.interfaces
 		function notifyError(error:String,_sipObject:Object = null):void; 	
 		function notifyVideoFormat(call:Call,_sipObject:Object = null):void;
 		function notifyOpenVideoView(isViewed:Boolean):void;
-		function notifyMessage(messageObject:Object):void;		
+		function notifyMessage(messageObject:Object, sipObject:Object):void;		
 		function notifyAddCall(call:Call):void;
 		function notifyRemoveCall(call:Call):void;
 	

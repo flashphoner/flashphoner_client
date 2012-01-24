@@ -39,10 +39,11 @@ package com.flashphoner.api
 			
 			var flashAPI:Flash_API = (event as MessageEvent).flashAPI;					
 			var messageObject:Object = (event as MessageEvent).messageObj;
+			var sipObject:Object = (event as MessageEvent).sipObject;
 			
 			if (messageObject.state=="RECEIVED"){
 				//new incoming message
-				notify(messageObject,flashAPI,event);
+				notify(flashAPI, messageObject, sipObject, event);
 			} else {
 				//existing message				
 				var instantMessage:InstantMessage = flashAPI.findMessageById(messageObject.id);
@@ -56,17 +57,17 @@ package com.flashphoner.api
 					//update message
 					instantMessage.state = messageObject.state;
 					instantMessage.raw = messageObject.raw;					
-					notify(instantMessage,flashAPI,event);					
+					notify(flashAPI, instantMessage, sipObject, event);					
 				}
 			}	
 			
 			
 		}
 		
-		private function notify(messageObject:Object, flashAPI:Flash_API, event:CairngormEvent):void{
+		private function notify(flashAPI:Flash_API, messageObject:Object, sipObject:Object, event:CairngormEvent):void{
 			if (event.type == MessageEvent.MESSAGE_EVENT){
 				for each (var apiNotify:APINotify in flashAPI.apiNotifys){
-					apiNotify.notifyMessage(messageObject);
+					apiNotify.notifyMessage(messageObject,sipObject);
 				}
 			}		
 		}

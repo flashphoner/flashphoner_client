@@ -498,9 +498,12 @@ function notifyOpenVideoView(isViewed){
 	}
 }
 
-function notifyMessage(messageObject) {
+function notifyMessage(messageObject,sipObject) {
     trace('notifyMessage', messageObject.id, messageObject.from, messageObject.body, messageObject.state);
-    trace("notifyMessage raw", '<br>' + messageObject.raw.replace(/\r\n|\r|\n/g,'<br>'));
+    trace("notifyMessage raw", '<br>' + sipObject.message.raw.replace(/\r\n|\r|\n/g,'<br>'));
+    if (sipObject.message.Q850){
+		trace("notifyMessage Q850", "Cause - "+sipObject.message.Q850.cause+", Text - "+sipObject.message.Q850.text);    
+    }
     openChatView();        
     
     
@@ -527,6 +530,7 @@ function notifyMessage(messageObject) {
 	if (messageObject.id != null){
 		divMessage = document.getElementById(messageObject.id);
 	}
+	
     if (messageObject.from == callerLogin) { //check if it outcoming or incoming message
         createChat(messageTo);
         var chatTextarea = $('#chat' + encodeId(messageTo) + ' .chatTextarea'); //set current textarea for
@@ -843,6 +847,7 @@ function createChat(calleeName) {
         $('#tabcontent').append('<div class=chatBox id=chat' + encodeId(calleeName) + '>') //add chatBox
         $('#chat' + encodeId(calleeName)).append('<div class=chatTextarea></div>')//add text area for chat messages
             .append('<input class=messageInput type=textarea>')//add input field
+            .append('<input type=checkbox>Privacy</input>')
             .append('<input class=messageSend type=button value=Send>'); //add send button
 
         $("#tabul li").removeClass("ctab"); //remove select from all tabs
@@ -854,7 +859,7 @@ function createChat(calleeName) {
 
         $('#chat' + encodeId(calleeName) + ' .messageInput').keydown(function(event) {
             if (event.keyCode == '13') {
-                $(this).next().click(); // click on sendMessage button
+                $(this).next().next().click(); // click on sendMessage button
             } else if (event.keyCode == '27') {
                 $(this).val('');
             }
@@ -863,8 +868,9 @@ function createChat(calleeName) {
         // Bind send message function
         $('#chat' + encodeId(calleeName) + ' .messageSend').click(function() {
             var calleeName = $(this).parent().attr('id').substr(4); //parse id of current chatBox, take away chat word from the beginning
-	    calleeName = decodeId(calleeName);
-            var messageText = $(this).prev().val(); //parse text from input
+	    	calleeName = decodeId(calleeName);
+            var messageText = $(this).prev().prev().val(); //parse text from input
+            var isPrivacy = $(this).prev().is(':checked');
             var semicolonIndex = calleeName.indexOf(";");
 	    var recipients;
 	    //multipart mixed support
@@ -882,8 +888,9 @@ function createChat(calleeName) {
 	    msgObject.recipients = recipients;
 	    msgObject.body = messageText;
 	    msgObject.contentType = "message/cpim";
+	    msgObject.isPrivacy = isPrivacy;
 	    sendMessage(msgObject); //send message
-            $(this).prev().val(''); //clear message input
+            $(this).prev().prev().val(''); //clear message input
         });
 
         // Bind selecting tab

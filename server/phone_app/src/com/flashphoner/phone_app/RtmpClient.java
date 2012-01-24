@@ -223,13 +223,12 @@ public class RtmpClient extends AbstractRtmpClient {
         //getClient().call("notifyRequest", null, requestObj);
     }
 
-    public void notifyMessage(InstantMessage instantMessage) {
+    public void notifyMessage(InstantMessage instantMessage, SipMessageObject sipMessageObject) {
         Logger.logger.info("rtmpClient notifyMessage: " + instantMessage);
 
         AMFDataObj messageObj = new AMFDataObj();
 
         messageObj.put("state", instantMessage.getState());
-        messageObj.put("raw", instantMessage.getRaw());
 
         if (InstantMessageState.RECEIVED.equals(instantMessage.getState())) {
             messageObj.put("from", instantMessage.getFrom());
@@ -243,7 +242,7 @@ public class RtmpClient extends AbstractRtmpClient {
 
         }
 
-        getClient().call("notifyMessage", null, messageObj);
+        getClient().call("notifyMessage", null, messageObj, sipMessageObject.toAMFObj());
     }
 
     //speex, pcma, pcmu

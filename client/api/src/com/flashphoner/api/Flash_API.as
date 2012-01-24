@@ -610,11 +610,12 @@ package com.flashphoner.api
 			instantMessage.from = modelLocator.login; 
 			instantMessage.to = msgObj.to;
 			instantMessage.contentType = msgObj.contentType;
+			instantMessage.isPrivacy = msgObj.isPrivacy;
 			//Add message into the internal collection
 			instantMessage.id = msgObj.id;
 			messages.addItem(instantMessage);
 			//startMessageExpiredTimer
-			startExpirationTimer(instantMessage);
+			//startExpirationTimer(instantMessage);
 			this.phoneServerProxy.sendInstantMessage(instantMessage);
 		}
 		

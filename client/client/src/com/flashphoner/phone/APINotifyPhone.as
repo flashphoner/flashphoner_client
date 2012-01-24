@@ -37,7 +37,7 @@ package com.flashphoner.phone
 			phone(Application.application).toLoggedOffState();
 			phone(Application.application).videoView.stopVideo();
 			phone(Application.application).videoView.onCloseClick();
-			DataPhone.getInstance().viewController.hideIncomingView();	
+			DataPhone.getInstance().viewController.hideIncomingView();
 		}
 		public function notifyConnected():void{
 				if (!PhoneConfig.REGISTER_REQUIRED){				
@@ -118,7 +118,7 @@ package com.flashphoner.phone
 			}
 		}
 		
-		public function notifyMessage(messageObject:Object):void {
+		public function notifyMessage(messageObject:Object, _sipObject:Object):void {
 			DataPhone.getInstance().viewController.pushMessageToInstantMessageChatView(messageObject);			
 		}	
 		

@@ -32,13 +32,13 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyConnected");
 		}
 		public function notifyRegistered(_sipObject:Object):void{
-			ExternalInterface.call("notifyRegistered");
+			ExternalInterface.call("notifyRegistered",_sipObject);
 		}
 		public function notifyBalance(balance:Number,_sipObject:Object):void{
-			ExternalInterface.call("notifyBalance",String(balance));
+			ExternalInterface.call("notifyBalance",String(balance), _sipObject);
 		}
 		public function notify(call:Call,_sipObject:Object):void{
-			ExternalInterface.call("notify",call);
+			ExternalInterface.call("notify",call,_sipObject);
 		}
 		public function notifyCallbackHold(call:Call,isHold:Boolean):void{
 			ExternalInterface.call("notifyCallbackHold",call,isHold);
@@ -49,19 +49,19 @@ package com.flashphoner.api.js
 		}
 
 		public function notifyError(error:String,_sipObject:Object = null):void{
-			ExternalInterface.call("notifyError",error);
+			ExternalInterface.call("notifyError",error, _sipObject);
 		}
 		
 		public function notifyVideoFormat(call:Call,_sipObject:Object = null):void{
-			ExternalInterface.call("notifyVideoFormat",call);
+			ExternalInterface.call("notifyVideoFormat",call, _sipObject);
 		}
 		
 		public function notifyOpenVideoView(isViewed:Boolean):void{
 			ExternalInterface.call("notifyOpenVideoView",isViewed);
 		}
 		
-		public function notifyMessage(messageObject:Object):void{
-			ExternalInterface.call("notifyMessage",messageObject);
+		public function notifyMessage(messageObject:Object, _sipObject:Object):void{
+			ExternalInterface.call("notifyMessage",messageObject, _sipObject);
 		}
 		
 		public function notifyAddCall(call:Call):void{
