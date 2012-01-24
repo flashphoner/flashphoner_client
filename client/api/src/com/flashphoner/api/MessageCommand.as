@@ -43,7 +43,7 @@ package com.flashphoner.api
 			
 			if (messageObject.state=="RECEIVED"){
 				//new incoming message
-				notify(flashAPI, instantMessage, sipObject, event);
+				notify(flashAPI, messageObject, sipObject, event);
 			} else {
 				//existing message				
 				var instantMessage:InstantMessage = flashAPI.findMessageById(messageObject.id);
