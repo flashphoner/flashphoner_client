@@ -18,7 +18,7 @@ import com.flashphoner.sdk.softphone.ISoftphoneCall;
 import com.flashphoner.sdk.softphone.InstantMessage;
 import com.flashphoner.sdk.softphone.InstantMessageState;
 import com.flashphoner.sdk.softphone.Logger;
-import com.flashphoner.sip.subscribe.Subscription;
+import com.flashphoner.sdk.sip.Subscription;
 import com.wowza.wms.amf.AMFDataObj;
 import com.wowza.wms.client.IClient;
 
