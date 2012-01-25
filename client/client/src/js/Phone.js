@@ -431,9 +431,13 @@ function notifyCallbackHold(call, isHold) {
 function notifyCost(cost) {
 }
 
-function notifyError(error) {
+function notifyError(error, sipObject) {
 
     trace("notifyError", error);
+
+    if (sipObject.message.reason){
+		trace("notifyMessage.reason", "Protocol - "+sipObject.message.reason.protocol+", Cause - "+sipObject.message.reason.cause+", Text - "+sipObject.message.reason.text+", Raw - "+sipObject.message.reason.raw);    
+    }
 
     if (error == CONNECTION_ERROR) {
         openInfoView("Connection fail", 3000,30);
@@ -501,8 +505,8 @@ function notifyOpenVideoView(isViewed){
 function notifyMessage(messageObject,sipObject) {
     trace('notifyMessage', messageObject.id, messageObject.from, messageObject.body, messageObject.state);
     trace("notifyMessage raw", '<br>' + sipObject.message.raw.replace(/\r\n|\r|\n/g,'<br>'));
-    if (sipObject.message.Q850){
-		trace("notifyMessage Q850", "Cause - "+sipObject.message.Q850.cause+", Text - "+sipObject.message.Q850.text);    
+    if (sipObject.message.reason){
+		trace("notifyMessage.reason", "Protocol - "+sipObject.message.reason.protocol+", Cause - "+sipObject.message.reason.cause+", Text - "+sipObject.message.reason.text+", Raw - "+sipObject.message.reason.raw);    
     }
     openChatView();        
     
