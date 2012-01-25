@@ -294,13 +294,19 @@ function addLogMessage(message) {
     trace(message);
 }
 
-function notifySubscribed(sipObject){
+function notifySubscribed(subscribeObject,sipObject){
   trace("notifySubscribed");
   trace("sipObject: "+sipObject.type+" "+sipObject.message.code+" "+sipObject.message.reason);
   trace("sipObject raw: "+sipObject.message.raw);
 }
 
-function notifyRfc3265(sipObject){
+function notifySubscriptionTerminated(subscribeObject,sipObject){
+  trace("notify subscription terminated");
+  trace("sipObject: "+sipObject.type+" "+sipObject.message.code+" "+sipObject.message.reason);
+  trace("sipObject raw: "+sipObject.message.raw);
+}
+
+function notifyRfc3265(subscribeObject,sipObject){
   trace("notifyRfc3265");
   trace("sipObject: "+sipObject.type+" "+sipObject.message.method+" "+sipObject.message.requestURI);
   trace("sipObject raw: "+sipObject.message.raw);

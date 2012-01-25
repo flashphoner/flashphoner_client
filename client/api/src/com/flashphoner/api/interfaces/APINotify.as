@@ -31,9 +31,8 @@ package com.flashphoner.api.interfaces
 		function notifyRemoveCall(call:Call):void;
 	
 		function addLogMessage(message:String):void;
-		function notifyVersion(version:String):void;
-		function notifySubscribed(_sipObject:Object):void;
-		function notifyRfc3265(_sipObject:Object):void;
+		function notifyVersion(version:String):void;		
+		function notifySubscription(subscriptionObject:Object,_sipObject:Object):void;		
 	
 	}
 }

@@ -18,6 +18,7 @@ import com.flashphoner.sdk.softphone.ISoftphoneCall;
 import com.flashphoner.sdk.softphone.InstantMessage;
 import com.flashphoner.sdk.softphone.InstantMessageState;
 import com.flashphoner.sdk.softphone.Logger;
+import com.flashphoner.sip.subscribe.Subscription;
 import com.wowza.wms.amf.AMFDataObj;
 import com.wowza.wms.client.IClient;
 
@@ -257,17 +258,8 @@ public class RtmpClient extends AbstractRtmpClient {
     }
 
 
-    @Override
-    public void subscribed(SipMessageObject sipMsg) {
-        if (sipMsg != null) {
-            getClient().call("subscribed", null, sipMsg.toAMFObj());
-        }
+    public void notifySubscription(Subscription subscription, SipMessageObject sipMsg) {
+        getClient().call("notifySubscription", null, subscription.toAMFDataObj(), sipMsg.toAMFObj());
     }
-
-    @Override
-    public void notifyRfc3265(SipMessageObject sipMsg) {
-        if (sipMsg != null) {
-            getClient().call("notifyRfc3265", null, sipMsg.toAMFObj());
-        }
-    }
+    
 }
