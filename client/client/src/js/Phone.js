@@ -205,6 +205,10 @@ function answer(callId) {
     }
 }
 
+function ignore(callId) {
+    trace("ignore", callId);
+    flashphoner.ignore(callId);
+}
 function hangup(callId) {
     trace("hangup", callId);
     flashphoner.hangup(callId);
@@ -1072,6 +1076,11 @@ $(function() {
     $(".closeButton").click(function() {
       close($(this).parent());
     });
+    
+	$(".closeButton_incoming_call").click(function() {
+		ignore(currentCall.id);
+    	close($(this).parent());
+    });    
 
     //enable drag and resize objects
     $("#loginDiv").draggable({handle: '.bar', stack:"#loginDiv"});

@@ -110,6 +110,14 @@ package com.flashphoner.api
 			this.flash_API = flash_API;
 			callServerProxy = new CallServerProxy(this,flash_API.phoneServerProxy.nc);
 		}
+		
+		/**
+		 * Ignore this call
+		 **/
+		public function ignore():void{
+			SoundControl.stopRingSound();
+		}
+		
 		/**
 		 * Hangup this call
 		 **/
