@@ -8,7 +8,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="wowza" level="project" />
-    <orderEntry type="module" module-name="flashphoner" />
+    <orderEntry type="library" name="flashphoner" level="project" />
   </component>
 </module>
 
