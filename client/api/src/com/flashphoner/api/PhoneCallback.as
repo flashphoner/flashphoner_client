@@ -78,18 +78,12 @@ package com.flashphoner.api
 				apiNotify.notifyRegistered(_sipObject);
 			}
 			CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.REGISTERED,flash_API));
-		}
+		}		
 		
-		public function subscribed(_sipObject:Object):void{
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
-				apiNotify.notifySubscribed(_sipObject);
-			}
-			CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.SUBSCRIBED,flash_API));
-		}
 		
-		public function notifyRfc3265(_sipObject:Object):void{
+		public function notifySubscription(subscribtionObject:Object,_sipObject:Object):void{
 			for each (var apiNotify:APINotify in flash_API.apiNotifys){
-				apiNotify.notifyRfc3265(_sipObject);
+				apiNotify.notifySubscription(subscribtionObject,_sipObject);
 			}		
 		}
 		
