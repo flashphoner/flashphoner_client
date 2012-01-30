@@ -14,7 +14,6 @@ package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.media.SdpState;
 import com.flashphoner.sdk.rtmp.*;
-import com.flashphoner.sdk.sip.request_params.RequestParams;
 import com.flashphoner.sdk.softphone.*;
 import com.flashphoner.sdk.softphone.exception.CrossCallException;
 import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
