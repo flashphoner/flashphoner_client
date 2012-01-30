@@ -93,6 +93,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("sendMessage",sendMessage);
 			ExternalInterface.addCallback("call",call);
 			ExternalInterface.addCallback("callByToken",callByToken);
+			ExternalInterface.addCallback("ignore",ignore);
 			ExternalInterface.addCallback("hangup",hangup);
 			ExternalInterface.addCallback("answer",answer);
 			ExternalInterface.addCallback("sendDTMF",sendDTMF);
@@ -127,6 +128,17 @@ package com.flashphoner.api
 			soundControl = new SoundControl(this);
 			videoControl = new VideoControl();
 		}
+
+		/**
+		 * Ignore call by id
+		 * @param callId Identifier of call
+		 **/
+		public function ignore(callId:String):void{
+			var call:Call = getCallById(callId);
+			if (call != null){
+				call.ignore();
+			}
+		}		
 		
 		/**
 		 * Hangup call by id

@@ -46,7 +46,8 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 #settingsDiv,
 #versionOfProduct, 
 #controlPanel, 
-.closeButton, 
+.closeButton,
+.closeButton_incoming_call,
 .transferButton, 
 .holdButton,
 .holdImage,
@@ -137,7 +138,8 @@ input::-webkit-input-placeholder {
 	height: 14px;
 }
 
-.closeButton {
+.closeButton,
+.closeButton_incoming_call {
 	background: url(../assets/close.png);
 	right: 3px;
 	opacity: 0.7;
@@ -145,6 +147,7 @@ input::-webkit-input-placeholder {
 	width: 14px;
 	height: 14px;
 }
+
 #cameraButton {
 	background: url(../assets/camera.png) no-repeat center;
 }

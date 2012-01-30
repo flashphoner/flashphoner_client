@@ -21,6 +21,6 @@
 	<use_enhanced_mic>true</use_enhanced_mic>
 	<ring_sound></ring_sound>
 	<busy_sound></busy_sound>
-	<register_sound></register_sound>
+	<register_sound>assets/YesLife_SignIn.mp3</register_sound>
 	<finish_sound></finish_sound>
 </flashphoner>
