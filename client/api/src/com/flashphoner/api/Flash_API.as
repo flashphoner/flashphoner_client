@@ -112,7 +112,9 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("setCookie",setCookie);
 			ExternalInterface.addCallback("getCookie",getCookie);
 			ExternalInterface.addCallback("getVersion",getVersion);
-			ExternalInterface.addCallback("subscribe",subscribe);
+			ExternalInterface.addCallback("subscribe",subscribe);			
+			ExternalInterface.addCallback("sendRawRequest",sendRawRequest);
+			
 			calls = new ArrayCollection();
 			messages = new ArrayCollection();
 			modelLocator = new ModelLocator();
@@ -658,8 +660,11 @@ package com.flashphoner.api
 		
 		public function subscribe(subscribeObj:Object):void{
 			this.phoneServerProxy.subscribe(subscribeObj);
-		}
+		}		
 		
+		public function sendRawRequest(rawRequest:String):void{
+			this.phoneServerProxy.sendRawRequest(rawRequest);
+		}	
 
 	}
 }

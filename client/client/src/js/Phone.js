@@ -193,6 +193,13 @@ function sendMessage(msgObject){
 	flashphoner.sendMessage(msgObject);
 }
 
+function sendRawRequest(rawRequest){
+	var rawRequestText = getElement('rawRequestText').value;
+	trace("sendRawRequest",rawRequestText);
+	setCookie("rawRequestText", rawRequestText);	
+	flashphoner.sendRawRequest(rawRequestText);		
+}
+
 function answer(callId) {
     trace("answer", callId);
     if (isMuted() == 1) {
@@ -294,21 +301,10 @@ function addLogMessage(message) {
     trace(message);
 }
 
-function notifySubscribed(subscribeObject,sipObject){
-  trace("notifySubscribed");
-  trace("sipObject: "+sipObject.type+" "+sipObject.message.code+" "+sipObject.message.reason);
-  trace("sipObject raw: "+sipObject.message.raw);
-}
 
-function notifySubscriptionTerminated(subscribeObject,sipObject){
-  trace("notify subscription terminated");
+function notifySubscription(subscribeObject,sipObject){
+  trace("notify subscription");
   trace("sipObject: "+sipObject.type+" "+sipObject.message.code+" "+sipObject.message.reason);
-  trace("sipObject raw: "+sipObject.message.raw);
-}
-
-function notifyRfc3265(subscribeObject,sipObject){
-  trace("notifyRfc3265");
-  trace("sipObject: "+sipObject.type+" "+sipObject.message.method+" "+sipObject.message.requestURI);
   trace("sipObject raw: "+sipObject.message.raw);
 }
 
@@ -319,6 +315,7 @@ function notifyFlashReady() {
     } else {
         closeConnectingView();
     }
+    getElement('rawRequestText').value=getCookie('rawRequestText');
 }
 
 function notifyRegisterRequired(registerR) {
@@ -360,12 +357,16 @@ function notifyRegistered() {
         getElement("callerLogin").innerHTML = callerLogin;
         isLogged = true;
         closeConnectingView();
+	subscribeReg();		
+	setTimeout("deferredCall()",3000);        
+    }
+}
+
+function subscribeReg(){
 	var subscribeObj = new Object();
         subscribeObj.event="reg";
 	subscribeObj.expires=3600;
 	subscribe(subscribeObj);        
-	setTimeout("deferredCall()",3000);        
-    }
 }
 
 function notifyBalance(balance) {
@@ -1004,7 +1005,7 @@ $(function() {
 
     // click on caller login show logout button
     $("#callerLogin").click(function() {
-      $('#logoutButton').toggle()
+      $('#logoutButton').toggle();
     });
 
     // every time when we change callee field - we set parameter callee
@@ -1013,6 +1014,10 @@ $(function() {
     $("#calleeText").keyup(function() {
       callee1 = $(this).val();
     });
+
+    $("#sendRawRequestButton").click(function() {
+      sendRawRequest();
+    });	        		    
 
     //Bind click on different buttons
     $("#callButton").click(function() {

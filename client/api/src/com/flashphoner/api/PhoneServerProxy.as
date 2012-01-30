@@ -30,6 +30,7 @@ package com.flashphoner.api
 	import flash.utils.setTimeout;
 	
 	import mx.controls.Alert;
+	import mx.core.mx_internal;
 	
 	/**
 	 * Media server outgoing communication class
@@ -170,6 +171,12 @@ package com.flashphoner.api
 			instantMessageObj.isPrivacy=instantMessage.isPrivacy;
 			
 			nc.call("sendInstantMessage",responder,instantMessageObj);
+		}	
+		
+		
+		public function sendRawRequest(rawRequest:String):void{
+			Logger.info("sendRawRequest: "+rawRequest);			
+			nc.call("sendRawRequest",responder,rawRequest);
 		}
 		
 
