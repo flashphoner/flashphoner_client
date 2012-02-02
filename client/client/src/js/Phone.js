@@ -224,7 +224,7 @@ function hangup(callId) {
 
 function sendDTMF(callId, dtmf) {
     trace("sendDTMF", callId, dtmf);
-    if (dtmf='#'){
+    if (dtmf=='#'){
 	var infoObject = new Object();
 	infoObject.callId = callId;
 	infoObject.contentType = "application/broadsoft";
