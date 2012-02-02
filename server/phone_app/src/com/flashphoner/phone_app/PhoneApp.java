@@ -14,6 +14,7 @@ package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.media.SdpState;
 import com.flashphoner.sdk.rtmp.*;
+import com.flashphoner.sdk.sip.request_params.InfoParams;
 import com.flashphoner.sdk.softphone.*;
 import com.flashphoner.sdk.softphone.exception.CrossCallException;
 import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
@@ -696,7 +697,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         } catch (SoftphoneException e) {
             Logger.logger.error("Can not subscribe", e);
         }
-    }    
+    }
 
     public void sendRawRequest(IClient client, RequestFunction requestFunction, AMFDataList params) {
         IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
@@ -705,7 +706,18 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         try {
             rtmpClient.getSoftphone().sendRawRequest(rawRequest);
         } catch (SoftphoneException e) {
-            Logger.logger.error("Can not send raw request", e);            
+            Logger.logger.error("Can not send raw request", e);
+        }
+    }
+
+    public void sendInfo(IClient client, RequestFunction requestFunction, AMFDataList params) {
+        IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
+        AMFDataObj infoObj = params.getObject(PARAM1);
+        InfoParams infoParams = new InfoParams(infoObj.getString("contentType"), infoObj.getString("body"), infoObj.getString("callId"));
+        try {
+            rtmpClient.getSoftphone().sendInfo(infoParams);
+        } catch (SoftphoneException e) {
+            Logger.logger.error("Can not send raw request", e);
         }
     }
 

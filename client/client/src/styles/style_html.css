@@ -69,7 +69,9 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 #chatDiv,
 #micSlider, #speakerSlider,
 #micBack, #speakerBack,
-#console {
+#console,
+#rawRequest,
+#callManagement {
 	position: absolute;
 }
 /* ---------- Border ------------ */
@@ -758,11 +760,41 @@ div with zero size.
 	bottom: -1px !important;
   border: 1px solid #222 !important;
 }
+
+/*-----------Call management ----------*/
+#callManagement{
+	top: 520px;
+	left: 20px;	
+	height: 300px;
+	width: 1000px;
+	float: left;
+	background-color: #FEFEFE;
+	font: 14px Courier;
+	color: #000000; 
+	padding: 10px;
+	overflow: auto;
+	word-wrap: break-word;
+}
+
+#managedCalls{	
+	left:5;
+	bottom:5;
+	height: 250px;
+	width: 950px;
+	float: left;
+	background-color: #000000;
+	font: 14px Courier;
+	color: #eee; 
+	padding: 10px;
+	overflow: auto;
+	word-wrap: break-word;
+}
+
+/*-------------------------------------*/
 	
 /* -------------------------------------- */
 /* --------- Console ------------*/
 #rawRequest {
-	position: absolute;
 	top: 20px;
 	left: 945px;	
 	height: 500px;
@@ -774,6 +806,7 @@ div with zero size.
 	padding: 10px;
 	overflow: auto;
 	word-wrap: break-word;
+	visibility:hidden;
 }
 
 .rawRequestText {

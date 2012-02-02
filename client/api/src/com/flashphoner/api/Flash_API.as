@@ -115,6 +115,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("getVersion",getVersion);
 			ExternalInterface.addCallback("subscribe",subscribe);			
 			ExternalInterface.addCallback("sendRawRequest",sendRawRequest);
+			ExternalInterface.addCallback("sendInfo",sendInfo);
 			
 			calls = new ArrayCollection();
 			messages = new ArrayCollection();
@@ -676,7 +677,11 @@ package com.flashphoner.api
 		
 		public function sendRawRequest(rawRequest:String):void{
 			this.phoneServerProxy.sendRawRequest(rawRequest);
-		}	
+		}
+		
+		public function sendInfo(infoObj:Object):void{
+			this.phoneServerProxy.sendInfo(infoObj);
+		}
 
 	}
 }
