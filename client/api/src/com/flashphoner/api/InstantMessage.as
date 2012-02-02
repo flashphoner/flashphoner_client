@@ -40,8 +40,6 @@ package com.flashphoner.api
 		 **/
 		public var contentType:String;
 		
-		public var isPrivacy:Boolean;
-		
 		public var state:String;
 		
 		public var raw:String;

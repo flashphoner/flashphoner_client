@@ -862,7 +862,6 @@ function createChat(calleeName) {
         $('#tabcontent').append('<div class=chatBox id=chat' + encodeId(calleeName) + '>') //add chatBox
         $('#chat' + encodeId(calleeName)).append('<div class=chatTextarea></div>')//add text area for chat messages
             .append('<input class=messageInput type=textarea>')//add input field
-            .append('<input type=checkbox>Privacy</input>')
             .append('<input class=messageSend type=button value=Send>'); //add send button
 
         $("#tabul li").removeClass("ctab"); //remove select from all tabs
@@ -874,7 +873,7 @@ function createChat(calleeName) {
 
         $('#chat' + encodeId(calleeName) + ' .messageInput').keydown(function(event) {
             if (event.keyCode == '13') {
-                $(this).next().next().click(); // click on sendMessage button
+                $(this).next().click(); // click on sendMessage button
             } else if (event.keyCode == '27') {
                 $(this).val('');
             }
@@ -884,8 +883,7 @@ function createChat(calleeName) {
         $('#chat' + encodeId(calleeName) + ' .messageSend').click(function() {
             var calleeName = $(this).parent().attr('id').substr(4); //parse id of current chatBox, take away chat word from the beginning
 	    	calleeName = decodeId(calleeName);
-            var messageText = $(this).prev().prev().val(); //parse text from input
-            var isPrivacy = $(this).prev().is(':checked');
+            var messageText = $(this).prev().val(); //parse text from input
             var semicolonIndex = calleeName.indexOf(";");
 	    var recipients;
 	    //multipart mixed support
@@ -903,9 +901,8 @@ function createChat(calleeName) {
 	    msgObject.recipients = recipients;
 	    msgObject.body = messageText;
 	    msgObject.contentType = "message/cpim";
-	    msgObject.isPrivacy = isPrivacy;
 	    sendMessage(msgObject); //send message
-            $(this).prev().prev().val(''); //clear message input
+            $(this).prev().val(''); //clear message input
         });
 
         // Bind selecting tab
