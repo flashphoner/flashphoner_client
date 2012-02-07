@@ -121,10 +121,10 @@ function login() {
     }
 }
 
-function loginWithToken(token) {
-    trace("loginWithToken", token);
+function loginByToken(token) {
+    trace("loginByToken", token);
     connectingViewBeClosed = false;
-    var result = flashphoner.loginWithToken(token);
+    var result = flashphoner.loginByToken(token);
 
     closeLoginView();
     openConnectingView("Connecting...", 0);
