@@ -183,6 +183,8 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
                 } else {
                     url = new URL(auto_login_url + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl="+pageUrl);
                     URLConnection conn = url.openConnection();
+                    // WSP-1667 - autologin not work. this paramteres imitate browswer request because some servers do not allow java make requests
+                    conn.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
                     bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
                 }
@@ -496,6 +498,8 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             } else {
                 url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl="+pageUrl);
                 URLConnection conn = url.openConnection();
+                // WSP-1667 - autologin not work. this paramteres imitate browswer request because some servers do not allow java make requests
+                conn.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
                 bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             }
 
