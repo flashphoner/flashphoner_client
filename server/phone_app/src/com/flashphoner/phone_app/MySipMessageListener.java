@@ -13,16 +13,19 @@ This code and accompanying materials also available under LGPL and MPL license f
 package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.sip.ISipMessageListener;
-import com.flashphoner.sdk.softphone.Logger;
 import gov.nist.javax.sip.message.SIPMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Simple example of usage {@link ISipMessageListener} interface.<br/>
  * Just logs intercepted sip message.
  */
-public class MySipMessageListener implements ISipMessageListener {
+public class MySipMessageListener implements ISipMessageListener {     
+
+    private static Logger log = LoggerFactory.getLogger(MySipMessageListener.class);
 
     public void processMessage(SIPMessage sipMessage) {
-        Logger.logger.info(4, "Message:\n" + sipMessage.toString());
+        log.info("Message:\n" + sipMessage.toString());
     }
 }

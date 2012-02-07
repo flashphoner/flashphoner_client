@@ -21,7 +21,8 @@ import com.flashphoner.sdk.media.Timing;
 import com.flashphoner.sdk.rtmp.Config;
 import com.flashphoner.sdk.rtmp.ConfigValidator;
 import com.flashphoner.sdk.rtmp.IConfig;
-import com.flashphoner.sdk.softphone.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -36,6 +37,9 @@ import java.util.Properties;
  * To change this template use File | Settings | File Templates.
  */
 public class ClientConfig implements IConfig {
+
+    private static Logger log = LoggerFactory.getLogger(ClientConfig.class);
+
     /**
      * Internal properties object
      */
@@ -48,8 +52,7 @@ public class ClientConfig implements IConfig {
 
 
     static {
-        config = new ClientConfig();
-        Logger.init();
+        config = new ClientConfig();        
     }
 
     /**
@@ -63,7 +66,7 @@ public class ClientConfig implements IConfig {
         try {
             props.load(new FileInputStream(wowzaHome + "/conf/phone_app/flashphoner-client.properties"));
         } catch (Exception e) {
-            Logger.logger.error("Error flashphoner-client.properties init", e);
+            log.error("Error flashphoner-client.properties init", e);
         }
     }
 
