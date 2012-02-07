@@ -272,7 +272,7 @@ function addLogMessage(message) {
 function notifyFlashReady() {
 	$('#versionOfProduct').html(getVersion());
     if (flashvars.token != null) {
-        loginWithToken(flashvars.token);
+        loginByToken(flashvars.token);
     } else {
         closeConnectingView();
     }
@@ -586,7 +586,7 @@ function disableHoldButton() {
 
 function openLoginView() {
     if (flashvars.token != null) {
-        loginWithToken(flashvars.token);
+        loginByToken(flashvars.token);
     } else {
         trace("openLoginView");
         $('#loginDiv').css('visibility', 'visible');
