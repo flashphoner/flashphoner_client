@@ -103,7 +103,7 @@ package com.flashphoner.api
 				mic = Microphone.getMicrophone();
 			}
 			if (mic != null){
-				initMic(mic,50,false);
+				initMic(mic,100,false);
 			}
 			
 			updateSounds();
