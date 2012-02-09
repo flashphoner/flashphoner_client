@@ -126,7 +126,14 @@ function generateUUID(){
 function login() {
     trace("login");
     connectingViewBeClosed = false;
-    var result = flashphoner.login('sip:' + $('#username').val() + '@' + $('#domain').val(), $('#password').val(), $('#authname').val(), $('#outbound_proxy').val(), $('#port').val());
+    var loginObject = new Object();
+    loginObject.username = 'sip:' + $('#username').val() + '@' + $('#domain').val();
+    loginObject.password = $('#password').val();
+    loginObject.authenticationName = $('#authname').val();
+    loginObject.outboundProxy = $('#outbound_proxy').val();
+    loginObject.port = $('#port').val();
+    loginObject.qValue = '1.0';        
+    var result = flashphoner.login(loginObject);
     closeLoginView();
     if (result == 0) {
         openConnectingView("Connecting...", 0);
@@ -139,10 +146,10 @@ function login() {
     }
 }
 
-function loginWithToken(token) {
-    trace("loginWithToken", token);
+function loginByToken(token) {
+    trace("loginByToken", token);
     connectingViewBeClosed = false;
-    var result = flashphoner.loginWithToken(token);
+    var result = flashphoner.loginByToken(token);
 
     closeLoginView();
     openConnectingView("Connecting...", 0);

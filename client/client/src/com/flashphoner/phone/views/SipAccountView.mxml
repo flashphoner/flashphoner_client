@@ -53,7 +53,13 @@ This code and accompanying materials also available under LGPL and MPL license f
 				}
 				
 				DataPhone.getInstance().viewController.showConnectingView();
-				if (DataPhone.getInstance().flash_API.login("sip:"+username.text+"@"+domain.text, password.text, authName.text, outboundProxy.text, port.text) == 0){
+				var loginObject:Object = new Object();
+				loginObject.username = "sip:"+username.text+"@"+domain.text;
+				loginObject.password = password.text;
+				loginObject.authenticationName = authName.text;
+				loginObject.outboundProxy = outboundProxy.text;
+				loginObject.port = port.text;
+				if (DataPhone.getInstance().flash_API.login(loginObject) == 0){
 					save();
 				}
 			}

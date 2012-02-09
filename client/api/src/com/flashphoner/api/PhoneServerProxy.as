@@ -61,7 +61,14 @@ package com.flashphoner.api
 			phoneSpeaker = new PhoneSpeaker(nc,flash_API);
 		}
 		
-		public function login(username:String, password:String, authenticationName:String, outboundProxy:String, port:String):int{			
+		public function login(loginObject:Object):int{
+			var username:String = loginObject.username;
+			var authenticationName:String = loginObject.authenticationName;
+			var password:String = loginObject.password;
+			var outboundProxy:String = loginObject.outboundProxy;
+			var port:String = loginObject.port;
+			var qValue:String = loginObject.qValue;
+			
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
@@ -87,6 +94,7 @@ package com.flashphoner.api
 			obj.port = port;
 			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
 			obj.visibleName = modelLocator.visibleName;
+			obj.qValue = qValue;
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);	
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 			return 0;			

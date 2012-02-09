@@ -53,7 +53,7 @@ import java.util.Map;
  */
 public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnApp, IRtmpClientsCollectionSupport {
 
-     private static Logger log = LoggerFactory.getLogger(PhoneApp.class);
+    private static Logger log = LoggerFactory.getLogger(PhoneApp.class);
 
     /**
      * Wowza application name. If your use own application name, you should change it here
@@ -162,6 +162,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String login = obj.getString("login");
         String password = obj.getString("password");
         String visibleName = obj.getString("visibleName");
+        String qValue = obj.getString("qValue");
 
         if (login != null && password != null) {
             outboundProxy = obj.getString("outboundProxy");
@@ -275,6 +276,11 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
                     port = SIPConstants.DEFAULT_PORT;
                 }
             }
+
+            domain = el.getAttribute("domain");
+
+            qValue = el.getAttribute("qValue");
+
         }
         log.info("outboundProxy - " + outboundProxy);
 
@@ -298,7 +304,13 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         config.setSupportedResolutions(supportedResolutions);
         config.setMajorMinorPlayerVersion(majorMinorVersion);
         config.setSwfUrl(swfUrl);
-        config.setPageUrl(pageUrl);
+        config.setPageUrl(pageUrl);        
+
+        try{
+            config.setqValue(Float.parseFloat(qValue));
+        }catch(Exception e){
+            //do nothing
+        }
 
         log.info(config.toString());
 
