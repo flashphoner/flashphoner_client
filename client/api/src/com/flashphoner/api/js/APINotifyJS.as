@@ -82,6 +82,10 @@ package com.flashphoner.api.js
 		
 		public function notifySubscription(subscriptionObject:Object, _sipObject:Object):void{
 			ExternalInterface.call("notifySubscription", subscriptionObject, _sipObject);
+		}
+		
+		public function notifyChangeMicVolume(volume:int):void{
+			ExternalInterface.call("notifyChangeMicVolume", volume);
 		}	
 		
 		

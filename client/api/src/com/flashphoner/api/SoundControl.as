@@ -16,13 +16,17 @@ package com.flashphoner.api
 	import com.flashphoner.api.data.PhoneConfig;
 	import com.flashphoner.api.interfaces.APINotify;
 	
+	import flash.events.SampleDataEvent;
+	import flash.events.TimerEvent;
 	import flash.media.Microphone;
+	import flash.media.MicrophoneEnhancedOptions;
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
 	import flash.media.SoundCodec;
 	import flash.media.SoundTransform;
 	import flash.net.URLRequest;
 	import flash.system.Capabilities;
+	import flash.utils.Timer;
 	
 	public class SoundControl
 	{
@@ -63,7 +67,13 @@ package com.flashphoner.api
 		
 		private var mic:Microphone;
 		
+		private var minCountSamples:int;
+		
+		private var maxCountSamples:int;
+		
 		private var flash_API:Flash_API;
+		
+		private var timerAGC:Timer;
 		
 		/**
 		 * Control class (singelton) for microphone and sounds.
@@ -72,16 +82,16 @@ package com.flashphoner.api
 		public function SoundControl(flash_API:Flash_API)
 		{
 			this.flash_API = flash_API;
+			this.minCountSamples = 0;
+			this.maxCountSamples = 0;
+			
+			timerAGC = new Timer(5000);
+			timerAGC.addEventListener(TimerEvent.TIMER, timerAGCHandler);
+
 			Logger.info("Use enchenced mic: "+PhoneConfig.USE_ENHANCED_MIC);
 			if (PhoneConfig.USE_ENHANCED_MIC){
-				var flashPlayerVersion:String = Capabilities.version;
-
-				var osArray:Array = flashPlayerVersion.split(' ');
-				var osType:String = osArray[0];
-				var versionArray:Array = osArray[1].split(',');
-				var majorVersion:Number = parseInt(versionArray[0]);
 				
-				if (majorVersion >= 11 || Capabilities.language.indexOf("en") >= 0){
+				if (getMajorVersion() >= 11 || Capabilities.language.indexOf("en") >= 0){
 					mic = Microphone.getEnhancedMicrophone();				
 				}else{
 					mic = Microphone.getMicrophone();
@@ -93,10 +103,32 @@ package com.flashphoner.api
 				mic = Microphone.getMicrophone();
 			}
 			if (mic != null){
-				initMic(mic,50,false);
+				initMic(mic,50);
 			}
 			
 			updateSounds();
+		}
+		
+		private function timerAGCHandler(timeEvent:TimerEvent):void{
+			Logger.info("timerAGCHandler; minCountSamples - " + minCountSamples +"; maxCountSamples - "+ maxCountSamples); 
+			Logger.info("Old mic gain - "+mic.gain);
+			if (maxCountSamples > 0){
+				if (maxCountSamples > 10){
+					maxCountSamples = 10;
+				}
+				mic.gain -= maxCountSamples;
+				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+					apiNotify.notifyChangeMicVolume(mic.gain);
+				}	
+			}else if (minCountSamples >= 1 && minCountSamples < 5){
+				mic.gain += 10;
+				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+					apiNotify.notifyChangeMicVolume(mic.gain);
+				}	
+			}
+			maxCountSamples = 0;
+			minCountSamples = 0;
+			Logger.info("New mic gain - "+mic.gain);
 		}
 		
 		/**
@@ -185,7 +217,7 @@ package com.flashphoner.api
 			
 			var microphone:Microphone;
 			if (PhoneConfig.USE_ENHANCED_MIC){
-				if (Capabilities.language.indexOf("en") >= 0){
+				if (getMajorVersion() >= 11 || Capabilities.language.indexOf("en") >= 0){
 					microphone = Microphone.getEnhancedMicrophone(index);
 				}else{
 					microphone = Microphone.getMicrophone(index);
@@ -210,7 +242,7 @@ package com.flashphoner.api
 			return mic;
 		}
 		
-		private function initMic(mic:Microphone, gain:int=50, loopback:Boolean=false):void{
+		private function initMic(mic:Microphone, gain:int=50, loopback:Boolean=true):void{
 			var logMsg:String = "Init mic: codec: "+PhoneConfig.AUDIO_CODEC+" gain: "+50+" loopback: "+loopback;
 			Logger.info(logMsg);
 			for each (var apiNotify:APINotify in flash_API.apiNotifys){
@@ -221,6 +253,9 @@ package com.flashphoner.api
 			
 			if (gain != -1){
 				mic.gain = gain;
+				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+					apiNotify.notifyChangeMicVolume(mic.gain);
+				}	
 			}
 			
 			mic.soundTransform = new SoundTransform(1,0);			
@@ -228,6 +263,46 @@ package com.flashphoner.api
 			mic.setSilenceLevel(0,3600000);
 			mic.setUseEchoSuppression(true);
 		}
+		
+		public function enableAGC():void{
+			if (PhoneConfig.USE_AUTO_GAIN_CONTROL){
+				if (mic.hasEventListener(SampleDataEvent.SAMPLE_DATA)){
+					mic.removeEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);
+				}
+				mic.addEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);
+				if (!timerAGC.running){
+					timerAGC.start();
+				}
+			}			
+		}
+		
+		public function disableAGC():void{
+			if (PhoneConfig.USE_AUTO_GAIN_CONTROL){
+				mic.removeEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);
+				timerAGC.stop();
+				maxCountSamples = 0;
+				minCountSamples = 0;
+			}
+		}
+		
+		private function micSampleDataHandler(event:SampleDataEvent):void {
+			var count:Number = event.data.length;
+			var sum:Number = 0;
+			
+			while(event.data.bytesAvailable)     { 
+				var sample:Number = event.data.readFloat();
+				sum += sample;
+			} 
+			var value:Number = sum/count;
+			if (value > 0.001){
+				maxCountSamples++;
+			}
+			if (value > 0.0000003){
+				minCountSamples++;
+			}
+		}			
+		
+		
 		
 		public function changeAudioCodec(codec:Object):void{			
 			var codecName:String = codec.name;
@@ -251,6 +326,15 @@ package com.flashphoner.api
 				mic.framesPerPacket = 2;
 				mic.rate = 8;
 			}
+		}
+		
+		private function getMajorVersion():Number{
+			var flashPlayerVersion:String = Capabilities.version;
+			
+			var osArray:Array = flashPlayerVersion.split(' ');
+			var osType:String = osArray[0];
+			var versionArray:Array = osArray[1].split(',');
+			return parseInt(versionArray[0]);
 		}
 		
 

@@ -305,6 +305,10 @@ function addLogMessage(message) {
     trace(message);
 }
 
+function notifyChangeMicVolume(volume){
+	$("#micSlider").slider("option", "value", volume);
+}
+
 
 function notifySubscription(subscribeObject,sipObject){
   trace("notify subscription");
@@ -1150,7 +1154,7 @@ $(function() {
 			range: "min",
 			min: 0,
 			max: 100,
-      value: 60,
+      		value: 50,
 			slide: function(event, ui) {
         flashphoner.setMicVolume(ui.value);
       }

@@ -118,6 +118,8 @@ package com.flashphoner.api
 					var use_enhanced_mic:String = xml.use_enhanced_mic;
 					PhoneConfig.USE_ENHANCED_MIC = (use_enhanced_mic == "true");
 					
+					var use_auto_gain_control:String = xml.use_auto_gain_control;
+					PhoneConfig.USE_AUTO_GAIN_CONTROL = (use_auto_gain_control == "true");
 					
 			        var regRequired:String = xml.register_required; 
 			        PhoneConfig.REGISTER_REQUIRED = (regRequired == "true");
