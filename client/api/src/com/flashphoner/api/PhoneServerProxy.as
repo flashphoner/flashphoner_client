@@ -178,6 +178,11 @@ package com.flashphoner.api
 			nc.call("sendRawRequest",responder,rawRequest);
 		}
 		
+		public function sendInfo(infoObj:Object):void{
+			Logger.info("sendInfo: "+infoObj);
+			nc.call("sendInfo",responder,infoObj);
+		}
+		
 
 	}
 }

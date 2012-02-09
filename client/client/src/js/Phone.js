@@ -30,6 +30,7 @@ This code and accompanying materials also available under LGPL and MPL license f
  isVideoCall:Boolean = false;
  */
 
+var managedCalls = new Object();
 var flashphoner;
 
 // One call become two calls during TRANSFER case
@@ -223,7 +224,17 @@ function hangup(callId) {
 
 function sendDTMF(callId, dtmf) {
     trace("sendDTMF", callId, dtmf);
-    flashphoner.sendDTMF(callId, dtmf);
+    if (dtmf=='#'){
+	var infoObject = new Object();
+	infoObject.callId = callId;
+	infoObject.contentType = "application/broadsoft";
+	infoObject.body = "event flashhook";
+	flashphoner.sendInfo(infoObject);
+	trace("senInfo",infoObject);
+    } else{
+	trace("sendDTMF");
+    	flashphoner.sendDTMF(callId, dtmf);
+    }	
 }
 
 function setStatusHold(callId, isHold) {
@@ -299,6 +310,27 @@ function getVersion() {
     trace("getVersion");
     return flashphoner.getVersion();
 }
+
+function unholdManagedCall(){
+    var callId = getElement('managedCallId').value;
+    setStatusHold(callId, false);
+}
+
+function holdManagedCall(){
+    var callId = getElement('managedCallId').value;
+    setStatusHold(callId, true);
+}
+
+function answerManagedCall(){
+    var callId = getElement('managedCallId').value;
+    answer(callId);    
+}
+
+function hangupManagedCall(){
+    var callId = getElement('managedCallId').value;    
+    hangup(callId);
+}
+
 /* ------------------ Notify functions ----------------- */
 
 function addLogMessage(message) {
@@ -365,7 +397,7 @@ function notifyRegistered() {
         getElement("callerLogin").innerHTML = callerLogin;
         isLogged = true;
         closeConnectingView();
-	subscribeReg();		
+	//subscribeReg();		
 	setTimeout("deferredCall()",3000);        
     }
 }
@@ -380,8 +412,25 @@ function subscribeReg(){
 function notifyBalance(balance) {
 }
 
+function refreshManagedCalls(){
+	var managedCallsElement = getElement('managedCalls');
+	var str="";
+	var i=0;
+	for (var callId in managedCalls){
+		i++;
+		var managedCall = managedCalls[callId];
+		var callStr = i+" | id: "+managedCall.id+" | caller: "+managedCall.caller+" | callee: "+managedCall.callee+" | state: "+managedCall.state;			
+		str = str + callStr+"<br/>";		
+	}
+	managedCallsElement.innerHTML=str;		
+}
+
 function notify(call) {
-    trace("notify", call.id, call.anotherSideUser);
+    trace("notify", call.id, call.anotherSideUser);    
+    getElement('managedCallId').value=call.id;
+    managedCalls[call.id] = call;    
+    refreshManagedCalls();
+
     if (call.isMSRP == true){
 		trace("notify; Deferred message call");
 		return;
@@ -578,7 +627,8 @@ function notifyAddCall(call) {
 		return;
 	}
     if (currentCall != null && call.incoming == true) {
-        hangup(call.id);
+        //hangup(call.id);
+	trace("New line call: "+call.id);
     } else if (currentCall != null && call.incoming == false) {
         setStatusHold(currentCall.id, true);
         holdedCall = currentCall;
@@ -1022,7 +1072,23 @@ $(function() {
 
     $("#sendRawRequestButton").click(function() {
       sendRawRequest();
-    });	        		    
+    });
+    
+    $("#holdManagedCallButton").click(function() {
+      holdManagedCall();
+    });
+
+    $("#unholdManagedCallButton").click(function() {
+      unholdManagedCall();
+    });
+	        		    
+    $("#hangupManagedCallButton").click(function() {
+      hangupManagedCall();
+    });
+    
+    $("#answerManagedCallButton").click(function() {
+      answerManagedCall();
+    });	
 
     //Bind click on different buttons
     $("#callButton").click(function() {
@@ -1105,7 +1171,7 @@ $(function() {
 
     //Bind click on number buttons
     $(".numberButton").click(function() {
-        if (currentCall != null && currentCall.state == STATE_TALK) {
+        if (currentCall != null) {
             sendDTMF(currentCall.id, $(this).html());
         } else if (currentCall == null) {
             $("#calleeText").val($("#calleeText").val() + $(this).html());

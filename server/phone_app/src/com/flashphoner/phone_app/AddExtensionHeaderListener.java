@@ -13,7 +13,6 @@ This code and accompanying materials also available under LGPL and MPL license f
 package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.sip.ISipMessageListener;
-import com.flashphoner.sdk.softphone.Logger;
 import gov.nist.javax.sip.address.SipUri;
 import gov.nist.javax.sip.header.RequestLine;
 import gov.nist.javax.sip.message.SIPMessage;
@@ -38,8 +37,6 @@ public class AddExtensionHeaderListener implements ISipMessageListener {
                 e.printStackTrace();
             }
 
-        }
-
-        Logger.logger.info("AddExtensionHeaderListener processMessage:\n" + sipMessage.toString());
+        }        
     }
 }
