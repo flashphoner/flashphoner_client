@@ -21,6 +21,7 @@ package com.flashphoner.api
 	import com.flashphoner.api.management.VideoControl;
 	
 	import flash.events.*;
+	import flash.media.SoundCodec;
 	import flash.utils.*;
 	
 	internal class CallCommand implements ICommand
@@ -44,6 +45,7 @@ package com.flashphoner.api
 				call.startTimer();
 				if (!call.isMSRP){
 					SoundControl.stopRingSound();
+					flashAPI.soundControl.enableAGC();
 					call.publish();						
 					flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
 					if (PhoneConfig.VIDEO_ENABLED){
@@ -94,6 +96,7 @@ package com.flashphoner.api
 				call.stopTimer();
 				flashAPI.removeCall(call.id);
 				if (!call.isMSRP){
+					flashAPI.soundControl.disableAGC();
 					SoundControl.playFinishSound();		
 					SoundControl.stopRingSound();														
 				

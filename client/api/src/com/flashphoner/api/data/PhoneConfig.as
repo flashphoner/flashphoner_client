@@ -64,6 +64,11 @@ package com.flashphoner.api.data
 		 * Is use enhansed mic for echo supression (true/false) 
 		 **/
 		public static var USE_ENHANCED_MIC:Boolean = true;
+		
+		/**
+		 * Is use enhansed mic for echo supression (true/false) 
+		 **/
+		public static var USE_AUTO_GAIN_CONTROL:Boolean = true;
 	
 		/**
 		 * Current version of Flashphoner client

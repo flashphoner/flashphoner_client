@@ -141,7 +141,11 @@ package com.flashphoner.phone
 		
 		public function notifySubscription(subscriptionObject:Object, _sipObject:Object):void{
 			
-		}		
+		}	
+		
+		public function notifyChangeMicVolume(volume:int):void{
+			
+		}
 		
 	}
 }

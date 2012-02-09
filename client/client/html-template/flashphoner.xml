@@ -19,6 +19,7 @@
 	<video_height>480</video_height>
 	<check_validation_callee>true</check_validation_callee>
 	<use_enhanced_mic>true</use_enhanced_mic>
+	<use_auto_gain_control>true</use_auto_gain_control>
 	<ring_sound></ring_sound>
 	<busy_sound></busy_sound>
 	<register_sound>assets/YesLife_SignIn.mp3</register_sound>
