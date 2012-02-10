@@ -150,7 +150,7 @@ package com.flashphoner.api
 							if (callee.indexOf(":") != -1){
 								return 1;
 							}
-							callee = "sip:"+callee+"@"+modelLocator.sipProviderAddress+":"+modelLocator.sipProviderPort;
+							callee = "sip:"+callee+"@"+modelLocator.domain+":"+modelLocator.port;
 						}
 					}
 				}else{

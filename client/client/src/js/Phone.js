@@ -109,15 +109,23 @@ $(document).ready(function() {
 function login() {
     trace("login");
     connectingViewBeClosed = false;
-    var result = flashphoner.login('sip:' + $('#username').val() + '@' + $('#server').val() + ':' + $('#port').val(), $('#password').val(), $('#authname').val());
+    var loginObject = new Object();
+    loginObject.username = 'sip:' + $('#username').val() + '@' + $('#domain').val();
+    loginObject.password = $('#password').val();
+    loginObject.authenticationName = $('#authname').val();
+    loginObject.outboundProxy = $('#outbound_proxy').val();
+    loginObject.port = $('#port').val();
+    
+    var result = flashphoner.login(loginObject);
     closeLoginView();
     if (result == 0) {
         openConnectingView("Connecting...", 0);
         setCookie("login", $('#username').val());
         setCookie("authName", $('#authname').val());
         setCookie("pwd", $('#password').val());
-        setCookie("sipProviderAddress", $('#server').val());
-        setCookie("sipProviderPort", $('#port').val());
+        setCookie("domain", $('#domain').val());
+        setCookie("outbound_proxy", $('#outbound_proxy').val());
+        setCookie("port", $('#port').val());
     }
 }
 
@@ -531,15 +539,14 @@ function notifyVersion(version){
 
 function toLogState() {
     trace("toLogState");
-    $('#loginMainButton').val('Log out');
     $("#callerLogin").show().html(callerLogin);
     $("#loginMainButton").hide();
 }
 
 function toLogOffState() {
     trace("toLogOffState");
-    $('#loginMainButton').val('Log in');
-    $('#callerLogin').html('');
+    $("#loginMainButton").show();
+    $('#callerLogin').hide().html('');
 }
 
 function toHangupState() {
@@ -593,8 +600,9 @@ function openLoginView() {
         $('#username').val(getCookie('login'));
         $('#authname').val(getCookie('authName'));
         $('#password').val(getCookie('pwd'));
-        $('#server').val(getCookie('sipProviderAddress'));
-        $('#port').val(getCookie('sipProviderPort'));
+        $('#domain').val(getCookie('domain'));
+        $('#outbound_proxy').val(getCookie('outbound_proxy'));
+        $('#port').val(getCookie('port'));
     }
 
 }
