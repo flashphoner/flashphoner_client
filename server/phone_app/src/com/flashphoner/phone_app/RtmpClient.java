@@ -16,7 +16,7 @@ import com.flashphoner.sdk.rtmp.AbstractRtmpClient;
 import com.flashphoner.sdk.rtmp.Config;
 import com.flashphoner.sdk.rtmp.IConfig;
 import com.flashphoner.sdk.rtmp.RtmpClientConfig;
-import com.flashphoner.sdk.sip.SipHeader;
+import com.flashphoner.sdk.sip.SipMessageObject;
 import com.flashphoner.sdk.softphone.ISoftphoneCall;
 import com.flashphoner.sdk.softphone.InstantMessage;
 import com.flashphoner.sdk.softphone.Logger;
@@ -51,7 +51,7 @@ public class RtmpClient extends AbstractRtmpClient {
      *
      * @param sipHeader
      */
-    public void registered(SipHeader sipHeader) {
+    public void registered(SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.registered()");
         getClient().call("registered", null, sipHeader.toAMFObj());
     }
@@ -60,9 +60,9 @@ public class RtmpClient extends AbstractRtmpClient {
      * Notifies flash-client about balance value
      *
      * @param balance   balance header value
-     * @param sipHeader SipHeader object, wich contains raw SIP message data
+     * @param sipHeader SipMessageObject object, wich contains raw SIP message data
      */
-    public void notifyBalance(String balance, SipHeader sipHeader) {
+    public void notifyBalance(String balance, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.notifyBalance()");
         getClient().call("notifyBalance", null, balance, sipHeader.toAMFObj());
     }
@@ -74,7 +74,6 @@ public class RtmpClient extends AbstractRtmpClient {
      */
     public void incommingCall(ISoftphoneCall call) {
         Logger.logger.info(4, "RtmpClient.incommingCall() " + call.getId());
-        streamStart(rtmpClientConfig.getLogin(), call.getId());
     }
 
 
@@ -82,12 +81,12 @@ public class RtmpClient extends AbstractRtmpClient {
      * Notifies flash-client about RING status of call
      *
      * @param call      ISoftphoneCall
-     * @param sipHeader SipHeader object, wich contains raw SIP message data
+     * @param sipHeader SipMessageObject object, wich contains raw SIP message data
      */
-    public void ring(ISoftphoneCall call, SipHeader sipHeader) {
+    public void ring(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.ring() " + call.getId());
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         getClient().call("ring", null, call.toAMFDataObj(), sipHeader.toAMFObj());
     }
@@ -96,9 +95,9 @@ public class RtmpClient extends AbstractRtmpClient {
      * Notifies flash-client about RINGING status of call
      *
      * @param call      ISoftphoneCall
-     * @param sipHeader SipHeader object, wich contains raw SIP message data
+     * @param sipHeader SipMessageObject object, wich contains raw SIP message data
      */
-    public void ringing(ISoftphoneCall call, SipHeader sipHeader) {
+    public void ringing(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.ringing() " + call.getId());
     }
 
@@ -106,12 +105,12 @@ public class RtmpClient extends AbstractRtmpClient {
      * Notifies flash-client about SESSION_PROGRESS status of call
      *
      * @param call      ISoftphoneCall
-     * @param sipHeader SipHeader object, wich contains raw SIP message data
+     * @param sipHeader SipMessageObject object, wich contains raw SIP message data
      */
-    public void sessionProgress(ISoftphoneCall call, SipHeader sipHeader) {
+    public void sessionProgress(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.sessionProgress()");
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         getClient().call("sessionProgress", null, call.toAMFDataObj(), sipHeader.toAMFObj());
     }
@@ -120,12 +119,12 @@ public class RtmpClient extends AbstractRtmpClient {
      * Notifies flash-client about TALK status of call and starts incoming stream
      *
      * @param call      ISoftphoneCall
-     * @param sipHeader SipHeader object, wich contains raw SIP message data
+     * @param sipHeader SipMessageObject object, wich contains raw SIP message data
      */
-    public void talk(ISoftphoneCall call, SipHeader sipHeader) {
+    public void talk(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.talk() " + call.getId());
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         getClient().call("talk", null, call.toAMFDataObj(), sipHeader.toAMFObj());
     }
@@ -136,10 +135,10 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param call      ISoftphoneCall
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void notifyHold(ISoftphoneCall call, SipHeader sipHeader) {
+    public void notifyHold(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.notifyHold() " + call.getId());
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         getClient().call("hold", null, call.toAMFDataObj(), sipHeader.toAMFObj());
     }
@@ -161,10 +160,10 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param call      ISoftphoneCall
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void finish(ISoftphoneCall call, SipHeader sipHeader) {
+    public void finish(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.finish() " + call.getId());
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         streamAudioStop(call.getId());
         streamVideoStop(call.getId());
@@ -177,119 +176,12 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param call      ISoftphoneCall
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void busy(ISoftphoneCall call, SipHeader sipHeader) {
+    public void busy(ISoftphoneCall call, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.busy() " + call.getId());
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         getClient().call("busy", null, call.toAMFDataObj(), sipHeader.toAMFObj());
-    }
-
-    /**
-     * Creates outgoing call
-     *
-     * @param caller      login, which initiates this call
-     * @param callee      login, which callable, call's target
-     * @param visibleName visible name of caller, which may be displayed on SIP endpoint screen
-     * @param isVideoCall is this call with video support
-     * @return ISoftphoneCall
-     * @throws SoftphoneException
-     */
-    public ISoftphoneCall call(final String caller, final String callee, final String visibleName, final Boolean isVideoCall) throws SoftphoneException, LicenseRestictionException {
-        Logger.logger.info(4, "RtmpClient.call() " + callee);
-        ISoftphoneCall call = getSoftphone().call(caller, callee, visibleName, isVideoCall);
-        streamStart(rtmpClientConfig.getLogin(), call.getId());
-        return call;
-    }
-
-    /**
-     * Creates outgoing call
-     *
-     * @param caller      login, which initiates this call
-     * @param callee      login, which callable, call's target
-     * @param visibleName visible name of caller, which may be displayed on SIP endpoint screen
-     * @param isVideoCall is this call with video support
-     * @param inviteParameters additional parameters for INVITE-request
-     * @return ISoftphoneCall
-     * @throws SoftphoneException
-     */
-    public ISoftphoneCall call(final String caller, final String callee, final String visibleName, final Boolean isVideoCall, Map<String, String> inviteParameters) throws SoftphoneException, LicenseRestictionException {
-        Logger.logger.info(4, "RtmpClient.call() " + callee);
-        ISoftphoneCall call = getSoftphone().call(caller, callee, visibleName, isVideoCall, inviteParameters);
-        streamStart(rtmpClientConfig.getLogin(), call.getId());
-        return call;
-    }
-    /**
-     * Answer incoming call
-     *
-     * @param callId      SIP callId which call is answered
-     * @param isVideoCall is video supported for this answer
-     * @throws SoftphoneException
-     */
-    public void answer(final String callId, final Boolean isVideoCall) throws SoftphoneException {
-        Logger.logger.info(4, "RtmpClient.answer() " + callId);
-        getSoftphone().answer(callId, isVideoCall);
-    }
-
-    /**
-     * Update call session to video
-     *
-     * @param callId SIP callId which call is updated
-     * @throws SoftphoneException
-     */
-    public void updateCallToVideo(final String callId) throws SoftphoneException {
-        Logger.logger.info(4, "RtmpClient.updateCallToVideo() " + callId);
-        getSoftphone().updateCallToVideo(callId);
-    }
-
-
-    /**
-     * Hangup by callId
-     *
-     * @param callId SIP callId which call is hanguped
-     * @throws SoftphoneException
-     */
-    public void hangup(final String callId) throws SoftphoneException {
-        Logger.logger.info(4, "RtmpClient.hangup() " + callId);
-        getSoftphone().hangup(callId);
-        streamAudioStop(callId);
-        streamVideoStop(callId);
-    }
-
-    /**
-     * Transfer by callId and callee
-     *
-     * @param callId SIP callId which call is transferred
-     * @param callee
-     * @throws SoftphoneException
-     */
-    public void transfer(final String callId, final String callee) throws SoftphoneException {
-        Logger.logger.info(4, "RtmpClient.transfer() " + callId);
-        getSoftphone().transfer(callId, callee);
-    }
-
-    /**
-     * Hold by callId and isHold
-     *
-     * @param callId SIP callId which call is holded
-     * @param isHold
-     * @throws SoftphoneException
-     */
-    public void hold(final String callId, final Boolean isHold) throws SoftphoneException {
-        Logger.logger.info(4, "RtmpClient.hold() " + callId + "; holding - " + isHold);
-        getSoftphone().hold(callId, isHold);
-    }
-
-    /**
-     * Send DTMF
-     *
-     * @param callId SIP callId for which call DTMF is sended
-     * @param dtmf
-     * @throws SoftphoneException
-     */
-    public void sendDtmf(final String callId, final String dtmf) throws SoftphoneException {
-        Logger.logger.info(4, "RtmpClient.sendDtmf() " + dtmf);
-        getSoftphone().sendDtmf(callId, dtmf);
     }
 
     /**
@@ -298,10 +190,10 @@ public class RtmpClient extends AbstractRtmpClient {
      * @param errorCode
      * @param sipHeader SipHeader object, wich contains raw SIP message data
      */
-    public void fail(String errorCode, SipHeader sipHeader) {
+    public void fail(String errorCode, SipMessageObject sipHeader) {
         Logger.logger.info(4, "RtmpClient.fail() " + errorCode);
         if (sipHeader == null) {
-            sipHeader = new SipHeader();
+            sipHeader = new SipMessageObject();
         }
         if (getClient() != null) {
             getClient().call("fail", null, errorCode, sipHeader.toAMFObj());

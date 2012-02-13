@@ -333,15 +333,14 @@ input::-webkit-input-placeholder {
   display: none;
 }
 #loginDiv {
-	top: 75px;
-	left: 5px;
-	height: 142px;
+	top: 46px;
+	left: 10px;
+	height: 172px;
 	width: 200px;
 	padding: 20px;
 	padding-top: 25px;
 	float: left;
 	visibility: hidden;
-
 }
 #loginMainButton {
 	top: -1px;
