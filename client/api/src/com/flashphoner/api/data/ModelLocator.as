@@ -29,11 +29,13 @@ package com.flashphoner.api.data
 		/**
 		 * Host of sip provider (example: sipnet.ru)
 		 */
-		public var sipProviderAddress:String;
+		public var outboundProxy:String;
+		
+		public var domain:String;
 		/**
 		 * Port of sip provider (default - 5060)
 		 **/
-		public var sipProviderPort:String;
+		public var port:String;
 		/**
 		 * Visible name of user
 		 **/ 

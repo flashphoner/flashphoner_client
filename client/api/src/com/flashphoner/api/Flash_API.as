@@ -312,9 +312,9 @@ package com.flashphoner.api
 		 * @param username sip format username (example: sip:...)
 		 * @param password Password for user
 		 **/
-		public function login(username:String,password:String,authenticationName:String = null):int{
+		public function login(loginObject:Object):int{
 			videoControl.init();
-			return phoneServerProxy.login(username,password,authenticationName);							
+			return phoneServerProxy.login(loginObject);							
 		}
 		
 		/**
@@ -323,6 +323,7 @@ package com.flashphoner.api
 		 * @param password Password for user
 		 **/		
 		public function loginByToken(token:String = null):void{
+			Logger.info("loginByToken: "+token);
 			videoControl.init();
 			phoneServerProxy.loginByToken(token);
 		}
@@ -349,7 +350,7 @@ package com.flashphoner.api
 								if (callee.indexOf(":") != -1){
 									return 1;
 								}
-								callee = "sip:"+callee+"@"+modelLocator.sipProviderAddress+":"+modelLocator.sipProviderPort;
+								callee = "sip:"+callee+"@"+modelLocator.domain+":"+modelLocator.port;
 							}
 						}
 				}else{

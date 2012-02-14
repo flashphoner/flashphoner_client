@@ -60,7 +60,14 @@ package com.flashphoner.api
 			phoneSpeaker = new PhoneSpeaker(nc,flash_API);
 		}
 		
-		public function login(username:String, password:String, authenticationName:String = null):int{			
+		public function login(loginObject:Object):int{
+			var username:String = loginObject.username;
+			var authenticationName:String = loginObject.authenticationName;
+			var password:String = loginObject.password;
+			var outboundProxy:String = loginObject.outboundProxy;
+			var port:String = loginObject.port;
+			var qValue:String = loginObject.qValue;
+			
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
@@ -77,14 +84,21 @@ package com.flashphoner.api
 			obj.password = password;
 			obj.width = PhoneConfig.VIDEO_WIDTH;
 			obj.height = PhoneConfig.VIDEO_HEIGHT;
-			obj.sipProviderAddress = username.substring(username.indexOf("@")+1,username.indexOf(":"));
-			obj.sipProviderPort = username.substring(username.indexOf(":")+1);
+			var endIndex:int = username.indexOf(":");
+			if (endIndex == -1){
+				endIndex = username.length;
+			}
+			obj.domain = username.substring(username.indexOf("@")+1,endIndex);
+			obj.outboundProxy = outboundProxy;
+			obj.port = port;
 			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
 			obj.visibleName = modelLocator.visibleName;
+			obj.qValue = qValue;
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);	
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 			return 0;			
 		}
+
 		
 		public function loginByToken(token:String = null):void{
 			var modelLocator:ModelLocator = flash_API.modelLocator;

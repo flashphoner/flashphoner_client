@@ -49,8 +49,9 @@ package com.flashphoner.api
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			modelLocator.login = resObj.login;
 			modelLocator.pwd = resObj.password;
-			modelLocator.sipProviderAddress = resObj.sipProviderAddress;
-			modelLocator.sipProviderPort = resObj.sipProviderPort;
+			modelLocator.outboundProxy = resObj.outboundProxy;
+			modelLocator.domain = resObj.domain;
+			modelLocator.port = resObj.port;
 			
 			PhoneConfig.REGISTER_REQUIRED = resObj.regRequired;
 			ExternalInterface.call("notifyRegisterRequired",PhoneConfig.REGISTER_REQUIRED);

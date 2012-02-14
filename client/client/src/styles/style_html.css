@@ -8,8 +8,11 @@ http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 Contributors:
     Flashphoner - initial API and implementation
 
-This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+This code and accompanying materials also available under LGPL and 
+MPL license for Flashphoner buyers. Other license versions by negatiation. 
+Write us support@flashphoner.com with any questions.
 */
+
 body {
 	font: 12px Arial;
 }
@@ -23,34 +26,66 @@ input[type="submit"]::-moz-focus-inner,
 input[type="file"] > input[type="button"]::-moz-focus-inner {
 	border: none;
 }
-#jsSWFDiv, #phoneDiv, #loginDiv, #incomingDiv, #infoDiv, #connectingDiv, #settingsDiv {
+
+/* -------- Backgrounds ------- */
+#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, .login_link, #transfer, #incomingDiv, #newChat {
+	background: #fff;
+}
+#controlPanel, .bar, .videoDiv, #chatDiv, #tabul, .button {
+  background-color: #ddd;
+}
+
+/* ---------- Positions --------- */
+#jsSWFDiv, 
+#phoneDiv, 
+#loginDiv, 
+#incomingDiv, 
+#infoDiv, 
+#connectingDiv, 
+#settingsDiv,
+#versionOfProduct, 
+#controlPanel, 
+.closeButton, 
+.transferButton, 
+.holdButton,
+.holdImage,
+.bar,
+#settingsButton,
+#settingsButtonInCallView,
+#answerButton, 
+#hangupButton,
+#callerLogin,
+#logoutButton,
+#loginMainButton,
+#video_requestUnmuteDiv,
+#sendVideo,
+#requestUnmuteText,
+#closeButton_video_requestUnmuteDiv,
+#transfer,
+.callDiv,
+.caller,
+#chatDiv,
+#micSlider, #speakerSlider,
+#micBack, #speakerBack,
+#console {
 	position: absolute;
 }
-/* -------- Background ------- */
-#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, .login_link, #transferDiv, #incomingDiv, #newChat {
-	background: #fff;
-}
-#phoneDiv {
-	background: #fff;
-}
 /* ---------- Border ------------ */
-#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, #transferDiv, #incomingDiv, #video_requestUnmuteDiv  {
+#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, #transfer, #incomingDiv, #video_requestUnmuteDiv, #controlPanel, #chatDiv {
 	border-width: 2px 5px 5px\0/; /*only for ie8*/
 	border-style: solid\0/; /*only for ie8*/
 	border-color: #ddd\0/; /*only for ie8*/
+  border: 1px solid #aaa;
 }
 #connectingDiv, #infoDiv {
 	border-width: 5px\0/; /*only for ie8*/
 }
-/* ---------- Shadow ---------- */
-#settingsDiv, #transferDiv, #infoDiv, #loginDiv, #connectingDiv, #video_requestUnmuteDiv, #incomingDiv, #chatDiv
+/* ---------- Shadow ----------*/ 
+#settingsDiv, #transfer, #infoDiv, #loginDiv, #connectingDiv, #video_requestUnmuteDiv, #incomingDiv, #chatDiv
  {
-	box-shadow: 0 0 10px black;
-	box-shadow: 0 0 10px rgba(0,0,0,0.5);
-	-moz-box-shadow: 0 0 10px rgba(0,0,0,0.5);
-/* Firefox */
-	-webkit-box-shadow: 0 0 10px rgba(0,0,0,0.5);
-/* Safari, Chrome */
+  box-shadow: 0 0 10px rgba(0,0,0,0.35);
+  -moz-box-shadow: 0 0 10px rgba(0,0,0,0.35);
+	-webkit-box-shadow: 0 0 10px rgba(0,0,0,0.35);
 }
 
 /* ----------------------------- */
@@ -71,74 +106,71 @@ input::-webkit-input-placeholder {
 #phoneDiv {
 	left: 30px;
 	height: 240px;
-	width: 147px;
+	width: 153px;
 	padding: 10px;
 	position: relative;
 }
 #versionOfProduct {
-	position: absolute;
 	top: 134px;
 	right: 17px;
 	font: 8px Arial;
 	color: #bbb;
 }
+#controlPanel {
+  width: 152px;
+  height: 20px;
+  top: 6px;
+  left: 10px;
+  border: 1px solid #bbb;
+  box-shadow: /*0px 1px 0px #fff, */inset 0px 1px 0px #fff;
+}
+
 /* ---------------- Buttons ---------------- */
 .closeButton {
 	background: url(../assets/close.png);
 	right: 3px;
 	opacity: 0.7;
-	position: absolute;
 	top: 3px;
 	width: 14px;
 	height: 14px;
 }
-#cameraButtonInCallee {
-	background: url(../assets/camera.png);
-	position: absolute;
-	top: 125px;
-	left: 39px;
-	width: 20px;
-	height: 20px;	
-}
 #cameraButton {
-	background: url(../assets/camera.png);
-	position: absolute;
-	top: 96px;
-	left: 29px;
-	width: 20px;
-	height: 20px;
+	background: url(../assets/camera.png) no-repeat center;
 }
 #micButton {
-	background: url(../assets/mic.png);
-	position: absolute;
-	top: 95px;
-	left: 53px;
-	width: 20px;
-	height: 20px;
+	background: url(../assets/mic.png) no-repeat center;
 }
 #soundButton {
-	background: url(../assets/sound.png);
-	position: absolute;
-	top: 95px;
-	left: 75px;
-	width: 20px;
-	height: 20px;
+	background: url(../assets/speaker.png) no-repeat center;
 }
 .iconButton {
-	width: 16px;
-	height: 16px;
+	width: 24px;
+	height: 20px;
 	float: left;
-	-moz-opacity: 0.6;
+	cursor: pointer;
+	/*
+  -moz-opacity: 0.6;
 	-khtml-opacity: 0.6;
 	opacity: 0.6;
+	*/
 }
+
+.iconBackgroundPressed{
+  width: 24px;
+  height: 20px;
+  /*background: -webkit-radial-gradient(#aaa, #ddd, #eee, #eee);*/
+  float: left;
+}
+
+.iconPressed{
+}
+
 .iconButton:hover {
 	-moz-opacity: 1;
 	-khtml-opacity: 1;
 	opacity: 1;
 }
 .transferButton, .holdButton {
-	position: absolute;
 	top: 97px;
 	width: 14px;
 	height: 14px;
@@ -157,7 +189,6 @@ input::-webkit-input-placeholder {
 	visibility:hidden;
 }
 .holdImage {
-	position: absolute;
 	background: url(../assets/hold_big.png);
 	right: 55px;
 	top: 57px;
@@ -168,12 +199,10 @@ input::-webkit-input-placeholder {
 /* ----------------------------------------- */
 /* ------------- ��������� �������� ------------ */
 .bar {
-	position: absolute;
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 20px;
-	background-color: #ddd;
 	cursor: move;
 	font: 12px Arial;
 	font-weight: bolder;
@@ -181,6 +210,7 @@ input::-webkit-input-placeholder {
 	text-shadow: #fff 0px 1px;
 	line-height: 20px;
 	text-align: left;
+	box-shadow: inset 0 1px 0 #fff;
 }
 /* ----------------------------------- */
 /* ------------- Settings ------------ */
@@ -194,14 +224,12 @@ input::-webkit-input-placeholder {
 	background: url(../assets/mic_settings_background.png);
 }
 #settingsButton {
-	position: absolute;
-  	top: 126px;
-	left: 15px;
+  top: 2px;
+	left: 5px;
 	background: url(../assets/mic_settings.png);
 }
 #settingsButtonInCallView {
-	position: absolute;
-  	top: 98px;
+  top: 98px;
 	left: 5px;
 	background: url(../assets/mic_settings.png);
 }
@@ -211,7 +239,7 @@ input::-webkit-input-placeholder {
 #incomingDiv {
 	top: 110px;
 	left: 5px;
-	height: 72px;
+	height: 82px;
 	width: 215px;
 	border: 1px solid #bbb;
 	padding: 5px;
@@ -219,13 +247,12 @@ input::-webkit-input-placeholder {
 	font: 16px Arial;
 	text-align: center;
 	color: #aaa;
-	visibility: hidden;
+	display: none;
 }
 #answerButton, #hangupButton {
 	width: 80px;
-	height: 22px;
-	color: white;
-	position: absolute;
+	/*height: 22px;*/
+	/*color: white;*/
 	top: 70px;
 }
 #answerButton {
@@ -253,12 +280,6 @@ input::-webkit-input-placeholder {
 	color: #aaa;
 	text-align: center;
 	line-height: 30px;
-	-moz-opacity: 0.95;
-/* Mozilla 1.6 */
-	-khtml-opacity: 0.95;
-/* Konqueror 3.1, Safari 1.1 */
-	opacity: 0.95;
-/* CSS3 - Mozilla 1.7b +, Firefox 0.9 +, Safari 1.2+, Opera 9+ */
 }
 #connectingText {
 }
@@ -284,18 +305,63 @@ input::-webkit-input-placeholder {
 }
 #infoText {
 }
-/* ------------------------------------------------------ */
-#loggedUserDiv {
-	font: 12px Arial;
-	width: 48%;
-	height: 14px;
+/* --------- Login, logout --------------------------------------------- */
+#callerLogin {
+  top: 0px;
+  right: 0px; 
+  font: 12px Arial;
+	width: 74px;
+	height: 20px;
 	float: left;
-	text-align: left;
-	color: #777;
+	text-align: right;
+	overflow: hidden;
+	color: #333;
+	display: none;
+	font: bold 12px Helvetica;
+	text-shadow: 0 1px 0 #fff;
+	line-height: 20px;
+	padding-right: 5px;
+	cursor: pointer;
+}
+#logoutButton {
+  width: 60px;
+  height: 20px;
+  bottom: -22px;
+  right: 0px;
+  font-size: 12px;
+  line-height: 20px;
+  display: none;
+}
+#loginDiv {
+	top: 46px;
+	left: 10px;
+	height: 172px;
+	width: 200px;
+	padding: 20px;
+	padding-top: 25px;
+	float: left;
+	visibility: hidden;
+}
+#loginMainButton {
+	top: -1px;
+	right: -1px;
+  font-size: 12px;
+  border: 1px solid #aaa; 
+  padding: 0 5px 0 5px;
+  margin: 0px;
+  width:40px;
+  height: 20px;
+  line-height: 20px;
+  text-shadow: 0 1px 0 #eee;
+  
+}
+
+#loginButton {
+	margin: 10px 0 0 15px;
+	width: 80px;
 }
 /* ------------ Video + Security settings view -------------- */
 #video_requestUnmuteDiv {
-	position: absolute;
 	top: 50px;
 	left: 20px;
 	overflow: hidden;
@@ -306,7 +372,6 @@ input::-webkit-input-placeholder {
 	visibility: visible;
 	width: 215px;
 	height: 180px;
-	background-color: #000;
 }
 .securityDiv {
 	visibility: visible;
@@ -334,12 +399,10 @@ div with zero size.
 
 #sendVideo {
 	width: 100px;
-	position: absolute;
-	bottom: 5px;
-	left: 10px;
+	bottom: 6px;
+	left: 6px;
 }
 #requestUnmuteText {
-	position: absolute;
 	text-align: center;
 	width: 100%;
 	font-weight: bolder;
@@ -348,17 +411,15 @@ div with zero size.
 	background: url(../assets/close.png);
 	right: 3px;
 	opacity: 0.7;
-	position: absolute;
 	top: 3px;
 	width: 14px;
 	height: 14px;
 }
 /* -------------------------------------- */
 /* ------------ Transfer view -------------- */
-#transferDiv {
+#transfer {
 	width: 200px;
-	height: 86px;
-	position: absolute;
+	height: 94px;
 	top: 90px;
 	left: 20px;
 	text-align: center;
@@ -367,32 +428,34 @@ div with zero size.
 	padding-top: 30px;
 	visibility: hidden;
 }
-#transferDivInput {
+#transferInput {
 	width: 180px;
 	margin-bottom: 20px;
 }
-#transferDivButton {
+#transferOk, #transferCansel {
 	width: 80px;
 	margin: 0 6px 0 16px;
 }
+#transferCansel {
+	margin: 0;
+}
+
 /* -------------------------------------- */
 /* ------ Call view-------- */
 .callDiv {
-	width: 142px;
+	width: 152px;
 	height: 118px;
-	position: absolute;
-	top: 34px;
-	left: 48px;
+	top: 36px;
+	left: 49px;
 	float: left;
 	background: #333;
-	border: 1px solid #B7BABC;
+	/*border: 1px solid #B7BABC;*/
 	color: #eee;
 	font: 22px Arial;
 	visibility: hidden;
 }
 .caller {
 	float: left;
-	position: absolute;
 	top: 35px;
 	text-align: center;
 	width: 100%;
@@ -408,11 +471,9 @@ div with zero size.
 /* ------ Chat view -------- */
 #chatDiv {
 	width: 320px;
-	position: absolute;
 	top: 250px;
 	left: 20px;
 	visibility: hidden;
-	background-color: #ddd;
 }
 .chatBox {
 	width: 100%;
@@ -454,8 +515,6 @@ div with zero size.
 	margin-left: 50px;
 	padding: 0;
 	z-index: 10;
-	background-color: #ddd;
-
 }
 #tabul li {
 	display: inline;
@@ -500,22 +559,92 @@ div with zero size.
 	height: 240px;
 }
 /* ---------------------------------------------------- */
+
 .button {
-	background: #dcdcdc;
-	width: 46px;
-	height: 22px;
+	/*background: #dcdcdc;*/
+	width: 50px;
+	height: 28px;
 	float: left;
-	margin: 0px 3px 3px 0;
+	margin: 0px -1px 0px 0;
 	text-align: center;
-	font: bold 14px Arial;
-	line-height: 19px;
-	border: solid 1px #ddd; 
-  border-style: outset;
 	-moz-user-select: none;
 	-khtml-user-select: none;
 	user-select: none;
-	outline: none;
+	font: bold 14px Helvetica;
+	border: 1px solid #aaa;
+	color: #333;
+	text-shadow: 0px 1px 0 #fff;
+	box-shadow: /*0px 1px 0px #fff*/ inset 0px 1px 0px #fff;
+	text-align: center;
+	border-radius: 0px;
+	cursor: pointer;
+  /*
+  background: -webkit-gradient(linear, left top, left bottom, from(#ddd), to(#ddd));
+	background: -moz-linear-gradient(top, #ddd, #ccc);
+	background: -o-linear-gradient(top, #ddd, #ccc);
+  filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#dddddd', endColorstr='#cccccc');
+  */
+  line-height: 28px;
+  font-family: ;
 }
+
+.buttonLine {
+	float: left;
+	height: 29px;
+}
+
+.chat, .call, .hangup {
+  width: 75px;
+  color: #000;
+  	
+}
+.chat {
+  box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #C2DDF2; /*#A8CFEC;/* #96C6E9;*/
+  text-shadow: 0px 1px 0 #A8CFEC;
+  background: -webkit-gradient(linear, left top, left bottom, from(#A1CCEB), to(#7BB8E4));
+  /*background: -webkit-gradient(linear, left top, left bottom, from(#7CB8E3), to(#419AD9));*/
+	background: -moz-linear-gradient(top, #ddd, #ccc);
+	background: -o-linear-gradient(top, #ddd, #ccc);
+  filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#dddddd', endColorstr='#cccccc');
+  /*color: #1B527A;*/
+  width: 76px;
+}
+.call {
+	box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #4DE74D;/*#0d0;*/
+	text-shadow: 0px 1px 0px #0d0;
+	background: -webkit-gradient(linear, left top, left bottom, from(#6ECF6E), to(#4DC34D));
+  /*background: -webkit-gradient(linear, left top, left bottom, from(#3b3), to(#0a0));*/
+	background: -moz-linear-gradient(top, #3b3, #0a0);
+	background: -o-linear-gradient(top, #3b3, #0a0);
+	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#33bb33', endColorstr='#00aa00');
+	/*color: #004400;*/
+	border-left-color: #888;
+
+}
+.hangup {
+	box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #FF9494;/*#f66;*/
+	text-shadow: 0px 1px 0 #f33; 
+	background: -webkit-gradient(linear, left top, left bottom, from(#E16C6C), to(#DB4D4D));
+  /*background: -webkit-gradient(linear, left top, left bottom, from(#f33), to(#c00));*/
+	background: -moz-linear-gradient(top, #f33, #c00);
+	background: -o-linear-gradient(top, #f33, #c00);
+	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#ff3333', endColorstr='#cc0000');
+}
+
+.pressed {
+	border-color: #888;
+	/*border-bottom-color: #fff;*/
+	box-shadow: inset 0px 1px 6px #333;
+  /*height: 23px;*/
+	line-height: 30px;
+	/*border-radius: 4px 4px 5px 5px;*/
+	background-color: #d7d7d7;
+}
+
+.disabled {
+	opacity: 0.7;
+}
+    
 .call_button, .chat_button {
 	width: 81px;
 	background-color: #009800;
@@ -532,51 +661,80 @@ div with zero size.
 	cursor: default;
 	margin-bottom: 3px;
 }
-.chat_button {
-	width: 60px;
-	background-color: #5555dd;
-	margin-right: 3px;
-}
-/* -------------- Log in ------------- */
-.login_link {
-	width: 42px;
-	height: 14px;
-	text-decoration: underline;
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	user-select: none;
-	cursor: pointer;
-	float: left;
-	border: none;
-	padding: 0;
-	color: #bbb;
-	text-align: left;
-	background: none;
-	font: 11px Arial;
-}
-#loginDiv {
-	top: 75px;
-	left: 5px;
-	height: 130px;
-	width: 200px;
-	padding: 20px;
-	padding-top: 25px;
-	float: left;
-	visibility: hidden;
-}
-#loginMainButton {
-	position: absolute;
+
+
+
+/* ----------- Slider -------------- */
+#micSlider, #speakerSlider {
 	top: 10px;
-	right: 6px;
+	display: none;
 }
-#loginButton {
-	margin: 10px 0 0 15px;
-	width: 80px;
+#micBack, #speakerBack {
+/* TODO replace sliders within sliderbackground*/
+	top: 20px;
+	width: 24px;
+	height: 102px;
+	background: #ddd;
+	box-shadow: 0px 0px 4px #bbb;
+	display: none;
+	border: 1px solid #aaa;
+	border-top: none;
 }
+#micBack {
+	left: -1px;
+}
+#speakerBack {
+	left: 23px;
+}
+#micSlider {
+	left: 8px;
+}
+#speakerSlider {
+	left: 8px;
+}
+.ui-slider-vertical {
+	width: 6px !important;
+	height: 80px !important;
+	border: 1px solid #999 !important;
+	background-color: #ddd !important;
+	box-shadow: inset 0px 0px 1px #777 !important;*/
+}
+.ui-slider-handle {
+	left: -5px !important;
+  border-radius: 8px !important;*/
+	cursor: pointer !important;
+	border: 1px solid #888 !important;
+	box-shadow: inset 0px 1px 0px #fff, 0px 0px 1px #777;
+	background-color: #dcdcdc !important;
+  /*
+  background: -webkit-gradient(linear, left top, left bottom, from(#ddd), to(#ccc)) !important;
+	background: -moz-linear-gradient(top, #777, #555) !important;
+	background: -o-linear-gradient(top, #777, #555) !important;
+	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#555555') !important;
+	*/
+	height: 14px !important;
+	width: 14px  !important;
+	cursor: pointer !important;
+}
+.ui-slider-handle:focus {
+	outline: none;
+}
+.ui-slider-range {
+	border-radius: 10px !important;
+	box-shadow: inset 2px 0px 5px #222;
+	
+  background: -webkit-gradient(linear, left top, left bottom, from(#777), to(#555)) !important;
+	background: -moz-linear-gradient(top, #777, #555) !important;
+	background: -o-linear-gradient(top, #777, #555) !important;
+	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#555555') !important;
+	left: -1px !important;
+	bottom: -1px !important;
+  border: 1px solid #222 !important;
+}
+	
 /* -------------------------------------- */
 /* --------- Console ------------*/
 #console {
-	position: absolute;
 	top: 35px;
 	left: 250px;	
 	height: 300px;
@@ -591,7 +749,7 @@ div with zero size.
 }
 /* -------------------------------- */
 .phone_screen_1 {
-	width: 141px;
+	width: 151px;
 	background: #deeeff;
 	float: left;
 	margin: 2px 0 0 0;
@@ -603,11 +761,11 @@ div with zero size.
 	line-height: 22px;
 }
 .phone_screen_2 {
-	width: 142px;
+	width: 152px;
 	height: 90px;
 	background: #deeeff;
 	float: left;
-	margin: 0 0 2px 0;
+	margin: 0 0 -1px 0;
 	font: 22px Arial;
 	border: 1px solid #b7babc;
 	border-top: none;
@@ -649,24 +807,11 @@ div with zero size.
 #connectingDiv {
 	z-index: 15;
 }
-#infoDiv {
-	z-index: 30;
-}
-#jsSWFDiv {
-	z-index: 100;
-}
 #settingsDiv {
 	z-index: 17;
 }
 #messageDiv {
 	z-index: 18;
-}
-/*.callDiv {
-	z-index: 13;
-}
-*/
-#chatDiv {
-	z-index: 21;
 }
 #loginDiv {
 	z-index: 19;
@@ -674,9 +819,30 @@ div with zero size.
 #video_requestUnmuteDiv {
 	z-index: 20;
 }
-#transferDiv {
+#chatDiv {
+	z-index: 21;
+}
+
+#transfer {
 	z-index: 22;
+}
+#infoDiv {
+	z-index: 30;
+}
+#jsSWFDiv {
+	z-index: 100;
+}
+#micBack, #speakerBack{
+	z-index: 100;
+}
+.iconBackgroundPressed{
+	z-index: 101;
 }
 .closeButton {
 	z-index: 101;
 }
+
+grey {
+	color: #888;
+}
+
