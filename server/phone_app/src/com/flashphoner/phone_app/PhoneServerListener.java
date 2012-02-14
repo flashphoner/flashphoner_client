@@ -36,7 +36,8 @@ public class PhoneServerListener implements IServerNotify {
             Config.getInstance();
 
             String stringProps = Config.getInstance().getProperties().toString();
-            Logger.logger.info(4, "Initializing flashphoner properties: " + stringProps.replace("=","=\033[32m").replace(", ", ", \033[0m").replace("}", "\033[0m}"));
+            // \033[32m - log text will green, \033[0m - log test will has default color
+            Logger.logger.info(4, "Initializing flashphoner properties: " + stringProps.replace("=","=\033[32m").replace(", ", "\033[0m, ").replace("}", "\033[0m}"));
 
             // Deprecated, not used.
             //Logger.logger.info(4, "Flashphoner build: " + Config.BUILD + " deployed.");

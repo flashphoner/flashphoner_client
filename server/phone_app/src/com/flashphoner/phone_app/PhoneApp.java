@@ -89,7 +89,10 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
      */
     public void onConnect(IClient client, RequestFunction requestFunction, AMFDataList params) {
 
+        // If we are logged by token - we will not send user data to client app, because this is security violation
+        boolean loggedByToken = false;
         Logger.logger.info("onConnect " + params);
+
 
         if (!isDefaultInstance(client)) {
             client.rejectConnection();
@@ -104,6 +107,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String swfUrl = obj2.getString("swfUrl");
         String pageUrl = obj2.getString("pageUrl");
         String allowDomainsString = ClientConfig.getInstance().getProperty("allow_domains");
+
         if (allowDomainsString != null && !"".equals(allowDomainsString)) {
             String[] allowDomains = allowDomainsString.split(",");
             Boolean isAllowDomain = false;
@@ -129,6 +133,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         Logger.logger.info("majorMinorVersion: " + majorMinorVersion);
 
         AMFDataObj obj = params.getObject(PARAM1);
+
 
         if (obj == null) {
             Logger.logger.info("Connect's parameters are NULL");
@@ -157,6 +162,9 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String visibleName = obj.getString("visibleName");
 
         if (login != null && password != null) {
+
+
+
             outboundProxy = obj.getString("outboundProxy");
             if (outboundProxy == null || "".equals(outboundProxy)) {
                 client.rejectConnection();
@@ -174,6 +182,8 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
                 port = SIPConstants.DEFAULT_PORT;
             }
         } else {
+            loggedByToken = true;
+
             if (auto_login_url == null) {
                 Logger.logger.error("ERROR - Property auto_login_url - '" + auto_login_url + "' does not exits in flashphoner-client.properties");
                 client.rejectConnection();
@@ -274,9 +284,11 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         }
         Logger.logger.info("outboundProxy - " + outboundProxy);
 
+
         if (visibleName == null || "".equals(visibleName)) {
             visibleName = login;
         }
+
 
         RtmpClientConfig config = new RtmpClientConfig();
         config.setLogin(login);
@@ -296,22 +308,24 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         config.setSwfUrl(swfUrl);
         config.setPageUrl(pageUrl);
 
-
         Logger.logger.info(config.toString());
 
         rtmpClient = new RtmpClient(config, client);
 
-        AMFDataObj amfDataObj = new AMFDataObj();
-        amfDataObj.put("login", config.getLogin());
-        if (config.getAuthenticationName() != null) {
-            amfDataObj.put("authenticationName", config.getAuthenticationName());
+        if (!loggedByToken) {
+            AMFDataObj amfDataObj = new AMFDataObj();
+            amfDataObj.put("login", config.getLogin());
+            if (config.getAuthenticationName() != null) {
+                amfDataObj.put("authenticationName", config.getAuthenticationName());
+            }
+            amfDataObj.put("password", config.getPassword());
+            amfDataObj.put("domain", config.getDomain());
+            amfDataObj.put("outboundProxy", config.getOutboundProxy());
+            amfDataObj.put("port", config.getPort());
+            amfDataObj.put("regRequired", regRequired);
+
+            client.call("getUserData", null, amfDataObj);
         }
-        amfDataObj.put("password", config.getPassword());
-        amfDataObj.put("domain", config.getDomain());
-        amfDataObj.put("outboundProxy", config.getOutboundProxy());
-        amfDataObj.put("port", config.getPort());
-        amfDataObj.put("regRequired", regRequired);
-        client.call("getUserData", null, amfDataObj);
 
         getRtmpClients().add(rtmpClient);
 
@@ -509,7 +523,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             if (file.exists()) {
                 bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             } else {
-                url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl="+pageUrl);
+                url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl=" + pageUrl);
                 URLConnection conn = url.openConnection();
                 // WSP-1667 - autologin not work. this paramteres imitate browswer request because some servers do not allow java make requests
                 conn.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
