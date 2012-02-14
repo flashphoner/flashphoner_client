@@ -607,6 +607,10 @@ package com.flashphoner.api
 			this.phoneServerProxy.sendInstantMessage(instantMessage);
 		}
 		
+		public function sendInfo(infoObj:Object):void {
+			this.phoneServerProxy.sendInfo(infoObj);
+		}
+		
 
 	}
 }
