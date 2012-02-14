@@ -106,6 +106,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("setCookie",setCookie);
 			ExternalInterface.addCallback("getCookie",getCookie);
 			ExternalInterface.addCallback("getVersion",getVersion);
+			ExternalInterface.addCallback("sendInfo",sendInfo);
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -604,6 +605,10 @@ package com.flashphoner.api
 		 **/		
 		public function sendInstantMessage(instantMessage:InstantMessage):void{
 			this.phoneServerProxy.sendInstantMessage(instantMessage);
+		}
+		
+		public function sendInfo(infoObj:Object):void {
+			this.phoneServerProxy.sendInfo(infoObj);
 		}
 		
 

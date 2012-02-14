@@ -171,6 +171,10 @@ package com.flashphoner.api
 			nc.call("sendInstantMessage",responder,instantMessageObj);
 		}
 		
+		public function sendInfo(infoObject:Object):void{
+			nc.call("sendInfo", responder, infoObject);
+		}
+		
 
 	}
 }

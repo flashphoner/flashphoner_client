@@ -13,6 +13,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.rtmp.*;
+import com.flashphoner.sdk.sip.request_params.InfoParams;
 import com.flashphoner.sdk.softphone.*;
 import com.flashphoner.sdk.softphone.exception.CrossCallException;
 import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
@@ -683,6 +684,17 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             rtmpClient.getSoftphone().sendInstantMessage(instantMessage);
         } catch (SoftphoneException e) {
             Logger.logger.error("Can not send instant message", e);
+        }
+    }
+
+    public void sendInfo(IClient client, RequestFunction requestFunction, AMFDataList params) {
+        IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
+        AMFDataObj obj = params.getObject(PARAM1);
+        InfoParams infoParams = new InfoParams(obj.getString("contentType"), obj.getString("body"), obj.getString("callId"));
+        try {
+            rtmpClient.getSoftphone().sendInfo(infoParams);
+        } catch (SoftphoneException e) {
+            Logger.logger.error("Can not send info", e);
         }
     }
 
