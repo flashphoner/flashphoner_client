@@ -24,7 +24,7 @@ package com.flashphoner.api
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
 
-	internal class PhoneCallback
+	public class PhoneCallback
 	{	
 		private var flash_API:Flash_API;
 		public function PhoneCallback(flashAPI:Flash_API)
@@ -210,7 +210,13 @@ package com.flashphoner.api
 			var event:MainEvent = new MainEvent(MainEvent.AUDIO_CODEC_CHANGED_EVENT,flash_API);
 			event.obj = codec;
 			CairngormEventDispatcher.getInstance().dispatchEvent(event);		
-		}	
+		}
+		
+		public function notifyOptions(sipObj:Object):int {
+			Logger.info("notifyOptions "+sipObj);
+			return 200;
+		}
+		
 		
 	}
 }

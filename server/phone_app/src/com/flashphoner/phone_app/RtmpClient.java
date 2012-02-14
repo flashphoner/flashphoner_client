@@ -27,6 +27,8 @@ import com.wowza.wms.client.IClient;
 import com.wowza.wms.logging.WMSLogger;
 import com.wowza.wms.logging.WMSLoggerFactory;
 
+import javax.sip.message.Request;
+
 import javax.sip.RequestEvent;
 import java.util.Map;
 import java.util.Timer;
@@ -37,6 +39,8 @@ import java.util.Timer;
  * See more info in {@link com.flashphoner.sdk.rtmp.IRtmpClient} and in {@link AbstractRtmpClient} class.
  */
 public class RtmpClient extends AbstractRtmpClient {
+
+    private OptionsCallResult optionsCallResult;
 
     /**
      * @param rtmpClientConfig config contains all parameters for the instance creation
@@ -247,5 +251,14 @@ public class RtmpClient extends AbstractRtmpClient {
         if (getClient() != null) {
             getClient().call("notifyAudioCodec", null, codecObj);
         }
+    }
+
+    public void notifyOptions(SipMessageObject sipMessageObject) {
+        Logger.logger.info("notifyOptions: " + getRtmpClientConfig().getLogin());
+        OptionsCallResult optionsCallResult = new OptionsCallResult(this, sipMessageObject);
+        if (getClient() != null) {
+            getClient().call("notifyOptions", optionsCallResult, sipMessageObject.toAMFObj());
+        }
+
     }
 }
