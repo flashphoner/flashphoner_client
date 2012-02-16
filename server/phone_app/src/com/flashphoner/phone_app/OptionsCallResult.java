@@ -19,7 +19,6 @@
 package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.sip.SipMessageObject;
-import com.flashphoner.sdk.softphone.Logger;
 import com.flashphoner.sdk.softphone.Softphone;
 import com.flashphoner.sdk.softphone.exception.SoftphoneException;
 import com.wowza.wms.amf.AMFDataList;
@@ -27,6 +26,8 @@ import com.wowza.wms.client.IClient;
 import com.wowza.wms.module.IModuleCallResult;
 import com.wowza.wms.module.ModuleBase;
 import com.wowza.wms.request.RequestFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sip.message.Request;
 import javax.sip.message.Response;
@@ -40,6 +41,8 @@ import javax.sip.message.Response;
  */
 public class OptionsCallResult extends ModuleBase implements IModuleCallResult {
 
+    private Logger log = LoggerFactory.getLogger(OptionsCallResult.class);
+
     private RtmpClient rtmpClient;
     private SipMessageObject sipMessageObject;
 
@@ -52,10 +55,10 @@ public class OptionsCallResult extends ModuleBase implements IModuleCallResult {
     public void onResult(IClient client, RequestFunction requestFunction, AMFDataList params) {
         try {
             int responseStatus = params.getInt(PARAM1);
-            Logger.logger.info("OptionsCallResult responseStatus: " + responseStatus);
+            log.info("OptionsCallResult responseStatus: " + responseStatus);
             rtmpClient.getSoftphone().sendResponse((Request) sipMessageObject.getMessage(), responseStatus);
         } catch (Exception e) {
-            Logger.logger.error("Can not send OK response", e);
+            log.error("Can not send OK response", e);
         }
     }
 }
