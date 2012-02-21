@@ -73,7 +73,10 @@ package com.flashphoner.api
 				if (PhoneConfig.VIDEO_ENABLED && sendVideo){	 
 					outStream.attachCamera(flashCall.flash_API.videoControl.getCam());
 				}		
-				outStream.publish(login+"_"+flashCall.id);
+				/* outStream.publish(login+"_"+flashCall.id);
+				WSP-1703 - Removed "login_" from stream name. No need now.
+				*/
+				outStream.publish(flashCall.id);
 			}					
 		}
 		
