@@ -234,18 +234,17 @@ public class RtmpClient extends AbstractRtmpClient {
 
         messageObj.put("state", instantMessage.getState());
 
+        if (instantMessage.getId() != null) {
+            messageObj.put("id", instantMessage.getId());
+        }
+
         if (InstantMessageState.RECEIVED.equals(instantMessage.getState())) {
             messageObj.put("from", instantMessage.getFrom());
             messageObj.put("to", instantMessage.getTo());
             messageObj.put("contentType", instantMessage.getContentType());
             messageObj.put("body", instantMessage.getBody());
-        } else {
-            if (instantMessage.getId() != null) {
-                messageObj.put("id", instantMessage.getId());
-            }
-
         }
-
+        
         getClient().call("notifyMessage", null, messageObj, sipMessageObject.toAMFObj());
     }
 
@@ -264,5 +263,5 @@ public class RtmpClient extends AbstractRtmpClient {
     public void notifySubscription(Subscription subscription, SipMessageObject sipMsg) {
         getClient().call("notifySubscription", null, subscription.toAMFDataObj(), sipMsg.toAMFObj());
     }
-    
+
 }
