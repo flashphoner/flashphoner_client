@@ -10,25 +10,6 @@ Contributors:
 
 This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 */
-/*
- id:String;
- state:String;
- iHolded:Boolean = false;
- sip_state:String;
- callee:String;
- caller:String;
- visibleNameCallee:String;
- visibleNameCaller:String;
- playerVideoHeight:int;
- playerVideoWidth:int;
- streamerVideoHeight:int;
- streamerVideoWidth:int;
- timeOfCall:int = 0;
- timer:Timer;
- anotherSideUser:String;
- incoming:Boolean = false;
- isVideoCall:Boolean = false;
- */
 
 var flashphoner;
 
@@ -981,6 +962,7 @@ $(function() {
             sendDTMF(currentCall.id, $(this).val());
         } else if (currentCall == null) {
             $("#calleeText").val($("#calleeText").val() + $(this).html());
+            callee1 = callee1 + $(this).html(); 
         }
     });
 
