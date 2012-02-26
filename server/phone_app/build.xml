@@ -18,6 +18,7 @@
         <property name="install_dir" value="../../install"/>
         <property name="classDir" value="${build_dir}/classes"/>
         <property name="javadoc_dir" value="${install_dir}/server-side-api"/>
+	<property name="javac_target" value="1.6"/>
 
         <property name="classpath" value=".;${lib_dir}/log4j/log4j-1.2.14.jar;${lib_dir}/wowza/wms-server.jar;${lib_dir}/wowza/wms-stream-live.jar;${lib_dir}/wowza/wms-stream-publish.jar;${lib_dir}/flashphoner/jain-sip.jar;${lib_dir}/flashphoner/tbs-flashphoner.jar;${lib_dir}/slf4j/slf4j-api-1.6.4.jar"/>
         <echo message="${classpath}"/>
@@ -78,7 +79,7 @@
     <!-- compile -->
     <target name="compile" depends="init">
         
-        <javac srcdir="${phone_app_dir}/src" classpath="${classpath}" destdir="${classDir}"/>
+        <javac target="${javac_target}" srcdir="${phone_app_dir}/src" classpath="${classpath}" destdir="${classDir}"/>
 
     </target>
 
