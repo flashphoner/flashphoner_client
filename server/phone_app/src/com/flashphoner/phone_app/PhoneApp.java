@@ -317,9 +317,15 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         rtmpClient = new RtmpClient(config, client);
 
+        AMFDataObj amfDataObj = new AMFDataObj();
+        amfDataObj.put("login", config.getLogin());
+
+        /* If we login by token - we will not send other user data except user login.
+        But user login we MUST send, because it need for flash client to parse incoming stream.
+        If we will not send login - it will raise bug here. (we will can`t hear incoming stream on flash side)
+        */
+
         if (!loggedByToken) {
-            AMFDataObj amfDataObj = new AMFDataObj();
-            amfDataObj.put("login", config.getLogin());
             if (config.getAuthenticationName() != null) {
                 amfDataObj.put("authenticationName", config.getAuthenticationName());
             }
@@ -328,9 +334,9 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             amfDataObj.put("outboundProxy", config.getOutboundProxy());
             amfDataObj.put("port", config.getPort());
             amfDataObj.put("regRequired", regRequired);
-
-            client.call("getUserData", null, amfDataObj);
         }
+
+        client.call("getUserData", null, amfDataObj);
 
         getRtmpClients().add(rtmpClient);
 
