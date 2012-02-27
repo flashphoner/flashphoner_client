@@ -30,26 +30,33 @@ package com.flashphoner.api
 	
 	public class SoundControl
 	{
-		
+		[Embed(source="/sounds/CALL_IN.mp3")]
+		private static var ringInClass:Class;	
 		[Embed(source="/sounds/CALL_OUT.mp3")]
-		private static var ringClass:Class;		
+		private static var ringOutClass:Class;		
 		[Embed(source="/sounds/BUSY.mp3")]
 		private static var busyClass:Class;
 		[Embed(source="/sounds/REGISTER.mp3")]
 		private static var registerClass:Class;
 		[Embed(source="/sounds/HANGUP.mp3")]
 		private static var finishClass:Class;
-
-		private static var ringSound:Sound;		
+		
+		private static var ringOutSound:Sound;
+		private static var ringInSound:Sound;		
 		private static var busySound:Sound;
 		private static var registerSound:Sound;
 		private static var finishSound:Sound;
 		private static var ringSoundChannel:SoundChannel;
-
+		
 		/**
 		 * Path to sound for ring
 		 **/		
-		public static var RING_SOUND:String = null;
+		public static var RING_OUT_SOUND:String = null;
+		
+		/**
+		 * Path to sound for ring
+		 **/		
+		public static var RING_IN_SOUND:String = null;
 		/**
 		 * Path to sound for busy
 		 **/		
@@ -135,13 +142,17 @@ package com.flashphoner.api
 		 * Update all sounds from pathes
 		 **/
 	    public static function updateSounds():void{
-			ringSound = Sound(new ringClass());			
+			ringOutSound = Sound(new ringOutClass());
+			ringInSound = Sound(new ringInClass());			
 			busySound = Sound(new busyClass());
 			registerSound = Sound(new registerClass());
 			finishSound = Sound(new finishClass());	    
 			
-	    	if (SoundControl.RING_SOUND != null){
-				ringSound = new Sound(new URLRequest(SoundControl.RING_SOUND));
+			if (SoundControl.RING_OUT_SOUND != null){
+				ringOutSound = new Sound(new URLRequest(SoundControl.RING_OUT_SOUND));
+			}
+	    	if (SoundControl.RING_IN_SOUND != null){
+				ringInSound = new Sound(new URLRequest(SoundControl.RING_IN_SOUND));
 	    	}
 	    	if (SoundControl.BUSY_SOUND != null){
 				busySound = new Sound(new URLRequest(SoundControl.BUSY_SOUND));
@@ -188,9 +199,20 @@ package com.flashphoner.api
 		/**
 		 * Play register sound
 		 **/		
-		public static function playRingSound():void{
+		public static function playInRingSound():void{
+			Logger.info("playInRingSound");
 			if (ringSoundChannel == null){
-				ringSoundChannel = ringSound.play(0,999);
+				ringSoundChannel = ringInSound.play(0,999);
+			}			
+		}
+		
+		/**
+		 * Play register sound
+		 **/		
+		public static function playOutRingSound():void{
+			Logger.info("playOutRingSound");
+			if (ringSoundChannel == null){
+				ringSoundChannel = ringOutSound.play(0,999);
 			}			
 		}
 		

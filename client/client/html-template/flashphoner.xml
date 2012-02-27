@@ -17,10 +17,11 @@
 	<application>phone_app</application>
 	<video_width>640</video_width>
 	<video_height>480</video_height>
-	<check_validation_callee>true</check_validation_callee>
+	<check_validation_callee>false</check_validation_callee>
 	<use_enhanced_mic>true</use_enhanced_mic>
 	<use_auto_gain_control>true</use_auto_gain_control>
-	<ring_sound></ring_sound>
+	<ring_in_sound>assets/CALL_IN.mp3</ring_in_sound>
+	<ring_out_sound>assets/CALL_OUT.mp3</ring_out_sound>
 	<busy_sound></busy_sound>
 	<register_sound>assets/YesLife_SignIn.mp3</register_sound>
 	<finish_sound></finish_sound>

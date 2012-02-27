@@ -135,8 +135,13 @@ package com.flashphoner.api
 					}
 					Logger.info("audio codec: "+PhoneConfig.AUDIO_CODEC);
 					
-			        if (xml.ring_sound != null && xml.ring_sound.toString() != ""){
-			        	SoundControl.RING_SOUND = xml.ring_sound;
+					if (xml.ring_out_sound != null && xml.ring_out_sound.toString() != ""){
+						Logger.info("RING_OUT_SOUND="+xml.ring_out_sound);
+						SoundControl.RING_OUT_SOUND = xml.ring_out_sound;
+					}					
+			        if (xml.ring_in_sound != null && xml.ring_in_sound.toString() != ""){
+						Logger.info("RING_IN_SOUND="+xml.ring_in_sound);
+			        	SoundControl.RING_IN_SOUND = xml.ring_in_sound;
 			        }
 			        if (xml.busy_sound != null && xml.busy_sound.toString() != ""){
 			        	SoundControl.BUSY_SOUND = xml.busy_sound;

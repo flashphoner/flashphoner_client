@@ -72,13 +72,13 @@ package com.flashphoner.api
 			
 			if (event.type==CallEvent.IN){
 				if (!call.isMSRP){
-					SoundControl.playRingSound();
+					SoundControl.playInRingSound();
 				}
 			}
 			
 			if (event.type ==CallEvent.OUT){
 				if (!call.isMSRP){
-					SoundControl.playRingSound();
+					SoundControl.playOutRingSound();
 				}
 			}
 			
