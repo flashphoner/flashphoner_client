@@ -73,7 +73,7 @@ package com.flashphoner.api.data
 		/**
 		 * Current version of Flashphoner client
 		 **/
-		public static var VERSION_OF_CLIENT:String = "1.0.X";
+		public static var VERSION_OF_CLIENT:String =  "1.0.X";
 
 		/**
 		 * Current version of Flashphoner server
