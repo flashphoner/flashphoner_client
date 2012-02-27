@@ -91,16 +91,20 @@ package com.flashphoner.api
 		}		
 		public function setSendVideo(flag:Boolean):void{
 			sendVideo = flag;
+			
 			if (outStream == null){
 				return;
 			}
+			
 			if (PhoneConfig.VIDEO_ENABLED && sendVideo && flashCall != null){
 				if (!flashCall.isVideoSended){
 					nc.call("updateCallToVideo",null,flashCall.id);
-				}
+				} 
 				flashCall.isVideoSended = true;
 				outStream.attachCamera(flashCall.flash_API.videoControl.getCam());
-				nc.call("updateCallToVideo",null,flashCall.id);
+				// With that second call we have double "updateToCall" to server first time when we send video.
+				// and that lead to 500 Internall error from server side. So we remove that.
+				//nc.call("updateCallToVideo",null,flashCall.id);
 			}
 			
 			if (!sendVideo){

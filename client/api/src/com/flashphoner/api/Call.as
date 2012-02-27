@@ -94,7 +94,7 @@ package com.flashphoner.api
 		 **/
 		public var incoming:Boolean = false;
 		/**
-		 * Flasg on video call
+		 * Flag on video call
 		 **/
 		public var isVideoCall:Boolean = false;
 		
