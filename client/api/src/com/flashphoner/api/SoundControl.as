@@ -107,18 +107,33 @@ package com.flashphoner.api
 			busySound = Sound(new busyClass());
 			registerSound = Sound(new registerClass());
 			finishSound = Sound(new finishClass());	    
+			var newSound:Sound;
+			
+			// For all sounds we will check if it length != 0 to be sure that is real sounds 
 			
 	    	if (SoundControl.RING_SOUND != null){
-				ringSound = new Sound(new URLRequest(SoundControl.RING_SOUND));
+				newSound = new Sound(new URLRequest(SoundControl.RING_SOUND));
+				if ( newSound.length != 0 ){
+					ringSound = newSound;
+				}
 	    	}
 	    	if (SoundControl.BUSY_SOUND != null){
-				busySound = new Sound(new URLRequest(SoundControl.BUSY_SOUND));
+				newSound = new Sound(new URLRequest(SoundControl.BUSY_SOUND));
+				if ( newSound.length != 0 ){
+					busySound = newSound;
+				}
 	    	}
 	    	if (SoundControl.REGISTER_SOUND != null){
-				registerSound = new Sound(new URLRequest(SoundControl.REGISTER_SOUND));
+				newSound = new Sound(new URLRequest(SoundControl.REGISTER_SOUND));
+				if ( newSound.length != 0 ){
+					registerSound = newSound;
+				}
 	    	}
 	    	if (SoundControl.FINISH_SOUND != null){
-				finishSound = new Sound(new URLRequest(SoundControl.FINISH_SOUND));
+				newSound = new Sound(new URLRequest(SoundControl.FINISH_SOUND));
+				if ( newSound.length != 0 ){
+					finishSound = newSound;
+				}
 	    	}
 	    }
 
