@@ -1,10 +1,15 @@
-﻿#flashphoner_client installer
+#!/bin/sh
+SILENT=$1
+#flashphoner_client installer
 FLASHPHONER_URL="flashphoner.com"
 INSTALLER_DIR=`pwd`
 PRODUCT="flashphoner_client"
 VERSION=`cat ./flashphoner_client.version`
+SHORT_VERSION=`echo "$VERSION" | sed 's/\(.*\.\)\(.*\.\)\(.*\)/\3/'`
+echo "SHORT_VERSION:$SHORT_VERSION"
 SUPPORT_URL="http://flashphoner.com"
 PRODUCT_APP_JAR=tbs-phone-app.jar
+DEFAULT_WWW_DIR=/var/www/html
 
 echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
 echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
@@ -39,7 +44,9 @@ echo "*  To install press ENTER, to abort press CTRL+C.   "
 echo "*                                                   "
 echo "****************************************************"
 
-read cont < /dev/tty
+if [ "$SILENT" != "-silent" ]; then
+    read cont < /dev/tty
+fi
 
 ####################
 # Detecting JDK
@@ -327,7 +334,13 @@ function get_path_client(){
         get_path_client
     fi
 }
-get_path_client
+
+if [ "$SILENT" != "-silent" ]; then
+    get_path_client
+else    
+    CLIENT_PATH=$DEFAULT_WWW_DIR/$SHORT_VERSION    
+fi
+
 if [[ ! "$CLIENT_PATH" = /* ]]
 then
     CLIENT_PATH=`pwd`/$CLIENT_PATH
@@ -372,4 +385,7 @@ echo "*                                                                         
 echo "*                                                                      Press ENTER to continue *"
 echo "************************************************************************************************"
 echo ""
-read cont < /dev/tty
+
+if [ "$SILENT" != "-silent" ]; then
+    read cont < /dev/tty
+fi
