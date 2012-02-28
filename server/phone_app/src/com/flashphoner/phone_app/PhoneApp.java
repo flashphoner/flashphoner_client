@@ -304,11 +304,11 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         config.setSupportedResolutions(supportedResolutions);
         config.setMajorMinorPlayerVersion(majorMinorVersion);
         config.setSwfUrl(swfUrl);
-        config.setPageUrl(pageUrl);        
+        config.setPageUrl(pageUrl);
 
-        try{
+        try {
             config.setqValue(Float.parseFloat(qValue));
-        }catch(Exception e){
+        } catch (Exception e) {
             //do nothing
         }
 
@@ -692,6 +692,13 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         instantMessage.setTo(obj.getString("to"));
         instantMessage.setFrom(obj.getString("from"));
         instantMessage.setRecipients(obj.getString("recipients"));
+
+        try {
+            instantMessage.setDeliveryNotification(Boolean.parseBoolean(obj.getString("deliveryNotification")));
+        } catch (Exception e) {
+            log.info("deliveryNotification = {}",obj.getString("deliveryNotification"));
+        }
+
         try {
             rtmpClient.getSoftphone().sendInstantMessage(instantMessage);
         } catch (SoftphoneException e) {

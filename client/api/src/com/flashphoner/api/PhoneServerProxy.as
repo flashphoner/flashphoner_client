@@ -176,6 +176,7 @@ package com.flashphoner.api
 			instantMessageObj.recipients=instantMessage.recipients;
 			instantMessageObj.body=instantMessage.body;
 			instantMessageObj.contentType=instantMessage.contentType;
+			instantMessageObj.deliveryNotification=instantMessage.deliveryNotification;
 			
 			nc.call("sendInstantMessage",responder,instantMessageObj);
 		}	

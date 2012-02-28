@@ -625,6 +625,7 @@ package com.flashphoner.api
 			instantMessage.from = modelLocator.login; 
 			instantMessage.to = msgObj.to;
 			instantMessage.contentType = msgObj.contentType;
+			instantMessage.deliveryNotification=msgObj.deliveryNotification;
 			//Add message into the internal collection
 			instantMessage.id = msgObj.id;
 			messages.addItem(instantMessage);
@@ -667,6 +668,7 @@ package com.flashphoner.api
 		 * @param instantMessage 
 		 **/		
 		public function sendInstantMessage(instantMessage:InstantMessage):void{
+			Logger.info("sendInstantMessage: "+instantMessage.from+" "+instantMessage.to+" "+instantMessage.body+" "+instantMessage.deliveryNotification+" "+instantMessage.id);
 			this.phoneServerProxy.sendInstantMessage(instantMessage);
 		}
 		
