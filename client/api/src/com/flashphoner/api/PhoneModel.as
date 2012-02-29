@@ -116,8 +116,17 @@ package com.flashphoner.api
 					PhoneConfig.CHECK_VALIDATION_CALLEE = (check_validation_callee == "true");
 					
 					var use_enhanced_mic:String = xml.use_enhanced_mic;
-					PhoneConfig.USE_ENHANCED_MIC = (use_enhanced_mic == "true");
 					
+					if (use_enhanced_mic!=null && use_enhanced_mic.length!=0){
+						PhoneConfig.USE_ENHANCED_MIC = (use_enhanced_mic == "true");
+					}
+					Logger.info("USE_ENHANCED_MIC: "+PhoneConfig.USE_ENHANCED_MIC);
+					
+					var forceEnhancedMic:String = xml.force_enhanced_mic;
+					if (forceEnhancedMic!=null && forceEnhancedMic.length!=0){
+						PhoneConfig.FORCE_ENHANCED_MIC= (forceEnhancedMic=="true");
+					}
+					Logger.info("FORCE_ENHANCED_MIC: "+PhoneConfig.FORCE_ENHANCED_MIC);
 					
 			        var regRequired:String = xml.register_required; 
 			        PhoneConfig.REGISTER_REQUIRED = (regRequired == "true");
@@ -144,7 +153,8 @@ package com.flashphoner.api
 			        }
 			        if (xml.finish_sound != null && xml.finish_sound.toString() != ""){
 				        SoundControl.FINISH_SOUND = xml.finish_sound;
-			        }
+			        }					
+					
 			        SoundControl.updateSounds();
 			    }
 			    else

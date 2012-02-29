@@ -64,6 +64,11 @@ package com.flashphoner.api.data
 		 * Is use enhansed mic for echo supression (true/false) 
 		 **/
 		public static var USE_ENHANCED_MIC:Boolean = true;
+		
+		/**
+		 * Always use enhanced mic, regardless of Player version or locale
+		 **/
+		public static var FORCE_ENHANCED_MIC:Boolean = false;
 	
 		/**
 		 * Current version of Flashphoner client

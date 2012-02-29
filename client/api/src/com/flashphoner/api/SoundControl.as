@@ -65,6 +65,8 @@ package com.flashphoner.api
 		
 		private var flash_API:Flash_API;
 		
+		private var majorPlayerVersion:Number=11;
+		
 		/**
 		 * Control class (singelton) for microphone and sounds.
 		 **/
@@ -72,31 +74,47 @@ package com.flashphoner.api
 		public function SoundControl(flash_API:Flash_API)
 		{
 			this.flash_API = flash_API;
-			Logger.info("Use enchenced mic: "+PhoneConfig.USE_ENHANCED_MIC);
-			if (PhoneConfig.USE_ENHANCED_MIC){
-				var flashPlayerVersion:String = Capabilities.version;
-
-				var osArray:Array = flashPlayerVersion.split(' ');
-				var osType:String = osArray[0];
-				var versionArray:Array = osArray[1].split(',');
-				var majorVersion:Number = parseInt(versionArray[0]);
-				
-				if (majorVersion >= 11 || Capabilities.language.indexOf("en") >= 0){
-					mic = Microphone.getEnhancedMicrophone();				
-				}else{
-					mic = Microphone.getMicrophone();
-					for each (var apiNotify:APINotify in flash_API.apiNotifys){
-						apiNotify.addLogMessage("WARNING!!! Echo cancellation is turned off on your side (because your OS has no-english localization). Please use a headset to avoid echo for your interlocutor.");
-					}
-				}
-			}else{
-				mic = Microphone.getMicrophone();
-			}
+			Logger.info("Use enchenced mic: "+PhoneConfig.USE_ENHANCED_MIC);		
+			setFlashPlayerMajorVersion();
+			mic = defineMicrophone();	
+			
 			if (mic != null){
 				initMic(mic,50,false);
 			}
 			
 			updateSounds();
+		}
+		
+		private function setFlashPlayerMajorVersion():void {
+			Logger.info("setFlashPlayerMajorVersion");
+			var flashPlayerVersion:String = Capabilities.version;			
+			var osArray:Array = flashPlayerVersion.split(' ');
+			var osType:String = osArray[0];
+			var versionArray:Array = osArray[1].split(',');
+			this.majorPlayerVersion = parseInt(versionArray[0]);
+			Logger.info("majorVersion "+majorPlayerVersion);
+		}
+		
+		private function defineMicrophone(index:int=-1):Microphone {
+			Logger.info("getMicrophone "+index);
+			if (PhoneConfig.USE_ENHANCED_MIC){				
+				if (majorPlayerVersion >= 11 || Capabilities.language.indexOf("en") >= 0 || PhoneConfig.FORCE_ENHANCED_MIC){
+					Logger.info("return EnhancedMicrophone");
+					Logger.info("majorVersion: "+majorPlayerVersion);
+					Logger.info("Capabilities.language: "+Capabilities.language);
+					Logger.info("FORCE_ENHANCED_MIC: "+PhoneConfig.FORCE_ENHANCED_MIC);
+					return Microphone.getEnhancedMicrophone(index);				
+				}else{					
+					for each (var apiNotify:APINotify in flash_API.apiNotifys){
+						apiNotify.addLogMessage("WARNING!!! Echo cancellation is turned off on your side (because your OS has no-english localization). Please use a headset to avoid echo for your interlocutor.");
+					}
+					Logger.info("return Microphone");
+					return Microphone.getMicrophone(index);
+				}
+			}else{
+				Logger.info("return Microphone");
+				return Microphone.getMicrophone(index);
+			}
 		}
 		
 		/**
@@ -197,19 +215,8 @@ package com.flashphoner.api
 		 * @param gain volume of microphone(-1 - if not change volume)
 		 **/
 		public function changeMicrophone(index:int,isLoopback:Boolean,gain:Number = -1):void{
-			
-			var microphone:Microphone;
-			if (PhoneConfig.USE_ENHANCED_MIC){
-				if (Capabilities.language.indexOf("en") >= 0){
-					microphone = Microphone.getEnhancedMicrophone(index);
-				}else{
-					microphone = Microphone.getMicrophone(index);
-				}
-			}else{
-				microphone = Microphone.getMicrophone(index);
-			}
-			
-
+			Logger.info("changeMicrophone: index "+index+" isLoopback "+isLoopback+" gain: "+gain);
+			var microphone:Microphone = defineMicrophone(index);
 			if (microphone != null){
 				this.mic = microphone;
 				if (this.mic != null){	
