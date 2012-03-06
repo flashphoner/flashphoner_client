@@ -109,7 +109,7 @@ input::-webkit-input-placeholder {
 }
 #phoneDiv {
 	left: 60px;
-	top: 20px;
+	top: 24px;
 	height: 282px;
 	width: 153px;
 	/*padding: 10px;*/
@@ -761,33 +761,36 @@ div with zero size.
   border: 1px solid #222 !important;
 }
 
-/*-----------Call management ----------*/
+/*----------- Call management ----------*/
 #callManagement{
-	top: 520px;
-	left: 20px;	
-	height: 300px;
-	width: 1000px;
+	top: 550px;
+	left: 240px;	
+	height: 340px;
+	width: 720px;
 	float: left;
 	background-color: #FEFEFE;
 	font: 14px Courier;
-	color: #000000; 
-	padding: 10px;
+	color: #333; 
 	overflow: auto;
 	word-wrap: break-word;
 }
 
-#managedCalls{	
-	left:5;
-	bottom:5;
+#managedCalls{
+	left: 5;
+	bottom: 5;
 	height: 250px;
 	width: 950px;
 	float: left;
-	background-color: #000000;
+	background-color: #333;
 	font: 14px Courier;
 	color: #eee; 
-	padding: 10px;
+	margin-top: 9px;
 	overflow: auto;
 	word-wrap: break-word;
+}
+
+.callManagementButton {
+  width: 60px;
 }
 
 /*-------------------------------------*/

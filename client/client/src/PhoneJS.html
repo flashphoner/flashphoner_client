@@ -21,6 +21,7 @@
 <script type="text/javascript" src="js/Phone.js"></script>
 <script type="text/javascript" src="js/flashLoader.js"></script>
 <!-- ************* -->
+
 <title>Phone</title>
 </head>
 <body>
@@ -185,12 +186,10 @@
 </div>
 <!-- ********* -->
 	  
-	  
+ 
 	  
 </div>
 <!-- *********** -->
-
-
 
 <!-- Console -->
 <div id="console">
@@ -199,13 +198,15 @@
 
 <!-- Call management -->
 <div id="callManagement">
-	callId: <input id="managedCallId" size="50" type="text" value=""/>	
-	<input id="answerManagedCallButton" type="button" value="answer"/>
-	<input id="hangupManagedCallButton" type="button" value="hangup"/>
-	<input id="holdManagedCallButton" type="button" value="hold"/>
-	<input id="unholdManagedCallButton" type="button" value="unhold"/>	
-	<div id="managedCalls">	
-	</div>	
+  callId: 
+  <input type="text" id="managedCallId" size="50" value=""/>	
+  <input type="button" class="callManagementButton" id="answerManagedCallButton" value="Answer"/> 
+  <input type="button" class="callManagementButton" id="hangupManagedCallButton" value="Hangup"/>
+  <input type="button" class="callManagementButton" id="holdManagedCallButton" value="Hold"/> 
+  <input type="button" class="callManagementButton" id="unholdManagedCallButton" value="Unhold"/>
+
+  <div id="managedCalls">	
+  </div>
 	
 </div>
 
