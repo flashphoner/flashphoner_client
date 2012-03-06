@@ -15,7 +15,7 @@ package com.flashphoner.api
 	import com.flashphoner.api.data.ModelLocator;
 	import com.flashphoner.api.data.PhoneConfig;
 	
-	import flash.events.TimerEvent;
+	import flash.events.TimerEvent;	
 	import flash.utils.Timer;
 
 	/**
@@ -199,6 +199,7 @@ package com.flashphoner.api
 		 * @param dtmf DTMF command
 		 **/ 
 		public function sendDTMF(dtmf:String):void{
+			new DtmfPlayer(dtmf.toUpperCase()).play();
 			callServerProxy.sendDtmf(dtmf);			
 		}		
 		
@@ -247,7 +248,7 @@ package com.flashphoner.api
 
 		private function timerHandler(timeEvent:TimerEvent):void{
 			timeOfCall++;
-		}
+		}	
 		
 	}
 }
