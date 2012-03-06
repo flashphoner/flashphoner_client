@@ -28,6 +28,7 @@ package com.flashphoner.api
 	import flash.media.Microphone;
 	import flash.net.Responder;
 	import flash.net.SharedObject;
+	import flash.system.Security;
 	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
@@ -115,7 +116,8 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("getVersion",getVersion);
 			ExternalInterface.addCallback("subscribe",subscribe);			
 			ExternalInterface.addCallback("sendRawRequest",sendRawRequest);
-			ExternalInterface.addCallback("sendInfo",sendInfo);			
+			ExternalInterface.addCallback("sendInfo",sendInfo);
+			ExternalInterface.addCallback("showSecurityPanel",showSecurityPanel);	
 			
 			calls = new ArrayCollection();
 			messages = new ArrayCollection();
@@ -682,7 +684,12 @@ package com.flashphoner.api
 		
 		public function sendInfo(infoObj:Object):void{
 			this.phoneServerProxy.sendInfo(infoObj);
-		}		
+		}
+		
+		public function showSecurityPanel():void{
+			Logger.info("showSecurityPanel");
+			Security.showSettings();				
+		}
 
 	}
 }
