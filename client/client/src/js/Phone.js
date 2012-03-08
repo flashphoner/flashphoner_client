@@ -231,6 +231,20 @@ function setStatusHold(callId, isHold) {
     disableHoldButton();
 }
 
+function changeStatusHold(callId){
+    trace("changeStatusHold");
+    var call = managedCalls[callId];
+    trace("current call status: "+call.state);
+    if ("HOLD"==call.state){
+    	//unhold
+	setStatusHold(callId,false);
+    }else{
+	//hold
+	setStatusHold(callId,true);	
+    }
+}
+
+
 function transfer(callId, target) {
     trace("transfer", callId, target);
     flashphoner.transfer(callId,target);
@@ -467,15 +481,9 @@ function notifyCallbackHold(call, isHold) {
     if (currentCall != null && currentCall.id == call.id) {
         currentCall = call;
         if (call.iHolded) {
-            getElement('holdButton').style.background = "url(assets/unhold.png)";
-            getElement('holdButton').onclick = function() {
-               	setStatusHold(call.id, false);
-            }
+            getElement('holdButton').style.background = "url(assets/unhold.png)";            
         } else {
-            getElement('holdButton').style.background = "url(assets/hold.png)";
-            getElement('holdButton').onclick = function() {
-               	setStatusHold(call.id, true);
-            }
+            getElement('holdButton').style.background = "url(assets/hold.png)";            
         }
     }
 }
@@ -1029,6 +1037,11 @@ function close(element) {
 
 /* --------------------- On document load we do... ------------------ */
 $(function() {
+	
+    // hold button
+    $("#holdButton").click(function() {
+      changeStatusHold(currentCall.id);
+    });
     
     // open login view
     $("#loginMainButton").click(function() {
