@@ -1,4 +1,3 @@
-#!/bin/sh
 SILENT=$1
 #flashphoner_client installer
 FLASHPHONER_URL="flashphoner.com"
