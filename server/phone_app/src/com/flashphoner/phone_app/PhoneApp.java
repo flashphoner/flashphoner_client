@@ -169,7 +169,6 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         if (login != null && password != null) {
 
 
-
             outboundProxy = obj.getString("outboundProxy");
             if (outboundProxy == null || "".equals(outboundProxy)) {
                 client.rejectConnection();
@@ -706,6 +705,11 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         } catch (SoftphoneException e) {
             log.error("Can not send info", e);
         }
+    }
+
+    public void keepAlive(IClient client, RequestFunction requestFunction, AMFDataList params) {
+        log.debug("keepAlive");
+        sendResult(client, params, 1);
     }
 
 }

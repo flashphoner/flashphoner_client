@@ -82,6 +82,14 @@ package com.flashphoner.api.data
 		
 		public static var AUDIO_CODEC:String = "speex";
 		
+		public static var KEEP_ALIVE:Boolean = false;
+		
+		public static var KEEP_ALIVE_INTERVAL:int = 1000;
+		
+		public static var KEEP_ALIVE_TIMEOUT:int = 5000;
+		
+		public static var LOG_SEVERITY:String = "DEBUG";
+		
 		/**
 		 * Current version of Flashphoner product
 		 **/		
