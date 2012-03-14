@@ -76,6 +76,7 @@ package com.flashphoner.api
 		 * Initialize calls,modelLocato and initialize library
 		 */		
 		public function Flash_API(apiNotify:APINotify){
+			Logger.init();
 			apiNotifys = new ArrayCollection();
 			addAPINotify(apiNotify);
 			PhoneModel.getInstance();

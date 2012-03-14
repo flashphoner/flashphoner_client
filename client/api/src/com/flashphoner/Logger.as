@@ -13,20 +13,34 @@ This code and accompanying materials also available under LGPL and MPL license f
 package com.flashphoner
 {
 	
-	import flash.system.Capabilities; 
+	import com.flashphoner.api.data.PhoneConfig;
+	
+	import flash.system.Capabilities;
+
 	public class Logger
 	{	
 		[Bindable]
 		/**
 		 * String which contain full logs.
 		**/
-		public static var log:String = new String();
+		public static var log:String = new String();				
+		
+		public static var SEVERITY:Object = new Object();
+		
+		public static var SEVERITY_VALUE:int = 30;
 		
 		/**
 		 * Default constructor
 		**/
-		public function Logger()
-		{
+		public static function init():void
+		{	
+			SEVERITY["ERROR"]=10;
+			SEVERITY["WARN"]=20;
+			SEVERITY["INFO"]=30;
+			SEVERITY["DEBUG"]=40;
+			SEVERITY["TRACE"]=50;
+			SEVERITY_VALUE = SEVERITY[PhoneConfig.LOG_SEVERITY];
+			trace("Init logger, SEVERITY: "+PhoneConfig.LOG_SEVERITY+" "+SEVERITY_VALUE);
 		}
 		
 		private static function getTime() : String
@@ -40,11 +54,8 @@ package com.flashphoner
 		 * Add info message to log and output to trace
 		 **/
         public static function info(str : String) : void
-        {           
-                str = 'INFO:    ' + getTime() + str;
-                trace(str);
-                log += str + '';
-            
+        {       
+			_log(str,"INFO");            
         }
 
 		/**
@@ -52,11 +63,7 @@ package com.flashphoner
 		 **/
         public static function debug(str : String) : void
         {
-           
-                str = 'DEBUG:   ' + getTime() + str;
-                trace(str);
-                log += str + '';
-          
+			_log(str,"DEBUG");          
         }
 
 		/**
@@ -64,12 +71,28 @@ package com.flashphoner
 		 **/
         public static function error(str : String) : void
         {
-           
-                str = 'ERROR:   ' + getTime() + str;
-                trace(str);
-                log += str + '';
-           
-        }       
+			_log(str,"ERROR");           
+        }     
+		
+		public static function warn(str : String) : void
+		{
+			_log(str,"WARN");
+			
+		}
+		
+		public static function _trace(str : String) : void
+		{
+			_log(str,"TRACE");
+			
+		} 
+		
+		private static function _log(str:String,severity:String):void{
+			if (SEVERITY[severity] <= SEVERITY_VALUE ){
+				str = severity+':   ' + getTime() + str;
+				trace(str);
+				log += str + '';
+			}
+		}
 
 	
 	}

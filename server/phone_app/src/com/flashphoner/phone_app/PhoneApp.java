@@ -112,13 +112,15 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String swfUrl = obj2.getString("swfUrl");
         String pageUrl = obj2.getString("pageUrl");
         String allowDomainsString = ClientConfig.getInstance().getProperty("allow_domains");
+        log.info("swfUrl: {} pageUrl: {} allowDomainsString: {}", new Object[]{swfUrl, pageUrl, allowDomainsString});
 
         if (allowDomainsString != null && !"".equals(allowDomainsString)) {
             String[] allowDomains = allowDomainsString.split(",");
             Boolean isAllowDomain = false;
             for (String allowDomain : allowDomains) {
                 int index = swfUrl.indexOf(allowDomain);
-                if (index >= 0 && index < 7) {
+                log.debug("swfUrl.indexOf(allowDomain) {}", index);
+                if (index >= 0 && index <= 7) {
                     isAllowDomain = true;
                 }
             }
@@ -167,7 +169,6 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String visibleName = obj.getString("visibleName");
 
         if (login != null && password != null) {
-
 
 
             outboundProxy = obj.getString("outboundProxy");
@@ -706,6 +707,11 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         } catch (SoftphoneException e) {
             log.error("Can not send info", e);
         }
+    }
+
+    public void keepAlive(IClient client, RequestFunction requestFunction, AMFDataList params) {
+        log.debug("keepAlive");
+        sendResult(client, params, 1);
     }
 
 }

@@ -137,10 +137,26 @@ package com.flashphoner.api
 					if (xml.video_height != null && xml.video_height.toString() != ""){
 						PhoneConfig.VIDEO_HEIGHT = int(xml.video_height);
 					}
+					
+					if (xml.keep_alive == "true"){
+						PhoneConfig.KEEP_ALIVE=true;	
+					}
+					Logger.info("KEEP_ALIVE: "+PhoneConfig.KEEP_ALIVE);
+					
+					if (xml.keep_alive_interval !=null && xml.keep_alive_interval.toString() !=""){
+						PhoneConfig.KEEP_ALIVE_INTERVAL = int(xml.keep_alive_interval);
+					}
+					Logger.info("KEEP_ALIVE_INTERVAL: "+PhoneConfig.KEEP_ALIVE_INTERVAL);
+					
+					if (xml.keep_alive_timeout !=null && xml.keep_alive_timeout.toString() !=""){
+						PhoneConfig.KEEP_ALIVE_TIMEOUT = int(xml.keep_alive_timeout);
+					}
+					Logger.info("KEEP_ALIVE_TIMEOUT: "+PhoneConfig.KEEP_ALIVE_TIMEOUT);					
+					
 					if (xml.audio_codec != null && xml.audio_codec.toString() != ""){						
 						PhoneConfig.AUDIO_CODEC = xml.audio_codec;
 					}
-					Logger.info("audio codec: "+PhoneConfig.AUDIO_CODEC);
+					Logger.info("AUDIO_CODEC: "+PhoneConfig.AUDIO_CODEC);
 					
 			        if (xml.ring_sound != null && xml.ring_sound.toString() != ""){
 			        	SoundControl.RING_SOUND = xml.ring_sound;
