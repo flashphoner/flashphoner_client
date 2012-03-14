@@ -10,16 +10,7 @@ SUPPORT_URL="http://flashphoner.com"
 PRODUCT_APP_JAR=tbs-phone-app.jar
 DEFAULT_WWW_DIR=/var/www/html
 
-echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
-echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
-echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
-echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
-echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
-echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
-echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
-echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
-echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
-echo ""; echo ""; echo ""; echo ""; echo ""; echo "";
+clear
 
 echo "****************************************************"
 echo "*                                                   "
