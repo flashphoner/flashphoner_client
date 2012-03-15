@@ -17,6 +17,7 @@ package com.flashphoner.api
 	import com.flashphoner.api.interfaces.APINotify;
 	
 	import flash.events.ProgressEvent;
+	import flash.events.Event; 
 	import flash.media.Microphone;
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
@@ -134,33 +135,37 @@ package com.flashphoner.api
 			var newRegisterSound:Sound = new Sound(new URLRequest(SoundControl.REGISTER_SOUND));
 			var newFinishSound:Sound = new Sound(new URLRequest(SoundControl.FINISH_SOUND));
 			
-			// We are waiting for "progress" event. That mean if link broken and there is
-			// no sound on that url, progress event will never appear.
-			newRingSound.addEventListener(ProgressEvent.PROGRESS, assign);
-			newBusySound.addEventListener(ProgressEvent.PROGRESS, assign);
-			newRegisterSound.addEventListener(ProgressEvent.PROGRESS, assign);
-			newFinishSound.addEventListener(ProgressEvent.PROGRESS, assign);
+			// We are waiting for "complete" event. That mean if link broken and there is
+			// no sound on that url, complete event will never appear.
+			newRingSound.addEventListener(Event.COMPLETE, assign);
+			newBusySound.addEventListener(Event.COMPLETE, assign);
+			newRegisterSound.addEventListener(Event.COMPLETE, assign);
+			newFinishSound.addEventListener(Event.COMPLETE, assign);
 			
-			// On progress event we are invoking assign function.
+			// On complete event we are invoking assign function.
 			// It assign old sounds to new ones.
 			
-			function assign(event:ProgressEvent):void{
+			function assign(event:Event):void{
 				
 				var localSound:Sound = event.target as Sound;
 				
-				// For every event we check by what sounds it was invoked.
+				// For every event we check by what sounds complete event was invoked.
 				// we check sound url and compare it with all our urls.
 				// When we found coincidence - we making assignment
-				// TODO: maybe progress event is not best solution. It invokes few times.
-				// so we are making assignment few times. May be need use COMPLETE event.
 				
 				if (localSound.url.indexOf(SoundControl.RING_SOUND) >= 0) {
 					ringSound = localSound;
-				} else if (localSound.url.indexOf(SoundControl.BUSY_SOUND) >= 0) {
+				} 
+				
+				if (localSound.url.indexOf(SoundControl.BUSY_SOUND) >= 0) {
 					busySound = localSound;
-				} else if (localSound.url.indexOf(SoundControl.REGISTER_SOUND) >= 0) {
+				} 
+				
+				if (localSound.url.indexOf(SoundControl.REGISTER_SOUND) >= 0) {
 					registerSound = localSound;
-				} else if (localSound.url.indexOf(SoundControl.FINISH_SOUND) >= 0) {
+				} 
+				
+				if (localSound.url.indexOf(SoundControl.FINISH_SOUND) >= 0) {
 					finishSound = localSound;
 				}
 			} 
