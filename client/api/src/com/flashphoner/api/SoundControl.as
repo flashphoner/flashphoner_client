@@ -16,6 +16,7 @@ package com.flashphoner.api
 	import com.flashphoner.api.data.PhoneConfig;
 	import com.flashphoner.api.interfaces.APINotify;
 	
+	import flash.events.ProgressEvent;
 	import flash.media.Microphone;
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
@@ -45,19 +46,19 @@ package com.flashphoner.api
 		/**
 		 * Path to sound for ring
 		 **/		
-		public static var RING_SOUND:String = null;
+		public static var RING_SOUND:String = "";
 		/**
 		 * Path to sound for busy
 		 **/		
-		public static var BUSY_SOUND:String = null;
+		public static var BUSY_SOUND:String = "";
 		/**
 		 * Path to sound for register event on voip server
 		 **/		
-		public static var REGISTER_SOUND:String = null;
+		public static var REGISTER_SOUND:String = "";
 		/**
 		 * Path to sound for finish call
 		 **/		
-		public static var FINISH_SOUND:String = null;
+		public static var FINISH_SOUND:String = "";
 				
 		private static var soundControl:SoundControl;
 		
@@ -124,35 +125,45 @@ package com.flashphoner.api
 			ringSound = Sound(new ringClass());			
 			busySound = Sound(new busyClass());
 			registerSound = Sound(new registerClass());
-			finishSound = Sound(new finishClass());	    
-			var newSound:Sound;
+			finishSound = Sound(new finishClass());	
 			
-			// For all sounds we will check if it length != 0 to be sure that is real sounds 
+			// Create new sounds. We will not check if links != 0, because it equals "" by default. 
+			// So it will not create error. Just will empty sounds. 
+			var newRingSound:Sound = new Sound(new URLRequest(SoundControl.RING_SOUND));
+			var newBusySound:Sound = new Sound(new URLRequest(SoundControl.BUSY_SOUND));
+			var newRegisterSound:Sound = new Sound(new URLRequest(SoundControl.REGISTER_SOUND));
+			var newFinishSound:Sound = new Sound(new URLRequest(SoundControl.FINISH_SOUND));
 			
-	    	if (SoundControl.RING_SOUND != null){
-				newSound = new Sound(new URLRequest(SoundControl.RING_SOUND));
-				if ( newSound.length != 0 ){
-					ringSound = newSound;
+			// We are waiting for "progress" event. That mean if link broken and there is
+			// no sound on that url, progress event will never appear.
+			newRingSound.addEventListener(ProgressEvent.PROGRESS, assign);
+			newBusySound.addEventListener(ProgressEvent.PROGRESS, assign);
+			newRegisterSound.addEventListener(ProgressEvent.PROGRESS, assign);
+			newFinishSound.addEventListener(ProgressEvent.PROGRESS, assign);
+			
+			// On progress event we are invoking assign function.
+			// It assign old sounds to new ones.
+			
+			function assign(event:ProgressEvent):void{
+				
+				var localSound:Sound = event.target as Sound;
+				
+				// For every event we check by what sounds it was invoked.
+				// we check sound url and compare it with all our urls.
+				// When we found coincidence - we making assignment
+				// TODO: maybe progress event is not best solution. It invokes few times.
+				// so we are making assignment few times. May be need use COMPLETE event.
+				
+				if (localSound.url.indexOf(SoundControl.RING_SOUND) >= 0) {
+					ringSound = localSound;
+				} else if (localSound.url.indexOf(SoundControl.BUSY_SOUND) >= 0) {
+					busySound = localSound;
+				} else if (localSound.url.indexOf(SoundControl.REGISTER_SOUND) >= 0) {
+					registerSound = localSound;
+				} else if (localSound.url.indexOf(SoundControl.FINISH_SOUND) >= 0) {
+					finishSound = localSound;
 				}
-	    	}
-	    	if (SoundControl.BUSY_SOUND != null){
-				newSound = new Sound(new URLRequest(SoundControl.BUSY_SOUND));
-				if ( newSound.length != 0 ){
-					busySound = newSound;
-				}
-	    	}
-	    	if (SoundControl.REGISTER_SOUND != null){
-				newSound = new Sound(new URLRequest(SoundControl.REGISTER_SOUND));
-				if ( newSound.length != 0 ){
-					registerSound = newSound;
-				}
-	    	}
-	    	if (SoundControl.FINISH_SOUND != null){
-				newSound = new Sound(new URLRequest(SoundControl.FINISH_SOUND));
-				if ( newSound.length != 0 ){
-					finishSound = newSound;
-				}
-	    	}
+			} 
 	    }
 
 		/**
