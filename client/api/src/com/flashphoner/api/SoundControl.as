@@ -16,8 +16,9 @@ package com.flashphoner.api
 	import com.flashphoner.api.data.PhoneConfig;
 	import com.flashphoner.api.interfaces.APINotify;
 	
+	import flash.events.Event;
+	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
-	import flash.events.Event; 
 	import flash.media.Microphone;
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
@@ -25,6 +26,8 @@ package com.flashphoner.api
 	import flash.media.SoundTransform;
 	import flash.net.URLRequest;
 	import flash.system.Capabilities;
+	
+	import flashx.textLayout.events.UpdateCompleteEvent;
 	
 	public class SoundControl
 	{
@@ -82,9 +85,8 @@ package com.flashphoner.api
 			
 			if (mic != null){
 				initMic(mic,50,false);
-			}
+			}	
 			
-			updateSounds();
 		}
 		
 		private function setFlashPlayerMajorVersion():void {
@@ -129,48 +131,67 @@ package com.flashphoner.api
 			finishSound = Sound(new finishClass());	
 			
 			// Create new sounds. We will not check if links != 0, because we plus "" there. 
-			// So it will not create error. Just will empty sounds. 
-			var newRingSound:Sound = new Sound(new URLRequest(SoundControl.RING_SOUND+""));
-			var newBusySound:Sound = new Sound(new URLRequest(SoundControl.BUSY_SOUND+""));
-			var newRegisterSound:Sound = new Sound(new URLRequest(SoundControl.REGISTER_SOUND+""));
-			var newFinishSound:Sound = new Sound(new URLRequest(SoundControl.FINISH_SOUND+""));
+			// So it will not create error. Just will empty sounds.
 			
-			// We are waiting for "complete" event. That mean if link broken and there is
-			// no sound on that url, complete event will never appear.
-			newRingSound.addEventListener(Event.COMPLETE, assign);
-			newBusySound.addEventListener(Event.COMPLETE, assign);
-			newRegisterSound.addEventListener(Event.COMPLETE, assign);
-			newFinishSound.addEventListener(Event.COMPLETE, assign);
+			if (SoundControl.RING_SOUND!=null && SoundControl.RING_SOUND.length!=0){				
+				updateSound(new Sound(new URLRequest(SoundControl.RING_SOUND)));
+			}
+						
+			if (SoundControl.BUSY_SOUND!=null && SoundControl.BUSY_SOUND.length!=0){			
+				updateSound(new Sound(new URLRequest(SoundControl.BUSY_SOUND)));
+			}
 			
-			// On complete event we are invoking assign function.
-			// It assign old sounds to new ones.
+			if (SoundControl.REGISTER_SOUND!=null && SoundControl.REGISTER_SOUND.length!=0){				
+				updateSound(new Sound(new URLRequest(SoundControl.REGISTER_SOUND)));
+			}
 			
-			function assign(event:Event):void{
-				
-				var localSound:Sound = event.target as Sound;
-				
-				// For every event we check by what sounds complete event was invoked.
-				// we check sound url and compare it with all our urls.
-				// When we found coincidence - we making assignment
-					
-				if (localSound.url.indexOf(SoundControl.RING_SOUND) >= 0){
-					ringSound = localSound;
-				} 
-				
-				if (localSound.url.indexOf(SoundControl.BUSY_SOUND) >= 0) {
-					busySound = localSound;
-				} 	
-				
-				if (localSound.url.indexOf(SoundControl.REGISTER_SOUND) >= 0) {
-					registerSound = localSound;
-				} 
-				
-				if (localSound.url.indexOf(SoundControl.FINISH_SOUND) >= 0) {
-					finishSound = localSound;
-				}
-
-			} 
+			if (SoundControl.FINISH_SOUND!=null && SoundControl.FINISH_SOUND.length!=0){				
+				updateSound(new Sound(new URLRequest(SoundControl.FINISH_SOUND)));
+			}
+						 		
 	    }
+		
+		private static function updateSound(sound:Sound):void{			
+			sound.addEventListener(Event.COMPLETE, onUpdateSoundComplete);	
+			sound.addEventListener(IOErrorEvent.IO_ERROR,onUpdateSoundError);
+			Logger.info("updateSound: "+sound.url);
+		}
+		
+		public static function onUpdateSoundError(event:IOErrorEvent):void{
+			Logger.info("Error: "+event.text);	
+		}
+		
+		// We are waiting for "complete" event. That mean if link broken and there is
+		// no sound on that url, complete event will never appear.			
+		// On complete event we are invoking assign function.
+		// It assign old sounds to new ones.
+		
+		public static function onUpdateSoundComplete(event:Event):void{
+			
+			var localSound:Sound = event.target as Sound;
+			
+			// For every event we check by what sounds complete event was invoked.
+			// we check sound url and compare it with all our urls.
+			// When we found coincidence - we making assignment
+			
+			if (localSound.url.indexOf(SoundControl.RING_SOUND) >= 0){
+				ringSound = localSound;				
+			} 
+			
+			if (localSound.url.indexOf(SoundControl.BUSY_SOUND) >= 0) {
+				busySound = localSound;
+			} 	
+			
+			if (localSound.url.indexOf(SoundControl.REGISTER_SOUND) >= 0) {
+				registerSound = localSound;
+			} 
+			
+			if (localSound.url.indexOf(SoundControl.FINISH_SOUND) >= 0) {
+				finishSound = localSound;
+			}
+			
+			Logger.info("onUpdateSoundComplete :"+localSound.url);			
+		} 
 
 		/**
 		 * Play busy sound
@@ -190,6 +211,7 @@ package com.flashphoner.api
 		 * Play register sound
 		 **/
 		public static function playRegisterSound():void{
+			Logger.info("playRegisterSound "+registerSound.url);
 			registerSound.play(0,1);		
 		}			
 		

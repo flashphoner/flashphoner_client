@@ -88,7 +88,7 @@ package com.flashphoner.api.data
 		
 		public static var KEEP_ALIVE_TIMEOUT:int = 5000;
 		
-		public static var LOG_SEVERITY:String = "DEBUG";
+		public static var LOG_SEVERITY:String = "INFO";
 		
 		/**
 		 * Current version of Flashphoner product
