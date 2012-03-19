@@ -12,6 +12,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 */
 package com.flashphoner.phone_app;
 
+import com.flashphoner.sdk.media.RecordReport;
 import com.flashphoner.sdk.rtmp.AbstractRtmpClient;
 import com.flashphoner.sdk.rtmp.Config;
 import com.flashphoner.sdk.rtmp.IConfig;
@@ -261,5 +262,10 @@ public class RtmpClient extends AbstractRtmpClient {
             getClient().call("notifyOptions", optionsCallResult, sipMessageObject.toAMFObj());
         }
 
+    }
+
+    @Override
+    public void notifyRecordComplete(RecordReport recordReport) {
+        log.info("notifyRecordComplete: " + recordReport.getMixedFilename());
     }
 }
