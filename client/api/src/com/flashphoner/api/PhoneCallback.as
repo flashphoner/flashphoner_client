@@ -189,6 +189,7 @@ package com.flashphoner.api
 				call.visibleNameCaller = call.visibleNameCaller.replace(">","");
 			}
 			call.state = _call.state;
+			call.state_video = _call.state_video;
 			call.sip_state = _call.sip_state;
 			call.playerVideoHeight = _call.playerVideoHeight;
 			call.playerVideoWidth = _call.playerVideoWidth;
