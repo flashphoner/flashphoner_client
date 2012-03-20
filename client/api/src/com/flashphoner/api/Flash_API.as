@@ -117,7 +117,9 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("subscribe",subscribe);			
 			ExternalInterface.addCallback("sendRawRequest",sendRawRequest);
 			ExternalInterface.addCallback("sendInfo",sendInfo);
-			ExternalInterface.addCallback("showSecurityPanel",showSecurityPanel);	
+			ExternalInterface.addCallback("showSecurityPanel",showSecurityPanel);
+			ExternalInterface.addCallback("setProperty",setProperty);	
+			ExternalInterface.addCallback("setSpeexQuality",setSpeexQuality);
 			
 			calls = new ArrayCollection();
 			messages = new ArrayCollection();
@@ -689,6 +691,15 @@ package com.flashphoner.api
 		public function showSecurityPanel():void{
 			Logger.info("showSecurityPanel");
 			Security.showSettings();				
+		}		
+		
+		public function setProperty(key:String,value:String):void{
+			Logger.info("setProperty key: "+key+" value: "+value);
+			this.phoneServerProxy.setProperty(key,value);
+		}
+		
+		public function setSpeexQuality(quality:int):void{
+			soundControl.setSpeexQuality(quality);
 		}
 
 	}

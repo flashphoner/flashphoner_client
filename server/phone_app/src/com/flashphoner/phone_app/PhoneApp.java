@@ -696,7 +696,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         try {
             instantMessage.setDeliveryNotification(Boolean.parseBoolean(obj.getString("deliveryNotification")));
         } catch (Exception e) {
-            log.info("deliveryNotification = {}",obj.getString("deliveryNotification"));
+            log.info("deliveryNotification = {}", obj.getString("deliveryNotification"));
         }
 
         try {
@@ -741,6 +741,16 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         } catch (SoftphoneException e) {
             log.error("Can not send raw request", e);
         }
+    }
+
+    public void setProperty(IClient client, RequestFunction requestFunction, AMFDataList params) {
+        IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
+        AMFDataObj obj = params.getObject(PARAM1);
+        String key = obj.getString("key");
+        String value = obj.getString("value");
+        log.info("setProperty key: " + key + " value: " + value);
+        rtmpClient.getRtmpClientConfig().setProperty(key, value);
+
     }
 
 

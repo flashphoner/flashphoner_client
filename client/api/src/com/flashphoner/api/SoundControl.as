@@ -16,6 +16,7 @@ package com.flashphoner.api
 	import com.flashphoner.api.data.PhoneConfig;
 	import com.flashphoner.api.interfaces.APINotify;
 	
+	import flash.display.FrameLabel;
 	import flash.events.SampleDataEvent;
 	import flash.events.TimerEvent;
 	import flash.media.Microphone;
@@ -82,6 +83,9 @@ package com.flashphoner.api
 		
 		private var timerAGC:Timer;
 		
+		private var speexQuality:int = 6;
+		
+		
 		/**
 		 * Control class (singelton) for microphone and sounds.
 		 **/
@@ -114,6 +118,11 @@ package com.flashphoner.api
 			}
 			
 			updateSounds();
+		}
+		
+		public function setSpeexQuality(quality:int):void{
+			Logger.info("setSpeexQuality: "+quality);
+			this.speexQuality = quality;
 		}
 		
 		private function timerAGCHandler(timeEvent:TimerEvent):void{
@@ -338,7 +347,7 @@ package com.flashphoner.api
 				mic.codec = SoundCodec.SPEEX;
 				mic.framesPerPacket = 1;
 				mic.rate = 16;
-				mic.encodeQuality = 6;
+				mic.encodeQuality = speexQuality;				
 			}else if (name=="ulaw" || name=="pcmu" ){
 				mic.codec = SoundCodec.PCMU;
 				mic.framesPerPacket = 2;
@@ -348,6 +357,7 @@ package com.flashphoner.api
 				mic.framesPerPacket = 2;
 				mic.rate = 8;
 			}
+			Logger.info("codec: "+mic.codec+" framesPerPacket: "+mic.framesPerPacket+" encodeQuality: "+mic.encodeQuality+" rate: "+mic.rate);
 		}
 		
 		private function getMajorVersion():Number{

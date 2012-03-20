@@ -192,6 +192,13 @@ package com.flashphoner.api
 			nc.call("sendInfo",responder,infoObj);
 		}
 		
+		public function setProperty(key:String,value:String):void{
+			var obj:Object = new Object();
+			obj.key = key;
+			obj.value = value;			
+			nc.call("setProperty",responder,obj);
+		}
+		
 
 	}
 }

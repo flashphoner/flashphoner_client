@@ -400,6 +400,9 @@ function notifyRegistered() {
         isLogged = true;
         closeConnectingView();
 	//subscribeReg();		
+	//flashphoner.setProperty("local_audio_codec","speex16");
+	//flashphoner.setProperty("out_jitter_buffer_enabled","true");
+	//flashphoner.setSpeexQuality(8);
 	setTimeout("deferredCall()",3000);        
     }
 }
