@@ -163,7 +163,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String password = obj.getString("password");
         String visibleName = obj.getString("visibleName");
         String qValue = obj.getString("qValue");
-        String contactParams = obj.getString("contactParams");
+        String contactParams = nullIfEmpty(obj.getString("contactParams"));        
 
         if (login != null && password != null) {
             outboundProxy = obj.getString("outboundProxy");
@@ -756,6 +756,13 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         log.info("setProperty key: " + key + " value: " + value);
         rtmpClient.getRtmpClientConfig().setProperty(key, value);
 
+    }
+
+    private String nullIfEmpty(String str) {
+        if (str == null || "null".equals(str) || str.length() == 0) {
+            return null;
+        }
+        return str;
     }
 
 
