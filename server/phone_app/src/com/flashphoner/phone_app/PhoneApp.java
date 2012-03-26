@@ -163,6 +163,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String password = obj.getString("password");
         String visibleName = obj.getString("visibleName");
         String qValue = obj.getString("qValue");
+        String contactParams = obj.getString("contactParams");
 
         if (login != null && password != null) {
             outboundProxy = obj.getString("outboundProxy");
@@ -281,6 +282,8 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
             qValue = el.getAttribute("qValue");
 
+            contactParams = el.getAttribute("contactParams");
+
         }
         log.info("outboundProxy - " + outboundProxy);
 
@@ -311,6 +314,8 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         } catch (Exception e) {
             //do nothing
         }
+
+        config.setContactParams(contactParams);
 
         log.info(config.toString());
 
