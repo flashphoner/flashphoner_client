@@ -314,6 +314,11 @@ package com.flashphoner.api
 			}
 		}
 		
+		public function setSpeexQuality(quality:int){
+			Logger.info("setSpeexQuality: "+quality);
+			mic.encodeQuality=quality;
+		}
+		
 
 	}
 }
