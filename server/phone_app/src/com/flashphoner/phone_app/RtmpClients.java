@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Simple implementation of {@link IRtmpClientsCollection}.<br/>
@@ -39,7 +40,7 @@ public class RtmpClients implements IRtmpClientsCollection {
     /**
      * Internal map
      */
-    private Map<IClient, IRtmpClient> rtmpClients = Collections.synchronizedMap(new HashMap<IClient, IRtmpClient>());
+    private ConcurrentHashMap<IClient, IRtmpClient> rtmpClients = new ConcurrentHashMap<IClient, IRtmpClient>();
 
     /**
      * Private singleton constructor
@@ -68,12 +69,10 @@ public class RtmpClients implements IRtmpClientsCollection {
      */
     public IRtmpClient findByLogin(String login) {
         Iterator it = rtmpClients.keySet().iterator();
-        synchronized (rtmpClients) {
-            while (it.hasNext()) {
-                IRtmpClient rtmpClient = rtmpClients.get(it.next());
-                if (rtmpClient.getRtmpClientConfig().getLogin().equals(login)) {
-                    return rtmpClient;
-                }
+        while (it.hasNext()) {
+            IRtmpClient rtmpClient = rtmpClients.get(it.next());
+            if (rtmpClient.getRtmpClientConfig().getLogin().equals(login)) {
+                return rtmpClient;
             }
         }
         return null;
@@ -85,9 +84,7 @@ public class RtmpClients implements IRtmpClientsCollection {
      * @param rtmpClient
      */
     public void add(IRtmpClient rtmpClient) {
-        synchronized (rtmpClients) {
-            rtmpClients.put(rtmpClient.getClient(), rtmpClient);
-        }
+        rtmpClients.put(rtmpClient.getClient(), rtmpClient);
     }
 
     /**
@@ -97,9 +94,7 @@ public class RtmpClients implements IRtmpClientsCollection {
      * @return removed IRtmpClient
      */
     public IRtmpClient remove(IRtmpClient rtmpClient) {
-        synchronized (rtmpClients) {
-            return rtmpClients.remove(rtmpClient.getClient());
-        }
+            return rtmpClients.remove(rtmpClient.getClient());        
     }
 
     /**
@@ -109,8 +104,6 @@ public class RtmpClients implements IRtmpClientsCollection {
      * @return IRtmpClient
      */
     public IRtmpClient findByClient(IClient client) {
-        synchronized (rtmpClients) {
-            return rtmpClients.get(client);
-        }
+            return rtmpClients.get(client);        
     }
 }
