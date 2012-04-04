@@ -108,6 +108,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("getCookie",getCookie);
 			ExternalInterface.addCallback("getVersion",getVersion);
 			ExternalInterface.addCallback("sendInfo",sendInfo);
+			ExternalInterface.addCallback("setSpeexQuality",setSpeexQuality);
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -610,6 +611,10 @@ package com.flashphoner.api
 		
 		public function sendInfo(infoObj:Object):void {
 			this.phoneServerProxy.sendInfo(infoObj);
+		}
+		
+		public function setSpeexQuality(quality:int):void{
+			soundControl.setSpeexQuality(quality);
 		}
 		
 

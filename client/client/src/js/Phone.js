@@ -299,6 +299,8 @@ function notifyConnected() {
         isLogged = true;
         closeConnectingView();
     }
+    //You can set speex quality here
+    //flashphoner.setSpeexQuality(10);
 }
 
 function notifyRegistered() {
