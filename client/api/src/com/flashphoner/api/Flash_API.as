@@ -300,6 +300,10 @@ package com.flashphoner.api
 			}
 		}
 		
+		public function callsSize():int{
+			return calls.length;
+		}
+		
 		/**
 		 * Get controller of speaker
 		 **/		

@@ -70,8 +70,9 @@ package com.flashphoner.api
 				}
 		 	}
 			
-			if (event.type==CallEvent.IN){
-				if (!call.isMSRP){
+			if (event.type==CallEvent.IN){				
+				if (!call.isMSRP && flashAPI.callsSize() == 1){
+					Logger.info("CallCommand incoming ringing sound ...");
 					SoundControl.playInRingSound();
 				}
 			}
