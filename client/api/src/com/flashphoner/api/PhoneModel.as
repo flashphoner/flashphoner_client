@@ -152,6 +152,10 @@ package com.flashphoner.api
 			        if (xml.finish_sound != null && xml.finish_sound.toString() != ""){
 				        SoundControl.FINISH_SOUND = xml.finish_sound;
 			        }
+					if (xml.dtmf_level!=null && xml.dtmf_level.toString()!=""){
+						PhoneConfig.DTMF_LEVEL=Number(xml.dtmf_level);	
+					}
+					Logger.info("DTMF_LEVEL: "+PhoneConfig.DTMF_LEVEL);
 			        SoundControl.updateSounds();
 			    }
 			    else

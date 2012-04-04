@@ -82,6 +82,8 @@ package com.flashphoner.api.data
 		
 		public static var AUDIO_CODEC:String = "speex";
 		
+		public static var DTMF_LEVEL:Number = 0.20;
+		
 		/**
 		 * Current version of Flashphoner product
 		 **/		

@@ -1,6 +1,7 @@
 package com.flashphoner.api
 {
 	import com.flashphoner.Logger;
+	import com.flashphoner.api.data.PhoneConfig;
 	
 	import flash.events.SampleDataEvent;
 	import flash.media.Sound;
@@ -64,8 +65,8 @@ package com.flashphoner.api
 			
 			for (var i:int = 0; i < neededSamples; i++)
 			{
-				mySampleCol = Math.sin(i * hz.col * Math.PI * 2 / sampleRate) * 0.5;
-				mySampleRow = Math.sin(i * hz.row * Math.PI * 2 / sampleRate) * 0.5;
+				mySampleCol = Math.sin(i * hz.col * Math.PI * 2 / sampleRate) * PhoneConfig.DTMF_LEVEL;
+				mySampleRow = Math.sin(i * hz.row * Math.PI * 2 / sampleRate) * PhoneConfig.DTMF_LEVEL;
 				mySound.writeFloat(mySampleRow + mySampleCol);
 				
 			}
