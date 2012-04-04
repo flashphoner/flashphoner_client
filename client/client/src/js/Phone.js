@@ -90,6 +90,11 @@ $(document).ready(function() {
 function login() {
     trace("login");
     connectingViewBeClosed = false;
+    
+    if ($("#outbound_proxy").val() == "") {
+      $("#outbound_proxy").val($("#domain").val());
+    }
+    
     var loginObject = new Object();
     loginObject.username = 'sip:' + $('#username').val() + '@' + $('#domain').val();
     loginObject.password = $('#password').val();
@@ -988,9 +993,14 @@ $(function() {
         }
     });
 
-    /* Autofill Aut. name field when you fil Login field */
+    /* Autofill Aut. name field when you fill Login field */
     $('#username').keyup(function() {
         $('#authname').val($(this).val());
+    });
+    
+    /* Autofill Outb. proxy field when you fill "domain" field */
+    $('#domain').keyup(function() {
+        $('#outbound_proxy').val($(this).val());
     });
 
     // this functions resize flash when you resize video window
