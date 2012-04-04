@@ -12,14 +12,12 @@ This code and accompanying materials also available under LGPL and MPL license f
 */
 package com.flashphoner.phone_app;
 
+import com.flashphoner.jmx.UpAndRunningChecker;
 import com.flashphoner.sdk.rtmp.Config;
 import com.wowza.wms.server.IServer;
 import com.wowza.wms.server.IServerNotify;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 
 /**
@@ -36,7 +34,7 @@ public class PhoneServerListener implements IServerNotify {
 
     public void onServerInit(IServer server) {
         try {
-            
+
             Config.getInstance();
 
             log.info("Initializing flashphoner properties: " + Config.getInstance().getProperties());
@@ -44,7 +42,13 @@ public class PhoneServerListener implements IServerNotify {
             log.info("Flashphoner build: " + Config.BUILD + " deployed.");
 
         } catch (Throwable e) {
-            log.error("onServerInit error",e);
+            log.error("onServerInit error", e);
+        }
+
+        try {
+            UpAndRunningChecker.register();
+        } catch (Exception e) {
+            log.error("keepAlive bean error", e);
         }
 
     }

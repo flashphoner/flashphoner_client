@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="project" default="Linux" basedir=".">
+<project name="flashphoner-client" default="Linux" basedir=".">
 
     <!-- edit the following lines to your needs -->
     <target name="init">
