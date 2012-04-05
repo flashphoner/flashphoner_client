@@ -45,5 +45,7 @@ package com.flashphoner.api
 		public var raw:String;
 		
 		public var deliveryNotification:String;
+		
+		public var delivered:int=0;
 	}
 }

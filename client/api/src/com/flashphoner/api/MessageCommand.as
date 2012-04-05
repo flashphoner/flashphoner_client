@@ -52,7 +52,16 @@ package com.flashphoner.api
 				}else{
 					
 					if (messageObject.state !="SENT" && messageObject.state !="ACCEPTED"){
-						flashAPI.removeMessage(instantMessage);
+						if (messageObject.state=="DELIVERED"){
+							instantMessage.delivered++;
+							Logger.info("instantMessage.delivered: "+instantMessage.delivered+" for "+instantMessage.id);
+							if (instantMessage.recipients==null || instantMessage.recipients.length==0 || instantMessage.recipients.split(",").length==instantMessage.delivered){
+								Logger.info("All messages has been delivered for id: "+instantMessage.id);
+								flashAPI.removeMessage(instantMessage);
+							}							
+						}else{
+							flashAPI.removeMessage(instantMessage);
+						}
 					}
 					//update message
 					instantMessage.state = messageObject.state;
