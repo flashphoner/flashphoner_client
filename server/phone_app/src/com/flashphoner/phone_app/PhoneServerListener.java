@@ -45,11 +45,14 @@ public class PhoneServerListener implements IServerNotify {
             log.error("onServerInit error", e);
         }
 
+
         try {
             UpAndRunningChecker.register();
         } catch (Exception e) {
             log.error("keepAlive bean error", e);
         }
+        
+        Config.preLoad();
 
     }
 
