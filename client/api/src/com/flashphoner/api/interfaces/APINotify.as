@@ -35,6 +35,7 @@ package com.flashphoner.api.interfaces
 		function notifySubscription(subscriptionObject:Object,_sipObject:Object):void;
 		
 		function notifyChangeMicVolume(volume:int):void;
+		function notifyAgc(result:Object):void;
 	
 	}
 }

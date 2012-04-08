@@ -73,17 +73,15 @@ package com.flashphoner.api
 				
 		private static var soundControl:SoundControl;
 		
-		private var mic:Microphone;
-		
-		private var minCountSamples:int;
-		
-		private var maxCountSamples:int;
+		private var mic:Microphone;	
 		
 		private var flash_API:Flash_API;
 		
-		private var timerAGC:Timer;
-		
 		private var speexQuality:int = 6;
+		
+		private var agc:AGC;
+		
+		private static var DEFAULT_GAIN:Number=100;
 		
 		
 		/**
@@ -92,12 +90,7 @@ package com.flashphoner.api
 
 		public function SoundControl(flash_API:Flash_API)
 		{
-			this.flash_API = flash_API;
-			this.minCountSamples = 0;
-			this.maxCountSamples = 0;
-			
-			timerAGC = new Timer(5000);
-			timerAGC.addEventListener(TimerEvent.TIMER, timerAGCHandler);
+			this.flash_API = flash_API;		
 
 			Logger.info("Use enchenced mic: "+PhoneConfig.USE_ENHANCED_MIC);
 			if (PhoneConfig.USE_ENHANCED_MIC){
@@ -117,35 +110,15 @@ package com.flashphoner.api
 				initMic(mic,100,false);
 			}
 			
+			agc = new AGC();
+			
 			updateSounds();
 		}
 		
 		public function setSpeexQuality(quality:int):void{
 			Logger.info("setSpeexQuality: "+quality);
 			this.speexQuality = quality;
-		}
-		
-		private function timerAGCHandler(timeEvent:TimerEvent):void{
-			Logger.info("timerAGCHandler; minCountSamples - " + minCountSamples +"; maxCountSamples - "+ maxCountSamples); 
-			Logger.info("Old mic gain - "+mic.gain);
-			if (maxCountSamples > 0){
-				if (maxCountSamples > 10){
-					maxCountSamples = 10;
-				}
-				mic.gain -= maxCountSamples;
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
-					apiNotify.notifyChangeMicVolume(mic.gain);
-				}	
-			}else if (minCountSamples >= 1 && minCountSamples < 5){
-				mic.gain += 10;
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
-					apiNotify.notifyChangeMicVolume(mic.gain);
-				}	
-			}
-			maxCountSamples = 0;
-			minCountSamples = 0;
-			Logger.info("New mic gain - "+mic.gain);
-		}
+		}		
 		
 		/**
 		 * Update all sounds from pathes
@@ -296,49 +269,50 @@ package com.flashphoner.api
 		}
 		
 		public function enableAGC():void{
-			if (PhoneConfig.USE_AUTO_GAIN_CONTROL){
-				if (mic.hasEventListener(SampleDataEvent.SAMPLE_DATA)){
-					mic.removeEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);
-				}
-				mic.addEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);
-				if (!timerAGC.running){
-					timerAGC.start();
+			Logger.info("enableAGC")
+			mic.gain = DEFAULT_GAIN;
+			if (PhoneConfig.USE_AUTO_GAIN_CONTROL){				
+				if (!mic.hasEventListener(SampleDataEvent.SAMPLE_DATA)){
+					mic.addEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);
 				}
 			}			
 		}
 		
 		public function disableAGC():void{
-			if (PhoneConfig.USE_AUTO_GAIN_CONTROL){
-				mic.removeEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);
-				timerAGC.stop();
-				maxCountSamples = 0;
-				minCountSamples = 0;
+			Logger.info("disableAGC");
+			mic.gain = DEFAULT_GAIN;
+			if (PhoneConfig.USE_AUTO_GAIN_CONTROL){				
+				mic.removeEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);			
 			}
 		}
 		
 		private function micSampleDataHandler(event:SampleDataEvent):void {
-			var count:Number = event.data.length;
-			var sum:Number = 0;
-			
-			while(event.data.bytesAvailable)     { 
-				var sample:Number = event.data.readFloat();
-				sum += sample;
-			} 
-			var value:Number = sum/count;
-			if (value > 0.001){
-				maxCountSamples++;
+			var result:AGCResult = agc.process(event.data,mic);
+			if (result.hasResult){
+				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+					apiNotify.notifyAgc(result.result);
+				}
 			}
-			if (value > 0.0000003){
-				minCountSamples++;
-			}
-		}			
+		}
 		
-		
+		public function setAgcPolicy(policy:String):void{
+			Logger.info("setAgcPolicy: "+policy);
+			agc.setPolicy(policy);	
+		}
 		
 		public function changeAudioCodec(codec:Object):void{			
-			var codecName:String = codec.name;
-			Logger.info("changeAudioCodec: "+codecName);
-			changeCodec(codecName);
+			var localCodec:String = codec.localCodec;
+			var remoteCodec:String = codec.remoteCodec;
+			
+			Logger.info("changeAudioCodec localCodec: "+localCodec+" remoteCodec: "+remoteCodec+" streamerTranscodingEnabled: "+codec.streamerTranscodingEnabled+" playerTranscodingEnabled: "+codec.playerTranscodingEnabled);
+			changeCodec(localCodec);
+			//if server-side transcoding is not enabled, use local client-side AGC
+			if (!codec.streamerTranscodingEnabled){
+				enableAGC();	
+			}else{
+			//if server-side transcoding is disabled, disable local client-side AGC, and use server-side AGC
+				disableAGC();
+			}
 		}
 		
 		private function changeCodec(name:String):void{

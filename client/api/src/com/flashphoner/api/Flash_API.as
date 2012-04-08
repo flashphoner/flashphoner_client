@@ -120,6 +120,8 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("showSecurityPanel",showSecurityPanel);
 			ExternalInterface.addCallback("setProperty",setProperty);	
 			ExternalInterface.addCallback("setSpeexQuality",setSpeexQuality);
+			ExternalInterface.addCallback("setAgcPolicy",setAgcPolicy);
+			
 			
 			calls = new ArrayCollection();
 			messages = new ArrayCollection();
@@ -704,6 +706,10 @@ package com.flashphoner.api
 		
 		public function setSpeexQuality(quality:int):void{
 			soundControl.setSpeexQuality(quality);
+		}
+		
+		public function setAgcPolicy(policy:String):void{
+			soundControl.setAgcPolicy(policy);
 		}
 
 	}

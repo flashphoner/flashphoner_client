@@ -44,8 +44,7 @@ package com.flashphoner.api
 				Logger.info("MainEvent.TALK "+call.id);
 				call.startTimer();
 				if (!call.isMSRP){
-					SoundControl.stopRingSound();
-					flashAPI.soundControl.enableAGC();
+					SoundControl.stopRingSound();					
 					call.publish();						
 					flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
 					if (PhoneConfig.VIDEO_ENABLED){

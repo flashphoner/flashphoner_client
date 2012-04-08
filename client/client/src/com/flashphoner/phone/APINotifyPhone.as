@@ -147,5 +147,9 @@ package com.flashphoner.phone
 			
 		}
 		
+		public function notifyAgc(result:Object):void{
+		
+		}
+		
 	}
 }

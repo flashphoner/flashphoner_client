@@ -12,6 +12,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 */
 package com.flashphoner.phone_app;
 
+import com.flashphoner.sdk.media.CodecConfiguration;
 import com.flashphoner.sdk.rtmp.*;
 import com.flashphoner.sdk.sip.SipMessageObject;
 import com.flashphoner.sdk.softphone.ISoftphoneCall;
@@ -244,16 +245,19 @@ public class RtmpClient extends AbstractRtmpClient {
             messageObj.put("contentType", instantMessage.getContentType());
             messageObj.put("body", instantMessage.getBody());
         }
-        
+
         getClient().call("notifyMessage", null, messageObj, sipMessageObject.toAMFObj());
     }
 
     //speex, pcma, pcmu
 
-    public void notifyAudioCodec(String audioCodec) {
-        log.info("notifyAudioCodec " + audioCodec);
+    public void notifyAudioCodec(CodecConfiguration codecConfiguration) {
+        log.info("notifyAudioCodec codecConfiguration: {}", codecConfiguration);
         AMFDataObj codecObj = new AMFDataObj();
-        codecObj.put("name", audioCodec.toLowerCase());
+        codecObj.put("localCodec", codecConfiguration.getLocalCodec().toLowerCase());
+        codecObj.put("remoteCodec", codecConfiguration.getRemoteCodec().toLowerCase());
+        codecObj.put("playerTranscodingEnabled",codecConfiguration.isPlayerTranscodingEnabled());
+        codecObj.put("streamerTranscodingEnabled",codecConfiguration.isStreamerTranscodingEnabled());
         if (getClient() != null) {
             getClient().call("notifyAudioCodec", null, codecObj);
         }

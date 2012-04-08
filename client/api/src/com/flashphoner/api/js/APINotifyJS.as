@@ -88,6 +88,9 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyChangeMicVolume", volume);
 		}	
 		
+		public function notifyAgc(agcObject:Object):void{
+			ExternalInterface.call("notifyAgc", agcObject);
+		}	
 		
 	}
 }
