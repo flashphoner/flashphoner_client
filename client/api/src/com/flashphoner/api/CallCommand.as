@@ -30,7 +30,16 @@ package com.flashphoner.api
 		
 		public function CallCommand()
 		{
-		}	
+		}
+		
+		public function publishPlay(call:Call,login:String, phoneSpeaker:PhoneSpeaker):void{			
+			Logger.info("publishPlay");
+			call.publish();	 		
+			phoneSpeaker.play("INCOMING_"+login+"_"+call.id);
+			if (PhoneConfig.VIDEO_ENABLED){
+				phoneSpeaker.playVideo("VIDEO_INCOMING_"+login+"_"+call.id);
+			}
+		}
 				
 		public function execute( event : CairngormEvent ) : void
 		{	
@@ -45,11 +54,7 @@ package com.flashphoner.api
 				call.startTimer();
 				if (!call.isMSRP){
 					SoundControl.stopRingSound();					
-					call.publish();						
-					flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
-					if (PhoneConfig.VIDEO_ENABLED){
-						flashAPI.phoneServerProxy.phoneSpeaker.playVideo("VIDEO_INCOMING_"+modelLocator.login+"_"+call.id);
-					}
+					publishPlay(call,modelLocator.login,flashAPI.phoneServerProxy.phoneSpeaker);
 				}
 			}
 			
@@ -62,22 +67,23 @@ package com.flashphoner.api
 			if (event.type == CallEvent.SESSION_PROGRESS){
 				Logger.info("MainEvent.SESSION_PROGRESS");
 				if (!call.isMSRP){
-		 			SoundControl.stopRingSound();
-				
-					call.publish();	 		
-		 			flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
+		 			SoundControl.stopRingSound();				
+					publishPlay(call,modelLocator.login,flashAPI.phoneServerProxy.phoneSpeaker);
 				}
 		 	}
 			
 			if (event.type==CallEvent.IN){				
 				if (!call.isMSRP && flashAPI.callsSize() == 1){
 					Logger.info("CallCommand incoming ringing sound ...");
+					publishPlay(call,modelLocator.login,flashAPI.phoneServerProxy.phoneSpeaker);
 					SoundControl.playInRingSound();
 				}
 			}
 			
 			if (event.type ==CallEvent.OUT){
-				if (!call.isMSRP){
+				if (!call.isMSRP && flashAPI.callsSize() == 1){
+					Logger.info("CallCommand outgoing ringing sound ...");
+					publishPlay(call,modelLocator.login,flashAPI.phoneServerProxy.phoneSpeaker);
 					SoundControl.playOutRingSound();
 				}
 			}
