@@ -30,23 +30,26 @@
 			private var emaMax:Number=0;
 			
 			//drwaing scale coeff
-			private var K:Number = 10;
+			private var scaleCoeff:Number = 1;
 			
 			//Coefficients
 			[Bindable]
 			private var EMA_K:Number = 0.5;		
 			
 			[Bindable]
-			private var AGC_LEVEL_MAX:Number = 10;			
+			private var AGC_LEVEL_MAX:Number = 80;			
 			
 			[Bindable]
-			private var AGC_LEVEL_MIN:Number = 2;			
+			private var AGC_LEVEL_MIN:Number = 20;			
 			
 			[Bindable]
-			private var DOWN_AGRESSIVE_FACTOR:Number = 1.05;				
+			private var DOWN_AGRESSIVE_FACTOR:Number = 1.01;				
 			
 			[Bindable]
-			private var UP_AGRESSIVE_FACTOR:Number = 1.25;
+			private var UP_AGRESSIVE_FACTOR:Number = 1.05;
+			
+			[Bindable]
+			private var GAIN_LEVEL:Number=8;
 			
 			public function init():void{
 				Logger.info("init...");
@@ -62,54 +65,61 @@
 				
 			}
 			
-			private function micSampleDataHandler(event:SampleDataEvent):void {
-				var count:Number = event.data.length;
-				var sum:Number = 0;
-				var samples:String="";
+			private function micSampleDataHandler(event:SampleDataEvent):void {	
+				 
+				var energy:Number=0;
+				var outputPowerNormal:Number = Math.pow(10,GAIN_LEVEL/10);
 				
-				var i:int=0;
-				while(event.data.bytesAvailable)     { 
+				var N:int=0;
+				while(event.data.bytesAvailable){				
 					var sample:Number = event.data.readFloat();
-					sum += sample*sample;
-					i++;
-														 
-				} 
+					energy+=sample*sample;
+					N++;
+				}
 				
-				var value:Number = Math.sqrt(sum);				
+				if (energy==0){
+					return;
+				}
+				
+				var K:Number =Math.min(Math.sqrt(outputPowerNormal*N/energy),100);				
+				
 				
 				if (ema==0){
-					ema = value;
+					ema = K;
 				}else{
-					ema = EMA_K*value+(1-EMA_K)*ema;
+					ema = EMA_K*K+(1-EMA_K)*ema;
 				}
 				
 				emaMax = Math.max(emaMax,ema);
 				
+				
 				if (ema > AGC_LEVEL_MAX){
-					maxCount=Math.min(10,minCount+1);
-					gain = mic.gain*(1/Math.pow(DOWN_AGRESSIVE_FACTOR,maxCount));					
+					maxCount=maxCount+1
+					gain = Math.min(mic.gain*(Math.pow(UP_AGRESSIVE_FACTOR,maxCount)),100);					
 				}else{
 					maxCount=0;
 				}
 				
 				if (ema < AGC_LEVEL_MIN){					
-					minCount=Math.min(10,minCount+1);
-					gain = Math.min(mic.gain*(Math.pow(UP_AGRESSIVE_FACTOR,minCount)),100); 
+					minCount=minCount+1					
+					gain = Math.max(mic.gain/Math.pow(DOWN_AGRESSIVE_FACTOR,minCount),80);
 				}else{
 					minCount=0;
-				}
+				}				
 				
-				mic.gain = gain;
-				
+				mic.gain = gain;				
+								
 				if (enableDraw){
-					lineChartDataProvider.addItem({x:seq,y:value*K,ema:ema*K,gain:mic.gain});
+					lineChartDataProvider.addItem({x:seq,y:K*scaleCoeff,ema:ema*scaleCoeff,gain:mic.gain});
 				}
+					
+				var logMsg:String = "emaMax: "+emaMax+" minCount: "+minCount+" maxCount: "+maxCount+" ema: "+ema+" gain: "+mic.gain+" seq: "+seq+" K: "+K;
 				
-				var logMsg:String = "emaMax: "+emaMax+" value: "+value+" minCount: "+minCount+" maxCount: "+maxCount+" ema: "+ema+" gain: "+mic.gain;
+				log = logMsg+"\n"+log;				
 				
-				log = logMsg+"\n"+log;
+				seq++;			
 				
-				seq++;
+				
 			}	
 			
 			private function updateCoeffs():void{
@@ -119,6 +129,7 @@
 				DOWN_AGRESSIVE_FACTOR = Number(agressive.text);
 				UP_AGRESSIVE_FACTOR = Number(upagressive.text);
 				EMA_K = Number(emaAlpha.text);
+				GAIN_LEVEL = Number(gainLevel.text);
 			}
 		]]>
 	</mx:Script>
@@ -129,6 +140,7 @@
 	<mx:TextInput id="agressive" x="115" y="68" text="{DOWN_AGRESSIVE_FACTOR}" width="35"/><mx:Label x="150" y="68" text="agressive" color="black"/>
 	<mx:TextInput id="upagressive" x="115" y="98" text="{UP_AGRESSIVE_FACTOR}" width="35"/><mx:Label x="150" y="98" text="up agressive" color="black"/>
 	<mx:TextInput id="emaAlpha" x="115" y="138" text="{EMA_K}" width="35"/><mx:Label x="150" y="138" text="EMA alpha" color="black"/>
+	<mx:TextInput id="gainLevel" x="115" y="168" text="{GAIN_LEVEL}" width="35"/><mx:Label x="150" y="168" text="gainLevel" color="black"/>
 	
 	<mx:Label x="250" y="8" text="gain: {gain}" color="black"/>
 	<mx:Label x="250" y="38" text="emaMax: {emaMax}" color="black"/>

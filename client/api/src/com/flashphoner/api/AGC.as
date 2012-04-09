@@ -19,17 +19,22 @@ package com.flashphoner.api
 		
 		//Coefficients		
 		private var EMA_ALPHA:Number = 0.5;		
-		private var AGC_LEVEL_MAX:Number = 10;		
-		private var AGC_LEVEL_MIN:Number = 2;		
-		private var DOWN_AGRESSIVE_FACTOR:Number = 1.05;		
-		private var UP_AGRESSIVE_FACTOR:Number = 1.25;
+		private var AGC_LEVEL_MAX:Number = 80;		
+		private var AGC_LEVEL_MIN:Number = 20;		
+		private var DOWN_AGRESSIVE_FACTOR:Number = 1.01;		
+		private var UP_AGRESSIVE_FACTOR:Number = 1.05;
+		private var GAIN_LEVEL:Number=8;
+		private var MAX_GAIN:Number=100;
+		private var MIN_GAIN:Number=80;
+		public var TRACE_AGC:Boolean=false;
+		
 		
 		public function AGC()			
 		{			
 		}
 		
 		public function setPolicy(policy:String):void{
-			//Example: policy=min_level=2,max_level=10,agressive_down=1.05,agressive_up=1.25,ema_alpha=0.5
+			//Example: min_level=20,max_level=80,agressive_down=1.01,agressive_up=1.05,ema_alpha=0.5,gain_level=8,max_gain=100,min_gain=80,trace=true
 			if (policy !=null || policy.length!=0){
 				var params:Array = policy.split(",");
 				for (var i:int=0;i<params.length;i++){
@@ -49,6 +54,14 @@ package com.flashphoner.api
 						UP_AGRESSIVE_FACTOR = Number(value);
 					} else if (name=="ema_alpha"){
 						EMA_ALPHA = Number(value);	
+					}else if (name=="gain_level"){
+						GAIN_LEVEL = Number(value);
+					}else if (name=="max_gain"){
+						MAX_GAIN = Number(value);
+					}else if (name=="min_gain"){
+						MIN_GAIN = Number(value);
+					}else if (name=="trace"){
+						TRACE_AGC = Boolean(value);
 					}
 				}
 			}
@@ -59,62 +72,74 @@ package com.flashphoner.api
 			Logger.info("agressive_down: "+DOWN_AGRESSIVE_FACTOR);
 			Logger.info("agressive_up: "+UP_AGRESSIVE_FACTOR);
 			Logger.info("ema_alpha: "+EMA_ALPHA);			
+			Logger.info("gain_level: "+GAIN_LEVEL);
+			Logger.info("min_gain: "+MIN_GAIN);
+			Logger.info("max_gain: "+MAX_GAIN);
+			Logger.info("trace: "+TRACE_AGC);
 		}
 		
-		public function process(data:ByteArray,mic:Microphone):AGCResult {
+		public function process(data:ByteArray,mic:Microphone):AGCResult {				
 			
-			var count:Number = data.length;
-			var sum:Number = 0;		
+			var energy:Number=0;
+			var outputPowerNormal:Number = Math.pow(10,GAIN_LEVEL/10);
 			
-			var i:int=0;
-			while(data.bytesAvailable)     { 
+			var N:int=0;
+			while(data.bytesAvailable){				
 				var sample:Number = data.readFloat();
-				sum += sample*sample;
-				i++;				
-			} 
+				energy+=sample*sample;
+				N++;
+			}
 			
-			var value:Number = Math.sqrt(sum);				
+			if (energy==0){
+				energy=1;
+			}
+			
+			var K:Number =Math.min(Math.sqrt(outputPowerNormal*N/energy),100);				
+			
 			
 			if (ema==0){
-				ema = value;
+				ema = K;
 			}else{
-				ema = EMA_ALPHA*value+(1-EMA_ALPHA)*ema;
+				ema = EMA_ALPHA*K+(1-EMA_ALPHA)*ema;
 			}
 			
 			emaMax = Math.max(emaMax,ema);
 			
+			
 			if (ema > AGC_LEVEL_MAX){
-				maxCount=Math.min(10,minCount+1);
-				gain = mic.gain*(1/Math.pow(DOWN_AGRESSIVE_FACTOR,maxCount));					
+				maxCount=maxCount+1
+				gain = Math.min(mic.gain*(Math.pow(UP_AGRESSIVE_FACTOR,maxCount)),MAX_GAIN);					
 			}else{
 				maxCount=0;
 			}
 			
 			if (ema < AGC_LEVEL_MIN){					
-				minCount=Math.min(10,minCount+1);
-				gain = Math.min(mic.gain*(Math.pow(UP_AGRESSIVE_FACTOR,minCount)),100); 
+				minCount=minCount+1					
+				gain = Math.max(mic.gain/Math.pow(DOWN_AGRESSIVE_FACTOR,minCount),MIN_GAIN);
 			}else{
 				minCount=0;
-			}				
+			}
 			
-			var logMsg:String = "ema: "+ema+" energy: "+value+" gain: "+gain+" emaMax: "+emaMax;			
-			
-			Logger.debug(logMsg);
-			
-			var result:AGCResult = new AGCResult();
-			if (mic.gain != gain){
-				mic.gain = gain;
-				var resultObj:Object = new Object();
-				resultObj.ema=ema;
-				resultObj.energy=value;
-				resultObj.gain=gain;
-				resultObj.emaMax=emaMax;
-				result.result = resultObj;
-				result.hasResult = true;
-				return result;
-			}else{
-				result.hasResult = false;
-				return result;
+			if (TRACE_AGC){
+				var logMsg:String = "ema: "+ema+" K: "+K+" gain: "+gain;			
+				Logger.debug(logMsg);			
+				var result:AGCResult = new AGCResult();
+				if (mic.gain != gain){
+					mic.gain = gain;
+					var resultObj:Object = new Object();
+					resultObj.ema=ema;
+					resultObj.K=K;
+					resultObj.gain=gain;
+					resultObj.emaMax=emaMax;
+					result.result = resultObj;
+					result.hasResult = true;
+					return result;
+				}else{
+					result.hasResult = false;
+					return result;
+				}
+			}else {
+				return null;
 			}
 		}	
 	}

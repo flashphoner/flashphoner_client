@@ -288,9 +288,11 @@ package com.flashphoner.api
 		
 		private function micSampleDataHandler(event:SampleDataEvent):void {
 			var result:AGCResult = agc.process(event.data,mic);
-			if (result.hasResult){
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
-					apiNotify.notifyAgc(result.result);
+			if (agc.TRACE_AGC){
+				if (result.hasResult){
+					for each (var apiNotify:APINotify in flash_API.apiNotifys){
+						apiNotify.notifyAgc(result.result);
+					}
 				}
 			}
 		}
