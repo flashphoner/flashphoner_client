@@ -103,7 +103,9 @@ package com.flashphoner.api
 				flashAPI.removeCall(call.id);
 				if (!call.isMSRP){
 					flashAPI.soundControl.disableAGC();
-					SoundControl.playFinishSound();		
+					if (flashAPI.callsSize() == 0){
+						SoundControl.playFinishSound();
+					}
 					SoundControl.stopRingSound();														
 				
 					call.unpublish();
