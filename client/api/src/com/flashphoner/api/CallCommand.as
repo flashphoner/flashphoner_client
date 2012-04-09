@@ -46,15 +46,14 @@ package com.flashphoner.api
 			Logger.info("PhoneCommand.execute() event.type "+event.type);
 			
 			var call:Call = (event as CallEvent).call;
-			var flashAPI:Flash_API = call.flash_API;
-			var modelLocator:ModelLocator = flashAPI.modelLocator;
+			var flashAPI:Flash_API = call.flash_API;			
 			
 			if (event.type==CallEvent.TALK){
 				Logger.info("MainEvent.TALK "+call.id);
 				call.startTimer();
 				if (!call.isMSRP){
 					SoundControl.stopRingSound();					
-					publishPlay(call,modelLocator.login,flashAPI.phoneServerProxy.phoneSpeaker);
+					flashAPI.publishPlay(call);
 				}
 			}
 			
@@ -68,14 +67,13 @@ package com.flashphoner.api
 				Logger.info("MainEvent.SESSION_PROGRESS");
 				if (!call.isMSRP){
 		 			SoundControl.stopRingSound();				
-					publishPlay(call,modelLocator.login,flashAPI.phoneServerProxy.phoneSpeaker);
+					flashAPI.publishPlay(call);
 				}
 		 	}
 			
 			if (event.type==CallEvent.IN){				
 				if (!call.isMSRP && flashAPI.callsSize() == 1){
-					Logger.info("CallCommand incoming ringing sound ...");
-					publishPlay(call,modelLocator.login,flashAPI.phoneServerProxy.phoneSpeaker);
+					Logger.info("CallCommand incoming ringing sound ...");					
 					SoundControl.playInRingSound();
 				}
 			}
@@ -83,7 +81,7 @@ package com.flashphoner.api
 			if (event.type ==CallEvent.OUT){
 				if (!call.isMSRP && flashAPI.callsSize() == 1){
 					Logger.info("CallCommand outgoing ringing sound ...");
-					publishPlay(call,modelLocator.login,flashAPI.phoneServerProxy.phoneSpeaker);
+					flashAPI.publishPlay(call);
 					SoundControl.playOutRingSound();
 				}
 			}

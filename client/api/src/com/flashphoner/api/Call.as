@@ -184,6 +184,7 @@ package com.flashphoner.api
 					tempCall.setStatusHold(true);
 				}
 			}
+			flash_API.publishPlay(this);
 			callServerProxy.answer(isVideoCall);			
 		}
 		/**

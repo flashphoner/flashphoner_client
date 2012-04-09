@@ -135,6 +135,15 @@ package com.flashphoner.api
 			soundControl = new SoundControl(this);
 			videoControl = new VideoControl();
 		}
+		
+		public function publishPlay(call:Call):void{			
+			Logger.info("publishPlay");
+			call.publish();	 		
+			phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
+			if (PhoneConfig.VIDEO_ENABLED){
+				phoneServerProxy.phoneSpeaker.playVideo("VIDEO_INCOMING_"+login+"_"+call.id);
+			}
+		}
 
 		/**
 		 * Ignore call by id
@@ -400,7 +409,7 @@ package com.flashphoner.api
 			}
 			phoneServerProxy.call(callee,visibleName, isVideoCall,inviteParameters);
 			return 0;
-		}
+		}	
 		
 		/**
 		 * Create new call by URL
