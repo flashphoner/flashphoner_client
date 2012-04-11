@@ -42,6 +42,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -163,7 +164,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         String password = obj.getString("password");
         String visibleName = obj.getString("visibleName");
         String qValue = obj.getString("qValue");
-        String contactParams = nullIfEmpty(obj.getString("contactParams"));        
+        String contactParams = nullIfEmpty(obj.getString("contactParams"));
 
         if (login != null && password != null) {
             outboundProxy = obj.getString("outboundProxy");
@@ -198,10 +199,11 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
                 if (file.exists()) {
                     bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
                 } else {
-                    url = new URL(auto_login_url + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl=" + pageUrl);
+                    String urlString = auto_login_url + "?token=" + token + "&swfUrl=" + URLEncoder.encode(swfUrl,"UTF-8") + "&pageUrl=" + URLEncoder.encode(pageUrl,"UTF-8");
+                    log.info("urlString source: " + urlString);                  
+                    url = new URL(urlString);
                     URLConnection conn = url.openConnection();
                     bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
                 }
 
                 String line;
@@ -212,12 +214,12 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
                 log.info("response from auth server - " + response.toString());
             } catch (MalformedURLException e) {
-                log.error("ERROR - '" + auto_login_url + "' is wrong;" + e);
+                log.error("ERROR - '" + auto_login_url + "' is wrong", e);
                 client.rejectConnection();
                 client.setShutdownClient(true);
                 return;
             } catch (IOException e) {
-                log.error("ERROR - '" + auto_login_url + "' is wrong;" + e);
+                log.error("ERROR - '" + auto_login_url + "' is wrong", e);
                 client.rejectConnection();
                 client.setShutdownClient(true);
                 return;
