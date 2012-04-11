@@ -97,7 +97,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
      */
     public void onConnect(IClient client, RequestFunction requestFunction, AMFDataList params) {
 
-        log.info("onConnect " + params);
+        log.info("onConnect " + params + " clientId: " + client.getClientId());
 
         if (!isDefaultInstance(client)) {
             client.rejectConnection();
@@ -199,8 +199,8 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
                 if (file.exists()) {
                     bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
                 } else {
-                    String urlString = auto_login_url + "?token=" + token + "&swfUrl=" + URLEncoder.encode(swfUrl,"UTF-8") + "&pageUrl=" + URLEncoder.encode(pageUrl,"UTF-8");
-                    log.info("urlString source: " + urlString);                  
+                    String urlString = auto_login_url + "?token=" + token + "&swfUrl=" + URLEncoder.encode(swfUrl, "UTF-8") + "&pageUrl=" + URLEncoder.encode(pageUrl, "UTF-8");
+                    log.info("urlString source: " + urlString);
                     url = new URL(urlString);
                     URLConnection conn = url.openConnection();
                     bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
