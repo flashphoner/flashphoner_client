@@ -156,6 +156,12 @@ package com.flashphoner.api
 						PhoneConfig.DTMF_LEVEL=Number(xml.dtmf_level);	
 					}
 					Logger.info("DTMF_LEVEL: "+PhoneConfig.DTMF_LEVEL);
+					
+					if (xml.security_allow_deny_remember!=null && xml.security_allow_deny_remember.length!=0){
+						PhoneConfig.SECURITY_ALLOW_DENY_REMEMBER = (xml.security_allow_deny_remember == "true");
+					}
+					Logger.info("SECURITY_ALLOW_DENY_REMEMBER: "+PhoneConfig.SECURITY_ALLOW_DENY_REMEMBER);
+					
 			        SoundControl.updateSounds();
 			    }
 			    else

@@ -22,10 +22,10 @@ This code and accompanying materials also available under LGPL and MPL license f
 			import com.adobe.cairngorm.control.CairngormEventDispatcher;
 			import com.flashphoner.Logger;
 			import com.flashphoner.api.Flash_API;
+			import com.flashphoner.api.PhoneSpeaker;
 			import com.flashphoner.api.SoundControl;
 			import com.flashphoner.api.data.PhoneConfig;
 			import com.flashphoner.api.js.APINotifyJS;
-			import com.flashphoner.api.PhoneSpeaker;
 			
 			import flash.utils.setTimeout;
 			
@@ -70,15 +70,23 @@ This code and accompanying materials also available under LGPL and MPL license f
 			}
 			
 			public function viewVideo():void{
-				videoMy.attachCamera(flashAPI.videoControl.getCam());
+				if (!PhoneConfig.SECURITY_ALLOW_DENY_REMEMBER){
+					videoMy.attachCamera(flashAPI.videoControl.getCam());
+				}
 				//messageAccess.visible = false;
 				videoPartner.visible = true;
 				videoMy.visible = true;
 			}			
 			
 			public function viewAccessMessage():void{
-				if (flashAPI.soundControl.isMuted() == 1){ 
-					flashAPI.soundControl.getMicrophone().setLoopBack(true);
+				if (flashAPI.soundControl.isMuted() == 1){
+					
+					if (PhoneConfig.SECURITY_ALLOW_DENY_REMEMBER){
+						Security.showSettings(SecurityPanel.PRIVACY);
+					}else{
+						flashAPI.soundControl.getMicrophone().setLoopBack(true);
+					}				
+					
 					timer.addEventListener(TimerEvent.TIMER, timerTick);
 					timer.start();
 				}
@@ -87,7 +95,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 				videoMy.visible = false;
 			}
 			
-			private function timerTick(event:TimerEvent){
+			private function timerTick(event:TimerEvent):void{
 				flashAPI.soundControl.getMicrophone().setLoopBack(false);
 			}
 			

@@ -84,6 +84,8 @@ package com.flashphoner.api.data
 		
 		public static var DTMF_LEVEL:Number = 0.20;
 		
+		public static var SECURITY_ALLOW_DENY_REMEMBER:Boolean = false;
+		
 		/**
 		 * Current version of Flashphoner product
 		 **/		
