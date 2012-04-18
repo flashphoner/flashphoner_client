@@ -12,6 +12,7 @@ package com.flashphoner.api
 		private var ema:Number=0;
 		private var minCount:int=0;			
 		private var maxCount:int=0;
+		private var emaPrev:Number;
 		
 		private var gain:Number=100;			
 		
@@ -19,14 +20,16 @@ package com.flashphoner.api
 		
 		//Coefficients		
 		private var EMA_ALPHA:Number = 0.5;		
-		private var AGC_LEVEL_MAX:Number = 80;		
-		private var AGC_LEVEL_MIN:Number = 20;		
+		private var K_LEVEL_MAX:Number = 100;		
+		private var K_LEVEL_MIN:Number = 40;		
 		private var DOWN_AGRESSIVE_FACTOR:Number = 1.01;		
-		private var UP_AGRESSIVE_FACTOR:Number = 1.05;
+		private var UP_AGRESSIVE_FACTOR:Number = 1.005;
 		private var GAIN_LEVEL:Number=8;
 		private var MAX_GAIN:Number=100;
 		private var MIN_GAIN:Number=80;
 		public var TRACE_AGC:Boolean=false;
+		public var K_LEVEL_SUP:Number = 300;
+		public var K_LEVEL_MAX_DELTA:Number = 180;
 		
 		
 		public function AGC()			
@@ -45,9 +48,9 @@ package com.flashphoner.api
 					Logger.info("AGC param: name="+name+" value="+value);
 					
 					if (name=="min_level"){
-						AGC_LEVEL_MIN = Number(value);
+						K_LEVEL_MIN = Number(value);
 					}else if (name=="max_level"){
-						AGC_LEVEL_MAX = Number(value);
+						K_LEVEL_MAX = Number(value);
 					}else if (name=="agressive_down"){
 						DOWN_AGRESSIVE_FACTOR = Number(value);
 					}else if (name=="agressive_up"){
@@ -62,13 +65,17 @@ package com.flashphoner.api
 						MIN_GAIN = Number(value);
 					}else if (name=="trace"){
 						TRACE_AGC = Boolean(value);
+					}else if (name=="sup_level"){
+						K_LEVEL_SUP = Number(value);
+					}else if (name=="max_level_delta"){
+						K_LEVEL_MAX_DELTA = Number(value);
 					}
 				}
 			}
 			
 			Logger.info("AGC initialized");
-			Logger.info("min_level: "+AGC_LEVEL_MIN);
-			Logger.info("max_level: "+AGC_LEVEL_MAX);
+			Logger.info("min_level: "+K_LEVEL_MIN);
+			Logger.info("max_level: "+K_LEVEL_MAX);
 			Logger.info("agressive_down: "+DOWN_AGRESSIVE_FACTOR);
 			Logger.info("agressive_up: "+UP_AGRESSIVE_FACTOR);
 			Logger.info("ema_alpha: "+EMA_ALPHA);			
@@ -76,6 +83,8 @@ package com.flashphoner.api
 			Logger.info("min_gain: "+MIN_GAIN);
 			Logger.info("max_gain: "+MAX_GAIN);
 			Logger.info("trace: "+TRACE_AGC);
+			Logger.info("K_LEVEL_SUP:"+K_LEVEL_SUP);
+			Logger.info("K_LEVEL_MAX_DELTA:"+K_LEVEL_MAX_DELTA);
 		}
 		
 		public function process(data:ByteArray,mic:Microphone):AGCResult {				
@@ -94,7 +103,7 @@ package com.flashphoner.api
 				energy=1;
 			}
 			
-			var K:Number =Math.min(Math.sqrt(outputPowerNormal*N/energy),100);				
+			var K:Number =Math.min(Math.sqrt(outputPowerNormal*N/energy),K_LEVEL_SUP);				
 			
 			
 			if (ema==0){
@@ -106,19 +115,21 @@ package com.flashphoner.api
 			emaMax = Math.max(emaMax,ema);
 			
 			
-			if (ema > AGC_LEVEL_MAX){
+			if (ema > K_LEVEL_MAX && ema < K_LEVEL_MAX+K_LEVEL_MAX_DELTA && ema > emaPrev){
 				maxCount=maxCount+1
 				gain = Math.min(mic.gain*(Math.pow(UP_AGRESSIVE_FACTOR,maxCount)),MAX_GAIN);					
 			}else{
 				maxCount=0;
 			}
 			
-			if (ema < AGC_LEVEL_MIN){					
+			if (ema < K_LEVEL_MIN){					
 				minCount=minCount+1					
 				gain = Math.max(mic.gain/Math.pow(DOWN_AGRESSIVE_FACTOR,minCount),MIN_GAIN);
 			}else{
 				minCount=0;
 			}
+			
+			emaPrev = ema;
 			
 			if (TRACE_AGC){
 				var logMsg:String = "ema: "+ema+" K: "+K+" gain: "+gain;			

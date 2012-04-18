@@ -35,11 +35,11 @@ public class PhoneServerListener implements IServerNotify {
     public void onServerInit(IServer server) {
         try {
 
-            Config.getInstance();
+            Config cfg = Config.getInstance();
 
-            log.info("Initializing flashphoner properties: " + Config.getInstance().getProperties());
+            log.info("Initializing flashphoner properties: " + cfg.getProperties());
 
-            log.info("Flashphoner build: " + Config.BUILD + " deployed.");
+            log.info("Flashphoner-server {} started",cfg.getVersion());
 
         } catch (Throwable e) {
             log.error("onServerInit error", e);
