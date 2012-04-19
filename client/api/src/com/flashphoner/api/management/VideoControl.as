@@ -40,14 +40,14 @@ package com.flashphoner.api.management
 		 * Init width,height,fps and another parameters
 		 **/ 
 		public function init():void{			
-			if (cam != null){
+			if (cam != null){				
 				supportedResolutions("720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
 				cam.setMode(PhoneConfig.VIDEO_WIDTH,PhoneConfig.VIDEO_HEIGHT,30,true);
 				cam.setKeyFrameInterval(48);
 				cam.setQuality(0,90);
 				cam.setMotionLevel(0,2000);
 				PhoneConfig.VIDEO_WIDTH = cam.width;
-				PhoneConfig.VIDEO_HEIGHT = cam.height;
+				PhoneConfig.VIDEO_HEIGHT = cam.height;	
 			}
 			
 		}		
@@ -95,15 +95,17 @@ package com.flashphoner.api.management
 		 * Change output format CIF/QCIF
 		 **/
 		public function changeFormat(width:int, height:int):void{
+			Logger.info("change format "+width+"x"+height);			
 			if ((width>0)&&(height>0)){
 				cam.setMode(width,height,30,true);
-			}
+			}			
 		}
 
   		/**
 		 * change current camera to used Flashphoner
 		 **/
 		public function changeCamera(camera:Camera):void{
+			Logger.info("changeCamera");
 			if (PhoneConfig.VIDEO_ENABLED){
 				camera.setMode(176,144,15,false);
 				camera.setKeyFrameInterval(48);

@@ -18,6 +18,9 @@ package com.flashphoner.api
 	
 	import flash.events.AsyncErrorEvent;
 	import flash.events.NetStatusEvent;
+	import flash.media.Camera;
+	import flash.media.H264Profile;
+	import flash.media.H264VideoStreamSettings;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
 	import flash.net.Responder;
@@ -70,14 +73,26 @@ package com.flashphoner.api
 				outStream.addEventListener(NetStatusEvent.NET_STATUS,onNetStatus);									
 				outStream.attachAudio(flashCall.flash_API.soundControl.getMicrophone());		
 				
-				if (PhoneConfig.VIDEO_ENABLED && sendVideo){	 
-					outStream.attachCamera(flashCall.flash_API.videoControl.getCam());
+				if (PhoneConfig.VIDEO_ENABLED && sendVideo){					
+					setVideoCompressionSettings(outStream);					
 				}		
 				/* outStream.publish(login+"_"+flashCall.id);
 				WSP-1703 - Removed "login_" from stream name. No need now.
 				*/
 				outStream.publish(flashCall.id);
 			}					
+		}
+		
+		private function setVideoCompressionSettings(outStream:NetStream):void{
+			if (PhoneConfig.MAJOR_PLAYER_VERSION >= 11 && PhoneConfig.AVOID_FLV2H264_TRANSCODING){
+				Logger.info("Player 11. Using h.264 compresstion settings...")
+				var settings:flash.media.H264VideoStreamSettings= new flash.media.H264VideoStreamSettings();					
+				settings.setProfileLevel(H264Profile.BASELINE, flash.media.H264Level.LEVEL_3);					
+				outStream.videoStreamSettings = settings;				
+			}
+			var cam:Camera = flashCall.flash_API.videoControl.getCam();
+			outStream.attachCamera(cam);
+			Logger.info("attach video stream: "+cam.width+"x"+cam.height);
 		}
 		
 		public function unpublish():void{	
@@ -103,7 +118,7 @@ package com.flashphoner.api
 				}
 				
 				flashCall.isVideoSended = true;
-				outStream.attachCamera(flashCall.flash_API.videoControl.getCam());
+				setVideoCompressionSettings(outStream);
 			}
 			
 			if (!sendVideo){

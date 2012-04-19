@@ -80,31 +80,20 @@ package com.flashphoner.api
 		{
 			this.flash_API = flash_API;
 			Logger.info("Use enchenced mic: "+PhoneConfig.USE_ENHANCED_MIC);		
-			setFlashPlayerMajorVersion();
 			mic = defineMicrophone();	
 			
 			if (mic != null){
 				initMic(mic,50,false);
-			}	
-			
+			}			
 		}
 		
-		private function setFlashPlayerMajorVersion():void {
-			Logger.info("setFlashPlayerMajorVersion");
-			var flashPlayerVersion:String = Capabilities.version;			
-			var osArray:Array = flashPlayerVersion.split(' ');
-			var osType:String = osArray[0];
-			var versionArray:Array = osArray[1].split(',');
-			this.majorPlayerVersion = parseInt(versionArray[0]);
-			Logger.info("majorVersion "+majorPlayerVersion);
-		}
 		
 		private function defineMicrophone(index:int=-1):Microphone {
 			Logger.info("getMicrophone "+index);
 			if (PhoneConfig.USE_ENHANCED_MIC){				
-				if (majorPlayerVersion >= 11 || Capabilities.language.indexOf("en") >= 0 || PhoneConfig.FORCE_ENHANCED_MIC){
+				if (PhoneConfig.MAJOR_PLAYER_VERSION >= 11 || Capabilities.language.indexOf("en") >= 0 || PhoneConfig.FORCE_ENHANCED_MIC){
 					Logger.info("return EnhancedMicrophone");
-					Logger.info("majorVersion: "+majorPlayerVersion);
+					Logger.info("majorVersion: "+PhoneConfig.MAJOR_PLAYER_VERSION);
 					Logger.info("Capabilities.language: "+Capabilities.language);
 					Logger.info("FORCE_ENHANCED_MIC: "+PhoneConfig.FORCE_ENHANCED_MIC);
 					return Microphone.getEnhancedMicrophone(index);				
