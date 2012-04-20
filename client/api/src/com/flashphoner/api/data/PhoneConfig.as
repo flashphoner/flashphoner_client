@@ -90,6 +90,10 @@ package com.flashphoner.api.data
 		
 		public static var LOG_SEVERITY:String = "INFO";
 		
+		public static var MAJOR_PLAYER_VERSION:int = 11;
+		
+		public static var AVOID_FLV2H264_TRANSCODING:Boolean = false;
+		
 		/**
 		 * Current version of Flashphoner product
 		 **/		

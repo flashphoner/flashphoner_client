@@ -24,6 +24,7 @@ package com.flashphoner.api
 	import flash.external.ExternalInterface;
 	import flash.media.*;
 	import flash.net.*;
+	import flash.system.Capabilities;
 	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
@@ -87,8 +88,20 @@ package com.flashphoner.api
 			loader.load(request);
 			loader.addEventListener(Event.COMPLETE, onComplete);
 			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR,seurityErrorHandler);
-			loader.addEventListener(IOErrorEvent.IO_ERROR,ioErrorHandler);
+			loader.addEventListener(IOErrorEvent.IO_ERROR,ioErrorHandler);	
 			
+			setFlashPlayerMajorVersion();
+			
+		}
+		
+		private function setFlashPlayerMajorVersion():void {
+			Logger.info("setFlashPlayerMajorVersion");
+			var flashPlayerVersion:String = Capabilities.version;			
+			var osArray:Array = flashPlayerVersion.split(' ');
+			var osType:String = osArray[0];
+			var versionArray:Array = osArray[1].split(',');
+			PhoneConfig.MAJOR_PLAYER_VERSION = parseInt(versionArray[0]);
+			Logger.info("majorVersion "+PhoneConfig.MAJOR_PLAYER_VERSION);
 		}
 		
 		private function seurityErrorHandler(event:SecurityErrorEvent):void{
@@ -167,6 +180,11 @@ package com.flashphoner.api
 					}
 					Logger.info("AUDIO_CODEC: "+PhoneConfig.AUDIO_CODEC);
 					
+					if (xml.avoid_flv2h264_transcoding != null && xml.avoid_flv2h264_transcoding.toString() != ""){
+						PhoneConfig.AVOID_FLV2H264_TRANSCODING = (xml.avoid_flv2h264_transcoding == "true");
+					}
+					Logger.info("AVOID_H264_TRANSCODING: "+PhoneConfig.AVOID_FLV2H264_TRANSCODING);
+					
 			        if (xml.ring_sound != null && xml.ring_sound.toString() != ""){
 			        	SoundControl.RING_SOUND = xml.ring_sound;
 			        }
@@ -178,7 +196,7 @@ package com.flashphoner.api
 			        }
 			        if (xml.finish_sound != null && xml.finish_sound.toString() != ""){
 				        SoundControl.FINISH_SOUND = xml.finish_sound;
-			        }					
+			        }										
 					
 			        SoundControl.updateSounds();
 			    }
