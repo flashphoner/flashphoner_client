@@ -109,7 +109,7 @@ package com.flashphoner.api
 					Logger.info("FORCE_ENHANCED_MIC: "+PhoneConfig.FORCE_ENHANCED_MIC);
 					return Microphone.getEnhancedMicrophone(index);				
 				}else{					
-					for each (var apiNotify:APINotify in flash_API.apiNotifys){
+					for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 						apiNotify.addLogMessage("WARNING!!! Echo cancellation is turned off on your side (because your OS has no-english localization). Please use a headset to avoid echo for your interlocutor.");
 					}
 					Logger.info("return Microphone");
@@ -274,7 +274,7 @@ package com.flashphoner.api
 		private function initMic(mic:Microphone, gain:int=50, loopback:Boolean=false):void{
 			var logMsg:String = "Init mic: codec: "+PhoneConfig.AUDIO_CODEC+" gain: "+50+" loopback: "+loopback;
 			Logger.info(logMsg);
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.addLogMessage(logMsg);
 			}	
 			

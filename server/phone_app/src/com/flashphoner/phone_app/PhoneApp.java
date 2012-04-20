@@ -487,7 +487,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             visibleName = rtmpClient.getRtmpClientConfig().getVisibleName();
         }
         if (callee == null || "".equals(callee)) {
-            rtmpClient.fail(ErrorCodes.USER_NOT_AVAILABLE, null);
+            rtmpClient.fail(ErrorCodes.CALLEE_NAME_IS_NULL, null);
             return;
         }
 

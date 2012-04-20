@@ -47,7 +47,7 @@ package com.flashphoner.api.data
 		 **/
 		public static const CONNECTION_ERROR:String = "CONNECTION_ERROR";
 		/**
-		 * It is client error, throw if answer on registgation do not receive from server within 15 seconds
+		 * It is client error, throw if answer on registration do not receive from server within 15 seconds
 		 **/ 
 		public static const REGISTER_EXPIRE:String = "REGISTER_EXPIRE";	
 		/**
@@ -67,5 +67,10 @@ package com.flashphoner.api.data
 		 * flashphoner server can not connect with sip provider server.
 		 **/ 
 		public static const WRONG_SIPPROVIDER_ADDRESS:String = "WRONG_SIPPROVIDER_ADDRESS";
+		/**
+		 * Application can`t load flashphoner.xml properly
+		 **/ 
+		public static const WRONG_FLASHPHONER_XML:String = "WRONG_FLASHPHONER_XML";
+		
 	}
 }

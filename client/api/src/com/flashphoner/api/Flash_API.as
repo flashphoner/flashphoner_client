@@ -48,7 +48,7 @@ package com.flashphoner.api
 		 * @private
 		 * Notifier added by addNotify()
 		 **/ 
-		internal var apiNotifys:ArrayCollection;		
+		public static var apiNotifys:ArrayCollection;		
 		/**
 		 * Data about logged user
 		 **/
@@ -288,7 +288,7 @@ package com.flashphoner.api
 		 * @param apiNotify Object will be implemented APINotify
 		 **/
 		public function addAPINotify(apiNotify:APINotify):void{
-			this.apiNotifys.addItem(apiNotify);
+			Flash_API.apiNotifys.addItem(apiNotify);
 		}
 		/**
 		 * Get parameters from file 'flashphoner.xml'
@@ -547,7 +547,7 @@ package com.flashphoner.api
 			if (registeredTimer!=null){
 				registeredTimer.stop();
 			} else {
-				registeredTimer = new Timer(13000);
+				registeredTimer = new Timer(15000);
 				registeredTimer.addEventListener(TimerEvent.TIMER,registeredExpire);					
 			}
 		}

@@ -33,14 +33,14 @@ package com.flashphoner.api
 		}
 		
 		public function notifyBalance(balance:Number,_sipObject:Object):void{
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notifyBalance(balance,_sipObject);
 			}
 		}	
 		
 		public function getVersion(version:String):void{
 			PhoneConfig.VERSION_OF_SERVER = version;
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notifyVersion(PhoneConfig.getFullVersion());
 			}
 		}
@@ -66,7 +66,7 @@ package com.flashphoner.api
 			if (errorCode == ErrorCodes.AUTHENTICATION_FAIL || errorCode == ErrorCodes.SIP_PORTS_BUSY){
 				flash_API.dropRegisteredTimer();
 			}			
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notifyError(errorCode,_sipObject);
 			}
 		}
@@ -75,7 +75,7 @@ package com.flashphoner.api
 		}
 		
 		public function registered(_sipObject:Object):void{
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notifyRegistered(_sipObject);
 			}
 			CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.REGISTERED,flash_API));
@@ -83,7 +83,7 @@ package com.flashphoner.api
 		
 		public function ring(_call:Object,_sipObject:Object):void{
 			var call:Call = process(_call);
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notify(call,_sipObject);
 			}
 			if (!call.incoming){
@@ -100,7 +100,7 @@ package com.flashphoner.api
 		
 		public function talk(_call:Object,_sipObject:Object):void{
 			var call:Call = process(_call);
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notify(call,_sipObject);
 			}
 			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.TALK,call));
@@ -108,7 +108,7 @@ package com.flashphoner.api
 		
 		public function hold(_call:Object, _sipObject:Object):void{
 			var call:Call = process(_call);
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notify(call,_sipObject);
 			}
 			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.HOLD,call));
@@ -117,7 +117,7 @@ package com.flashphoner.api
 		// Notify about CIF 352x288 or QCIF 176x144 video format 
 		public function notifyVideoFormat(_call:Object):void{
 			var call:Call = process(_call);
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notifyVideoFormat(call);			
 			}
 			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.VIDEO_FORMAT_CHANGED, call));
@@ -133,13 +133,13 @@ package com.flashphoner.api
 					}
 				}
 			}
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notifyCallbackHold(call,isHold);
 			}
 		}
 		public function busy(_call:Object,_sipObject:Object):void{
 			var call:Call = process(_call);
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notify(call,_sipObject);
 			}
 			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.BUSY,call));	
@@ -147,7 +147,7 @@ package com.flashphoner.api
 		
 		public function finish(_call:Object,_sipObject:Object):void{
 			var call:Call = process(_call);
-			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notify(call,_sipObject);
 			}
 			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.FINISH,call));

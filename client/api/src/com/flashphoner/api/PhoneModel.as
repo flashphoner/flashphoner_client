@@ -16,6 +16,8 @@ package com.flashphoner.api
 	import com.flashphoner.Logger;
 	import com.flashphoner.api.data.ErrorCodes;
 	import com.flashphoner.api.data.PhoneConfig;
+	import com.flashphoner.api.interfaces.APINotify;
+	import com.flashphoner.api.js.APINotifyJS;
 	
 	import flash.display.DisplayObjectContainer;
 	import flash.events.*;
@@ -62,6 +64,7 @@ package com.flashphoner.api
 			phoneController = new PhoneController();	
 						
 		}	
+		
 		
 		private function init(event:TimerEvent = null):void{
 			if (Application.application == null || Application.application.parameters == null){
@@ -111,6 +114,12 @@ package com.flashphoner.api
 					}
 			        
 			        PhoneConfig.SERVER_URL = xml.rtmp_server;
+					if (PhoneConfig.SERVER_URL == null) {
+						for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+							apiNotify.notifyError(ErrorCodes.WRONG_FLASHPHONER_XML);
+						}
+					}
+					
 			        PhoneConfig.APP_NAME = xml.application;
 					var check_validation_callee:String = xml.check_validation_callee;
 					PhoneConfig.CHECK_VALIDATION_CALLEE = (check_validation_callee == "true");

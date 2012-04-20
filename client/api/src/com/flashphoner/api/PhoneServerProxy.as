@@ -171,7 +171,7 @@ package com.flashphoner.api
 			if(event.info.code == "NetConnection.Connect.Success")
 			{
 				Logger.info("NetConnection.Connect.Success");
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 					apiNotify.notifyConnected();
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.CONNECTED,flash_API));
@@ -180,23 +180,23 @@ package com.flashphoner.api
 					startKeepAlive();
 				}
 								
-			}else if(event.info.code == "NetConnection.Connect.Failed")
+			} else if(event.info.code == "NetConnection.Connect.Failed")
 			{
 				Logger.info("NetConnection.Connect.Failed");
 				flash_API.dropRegisteredTimer();
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 					apiNotify.notifyError(ErrorCodes.CONNECTION_ERROR);
 				}
 				hasDisconnectAttempt = false;
-			}else if (event.info.code == 'NetConnection.Connect.Rejected')
+			} else if (event.info.code == 'NetConnection.Connect.Rejected')
 			{
 				Logger.info("NetConnection.Connect.Rejected");
-				Alert.show("Too many users.\nPlease try again later.");
+				Alert.show("Connect rejected,\n permission to server denied.");
 				hasDisconnectAttempt = false;
-			}else if (event.info.code == 'NetConnection.Connect.Closed')
+			} else if (event.info.code == 'NetConnection.Connect.Closed')
 			{				
 				Logger.info("NetConnection.Connect.Closed");
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 					apiNotify.notifyCloseConnection();
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.DISCONNECT,flash_API));
