@@ -767,5 +767,12 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         return str;
     }
 
+    public void keepAlive(IClient client, RequestFunction requestFunction, AMFDataList params) {
+        if (log.isDebugEnabled()){
+            log.debug("keepAlive");    
+        }
+        sendResult(client, params, 1);
+    }
+
 
 }

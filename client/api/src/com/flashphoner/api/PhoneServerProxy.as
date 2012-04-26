@@ -28,6 +28,7 @@ package com.flashphoner.api
 	import flash.system.Security;
 	import flash.system.SecurityPanel;
 	import flash.utils.setTimeout;
+	import flash.utils.Timer;
 	
 	import mx.controls.Alert;
 	import mx.core.mx_internal;
@@ -50,6 +51,10 @@ package com.flashphoner.api
 		public var phoneSpeaker:PhoneSpeaker;
 		
 		private var flash_API:Flash_API;
+		
+		private var keepAliveTimer:Timer;
+		
+		private var keepAliveTimeoutTimer:Timer;
 		
 		public function PhoneServerProxy(responder:Responder,flash_API:Flash_API)
 		{		
@@ -144,6 +149,10 @@ package com.flashphoner.api
 					apiNotify.notifyConnected();
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.CONNECTED,flash_API));
+				if (PhoneConfig.KEEP_ALIVE){
+					initKeepAlive();
+					startKeepAlive();
+				}
 								
 			}else if(event.info.code == "NetConnection.Connect.Failed")
 			{
@@ -199,6 +208,39 @@ package com.flashphoner.api
 			obj.key = key;
 			obj.value = value;			
 			nc.call("setProperty",responder,obj);
+		}
+		
+		//keep alive support
+		public function initKeepAlive():void{
+			Logger.info("initKeepAlive");	
+			keepAliveTimer = new Timer(PhoneConfig.KEEP_ALIVE_INTERVAL,1);
+			keepAliveTimer.addEventListener(TimerEvent.TIMER_COMPLETE,fireKeepAlive);
+			
+			keepAliveTimeoutTimer = new Timer(PhoneConfig.KEEP_ALIVE_TIMEOUT,1);
+			keepAliveTimeoutTimer.addEventListener(TimerEvent.TIMER_COMPLETE,fireKeepAliveTimeout);
+			Logger.info("keepAliveTimeoutTimer: "+PhoneConfig.KEEP_ALIVE_INTERVAL+" keepAliveTimeoutTimer: "+PhoneConfig.KEEP_ALIVE_TIMEOUT);
+		}
+		
+		public function startKeepAlive():void{			
+			Logger.debug("startKeepAlive "+new Date());
+			keepAliveTimer.start();			
+		}
+		
+		public function fireKeepAlive(event:TimerEvent):void{
+			Logger.debug("fireKeepAlive "+new Date());			
+			nc.call("keepAlive",new Responder(keepAliveResponse));
+			keepAliveTimeoutTimer.start();
+		}
+		
+		public function keepAliveResponse(result:int):void{
+			Logger.debug("keepAliveResponse: "+result);
+			keepAliveTimeoutTimer.stop();			
+			startKeepAlive();
+		}
+		
+		public function fireKeepAliveTimeout(event:TimerEvent):void{
+			Logger.info("fireKeepAliveTimeout. Close connection by keep alive timeout: "+PhoneConfig.KEEP_ALIVE_TIMEOUT);			
+			nc.close();			
 		}
 		
 

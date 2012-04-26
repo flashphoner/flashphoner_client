@@ -162,6 +162,21 @@ package com.flashphoner.api
 					}
 					Logger.info("SECURITY_ALLOW_DENY_REMEMBER: "+PhoneConfig.SECURITY_ALLOW_DENY_REMEMBER);
 					
+					if (xml.keep_alive == "true"){
+						PhoneConfig.KEEP_ALIVE=true;	
+					}
+					Logger.info("KEEP_ALIVE: "+PhoneConfig.KEEP_ALIVE);
+					
+					if (xml.keep_alive_interval !=null && xml.keep_alive_interval.toString() !=""){
+						PhoneConfig.KEEP_ALIVE_INTERVAL = int(xml.keep_alive_interval);
+					}
+					Logger.info("KEEP_ALIVE_INTERVAL: "+PhoneConfig.KEEP_ALIVE_INTERVAL);
+					
+					if (xml.keep_alive_timeout !=null && xml.keep_alive_timeout.toString() !=""){
+						PhoneConfig.KEEP_ALIVE_TIMEOUT = int(xml.keep_alive_timeout);
+					}
+					Logger.info("KEEP_ALIVE_TIMEOUT: "+PhoneConfig.KEEP_ALIVE_TIMEOUT);
+					
 			        SoundControl.updateSounds();
 			    }
 			    else
