@@ -67,7 +67,7 @@ package com.flashphoner.api
 		
 		private function nsOnStatus(infoObject:NetStatusEvent):void
 		{
-			Logger.info("PhoneSpeaker.nsOnStatus()");
+			Logger.info("PhoneSpeaker.nsOnStatus() "+infoObject.info.code);
 			
 			if (incomingStream==null){
 				return;
