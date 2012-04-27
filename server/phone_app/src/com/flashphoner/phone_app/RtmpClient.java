@@ -14,6 +14,7 @@ package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.media.CodecConfiguration;
 import com.flashphoner.sdk.rtmp.*;
+import com.flashphoner.sdk.sip.NotifyMessageCallResult;
 import com.flashphoner.sdk.sip.SipMessageObject;
 import com.flashphoner.sdk.softphone.ISoftphoneCall;
 import com.flashphoner.sdk.softphone.InstantMessage;
@@ -240,14 +241,20 @@ public class RtmpClient extends AbstractRtmpClient {
             messageObj.put("id", instantMessage.getId());
         }
 
+        NotifyMessageCallResult notifyMessageCallResult = null;
         if (InstantMessageState.RECEIVED.equals(instantMessage.getState())) {
             messageObj.put("from", instantMessage.getFrom());
             messageObj.put("to", instantMessage.getTo());
             messageObj.put("contentType", instantMessage.getContentType());
             messageObj.put("body", instantMessage.getBody());
+            //getPagerModeClient and getRequestEvent may be null for incoming MSRP message
+            //using notifyMessageCallResult for regular incoming messages only
+            if (instantMessage.getPagerModeClient() != null && instantMessage.getRequestEvent() != null) {
+                notifyMessageCallResult = new NotifyMessageCallResult(instantMessage);
+            }
         }
 
-        getClient().call("notifyMessage", null, messageObj, sipMessageObject.toAMFObj());
+        getClient().call("notifyMessage", notifyMessageCallResult, messageObj, sipMessageObject.toAMFObj());
     }
 
     //speex, pcma, pcmu
