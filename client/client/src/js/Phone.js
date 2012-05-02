@@ -585,7 +585,7 @@ function notifyMessage(messageObject,sipObject) {
     }
 
     var messageContent = messageObject.body;
-    if (messageObject.state=="FAILED" || messageObject.state=="ERROR" || messageObject.state=="FORBIDDEN"){
+    if (messageObject.state=="IMDN_FAILED" || messageObject.state=="ERROR" || messageObject.state=="FORBIDDEN"){
 		messageContent = "<div class=msg_failed>"+messageContent+"</div>";
 	}else if (messageObject.state=="SENT"){
     	messageContent = "<div class=msg_sent>"+messageContent+"</div>";

@@ -14,6 +14,7 @@ package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.media.CodecConfiguration;
 import com.flashphoner.sdk.rtmp.*;
+import com.flashphoner.sdk.sip.INotifyMessageCallback;
 import com.flashphoner.sdk.sip.NotifyMessageCallResult;
 import com.flashphoner.sdk.sip.SipMessageObject;
 import com.flashphoner.sdk.softphone.ISoftphoneCall;
@@ -26,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sip.RequestEvent;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Implementation of IRtmpClient class via {@link AbstractRtmpClient}.<br/>
@@ -34,7 +37,7 @@ import javax.sip.RequestEvent;
  */
 public class RtmpClient extends AbstractRtmpClient {
 
-    private static Logger log = LoggerFactory.getLogger(RtmpClient.class);
+    private static Logger log = LoggerFactory.getLogger(RtmpClient.class);    
 
     /**
      * @param rtmpClientConfig config contains all parameters for the instance creation
@@ -229,7 +232,7 @@ public class RtmpClient extends AbstractRtmpClient {
         //getClient().call("notifyRequest", null, requestObj);
     }
 
-    public void notifyMessage(InstantMessage instantMessage, SipMessageObject sipMessageObject) {
+    public void notifyMessage(InstantMessage instantMessage, SipMessageObject sipMessageObject, INotifyMessageCallback notifyMessageCallback) {
 
         log.info("notifyMessage: {}, clientId: {} login: {}", new Object[]{instantMessage, getClient().getClientId(), getRtmpClientConfig().getLogin()});
 
@@ -241,17 +244,16 @@ public class RtmpClient extends AbstractRtmpClient {
             messageObj.put("id", instantMessage.getId());
         }
 
-        NotifyMessageCallResult notifyMessageCallResult = null;
-        if (InstantMessageState.RECEIVED.equals(instantMessage.getState())) {
+        if (InstantMessageState.RECEIVED.contains(instantMessage.getState())) {
             messageObj.put("from", instantMessage.getFrom());
             messageObj.put("to", instantMessage.getTo());
             messageObj.put("contentType", instantMessage.getContentType());
             messageObj.put("body", instantMessage.getBody());
-            //getPagerModeClient and getRequestEvent may be null for incoming MSRP message
-            //using notifyMessageCallResult for regular incoming messages only
-            if (instantMessage.getPagerModeClient() != null && instantMessage.getRequestEvent() != null) {
-                notifyMessageCallResult = new NotifyMessageCallResult(instantMessage);
-            }
+        }
+
+        NotifyMessageCallResult notifyMessageCallResult = null;
+        if (notifyMessageCallback != null) {
+            notifyMessageCallResult = new NotifyMessageCallResult(notifyMessageCallback);
         }
 
         getClient().call("notifyMessage", notifyMessageCallResult, messageObj, sipMessageObject.toAMFObj());
