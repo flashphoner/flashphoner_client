@@ -268,6 +268,19 @@ package com.flashphoner.api
 			mic.setUseEchoSuppression(true);
 		}
 		
+		public function setMicVolume(volume:int):void {			
+			if (volume==0){
+				//mute
+				agc.muted = true;
+			}else{
+				//unmute
+				agc.muted = false;
+			}
+			if (mic != null){
+				mic.gain = volume;
+			}		
+		}	
+		
 		public function enableAGC():void{
 			Logger.info("enableAGC")
 			mic.gain = DEFAULT_GAIN;

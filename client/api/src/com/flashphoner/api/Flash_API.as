@@ -472,11 +472,9 @@ package com.flashphoner.api
 		 * Set volume for current microphone
 		 * @param volume interval 1-100
 		 **/
-		public function setMicVolume(volume:int):void{
-			var mic:Microphone = soundControl.getMicrophone();
-			if (mic != null){
-				mic.gain = volume;
-			}
+		public function setMicVolume(volume:int):void{			
+			Logger.info("setMicVolume: "+volume);
+			soundControl.setMicVolume(volume);
 		}
 		
 		/**

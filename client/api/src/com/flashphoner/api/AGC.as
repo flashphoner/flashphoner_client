@@ -31,6 +31,8 @@ package com.flashphoner.api
 		public var K_LEVEL_SUP:Number = 300;
 		public var K_LEVEL_MAX_DELTA:Number = 180;
 		
+		public var muted:Boolean = false;
+		
 		
 		public function AGC()			
 		{			
@@ -129,27 +131,31 @@ package com.flashphoner.api
 				minCount=0;
 			}
 			
-			emaPrev = ema;
+			emaPrev = ema;			 
+						
+			var result:AGCResult = new AGCResult();
+			
+			if (muted){
+				mic.gain = 0;
+				result.hasResult = false;
+			}else if (mic.gain != gain){
+				mic.gain = gain;
+				var resultObj:Object = new Object();
+				resultObj.ema=ema;
+				resultObj.K=K;
+				resultObj.gain=gain;
+				resultObj.emaMax=emaMax;
+				result.result = resultObj;
+				result.hasResult = true;					
+			}else{
+				result.hasResult = false;					
+			}
 			
 			if (TRACE_AGC){
-				var logMsg:String = "ema: "+ema+" K: "+K+" gain: "+gain;			
-				Logger.debug(logMsg);			
-				var result:AGCResult = new AGCResult();
-				if (mic.gain != gain){
-					mic.gain = gain;
-					var resultObj:Object = new Object();
-					resultObj.ema=ema;
-					resultObj.K=K;
-					resultObj.gain=gain;
-					resultObj.emaMax=emaMax;
-					result.result = resultObj;
-					result.hasResult = true;
-					return result;
-				}else{
-					result.hasResult = false;
-					return result;
-				}
-			}else {
+				var logMsg:String = "ema: "+ema+" K: "+K+" gain: "+mic.gain;			
+				Logger.debug(logMsg);	
+				return result;
+			}else{
 				return null;
 			}
 		}	
