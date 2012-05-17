@@ -66,7 +66,7 @@ package com.flashphoner.api
 			if (event.type == CallEvent.SESSION_PROGRESS){
 				Logger.info("MainEvent.SESSION_PROGRESS");
 				if (!call.isMSRP){
-		 			SoundControl.playOutRingSound();			
+		 			SoundControl.stopRingSound();			
 					flashAPI.publishPlay(call);
 				}
 		 	}
