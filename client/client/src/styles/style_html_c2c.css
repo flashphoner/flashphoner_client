@@ -516,20 +516,48 @@ input::-webkit-input-placeholder {
 }
 /* ----------------------------------- */
 /* ------------- Settings ------------ */
-#settingsDiv {
-	top: 80px;
-	left: 5px;
+
+#settingsButton, #settingsView, #settingsOkButton, #micSelector, #camSelector,
+#settingsMicImage, #settingsCamImage {
+position: absolute;
+}
+
+#settingsView {
+	top: 54px;
+	left: 50px;
 	height: 113px;
 	width: 230px;
 	padding-top: 20px;
-	visibility: hidden;
-	background: url(../assets/mic_settings_background.png);
 }
 #settingsButton {
-	position: absolute;
-	top: 126px;
-	left: 15px;
-	background: url(../assets/mic_settings.png);
+	top: 19px;
+	left: 18px;
+	width: 140px;
+	visibility: hidden;
+}
+#settingsOkButton{
+  top: 94px;
+  left: 72px;
+  width: 80px;
+}
+#micSelector{
+  top: 18px;
+  left: 45px;
+  width: 170px;
+}
+#camSelector{
+  top: 54px;
+  left: 45px;
+  width: 170px;
+}
+#settingsMicImage{
+  top: 22px;
+  left: 14px;
+}
+
+#settingsCamImage{
+  top: 58px;
+  left: 15px;
 }
 /* -------------------------------------- */
 /* ------------------ Info ------------------------ */
@@ -555,46 +583,13 @@ input::-webkit-input-placeholder {
 #infoText {
 }
 /* ------------ Flash div -------------- */
-/*#flash {
-	position: absolute;
-	top: 30px;
-	left: 60px;
-	overflow: hidden;
-	padding-top: 20px;
-}
-.video {
-	visibility: visible;
-	width: 215px;
-	height: 180px;
-	background-color: #000;
-}
-.security {
-	visibility: visible;
-	width: 215px;
-	height: 178px;
-	background-color: #fff;
-	padding-top: 20px;
-	border: 1px solid #ccc;
-}
-*/
+
 .closed {
 	width: 1px !important;
 	height: 1px !important;
 	visibility: hidden;
 }
-/*.init {
-	width: 1px;
-	height: 1px;
-	visibility: hidden;
-}
-*/
-/*#sendVideo {
-	width: 100px;
-	position: absolute;
-	bottom: 5px;
-	left: 10px;
-}
-*/
+
 #requestUnmuteText {
 	position: absolute;
 	text-align: center;
@@ -610,24 +605,7 @@ input::-webkit-input-placeholder {
 	width: 14px;
 	height: 14px;
 }
-/* ---------------------------------------------------- */
-/*.button {
-	background: #dcdcdc;
-	width: 46px;
-	height: 22px;
-	float: left;
-	margin: 0px 3px 3px 0;
-	text-align: center;
-	font: bold 14px Arial;
-	line-height: 19px;
-	border: solid 1px #ddd;
-	border-style: outset;
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	user-select: none;
-	outline: none;
-}
-/* -------------------------------------- */
+
 /* --------- Console ------------*/
 #console {
 	position: absolute;
@@ -644,30 +622,10 @@ input::-webkit-input-placeholder {
 	word-wrap: break-word;
 	line-height: 18px;
 }
+
+
 /* -------------- Z indexes -------------*/
-/*#connectingDiv {
-	z-index: 15;
-}
-#infoDiv {
-	z-index: 30;
-}
-#jsSWFDiv {
-	z-index: 100;
-}
-#settingsDiv {
-	z-index: 17;
-}
-#video_requestUnmuteDiv {
-	z-index: 20;
-}
-.closeButton {
-	z-index: 101;
-}
-*/
-/*#c2c {
-	z-index: 1;
-}
-*/
+
 #versionOfProduct {
 	z-index: 4;
 }

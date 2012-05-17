@@ -625,6 +625,50 @@ $(function() {
     }).click(function() {
       sendVideoChangeState();
     });
+    
+    // Settings button button opens settings view  
+    $("#settingsButton").click(function() {
+      if ($(this).hasClass('pressed')) {
+        
+        $("#settingsView").show();
+        
+        var micList = flashphoner.getMicropones();
+        var camList = flashphoner.getCameras();
+ 
+        //clear it each time, else we append it more and more... 
+        $("#micSelector").html("");
+        $("#camSelector").html("");
+        
+        for (var i = 0; i < micList.length; i++) {
+          $("#micSelector").append('<option value="' + micList[i] + '">' + micList[i] + '</option>');
+        }
+
+        // we use here index instead of name because AS getcamera can only use indexes
+        for (var i = 0; i < camList.length; i++) {
+          $("#camSelector").append('<option value="' + i + '">' + camList[i] + '</option>');
+        }
+        
+      } else {
+        $("#settingsView").hide();
+      }
+    }); 
+    
+
+    $("#micSelector").change(function() {
+      flashphoner.setMicrophone($(this).val());
+      trace('Microphone changed to ', $(this).val());
+    });
+
+    $("#camSelector").change(function() {
+      flashphoner.setCamera($(this).val());
+      trace('Camera changed to ', $(this).val());
+    });
+    
+    $("#settingsOkButton").click(function() {
+      $("#settingsView").hide();
+      $("#settingsButton").removeClass("pressed");
+    });
+    
 });
 
 
