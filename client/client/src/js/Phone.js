@@ -11,6 +11,8 @@ Contributors:
 This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 */
 
+var _loginObject = null;
+
 var managedCalls = new Object();
 var flashphoner;
 
@@ -108,12 +110,17 @@ function login() {
     trace("login");
     connectingViewBeClosed = false;
     var loginObject = new Object();
-    loginObject.username = 'sip:' + $('#username').val() + '@' + $('#domain').val();
-    loginObject.password = $('#password').val();
-    loginObject.authenticationName = $('#authname').val();
-    loginObject.outboundProxy = $('#outbound_proxy').val();
-    loginObject.port = $('#port').val();
-    loginObject.qValue = '1.0';        
+    if (this._loginObject!=null){
+	loginObject = this._loginObject;
+    }else{
+	loginObject.username = 'sip:' + $('#username').val() + '@' + $('#domain').val();
+	loginObject.password = $('#password').val();
+	loginObject.authenticationName = $('#authname').val();
+	loginObject.outboundProxy = $('#outbound_proxy').val();
+	loginObject.port = $('#port').val();
+	loginObject.qValue = '1.0';        
+	this._loginObject = loginObject;
+    }
     var result = flashphoner.login(loginObject);
     closeLoginView();
     if (result == 0) {
@@ -366,6 +373,7 @@ function notifyRegisterRequired(registerR) {
 
 function notifyCloseConnection() {
     trace("notifyCloseConnection");
+    connected = false;
     currentCall = null;    
     toLogOffState();
     toCallState();
@@ -374,10 +382,20 @@ function notifyCloseConnection() {
     closeVideoView();
     closeCallView();
     getElement('sendVideo').value = "Send video";
+    setTimeout(tryReconnect,10000);
+}
+
+function tryReconnect(){    
+    if (!connected){
+	trace("trying to reconnect");
+	login();	
+        setTimeout(tryReconnect,10000);
+    }
 }
 
 function notifyConnected() {
     trace("notifyConnected");
+    connected = true;
     if (registerRequired) {
         if (!connectingViewBeClosed) {
             openConnectingView("Waiting for registering...", 0);
