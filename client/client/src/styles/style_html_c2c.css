@@ -639,6 +639,16 @@ position: absolute;
 	line-height: 18px;
 }
 
+/* --------- Timer ------------*/
+
+#timer {
+position: absolute;
+top: 170px;
+left: 135px;
+text-shadow: 0 1px black;
+color: #999;
+display: none;
+}
 
 /* -------------- Z indexes -------------*/
 

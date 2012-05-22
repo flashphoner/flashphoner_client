@@ -31,6 +31,11 @@ var proportion = 0;
 var proportionStreamer = 0;
 var callToken = "";
 
+var timerHours = 0;
+var timerMinutes = 0;
+var timerSeconds = 0;
+var timerTimeout;
+
 var testInviteParameter = new Object;
 testInviteParameter['param1'] = "value1";
 testInviteParameter['param2'] = "value2";
@@ -72,6 +77,29 @@ function trace(funcName, param1, param2, param3) {
     if (isScrolled < 1) {
         console[0].scrollTop = console[0].scrollHeight; 
     }
+}
+
+function timer() {
+
+  if (timerHours < 10) {mTimerHours = "0" + timerHours} else {mTimerHours = timerHours}
+  if (timerMinutes < 10) {mTimerMinutes = "0" + timerMinutes} else {mTimerMinutes = timerMinutes}
+  if (timerSeconds < 10) {mTimerSeconds = "0" + timerSeconds} else {mTimerSeconds = timerSeconds}
+
+  $("#timer").html(mTimerHours + ":" + mTimerMinutes + ":" + mTimerSeconds);
+  
+  timerSeconds = timerSeconds + 1;
+  
+  if ( timerSeconds == 60) {
+    timerMinutes = timerMinutes + 1; 
+    timerSeconds = 0;
+  }
+
+  if ( timerMinutes == 60) {
+    timerHours = timerHours + 1; 
+    timerMinutes = 0;
+  }  
+   
+  timerTimeout = setTimeout("timer()", 1000);
 }
 
 $(document).ready(function() {
@@ -258,12 +286,20 @@ function notify(call) {
             initSendVideoButton();
             $('#callState').html('Finished');
             toCallState();
+            
+            timerMinutes = 0;
+            timerHours = 0;
+            timerSeconds = 0;
+            $("#timer").hide();
+            clearTimeout(timerTimeout);
         // if call is holded
         } else if (call.state == STATE_HOLD) {
             $('#callState').html('...Holded...');
         // or if call is started talk
         } else if (call.state == STATE_TALK) {
             $('#callState').html('...Talking...');
+            timer();
+            $("#timer").show();
         // or if we just ringing    
         } else if (call.state == STATE_RING) {
             $('#callState').html('...Ringing...');
