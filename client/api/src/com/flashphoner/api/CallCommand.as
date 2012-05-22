@@ -67,7 +67,7 @@ package com.flashphoner.api
 				Logger.info("MainEvent.SESSION_PROGRESS");
 				if (!call.isMSRP){
 		 			SoundControl.stopRingSound();			
-					flashAPI.publishPlay(call);
+					flashAPI.play(call);
 				}
 		 	}
 			
@@ -80,8 +80,7 @@ package com.flashphoner.api
 			
 			if (event.type ==CallEvent.OUT){
 				if (!call.isMSRP && flashAPI.callsSize() == 1){
-					Logger.info("CallCommand outgoing ringing sound ...");
-					flashAPI.publishPlay(call);
+					Logger.info("CallCommand outgoing ringing sound ...");					
 					SoundControl.playOutRingSound();
 				}
 			}

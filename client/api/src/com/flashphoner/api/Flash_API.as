@@ -139,6 +139,11 @@ package com.flashphoner.api
 		public function publishPlay(call:Call):void{			
 			Logger.info("publishPlay");
 			call.publish();	 		
+			play(call);
+		}
+		
+		public function play(call:Call):void{
+			Logger.info("play");
 			phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
 			if (PhoneConfig.VIDEO_ENABLED){
 				phoneServerProxy.phoneSpeaker.playVideo("VIDEO_INCOMING_"+login+"_"+call.id);
