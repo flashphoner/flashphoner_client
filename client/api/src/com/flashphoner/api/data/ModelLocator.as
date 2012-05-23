@@ -23,6 +23,10 @@ package com.flashphoner.api.data
 		 */
 		public var login:String = '';
 		/**
+		 * Auth name
+		 */
+		public var authenticationName ='';
+		/**
 		 * Password of user
 		 **/
 		public var pwd:String = null;

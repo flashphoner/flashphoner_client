@@ -48,7 +48,8 @@ package com.flashphoner.api
 		public function getUserData(resObj:Object):void{
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			modelLocator.login = resObj.login;
-			modelLocator.pwd = resObj.password;
+			modelLocator.authenticationName=resObj.authenticationName;
+			modelLocator.pwd = resObj.password;		    
 			modelLocator.sipProviderAddress = resObj.sipProviderAddress;
 			modelLocator.sipProviderPort = resObj.sipProviderPort;
 			

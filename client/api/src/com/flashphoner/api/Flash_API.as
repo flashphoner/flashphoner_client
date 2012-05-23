@@ -144,7 +144,7 @@ package com.flashphoner.api
 		
 		public function play(call:Call):void{
 			Logger.info("play");
-			phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
+			phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.authenticationName+"_"+call.id);
 			if (PhoneConfig.VIDEO_ENABLED){
 				phoneServerProxy.phoneSpeaker.playVideo("VIDEO_INCOMING_"+login+"_"+call.id);
 			}
