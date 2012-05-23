@@ -219,7 +219,14 @@ package com.flashphoner.api
 			var event:MainEvent = new MainEvent(MainEvent.AUDIO_CODEC_CHANGED_EVENT,flash_API);
 			event.obj = codec;
 			CairngormEventDispatcher.getInstance().dispatchEvent(event);		
-		}	
+		}
+		
+		public function notifyAuthenticationSent(_sipObject:Object):void{
+			Logger.info("notifyAuthenticationSent");
+			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				apiNotify.notifyAuthenticationSent(_sipObject);
+			}	
+		}
 		
 	}
 }

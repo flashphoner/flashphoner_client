@@ -342,6 +342,12 @@ function hangupManagedCall(){
 
 /* ------------------ Notify functions ----------------- */
 
+function notifyAuthenticationSent(sipObject){
+  trace("notifyAuthenticationSent");
+  trace("sipObject: "+sipObject.type+" "+sipObject.message.method);
+  trace("sipObject raw: "+sipObject.message.raw);
+}
+
 function addLogMessage(message) {
     trace(message);
 }

@@ -151,5 +151,9 @@ package com.flashphoner.phone
 		
 		}
 		
+		public function notifyAuthenticationSent(_sipObject:Object):void{
+			
+		}
+		
 	}
 }

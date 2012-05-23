@@ -37,7 +37,7 @@ import java.util.Set;
  */
 public class RtmpClient extends AbstractRtmpClient {
 
-    private static Logger log = LoggerFactory.getLogger(RtmpClient.class);    
+    private static Logger log = LoggerFactory.getLogger(RtmpClient.class);
 
     /**
      * @param rtmpClientConfig config contains all parameters for the instance creation
@@ -278,4 +278,8 @@ public class RtmpClient extends AbstractRtmpClient {
         getClient().call("notifySubscription", null, subscription.toAMFDataObj(), sipMsg.toAMFObj());
     }
 
+    @Override
+    public void notifyAuthenticationSent(SipMessageObject sipMsg) {
+        getClient().call("notifyAuthenticationSent", null, sipMsg.toAMFObj());
+    }
 }

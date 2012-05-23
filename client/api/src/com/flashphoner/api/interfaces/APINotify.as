@@ -33,6 +33,7 @@ package com.flashphoner.api.interfaces
 		function addLogMessage(message:String):void;
 		function notifyVersion(version:String):void;		
 		function notifySubscription(subscriptionObject:Object,_sipObject:Object):void;
+		function notifyAuthenticationSent(_sipObject:Object):void;
 		
 		function notifyChangeMicVolume(volume:int):void;
 		function notifyAgc(result:Object):void;

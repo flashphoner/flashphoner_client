@@ -92,5 +92,9 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyAgc", agcObject);
 		}	
 		
+		public function notifyAuthenticationSent(_sipObject:Object):void{
+			ExternalInterface.call("notifyAuthenticationSent", _sipObject);
+		}
+		
 	}
 }
