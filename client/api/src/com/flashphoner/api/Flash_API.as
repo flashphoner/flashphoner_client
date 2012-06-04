@@ -324,10 +324,15 @@ package com.flashphoner.api
 		 * @param token Token for auth server
 		 * @param password Password for user
 		 **/		
-		public function loginByToken(token:String = null):void{
-			Logger.info("loginByToken: "+token);
+		public function loginByToken(token:String = null, pageUrl:String = null):void{
+			
+			/** 
+			 * pageUrl need here by that reason = WSP-1855 "Problem with pageUrl in Firefox"
+			 * if client broswer is Firefox, default pageUrl not works, and we send from js special pageUrl 
+			 */
+			Logger.info("loginByToken: " + token + ", pageUrl: " + pageUrl);
 			videoControl.init();
-			phoneServerProxy.loginByToken(token);
+			phoneServerProxy.loginByToken(token, pageUrl);
 		}
 		
 		/**

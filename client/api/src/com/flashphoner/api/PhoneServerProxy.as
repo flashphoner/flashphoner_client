@@ -101,22 +101,46 @@ package com.flashphoner.api
 			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
 			obj.visibleName = modelLocator.visibleName;
 			obj.qValue = qValue;
+						
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);	
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 			return 0;			
 		}
 
 		
-		public function loginByToken(token:String = null):void{
+		public function loginByToken(token:String = null, pageUrl:String = null):void{
+			
+			/** 
+			 * pageUrl need here by that reason = WSP-1855 "Problem with pageUrl in Firefox"
+			 * if client broswer is Firefox, default pageUrl not works, and we send from js special pageUrl 
+			 */
+			
+			var modelLocator:ModelLocator = flash_API.modelLocator;
+			var obj:Object = new Object();
+			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
+			obj.token = token;
+			obj.pageUrl = pageUrl;
+			obj.width = PhoneConfig.VIDEO_WIDTH;
+			obj.height = PhoneConfig.VIDEO_HEIGHT;
+			
+			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
+			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
+			
+		}		
+		
+		/*		
+		public function loginByTokenWithPageUrl(token:String = null, pageUrl:String):void{
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
 			obj.token = token;
 			obj.width = PhoneConfig.VIDEO_WIDTH;
-			obj.height = PhoneConfig.VIDEO_HEIGHT;			
+			obj.height = PhoneConfig.VIDEO_HEIGHT;	
+			obj.pageUrl = pageUrl;
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
-		}		
+		}
+		*/
 		
 		public function call(callee:String, visibleName:String, isVideoCall:Boolean, inviteParameters:Object):void{
 			Logger.info("PhoneServerProxy.call()");
@@ -218,6 +242,5 @@ package com.flashphoner.api
 			nc.call("sendInfo", responder, infoObject);
 		}
 		
-
 	}
 }

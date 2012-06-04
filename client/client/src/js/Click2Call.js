@@ -113,9 +113,15 @@ $(document).ready(function() {
 
 
 function loginByToken(token) {
-    trace("loginByToken", token);
+    trace("loginByToken", window.location, token);
     $('#callState').html('...Calling...');
-    var result = flashphoner.loginByToken(token);
+    
+    if (navigator.userAgent.indexOf("Firefox") != -1) {
+      var pageUrl = window.location.toString();
+      trace ("Client browser is Firefox");
+    }
+    
+    var result = flashphoner.loginByToken(token, pageUrl);
 }
 
 function getInfoAboutMe() {
