@@ -55,7 +55,6 @@ package com.flashphoner.api
 			this.flash_API = flash_API;
 			this.responder = responder;
 			nc = new NetConnection();
-			nc.objectEncoding = flash.net.ObjectEncoding.AMF0;
 			nc.client = new PhoneCallback(flash_API);
 			phoneSpeaker = new PhoneSpeaker(nc,flash_API);
 		}
