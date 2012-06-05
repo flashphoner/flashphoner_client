@@ -115,8 +115,28 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         String swfUrl = obj2.getString("swfUrl");
         String pageUrl = obj2.getString("pageUrl");
+
+        /** ------------------------------------------------
+         * WSP-1855 - Problem with pageUrl + Firefox
+         * If browser = Firefox, then pageUrlFromJS != 0 and we need use it
+         * because default pageUrl not works in Firefox
+         */
+
+        AMFDataObj obj3 = params.getObject(3);
+        String pageUrlFromJS = obj3.getString("pageUrl");
+
+        log.info("pageUrlFromJS != null = " + (pageUrlFromJS != null));
+        log.info("!pageUrlFromJS.equals('') = " + !pageUrlFromJS.equals(""));
+        log.info("!pageUrlFromJS.equals('null') = " + (!pageUrlFromJS.equals("null")));
+
+        if (pageUrlFromJS != null && !pageUrlFromJS.equals("") && !pageUrlFromJS.equals("null")) {
+            pageUrl = pageUrlFromJS;
+            log.info("Client browser is Firefox, pageUrl from JS = " + pageUrlFromJS);
+        }
+        // ------------------------------------------------
+
         String allowDomainsString = ClientConfig.getInstance().getProperty("allow_domains");
-        log.info("swfUrl: {} pageUrl: {} allowDomainsString: {}", new Object[]{swfUrl, pageUrl, allowDomainsString});
+        log.info("swfUrl: {}, pageUrl: {}, allowDomainsString: {}", new Object[]{swfUrl, pageUrl, allowDomainsString});
 
         if (allowDomainsString != null && !"".equals(allowDomainsString)) {
             String[] allowDomains = allowDomainsString.split(",");
