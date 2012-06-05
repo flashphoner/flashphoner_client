@@ -23,12 +23,12 @@ package com.flashphoner.api.data
 		/**
 		 * Url to connect Wowza Media Server
 		 **/
-		public static var SERVER_URL:String = "rtmp://87.226.225.50:1935";
+		public static var SERVER_URL:String = "";
 		
 		/**
 		 * Name of application in Wowza Media Server
 		 **/
-		public static var APP_NAME:String ="flashphoner_app";
+		public static var APP_NAME:String ="phone_app";
 		
 		/**
 		 * Width of outgoing video
@@ -64,6 +64,11 @@ package com.flashphoner.api.data
 		 * Is use enhansed mic for echo supression (true/false) 
 		 **/
 		public static var USE_ENHANCED_MIC:Boolean = true;
+		
+		/**
+		 * Always use enhanced mic, regardless of Player version or locale
+		 **/
+		public static var FORCE_ENHANCED_MIC:Boolean = false;
 	
 		/**
 		 * Current version of Flashphoner client
@@ -76,6 +81,18 @@ package com.flashphoner.api.data
 		public static var VERSION_OF_SERVER:String = "1.0.5.X";
 		
 		public static var AUDIO_CODEC:String = "speex";
+		
+		public static var KEEP_ALIVE:Boolean = false;
+		
+		public static var KEEP_ALIVE_INTERVAL:int = 1000;
+		
+		public static var KEEP_ALIVE_TIMEOUT:int = 5000;
+		
+		public static var LOG_SEVERITY:String = "INFO";
+		
+		public static var MAJOR_PLAYER_VERSION:int = 11;
+		
+		public static var AVOID_FLV2H264_TRANSCODING:Boolean = false;
 		
 		/**
 		 * Current version of Flashphoner product

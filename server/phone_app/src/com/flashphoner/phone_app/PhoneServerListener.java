@@ -13,9 +13,10 @@ This code and accompanying materials also available under LGPL and MPL license f
 package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.rtmp.Config;
-import com.flashphoner.sdk.softphone.Logger;
 import com.wowza.wms.server.IServer;
 import com.wowza.wms.server.IServerNotify;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,6 +28,8 @@ import java.util.Date;
  */
 public class PhoneServerListener implements IServerNotify {
 
+    private Logger log = LoggerFactory.getLogger(PhoneServerListener.class);
+
     public void onServerCreate(IServer server) {
     }
 
@@ -35,12 +38,15 @@ public class PhoneServerListener implements IServerNotify {
 
             Config.getInstance();
 
-            Logger.logger.info(4, "Initializing flashphoner properties: " + Config.getInstance().getProperties());
+            String stringProps = Config.getInstance().getProperties().toString();
+            // \033[32m - log text will green, \033[0m - log test will has default color
+            log.info("Initializing flashphoner properties: " + stringProps.replace("=","=\033[32m").replace(", ", "\033[0m, ").replace("}", "\033[0m}"));
 
-            Logger.logger.info(4, "Flashphoner build: " + Config.BUILD + " deployed.");
+            // Deprecated, not used.
+            //Logger.logger.info(4, "Flashphoner build: " + Config.BUILD + " deployed.");
 
         } catch (Throwable e) {
-            Logger.logger.error(e);
+            log.error("Can not complete onServerInit operation",e);
         }
 
     }

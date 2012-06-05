@@ -32,6 +32,12 @@ package com.flashphoner.api
 		public static const STATE_BUSY:String = "BUSY";
 		public static const STATE_SESSION_PROGRESS:String = "SESSION_PROGRESS";
 		
+
+		/**
+		 * Video state of the call (sendrecv / recvonly etc.)
+		 **/
+		public var state_video:String;  
+		
 		/**
 		 * Identifier of call
 		 **/
@@ -94,7 +100,7 @@ package com.flashphoner.api
 		 **/
 		public var incoming:Boolean = false;
 		/**
-		 * Flasg on video call
+		 * Flag on video call
 		 **/
 		public var isVideoCall:Boolean = false;
 		

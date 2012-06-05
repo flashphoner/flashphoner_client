@@ -29,7 +29,12 @@ public class HangupTimerTask extends TimerTask {
 
     public void run() {
         try {
-            rtmpClient.getSoftphone().hangupAll();
+            /** We not use HangupTimerTask anymore, so i commented that
+             *
+             * rtmpClient.getSoftphone().hangupAll();
+             *
+             */
+
         } catch (Throwable e) {
             e.printStackTrace();
         }

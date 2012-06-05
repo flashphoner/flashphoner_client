@@ -18,8 +18,9 @@
         <property name="install_dir" value="../../install"/>
         <property name="classDir" value="${build_dir}/classes"/>
         <property name="javadoc_dir" value="${install_dir}/server-side-api"/>
+	<property name="javac_target" value="1.6"/>
 
-        <property name="classpath" value=".;${lib_dir}/log4j/log4j-1.2.14.jar;${lib_dir}/wowza/wms-server.jar;${lib_dir}/wowza/wms-stream-live.jar;${lib_dir}/wowza/wms-stream-publish.jar;${lib_dir}/flashphoner/jain-sip.jar;${lib_dir}/flashphoner/tbs-flashphoner.jar"/>
+        <property name="classpath" value=".;${lib_dir}/log4j/log4j-1.2.14.jar;${lib_dir}/wowza/wms-server.jar;${lib_dir}/wowza/wms-stream-live.jar;${lib_dir}/wowza/wms-stream-publish.jar;${lib_dir}/flashphoner/jain-sip.jar;${lib_dir}/flashphoner/tbs-flashphoner.jar;${lib_dir}/flashphoner/slf4j-api-1.6.4.jar"/>
 
         <property name="product-app-jar" value="tbs-phone-app.jar"/>
 
@@ -77,7 +78,7 @@
     <!-- compile -->
     <target name="compile" depends="init">
         
-        <javac srcdir="${phone_app_dir}/src" classpath="${classpath}" destdir="${classDir}"/>
+        <javac target="${javac_target}" srcdir="${phone_app_dir}/src" classpath="${classpath}" destdir="${classDir}"/>
 
     </target>
 
@@ -89,6 +90,13 @@
                 <include name="com/flashphoner/phone_app/**"/>
             </fileset>
         </jar>
+
+        <jar jarfile="${build_dir}/tbs-flashphoner-loadstat.jar">
+            <fileset dir="${classDir}">
+                <include name="com/flashphoner/loadstat/**"/>
+            </fileset>
+        </jar>
+
     </target>
 
 

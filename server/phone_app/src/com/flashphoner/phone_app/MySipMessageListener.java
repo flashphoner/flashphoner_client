@@ -13,7 +13,6 @@ This code and accompanying materials also available under LGPL and MPL license f
 package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.sip.ISipMessageListener;
-import com.flashphoner.sdk.softphone.Logger;
 import gov.nist.javax.sip.message.SIPMessage;
 
 /**
@@ -23,6 +22,6 @@ import gov.nist.javax.sip.message.SIPMessage;
 public class MySipMessageListener implements ISipMessageListener {
 
     public void processMessage(SIPMessage sipMessage) {
-        Logger.logger.info(4, "Message:\n" + sipMessage.toString());
+        
     }
 }

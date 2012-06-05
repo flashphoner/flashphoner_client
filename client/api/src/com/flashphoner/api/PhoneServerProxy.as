@@ -27,6 +27,7 @@ package com.flashphoner.api
 	import flash.net.SharedObject;
 	import flash.system.Security;
 	import flash.system.SecurityPanel;
+	import flash.utils.Timer;
 	import flash.utils.setTimeout;
 	
 	import mx.controls.Alert;
@@ -50,13 +51,19 @@ package com.flashphoner.api
 		
 		private var flash_API:Flash_API;
 		
+		private var keepAliveTimer:Timer;
+		
+		private var keepAliveTimeoutTimer:Timer;
+		
+		
 		public function PhoneServerProxy(responder:Responder,flash_API:Flash_API)
 		{		
 			this.flash_API = flash_API;
 			this.responder = responder;
 			nc = new NetConnection();
 			nc.client = new PhoneCallback(flash_API);
-			phoneSpeaker = new PhoneSpeaker(nc,flash_API);
+			phoneSpeaker = new PhoneSpeaker(nc,flash_API);	
+			
 		}
 		
 		public function login(loginObject:Object):int{
@@ -93,22 +100,46 @@ package com.flashphoner.api
 			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
 			obj.visibleName = modelLocator.visibleName;
 			obj.qValue = qValue;
+						
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);	
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 			return 0;			
 		}
 
 		
-		public function loginByToken(token:String = null):void{
+		public function loginByToken(token:String = null, pageUrl:String = null):void{
+			
+			/** 
+			 * pageUrl need here by that reason = WSP-1855 "Problem with pageUrl in Firefox"
+			 * if client broswer is Firefox, default pageUrl not works, and we send from js special pageUrl 
+			 */
+			
+			var modelLocator:ModelLocator = flash_API.modelLocator;
+			var obj:Object = new Object();
+			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
+			obj.token = token;
+			obj.pageUrl = pageUrl;
+			obj.width = PhoneConfig.VIDEO_WIDTH;
+			obj.height = PhoneConfig.VIDEO_HEIGHT;
+			
+			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
+			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
+			
+		}		
+		
+		/*		
+		public function loginByTokenWithPageUrl(token:String = null, pageUrl:String):void{
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
 			obj.token = token;
 			obj.width = PhoneConfig.VIDEO_WIDTH;
-			obj.height = PhoneConfig.VIDEO_HEIGHT;			
+			obj.height = PhoneConfig.VIDEO_HEIGHT;	
+			obj.pageUrl = pageUrl;
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
-		}		
+		}
+		*/
 		
 		public function call(callee:String, visibleName:String, isVideoCall:Boolean, inviteParameters:Object):void{
 			Logger.info("PhoneServerProxy.call()");
@@ -125,34 +156,70 @@ package com.flashphoner.api
 			nc.close();
 		}
 		
+		public function initKeepAlive():void{
+			Logger.info("initKeepAlive");	
+			keepAliveTimer = new Timer(PhoneConfig.KEEP_ALIVE_INTERVAL,1);
+			keepAliveTimer.addEventListener(TimerEvent.TIMER_COMPLETE,fireKeepAlive);
+			
+			keepAliveTimeoutTimer = new Timer(PhoneConfig.KEEP_ALIVE_TIMEOUT,1);
+			keepAliveTimeoutTimer.addEventListener(TimerEvent.TIMER_COMPLETE,fireKeepAliveTimeout);
+			Logger.info("keepAliveTimeoutTimer: "+PhoneConfig.KEEP_ALIVE_INTERVAL+" keepAliveTimeoutTimer: "+PhoneConfig.KEEP_ALIVE_TIMEOUT);
+		}
+		
+		public function startKeepAlive():void{			
+			Logger.debug("startKeepAlive "+new Date());
+			keepAliveTimer.start();			
+		}
+		
+		public function fireKeepAlive(event:TimerEvent):void{
+			Logger.debug("fireKeepAlive "+new Date());			
+			nc.call("keepAlive",new Responder(keepAliveResponse));
+			keepAliveTimeoutTimer.start();
+		}
+		
+		public function keepAliveResponse(result:int):void{
+			Logger.debug("keepAliveResponse: "+result);
+			keepAliveTimeoutTimer.stop();			
+			startKeepAlive();
+		}
+		
+		public function fireKeepAliveTimeout(event:TimerEvent):void{
+			Logger.info("fireKeepAliveTimeout. Close connection by keep alive timeout: "+PhoneConfig.KEEP_ALIVE_TIMEOUT);			
+			nc.close();			
+		}
+		
 		public function netStatusHandler(event : NetStatusEvent) : void
 		{			
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			if(event.info.code == "NetConnection.Connect.Success")
 			{
 				Logger.info("NetConnection.Connect.Success");
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 					apiNotify.notifyConnected();
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.CONNECTED,flash_API));
+				if (PhoneConfig.KEEP_ALIVE){
+					initKeepAlive();
+					startKeepAlive();
+				}
 								
-			}else if(event.info.code == "NetConnection.Connect.Failed")
+			} else if(event.info.code == "NetConnection.Connect.Failed")
 			{
 				Logger.info("NetConnection.Connect.Failed");
 				flash_API.dropRegisteredTimer();
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 					apiNotify.notifyError(ErrorCodes.CONNECTION_ERROR);
 				}
 				hasDisconnectAttempt = false;
-			}else if (event.info.code == 'NetConnection.Connect.Rejected')
+			} else if (event.info.code == 'NetConnection.Connect.Rejected')
 			{
 				Logger.info("NetConnection.Connect.Rejected");
-				Alert.show("Too many users.\nPlease try again later.");
+				Alert.show("Connect rejected,\n permission to server denied.");
 				hasDisconnectAttempt = false;
-			}else if (event.info.code == 'NetConnection.Connect.Closed')
+			} else if (event.info.code == 'NetConnection.Connect.Closed')
 			{				
 				Logger.info("NetConnection.Connect.Closed");
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 					apiNotify.notifyCloseConnection();
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.DISCONNECT,flash_API));
@@ -170,6 +237,9 @@ package com.flashphoner.api
 			nc.call("sendInstantMessage",responder,instantMessageObj);
 		}
 		
-
+		public function sendInfo(infoObject:Object):void{
+			nc.call("sendInfo", responder, infoObject);
+		}
+		
 	}
 }
