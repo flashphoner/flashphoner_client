@@ -70,7 +70,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 				flash_API.setCookie("authName",authName.text);
 				flash_API.setCookie("pwd",password.text);
 				flash_API.setCookie("domain",domain.text);
-				flash_API.setCookie("ouboundProxy",outboundProxy.text);
+				flash_API.setCookie("outboundProxy",outboundProxy.text);
 				flash_API.setCookie("port",port.text);
 				
 			}			
