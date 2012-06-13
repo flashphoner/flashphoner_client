@@ -81,9 +81,11 @@ package com.flashphoner.api
 			
 			if (event.type ==CallEvent.OUT){
 				if (!call.isMSRP && flashAPI.callsSize() == 1){
-					Logger.info("CallCommand outgoing ringing sound ...");					
-					SoundControl.playOutRingSound();
-					flashAPI.play(call);
+					Logger.info("CallCommand outgoing ringing sound ... flashAPI.phoneServerProxy.phoneSpeaker.playing: "+flashAPI.phoneServerProxy.phoneSpeaker.playing);					
+					if (!flashAPI.phoneServerProxy.phoneSpeaker.playing){
+						SoundControl.playOutRingSound();
+						flashAPI.play(call);
+					}
 				}
 			}
 			
