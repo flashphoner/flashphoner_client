@@ -125,13 +125,11 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         AMFDataObj obj3 = params.getObject(3);
         String pageUrlFromJS = obj3.getString("pageUrl");
 
-        log.info("pageUrlFromJS != null = " + (pageUrlFromJS != null));
-        log.info("!pageUrlFromJS.equals('') = " + !pageUrlFromJS.equals(""));
-        log.info("!pageUrlFromJS.equals('null') = " + (!pageUrlFromJS.equals("null")));
-
-        if (pageUrlFromJS != null && !pageUrlFromJS.equals("") && !pageUrlFromJS.equals("null")) {
-            pageUrl = pageUrlFromJS;
-            log.info("Client browser is Firefox, pageUrl from JS = " + pageUrlFromJS);
+        if (pageUrlFromJS != null) {
+            if (!pageUrlFromJS.equals("") && !pageUrlFromJS.equals("null")) {
+                pageUrl = pageUrlFromJS;
+                log.info("Client browser is Firefox, pageUrl from JS = " + pageUrlFromJS);
+            }
         }
         // ------------------------------------------------
 
