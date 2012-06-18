@@ -155,5 +155,9 @@ package com.flashphoner.phone
 			
 		}
 		
+		public function notifyXcapResponse(xcapResponse:String):void{
+			
+		}
+		
 	}
 }

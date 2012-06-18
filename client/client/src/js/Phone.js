@@ -342,6 +342,10 @@ function hangupManagedCall(){
 
 /* ------------------ Notify functions ----------------- */
 
+function notifyXcapResponse(xcapResponse){
+  trace("notifyXcapResponse\n"+xcapResponse);
+}
+
 function notifyAuthenticationSent(sipObject){
   trace("notifyAuthenticationSent");
   trace("sipObject: "+sipObject.type+" "+sipObject.message.method);
@@ -427,6 +431,7 @@ function notifyRegistered() {
 	//flashphoner.setProperty("local_audio_codec","speex16");
 	//flashphoner.setProperty("out_jitter_buffer_enabled","true");
 	//flashphoner.setSpeexQuality(8);
+	flashphoner.sendXcapRequest("http://proxy11.yes.my:9110/services/org.openmobilealliance.deferred-list/users/%username/deferred-list");
 	setTimeout("deferredCall()",3000);        
     }
 }

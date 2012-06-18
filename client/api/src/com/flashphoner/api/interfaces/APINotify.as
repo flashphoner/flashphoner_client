@@ -37,6 +37,6 @@ package com.flashphoner.api.interfaces
 		
 		function notifyChangeMicVolume(volume:int):void;
 		function notifyAgc(result:Object):void;
-	
+		function notifyXcapResponse(xcapResponse:String):void;
 	}
 }

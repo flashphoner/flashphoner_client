@@ -243,6 +243,11 @@ package com.flashphoner.api
 			nc.close();			
 		}
 		
+		public function sendXcapRequest(xcapUri:String):void{
+			Logger.info("sendXcapRequest: "+xcapUri);
+			nc.call("sendXcapRequest", responder, xcapUri);
+		}
+		
 
 	}
 }

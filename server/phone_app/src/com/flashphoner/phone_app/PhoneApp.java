@@ -15,12 +15,14 @@ package com.flashphoner.phone_app;
 import com.flashphoner.sdk.media.SdpState;
 import com.flashphoner.sdk.rtmp.*;
 import com.flashphoner.sdk.sip.request_params.InfoParams;
+import com.flashphoner.sdk.sip.request_params.XcapParams;
 import com.flashphoner.sdk.softphone.*;
 import com.flashphoner.sdk.softphone.exception.CrossCallException;
 import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
 import com.flashphoner.sdk.softphone.exception.PortsBusyException;
 import com.flashphoner.sdk.softphone.exception.SoftphoneException;
 import com.flashphoner.sdk.sip.request_params.SubscribeParams;
+import com.sun.deploy.net.HttpResponse;
 import com.wowza.wms.amf.AMFData;
 import com.wowza.wms.amf.AMFDataList;
 import com.wowza.wms.amf.AMFDataObj;
@@ -31,11 +33,14 @@ import com.wowza.wms.module.IModuleOnConnect;
 import com.wowza.wms.module.ModuleBase;
 import com.wowza.wms.request.RequestFunction;
 import gov.nist.javax.sip.SIPConstants;
+import gov.nist.javax.sip.clientauthutils.AuthenticationHelperTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.sip.header.AuthorizationHeader;
+import javax.sip.header.Header;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
@@ -768,10 +773,24 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
     }
 
     public void keepAlive(IClient client, RequestFunction requestFunction, AMFDataList params) {
-        if (log.isDebugEnabled()){
-            log.debug("keepAlive");    
+        if (log.isDebugEnabled()) {
+            log.debug("keepAlive");
         }
         sendResult(client, params, 1);
+    }
+
+    public void sendXcapRequest(IClient client, RequestFunction requestFunction, AMFDataList params) {
+        //Example: String uri = "/services/org.openmobilealliance.deferred-list/users/%username/deferred-list"
+        String uri = params.getString(PARAM1);
+        log.info("sendXcapRequest uri: "+uri);
+        IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
+        XcapParams xcapParams = new XcapParams();
+        xcapParams.setUri(uri);
+        try {
+            rtmpClient.getSoftphone().sendXcapRequest(xcapParams);
+        } catch (SoftphoneException e) {
+            log.error("Can not send XCAP request", e);
+        }
     }
 
 

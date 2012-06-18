@@ -228,5 +228,12 @@ package com.flashphoner.api
 			}	
 		}
 		
+		public function notifyXcapResponse(xcapResponse:String):void{
+			Logger.info("notifyXcapResponse:\n"+xcapResponse);
+			for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				apiNotify.notifyXcapResponse(xcapResponse);
+			}	
+		}
+		
 	}
 }

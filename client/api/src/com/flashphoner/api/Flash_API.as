@@ -121,6 +121,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("setProperty",setProperty);	
 			ExternalInterface.addCallback("setSpeexQuality",setSpeexQuality);
 			ExternalInterface.addCallback("setAgcPolicy",setAgcPolicy);
+			ExternalInterface.addCallback("sendXcapRequest",sendXcapRequest);
 			
 			
 			calls = new ArrayCollection();
@@ -722,6 +723,10 @@ package com.flashphoner.api
 		
 		public function setAgcPolicy(policy:String):void{
 			soundControl.setAgcPolicy(policy);
+		}
+		
+		public function sendXcapRequest(xcapUri:String):void{
+			this.phoneServerProxy.sendXcapRequest(xcapUri);
 		}
 
 	}

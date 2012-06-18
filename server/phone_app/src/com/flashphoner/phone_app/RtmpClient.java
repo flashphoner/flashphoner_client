@@ -282,4 +282,10 @@ public class RtmpClient extends AbstractRtmpClient {
     public void notifyAuthenticationSent(SipMessageObject sipMsg) {
         getClient().call("notifyAuthenticationSent", null, sipMsg.toAMFObj());
     }
+
+    @Override
+    public void notifyXcapResponse(String xcapResponse) {
+        log.info("notifyXcapResponse:\n" + xcapResponse);
+        getClient().call("notifyXcapResponse", null, xcapResponse);
+    }
 }

@@ -96,5 +96,9 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyAuthenticationSent", _sipObject);
 		}
 		
+		public function notifyXcapResponse(xcapResponse:String):void{
+			ExternalInterface.call("notifyXcapResponse", xcapResponse);
+		}
+		
 	}
 }

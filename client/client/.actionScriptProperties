@@ -10,6 +10,7 @@
     <sourceAttachmentPath/>
   </compiler>
   <applications>
+    <application path="test_amf.mxml"/>
     <application path="phone.mxml"/>
     <application path="flashphoner_js_api.mxml"/>
     <application path="test_agc.mxml"/>
