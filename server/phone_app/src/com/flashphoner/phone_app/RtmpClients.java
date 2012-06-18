@@ -54,7 +54,7 @@ public class RtmpClients implements IRtmpClientsCollection {
      *
      * @return IRtmpClientsCollection
      */
-    public static IRtmpClientsCollection getInstance() {
+    public static synchronized IRtmpClientsCollection getInstance() {
         if (rtmpClientsCollection == null) {
             rtmpClientsCollection = new RtmpClients();
         }
