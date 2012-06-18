@@ -33,7 +33,6 @@ import com.wowza.wms.module.IModuleOnConnect;
 import com.wowza.wms.module.ModuleBase;
 import com.wowza.wms.request.RequestFunction;
 import gov.nist.javax.sip.SIPConstants;
-import gov.nist.javax.sip.clientauthutils.AuthenticationHelperTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
