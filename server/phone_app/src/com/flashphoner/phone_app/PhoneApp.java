@@ -22,7 +22,6 @@ import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
 import com.flashphoner.sdk.softphone.exception.PortsBusyException;
 import com.flashphoner.sdk.softphone.exception.SoftphoneException;
 import com.flashphoner.sdk.sip.request_params.SubscribeParams;
-import com.sun.deploy.net.HttpResponse;
 import com.wowza.wms.amf.AMFData;
 import com.wowza.wms.amf.AMFDataList;
 import com.wowza.wms.amf.AMFDataObj;
@@ -38,8 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.sip.header.AuthorizationHeader;
-import javax.sip.header.Header;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
