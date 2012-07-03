@@ -242,5 +242,26 @@ package com.flashphoner.api
 			nc.call("sendInfo", responder, infoObject);
 		}
 		
+		/**
+		 * Set property to RtmpClientConfig dynamically.
+		 * Basicly created for setting codecs dynamically before 
+		 * making the call. 
+		 * WSP-1869
+		 * */
+
+		public function setProperty(key:String,value:String):void{
+
+			var propertyObj:Object = new Object();
+			propertyObj.key = key;
+			propertyObj.value = value;
+			
+			nc.call("setProperty", responder, propertyObj);
+			
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				apiNotify.addLogMessage("-- setProperty was called to server --");
+			}
+			
+		}
+		
 	}
 }

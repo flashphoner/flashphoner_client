@@ -256,6 +256,12 @@ function getVersion() {
     trace("getVersion");
     return flashphoner.getVersion();
 }
+
+// WSP-1869
+function setProperty(key, value) {
+    trace("setProperty", key, value);
+    flashphoner.setProperty(key, value);
+}
 /* ------------------ Notify functions ----------------- */
 
 function addLogMessage(message) {
@@ -1054,6 +1060,14 @@ $(function() {
       }
 		});
 
-
+    //WSP-1869
+    $("#setSpeex").click(function() {
+      setProperty("force_local_audio_codec", "speex16");
+    });
+    
+    //WSP-1869
+    $("#setG711").click(function() {
+      setProperty("force_local_audio_codec", "alaw");
+    });
 
 });

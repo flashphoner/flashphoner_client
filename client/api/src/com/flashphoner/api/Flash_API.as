@@ -109,6 +109,10 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("getVersion",getVersion);
 			ExternalInterface.addCallback("sendInfo",sendInfo);
 			ExternalInterface.addCallback("setSpeexQuality",setSpeexQuality);
+
+			// WSP-1869
+			ExternalInterface.addCallback("setProperty",setProperty);
+			
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -620,6 +624,16 @@ package com.flashphoner.api
 		
 		public function setSpeexQuality(quality:int):void{
 			soundControl.setSpeexQuality(quality);
+		}
+		
+		/**
+		 * Set property to RtmpClientConfig dynamically.
+		 * Basicly created for setting codecs dynamically before 
+		 * making the call. 
+		 * WSP-1869
+		 * */
+		public function setProperty(key:String,value:String):void{
+			this.phoneServerProxy.setProperty(key, value);
 		}
 		
 
