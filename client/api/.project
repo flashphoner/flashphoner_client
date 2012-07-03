@@ -19,7 +19,7 @@
 		<link>
 			<name>bin-debug</name>
 			<type>2</type>
-			<locationURI>DOCUMENTS/libs</locationURI>
+			<location>D:/Projects/flashphoner_client_master/client/libs</location>
 		</link>
 	</linkedResources>
 </projectDescription>
