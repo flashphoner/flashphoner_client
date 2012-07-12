@@ -79,7 +79,7 @@ package com.flashphoner.api
 				/* outStream.publish(login+"_"+flashCall.id);
 				WSP-1703 - Removed "login_" from stream name. No need now.
 				*/
-				outStream.publish(flashCall.id);
+				outStream.publish((flashCall.incoming ? "0":"1") + "_" + flashCall.id);
 			}					
 		}
 		
