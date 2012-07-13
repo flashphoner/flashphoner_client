@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <project name="flashphoner_client" default="linux" basedir=".">
     <property name="DEPLOY_DIR" value="../output"/>
     <property file="./build.properties" />
@@ -100,6 +100,15 @@
     	<copy todir="${DEPLOY_DIR}/js">        
 	    <fileset dir="${basedir}/src/js"/>
         </copy>
+        
+        <!-- Copy all compiled result to release folder-->
+
+        <mkdir dir="${RELEASE_DIR}/Flashphoner-client-1.0.X"/>
+
+        <copy todir="${RELEASE_DIR}/Flashphoner-client-1.0.X">
+            <fileset dir="${DEPLOY_DIR}"/>
+        </copy>
+
 
     </target>
 
