@@ -4,9 +4,9 @@
 cd $CURRENT_DIR
 
 echo "" > log
-check_root_access
-detect_java
-detect_ant
+# check_root_access
+# detect_java
+# detect_ant
 
 echo "Start clients build..."
 build_client "$CURRENT_DIR/../"

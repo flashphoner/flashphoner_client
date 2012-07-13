@@ -103,9 +103,9 @@
         
         <!-- Copy all compiled result to release folder-->
 
-        <mkdir dir="${RELEASE_DIR}/Flashphoner-client-2.0.X"/>
+        <mkdir dir="${RELEASE_DIR}/FlashphonerMS-client-2.0.X"/>
 
-        <copy todir="${RELEASE_DIR}/Flashphoner-client-2.0.X">
+        <copy todir="${RELEASE_DIR}/FlashphonerMS-client-2.0.X">
             <fileset dir="${DEPLOY_DIR}"/>
         </copy>
 
