@@ -506,7 +506,16 @@ package com.flashphoner.api
 		 * @param name name of camera
 		 **/		
 		public function setCamera(name:String):void{
+			//videoControl.changeCamera(Camera.getCamera(name));
+			
+			// WSP-1933
+			var camera:Camera = Camera.getCamera(name);
 			videoControl.changeCamera(Camera.getCamera(name));
+			var call:Call = getCurrentCall();
+			if (call != null){
+				call.setNewCamera(camera);
+			}
+			
 		}
 		
 		/**

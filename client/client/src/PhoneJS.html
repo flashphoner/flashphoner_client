@@ -42,7 +42,6 @@
       
       <div id="controlPanel">
         <!--
-        <div class="iconButton" id="settingsButton"></div>
         <div class="iconButton" id="cameraButtonInCallee"></div>
         -->
         <div id="micBack"><div id="micSlider"></div></div>
@@ -51,6 +50,7 @@
         <div><div class="iconButton" id="micButton"></div></div>
         <div><div class="iconButton" id="soundButton"></div></div>
         <div><div class="iconButton" id="cameraButton"></div></div>
+		<div><div class="iconButton" id="settingsButton"></div></div>
       
 
         <div id="loginMainButton" class="button">Log in</div>
@@ -206,6 +206,17 @@
 <div class="button" id="setSpeex">Speex</div> <br><br><br>
 <div class="button" id="setG711">G711</div> <br><br><br>
 --> 
+
+<div id="settingsView" class="ui-draggable">
+	
+	<div class="bar">&nbsp;&nbsp;Settings</div>    
+	<img id="settingsMicImage" src="assets/mic.png" />
+	<img id="settingsCamImage" src="assets/camera.png" />
+	<select id="micSelector"><option value="1">Choose Microphone</option></select>
+  	<select id="camSelector"><option value="1">Choose Camera</option></select>
+	<div class="button dialButton" id="settingsOkButton">Ok</div>
+	
+</div>
 
 
 

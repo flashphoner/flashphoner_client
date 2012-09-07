@@ -982,7 +982,7 @@ $(function() {
     //enable drag and resize objects
     $("#loginDiv").draggable({handle: '.bar', stack:"#loginDiv"});
     $("#incomingDiv").draggable({handle: '.bar', stack:"#incomingDiv"});
-    $("#settingsDiv").draggable({handle: '.bar', stack:"#settingsDiv"});
+    $("#settingsView").draggable({handle: '.bar', stack:"#settingsView"});
     $("#transfer").draggable({handle: '.bar', stack:"#transfer"});
     $("#chatDiv").draggable({handle: '.bar', stack:"#chatDiv"});
     $("#video_requestUnmuteDiv").draggable({handle: '.bar', stack:"#video_requestUnmuteDiv"});
@@ -1068,6 +1068,53 @@ $(function() {
     //WSP-1869
     $("#setG711").click(function() {
       setProperty("force_local_audio_codec", "alaw");
+    });
+	
+		    // Settings button button opens settings view  
+    $("#settingsButton").click(function() {
+      if (!$(this).hasClass('pressed')) {
+        
+        $("#settingsView").show();
+        
+        var micList = flashphoner.getMicropones();
+        var camList = flashphoner.getCameras();
+ 
+        //clear it each time, else we append it more and more... 
+        $("#micSelector").html("");
+        $("#camSelector").html("");
+        
+		$("#micSelector").append('<option value="Select microphone">Select microphone</option>');
+		$("#camSelector").append('<option value="Select camera">Select camera</option>');
+		
+        for (var i = 0; i < micList.length; i++) {
+          $("#micSelector").append('<option value="' + micList[i] + '">' + micList[i] + '</option>');
+        }
+
+        // we use here index instead of name because AS getcamera can only use indexes
+        for (var i = 0; i < camList.length; i++) {
+          $("#camSelector").append('<option value="' + i + '">' + camList[i] + '</option>');
+        }
+        
+      } else {
+        $("#settingsView").hide();
+      }
+    }); 
+    
+
+    $("#micSelector").change(function() {
+      flashphoner.setMicrophone($(this).val());
+      trace('Microphone changed to ', $(this).val());
+    });
+
+    $("#camSelector").change(function() {
+      flashphoner.setCamera($(this).val());
+	  viewVideo();
+      trace('Camera changed to ', $(this).val());
+    });
+    
+    $("#settingsOkButton").click(function() {
+      $("#settingsView").hide();
+      $("#settingsButton").removeClass("pressed");
     });
 
 });

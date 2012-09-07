@@ -28,7 +28,7 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 }
 
 /* -------- Backgrounds ------- */
-#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, .login_link, #transfer, #incomingDiv, #newChat {
+#settingsView, #loginDiv, #infoDiv, #connectingDiv, .login_link, #transfer, #incomingDiv, #newChat {
 	background: #fff;
 }
 #controlPanel, .bar, .videoDiv, #chatDiv, #tabul, .button {
@@ -42,7 +42,7 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 #incomingDiv, 
 #infoDiv, 
 #connectingDiv, 
-#settingsDiv,
+#settingsView,
 #versionOfProduct, 
 #controlPanel, 
 .closeButton, 
@@ -50,7 +50,6 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 .holdButton,
 .holdImage,
 .bar,
-#settingsButton,
 #settingsButtonInCallView,
 #answerButton, 
 #hangupButton,
@@ -71,7 +70,7 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 	position: absolute;
 }
 /* ---------- Border ------------ */
-#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, #transfer, #incomingDiv, #video_requestUnmuteDiv, #controlPanel, #chatDiv {
+#settingsView, #loginDiv, #infoDiv, #connectingDiv, #transfer, #incomingDiv, #video_requestUnmuteDiv, #controlPanel, #chatDiv {
 	border-width: 2px 5px 5px\0/; /*only for ie8*/
 	border-style: solid\0/; /*only for ie8*/
 	border-color: #ddd\0/; /*only for ie8*/
@@ -81,7 +80,7 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 	border-width: 5px\0/; /*only for ie8*/
 }
 /* ---------- Shadow ----------*/ 
-#settingsDiv, #transfer, #infoDiv, #loginDiv, #connectingDiv, #video_requestUnmuteDiv, #incomingDiv, #chatDiv
+#settingsView, #transfer, #infoDiv, #loginDiv, #connectingDiv, #video_requestUnmuteDiv, #incomingDiv, #chatDiv
  {
   box-shadow: 0 0 10px rgba(0,0,0,0.35);
   -moz-box-shadow: 0 0 10px rgba(0,0,0,0.35);
@@ -213,7 +212,7 @@ input::-webkit-input-placeholder {
 	box-shadow: inset 0 1px 0 #fff;
 }
 /* ----------------------------------- */
-/* ------------- Settings ------------ */
+/* ------------- Settings ------------ 
 #settingsDiv {
 	top: 80px;
 	left: 5px;
@@ -232,6 +231,54 @@ input::-webkit-input-placeholder {
   top: 98px;
 	left: 5px;
 	background: url(../assets/mic_settings.png);
+}
+-------------------------------------- */
+
+/* ------------- Settings ------------ */
+
+#settingsView, #settingsOkButton, #micSelector, #camSelector,
+#settingsMicImage, #settingsCamImage {
+	position: absolute;
+}
+
+#settingsView {
+	top: 94px;
+	left: 8px;
+	height: 123px;
+	width: 230px;
+	padding-top: 20px;
+	display: none;
+}
+#settingsButton {
+	background: url(../assets/mic_settings_2.png) no-repeat center;
+	/*top: 19px;
+	left: 18px;
+	/*width: 140px;*/
+	opacity: 0.65;
+}
+#settingsOkButton{
+  top: 100px;
+  left: 72px;
+  width: 80px;
+}
+#micSelector{
+  top: 32px;
+  left: 45px;
+  width: 170px;
+}
+#camSelector{
+  top: 64px;
+  left: 45px;
+  width: 170px;
+}
+#settingsMicImage{
+  top: 35px;
+  left: 14px;
+}
+
+#settingsCamImage{
+  top: 67px;
+  left: 15px;
 }
 /* -------------------------------------- */
 
@@ -310,7 +357,7 @@ input::-webkit-input-placeholder {
   top: 0px;
   right: 0px; 
   font: 12px Arial;
-	width: 74px;
+	width: 50px;
 	height: 20px;
 	float: left;
 	text-align: right;

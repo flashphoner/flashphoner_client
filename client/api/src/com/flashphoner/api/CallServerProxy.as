@@ -131,5 +131,12 @@ package com.flashphoner.api
 		
 		private function onNetStatus(event : NetStatusEvent) : void{
 		}
+		
+		// WSP-1933
+		public function setNewCamera(camera:Camera):void{
+			if (outStream != null && PhoneConfig.VIDEO_ENABLED && sendVideo){
+				outStream.attachCamera(camera);
+			}
+		} 
 	}
 }
