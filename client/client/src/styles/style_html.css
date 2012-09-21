@@ -108,6 +108,7 @@ input::-webkit-input-placeholder {
 	width: 153px;
 	padding: 10px;
 	position: relative;
+	top: 21px; 
 }
 #versionOfProduct {
 	top: 134px;
@@ -784,7 +785,7 @@ div with zero size.
 #console {
 	top: 35px;
 	left: 250px;	
-	height: 300px;
+	height: 266px;
   width: 700px;
 	float: left;
 	background-color: #333;
