@@ -20,6 +20,7 @@ import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
 import com.flashphoner.sdk.softphone.exception.PortsBusyException;
 import com.flashphoner.sdk.softphone.exception.SoftphoneException;
 import com.wowza.wms.amf.AMFData;
+import com.wowza.wms.amf.AMFDataItem;
 import com.wowza.wms.amf.AMFDataList;
 import com.wowza.wms.amf.AMFDataObj;
 import com.wowza.wms.application.IApplicationInstance;
@@ -52,6 +53,16 @@ import java.util.Map;
 public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnApp, IRtmpClientsCollectionSupport {
 
     private static Logger log = LoggerFactory.getLogger(PhoneApp.class);
+
+    private static boolean ALLOW_THIRD_PARTY_CONNECTIONS = false;
+
+    static {
+        try {
+            ALLOW_THIRD_PARTY_CONNECTIONS = Boolean.parseBoolean(ClientConfig.getInstance().getProperty("allow_third_party_connections"));
+        } catch (Exception e) {
+        }
+        log.info("ALLOW_THIRD_PARTY_CONNECTIONS: " + ALLOW_THIRD_PARTY_CONNECTIONS);
+    }
 
     /**
      * Wowza application name. If your use own application name, you should change it here
@@ -98,6 +109,17 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         boolean loggedByToken = false;
         log.info("onConnect " + params);
 
+        if (ALLOW_THIRD_PARTY_CONNECTIONS) {
+            AMFData amfData = params.get(PARAM1);
+            if (amfData != null && amfData instanceof AMFDataItem) {
+                String value = amfData.getValue().toString();
+                log.info("THIRD_PARTY_CONNECTION value: " + value);
+                if ("THIRD_PARTY_CONNECTION".equals(value)) {
+                    client.acceptConnection();
+                    return;
+                }
+            }
+        }
 
         if (!isDefaultInstance(client)) {
             client.rejectConnection();

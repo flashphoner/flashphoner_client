@@ -12,6 +12,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 */
 package com.flashphoner.api
 {	
+	import com.flashphoner.Logger;
 	import com.flashphoner.api.data.ModelLocator;
 	import com.flashphoner.api.data.PhoneConfig;
 	
@@ -207,14 +208,22 @@ package com.flashphoner.api
 		 * Publish video and audio streams
 		 **/ 
 		internal function publish():void{
-			callServerProxy.publish(flash_API.modelLocator.login);
+			if (PhoneConfig.ALLOW_PUBLISH_STREAMS){
+				callServerProxy.publish(flash_API.modelLocator.login);
+			}else{
+				Logger.info("Stream publishing is not allowed. Can not publish stream.");
+			}
 		}
 		/**
 		 * @private
 		 * Unpublish video and audio streams
 		 **/ 
 		internal function unpublish():void{
-			callServerProxy.unpublish();
+			if (PhoneConfig.ALLOW_PUBLISH_STREAMS){
+				callServerProxy.unpublish();
+			}else{
+				Logger.info("Stream publishing is not allowed. Can not unpublish stream");
+			}			
 		}		
 		/**
 		 * @private

@@ -171,6 +171,13 @@ package com.flashphoner.api
 					}
 					Logger.info("AUDIO_CODEC: "+PhoneConfig.AUDIO_CODEC);
 					
+					var allowPublishStreams:String = xml.allow_publish_streams;
+					if (allowPublishStreams=="false"){
+						PhoneConfig.ALLOW_PUBLISH_STREAMS = false;
+					}
+					Logger.info("ALLOW_PUBLISH_STREAMS: "+PhoneConfig.ALLOW_PUBLISH_STREAMS);
+					
+					
 					if (xml.avoid_flv2h264_transcoding != null && xml.avoid_flv2h264_transcoding.toString() != ""){
 						PhoneConfig.AVOID_FLV2H264_TRANSCODING = (xml.avoid_flv2h264_transcoding == "true");
 					}

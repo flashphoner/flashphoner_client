@@ -94,6 +94,8 @@ package com.flashphoner.api.data
 		
 		public static var AVOID_FLV2H264_TRANSCODING:Boolean = false;
 		
+		public static var ALLOW_PUBLISH_STREAMS:Boolean = true;
+		
 		/**
 		 * Current version of Flashphoner product
 		 **/		
