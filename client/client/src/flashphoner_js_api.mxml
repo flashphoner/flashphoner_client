@@ -50,6 +50,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 				ExternalInterface.addCallback("viewVideo",viewVideo);
 				ExternalInterface.addCallback("viewAccessMessage",viewAccessMessage);
 				ExternalInterface.addCallback("changeRelationMyVideo",changeRelationMyVideo);
+				ExternalInterface.addCallback("openSettingsPanel",openSettingsPanel);
 				videoPartner.addEventListener(Event.RESIZE,onResize);
 				setTimeout(wait,500);
 			}

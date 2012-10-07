@@ -18,6 +18,7 @@ package com.flashphoner.api
 	
 	import flash.events.TimerEvent;
 	import flash.utils.Timer;
+	import flash.media.Camera;
 
 	/**
 	 * Class which contain data of call anf method for hangup,trasfer,hold.
@@ -43,10 +44,12 @@ package com.flashphoner.api
 		 * Identifier of call
 		 **/
 		public var id:String;
+		
 		/**
 		 * State of call (RING,HOLD,TALK,FINISH,BUSY,SESSION_PROGRESS)
 		 **/
 		public var state:String;	
+		
 		/**
 		 * Flag on execute hold operation
 		 * true - if user execute call.hold(true)
@@ -62,35 +65,43 @@ package com.flashphoner.api
 		 * Not initiator of the call
 		 **/
 		public var callee:String;
+		
 		/**
 		 * Initiator of the call
 		 **/
-		public var caller:String;		
+		public var caller:String;
+		
 		/**
 		 * Not initiators visible name of the call
 		 **/
 		public var visibleNameCallee:String;
+		
 		/**
 		 * Initiators visible name of the call
 		 **/
 		public var visibleNameCaller:String;
+		
 		/**
 		 * Player video format (CIF,QCIF)  
 		 **/
 		public var playerVideoHeight:int;
+				
 		
 		public var playerVideoWidth:int;
+		
 		/**
 		 * Streamer video format (CIF,QCIF)  
 		 **/
 		public var streamerVideoHeight:int;
 		
 		public var streamerVideoWidth:int;
+		
 		/**
 		 * Time of call  
 		 **/
 		public var timeOfCall:int = 0;
 		private var timer:Timer;
+		
 		/**
 		 * Another side logged user of call
 		 **/
@@ -100,6 +111,7 @@ package com.flashphoner.api
 		 * Flag on incomming call
 		 **/
 		public var incoming:Boolean = false;
+		
 		/**
 		 * Flag on video call
 		 **/
@@ -119,6 +131,8 @@ package com.flashphoner.api
 			this.flash_API = flash_API;
 			callServerProxy = new CallServerProxy(this,flash_API.phoneServerProxy.nc);
 		}
+		
+		
 		/**
 		 * Hangup this call
 		 **/
@@ -127,9 +141,10 @@ package com.flashphoner.api
 			callServerProxy.hangup();										
 			SoundControl.stopRingSound();
 		}
+		
 		/**
 		 * Change state of call (HOLD/TALK)
-		 */
+		 **/
 		public function setStatusHold(isHold:Boolean):void{
 			if (state == Call.STATE_TALK || state == Call.STATE_HOLD){
 				callServerProxy.hold(isHold);
@@ -257,6 +272,11 @@ package com.flashphoner.api
 		private function timerHandler(timeEvent:TimerEvent):void{
 			timeOfCall++;
 		}
+		
+		// WSP-1933
+		public function setNewCamera(camera:Camera):void{
+			callServerProxy.setNewCamera(camera);
+		}  
 		
 	}
 }

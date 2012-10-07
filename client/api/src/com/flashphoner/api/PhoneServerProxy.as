@@ -101,22 +101,46 @@ package com.flashphoner.api
 			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
 			obj.visibleName = modelLocator.visibleName;
 			obj.qValue = qValue;
+						
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);	
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 			return 0;			
 		}
 
 		
-		public function loginByToken(token:String = null):void{
+		public function loginByToken(token:String = null, pageUrl:String = null):void{
+			
+			/** 
+			 * pageUrl need here by that reason = WSP-1855 "Problem with pageUrl in Firefox"
+			 * if client broswer is Firefox, default pageUrl not works, and we send from js special pageUrl 
+			 */
+			
+			var modelLocator:ModelLocator = flash_API.modelLocator;
+			var obj:Object = new Object();
+			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
+			obj.token = token;
+			obj.pageUrl = pageUrl;
+			obj.width = PhoneConfig.VIDEO_WIDTH;
+			obj.height = PhoneConfig.VIDEO_HEIGHT;
+			
+			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
+			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
+			
+		}		
+		
+		/*		
+		public function loginByTokenWithPageUrl(token:String = null, pageUrl:String):void{
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
 			obj.token = token;
 			obj.width = PhoneConfig.VIDEO_WIDTH;
-			obj.height = PhoneConfig.VIDEO_HEIGHT;			
+			obj.height = PhoneConfig.VIDEO_HEIGHT;	
+			obj.pageUrl = pageUrl;
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
-		}		
+		}
+		*/
 		
 		public function call(callee:String, visibleName:String, isVideoCall:Boolean, inviteParameters:Object):void{
 			Logger.info("PhoneServerProxy.call()");
@@ -171,7 +195,7 @@ package com.flashphoner.api
 			if(event.info.code == "NetConnection.Connect.Success")
 			{
 				Logger.info("NetConnection.Connect.Success");
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 					apiNotify.notifyConnected();
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.CONNECTED,flash_API));
@@ -180,23 +204,23 @@ package com.flashphoner.api
 					startKeepAlive();
 				}
 								
-			}else if(event.info.code == "NetConnection.Connect.Failed")
+			} else if(event.info.code == "NetConnection.Connect.Failed")
 			{
 				Logger.info("NetConnection.Connect.Failed");
 				flash_API.dropRegisteredTimer();
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 					apiNotify.notifyError(ErrorCodes.CONNECTION_ERROR);
 				}
 				hasDisconnectAttempt = false;
-			}else if (event.info.code == 'NetConnection.Connect.Rejected')
+			} else if (event.info.code == 'NetConnection.Connect.Rejected')
 			{
 				Logger.info("NetConnection.Connect.Rejected");
-				Alert.show("Too many users.\nPlease try again later.");
+				Alert.show("Connect rejected,\n permission to server denied.");
 				hasDisconnectAttempt = false;
-			}else if (event.info.code == 'NetConnection.Connect.Closed')
+			} else if (event.info.code == 'NetConnection.Connect.Closed')
 			{				
 				Logger.info("NetConnection.Connect.Closed");
-				for each (var apiNotify:APINotify in flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 					apiNotify.notifyCloseConnection();
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.DISCONNECT,flash_API));
@@ -218,6 +242,26 @@ package com.flashphoner.api
 			nc.call("sendInfo", responder, infoObject);
 		}
 		
+		/**
+		 * Set property to RtmpClientConfig dynamically.
+		 * Basicly created for setting codecs dynamically before 
+		 * making the call. 
+		 * WSP-1869
+		 * */
 
+		public function setProperty(key:String,value:String):void{
+
+			var propertyObj:Object = new Object();
+			propertyObj.key = key;
+			propertyObj.value = value;
+			
+			nc.call("setProperty", responder, propertyObj);
+			
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				apiNotify.addLogMessage("-- setProperty was called to server --");
+			}
+			
+		}
+		
 	}
 }

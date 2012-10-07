@@ -35,12 +35,17 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import javax.net.ssl.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -133,8 +138,26 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         String swfUrl = obj2.getString("swfUrl");
         String pageUrl = obj2.getString("pageUrl");
+
+        /** ------------------------------------------------
+         * WSP-1855 - Problem with pageUrl + Firefox
+         * If browser = Firefox, then pageUrlFromJS != 0 and we need use it
+         * because default pageUrl not works in Firefox
+         */
+
+        AMFDataObj obj3 = params.getObject(3);
+        String pageUrlFromJS = obj3.getString("pageUrl");
+
+        if (pageUrlFromJS != null) {
+            if (!pageUrlFromJS.equals("") && !pageUrlFromJS.equals("null")) {
+                pageUrl = pageUrlFromJS;
+                log.info("Client browser is Firefox, pageUrl from JS = " + pageUrlFromJS);
+            }
+        }
+        // ------------------------------------------------
+
         String allowDomainsString = ClientConfig.getInstance().getProperty("allow_domains");
-        log.info("swfUrl: {} pageUrl: {} allowDomainsString: {}", new Object[]{swfUrl, pageUrl, allowDomainsString});
+        log.info("swfUrl: {}, pageUrl: {}, allowDomainsString: {}", new Object[]{swfUrl, pageUrl, allowDomainsString});
 
         if (allowDomainsString != null && !"".equals(allowDomainsString)) {
             String[] allowDomains = allowDomainsString.split(",");
@@ -220,17 +243,32 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             }
             URL url;
             StringBuilder response = new StringBuilder();
+
             try {
 
                 File file = new File(auto_login_url);
                 BufferedReader bufferedReader;
+                URLConnection conn;
+
                 if (file.exists()) {
                     bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
                 } else {
                     url = new URL(auto_login_url + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl=" + pageUrl);
-                    URLConnection conn = url.openConnection();
-                    bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
+                    // We need support of https too.
+                    if (auto_login_url.contains("https")) {
+                        /*
+                       Invoke method, where we override some verifiers to allow us use self-signed certificates.
+                       without that we will have errors in case of self-signed certificate.
+                        */
+                        fixForSelfSignedCertificate();
+                        log.debug("Do fix for self-signed certificates");
+                        conn = (HttpsURLConnection) url.openConnection();
+                    } else {
+                        conn = (HttpURLConnection) url.openConnection();
+                    }
+
+                    bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 }
 
                 String line;
@@ -316,7 +354,6 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         if (visibleName == null || "".equals(visibleName)) {
             visibleName = login;
         }
-
 
         RtmpClientConfig config = new RtmpClientConfig();
         config.setLogin(login);
@@ -509,7 +546,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             visibleName = rtmpClient.getRtmpClientConfig().getVisibleName();
         }
         if (callee == null || "".equals(callee)) {
-            rtmpClient.fail(ErrorCodes.USER_NOT_AVAILABLE, null);
+            rtmpClient.fail(ErrorCodes.CALLEE_NAME_IS_NULL, null);
             return;
         }
 
@@ -543,23 +580,44 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
     }
 
     private String[] getCalleeByToken(String token, String swfUrl, String pageUrl) {
-        String getCalleUrl = ClientConfig.getInstance().getProperty("get_callee_url");
-        if (getCalleUrl == null) {
-            log.error("ERROR - Property get_callee_url - '" + getCalleUrl + "' does not exits in flashphoner-client.properties");
+
+        String getCalleeUrl = ClientConfig.getInstance().getProperty("get_callee_url");
+
+        if (getCalleeUrl == null) {
+            log.error("ERROR - Property get_callee_url - '" + getCalleeUrl + "' does not exits in flashphoner-client.properties");
             return null;
         }
-        URL url;
 
+        URL url;
         StringBuilder response = new StringBuilder();
+
         try {
-            File file = new File(getCalleUrl);
+            File file = new File(getCalleeUrl);
             BufferedReader bufferedReader;
+            URLConnection conn;
+
             if (file.exists()) {
                 bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             } else {
-                url = new URL(getCalleUrl + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl=" + pageUrl);
-                URLConnection conn = url.openConnection();
-                // WSP-1667 - autologin not work. this paramteres imitate browswer request because some servers do not allow java make requests
+                url = new URL(getCalleeUrl + "?token=" + token + "&swfUrl=" + swfUrl + "&pageUrl=" + pageUrl);
+
+                // We need support of https too.
+                if (getCalleeUrl.contains("https")) {
+                    /*
+                     Invoke method, where we override some verifiers to allow us use self-signed certificates.
+                     without that we will have errors in case of self-signed certificate.
+                      */
+                    fixForSelfSignedCertificate();
+                    log.info("--- fixForSelfSignedCertificate ---");
+                    conn = (HttpsURLConnection) url.openConnection();
+                } else {
+                    conn = (HttpURLConnection) url.openConnection();
+                }
+
+                /*
+                WSP-1667 - auto-login not work.
+                This parameters imitate browser request, because some servers do not allow java make requests.
+                 */
                 conn.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)");
                 bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
             }
@@ -568,6 +626,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
             while ((line = bufferedReader.readLine()) != null) {
                 response.append(line);
             }
+
             bufferedReader.close();
             log.info("response from get_callee_url - " + response.toString());
 
@@ -590,11 +649,12 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
                 data[0] = temp;
             }
             return data;
+
         } catch (MalformedURLException e) {
-            log.error("ERROR - '" + getCalleUrl + "' is wrong;" + e);
+            log.error("ERROR - '" + getCalleeUrl + "' is wrong;" + e);
             return null;
         } catch (IOException e) {
-            log.error("ERROR - '" + getCalleUrl + "' is wrong;" + e);
+            log.error("ERROR - '" + getCalleeUrl + "' is wrong;" + e);
             return null;
         }
     }
@@ -734,6 +794,72 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
     public void keepAlive(IClient client, RequestFunction requestFunction, AMFDataList params) {
         log.debug("keepAlive");
         sendResult(client, params, 1);
+    }
+
+
+    /**
+     * That method override some methods, and allow us use even self-signed certificates
+     * from site where are placed account.xml and callee.xml.
+     * Else we would need add every new self-signed certificate to our JRE.
+     * To avoid this, we override some methods and avoid checking certificate for reliability.
+     * That is less secure but more convenient.
+     * Doing this, we mean that we will place account.xml and callee.xml only on our own sites.
+     * and we trust that certificate. We just want traffic be encrypted.
+     */
+
+    public static void fixForSelfSignedCertificate() {
+
+        TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                    }
+
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                    }
+
+                }
+        };
+
+        try {
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println("NoSuchAlgorithmException: " + e);
+        } catch (KeyManagementException e) {
+            System.out.println("KeyManagementException: " + e);
+        }
+
+        // Create all-trusting host name verifier
+        HostnameVerifier allHostsValid = new HostnameVerifier() {
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+        };
+        // Install the all-trusting host verifier
+        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+        /*
+        * end of the fix
+        */
+    }
+
+    // WSP-1869
+    public void setProperty(IClient client, RequestFunction requestFunction, AMFDataList params) {
+
+        IRtmpClient rtmpClient = getRtmpClients().findByClient(client);
+        AMFDataObj obj = params.getObject(PARAM1);
+        String key = obj.getString("key");
+        String value = obj.getString("value");
+
+        log.info("setProperty: key = " + key + ", value = " + value);
+        rtmpClient.getRtmpClientConfig().setProperty(key, value);
+
     }
 
 }

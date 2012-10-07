@@ -256,6 +256,12 @@ function getVersion() {
     trace("getVersion");
     return flashphoner.getVersion();
 }
+
+// WSP-1869
+function setProperty(key, value) {
+    trace("setProperty", key, value);
+    flashphoner.setProperty(key, value);
+}
 /* ------------------ Notify functions ----------------- */
 
 function addLogMessage(message) {
@@ -384,34 +390,54 @@ function notifyError(error) {
     trace("notifyError", error);
 
     if (error == CONNECTION_ERROR) {
-        openInfoView("Connection fail", 3000,30);
+        openInfoView("Can`t connect to server.", 3000, 30);
+        
     } else if (error == AUTHENTICATION_FAIL) {
-        openInfoView("Register fail", 3000,30);
+        openInfoView("Register fail, please check your SIP account details.", 3000, 30);
         window.setTimeout("logoff();", 3000);
+        
     } else if (error == USER_NOT_AVAILABLE) {
-        openInfoView("Callee not found!", 3000,30);
-    } else if (error == TOO_MANY_REGISTER_ATTEMPTS) {
-        openInfoView("Connection error", 3000,30);
+        openInfoView("User not available.", 3000, 30);
+        
+    /*  Deprecated error
+    
+        else if (error == TOO_MANY_REGISTER_ATTEMPTS) {
+        openInfoView("Connection error", 3000, 30);
         toLoggedOffState();
+       */ 
+       
     } else if (error == LICENSE_RESTRICTION) {
-        openInfoView("License restriction", 3000,30);
-	} else if (error==LICENSE_NOT_FOUND){
-		openInfoView("Please set the license key. You can get it here - www.flashphoner.com/license.", 5000,90);
+        openInfoView("You trying to connect too many users, or license is expired", 3000, 90);
+        
+	  } else if (error==LICENSE_NOT_FOUND){
+		    openInfoView("Please specify license in the flashphoner.properties (flashphoner.com/license)", 5000, 90);
+		
     } else if (error == INTERNAL_SIP_ERROR) {
-        openInfoView("Unknown error", 3000,30);
+        openInfoView("Unknown error. Please contact support.", 3000, 60);
+        
     } else if (error == REGISTER_EXPIRE) {
-        openInfoView("Check SIP account settings", 3000,30);
+        openInfoView("No response from VOIP server during 15 seconds.", 3000, 60);
+        
     } else if (error == SIP_PORTS_BUSY) {
-        openInfoView("All sip ports are busy", 3000,30);
+        openInfoView("SIP ports are busy. Please open SIP ports range (30000-31000 by default).", 3000, 90);
         connectingViewBeClosed = true;
         window.setTimeout("logoff();", 3000);
+        
     } else if (error == MEDIA_PORTS_BUSY) {
-        openInfoView("All media ports are busy", 3000,30);
+        openInfoView("Media ports are busy. Please open media ports range (31001-32000 by default).", 3000, 90);
+        
     } else if (error == WRONG_SIPPROVIDER_ADDRESS) {
-        openInfoView("Wrong sip provider address", 3000,30);
+        openInfoView("Wrong domain.", 3000, 30);
         connectingViewBeClosed = true;
         window.setTimeout("logoff();", 3000);
+        
+    } else if (error == CALLEE_NAME_IS_NULL) {
+        openInfoView("Callee name is empty.", 3000, 30);
+        
+    } else if (error == WRONG_FLASHPHONER_XML) {
+        openInfoView("Flashphoner.xml has errors. Please check it.", 3000, 60);
     }
+    
     closeConnectingView();
     toCallState();
 }
@@ -956,7 +982,7 @@ $(function() {
     //enable drag and resize objects
     $("#loginDiv").draggable({handle: '.bar', stack:"#loginDiv"});
     $("#incomingDiv").draggable({handle: '.bar', stack:"#incomingDiv"});
-    $("#settingsDiv").draggable({handle: '.bar', stack:"#settingsDiv"});
+    $("#settingsView").draggable({handle: '.bar', stack:"#settingsView"});
     $("#transfer").draggable({handle: '.bar', stack:"#transfer"});
     $("#chatDiv").draggable({handle: '.bar', stack:"#chatDiv"});
     $("#video_requestUnmuteDiv").draggable({handle: '.bar', stack:"#video_requestUnmuteDiv"});
@@ -1034,6 +1060,61 @@ $(function() {
       }
 		});
 
+    //WSP-1869
+    $("#setSpeex").click(function() {
+      setProperty("force_local_audio_codec", "speex16");
+    });
+    
+    //WSP-1869
+    $("#setG711").click(function() {
+      setProperty("force_local_audio_codec", "alaw");
+    });
+	
+		    // Settings button button opens settings view  
+    $("#settingsButton").click(function() {
+      if (!$(this).hasClass('pressed')) {
+        
+        $("#settingsView").show();
+        
+        var micList = flashphoner.getMicropones();
+        var camList = flashphoner.getCameras();
+ 
+        //clear it each time, else we append it more and more... 
+        $("#micSelector").html("");
+        $("#camSelector").html("");
+        
+		$("#micSelector").append('<option value="Select microphone">Select microphone</option>');
+		$("#camSelector").append('<option value="Select camera">Select camera</option>');
+		
+        for (var i = 0; i < micList.length; i++) {
+          $("#micSelector").append('<option value="' + micList[i] + '">' + micList[i] + '</option>');
+        }
 
+        // we use here index instead of name because AS getcamera can only use indexes
+        for (var i = 0; i < camList.length; i++) {
+          $("#camSelector").append('<option value="' + i + '">' + camList[i] + '</option>');
+        }
+        
+      } else {
+        $("#settingsView").hide();
+      }
+    }); 
+    
+
+    $("#micSelector").change(function() {
+      flashphoner.setMicrophone($(this).val());
+      trace('Microphone changed to ', $(this).val());
+    });
+
+    $("#camSelector").change(function() {
+      flashphoner.setCamera($(this).val());
+	  viewVideo();
+      trace('Camera changed to ', $(this).val());
+    });
+    
+    $("#settingsOkButton").click(function() {
+      $("#settingsView").hide();
+      $("#settingsButton").removeClass("pressed");
+    });
 
 });

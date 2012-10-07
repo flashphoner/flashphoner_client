@@ -48,7 +48,7 @@ package com.flashphoner.api
 		 * @private
 		 * Notifier added by addNotify()
 		 **/ 
-		internal var apiNotifys:ArrayCollection;		
+		public static var apiNotifys:ArrayCollection;		
 		/**
 		 * Data about logged user
 		 **/
@@ -109,6 +109,10 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("getVersion",getVersion);
 			ExternalInterface.addCallback("sendInfo",sendInfo);
 			ExternalInterface.addCallback("setSpeexQuality",setSpeexQuality);
+
+			// WSP-1869
+			ExternalInterface.addCallback("setProperty",setProperty);
+			
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -288,7 +292,7 @@ package com.flashphoner.api
 		 * @param apiNotify Object will be implemented APINotify
 		 **/
 		public function addAPINotify(apiNotify:APINotify):void{
-			this.apiNotifys.addItem(apiNotify);
+			Flash_API.apiNotifys.addItem(apiNotify);
 		}
 		/**
 		 * Get parameters from file 'flashphoner.xml'
@@ -324,10 +328,15 @@ package com.flashphoner.api
 		 * @param token Token for auth server
 		 * @param password Password for user
 		 **/		
-		public function loginByToken(token:String = null):void{
-			Logger.info("loginByToken: "+token);
+		public function loginByToken(token:String = null, pageUrl:String = null):void{
+			
+			/** 
+			 * pageUrl need here by that reason = WSP-1855 "Problem with pageUrl in Firefox"
+			 * if client broswer is Firefox, default pageUrl not works, and we send from js special pageUrl 
+			 */
+			Logger.info("loginByToken: " + token + ", pageUrl: " + pageUrl);
 			videoControl.init();
-			phoneServerProxy.loginByToken(token);
+			phoneServerProxy.loginByToken(token, pageUrl);
 		}
 		
 		/**
@@ -497,7 +506,16 @@ package com.flashphoner.api
 		 * @param name name of camera
 		 **/		
 		public function setCamera(name:String):void{
+			//videoControl.changeCamera(Camera.getCamera(name));
+			
+			// WSP-1933
+			var camera:Camera = Camera.getCamera(name);
 			videoControl.changeCamera(Camera.getCamera(name));
+			var call:Call = getCurrentCall();
+			if (call != null){
+				call.setNewCamera(camera);
+			}
+			
 		}
 		
 		/**
@@ -547,7 +565,7 @@ package com.flashphoner.api
 			if (registeredTimer!=null){
 				registeredTimer.stop();
 			} else {
-				registeredTimer = new Timer(13000);
+				registeredTimer = new Timer(15000);
 				registeredTimer.addEventListener(TimerEvent.TIMER,registeredExpire);					
 			}
 		}
@@ -615,6 +633,16 @@ package com.flashphoner.api
 		
 		public function setSpeexQuality(quality:int):void{
 			soundControl.setSpeexQuality(quality);
+		}
+		
+		/**
+		 * Set property to RtmpClientConfig dynamically.
+		 * Basicly created for setting codecs dynamically before 
+		 * making the call. 
+		 * WSP-1869
+		 * */
+		public function setProperty(key:String,value:String):void{
+			this.phoneServerProxy.setProperty(key, value);
 		}
 		
 

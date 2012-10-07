@@ -23,12 +23,12 @@ package com.flashphoner.api.data
 		/**
 		 * Url to connect Wowza Media Server
 		 **/
-		public static var SERVER_URL:String = "rtmp://87.226.225.50:1935";
+		public static var SERVER_URL:String = "";
 		
 		/**
 		 * Name of application in Wowza Media Server
 		 **/
-		public static var APP_NAME:String ="flashphoner_app";
+		public static var APP_NAME:String ="phone_app";
 		
 		/**
 		 * Width of outgoing video

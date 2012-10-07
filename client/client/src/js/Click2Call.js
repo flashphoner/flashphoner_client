@@ -31,6 +31,11 @@ var proportion = 0;
 var proportionStreamer = 0;
 var callToken = "";
 
+var timerHours = 0;
+var timerMinutes = 0;
+var timerSeconds = 0;
+var timerTimeout;
+
 var testInviteParameter = new Object;
 testInviteParameter['param1'] = "value1";
 testInviteParameter['param2'] = "value2";
@@ -74,6 +79,29 @@ function trace(funcName, param1, param2, param3) {
     }
 }
 
+function timer() {
+
+  if (timerHours < 10) {mTimerHours = "0" + timerHours} else {mTimerHours = timerHours}
+  if (timerMinutes < 10) {mTimerMinutes = "0" + timerMinutes} else {mTimerMinutes = timerMinutes}
+  if (timerSeconds < 10) {mTimerSeconds = "0" + timerSeconds} else {mTimerSeconds = timerSeconds}
+
+  $("#timer").html(mTimerHours + ":" + mTimerMinutes + ":" + mTimerSeconds);
+  
+  timerSeconds = timerSeconds + 1;
+  
+  if ( timerSeconds == 60) {
+    timerMinutes = timerMinutes + 1; 
+    timerSeconds = 0;
+  }
+
+  if ( timerMinutes == 60) {
+    timerHours = timerHours + 1; 
+    timerMinutes = 0;
+  }  
+   
+  timerTimeout = setTimeout("timer()", 1000);
+}
+
 $(document).ready(function() {
     if (playerIsRight()) {
     	$('#callState').html('...Loading...');
@@ -85,9 +113,15 @@ $(document).ready(function() {
 
 
 function loginByToken(token) {
-    trace("loginByToken", token);
+    trace("loginByToken", window.location, token);
     $('#callState').html('...Calling...');
-    var result = flashphoner.loginByToken(token);
+    
+    if (navigator.userAgent.indexOf("Firefox") != -1) {
+      var pageUrl = window.location.toString();
+      trace ("Client browser is Firefox");
+    }
+    
+    var result = flashphoner.loginByToken(token, pageUrl);
 }
 
 function getInfoAboutMe() {
@@ -258,12 +292,20 @@ function notify(call) {
             initSendVideoButton();
             $('#callState').html('Finished');
             toCallState();
+            
+            timerMinutes = 0;
+            timerHours = 0;
+            timerSeconds = 0;
+            $("#timer").hide();
+            clearTimeout(timerTimeout);
         // if call is holded
         } else if (call.state == STATE_HOLD) {
             $('#callState').html('...Holded...');
         // or if call is started talk
         } else if (call.state == STATE_TALK) {
             $('#callState').html('...Talking...');
+            timer();
+            $("#timer").show();
         // or if we just ringing    
         } else if (call.state == STATE_RING) {
             $('#callState').html('...Ringing...');
@@ -625,6 +667,50 @@ $(function() {
     }).click(function() {
       sendVideoChangeState();
     });
+    
+    // Settings button button opens settings view  
+    $("#settingsButton").click(function() {
+      if ($(this).hasClass('pressed')) {
+        
+        $("#settingsView").show();
+        
+        var micList = flashphoner.getMicropones();
+        var camList = flashphoner.getCameras();
+ 
+        //clear it each time, else we append it more and more... 
+        $("#micSelector").html("");
+        $("#camSelector").html("");
+        
+        for (var i = 0; i < micList.length; i++) {
+          $("#micSelector").append('<option value="' + micList[i] + '">' + micList[i] + '</option>');
+        }
+
+        // we use here index instead of name because AS getcamera can only use indexes
+        for (var i = 0; i < camList.length; i++) {
+          $("#camSelector").append('<option value="' + i + '">' + camList[i] + '</option>');
+        }
+        
+      } else {
+        $("#settingsView").hide();
+      }
+    }); 
+    
+
+    $("#micSelector").change(function() {
+      flashphoner.setMicrophone($(this).val());
+      trace('Microphone changed to ', $(this).val());
+    });
+
+    $("#camSelector").change(function() {
+      flashphoner.setCamera($(this).val());
+      trace('Camera changed to ', $(this).val());
+    });
+    
+    $("#settingsOkButton").click(function() {
+      $("#settingsView").hide();
+      $("#settingsButton").removeClass("pressed");
+    });
+    
 });
 
 

@@ -42,6 +42,8 @@ This code and accompanying materials also available under LGPL and MPL license f
   
   <div id="versionOfProduct"></div>
   
+  <div id="timer"></div>
+  
   <div id="caller" class="caller">Support</div>       
   <div id="callState"></div>                
   
@@ -118,9 +120,26 @@ This code and accompanying materials also available under LGPL and MPL license f
 <div id="aboutCallMe">
 This buttons opens click2call in popup window.
 Please use that for testing calls to different callees depends by pageUrl parameter.
-Details <a href="http://docs.flashphoner.com/display/FP973/Click2Call">here</a>
+Details <a href="http://docs.flashphoner.com/display/FPN/Click2Call">here</a>
 </div>
 
+<div class="button" id="settingsButton">Mic / Cam settings</div>
+
+<div id="settingsView" class="dialPad">
+  <!-- <div class="bar">&nbsp;&nbsp;Mic & Cam settings</div> -->
+  <img id="settingsMicImage" src="assets/c2c_mic.png" />
+  <img id="settingsCamImage" src="assets/c2c_camera.png" />
+  
+  <select id="micSelector">
+    <option value="1">Choose Microphone</option>
+  </select>
+  
+  <select id="camSelector">
+    <option value="1">Choose Camera</option>
+  </select>
+    
+  <div class="button dialButton" id="settingsOkButton">Ok</div>
+</div>
 
 
 
