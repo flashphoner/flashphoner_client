@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2011 Flashphoner
+  All rights reserved. This Code and the accompanying materials
+  are made available under the terms of the GNU Public License v2.0
+  which accompanies this distribution, and is available at
+  http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+  
+  Contributors:
+      Flashphoner - initial API and implementation
+  
+  This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+-->
+<flashphoner>
+	<rtmp_server>rtmp://192.168.1.5:1935</rtmp_server>
+	<register_required>true</register_required>
+	<application>phone_app</application>
+	<video_width>176</video_width>
+	<video_height>144</video_height>
+	<check_validation_callee>true</check_validation_callee>
+	<use_enhanced_mic>true</use_enhanced_mic>
+	<ring_sound></ring_sound>
+	<busy_sound></busy_sound>
+	<register_sound></register_sound>
+	<finish_sound></finish_sound>
+</flashphoner>

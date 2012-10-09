@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" minWidth="955" minHeight="600" creationComplete="init()">
+	<fx:Declarations>		
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import as3phone.APINotifyPhone;
+			
+			import com.flashphoner.api.Flash_API;
+			import com.flashphoner.api.PhoneSpeaker;
+			
+			private var flash_API:Flash_API = new Flash_API(new APINotifyPhone());
+			
+			private var timer:Timer;
+			
+			private var phoneSpeaker:PhoneSpeaker;
+			
+			private var callId:String;		
+			
+			
+			function init():void {
+				trace("init app");				
+				start();
+			}	
+			
+			function start():void{		
+				
+				if (flash_API.isInitialized()){
+						proceed();
+				}else{
+					waitForInit();				
+				}			
+								
+			}
+			
+			function waitForInit():void{
+				timer = new Timer(1000,9999);
+				timer.addEventListener(TimerEvent.TIMER,fire);
+				timer.start();
+			}
+			
+			function fire(event:TimerEvent){
+				trace("waiting init...");
+				if (flash_API.isInitialized()){
+					proceed();
+				}
+			}
+			
+			function resetTimer():void{
+				trace("resetTimer");
+				timer.stop();
+				timer=null;
+			}
+			
+			
+			function proceed():void{				
+				trace("Proceed");
+				trace("Flash API has been initialized");		
+				resetTimer();
+				flash_API.initMedia();
+				this.phoneSpeaker = flash_API.getPhoneSpeaker();
+				this.addElement(phoneSpeaker);				
+			}			
+			
+			
+			public function setCallId(callId:String):void{
+				this.callId = callId;
+			}		
+			
+			function login():void{
+				trace("login");
+				var loginObject:Object = new Object();	
+				loginObject.username=id_username.text;
+				loginObject.authenticationName=id_auth_name.text;
+				loginObject.password=id_passwd.text;
+				loginObject.outboundProxy=id_sipserver.text;
+				loginObject.port=id_port.text;
+				loginObject.qValue=id_q_value.text;
+				flash_API.login(loginObject);
+			}			
+			
+			
+			public function startCall():void{
+				trace("startCall");
+				flash_API.call(id_callee.text,"MyName",false,null);
+			}
+			
+			public function sendDTMF():void{
+				trace("sendDTMF");
+				flash_API.sendDTMF(this.callId, id_dtmf.text);
+			}
+			
+			public function hangupCall():void{
+				trace("hangupCall");
+				flash_API.hangup(this.callId);
+			}
+			
+		]]>
+	</fx:Script>	
+	
+	<!--DTMF-->
+	<s:Button x="304" y="137" label="send DTMF" click="sendDTMF()"/>
+	<s:Label x="264" y="166" text="value"/>
+	<s:TextInput id="id_dtmf" x="304" y="166" text="1" width="17"/>
+	
+	<!--Login-->
+	<s:Button x="83" y="43" label="login" click="login()"/>
+	<s:Label x="17" y="72" text="username"/>
+	<s:TextInput id="id_username" x="83" y="72" width="149" text="sip:2005@192.168.1.5"/>
+	<s:Label x="17" y="102" text="auth name"/>
+	<s:TextInput id="id_auth_name" x="83" y="102" text="2005"/>
+	<s:Label x="17" y="132" text="passwd"/>
+	<s:TextInput id="id_passwd" x="83" y="132" text="2005"/>
+	<s:Label x="17" y="166" text="sip server" height="11" width="63"/>
+	<s:TextInput id="id_sipserver" x="84" y="166" text="192.168.1.5"/>
+	<s:Label x="17" y="203" text="sip port" width="45"/>
+	<s:TextInput id="id_port" x="83" y="203" text="5060"/>
+	<s:Label x="20" y="240" text="q value"/>
+	<s:TextInput id="id_q_value" x="83" y="240" text="1.0"/>
+	
+	<!--Start call-->	
+	<s:Button x="302" y="43" label="start call" click="startCall()"/>
+	<s:Label x="264" y="74" text="callee"/>
+	<s:TextInput id="id_callee" x="302" y="72" text="sip:2006@192.168.1.5" width="151"/>
+	
+	<!--Hangup call-->
+	<s:Button x="298" y="240" label="hangup call" width="105" height="22" click="hangupCall()"/>
+	
+	
+</s:Application>
