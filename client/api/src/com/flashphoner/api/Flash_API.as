@@ -162,6 +162,7 @@ package com.flashphoner.api
 		 * @param isHold true, if set state hold
 		 **/		
 		public function setStatusHold(callId:String,isHold:Boolean = true):void{
+			Logger.info("setStatusHold; callId - " + callId + "; isHold - " + isHold);
 			var call:Call = getCallById(callId);
 			if (call != null){
 				call.setStatusHold(isHold);

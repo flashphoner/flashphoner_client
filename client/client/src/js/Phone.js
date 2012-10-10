@@ -512,10 +512,12 @@ function createCallView(call) {
   openCallView();
   $('#caller').html(call.anotherSideUser);
 
+  $('#holdButton').unbind('click');
   $('#holdButton').click(function() {
     setStatusHold(call.id, !call.isHolded);
 	});
 
+  $('#transferButton').unbind('click');
   $('#transferButton').click(function() {
     openTransferView(call);
   });
@@ -649,10 +651,12 @@ function openIncomingView(call) {
     $('#incomingDiv').show();
     $('#callerField').html(call.caller + " '" + call.visibleNameCaller + "'");
     
+    $('#answerButton').unbind('click');
     $('#answerButton').click(function() {
         answer(call.id);
         closeIncomingView();
     });
+    $('#hangupButton').unbind('click');
     $('#hangupButton').click(function() {
         hangup(call.id);
         closeIncomingView();
@@ -732,6 +736,7 @@ function closeCallView() {
 /* ----- TRANSFER ----- */
 function openTransferView(call) {
     trace("openTransferView");
+    $('#transferOk').unbind('click');
     $('#transferOk').click(function() {
         transfer(currentCall.id, $('#transferInput').val());
         closeTransferView();
