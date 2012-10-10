@@ -283,28 +283,34 @@ package com.flashphoner.api
 		
 		public function enableAGC():void{
 			Logger.info("enableAGC")
-			mic.gain = DEFAULT_GAIN;
-			if (PhoneConfig.USE_AUTO_GAIN_CONTROL){				
-				if (!mic.hasEventListener(SampleDataEvent.SAMPLE_DATA)){
-					mic.addEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);
+			if (mic!=null){
+				mic.gain = DEFAULT_GAIN;
+				if (PhoneConfig.USE_AUTO_GAIN_CONTROL){				
+					if (!mic.hasEventListener(SampleDataEvent.SAMPLE_DATA)){
+						mic.addEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);
+					}
 				}
-			}			
+			}
 		}
 		
 		public function disableAGC():void{
 			Logger.info("disableAGC");
-			mic.gain = DEFAULT_GAIN;
-			if (PhoneConfig.USE_AUTO_GAIN_CONTROL){				
-				mic.removeEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);			
+			if (mic!=null){
+				mic.gain = DEFAULT_GAIN;
+				if (PhoneConfig.USE_AUTO_GAIN_CONTROL){				
+					mic.removeEventListener(SampleDataEvent.SAMPLE_DATA, micSampleDataHandler);			
+				}
 			}
 		}
 		
 		private function micSampleDataHandler(event:SampleDataEvent):void {
-			var result:AGCResult = agc.process(event.data,mic);
-			if (agc.TRACE_AGC){
-				if (result.hasResult){
-					for each (var apiNotify:APINotify in flash_API.apiNotifys){
-						apiNotify.notifyAgc(result.result);
+			if (mic!=null){
+				var result:AGCResult = agc.process(event.data,mic);
+				if (agc.TRACE_AGC){
+					if (result.hasResult){
+						for each (var apiNotify:APINotify in flash_API.apiNotifys){
+							apiNotify.notifyAgc(result.result);
+						}
 					}
 				}
 			}
@@ -332,21 +338,23 @@ package com.flashphoner.api
 		
 		private function changeCodec(name:String):void{
 			Logger.info("changeCodec: "+name);
-			if (name=="speex"){
-				mic.codec = SoundCodec.SPEEX;
-				mic.framesPerPacket = 1;
-				mic.rate = 16;
-				mic.encodeQuality = speexQuality;				
-			}else if (name=="ulaw" || name=="pcmu" ){
-				mic.codec = SoundCodec.PCMU;
-				mic.framesPerPacket = 2;
-				mic.rate = 8;
-			}else if (name=="alaw" || name=="pcma" ){
-				mic.codec = SoundCodec.PCMA;
-				mic.framesPerPacket = 2;
-				mic.rate = 8;
+			if (mic!=null){
+				if (name=="speex"){
+					mic.codec = SoundCodec.SPEEX;
+					mic.framesPerPacket = 1;
+					mic.rate = 16;
+					mic.encodeQuality = speexQuality;				
+				}else if (name=="ulaw" || name=="pcmu" ){
+					mic.codec = SoundCodec.PCMU;
+					mic.framesPerPacket = 2;
+					mic.rate = 8;
+				}else if (name=="alaw" || name=="pcma" ){
+					mic.codec = SoundCodec.PCMA;
+					mic.framesPerPacket = 2;
+					mic.rate = 8;
+				}			
+				Logger.info("codec: "+mic.codec+" framesPerPacket: "+mic.framesPerPacket+" encodeQuality: "+mic.encodeQuality+" rate: "+mic.rate);
 			}
-			Logger.info("codec: "+mic.codec+" framesPerPacket: "+mic.framesPerPacket+" encodeQuality: "+mic.encodeQuality+" rate: "+mic.rate);
 		}
 		
 		private function getMajorVersion():Number{
