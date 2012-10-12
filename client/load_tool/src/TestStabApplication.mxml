@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="1040" height="652"
+				creationComplete="init()">
+	<mx:Script>
+		<![CDATA[
+			import com.flashphoner.api.Flash_API;
+			import com.flashphoner.api.data.PhoneConfig;
+			import com.flashphoner.api.PhoneModel;
+			
+			import mx.controls.Alert;
+			[Bindable]
+			public var logs:String = "";
+			private function init():void{
+				Flash_API.initLibrary();
+			}
+			
+			private function getAccountsList():void{
+				try{
+					var from:int = int(textFrom.text);
+					var to:int = int(textTo.text);
+				}catch(error:Error){
+					Alert.show("ERROR!!!","",Alert.OK);
+					return;					
+				}
+				if (from > to){
+					Alert.show("ERROR!!!","",Alert.OK);
+					return
+				}
+				try{
+					var loginLogoff:int = int(textLoginLogoff.text);
+					var loginAction:int = int(textLoginAction.text);
+
+					var incomHangup:int = int(textIncomHangup.text);
+					var incomAnswer:int = int(textIncomAnswer.text);
+
+					var callHangup:int = int(textCallHangup.text);
+
+					var talkHangup:int = int(textTalkHangup.text);
+					var talkHolding:int = int(textTalkHolding.text);
+					var talkTransfer:int = int(textTalkTransfer.text);
+					
+					var holdingHangup:int = int(textHoldingHangup.text);
+					var holdingUnhold:int = int(textHoldingUnhold.text);
+					
+					var holdedHangup:int = int(textHoldedHangup.text);
+					var holdedTransfer:int = int(textHoldedTransfer.text);
+					
+					var talkStopStartVideo = int(textTalkStopStartVideo.text);
+				}catch(error:Error){
+					Alert.show("ERROR Weight!!!","",Alert.OK);
+					return;					
+				}
+				if (loginLogoff+loginAction > 100){
+					Alert.show("ERROR Free Weight!!!","",Alert.OK);
+					return;					
+				}
+				if (incomHangup+incomAnswer > 100){
+					Alert.show("ERROR Incom Weight!!!","",Alert.OK);
+					return;					
+				}					
+				if (callHangup > 100){
+					Alert.show("ERROR Call Weight!!!","",Alert.OK);
+					return;					
+				}					
+				if (talkHangup + talkHolding + talkTransfer + talkStopStartVideo > 100){
+					Alert.show("ERROR Talk Weight!!!","",Alert.OK);
+					return;					
+				}
+				if (holdingHangup + holdingUnhold > 100){
+					Alert.show("ERROR Holding Weight!!!","",Alert.OK);
+					return;					
+				}					
+				if (holdedHangup + holdedTransfer > 100){
+					Alert.show("ERROR Holded Weight!!!","",Alert.OK);
+					return;					
+				}					
+				
+				var accounts:Accounts = Accounts.getInstance();
+				
+				accounts.loginLogoff = loginLogoff;
+				accounts.loginAction = loginAction;
+				accounts.incomHangup = incomHangup;
+				accounts.incomAnswer = incomAnswer; 
+				accounts.callHangup = callHangup;
+				accounts.talkHangup = talkHangup;
+				accounts.talkHolding= talkHolding;
+				accounts.talkTransfer= talkTransfer;
+				accounts.talkStopStartVideo = talkStopStartVideo;
+				
+				accounts.holdingHangup = holdingHangup;
+				accounts.holdingUnhold = holdingUnhold;
+				
+				accounts.holdedHangup = holdedHangup;
+				accounts.holdedTransfer = holdedTransfer;
+				
+				accounts.initAccounts(from,to);
+				buttonGetAccount.enabled = false;
+				textFrom.enabled = false;
+				textTo.enabled = false;
+				textLoginLogoff.enabled = false;
+				textLoginAction.enabled = false;
+				textIncomHangup.enabled = false;
+				textIncomAnswer.enabled = false;
+				textCallHangup.enabled = false;
+				
+				textTalkHangup.enabled = false;
+				textTalkHolding.enabled = false;
+				textTalkTransfer.enabled = false;
+				
+				textHoldingHangup.enabled = false;
+				textHoldingUnhold.enabled = false;
+				
+				textHoldedHangup.enabled = false;
+				textHoldedTransfer.enabled = false;
+				
+				checkBoxCallMe.enabled = false;
+				checkBoxEnableVideoCalls.enabled=false;
+			}
+			
+			private function onApplyParameters():void{
+				try{
+					var minCountCall:int = int(textMinCountCall.text);
+					var maxCountCall:int = int(textMaxCountCall.text);
+					var minTimeCall:int = int(textMinTimeCall.text);
+				}catch(error:Error){
+					Alert.show("ERROR!!!","",Alert.OK);
+					return;					
+				}
+				if (minCountCall > maxCountCall){
+					Alert.show("ERROR!!!","",Alert.OK);
+					return
+				}
+				Accounts.getInstance().minCountCall = minCountCall;
+				Accounts.getInstance().maxCountCall = maxCountCall;
+				Accounts.getInstance().minTimeCall = minTimeCall;
+			}			
+			
+			private function onStartTest():void{
+				if (buttonStartTest.label == "Start"){
+					Accounts.getInstance().startTest();
+					buttonStartTest.label = "Stop";
+				}else{
+					Accounts.getInstance().stopTest();
+					buttonStartTest.enabled = false;
+					buttonStartTest.label = "Start";
+					buttonGetAccount.enabled = true;
+					textFrom.enabled = true;
+					textTo.enabled = true;
+					
+					textLoginLogoff.enabled = true;
+					textLoginAction.enabled = true;
+					
+					textIncomHangup.enabled = true;
+					textIncomAnswer.enabled = true;
+					
+					textCallHangup.enabled = true;
+					
+					textTalkHangup.enabled = true;
+					textTalkHolding.enabled = true;
+					textTalkTransfer.enabled = true;
+					
+					textHoldingHangup.enabled = true;
+					textHoldingUnhold.enabled = true;
+					
+					textHoldedHangup.enabled = true;
+					textHoldedTransfer.enabled = true;
+					
+					textTalkStopStartVideo.enabled=true;
+					checkBoxCallMe.enabled = true;
+					checkBoxEnableVideoCalls.enabled=true;
+					
+				}
+			}
+			
+			private function onChange():void{
+				if (checkBoxCallMe.selected){
+					Accounts.getInstance().callMe = true;
+				}else{
+					Accounts.getInstance().callMe = false;
+				}
+			}
+			private function onChangeCheckBoxEnableVideoCalls():void{
+				if (checkBoxEnableVideoCalls.selected){
+					PhoneConfig.VIDEO_ENABLED=true;
+				}	else{
+					PhoneConfig.VIDEO_ENABLED=false;
+				}
+			}
+			
+			public function accountsLoaded():void{
+				Application.application.logs += "Accounts loaded\n";
+				buttonStartTest.enabled = true;
+			}
+		]]>
+	</mx:Script>
+	<mx:Button id="buttonStartTest" enabled="false" x="867" y="72" label="Start" click = "onStartTest()" width="100" fontFamily="Arial" fontSize="11" color="#000000" cornerRadius="2"/>
+	<mx:Button id="buttonGetAccount" x="933" y="40" label="Accounts" click="getAccountsList()" cornerRadius="2" color="#000000" fontFamily="Arial" fontWeight="bold" fontSize="11" width="79"/>
+	<mx:TextArea x="10" y="10" width="632" height="632" text="{logs}" borderStyle="none" color="#000000" fontFamily="Courier New" fontSize="11"/>
+	<mx:TextInput id="textFrom" x="917.5" y="10" width="40" text="1" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textTo" x="972" y="11" width="40" text="10" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:Text x="960.5" y="109" text="-" fontFamily="Arial" fontSize="11" color="#000000"/>
+	<mx:Text x="960.5" y="12" text="-" fontFamily="Arial" fontSize="11" color="#000000"/>
+	<mx:DataGrid id="dataGrid" x="650" y="10" width="158.5" height="277" dataProvider="{Accounts.getInstance().statisticCollection}" fontFamily="Arial" fontSize="11" color="#000000" alternatingItemColors="[#B9B9B9, #B9B9B9]" borderStyle="outset" textAlign="center">
+		<mx:columns>
+			<mx:DataGridColumn headerText="State" dataField="state"/>
+			<mx:DataGridColumn headerText="Count" dataField="count"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:TextInput id="textMinCountCall" x="917.5" y="107" width="40" text="8" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textMaxCountCall" x="972" y="107" width="40" text="12" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:Text x="816.5" y="137" text="Min time of call" fontFamily="Arial" fontSize="11" color="#000000"/>
+	<mx:TextInput id="textMinTimeCall" x="917.5" y="135" width="40" text="120" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:Text x="816.5" y="109" text="Count of call&#xa;" fontFamily="Arial" fontSize="11" color="#000000"/>
+	<mx:Button x="965.5" y="135" label="Apply" click="onApplyParameters()" fontFamily="Arial" fontSize="11" color="#000000" cornerRadius="2" width="69.5"/>
+	<mx:TextInput id="textLoginLogoff" x="721" y="320" width="50" text="30" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textLoginAction" x="779" y="320" width="50" text="50" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textIncomHangup" x="693" y="391" width="50" text="20" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textIncomAnswer" x="751" y="391" width="50" text="60" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textCallHangup" x="693" y="421" width="50" text="20" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textTalkHangup" x="693" y="451" width="50" text="20" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textTalkStopStartVideo" x="809" y="451" width="50" text="50" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textTalkHolding" x="867" y="451" width="50" text="10" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textTalkTransfer" x="922" y="451" width="50" text="10" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textHoldingHangup" x="693" y="479" width="50" text="20" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>	
+	<mx:TextInput id="textHoldingUnhold" x="867" y="479" width="50" text="50" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textHoldedHangup" x="693" y="507" width="50" text="20" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+	<mx:TextInput id="textHoldedTransfer" x="922" y="507" width="50" text="40" fontFamily="Arial" fontSize="11" color="#000000"  textAlign="center"/>
+
+	<mx:Text x="800" y="349" text="Send/Stop video" fontFamily="Arial" fontSize="11" color="#000000" width="68" textAlign="center"/>
+	<mx:CheckBox id="checkBoxEnableVideoCalls" x="822.5" y="40" label="Enable video calls" selected="false" change="onChangeCheckBoxEnableVideoCalls()" fontFamily="Arial" fontSize="11" color="#000000"/>
+	
+	<mx:Text x="678" y="322" text="User" fontFamily="Arial" fontSize="11" color="#000000"/>
+	<mx:Text x="650" y="393" text="Call(in)" fontFamily="Arial" fontSize="11" color="#000000"/>
+	<mx:Text x="650" y="423" text="Call(out)" fontFamily="Arial" fontSize="11" color="#000000"/>
+	<mx:Text x="650" y="453" text="Talk" fontFamily="Arial" fontSize="11" color="#000000"/>
+	<mx:Text x="650" y="481" text="Holding" fontFamily="Arial" fontSize="11" color="#000000"/>
+	<mx:Text x="721" y="295" text="Logoff" fontFamily="Arial" fontSize="11" color="#000000" width="50" textAlign="center"/>
+	<mx:Text x="693" y="363" text="Hangup" fontFamily="Arial" fontSize="11" color="#000000" width="50" textAlign="center"/>
+	<mx:Text x="751" y="363" text="Answer" fontFamily="Arial" fontSize="11" color="#000000" width="50" textAlign="center"/>
+	<mx:Text x="980" y="363" text="Null" fontFamily="Arial" fontSize="11" color="#000000" width="50" textAlign="center"/>
+	<mx:TextInput x="837" y="320" width="50" editable="false" text="{100-int(textLoginLogoff.text)-int(textLoginAction.text)}" fontFamily="Arial" fontSize="11" color="#000000" />
+	<mx:TextInput x="980" y="391" width="50" editable="false" text="{100-int(textIncomHangup.text)-int(textIncomAnswer.text)}" fontFamily="Arial" fontSize="11" color="#000000" />
+	<mx:TextInput x="980" y="421" width="50" editable="false" text="{100-int(textCallHangup.text)}" fontFamily="Arial" fontSize="11" color="#000000" />
+	<mx:TextInput x="980" y="451" width="50" editable="false" text="{100-int(textTalkHangup.text)-int(textTalkHolding.text)-int(textTalkTransfer.text)-int(textTalkStopStartVideo.text)}" fontFamily="Arial" fontSize="11" color="#000000" />
+	<mx:TextInput x="980" y="479" width="50" editable="false" text="{100-int(textHoldingHangup.text)-int(textHoldingUnhold.text)}" fontFamily="Arial" fontSize="11" color="#000000" />
+	<mx:TextInput x="980" y="507" width="50" editable="false" text="{100-int(textHoldedHangup.text)-int(textHoldedTransfer.text)}" fontFamily="Arial" fontSize="11" color="#000000" />
+	<mx:CheckBox id="checkBoxCallMe" x="822.5" y="12" label="Call me" selected="false" change="onChange()" fontFamily="Arial" fontSize="11" color="#000000"/>
+	<mx:TextInput x="751" y="421" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="751" y="451" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="922" y="391" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:Text x="779" y="295" text="Action" fontFamily="Arial" fontSize="11" color="#000000" width="50" textAlign="center" height="17"/>
+	<mx:Text x="837" y="295" text="Null" fontFamily="Arial" fontSize="11" color="#000000" width="50" textAlign="center"/>
+	<mx:Text x="867" y="363" text="(Un)Hold" fontFamily="Arial" fontSize="11" color="#000000" width="50" textAlign="center"/>
+	<mx:Text x="917.5" y="363" text="Transfer" fontFamily="Arial" fontSize="11" color="#000000" width="50" textAlign="center"/>
+	<mx:Text x="650" y="509" text="Holded" fontFamily="Arial" fontSize="11" color="#000000"/>
+	<mx:TextInput x="867" y="391" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="922" y="421" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="867" y="421" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="751" y="479" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="922" y="479" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="867" y="507" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="751" y="507" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="809" y="391" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="809" y="421" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="809" y="479" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+	<mx:TextInput x="809" y="507" width="50" fontFamily="Arial" fontSize="11" color="#000000"  borderStyle="outset" editable="false"/>
+</mx:Application>
