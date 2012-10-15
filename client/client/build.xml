@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="flashphoner_client" default="linux" basedir=".">
+    <property name="PRODUCT_NAME" value="Flashphoner-RSG"/>
     <property name="RELEASE_DIR" value="../../release"/>
     <property name="DEPLOY_DIR" value="../output"/>
     <property file="./build.properties" />
@@ -104,9 +105,9 @@
         
         <!-- Copy all compiled result to release folder-->
 
-        <mkdir dir="${RELEASE_DIR}/FlashphonerMS-client-2.0.X"/>
+        <mkdir dir="${RELEASE_DIR}/${PRODUCT_NAME}-client-2.0.X"/>
 
-        <copy todir="${RELEASE_DIR}/FlashphonerMS-client-2.0.X">
+        <copy todir="${RELEASE_DIR}/${PRODUCT_NAME}-client-2.0.X">
             <fileset dir="${DEPLOY_DIR}"/>
         </copy>
 
