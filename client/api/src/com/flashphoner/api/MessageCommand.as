@@ -40,7 +40,7 @@ package com.flashphoner.api
 			var messageObject:Object = (event as MessageEvent).messageObj;
 			
 			if (event.type == MessageEvent.MESSAGE_EVENT){
-				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in flashAPI.apiNotifys){
 					apiNotify.notifyMessage(messageObject);
 				}
 			}	

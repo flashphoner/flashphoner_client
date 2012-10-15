@@ -194,7 +194,7 @@ package com.flashphoner.api
 			if(event.info.code == "NetConnection.Connect.Success")
 			{
 				Logger.info("NetConnection.Connect.Success");
-				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in flash_API.apiNotifys){
 					apiNotify.notifyConnected();
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.CONNECTED,flash_API));
@@ -207,7 +207,7 @@ package com.flashphoner.api
 			{
 				Logger.info("NetConnection.Connect.Failed");
 				flash_API.dropRegisteredTimer();
-				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in flash_API.apiNotifys){
 					apiNotify.notifyError(ErrorCodes.CONNECTION_ERROR);
 				}
 				hasDisconnectAttempt = false;
@@ -219,7 +219,7 @@ package com.flashphoner.api
 			} else if (event.info.code == 'NetConnection.Connect.Closed')
 			{				
 				Logger.info("NetConnection.Connect.Closed");
-				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in flash_API.apiNotifys){
 					apiNotify.notifyCloseConnection();
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.DISCONNECT,flash_API));

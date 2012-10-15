@@ -95,7 +95,7 @@ package com.flashphoner.api
 					
 			if (infoObject.info.code == "NetStream.Play.Start"){
 				playingVideo = true;
-				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in flashAPI.apiNotifys){
 					apiNotify.notifyOpenVideoView(true);
 				}			
 
@@ -105,7 +105,7 @@ package com.flashphoner.api
 			else if (infoObject.info.code == "NetStream.Play.StreamNotFound" || infoObject.info.code == "NetStream.Play.Failed"||infoObject.info.code == "NetStream.Play.Stop"){
 				Logger.info("incomingVideoStream.nsVideoOnStatus() "+infoObject.info.description);
 				playingVideo = false;
-				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				for each (var apiNotify:APINotify in flashAPI.apiNotifys){
 					apiNotify.notifyOpenVideoView(false);
 				}			
 			}

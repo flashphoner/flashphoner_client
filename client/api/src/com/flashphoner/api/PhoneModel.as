@@ -128,9 +128,9 @@ package com.flashphoner.api
 			        
 			        PhoneConfig.SERVER_URL = xml.rtmp_server;
 					if (PhoneConfig.SERVER_URL == null) {
-						for each (var apiNotify:APINotify in Flash_API.apiNotifys){
-							apiNotify.notifyError(ErrorCodes.WRONG_FLASHPHONER_XML);
-						}
+//						for each (var apiNotify:APINotify in flashAPI.apiNotifys){
+//							apiNotify.notifyError(ErrorCodes.WRONG_FLASHPHONER_XML);
+//						}
 					}
 					
 			        PhoneConfig.APP_NAME = xml.application;

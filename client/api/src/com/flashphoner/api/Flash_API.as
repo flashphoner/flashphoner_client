@@ -48,7 +48,7 @@ package com.flashphoner.api
 		 * @private
 		 * Notifier added by addNotify()
 		 **/ 
-		public static var apiNotifys:ArrayCollection;		
+		public var apiNotifys:ArrayCollection;		
 		/**
 		 * Data about logged user
 		 **/
@@ -289,7 +289,7 @@ package com.flashphoner.api
 		 * @param apiNotify Object will be implemented APINotify
 		 **/
 		public function addAPINotify(apiNotify:APINotify):void{
-			Flash_API.apiNotifys.addItem(apiNotify);
+			apiNotifys.addItem(apiNotify);
 		}
 		/**
 		 * Get parameters from file 'flashphoner.xml'
