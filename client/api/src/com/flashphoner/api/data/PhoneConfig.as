@@ -103,6 +103,10 @@ package com.flashphoner.api.data
 			return client+"-"+server;
 		}
 		
+		public static function getRandomInt(from:int, to:int):int{
+			return int(Math.floor( from + ( Math.random() * ( to - from + 1))));
+		}
+		
 		/**
 		 * Resolutions which supported camera
 		 **/

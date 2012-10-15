@@ -234,11 +234,11 @@ package com.flashphoner.api
 			instantMessageObj.body=instantMessage.body;
 			instantMessageObj.contentType=instantMessage.contentType;
 			
-			nc.call("sendInstantMessage",responder,instantMessageObj);
+			nc.call("sendInstantMessage",null,instantMessageObj);
 		}
 		
 		public function sendInfo(infoObject:Object):void{
-			nc.call("sendInfo", responder, infoObject);
+			nc.call("sendInfo", null, infoObject);
 		}
 		
 	}

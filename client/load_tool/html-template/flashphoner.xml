@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flashphoner>
+	<rtmp_server>rtmfp://87.226.225.59:1935</rtmp_server>
+	<register_required>true</register_required>
+	<application>flashphoner_app</application>
+</flashphoner>
