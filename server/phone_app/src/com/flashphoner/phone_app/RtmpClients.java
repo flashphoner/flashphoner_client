@@ -17,6 +17,8 @@ import com.flashphoner.sdk.rtmp.IRtmpClientsCollection;
 import com.wowza.wms.client.IClient;
 import com.wowza.wms.logging.WMSLogger;
 import com.wowza.wms.logging.WMSLoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RtmpClients implements IRtmpClientsCollection {
 
-    private static WMSLogger log = WMSLoggerFactory.getLogger(RtmpClients.class);
+    private static Logger log = LoggerFactory.getLogger(RtmpClients.class);
 
     /**
      * Singleton field
@@ -105,5 +107,21 @@ public class RtmpClients implements IRtmpClientsCollection {
      */
     public IRtmpClient findByClient(IClient client) {
         return rtmpClients.get(client);
+    }
+
+    @Override
+    public IRtmpClient findByCalledInEstablishedCalls(String called) {
+        if (log.isDebugEnabled()){
+            log.info("findByCalledInEstablishedCalls called: "+called);
+        }
+        Iterator<IRtmpClient> clients = rtmpClients.values().iterator();
+        while (clients.hasNext()) {
+            IRtmpClient client = clients.next();
+            boolean hasEstablishedCall = client.getSoftphone().hasEstablishedCall(called);
+            if (hasEstablishedCall) {
+                return client;
+            }
+        }
+        return null;
     }
 }

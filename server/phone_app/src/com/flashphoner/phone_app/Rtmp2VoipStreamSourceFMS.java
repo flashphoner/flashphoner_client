@@ -84,41 +84,45 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                log.info("Waiting for user call established: " + username);
+                if (log.isDebugEnabled()) {
+                    log.debug("Checking for user call established: " + username);
+                }
                 IRtmpClientsCollection clients = getRtmpClients();
                 if (clients == null) {
                     log.info("IRtmpClientsCollection is empty. Waiting for connection...");
                     return;
                 }
-                IRtmpClient _rtmpClient = clients.findByLogin(username);
-                if (hasEstablishedCall(_rtmpClient)) {
-                    log.info("User connected and has established call: " + username + ". Ready to plug in external stream");
-                    rtmpClient = _rtmpClient;
+
+                rtmpClient = clients.findByCalledInEstablishedCalls(username);
+                if (rtmpClient != null) {
+                    log.debug("Established, called: " + username + " rtmpClient: " + rtmpClient.getRtmpClientConfig().getLogin());
                 } else {
-                    rtmpClient = null;
+                    log.debug("Call is not Established, called: " + username + " for stream: " + getName());
                 }
+
             }
         };
         timer.schedule(task, 0, 1000);
 
     }
 
-    private boolean hasEstablishedCall(IRtmpClient rtmpClient) {
-        if (rtmpClient == null) {
-            return false;
-        }
-        return rtmpClient.getSoftphone().hasEstablishedCall();
-    }
-
     protected void writeVideo(byte[] data) {
         if (rtmpClient != null) {
             rtmpClient.writeVideo(data, -1, getVideoTC());
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("writeVideo NULL rtmpClient this: " + getName());
+            }
         }
     }
 
     protected void writeAudio(byte[] data) {
         if (rtmpClient != null) {
             rtmpClient.writeAudio(data, -1);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("writeAudio NULL rtmpClient this: " + getName());
+            }
         }
     }
 }
