@@ -266,6 +266,7 @@ package com.flashphoner.api
 		 * @param callId Identifier of call
 		 **/
 		internal function removeCall(callId:String):void{
+			var hasTalkState:Boolean = false;			
 			for (var index:* in calls){
 				var obj:* = calls.getItemAt(index);
 				if (obj.id == callId){
@@ -273,8 +274,20 @@ package com.flashphoner.api
 						apiNotify.notifyRemoveCall(Call(obj));
 					}					
 					calls.removeItemAt(index);
-				}
+				} else if (obj.state == Call.STATE_TALK){
+					hasTalkState = true;
+				}				
 			}
+			if (!hasTalkState){
+				for each (var call:Call in calls){
+					if (call.state == Call.STATE_HOLD){
+						if (call.iHolded){
+							call.setStatusHold(false);						
+						}
+					}
+				
+				}
+			}			
 		}
 		
 		/**
@@ -387,25 +400,6 @@ package com.flashphoner.api
 			return 0;
 		}
 			
-		/**
-		 * Unhold all existed calls
-		 **/ 
-		public function unholdAnyCall():void{
-			var call:Call;
-			var hasTalkState:Boolean = false;
-			for each (var tempCall:Call in calls){
-				if (tempCall.state == Call.STATE_TALK){
-					hasTalkState = true;
-				}
-				if (tempCall.state == Call.STATE_HOLD){
-					call = tempCall;
-				}
-			}
-			if (call != null && !hasTalkState){
-				call.setStatusHold(false);
-			}
-		}
-		
 		/**
 		 * Get information about logged user
 		 **/

@@ -494,7 +494,6 @@ function notifyAddCall(call) {
     if (currentCall != null && call.incoming == true) {
         hangup(call.id);
     } else if (currentCall != null && call.incoming == false) {
-        setStatusHold(currentCall.id, true);
         holdedCall = currentCall;
         currentCall = call;
         createCallView(currentCall);
@@ -509,18 +508,28 @@ function notifyAddCall(call) {
 }
 
 function createCallView(call) {
-  openCallView();
-  $('#caller').html(call.anotherSideUser);
+  	openCallView();
+  	$('#caller').html(call.anotherSideUser);
+  
+	if (call.state == STATE_HOLD) {
+    	$('#callState').html('...Call on hold...');
+        enableHoldButton();
+    } else if (call.state == STATE_TALK) {
+        $('#callState').html('...Talking...');
+        enableHoldButton();
+    } else if (call.state == STATE_RING) {
+        $('#callState').html('...Ringing...');
+    }  
 
-  $('#holdButton').unbind('click');
-  $('#holdButton').click(function() {
-    setStatusHold(call.id, !call.isHolded);
+  	$('#holdButton').unbind('click');
+  	$('#holdButton').click(function() {
+    	setStatusHold(call.id, !call.isHolded);
 	});
 
-  $('#transferButton').unbind('click');
-  $('#transferButton').click(function() {
-    openTransferView(call);
-  });
+  	$('#transferButton').unbind('click');
+  	$('#transferButton').click(function() {
+    	openTransferView(call);
+  	});
 }
 
 function removeCallView(call) {
