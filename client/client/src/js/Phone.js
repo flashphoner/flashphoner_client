@@ -340,7 +340,6 @@ function notify(call) {
         } else if (call.state == STATE_TALK) {
             $('#callState').html('...Talking...');
             enableHoldButton();
-	    getElement('sendVideo').value = "Send video";
         } else if (call.state == STATE_RING) {
             $('#callState').html('...Ringing...');
         }
@@ -354,6 +353,7 @@ function notify(call) {
              then we delete old holded call from user1 memory
              */
             holdedCall = null;
+            getElement('sendVideo').value = "Send video";
         }
         enableHoldButton();
     }
