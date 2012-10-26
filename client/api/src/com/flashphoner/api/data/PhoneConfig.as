@@ -98,8 +98,17 @@ package com.flashphoner.api.data
 		 * Current version of Flashphoner product
 		 **/		
 		public static function getFullVersion():String{
-			var client:String = VERSION_OF_CLIENT.substring(VERSION_OF_CLIENT.lastIndexOf(".")+1);
-			var server:String = VERSION_OF_SERVER.substring(VERSION_OF_SERVER.lastIndexOf(".")+1);
+			var client:String = "X";
+			var indexClient:int = VERSION_OF_CLIENT.lastIndexOf(".");
+			if (indexClient > -1){
+				client = VERSION_OF_CLIENT.substring(indexClient+1);
+			}
+	
+			var indexServer:int = VERSION_OF_SERVER.lastIndexOf(".")
+			var server:String = "X";
+			if (indexServer > -1){
+				server = VERSION_OF_SERVER.substring(indexServer+1);
+			} 
 			return client+"-"+server;
 		}
 		

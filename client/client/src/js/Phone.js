@@ -235,13 +235,6 @@ function getVolume() {
     return flashphoner.getVolume();
 }
 
-function saveMicSettings() {
-    trace("saveMicSettings");
-    flashphoner.setVolume(speakerVolume);
-    flashphoner.setMicVolume(micVolume);
-    closeSettingsView();
-}
-
 function setCookie(key, value) {
     trace("setCookie", key, value);
     flashphoner.setCookie(key, value);
