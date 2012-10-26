@@ -340,6 +340,7 @@ function notify(call) {
         } else if (call.state == STATE_TALK) {
             $('#callState').html('...Talking...');
             enableHoldButton();
+	    getElement('sendVideo').value = "Send video";
         } else if (call.state == STATE_RING) {
             $('#callState').html('...Ringing...');
         }
