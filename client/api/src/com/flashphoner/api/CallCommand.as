@@ -86,7 +86,6 @@ package com.flashphoner.api
 				
 				call.stopTimer();
 				call.unpublish();
-				flashAPI.unholdAnyCall();
 				flashAPI.removeCall(call.id);
 				flashAPI.phoneServerProxy.phoneSpeaker.stopAudio(call.id);
 				flashAPI.phoneServerProxy.phoneSpeaker.stopVideo(call.id);
