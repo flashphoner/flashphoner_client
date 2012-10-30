@@ -35,18 +35,12 @@ package com.flashphoner.api
 		private var incomingVideoStream:NetStream;
 		private var netConnection:NetConnection;
 		/**
-		 * Playing flag for audio
+		 * Playing flag
 		 **/
 		public  var playing:Boolean;
-		/**
-		 * Playing flag for video
-		 **/
-		public var playingVideo:Boolean;
 
 		private  var currentVolume:int = 100;
-		private var streamNameAudio:String;
-		private var streamNameVideo:String;
-		
+		private var streamName:String;
 		
 		private var flashAPI:Flash_API;
 		
@@ -75,7 +69,7 @@ package com.flashphoner.api
 					
 			if (infoObject.info.code == "NetStream.Play.Start"){
 				playing = true;
-				SoundControl.stopRingSound();
+				SoundControl.stopRingSound();				
 			}		
 					
 			else if (infoObject.info.code == "NetStream.Play.StreamNotFound" || infoObject.info.code == "NetStream.Play.Failed"||infoObject.info.code == "NetStream.Play.Stop"){
@@ -94,20 +88,11 @@ package com.flashphoner.api
 			}			
 					
 			if (infoObject.info.code == "NetStream.Play.Start"){
-				playingVideo = true;
-				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
-					apiNotify.notifyOpenVideoView(true);
-				}			
 
-				SoundControl.stopRingSound();
 			}		
 					
 			else if (infoObject.info.code == "NetStream.Play.StreamNotFound" || infoObject.info.code == "NetStream.Play.Failed"||infoObject.info.code == "NetStream.Play.Stop"){
 				Logger.info("incomingVideoStream.nsVideoOnStatus() "+infoObject.info.description);
-				playingVideo = false;
-				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
-					apiNotify.notifyOpenVideoView(false);
-				}			
 			}
 				
 		}
@@ -116,9 +101,9 @@ package com.flashphoner.api
 		 * Stop playing audio stream for call
 		 * @param callId identifier for call
 		 **/
-		public function stopAudio(callId:String):void{
-			Logger.info("PhoneSpeaker.stopAudio() - "+callId +"; current stream name - "+streamNameAudio);
-			if (incomingStream!=null && streamNameAudio.indexOf(callId) != -1){				
+		public function stop(callId:String):void{
+			Logger.info("PhoneSpeaker.stopAudio() - "+callId +"; current stream name - "+streamName);
+			if (incomingStream!=null && streamName.indexOf(callId) != -1){				
 				try{
 					incomingStream.play(false);
 				}catch (e:Error){
@@ -126,26 +111,9 @@ package com.flashphoner.api
 				}
 				incomingStream = null;
 				playing = false;
-			}
-		}
-		
-		/**
-		 * Stop playing video stream for call
-		 * @param callId identifier for call
-		 **/
-		public function stopVideo(callId:String):void{
-			Logger.info("PhoneSpeaker.stopVideo() - "+callId);
-			if (incomingVideoStream!=null && PhoneConfig.VIDEO_ENABLED && streamNameVideo.indexOf(callId) != -1){
-				try{
-					incomingVideoStream.play(false);
-				}catch(e:Error){
-					Logger.error(e.message);
-				}
-				incomingVideoStream = null;	
-				playingVideo = false;
 				video.clear();
 				video.attachNetStream(null);			
-			}		
+			}
 		}
 		
 		/**
@@ -153,31 +121,16 @@ package com.flashphoner.api
 		 * @param streamName name of audio stream
 		 **/
 		public function play(streamName:String):void{
-			Logger.info("PhoneSpeaker play streamName="+streamName +"; currentStremName="+streamNameAudio);
-			if (streamName != streamNameAudio){
+			Logger.info("PhoneSpeaker play streamName="+streamName +"; currentStremName="+this.streamName);
+			if (this.streamName != streamName){
 				if (incomingStream != null){
-					stopAudio(streamNameAudio);
+					stop(this.streamName);
 				}
 				incomingStream = startNewIncomingStream(streamName,nsOnStatus);
-				streamNameAudio = streamName;
+				this.streamName = streamName;
 			}	
 		}
 
-		/**
-		 * Play video stream
-		 * @param streamName name of video stream
-		 **/
-		public function playVideo(streamName:String):void{
-			Logger.info("PhoneSpeaker playVideo streamName="+streamName+" playingVideo="+playingVideo);
-			if (streamName != streamNameVideo){
-				if (incomingVideoStream != null){
-					stopVideo(streamNameVideo);
-				}
-				incomingVideoStream = startNewIncomingStream(streamName,nsVideoOnStatus);
-				streamNameVideo = streamName;
-			}	
-		}
-		
 		private function startNewIncomingStream(streamName:String, listener:Function):NetStream{
 			Logger.info("PhoneSpeaker startNewIncomingStream streamName="+streamName);
 			

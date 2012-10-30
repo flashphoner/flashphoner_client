@@ -123,6 +123,13 @@ package com.flashphoner.api
 			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.VIDEO_FORMAT_CHANGED, call));
 		}
 		
+		public function onVideoPlay(_call:Object, play:Boolean):void{
+			var call:Call = process(_call);
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				apiNotify.notifyOpenVideoView(play);			
+			}
+		}		
+		
 		public function callbackHold(_call:Object, isHold:Boolean):void{
 			var call:Call = process(_call);
 			call.iHolded = isHold;
