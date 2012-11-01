@@ -13,7 +13,9 @@ This code and accompanying materials also available under LGPL and MPL license f
 package com.flashphoner.api.data
 {	
 	import flash.events.*;
+	import flash.media.H264Level;
 	import flash.net.*;
+
 	[Bindable]
 	/**
 	 * Confiruration parameters from file flashphoner.xml
@@ -95,6 +97,8 @@ package com.flashphoner.api.data
 		public static var AVOID_FLV2H264_TRANSCODING:Boolean = false;
 		
 		public static var ALLOW_PUBLISH_STREAMS:Boolean = true;
+		
+		public static var H264_LEVEL = H264Level.LEVEL_3;
 		
 		/**
 		 * Current version of Flashphoner product

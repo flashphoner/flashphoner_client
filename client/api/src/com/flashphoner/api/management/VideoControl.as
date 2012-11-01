@@ -40,14 +40,12 @@ package com.flashphoner.api.management
 		 * Init width,height,fps and another parameters
 		 **/ 
 		public function init():void{			
-			if (cam != null){				
-				supportedResolutions("720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
-				cam.setMode(PhoneConfig.VIDEO_WIDTH,PhoneConfig.VIDEO_HEIGHT,30,true);
-				cam.setKeyFrameInterval(48);
+			if (cam != null){	
+				supportedResolutions("1920x1080,1280x960,1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");				
+				cam.setKeyFrameInterval(48);				
 				cam.setQuality(0,90);
 				cam.setMotionLevel(0,2000);
-				PhoneConfig.VIDEO_WIDTH = cam.width;
-				PhoneConfig.VIDEO_HEIGHT = cam.height;	
+				Logger.info("initCam cam: "+cam.name+" "+cam.width+"x"+cam.height);
 			}
 			
 		}		
@@ -59,6 +57,8 @@ package com.flashphoner.api.management
 			var supportedResolutions:String = ""; 
 			var resolutionsSplit:Array = resolutions.split(",");
 			var flag:Boolean = true;
+			var optimalWidth=cam.width;
+			var optimalHeight=cam.height;
 			for (var i:int=0;i<resolutionsSplit.length;i++){
 				var res:String = resolutionsSplit[i];
 				var resSplit:Array = res.split("x");
@@ -66,17 +66,18 @@ package com.flashphoner.api.management
 				var h:int = int(resSplit[1]);
 				cam.setMode(w,h,30,true);
 				if ((w==cam.width)&&(h==cam.height)){
-					Logger.info("Resolution is supported: "+w+"x"+h);
+					Logger.info("Resolution is supported: "+w+"x"+h+" PhoneConfig.VIDEO_WIDTH: "+PhoneConfig.VIDEO_WIDTH+" PhoneConfig.VIDEO_HEIGHT: "+PhoneConfig.VIDEO_HEIGHT);
 					supportedResolutions += (w+"x"+h+",");
 					if ((w<=PhoneConfig.VIDEO_WIDTH)&&(h<=PhoneConfig.VIDEO_HEIGHT)&&flag){
-						PhoneConfig.VIDEO_WIDTH=w;
-						PhoneConfig.VIDEO_HEIGHT=h;
+						optimalWidth = w;
+						optimalHeight = h;
 						flag=false;
 					}
 				}else{
 					Logger.info("Resolution is NOT supported: "+w+"x"+h+", used: "+cam.width+"x"+cam.height);
 				}
 			}
+			cam.setMode(optimalWidth,optimalHeight,30,true);
 			
 			Logger.info("supportedResolutions: "+supportedResolutions+" PhoneConfig.VIDEO_WIDTH: "+PhoneConfig.VIDEO_WIDTH+" PhoneConfig.VIDEO_HEIGHT: "+PhoneConfig.VIDEO_HEIGHT);
 			
@@ -99,20 +100,15 @@ package com.flashphoner.api.management
 			if ((width>0)&&(height>0)){
 				cam.setMode(width,height,30,true);
 			}			
-		}
-
-  		/**
-		 * change current camera to used Flashphoner
-		 **/
-		public function changeCamera(camera:Camera):void{
-			Logger.info("changeCamera");
-			if (PhoneConfig.VIDEO_ENABLED){
-				camera.setMode(176,144,15,false);
-				camera.setKeyFrameInterval(48);
-				camera.setQuality(0,95);
-				camera.setMotionLevel(0,2000);	
-				this.cam = camera;			
+		}  		
+		
+		public function changeCamera(camera:Camera):Camera{			
+			if (PhoneConfig.VIDEO_ENABLED){				
+				this.cam = camera;
+				init();
 			}
+			Logger.info("changeCamera camera: "+cam.name+" "+cam.width+"x"+cam.height);
+			return this.cam;
 		}
 	}
 }

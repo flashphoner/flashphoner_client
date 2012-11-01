@@ -101,6 +101,8 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("isMuted",isMuted);
 			ExternalInterface.addCallback("getMicropones",getMicropones);
 			ExternalInterface.addCallback("setMicrophone",setMicrophone);
+			ExternalInterface.addCallback("getCurrentCam",getCurrentCam);
+			ExternalInterface.addCallback("getCurrentMic",getCurrentMic);
 			ExternalInterface.addCallback("getCameras",getCameras);
 			ExternalInterface.addCallback("setCamera",setCamera);
 			ExternalInterface.addCallback("getCurrentCall",getCurrentCall);
@@ -501,19 +503,28 @@ package com.flashphoner.api
 			return Camera.names;
 		}
 		
+		public function getCurrentCam():String{
+			var cam:String = videoControl.getCam().name;
+			Logger.info("getCurrentCam "+cam);
+			return cam; 
+		}
+		
+		public function getCurrentMic():String{
+			var mic:String = soundControl.getMicrophone().name;
+			Logger.info("getCurrentMic "+mic);
+			return mic;
+		}
+		
 		/**
 		 * Set current camera
 		 * @param name name of camera
 		 **/		
-		public function setCamera(name:String):void{
-			//videoControl.changeCamera(Camera.getCamera(name));
-			
-			// WSP-1933
+		public function setCamera(name:String):void{			
 			var camera:Camera = Camera.getCamera(name);
-			videoControl.changeCamera(Camera.getCamera(name));
+			var newCam:Camera = videoControl.changeCamera(camera);
 			var call:Call = getCurrentCall();
 			if (call != null){
-				call.setNewCamera(camera);
+				call.setNewCamera(newCam);
 			}
 			
 		}

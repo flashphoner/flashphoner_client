@@ -192,6 +192,13 @@ package com.flashphoner.api
 					}
 					Logger.info("AVOID_H264_TRANSCODING: "+PhoneConfig.AVOID_FLV2H264_TRANSCODING);
 					
+					var h264Level:String = xml.h264_level;
+					if (h264Level != null && h264Level.length!=0) {
+						PhoneConfig.H264_LEVEL = h264Level;	
+					}
+					Logger.info("H264_LEVEL: "+PhoneConfig.H264_LEVEL);
+					
+					
 			        if (xml.ring_sound != null && xml.ring_sound.toString() != ""){
 			        	SoundControl.RING_SOUND = xml.ring_sound;
 			        }

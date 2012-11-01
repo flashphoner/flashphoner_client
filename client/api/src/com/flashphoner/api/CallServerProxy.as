@@ -18,12 +18,17 @@ package com.flashphoner.api
 	
 	import flash.events.AsyncErrorEvent;
 	import flash.events.NetStatusEvent;
+	import flash.events.TimerEvent;
 	import flash.media.Camera;
 	import flash.media.H264Profile;
 	import flash.media.H264VideoStreamSettings;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
 	import flash.net.Responder;
+	import flash.utils.Timer;
+	import flash.utils.setTimeout;
+	
+	import org.osmf.events.TimeEvent;
 
 	internal class CallServerProxy
 	{
@@ -31,6 +36,8 @@ package com.flashphoner.api
 		
 		private var nc:NetConnection;
 		private var flashCall:Call;
+		
+		private var isChangeVideoSorceRequested=false;
 		
 		private var sendVideo:Boolean = false;
 		
@@ -70,7 +77,8 @@ package com.flashphoner.api
 			if (outStream == null){
 				outStream = new NetStream(nc);
 				outStream.addEventListener(AsyncErrorEvent.ASYNC_ERROR,asyncErrorHandler);
-				outStream.addEventListener(NetStatusEvent.NET_STATUS,onNetStatus);									
+				outStream.addEventListener(NetStatusEvent.NET_STATUS,onNetStatus);	
+			
 				outStream.attachAudio(flashCall.flash_API.soundControl.getMicrophone());		
 				
 				if (PhoneConfig.VIDEO_ENABLED && sendVideo){					
@@ -85,9 +93,9 @@ package com.flashphoner.api
 		
 		private function setVideoCompressionSettings(outStream:NetStream):void{
 			if (PhoneConfig.MAJOR_PLAYER_VERSION >= 11 && PhoneConfig.AVOID_FLV2H264_TRANSCODING){
-				Logger.info("Player 11. Using h.264 compresstion settings...")
+				Logger.info("Player 11. Using h.264 compresstion settings... level: "+PhoneConfig.H264_LEVEL)
 				var settings:flash.media.H264VideoStreamSettings= new flash.media.H264VideoStreamSettings();					
-				settings.setProfileLevel(H264Profile.BASELINE, flash.media.H264Level.LEVEL_3);					
+				settings.setProfileLevel(H264Profile.BASELINE, PhoneConfig.H264_LEVEL);					
 				outStream.videoStreamSettings = settings;				
 			}
 			var cam:Camera = flashCall.flash_API.videoControl.getCam();
@@ -98,10 +106,7 @@ package com.flashphoner.api
 		public function unpublish():void{	
 			Logger.info("CallServerProxy.unpublish() call.id: "+flashCall.id);
 			if (outStream != null){				
-				outStream.removeEventListener(AsyncErrorEvent.ASYNC_ERROR,asyncErrorHandler);
-				outStream.removeEventListener(NetStatusEvent.NET_STATUS,onNetStatus);		
-				outStream.close();
-				outStream=null;
+				outStream.close();				
 			}		
 		}		
 		public function setSendVideo(flag:Boolean):void{
@@ -130,13 +135,30 @@ package com.flashphoner.api
 		}
 		
 		private function onNetStatus(event : NetStatusEvent) : void{
-		}
+			Logger.info("onNetStatus "+event.info.code);
+			if (event.info.code=="NetStream.Unpublish.Success"){
+				if (isChangeVideoSorceRequested){
+					isChangeVideoSorceRequested=false;
+					setTimeout(publish,1000,flashCall.flash_API.modelLocator.login);					
+				}
+				
+				outStream.removeEventListener(AsyncErrorEvent.ASYNC_ERROR,asyncErrorHandler);
+				outStream.removeEventListener(NetStatusEvent.NET_STATUS,onNetStatus);
+				outStream=null;
+				
+			}
+		}		
+		
 		
 		// WSP-1933
 		public function setNewCamera(camera:Camera):void{
-			if (outStream != null && PhoneConfig.VIDEO_ENABLED && sendVideo){
-				outStream.attachCamera(camera);
+			Logger.info("setNewCamera");
+			if (outStream != null && PhoneConfig.VIDEO_ENABLED && sendVideo){				
+				isChangeVideoSorceRequested=true;
+				unpublish();				
 			}
-		} 
+		}	
+		
+		
 	}
 }

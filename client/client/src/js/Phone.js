@@ -1078,21 +1078,22 @@ $(function() {
         
         var micList = flashphoner.getMicropones();
         var camList = flashphoner.getCameras();
+	var cam = flashphoner.getCurrentCam();
+	var mic = flashphoner.getCurrentMic();
  
         //clear it each time, else we append it more and more... 
         $("#micSelector").html("");
-        $("#camSelector").html("");
-        
-		$("#micSelector").append('<option value="Select microphone">Select microphone</option>');
-		$("#camSelector").append('<option value="Select camera">Select camera</option>');
+        $("#camSelector").html("");        
 		
         for (var i = 0; i < micList.length; i++) {
-          $("#micSelector").append('<option value="' + micList[i] + '">' + micList[i] + '</option>');
+	  var selected = (mic==micList[i])?"selected":"";	
+          $("#micSelector").append('<option '+selected+' value="' + micList[i] + '">' + micList[i] + '</option>');
         }
 
         // we use here index instead of name because AS getcamera can only use indexes
         for (var i = 0; i < camList.length; i++) {
-          $("#camSelector").append('<option value="' + i + '">' + camList[i] + '</option>');
+	  var selected = (cam==camList[i])?"selected":"";
+          $("#camSelector").append('<option '+selected+' value="' + i + '">' + camList[i] + '</option>');
         }
         
       } else {
