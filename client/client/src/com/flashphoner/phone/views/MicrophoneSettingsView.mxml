@@ -76,7 +76,7 @@ This code and accompanying materials also available under LGPL and MPL license f
             }
             public function onClickOk():void{
             	PopUpManager.removePopUp(this);
-				flashAPI.soundControl.getMicrophone().setLoopBack(false);
+				flashAPI.soundControl.setLoopBack(false);
             }
 		]]>
 	</mx:Script>

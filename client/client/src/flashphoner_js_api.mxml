@@ -79,7 +79,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			
 			public function viewAccessMessage():void{
 				if (flashAPI.soundControl.isMuted() == 1){ 
-					flashAPI.soundControl.getMicrophone().setLoopBack(true);
+					flashAPI.soundControl.setLoopBack(true);
 					timer.addEventListener(TimerEvent.TIMER, timerTick);
 					timer.start();
 				}
@@ -89,7 +89,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			}
 			
 			private function timerTick(event:TimerEvent){
-				flashAPI.soundControl.getMicrophone().setLoopBack(false);
+				flashAPI.soundControl.setLoopBack(false);
 			}
 			
 			public function changeRelationMyVideo(relation:Number):void{

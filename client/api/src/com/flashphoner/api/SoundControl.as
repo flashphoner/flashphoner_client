@@ -85,10 +85,9 @@ package com.flashphoner.api
 			if (mic != null){
 				initMic(mic,50,false);
 			}			
-		}
+		}	
 		
-		
-		private function defineMicrophone(index:int=-1):Microphone {
+		protected function defineMicrophone(index:int=-1):Microphone {
 			Logger.info("getMicrophone "+index);
 			if (PhoneConfig.USE_ENHANCED_MIC){				
 				if (PhoneConfig.MAJOR_PLAYER_VERSION >= 11 || Capabilities.language.indexOf("en") >= 0 || PhoneConfig.FORCE_ENHANCED_MIC){
@@ -260,7 +259,7 @@ package com.flashphoner.api
 			return mic;
 		}
 		
-		private function initMic(mic:Microphone, gain:int=50, loopback:Boolean=false):void{
+		protected function initMic(mic:Microphone, gain:int=50, loopback:Boolean=false):void{
 			var logMsg:String = "Init mic: codec: "+PhoneConfig.AUDIO_CODEC+" gain: "+50+" loopback: "+loopback;
 			Logger.info(logMsg);
 			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
@@ -285,7 +284,7 @@ package com.flashphoner.api
 			changeCodec(codecName);
 		}
 		
-		private function changeCodec(name:String):void{
+		protected function changeCodec(name:String):void{
 			Logger.info("changeCodec: "+name);
 			if (name=="speex"){
 				mic.codec = SoundCodec.SPEEX;
@@ -303,9 +302,13 @@ package com.flashphoner.api
 			}
 		}
 		
-		public function setSpeexQuality(quality:int){
+		public function setSpeexQuality(quality:int):void{
 			Logger.info("setSpeexQuality: "+quality);
 			mic.encodeQuality=quality;
+		}
+		
+		public function setLoopBack(bool:Boolean):void{
+			mic.setLoopBack(bool);
 		}
 		
 
