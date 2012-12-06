@@ -66,6 +66,8 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
         String usernameByStreamName = streamMap.get(this.getName());
         if (usernameByStreamName == null) {
             log.warn("Username was not found by streamName: " + getName());
+            //use normal rtmpClient detection process for this stream
+            rtmpClient = getRtmpClients().findByClient(getClient());
             return;
         }
         checkingIfUserCallEstablished(usernameByStreamName);
@@ -74,10 +76,10 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
     @Override
     public void stopPublishing() {
         if (timer != null) {
-            timer.cancel();
-            rtmpClient = null;
+            timer.cancel();            
         }
         super.stopPublishing();
+        rtmpClient = null;
     }
 
     private void checkingIfUserCallEstablished(final String username) {
@@ -97,7 +99,7 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
                 if (rtmpClient != null) {
                     log.debug("Established, called: " + username + " rtmpClient: " + rtmpClient.getRtmpClientConfig().getLogin());
                 } else {
-                    log.debug("Call is not Established, called: " + username + " for stream: " + getName());
+                    log.debug("Call is not Established, called: " + username + " for stream: " + getName());                    
                 }
 
             }
