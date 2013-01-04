@@ -111,7 +111,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			}
 	        
         	private function onOpenMicrophoneSettingsView():void{
-        		flash_API.soundControl.getMicrophone().setLoopBack(true);
+        		flash_API.soundControl.setLoopBack(true);
         		PopUpManager.addPopUp(DataPhone.getInstance().microphoneSettingsView,this);
         		PopUpManager.centerPopUp(DataPhone.getInstance().microphoneSettingsView);
         	}

@@ -32,8 +32,12 @@ package com.flashphoner.api.management
 		
 		public function VideoControl()
 		{
-			cam = Camera.getCamera();
+			cam = getCamera();
 			
+		}
+		
+		public function getCamera():Camera{
+			return Camera.getCamera();
 		}
 		
 		/**

@@ -91,8 +91,10 @@ package com.flashphoner.api
 				outStream.videoStreamSettings = settings;				
 			}
 			var cam:Camera = flashCall.flash_API.videoControl.getCam();
-			outStream.attachCamera(cam);
-			Logger.info("attach video stream: "+cam.width+"x"+cam.height);
+			if (cam!=null){
+				outStream.attachCamera(cam);
+				Logger.info("attach video stream: "+cam.width+"x"+cam.height);
+			}
 		}
 		
 		public function unpublish():void{	

@@ -25,6 +25,7 @@ package com.flashphoner.api
 	import flash.media.*;
 	import flash.net.*;
 	import flash.system.Capabilities;
+	import flash.system.Security;
 	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
@@ -68,6 +69,9 @@ package com.flashphoner.api
 		
 		
 		private function init(event:TimerEvent = null):void{
+			
+			Security.allowDomain("*");
+			
 			if (Application.application == null || Application.application.parameters == null){
 				return;
 			}else{
@@ -179,6 +183,12 @@ package com.flashphoner.api
 						PhoneConfig.AUDIO_CODEC = xml.audio_codec;
 					}
 					Logger.info("AUDIO_CODEC: "+PhoneConfig.AUDIO_CODEC);
+					
+					var allowPublishStreams:String = xml.allow_publish_streams;
+					if (allowPublishStreams=="false"){
+						PhoneConfig.ALLOW_PUBLISH_STREAMS = false;
+					}
+					Logger.info("ALLOW_PUBLISH_STREAMS: "+PhoneConfig.ALLOW_PUBLISH_STREAMS);
 					
 					if (xml.avoid_flv2h264_transcoding != null && xml.avoid_flv2h264_transcoding.toString() != ""){
 						PhoneConfig.AVOID_FLV2H264_TRANSCODING = (xml.avoid_flv2h264_transcoding == "true");

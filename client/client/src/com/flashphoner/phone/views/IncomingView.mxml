@@ -61,13 +61,13 @@ This code and accompanying materials also available under LGPL and MPL license f
 			private function viewAccessMessage():void{
 				PopUpManager.addPopUp(accessView,DisplayObject(Application.application),true);
 				PopUpManager.centerPopUp(accessView);
-				flash_API.soundControl.getMicrophone().setLoopBack(true);
+				flash_API.soundControl.setLoopBack(true);
 				timer.addEventListener(TimerEvent.TIMER, timerTick);
 				timer.start();
 			}
 			
 			private function timerTick(event:TimerEvent){
-				flash_API.soundControl.getMicrophone().setLoopBack(false);
+				flash_API.soundControl.setLoopBack(false);
 			}
 			
 			private function onChangeStatus(event:TimerEvent){

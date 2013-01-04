@@ -117,8 +117,13 @@ package com.flashphoner.api
 		
 		public function initMedia():void{
 			Logger.info("Init media...");
-			soundControl = new SoundControl(this);
-			videoControl = new VideoControl();
+			if (PhoneConfig.ALLOW_PUBLISH_STREAMS){
+				soundControl = new SoundControl(this);
+				videoControl = new VideoControl();
+			}else{
+				soundControl = new NullSoundControl(this);
+				videoControl = new NullVideoControl();
+			}
 		}
 		
 		/**
@@ -490,6 +495,18 @@ package com.flashphoner.api
 		 **/
 		public function getCameras():Array{
 			return Camera.names;
+		}
+		
+		public function getCurrentCam():String{
+			var cam:Camera = videoControl.getCam();
+			
+			var camName:String = "null";
+			if (cam!=null){
+				camName = videoControl.getCam().name;	
+			}
+			
+			Logger.info("getCurrentCam "+camName);
+			return camName; 
 		}
 		
 		/**
