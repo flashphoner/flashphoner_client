@@ -18,8 +18,8 @@
 
 package com.flashphoner.phone_app;
 
-import com.flashphoner.sdk.rtmp.IRtmpClient;
 import com.flashphoner.sdk.rtmp.IRtmpClientsCollection;
+import com.flashphoner.sdk.util.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +38,7 @@ import java.util.TimerTask;
 public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
 
     private static Logger log = LoggerFactory.getLogger(Rtmp2VoipStreamSourceFMS.class);
+    private static Logger logWriteAudio = LoggerFactory.getLogger("_com.flashphoner.sdk.rtmp.Rtmp2VoipStreamSourceFMS.writeAudio");
 
     private static Map<String, String> streamMap = new HashMap<String, String>();
 
@@ -76,7 +77,7 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
     @Override
     public void stopPublishing() {
         if (timer != null) {
-            timer.cancel();            
+            timer.cancel();
         }
         super.stopPublishing();
         rtmpClient = null;
@@ -99,7 +100,7 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
                 if (rtmpClient != null) {
                     log.debug("Established, called: " + username + " rtmpClient: " + rtmpClient.getRtmpClientConfig().getLogin());
                 } else {
-                    log.debug("Call is not Established, called: " + username + " for stream: " + getName());                    
+                    log.debug("Call is not Established, called: " + username + " for stream: " + getName());
                 }
 
             }
@@ -119,6 +120,10 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
     }
 
     protected void writeAudio(byte[] data) {
+        if (logWriteAudio.isTraceEnabled()) {
+            String rtmpClientStr = (rtmpClient == null) ? "null" : rtmpClient.getRtmpClientConfig().getLogin();
+            logWriteAudio.trace("writeAudio rtmpClientStr;length;clientId;timecode;bytes: " + rtmpClientStr + ";" + data.length + ";" + this.client.getClientId() + ";" + this.getAudioTC() + ";" + LogUtils.byteArrayToHexString(data));
+        }
         if (rtmpClient != null) {
             rtmpClient.writeAudio(data, -1);
         } else {
