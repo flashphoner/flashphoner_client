@@ -84,6 +84,8 @@ package com.flashphoner.api
 		}
 		
 		private function setVideoCompressionSettings(outStream:NetStream):void{
+			outStream.audioReliable = PhoneConfig.AUDIO_RELIABLE;
+			outStream.videoReliable = PhoneConfig.VIDEO_RELIABLE;
 			if (PhoneConfig.MAJOR_PLAYER_VERSION >= 11 && PhoneConfig.AVOID_FLV2H264_TRANSCODING){
 				Logger.info("Player 11. Using h.264 compresstion settings...")
 				var settings:flash.media.H264VideoStreamSettings= new flash.media.H264VideoStreamSettings();					

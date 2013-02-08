@@ -92,7 +92,12 @@ package com.flashphoner.api.data
 		
 		public static var MAJOR_PLAYER_VERSION:int = 11;
 		
-		public static var AVOID_FLV2H264_TRANSCODING:Boolean = false;
+		public static var AVOID_FLV2H264_TRANSCODING:Boolean = true;
+		
+		public static var VIDEO_RELIABLE = false;
+		
+		public static var AUDIO_RELIABLE = false;		
+		
 		
 		/**
 		 * Current version of Flashphoner product
