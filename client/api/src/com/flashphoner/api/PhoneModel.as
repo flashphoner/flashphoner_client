@@ -195,6 +195,16 @@ package com.flashphoner.api
 					}
 					Logger.info("AVOID_H264_TRANSCODING: "+PhoneConfig.AVOID_FLV2H264_TRANSCODING);
 					
+					if (xml.audio_reliable != null && xml.audio_reliable.toString() != ""){
+						PhoneConfig.AUDIO_RELIABLE = (xml.audio_reliable == "true");
+					}
+					Logger.info("AUDIO_RELIABLE: "+PhoneConfig.AUDIO_RELIABLE);
+					
+					if (xml.video_reliable != null && xml.video_reliable.toString() != ""){
+						PhoneConfig.VIDEO_RELIABLE = (xml.video_reliable == "true");
+					}
+					Logger.info("VIDEO_RELIABLE: "+PhoneConfig.VIDEO_RELIABLE);
+					
 			        if (xml.ring_sound != null && xml.ring_sound.toString() != ""){
 			        	SoundControl.RING_SOUND = xml.ring_sound;
 			        }

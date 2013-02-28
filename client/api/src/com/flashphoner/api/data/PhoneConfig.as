@@ -96,6 +96,10 @@ package com.flashphoner.api.data
 		
 		public static var ALLOW_PUBLISH_STREAMS:Boolean = true;
 		
+		public static var VIDEO_RELIABLE = true;
+		
+		public static var AUDIO_RELIABLE = true;
+		
 		/**
 		 * Current version of Flashphoner product
 		 **/		
