@@ -141,6 +141,11 @@ package com.flashphoner.api
 			var streamClientObj:Object = new Object();
 			stream.client = streamClientObj;
 			stream.bufferTime = PhoneConfig.BUFFER_TIME;
+			if (stream.bufferTime==0){
+				stream.useJitterBuffer=true;
+			}else{
+				stream.useJitterBuffer=false;
+			}
 			Logger.info("bufferTime "+stream.bufferTime);
 				
 			var soundTransform:SoundTransform = new SoundTransform();	
