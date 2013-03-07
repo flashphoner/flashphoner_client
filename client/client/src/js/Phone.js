@@ -287,8 +287,9 @@ function notifyConnected() {
             openConnectingView("Waiting for registering...", 0);
         }
     } else {
+    	toLogState();
         callerLogin = getInfoAboutMe().login;
-        toLogState();
+        getElement("callerLogin").innerHTML = callerLogin;
         isLogged = true;
         closeConnectingView();
     }
@@ -303,6 +304,7 @@ function notifyRegistered() {
         callerLogin = getInfoAboutMe().login;
         getElement("callerLogin").innerHTML = callerLogin;
         isLogged = true;
+        connectingViewBeClosed = true;
         closeConnectingView();
     }
 }
