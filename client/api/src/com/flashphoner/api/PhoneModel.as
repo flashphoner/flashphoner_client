@@ -196,7 +196,7 @@ package com.flashphoner.api
 					Logger.info("VIDEO_RELIABLE: "+PhoneConfig.VIDEO_RELIABLE);
 					
 					if (xml.buffer_time != null && xml.buffer_time.toString() != ""){
-						PhoneConfig.BUFFER_TIME = int(xml.buffer_time);
+						PhoneConfig.BUFFER_TIME = Number(xml.buffer_time);
 					}
 					Logger.info("BUFFER_TIME: "+PhoneConfig.BUFFER_TIME);
 					

@@ -71,7 +71,9 @@ package com.flashphoner.api
 				outStream = new NetStream(nc);
 				outStream.addEventListener(AsyncErrorEvent.ASYNC_ERROR,asyncErrorHandler);
 				outStream.addEventListener(NetStatusEvent.NET_STATUS,onNetStatus);									
-				outStream.attachAudio(flashCall.flash_API.soundControl.getMicrophone());		
+				outStream.attachAudio(flashCall.flash_API.soundControl.getMicrophone());
+				outStream.audioReliable = PhoneConfig.AUDIO_RELIABLE;
+				outStream.videoReliable = PhoneConfig.VIDEO_RELIABLE;
 				
 				if (PhoneConfig.VIDEO_ENABLED && sendVideo){					
 					setVideoCompressionSettings(outStream);					
@@ -83,9 +85,7 @@ package com.flashphoner.api
 			}					
 		}
 		
-		private function setVideoCompressionSettings(outStream:NetStream):void{
-			outStream.audioReliable = PhoneConfig.AUDIO_RELIABLE;
-			outStream.videoReliable = PhoneConfig.VIDEO_RELIABLE;
+		private function setVideoCompressionSettings(outStream:NetStream):void{			
 			if (PhoneConfig.MAJOR_PLAYER_VERSION >= 11 && PhoneConfig.AVOID_FLV2H264_TRANSCODING){
 				Logger.info("Player 11. Using h.264 compresstion settings...")
 				var settings:flash.media.H264VideoStreamSettings= new flash.media.H264VideoStreamSettings();					

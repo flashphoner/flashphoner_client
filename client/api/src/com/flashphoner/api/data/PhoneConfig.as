@@ -43,7 +43,7 @@ package com.flashphoner.api.data
 		/**
 		 * Size of buffer in incomming video
 		 **/
-		public static var BUFFER_TIME:int = 0;
+		public static var BUFFER_TIME:Number = 0;
 		
 		/**
 		 * Is User Agent on VoIP server required (true/false)
