@@ -19,7 +19,7 @@
 		<link>
 			<name>bin-debug</name>
 			<type>2</type>
-			<locationURI>DOCUMENTS/libs</locationURI>
+			<location>C:/PROJECTS/Tooboos/Client/client/libs</location>
 		</link>
 	</linkedResources>
 </projectDescription>

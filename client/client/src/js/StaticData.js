@@ -28,3 +28,11 @@ var REGISTER_EXPIRE = "REGISTER_EXPIRE";
 var SIP_PORTS_BUSY = "SIP_PORTS_BUSY";	
 var MEDIA_PORTS_BUSY = "MEDIA_PORTS_BUSY";	
 var WRONG_SIPPROVIDER_ADDRESS = "WRONG_SIPPROVIDER_ADDRESS";
+
+function extend(Child, Parent) {
+    var F = function() { }
+    F.prototype = Parent.prototype
+    Child.prototype = new F()
+    Child.prototype.constructor = Child
+    Child.superclass = Parent.prototype
+}

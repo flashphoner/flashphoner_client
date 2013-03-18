@@ -12,28 +12,24 @@ This code and accompanying materials also available under LGPL and MPL license f
 */
 
 var flashphoner;
+var flashphonerLoader;
 
 // One call become two calls during TRANSFER case
 // there is why we need at least two kinds of calls here
 var holdedCall = null;
 var currentCall = null;
+// not sure if "callee" is reserved word so I will use callee /Pavel
 var callee = '';
-// not sure if "callee" is reserved word so I will use callee1 /Pavel
-var callee1 = '';
 var callerLogin = '';
 var registerRequired;
 var isLogged = false;
 
-var micVolume = 100;
-var speakerVolume = 100;
 var connectingViewBeClosed = false;
 var traceEnabled = true;
 var intervalId = -1;
-var isMutedMicButton = false;
-var isMutedSpeakerButton = false;
 var proportion = 0;
 
-var testInviteParameter = new Object;
+var testInviteParameter = {};
 testInviteParameter['param1'] = "value1";
 testInviteParameter['param2'] = "value2";
 
@@ -78,27 +74,26 @@ function trace(funcName, param1, param2, param3) {
 
 $(document).ready(function() {
     toLogOffState();
-    if (playerIsRight()) {
-    	openConnectingView("Loading...", 0);
-    }else{
-    	openConnectingView("You have old flash player", 0);
-		  trace("Download flash player from: http://get.adobe.com/flashplayer/");
-    }
+    openConnectingView("Loading...", 0);
+    flashphonerLoader = new FlashphonerLoader();
+// 	openConnectingView("You have old flash player", 0);
+//  trace("Download flash player from: http://get.adobe.com/flashplayer/");
 });
 
 
 function login() {
     trace("login");
     connectingViewBeClosed = false;
-    
+
     if ($("#outbound_proxy").val() == "") {
       $("#outbound_proxy").val($("#domain").val());
     }
     
-    var loginObject = new Object();
-    loginObject.username = 'sip:' + $('#username').val() + '@' + $('#domain').val();
+    var loginObject = {};
+    loginObject.login = $('#username').val();
     loginObject.password = $('#password').val();
     loginObject.authenticationName = $('#authname').val();
+    loginObject.domain = $('#domain').val();
     loginObject.outboundProxy = $('#outbound_proxy').val();
     loginObject.port = $('#port').val();
     
@@ -141,7 +136,7 @@ function call() {
             intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);call();}', 500);
             requestUnmute();
         } else if (isMuted() == -1){
-            var result = flashphoner.call(callee1, 'Caller', false, testInviteParameter);
+            var result = flashphoner.call(callee, 'Caller', false, testInviteParameter);
             if (result == 0) {
                 toHangupState();
             } else {
@@ -256,9 +251,11 @@ function addLogMessage(message) {
 }
 
 function notifyFlashReady() {
-	$('#versionOfProduct').html(getVersion());
-    if (flashvars.token != null) {
-        loginByToken(flashvars.token);
+    flashphoner = flashphonerLoader.getFlashphoner();
+    //todo refactoring
+	//$('#versionOfProduct').html(getVersion());
+    if (flashphonerLoader.getToken()) {
+        loginByToken(flashphonerLoader.getToken());
     } else {
         closeConnectingView();
     }
@@ -606,8 +603,8 @@ function disableHoldButton() {
 
 
 function openLoginView() {
-    if (flashvars.token != null) {
-        loginByToken(flashvars.token);
+    if (flashphonerLoader.getToken()) {
+        loginByToken(flashphonerLoader.getToken());
     } else {
         trace("openLoginView");
         $('#loginDiv').css('visibility', 'visible');
@@ -917,7 +914,7 @@ $(function() {
     // every time when we change callee field - we set parameter callee
     // that parameter used around the code 
     $("#calleeText").keyup(function() {
-      callee1 = $(this).val();
+      callee = $(this).val();
     });
 
     //Bind click on different buttons
@@ -998,7 +995,7 @@ $(function() {
             sendDTMF(currentCall.id, $(this).html());
         } else if (currentCall == null) {
             $("#calleeText").val($("#calleeText").val() + $(this).html());
-            callee1 = callee1 + $(this).html(); 
+            callee = callee + $(this).html();
         }
     });
 
@@ -1014,9 +1011,9 @@ $(function() {
     // Bind click on chatButton
     $("#chatButton").click(function() {
         if (isLogged) {
-            if (callee1 != '') {
+            if (callee != '') {
                 openChatView();
-                createChat(callee1.toLowerCase());
+                createChat(callee.toLowerCase());
             } else {
                 openConnectingView("Callee number is wrong", 3000);
             }

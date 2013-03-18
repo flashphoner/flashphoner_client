@@ -27,11 +27,11 @@
     <classEntry path="com.flashphoner.api.management.VideoControl"/>
   </includeClasses>
   <includeResources>
-    <resourceEntry destPath="sounds/CALL_OUT.mp3" sourcePath="sounds/CALL_OUT.mp3"/>
     <resourceEntry destPath="sounds/HANGUP.mp3" sourcePath="sounds/HANGUP.mp3"/>
+    <resourceEntry destPath="sounds/CALL_OUT.mp3" sourcePath="sounds/CALL_OUT.mp3"/>
     <resourceEntry destPath="sounds/BUSY.mp3" sourcePath="sounds/BUSY.mp3"/>
-    <resourceEntry destPath="sounds/CALL_IN.mp3" sourcePath="sounds/CALL_IN.mp3"/>
     <resourceEntry destPath="sounds/REGISTER.mp3" sourcePath="sounds/REGISTER.mp3"/>
+    <resourceEntry destPath="sounds/CALL_IN.mp3" sourcePath="sounds/CALL_IN.mp3"/>
   </includeResources>
   <namespaceManifests/>
 </flexLibProperties>

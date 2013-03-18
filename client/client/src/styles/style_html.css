@@ -72,13 +72,13 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 }
 /* ---------- Border ------------ */
 #settingsDiv, #loginDiv, #infoDiv, #connectingDiv, #transfer, #incomingDiv, #video_requestUnmuteDiv, #controlPanel, #chatDiv {
-	border-width: 2px 5px 5px\0/; /*only for ie8*/
-	border-style: solid\0/; /*only for ie8*/
-	border-color: #ddd\0/; /*only for ie8*/
+	border-width: 2px 5px 5px 0; /*only for ie8*/
+	border-style: solid; /*only for ie8*/
+	border-color: #ddd; /*only for ie8*/
   border: 1px solid #aaa;
 }
 #connectingDiv, #infoDiv {
-	border-width: 5px\0/; /*only for ie8*/
+	border-width: 5px; /*only for ie8*/
 }
 /* ---------- Shadow ----------*/ 
 #settingsDiv, #transfer, #infoDiv, #loginDiv, #connectingDiv, #video_requestUnmuteDiv, #incomingDiv, #chatDiv
@@ -89,7 +89,7 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 }
 
 /* ----------------------------- */
-textarea, text, input {
+textarea, input {
 	outline: none;
 	-moz-appearance: none;
 }
@@ -585,7 +585,6 @@ div with zero size.
   filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#dddddd', endColorstr='#cccccc');
   */
   line-height: 28px;
-  font-family: ;
 }
 
 .buttonLine {
@@ -697,11 +696,11 @@ div with zero size.
 	height: 80px !important;
 	border: 1px solid #999 !important;
 	background-color: #ddd !important;
-	box-shadow: inset 0px 0px 1px #777 !important;*/
+	box-shadow: inset 0px 0px 1px #777 !important;
 }
 .ui-slider-handle {
 	left: -5px !important;
-  border-radius: 8px !important;*/
+  border-radius: 8px !important;
 	cursor: pointer !important;
 	border: 1px solid #888 !important;
 	box-shadow: inset 0px 1px 0px #fff, 0px 0px 1px #777;
@@ -840,9 +839,5 @@ div with zero size.
 }
 .closeButton {
 	z-index: 101;
-}
-
-grey {
-	color: #888;
 }
 

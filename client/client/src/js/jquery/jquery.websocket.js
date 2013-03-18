@@ -1,0 +1,51 @@
+(function ($) {
+    $.extend({
+        websocketSettings: {
+            open: function () {
+            },
+            close: function () {
+            },
+            message: function () {
+            },
+            options: {},
+            events: {},
+            context: this
+        },
+        websocket: function (url, s) {
+            var ws = WebSocket ? new WebSocket(url) : {
+                send: function (m) {
+                    return false
+                },
+                close: function () {
+                }
+            };
+            $.extend($.websocketSettings, s);
+            $(ws).bind('open', $.websocketSettings.open)
+                .bind('close', $.websocketSettings.close)
+                .bind('message', $.websocketSettings.message)
+                .bind('message', function (e) {
+                    var m = $.evalJSON(e.originalEvent.data);
+                    var h = $.websocketSettings.events[m.type];
+                    if (h) h.call($.websocketSettings.context, m);
+                });
+
+            ws._send = ws.send;
+            ws.send = function (type, data) {
+                if (ws.readyState == 1) {
+                    var m = {type: type};
+                    m = $.extend(true, m, $.extend(true, {}, $.websocketSettings.options, m));
+                    if (data) m['data'] = data;
+                    return this._send($.toJSON(m));
+                }
+                {
+                    return false;
+                }
+            }
+            $(window).unload(function () {
+                ws.close();
+                ws = null
+            });
+            return ws;
+        }
+    });
+})(jQuery);
