@@ -24,7 +24,7 @@ var WebSocketManager = function (url) {
 WebSocketManager.prototype = {
 
     login: function (loginObject) {
-        this.webSocket.send("login", loginObject);
+        this.webSocket.send("connect", loginObject);
         return 0;
     },
 

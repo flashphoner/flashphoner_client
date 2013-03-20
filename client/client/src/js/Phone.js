@@ -96,7 +96,7 @@ function login() {
     loginObject.domain = $('#domain').val();
     loginObject.outboundProxy = $('#outbound_proxy').val();
     loginObject.port = $('#port').val();
-    
+
     var result = flashphoner.login(loginObject);
     closeLoginView();
     if (result == 0) {
