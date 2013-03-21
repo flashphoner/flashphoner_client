@@ -26,7 +26,7 @@
                 .bind('message', function (e) {
                     var m = $.evalJSON(e.originalEvent.data);
                     var h = $.websocketSettings.events[m.message];
-                    if (h) h.call($.websocketSettings.context, m);
+                    if (h) h.apply($.websocketSettings.context, m.data);
                 });
 
             ws._send = ws.send;
@@ -34,7 +34,7 @@
                 if (ws.readyState == 1) {
                     var m = {message: message};
                     m = $.extend(true, m, $.extend(true, {}, $.websocketSettings.options, m));
-                    if (data) m['data'] = data;
+                    if (data) m['data'] = [data, 5, 2.5, true];
                     return this._send($.toJSON(m));
                 }
                 {

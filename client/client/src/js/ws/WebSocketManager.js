@@ -13,9 +13,48 @@ var WebSocketManager = function (url) {
         },
         context:me,
         events: {
-            say: function(e) {
-                alert(e.data.name); // 'foo'
-                alert(e.data.text); // 'baa'
+            getUserData: function(user) {
+                alert(user);
+            },
+
+            getVersion: function(version) {
+                alert(version);
+            },
+
+            registered: function(sipHeader) {
+            },
+
+            ring: function(call, sipHeader) {
+            },
+
+            sessionProgress: function(call, sipHeader) {
+            },
+
+            talk: function(call, sipHeader) {
+            },
+
+            hold: function(call, sipHeader) {
+            },
+
+            callbackHold: function(call, isHold) {
+            },
+
+            finish: function(call, sipHeader) {
+            },
+
+            busy: function(call, sipHeader) {
+            },
+
+            fail: function(errorCode, sipHeader) {
+            },
+
+            notifyVideoFormat: function(call) {
+            },
+
+            notifyMessage: function(message) {
+            },
+
+            notifyAudioCodec: function(call) {
             }
         }
     });
@@ -24,6 +63,11 @@ var WebSocketManager = function (url) {
 WebSocketManager.prototype = {
 
     login: function (loginObject) {
+        this.webSocket.send("connect", loginObject);
+        return 0;
+    },
+
+    call: function (loginObject) {
         this.webSocket.send("connect", loginObject);
         return 0;
     },
