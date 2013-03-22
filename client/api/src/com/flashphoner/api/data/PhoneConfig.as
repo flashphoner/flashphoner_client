@@ -41,6 +41,14 @@ package com.flashphoner.api.data
 		public static var VIDEO_HEIGHT:int = 144;
 		
 		/**
+		 * Video stream related configuration
+		 **/
+		public static var CAM_FPS:int = 15;
+		public static var CAM_KEEP_RATIO:Boolean = true;
+		public static var CAM_KEY_INT:int = 48;
+		public static var CAM_QUALITY:int = 80;
+		
+		/**
 		 * Size of buffer in incomming video
 		 **/
 		public static var BUFFER_TIME:Number = 0;

@@ -160,6 +160,26 @@ package com.flashphoner.api
 						PhoneConfig.VIDEO_HEIGHT = int(xml.video_height);
 					}
 					
+					if (xml.cam_fps != null && xml.cam_fps.toString() != ""){
+						PhoneConfig.CAM_FPS = int(xml.cam_fps);
+					}
+					Logger.info("CAM_FPS: "+PhoneConfig.CAM_FPS);
+					
+					if (xml.cam_keep_ratio == "false"){
+						PhoneConfig.CAM_KEEP_RATIO = false;
+					}
+					Logger.info("CAM_KEEP_RATIO: "+PhoneConfig.CAM_KEEP_RATIO);
+					
+					if (xml.cam_key_int != null && xml.cam_key_int.toString() != ""){
+						PhoneConfig.CAM_KEY_INT = int(xml.cam_key_int);
+					}
+					Logger.info("CAM_KEY_INT: "+PhoneConfig.CAM_KEY_INT);
+					
+					if (xml.cam_quality != null && xml.cam_quality.toString() != ""){
+						PhoneConfig.CAM_QUALITY = int(xml.cam_quality);
+					}
+					Logger.info("CAM_QUALITY: "+PhoneConfig.CAM_QUALITY);
+					
 					if (xml.keep_alive == "true"){
 						PhoneConfig.KEEP_ALIVE=true;	
 					}

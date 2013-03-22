@@ -29,10 +29,6 @@ package com.flashphoner.api.management
 	{
 		private static var videoControl:VideoControl;
 		private var cam:Camera;
-		private const FPS:int = 15;
-		private const KEEP_RATIO:Boolean = true;
-		private const KEY_INT:int = 48;
-		private const QUALITY:int = 80;
 		
 		public function VideoControl()
 		{
@@ -46,9 +42,9 @@ package com.flashphoner.api.management
 		public function init():void{			
 			if (cam != null){				
 				supportedResolutions("720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
-				cam.setMode(PhoneConfig.VIDEO_WIDTH,PhoneConfig.VIDEO_HEIGHT,FPS,KEEP_RATIO);
-				cam.setKeyFrameInterval(KEY_INT);
-				cam.setQuality(0,QUALITY);
+				cam.setMode(PhoneConfig.VIDEO_WIDTH,PhoneConfig.VIDEO_HEIGHT,PhoneConfig.CAM_FPS,PhoneConfig.CAM_KEEP_RATIO);
+				cam.setKeyFrameInterval(PhoneConfig.CAM_KEY_INT);
+				cam.setQuality(0,PhoneConfig.CAM_QUALITY);
 				cam.setMotionLevel(0,2000);
 				PhoneConfig.VIDEO_WIDTH = cam.width;
 				PhoneConfig.VIDEO_HEIGHT = cam.height;	
@@ -101,7 +97,7 @@ package com.flashphoner.api.management
 		public function changeFormat(width:int, height:int):void{
 			Logger.info("change format "+width+"x"+height);			
 			if ((width>0)&&(height>0)){
-				cam.setMode(width,height,FPS,KEEP_RATIO);
+				cam.setMode(width,height,PhoneConfig.CAM_FPS,PhoneConfig.CAM_KEEP_RATIO);
 			}			
 		}
 
@@ -111,9 +107,9 @@ package com.flashphoner.api.management
 		public function changeCamera(camera:Camera):void{
 			Logger.info("changeCamera");
 			if (PhoneConfig.VIDEO_ENABLED){
-				camera.setMode(320,240,FPS,KEEP_RATIO);
-				camera.setKeyFrameInterval(KEY_INT);
-				camera.setQuality(0,QUALITY);
+				camera.setMode(320,240,PhoneConfig.CAM_FPS,PhoneConfig.CAM_KEEP_RATIO);
+				camera.setKeyFrameInterval(PhoneConfig.CAM_KEY_INT);
+				camera.setQuality(0,PhoneConfig.CAM_QUALITY);
 				camera.setMotionLevel(0,2000);	
 				this.cam = camera;			
 			}
