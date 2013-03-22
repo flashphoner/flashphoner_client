@@ -358,14 +358,16 @@ function notifyCallbackHold(call, isHold) {
         currentCall = call;
         if (call.iHolded) {
             getElement('holdButton').style.background = "url(assets/unhold.png)";
-            getElement('holdButton').onclick = function() {
-               	setStatusHold(call.id, false);
-            }
+            $('#holdButton').unbind('click');
+            $('#holdButton').click(function() {
+         	setStatusHold(call.id, false);
+            });
         } else {
             getElement('holdButton').style.background = "url(assets/hold.png)";
-            getElement('holdButton').onclick = function() {
-               	setStatusHold(call.id, true);
-            }
+            $('#holdButton').unbind('click');
+            $('#holdButton').click(function() {
+         	setStatusHold(call.id, true);
+            });
         }
     }
 }
