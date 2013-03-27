@@ -18,6 +18,7 @@
 
 package com.flashphoner.phone_app;
 
+import com.flashphoner.sdk.rtmp.IRtmpClient;
 import com.flashphoner.sdk.rtmp.IRtmpClientsCollection;
 import com.flashphoner.sdk.util.LogUtils;
 import org.slf4j.Logger;
@@ -38,7 +39,8 @@ import java.util.TimerTask;
 public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
 
     private static Logger log = LoggerFactory.getLogger(Rtmp2VoipStreamSourceFMS.class);
-    private static Logger logWriteAudio = LoggerFactory.getLogger("_com.flashphoner.sdk.rtmp.Rtmp2VoipStreamSourceFMS.writeAudio");
+    private static StreamLogger writeAudio = StreamLogger.getLogger("writeAudio.Rtmp2VoipStreamSourceFMS");
+    private static StreamLogger writeVideo = StreamLogger.getLogger("writeVideo.Rtmp2VoipStreamSourceFMS");
 
     private static Map<String, String> streamMap = new HashMap<String, String>();
 
@@ -64,11 +66,17 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
 
     @Override
     public void startPublishing() {
+        if (log.isDebugEnabled()) {
+            log.debug("startPublishing looking rtmpClient in streamMap by streamName: " + getName());
+        }
         String usernameByStreamName = streamMap.get(this.getName());
         if (usernameByStreamName == null) {
             log.warn("Username was not found by streamName: " + getName());
             //use normal rtmpClient detection process for this stream
             rtmpClient = getRtmpClients().findByClient(getClient());
+            if (log.isDebugEnabled()) {
+                log.debug("startPublishing rtmpClient was found: " + str(rtmpClient));
+            }
             return;
         }
         checkingIfUserCallEstablished(usernameByStreamName);
@@ -87,50 +95,55 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                if (log.isDebugEnabled()) {
-                    log.debug("Checking for user call established: " + username);
-                }
-                IRtmpClientsCollection clients = getRtmpClients();
-                if (clients == null) {
-                    log.info("IRtmpClientsCollection is empty. Waiting for connection...");
-                    return;
-                }
+                try {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Checking if user call is established: " + username);
+                    }
+                    IRtmpClientsCollection clients = getRtmpClients();
+                    if (clients == null) {
+                        log.info("IRtmpClientsCollection is empty. Waiting for connection...");
+                        return;
+                    }
 
-                rtmpClient = clients.findByCalledInEstablishedCalls(username);
-                if (rtmpClient != null) {
-                    log.debug("Established, called: " + username + " rtmpClient: " + rtmpClient.getRtmpClientConfig().getLogin());
-                } else {
-                    log.debug("Call is not Established, called: " + username + " for stream: " + getName());
+                    rtmpClient = clients.findByCalledInEstablishedCalls(username);
+                    if (rtmpClient != null) {
+                        log.debug("Established, called: " + username + " rtmpClient: " + str(rtmpClient) + " stream: " + getName());
+                    } else {
+                        log.debug("Call is not Established, called: " + username + " for stream: " + getName());
+                    }
+                } catch (Exception e) {
+                    log.warn("Error in checkingIfUserCallEstablished timer", e);
                 }
-
             }
         };
-        timer.schedule(task, 0, 1000);
+        timer.schedule(task, 0, 5000);
 
     }
 
     protected void writeVideo(byte[] data) {
+        if (writeVideo.isTraceEnabled()) {
+            String rtmpClientStr = str(rtmpClient);
+            writeVideo.trace("writeVideo rtmpClient: "+rtmpClientStr+" len: "+data.length+" clientId: "+client.getClientId()+" time: "+getVideoTC()+" streamName: "+getName());
+        }
         if (rtmpClient != null) {
             rtmpClient.writeVideo(data, -1, getVideoTC());
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("writeVideo NULL rtmpClient this: " + getName());
-            }
         }
     }
 
     protected void writeAudio(byte[] data) {
-        if (logWriteAudio.isTraceEnabled()) {
-            String rtmpClientStr = (rtmpClient == null) ? "null" : rtmpClient.getRtmpClientConfig().getLogin();
-            logWriteAudio.trace("writeAudio rtmpClientStr;length;clientId;timecode;bytes: " + rtmpClientStr + ";" + data.length + ";" + this.client.getClientId() + ";" + this.getAudioTC() + ";" + LogUtils.byteArrayToHexString(data));
+
+        if (writeAudio.isTraceEnabled()) {
+            String rtmpClientStr = str(rtmpClient);
+            writeAudio.trace("writeAudio rtmpClient: "+rtmpClientStr+" len: "+data.length+" clientId: "+client.getClientId()+" time: "+getAudioTC()+" streamName: "+getName());
         }
+
         if (rtmpClient != null) {
             rtmpClient.writeAudio(data, -1);
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("writeAudio NULL rtmpClient this: " + getName());
-            }
         }
+    }
+
+    private String str(IRtmpClient rtmpClient) {
+        return (rtmpClient == null) ? "null" : rtmpClient.getRtmpClientConfig().getLogin();
     }
 }
 
