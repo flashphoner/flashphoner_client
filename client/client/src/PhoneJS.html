@@ -19,6 +19,7 @@
     <!-- Other scripts -->
     <script type="text/javascript" src="js/swf/swfobject.js"></script>
     <script type="text/javascript" src="js/trackbar.js"></script>
+    <script type="text/javascript" src="js/rtc/WebRtcMediaManager.js"></script>
     <script type="text/javascript" src="js/ws/WebSocketManager.js"></script>
     <script type="text/javascript" src="js/StaticData.js"></script>
     <script type="text/javascript" src="js/Phone.js"></script>
@@ -155,16 +156,18 @@
 
 <!-- Video + RequestUnmuted view -->
 <div id="video_requestUnmuteDiv" class="init">
-    <div class="bar">&nbsp;&nbsp;Security panel</div>
-    <div id="requestUnmuteText">Please allow access to devices</div>
-    <div id="closeButton_video_requestUnmuteDiv"></div>
+    <video id="localVideoPreview" autoplay="autoplay" class="ui-widget-content"
+           style="height:120px; width:160px; margin-top: 10px; margin-right: 600px; -webkit-transition-property: opacity;-webkit-transition-duration: 2s;"></video>
+    <!--<div class="bar">&nbsp;&nbsp;Security panel</div>-->
+    <!--<div id="requestUnmuteText">Please allow access to devices</div>-->
+    <!--<div id="closeButton_video_requestUnmuteDiv"></div>-->
 
-    <div id="jsSWFDiv">
-        <a href="http://www.adobe.com/go/getflashplayer">
-            <img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif"
-                 alt="Get Adobe Flash player"/>
-        </a>
-    </div>
+    <!--<div id="jsSWFDiv">-->
+        <!--<a href="http://www.adobe.com/go/getflashplayer">-->
+            <!--<img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif"-->
+                 <!--alt="Get Adobe Flash player"/>-->
+        <!--</a>-->
+    <!--</div>-->
 
     <input type="button" class="button" id="sendVideo" value="Send video"/>
 </div>

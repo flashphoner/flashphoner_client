@@ -52,7 +52,7 @@ FlashphonerLoader.prototype = {
         }
 
         if (this.urlServer.indexOf("ws://") == 0) {
-            me.flashphoner = new WebSocketManager(this.urlServer);
+            me.flashphoner = new WebSocketManager(this.urlServer, getElement('localVideoPreview'));
             notifyFlashReady();
         } else if (this.urlServer.indexOf("rtmfp://") == 0 || this.urlServer.indexOf("rtmp://") == 0) {
             var params = {};

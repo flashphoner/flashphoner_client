@@ -34,7 +34,7 @@
                 if (ws.readyState == 1) {
                     var m = {message: message};
                     m = $.extend(true, m, $.extend(true, {}, $.websocketSettings.options, m));
-                    if (data) m['data'] = [data, 5, 2.5, true];
+                    if (data) m['data'] = [data];
                     return this._send($.toJSON(m));
                 }
                 {

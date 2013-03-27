@@ -1,9 +1,10 @@
-var WebSocketManager = function (url) {
+var WebSocketManager = function (url, localVideoPreview) {
     var me = this;
 
     me.isOpened = false;
     me.configLoaded = false;
-
+    this.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview);
+    var rtcManager = this.webRtcMediaManager;
     this.webSocket = $.websocket(url, {
         open: function() {
             me.isOpened = true;
@@ -14,20 +15,26 @@ var WebSocketManager = function (url) {
         context:me,
         events: {
             getUserData: function(user) {
-                alert(user);
+                me.user = user;
+                notifyRegisterRequired(user.regRequired)
             },
 
             getVersion: function(version) {
-                alert(version);
+                notifyVersion(version);
             },
 
             registered: function(sipHeader) {
+                notifyRegistered();
             },
 
             ring: function(call, sipHeader) {
             },
 
             sessionProgress: function(call, sipHeader) {
+            },
+
+            setRemoteSDP: function(call, sdp, isInitiator, sipHeader) {
+                rtcManager.setRemoteSDP(sdp, isInitiator);
             },
 
             talk: function(call, sipHeader) {
@@ -46,6 +53,7 @@ var WebSocketManager = function (url) {
             },
 
             fail: function(errorCode, sipHeader) {
+                notifyError(errorCode);
             },
 
             notifyVideoFormat: function(call) {
@@ -67,9 +75,21 @@ WebSocketManager.prototype = {
         return 0;
     },
 
-    call: function (loginObject) {
-        this.webSocket.send("connect", loginObject);
+    call: function (callRequest) {
+        var me = this;
+        this.webRtcMediaManager.createOffer(function(sdp) {
+            callRequest.sdp = sdp;
+            me.webSocket.send("call", callRequest);
+        });
         return 0;
+    },
+
+    isMuted: function(){
+        return this.webRtcMediaManager.localAudioVideoMediaStream != null ? -1 : 1;
+    },
+
+    getInfoAboutMe: function () {
+        return this.user;
     },
 
     getCookie: function (c_name) {

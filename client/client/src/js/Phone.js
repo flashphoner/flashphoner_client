@@ -136,7 +136,7 @@ function call() {
             intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);call();}', 500);
             requestUnmute();
         } else if (isMuted() == -1){
-            var result = flashphoner.call(callee, 'Caller', false, testInviteParameter);
+            var result = flashphoner.call({callee: callee, visibleName:'Caller', hasVideo:false, inviteParameters:testInviteParameter});
             if (result == 0) {
                 toHangupState();
             } else {
@@ -144,7 +144,7 @@ function call() {
             }
     	} else {
     		openConnectingView("Microphone is not plugged in", 3000);
-    	}        
+    	}
     } else {
         openLoginView();
     }
