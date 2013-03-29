@@ -1,10 +1,22 @@
-var WebSocketManager = function (url, localVideoPreview) {
+var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
     var me = this;
-
+    me.calls = [];
     me.isOpened = false;
     me.configLoaded = false;
-    this.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview);
+    this.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
     var rtcManager = this.webRtcMediaManager;
+
+    var proccessCall = function(call){
+        for (var i in me.calls) {
+            if (call.id == me.calls[i].id){
+                me.calls[i] = call;
+                return;
+            }
+        }
+        me.calls.push(call);
+        notifyAddCall(call);
+    };
+
     this.webSocket = $.websocket(url, {
         open: function() {
             me.isOpened = true;
@@ -28,28 +40,42 @@ var WebSocketManager = function (url, localVideoPreview) {
             },
 
             ring: function(call, sipHeader) {
+                proccessCall(call);
+                notify(call);
             },
 
             sessionProgress: function(call, sipHeader) {
+                proccessCall(call);
             },
 
             setRemoteSDP: function(call, sdp, isInitiator, sipHeader) {
+                proccessCall(call);
                 rtcManager.setRemoteSDP(sdp, isInitiator);
             },
 
             talk: function(call, sipHeader) {
+                proccessCall(call);
+                notify(call);
             },
 
             hold: function(call, sipHeader) {
+                proccessCall(call);
+                notify(call);
             },
 
             callbackHold: function(call, isHold) {
+                proccessCall(call);
+                notifyCallbackHold(call);
             },
 
             finish: function(call, sipHeader) {
+                proccessCall(call);
+                notify(call);
             },
 
             busy: function(call, sipHeader) {
+                proccessCall(call);
+                notify(call);
             },
 
             fail: function(errorCode, sipHeader) {
@@ -57,12 +83,15 @@ var WebSocketManager = function (url, localVideoPreview) {
             },
 
             notifyVideoFormat: function(call) {
+                proccessCall(call);
+                //notifyVideoFormat(call);
             },
 
             notifyMessage: function(message) {
+                notifyMessage(message);
             },
 
-            notifyAudioCodec: function(call) {
+            notifyAudioCodec: function(codec) {
             }
         }
     });
@@ -82,6 +111,13 @@ WebSocketManager.prototype = {
             me.webSocket.send("call", callRequest);
         });
         return 0;
+    },
+
+    answer: function(callId) {
+        var me = this;
+        this.webRtcMediaManager.createAnswer(function(sdp) {
+            me.webSocket.send("answer", {callId:callId, sdp:sdp});
+        });
     },
 
     isMuted: function(){

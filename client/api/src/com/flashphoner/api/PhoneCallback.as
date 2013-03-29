@@ -169,7 +169,7 @@ package com.flashphoner.api
 				call.id = _call.id;	
 			}
 
-			if (_call.isIncomming == 'true'){
+			if (_call.incoming == 'true'){
 				call.incoming = true;
 			}else{
 				call.incoming = false;

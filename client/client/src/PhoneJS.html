@@ -32,6 +32,7 @@
 
 <!-- JS phone -->
 <div id="phoneDiv">
+    <input id="auto_login_token" type="submit" value=""/>
 
     <div id="controlPanel">
         <!--
@@ -156,8 +157,6 @@
 
 <!-- Video + RequestUnmuted view -->
 <div id="video_requestUnmuteDiv" class="init">
-    <video id="localVideoPreview" autoplay="autoplay" class="ui-widget-content"
-           style="height:120px; width:160px; margin-top: 10px; margin-right: 600px; -webkit-transition-property: opacity;-webkit-transition-duration: 2s;"></video>
     <!--<div class="bar">&nbsp;&nbsp;Security panel</div>-->
     <!--<div id="requestUnmuteText">Please allow access to devices</div>-->
     <!--<div id="closeButton_video_requestUnmuteDiv"></div>-->
@@ -209,6 +208,12 @@
 <div id="console">
 </div>
 <!-- ******* -->
+
+<video id="localVideoPreview" autoplay="autoplay" class="ui-widget-content"
+       style="height:120px; width:160px; margin-top: 10px; margin-right: 600px; -webkit-transition-property: opacity;-webkit-transition-duration: 2s;"></video>
+<video id="remoteVideo" onDblClick="toggleFullScreen();" width="640px"
+       height="480px" autoplay="autoplay"
+       style="margin-top: 10px;-webkit-transition-property: opacity; -webkit-transition-duration: 2s;"></video>
 
 </body>
 </html>

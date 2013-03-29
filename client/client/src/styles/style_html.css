@@ -14,45 +14,44 @@ Write us support@flashphoner.com with any questions.
 */
 
 body {
-	font: 12px Arial;
+    font: 12px Arial;
 }
 img {
-	border: 0;
+    border: 0;
 }
-button::-moz-focus-inner,   
-input[type="reset"]::-moz-focus-inner,   
-input[type="button"]::-moz-focus-inner,   
-input[type="submit"]::-moz-focus-inner,   
+button::-moz-focus-inner,
+input[type="reset"]::-moz-focus-inner,
+input[type="button"]::-moz-focus-inner,
+input[type="submit"]::-moz-focus-inner,
 input[type="file"] > input[type="button"]::-moz-focus-inner {
-	border: none;
+    border: none;
 }
 
 /* -------- Backgrounds ------- */
-#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, .login_link, #transfer, #incomingDiv, #newChat {
-	background: #fff;
+#settingsView, #loginDiv, #infoDiv, #connectingDiv, .login_link, #transfer, #incomingDiv, #newChat {
+    background: #fff;
 }
 #controlPanel, .bar, .videoDiv, #chatDiv, #tabul, .button {
-  background-color: #ddd;
+    background-color: #ddd;
 }
 
 /* ---------- Positions --------- */
-#jsSWFDiv, 
-#phoneDiv, 
-#loginDiv, 
-#incomingDiv, 
-#infoDiv, 
-#connectingDiv, 
-#settingsDiv,
-#versionOfProduct, 
-#controlPanel, 
-.closeButton, 
-.transferButton, 
+#jsSWFDiv,
+#phoneDiv,
+#loginDiv,
+#incomingDiv,
+#infoDiv,
+#connectingDiv,
+#settingsView,
+#versionOfProduct,
+#controlPanel,
+.closeButton,
+.transferButton,
 .holdButton,
 .holdImage,
 .bar,
-#settingsButton,
 #settingsButtonInCallView,
-#answerButton, 
+#answerButton,
 #hangupButton,
 #callerLogin,
 #logoutButton,
@@ -68,152 +67,153 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 #micSlider, #speakerSlider,
 #micBack, #speakerBack,
 #console {
-	position: absolute;
+    position: absolute;
 }
 /* ---------- Border ------------ */
-#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, #transfer, #incomingDiv, #video_requestUnmuteDiv, #controlPanel, #chatDiv {
-	border-width: 2px 5px 5px 0; /*only for ie8*/
-	border-style: solid; /*only for ie8*/
-	border-color: #ddd; /*only for ie8*/
-  border: 1px solid #aaa;
+#settingsView, #loginDiv, #infoDiv, #connectingDiv, #transfer, #incomingDiv, #video_requestUnmuteDiv, #controlPanel, #chatDiv {
+    border-width: 2px 5px 5px\0/; /*only for ie8*/
+    border-style: solid\0/; /*only for ie8*/
+    border-color: #ddd\0/; /*only for ie8*/
+    border: 1px solid #aaa;
 }
 #connectingDiv, #infoDiv {
-	border-width: 5px; /*only for ie8*/
+    border-width: 5px\0/; /*only for ie8*/
 }
-/* ---------- Shadow ----------*/ 
-#settingsDiv, #transfer, #infoDiv, #loginDiv, #connectingDiv, #video_requestUnmuteDiv, #incomingDiv, #chatDiv
- {
-  box-shadow: 0 0 10px rgba(0,0,0,0.35);
-  -moz-box-shadow: 0 0 10px rgba(0,0,0,0.35);
-	-webkit-box-shadow: 0 0 10px rgba(0,0,0,0.35);
+/* ---------- Shadow ----------*/
+#settingsView, #transfer, #infoDiv, #loginDiv, #connectingDiv, #video_requestUnmuteDiv, #incomingDiv, #chatDiv
+{
+    box-shadow: 0 0 10px rgba(0,0,0,0.35);
+    -moz-box-shadow: 0 0 10px rgba(0,0,0,0.35);
+    -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.35);
 }
 
 /* ----------------------------- */
-textarea, input {
-	outline: none;
-	-moz-appearance: none;
+textarea, text, input {
+    outline: none;
+    -moz-appearance: none;
 }
 input::-webkit-input-placeholder {
-	color: #ccc;
-	font: 14px Arial;
+    color: #ccc;
+    font: 14px Arial;
 }
 #calleeText {
-	padding-left: 1px;
+    padding-left: 1px;
 }
 #jsSWFDiv {
-  height: 138px;
+    height: 138px;
 }
 #phoneDiv {
-	left: 30px;
-	height: 240px;
-	width: 153px;
-	padding: 10px;
-	position: relative;
+    left: 30px;
+    height: 240px;
+    width: 153px;
+    padding: 10px;
+    position: relative;
+    top: 21px;
 }
 #versionOfProduct {
-	top: 134px;
-	right: 17px;
-	font: 8px Arial;
-	color: #bbb;
+    top: 134px;
+    right: 17px;
+    font: 8px Arial;
+    color: #bbb;
 }
 #controlPanel {
-  width: 152px;
-  height: 20px;
-  top: 6px;
-  left: 10px;
-  border: 1px solid #bbb;
-  box-shadow: /*0px 1px 0px #fff, */inset 0px 1px 0px #fff;
+    width: 152px;
+    height: 20px;
+    top: 6px;
+    left: 10px;
+    border: 1px solid #bbb;
+    box-shadow: /*0px 1px 0px #fff, */inset 0px 1px 0px #fff;
 }
 
 /* ---------------- Buttons ---------------- */
 .closeButton {
-	background: url(../assets/close.png);
-	right: 3px;
-	opacity: 0.7;
-	top: 3px;
-	width: 14px;
-	height: 14px;
+    background: url(../assets/close.png);
+    right: 3px;
+    opacity: 0.7;
+    top: 3px;
+    width: 14px;
+    height: 14px;
 }
 #cameraButton {
-	background: url(../assets/camera.png) no-repeat center;
+    background: url(../assets/camera.png) no-repeat center;
 }
 #micButton {
-	background: url(../assets/mic.png) no-repeat center;
+    background: url(../assets/mic.png) no-repeat center;
 }
 #soundButton {
-	background: url(../assets/speaker.png) no-repeat center;
+    background: url(../assets/speaker.png) no-repeat center;
 }
 .iconButton {
-	width: 24px;
-	height: 20px;
-	float: left;
-	cursor: pointer;
-	/*
+    width: 24px;
+    height: 20px;
+    float: left;
+    cursor: pointer;
+    /*
   -moz-opacity: 0.6;
-	-khtml-opacity: 0.6;
-	opacity: 0.6;
-	*/
+    -khtml-opacity: 0.6;
+    opacity: 0.6;
+    */
 }
 
 .iconBackgroundPressed{
-  width: 24px;
-  height: 20px;
-  /*background: -webkit-radial-gradient(#aaa, #ddd, #eee, #eee);*/
-  float: left;
+    width: 24px;
+    height: 20px;
+    /*background: -webkit-radial-gradient(#aaa, #ddd, #eee, #eee);*/
+    float: left;
 }
 
 .iconPressed{
 }
 
 .iconButton:hover {
-	-moz-opacity: 1;
-	-khtml-opacity: 1;
-	opacity: 1;
+    -moz-opacity: 1;
+    -khtml-opacity: 1;
+    opacity: 1;
 }
 .transferButton, .holdButton {
-	top: 97px;
-	width: 14px;
-	height: 14px;
+    top: 97px;
+    width: 14px;
+    height: 14px;
 }
 .closeButton {
-	background: url(../assets/close.png);
-	right: 3px;
+    background: url(../assets/close.png);
+    right: 3px;
 }
 .transferButton {
-	background: url(../assets/transfer.png);
-	right: 7px;
+    background: url(../assets/transfer.png);
+    right: 7px;
 }
 .holdButton {
-	background: url(../assets/hold.png);
-	right: 27px;
-	visibility:hidden;
+    background: url(../assets/hold.png);
+    right: 27px;
+    visibility:hidden;
 }
 .holdImage {
-	background: url(../assets/hold_big.png);
-	right: 55px;
-	top: 57px;
-	width: 30px;
-	height: 30px;
-	visibility: hidden;
+    background: url(../assets/hold_big.png);
+    right: 55px;
+    top: 57px;
+    width: 30px;
+    height: 30px;
+    visibility: hidden;
 }
 /* ----------------------------------------- */
 /* ------------- ��������� �������� ------------ */
 .bar {
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 20px;
-	cursor: move;
-	font: 12px Arial;
-	font-weight: bolder;
-	color: #999;
-	text-shadow: #fff 0px 1px;
-	line-height: 20px;
-	text-align: left;
-	box-shadow: inset 0 1px 0 #fff;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    cursor: move;
+    font: 12px Arial;
+    font-weight: bolder;
+    color: #999;
+    text-shadow: #fff 0px 1px;
+    line-height: 20px;
+    text-align: left;
+    box-shadow: inset 0 1px 0 #fff;
 }
 /* ----------------------------------- */
-/* ------------- Settings ------------ */
+/* ------------- Settings ------------ 
 #settingsDiv {
 	top: 80px;
 	left: 5px;
@@ -233,158 +233,206 @@ input::-webkit-input-placeholder {
 	left: 5px;
 	background: url(../assets/mic_settings.png);
 }
+-------------------------------------- */
+
+/* ------------- Settings ------------ */
+
+#settingsView, #settingsOkButton, #micSelector, #camSelector,
+#settingsMicImage, #settingsCamImage {
+    position: absolute;
+}
+
+#settingsView {
+    top: 94px;
+    left: 8px;
+    height: 123px;
+    width: 230px;
+    padding-top: 20px;
+    display: none;
+}
+#settingsButton {
+    background: url(../assets/mic_settings_2.png) no-repeat center;
+    /*top: 19px;
+    left: 18px;
+    /*width: 140px;*/
+    opacity: 0.65;
+}
+#settingsOkButton{
+    top: 100px;
+    left: 72px;
+    width: 80px;
+}
+#micSelector{
+    top: 32px;
+    left: 45px;
+    width: 170px;
+}
+#camSelector{
+    top: 64px;
+    left: 45px;
+    width: 170px;
+}
+#settingsMicImage{
+    top: 35px;
+    left: 14px;
+}
+
+#settingsCamImage{
+    top: 67px;
+    left: 15px;
+}
 /* -------------------------------------- */
 
 /* ----------------- Incoming call view ---------------- */
 #incomingDiv {
-	top: 110px;
-	left: 5px;
-	height: 82px;
-	width: 215px;
-	border: 1px solid #bbb;
-	padding: 5px;
-	padding-top: 25px;
-	font: 16px Arial;
-	text-align: center;
-	color: #aaa;
-	display: none;
+    top: 110px;
+    left: 5px;
+    height: 82px;
+    width: 215px;
+    border: 1px solid #bbb;
+    padding: 5px;
+    padding-top: 25px;
+    font: 16px Arial;
+    text-align: center;
+    color: #aaa;
+    display: none;
 }
 #answerButton, #hangupButton {
-	width: 80px;
-	/*height: 22px;*/
-	/*color: white;*/
-	top: 70px;
+    width: 80px;
+    /*height: 22px;*/
+    /*color: white;*/
+    top: 70px;
 }
 #answerButton {
-	background-color: #009900;
-	left: 28px;
+    background-color: #009900;
+    left: 28px;
 }
 #hangupButton {
-	background-color: #cc0000;
-	right: 27px;
+    background-color: #cc0000;
+    right: 27px;
 }
 #callerField {
-	font-weight: bold;
-	color: #000;
+    font-weight: bold;
+    color: #000;
 }
 /* ------------------ Connecting ------------------------ */
 #connectingDiv {
-	top: 120px;
-	left: 10px;
-	height: 30px;
-	width: 200px;
-	padding: 10px;
-	float: left;
-	visibility: hidden;
-	font: 16px Arial;
-	color: #aaa;
-	text-align: center;
-	line-height: 30px;
+    top: 120px;
+    left: 10px;
+    height: 30px;
+    width: 200px;
+    padding: 10px;
+    float: left;
+    visibility: hidden;
+    font: 16px Arial;
+    color: #aaa;
+    text-align: center;
+    line-height: 30px;
 }
 #connectingText {
 }
 /* ------------------ Info ------------------------ */
 #infoDiv {
-	top: 120px;
-	left: 10px;
-	height: 30px;
-	width: 200px;
-	padding: 10px;
-	float: left;
-	visibility: hidden;
-	font: 16px Arial;
-	color: #aaa;
-	text-align: center;
-	line-height: 30px;
-	-moz-opacity: 0.95;
-	/* Mozilla 1.6 */
-	-khtml-opacity: 0.95;
-	/* Konqueror 3.1, Safari 1.1 */
-	opacity: 0.95;
-	/* CSS3 - Mozilla 1.7b +, Firefox 0.9 +, Safari 1.2+, Opera 9+ */
+    top: 120px;
+    left: 10px;
+    height: 30px;
+    width: 200px;
+    padding: 10px;
+    float: left;
+    visibility: hidden;
+    font: 16px Arial;
+    color: #aaa;
+    text-align: center;
+    line-height: 30px;
+    -moz-opacity: 0.95;
+    /* Mozilla 1.6 */
+    -khtml-opacity: 0.95;
+    /* Konqueror 3.1, Safari 1.1 */
+    opacity: 0.95;
+    /* CSS3 - Mozilla 1.7b +, Firefox 0.9 +, Safari 1.2+, Opera 9+ */
 }
 #infoText {
 }
 /* --------- Login, logout --------------------------------------------- */
 #callerLogin {
-  top: 0px;
-  right: 0px; 
-  font: 12px Arial;
-	width: 74px;
-	height: 20px;
-	float: left;
-	text-align: right;
-	overflow: hidden;
-	color: #333;
-	display: none;
-	font: bold 12px Helvetica;
-	text-shadow: 0 1px 0 #fff;
-	line-height: 20px;
-	padding-right: 5px;
-	cursor: pointer;
+    top: 0px;
+    right: 0px;
+    font: 12px Arial;
+    width: 50px;
+    height: 20px;
+    float: left;
+    text-align: right;
+    overflow: hidden;
+    color: #333;
+    display: none;
+    font: bold 12px Helvetica;
+    text-shadow: 0 1px 0 #fff;
+    line-height: 20px;
+    padding-right: 5px;
+    cursor: pointer;
 }
 #logoutButton {
-  width: 60px;
-  height: 20px;
-  bottom: -22px;
-  right: 0px;
-  font-size: 12px;
-  line-height: 20px;
-  display: none;
+    width: 60px;
+    height: 20px;
+    bottom: -22px;
+    right: 0px;
+    font-size: 12px;
+    line-height: 20px;
+    display: none;
 }
 #loginDiv {
-	top: 46px;
-	left: 10px;
-	height: 172px;
-	width: 200px;
-	padding: 20px;
-	padding-top: 25px;
-	float: left;
-	visibility: hidden;
+    top: 46px;
+    left: 10px;
+    height: 172px;
+    width: 200px;
+    padding: 20px;
+    padding-top: 25px;
+    float: left;
+    visibility: hidden;
 }
 #loginMainButton {
-	top: -1px;
-	right: -1px;
-  font-size: 12px;
-  border: 1px solid #aaa; 
-  padding: 0 5px 0 5px;
-  margin: 0px;
-  width:40px;
-  height: 20px;
-  line-height: 20px;
-  text-shadow: 0 1px 0 #eee;
-  
+    top: -1px;
+    right: -1px;
+    font-size: 12px;
+    border: 1px solid #aaa;
+    padding: 0 5px 0 5px;
+    margin: 0px;
+    width:40px;
+    height: 20px;
+    line-height: 20px;
+    text-shadow: 0 1px 0 #eee;
+
 }
 
 #loginButton {
-	margin: 10px 0 0 15px;
-	width: 80px;
+    margin: 10px 0 0 15px;
+    width: 80px;
 }
 /* ------------ Video + Security settings view -------------- */
 #video_requestUnmuteDiv {
-	top: 50px;
-	left: 20px;
-	overflow: hidden;
-	padding-top: 20px;
+    top: 50px;
+    left: 20px;
+    overflow: hidden;
+    padding-top: 20px;
 
 }
 .videoDiv {
-	visibility: visible;
-	width: 215px;
-	height: 180px;
+    visibility: visible;
+    width: 215px;
+    height: 180px;
 }
 .securityDiv {
-	visibility: visible;
-	width: 215px;
-	height: 178px;
-	background-color: #fff;
-	padding-top: 20px;
-	border: 1px solid #ccc;
+    visibility: visible;
+    width: 215px;
+    height: 178px;
+    background-color: #fff;
+    padding-top: 20px;
+    border: 1px solid #ccc;
 }
 .closed {
-	width: 1px !important;
-	height: 1px !important;
-	visibility: hidden;
+    width: 1px !important;
+    height: 1px !important;
+    visibility: hidden;
 }
 /*
 we use '.init' class to make div size 1x1 basically
@@ -392,407 +440,408 @@ Because Firefox can`t operate with swf object located in
 div with zero size. 
 */
 .init {
-	width: 1px;
-	height: 1px;
-	visibility: hidden;
+    width: 1px;
+    height: 1px;
+    visibility: hidden;
 }
 
 #sendVideo {
-	width: 100px;
-	bottom: 6px;
-	left: 6px;
+    width: 100px;
+    bottom: 6px;
+    left: 6px;
 }
 #requestUnmuteText {
-	text-align: center;
-	width: 100%;
-	font-weight: bolder;
+    text-align: center;
+    width: 100%;
+    font-weight: bolder;
 }
 #closeButton_video_requestUnmuteDiv{
-	background: url(../assets/close.png);
-	right: 3px;
-	opacity: 0.7;
-	top: 3px;
-	width: 14px;
-	height: 14px;
+    background: url(../assets/close.png);
+    right: 3px;
+    opacity: 0.7;
+    top: 3px;
+    width: 14px;
+    height: 14px;
 }
 /* -------------------------------------- */
 /* ------------ Transfer view -------------- */
 #transfer {
-	width: 200px;
-	height: 94px;
-	top: 90px;
-	left: 20px;
-	text-align: center;
-	font: bold 16px Arial;
-	padding: 10px;
-	padding-top: 30px;
-	visibility: hidden;
+    width: 200px;
+    height: 94px;
+    top: 90px;
+    left: 20px;
+    text-align: center;
+    font: bold 16px Arial;
+    padding: 10px;
+    padding-top: 30px;
+    visibility: hidden;
 }
 #transferInput {
-	width: 180px;
-	margin-bottom: 20px;
+    width: 180px;
+    margin-bottom: 20px;
 }
 #transferOk, #transferCansel {
-	width: 80px;
-	margin: 0 6px 0 16px;
+    width: 80px;
+    margin: 0 6px 0 16px;
 }
 #transferCansel {
-	margin: 0;
+    margin: 0;
 }
 
 /* -------------------------------------- */
 /* ------ Call view-------- */
 .callDiv {
-	width: 152px;
-	height: 118px;
-	top: 36px;
-	left: 49px;
-	float: left;
-	background: #333;
-	/*border: 1px solid #B7BABC;*/
-	color: #eee;
-	font: 22px Arial;
-	visibility: hidden;
+    width: 152px;
+    height: 118px;
+    top: 57px;
+    left: 49px;
+    float: left;
+    background: #333;
+    /*border: 1px solid #B7BABC;*/
+    color: #eee;
+    font: 22px Arial;
+    visibility: hidden;
 }
 .caller {
-	float: left;
-	top: 35px;
-	text-align: center;
-	width: 100%;
+    float: left;
+    top: 35px;
+    text-align: center;
+    width: 100%;
 }
 #callState {
-	color: #ddd;
-	position: relative;
-	top: 64px;
-	font-size: 12px;
-	text-align: center;
+    color: #ddd;
+    position: relative;
+    top: 64px;
+    font-size: 12px;
+    text-align: center;
 }
 /* ------------------------- */
 /* ------ Chat view -------- */
 #chatDiv {
-	width: 320px;
-	top: 250px;
-	left: 20px;
-	visibility: hidden;
+    width: 320px;
+    top: 250px;
+    left: 20px;
+    visibility: hidden;
 }
 .chatBox {
-	width: 100%;
-	height: 100%;
-	margin: 0;
-	border: 1px solid #ddd;
-	background: #fff;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border: 1px solid #ddd;
+    background: #fff;
 }
 .chatTextarea {
-	border: 0;
-	width: 305px;
-	height: 200px;
-	margin: 5px;
-	resize: none;
-	overflow: auto;
-	word-wrap: break-word;
+    border: 0;
+    width: 305px;
+    height: 200px;
+    margin: 5px;
+    resize: none;
+    overflow: auto;
+    word-wrap: break-word;
 }
 .messageInput {
-	margin: 4px;
-	width: 238px;
-	float: left;
+    margin: 4px;
+    width: 238px;
+    float: left;
 }
 .messageSend {
-	margin-top: 3px;
-	width: 60px;
-	margin-right: 3px;
+    margin-top: 3px;
+    width: 60px;
+    margin-right: 3px;
 }
 .myNick, .yourNick {
-	color: #ccc;
-	font-weight: bold;
-	padding-top: 7px;
+    color: #ccc;
+    font-weight: bold;
+    padding-top: 7px;
 }
 .yourNick {
-	color: #91c8ff;
+    color: #91c8ff;
 }
 #tabul {
-	padding: 0;
-	margin: 0;
-	margin-left: 50px;
-	padding: 0;
-	z-index: 10;
+    padding: 0;
+    margin: 0;
+    margin-left: 50px;
+    padding: 0;
+    z-index: 10;
 }
 #tabul li {
-	display: inline;
-	cursor: pointer;
-	max-width: 200px;
-	overflow: hidden;
-	text-overflow: ellipsis;
+    display: inline;
+    cursor: pointer;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .ntabs {
-	background: #ddd;
-	margin-right: -1px;
-	font-size: 11px;
-	font-weight: bold;
-	color: #333;
-	padding: 4px 2px 2px 6px;
-	position: relative;
-	max-width: 200px;
-	text-overflow: ellipsis;
+    background: #ddd;
+    margin-right: -1px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #333;
+    padding: 4px 2px 2px 6px;
+    position: relative;
+    max-width: 200px;
+    text-overflow: ellipsis;
 }
 .add {
-	padding: 3px 5px;
+    padding: 3px 5px;
 }
 .ctab {
-	background: #fff;
-	position: relative;
-	border-bottom-color: #fff;
+    background: #fff;
+    position: relative;
+    border-bottom-color: #fff;
 }
 .close {
-	text-decoration: none;
-	color: #bbb;
-	font-size: 16px;
-	padding: 0 4px;
+    text-decoration: none;
+    color: #bbb;
+    font-size: 16px;
+    padding: 0 4px;
 }
 .close:hover {
-	color: #333;
+    color: #333;
 }
 #tabcontent {
-	z-index: -10;
-	position: relative;
-	top: -1px;
-	border-top: none;
-	height: 240px;
+    z-index: -10;
+    position: relative;
+    top: -1px;
+    border-top: none;
+    height: 240px;
 }
 /* ---------------------------------------------------- */
 
 .button {
-	/*background: #dcdcdc;*/
-	width: 50px;
-	height: 28px;
-	float: left;
-	margin: 0px -1px 0px 0;
-	text-align: center;
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	user-select: none;
-	font: bold 14px Helvetica;
-	border: 1px solid #aaa;
-	color: #333;
-	text-shadow: 0px 1px 0 #fff;
-	box-shadow: /*0px 1px 0px #fff*/ inset 0px 1px 0px #fff;
-	text-align: center;
-	border-radius: 0px;
-	cursor: pointer;
-  /*
-  background: -webkit-gradient(linear, left top, left bottom, from(#ddd), to(#ddd));
-	background: -moz-linear-gradient(top, #ddd, #ccc);
-	background: -o-linear-gradient(top, #ddd, #ccc);
-  filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#dddddd', endColorstr='#cccccc');
-  */
-  line-height: 28px;
+    /*background: #dcdcdc;*/
+    width: 50px;
+    height: 28px;
+    float: left;
+    margin: 0px -1px 0px 0;
+    text-align: center;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+    font: bold 14px Helvetica;
+    border: 1px solid #aaa;
+    color: #333;
+    text-shadow: 0px 1px 0 #fff;
+    box-shadow: /*0px 1px 0px #fff*/ inset 0px 1px 0px #fff;
+    text-align: center;
+    border-radius: 0px;
+    cursor: pointer;
+    /*
+    background: -webkit-gradient(linear, left top, left bottom, from(#ddd), to(#ddd));
+      background: -moz-linear-gradient(top, #ddd, #ccc);
+      background: -o-linear-gradient(top, #ddd, #ccc);
+    filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#dddddd', endColorstr='#cccccc');
+    */
+    line-height: 28px;
+    font-family: ;
 }
 
 .buttonLine {
-	float: left;
-	height: 29px;
+    float: left;
+    height: 29px;
 }
 
 .chat, .call, .hangup {
-  width: 75px;
-  color: #000;
-  	
+    width: 75px;
+    color: #000;
+
 }
 .chat {
-  box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #C2DDF2; /*#A8CFEC;/* #96C6E9;*/
-  text-shadow: 0px 1px 0 #A8CFEC;
-  background: -webkit-gradient(linear, left top, left bottom, from(#A1CCEB), to(#7BB8E4));
-  /*background: -webkit-gradient(linear, left top, left bottom, from(#7CB8E3), to(#419AD9));*/
-	background: -moz-linear-gradient(top, #ddd, #ccc);
-	background: -o-linear-gradient(top, #ddd, #ccc);
-  filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#dddddd', endColorstr='#cccccc');
-  /*color: #1B527A;*/
-  width: 76px;
+    box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #C2DDF2; /*#A8CFEC;/* #96C6E9;*/
+    text-shadow: 0px 1px 0 #A8CFEC;
+    background: -webkit-gradient(linear, left top, left bottom, from(#A1CCEB), to(#7BB8E4));
+    /*background: -webkit-gradient(linear, left top, left bottom, from(#7CB8E3), to(#419AD9));*/
+    background: -moz-linear-gradient(top, #ddd, #ccc);
+    background: -o-linear-gradient(top, #ddd, #ccc);
+    filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#dddddd', endColorstr='#cccccc');
+    /*color: #1B527A;*/
+    width: 76px;
 }
 .call {
-	box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #4DE74D;/*#0d0;*/
-	text-shadow: 0px 1px 0px #0d0;
-	background: -webkit-gradient(linear, left top, left bottom, from(#6ECF6E), to(#4DC34D));
-  /*background: -webkit-gradient(linear, left top, left bottom, from(#3b3), to(#0a0));*/
-	background: -moz-linear-gradient(top, #3b3, #0a0);
-	background: -o-linear-gradient(top, #3b3, #0a0);
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#33bb33', endColorstr='#00aa00');
-	/*color: #004400;*/
-	border-left-color: #888;
+    box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #4DE74D;/*#0d0;*/
+    text-shadow: 0px 1px 0px #0d0;
+    background: -webkit-gradient(linear, left top, left bottom, from(#6ECF6E), to(#4DC34D));
+    /*background: -webkit-gradient(linear, left top, left bottom, from(#3b3), to(#0a0));*/
+    background: -moz-linear-gradient(top, #3b3, #0a0);
+    background: -o-linear-gradient(top, #3b3, #0a0);
+    filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#33bb33', endColorstr='#00aa00');
+    /*color: #004400;*/
+    border-left-color: #888;
 
 }
 .hangup {
-	box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #FF9494;/*#f66;*/
-	text-shadow: 0px 1px 0 #f33; 
-	background: -webkit-gradient(linear, left top, left bottom, from(#E16C6C), to(#DB4D4D));
-  /*background: -webkit-gradient(linear, left top, left bottom, from(#f33), to(#c00));*/
-	background: -moz-linear-gradient(top, #f33, #c00);
-	background: -o-linear-gradient(top, #f33, #c00);
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#ff3333', endColorstr='#cc0000');
+    box-shadow: 0px 1px 0px #fff, inset 0px 1px 0px #FF9494;/*#f66;*/
+    text-shadow: 0px 1px 0 #f33;
+    background: -webkit-gradient(linear, left top, left bottom, from(#E16C6C), to(#DB4D4D));
+    /*background: -webkit-gradient(linear, left top, left bottom, from(#f33), to(#c00));*/
+    background: -moz-linear-gradient(top, #f33, #c00);
+    background: -o-linear-gradient(top, #f33, #c00);
+    filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#ff3333', endColorstr='#cc0000');
 }
 
 .pressed {
-	border-color: #888;
-	/*border-bottom-color: #fff;*/
-	box-shadow: inset 0px 1px 6px #333;
-  /*height: 23px;*/
-	line-height: 30px;
-	/*border-radius: 4px 4px 5px 5px;*/
-	background-color: #d7d7d7;
+    border-color: #888;
+    /*border-bottom-color: #fff;*/
+    box-shadow: inset 0px 1px 6px #333;
+    /*height: 23px;*/
+    line-height: 30px;
+    /*border-radius: 4px 4px 5px 5px;*/
+    background-color: #d7d7d7;
 }
 
 .disabled {
-	opacity: 0.7;
+    opacity: 0.7;
 }
-    
+
 .call_button, .chat_button {
-	width: 81px;
-	background-color: #009800;
-	float: left;
-	height: 30px;
-	font: 20px Arial;
-	color: #fff;
-	text-align: center;
-	line-height: 30px;
-	border: 1px outset;
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	user-select: none;
-	cursor: default;
-	margin-bottom: 3px;
+    width: 81px;
+    background-color: #009800;
+    float: left;
+    height: 30px;
+    font: 20px Arial;
+    color: #fff;
+    text-align: center;
+    line-height: 30px;
+    border: 1px outset;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+    cursor: default;
+    margin-bottom: 3px;
 }
 
 
 
 /* ----------- Slider -------------- */
 #micSlider, #speakerSlider {
-	top: 10px;
-	display: none;
+    top: 10px;
+    display: none;
 }
 #micBack, #speakerBack {
-/* TODO replace sliders within sliderbackground*/
-	top: 20px;
-	width: 24px;
-	height: 102px;
-	background: #ddd;
-	box-shadow: 0px 0px 4px #bbb;
-	display: none;
-	border: 1px solid #aaa;
-	border-top: none;
+    /* TODO replace sliders within sliderbackground*/
+    top: 20px;
+    width: 24px;
+    height: 102px;
+    background: #ddd;
+    box-shadow: 0px 0px 4px #bbb;
+    display: none;
+    border: 1px solid #aaa;
+    border-top: none;
 }
 #micBack {
-	left: -1px;
+    left: -1px;
 }
 #speakerBack {
-	left: 23px;
+    left: 23px;
 }
 #micSlider {
-	left: 8px;
+    left: 8px;
 }
 #speakerSlider {
-	left: 8px;
+    left: 8px;
 }
 .ui-slider-vertical {
-	width: 6px !important;
-	height: 80px !important;
-	border: 1px solid #999 !important;
-	background-color: #ddd !important;
-	box-shadow: inset 0px 0px 1px #777 !important;
-}
+    width: 6px !important;
+    height: 80px !important;
+    border: 1px solid #999 !important;
+    background-color: #ddd !important;
+    box-shadow: inset 0px 0px 1px #777 !important;*/
+    }
 .ui-slider-handle {
-	left: -5px !important;
-  border-radius: 8px !important;
-	cursor: pointer !important;
-	border: 1px solid #888 !important;
-	box-shadow: inset 0px 1px 0px #fff, 0px 0px 1px #777;
-	background-color: #dcdcdc !important;
-  /*
-  background: -webkit-gradient(linear, left top, left bottom, from(#ddd), to(#ccc)) !important;
-	background: -moz-linear-gradient(top, #777, #555) !important;
-	background: -o-linear-gradient(top, #777, #555) !important;
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#555555') !important;
-	*/
-	height: 14px !important;
-	width: 14px  !important;
-	cursor: pointer !important;
-}
+    left: -5px !important;
+    border-radius: 8px !important;*/
+cursor: pointer !important;
+border: 1px solid #888 !important;
+box-shadow: inset 0px 1px 0px #fff, 0px 0px 1px #777;
+background-color: #dcdcdc !important;
+/*
+background: -webkit-gradient(linear, left top, left bottom, from(#ddd), to(#ccc)) !important;
+  background: -moz-linear-gradient(top, #777, #555) !important;
+  background: -o-linear-gradient(top, #777, #555) !important;
+  filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#555555') !important;
+  */
+height: 14px !important;
+width: 14px  !important;
+cursor: pointer !important;
+    }
 .ui-slider-handle:focus {
-	outline: none;
+    outline: none;
 }
 .ui-slider-range {
-	border-radius: 10px !important;
-	box-shadow: inset 2px 0px 5px #222;
-	
-  background: -webkit-gradient(linear, left top, left bottom, from(#777), to(#555)) !important;
-	background: -moz-linear-gradient(top, #777, #555) !important;
-	background: -o-linear-gradient(top, #777, #555) !important;
-	filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#555555') !important;
-	left: -1px !important;
-	bottom: -1px !important;
-  border: 1px solid #222 !important;
+    border-radius: 10px !important;
+    box-shadow: inset 2px 0px 5px #222;
+
+    background: -webkit-gradient(linear, left top, left bottom, from(#777), to(#555)) !important;
+    background: -moz-linear-gradient(top, #777, #555) !important;
+    background: -o-linear-gradient(top, #777, #555) !important;
+    filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#777777', endColorstr='#555555') !important;
+    left: -1px !important;
+    bottom: -1px !important;
+    border: 1px solid #222 !important;
 }
-	
+
 /* -------------------------------------- */
 /* --------- Console ------------*/
 #console {
-	top: 35px;
-	left: 250px;	
-	height: 300px;
-  width: 700px;
-	float: left;
-	background-color: #333;
-	font: 14px Courier;
-	color: #eee; 
-	padding: 10px;
-  overflow: auto;
-	word-wrap: break-word;
+    top: 35px;
+    left: 250px;
+    height: 266px;
+    width: 700px;
+    float: left;
+    background-color: #333;
+    font: 14px Courier;
+    color: #eee;
+    padding: 10px;
+    overflow: auto;
+    word-wrap: break-word;
 }
 /* -------------------------------- */
 .phone_screen_1 {
-	width: 151px;
-	background: #deeeff;
-	float: left;
-	margin: 2px 0 0 0;
-	font: 22px Arial;
-	border: 1px solid #b7babc;
-	border-bottom: none;
-	color: #5a5a5a;
-	outline: none;
-	line-height: 22px;
+    width: 151px;
+    background: #deeeff;
+    float: left;
+    margin: 2px 0 0 0;
+    font: 22px Arial;
+    border: 1px solid #b7babc;
+    border-bottom: none;
+    color: #5a5a5a;
+    outline: none;
+    line-height: 22px;
 }
 .phone_screen_2 {
-	width: 152px;
-	height: 90px;
-	background: #deeeff;
-	float: left;
-	margin: 0 0 -1px 0;
-	font: 22px Arial;
-	border: 1px solid #b7babc;
-	border-top: none;
-	color: #5a5a5a;
-	outline: none;
+    width: 152px;
+    height: 90px;
+    background: #deeeff;
+    float: left;
+    margin: 0 0 -1px 0;
+    font: 22px Arial;
+    border: 1px solid #b7babc;
+    border-top: none;
+    color: #5a5a5a;
+    outline: none;
 }
 .login_label {
-	float: left;
-	width: 100px;
-	height: 22px;
-	line-height: 22px;
+    float: left;
+    width: 100px;
+    height: 22px;
+    line-height: 22px;
 }
 .login_input {
-	float: left;
-	width: 100px;
-	height: 22px;
+    float: left;
+    width: 100px;
+    height: 22px;
 }
 
 .login_input input{
-	width: 100px;
+    width: 100px;
 }
 /* ---- Additional styles ---- */
 #auto_login_token {
-	width: 0;
-	height: 0;
-	margin: 0;
-	padding: 0;
-	border: none;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
 }
 
 /* -------------- Z indexes -------------*/
@@ -801,43 +850,46 @@ div with zero size.
 }
 */
 #incomingDiv {
-	z-index: 14;
+    z-index: 14;
 }
 #connectingDiv {
-	z-index: 15;
+    z-index: 15;
 }
 #settingsDiv {
-	z-index: 17;
+    z-index: 17;
 }
 #messageDiv {
-	z-index: 18;
+    z-index: 18;
 }
 #loginDiv {
-	z-index: 19;
+    z-index: 19;
 }
 #video_requestUnmuteDiv {
-	z-index: 20;
+    z-index: 20;
 }
 #chatDiv {
-	z-index: 21;
+    z-index: 21;
 }
 
 #transfer {
-	z-index: 22;
+    z-index: 22;
 }
 #infoDiv {
-	z-index: 30;
+    z-index: 30;
 }
 #jsSWFDiv {
-	z-index: 100;
+    z-index: 100;
 }
 #micBack, #speakerBack{
-	z-index: 100;
+    z-index: 100;
 }
 .iconBackgroundPressed{
-	z-index: 101;
+    z-index: 101;
 }
 .closeButton {
-	z-index: 101;
+    z-index: 101;
 }
 
+grey {
+    color: #888;
+}
