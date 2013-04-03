@@ -1,5 +1,6 @@
 var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
     var me = this;
+    me.url = url;
     me.calls = [];
     me.isOpened = false;
     me.configLoaded = false;
@@ -17,91 +18,104 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
         notifyAddCall(call);
     };
 
-    this.webSocket = $.websocket(url, {
-        open: function() {
-            me.isOpened = true;
-        },
-        close: function() {
-            me.isOpened = false;
-        },
-        context:me,
-        events: {
-            getUserData: function(user) {
-                me.user = user;
-                notifyRegisterRequired(user.regRequired)
-            },
 
-            getVersion: function(version) {
-                notifyVersion(version);
-            },
-
-            registered: function(sipHeader) {
-                notifyRegistered();
-            },
-
-            ring: function(call, sipHeader) {
-                proccessCall(call);
-                notify(call);
-            },
-
-            sessionProgress: function(call, sipHeader) {
-                proccessCall(call);
-            },
-
-            setRemoteSDP: function(call, sdp, isInitiator, sipHeader) {
-                proccessCall(call);
-                rtcManager.setRemoteSDP(sdp, isInitiator);
-            },
-
-            talk: function(call, sipHeader) {
-                proccessCall(call);
-                notify(call);
-            },
-
-            hold: function(call, sipHeader) {
-                proccessCall(call);
-                notify(call);
-            },
-
-            callbackHold: function(call, isHold) {
-                proccessCall(call);
-                notifyCallbackHold(call);
-            },
-
-            finish: function(call, sipHeader) {
-                proccessCall(call);
-                notify(call);
-            },
-
-            busy: function(call, sipHeader) {
-                proccessCall(call);
-                notify(call);
-            },
-
-            fail: function(errorCode, sipHeader) {
-                notifyError(errorCode);
-            },
-
-            notifyVideoFormat: function(call) {
-                proccessCall(call);
-                //notifyVideoFormat(call);
-            },
-
-            notifyMessage: function(message) {
-                notifyMessage(message);
-            },
-
-            notifyAudioCodec: function(codec) {
-            }
-        }
-    });
 };
 
 WebSocketManager.prototype = {
 
     login: function (loginObject) {
-        this.webSocket.send("connect", loginObject);
+        var me = this;
+        me.webSocket = $.websocket(me.url, {
+            open: function() {
+                me.isOpened = true;
+                me.webSocket.send("connect", loginObject);
+            },
+            close: function(event) {
+                me.isOpened = false;
+                if (!event.originalEvent.wasClean) {
+                    notifyError(CONNECTION_ERROR);
+                }
+                notifyCloseConnection();
+            },
+            error:function () {
+            },
+            context:me,
+            events: {
+                getUserData: function(user) {
+                    me.user = user;
+                    notifyRegisterRequired(user.regRequired);
+                },
+
+                getVersion: function(version) {
+                    notifyVersion(version);
+                },
+
+                registered: function(sipHeader) {
+                    notifyRegistered();
+                },
+
+                ring: function(call, sipHeader) {
+                    proccessCall(call);
+                    notify(call);
+                },
+
+                sessionProgress: function(call, sipHeader) {
+                    proccessCall(call);
+                },
+
+                setRemoteSDP: function(call, sdp, isInitiator, sipHeader) {
+                    proccessCall(call);
+                    rtcManager.setRemoteSDP(sdp, isInitiator);
+                },
+
+                talk: function(call, sipHeader) {
+                    proccessCall(call);
+                    notify(call);
+                },
+
+                hold: function(call, sipHeader) {
+                    proccessCall(call);
+                    notify(call);
+                },
+
+                callbackHold: function(call, isHold) {
+                    proccessCall(call);
+                    notifyCallbackHold(call);
+                },
+
+                finish: function(call, sipHeader) {
+                    proccessCall(call);
+                    notify(call);
+                    notifyRemoveCall(call);
+                },
+
+                busy: function(call, sipHeader) {
+                    proccessCall(call);
+                    notify(call);
+                },
+
+                fail: function(errorCode, sipHeader) {
+                    notifyError(errorCode);
+                },
+
+                notifyVideoFormat: function(call) {
+                    proccessCall(call);
+                    //notifyVideoFormat(call);
+                },
+
+                notifyMessage: function(message) {
+                    notifyMessage(message);
+                },
+
+                notifyAudioCodec: function(codec) {
+                }
+            }
+        });
         return 0;
+    },
+
+    logoff:function(){
+        this.webSocket.close();
     },
 
     call: function (callRequest) {
@@ -118,6 +132,17 @@ WebSocketManager.prototype = {
         this.webRtcMediaManager.createAnswer(function(sdp) {
             me.webSocket.send("answer", {callId:callId, sdp:sdp});
         });
+    },
+
+    hangup: function(callId) {
+        this.webSocket.send("hangup", callId);
+    },
+
+    viewVideo: function(){
+    },
+
+    viewAccessMessage:function() {
+
     },
 
     isMuted: function(){
@@ -142,7 +167,7 @@ WebSocketManager.prototype = {
     setCookie: function (c_name, value, exdays) {
         var exdate = new Date();
         exdate.setDate(exdate.getDate() + exdays);
-        var c_value = escape(value) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
+        var c_value = escape(value) + (!exdays ? "" : "; expires=" + exdate.toUTCString());
         document.cookie = c_name + "=" + c_value;
     }
 

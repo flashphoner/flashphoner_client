@@ -1,15 +1,15 @@
 /*
-Copyright (c) 2011 Flashphoner
-All rights reserved. This Code and the accompanying materials
-are made available under the terms of the GNU Public License v2.0
-which accompanies this distribution, and is available at
-http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ Copyright (c) 2011 Flashphoner
+ All rights reserved. This Code and the accompanying materials
+ are made available under the terms of the GNU Public License v2.0
+ which accompanies this distribution, and is available at
+ http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-Contributors:
-    Flashphoner - initial API and implementation
+ Contributors:
+ Flashphoner - initial API and implementation
 
-This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
-*/
+ This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+ */
 
 var flashphoner;
 var flashphonerLoader;
@@ -38,41 +38,51 @@ function trace(funcName, param1, param2, param3) {
 
     var today = new Date();
     // get hours, minutes and seconds
-    var hh = today.getHours(); 
+    var hh = today.getHours();
     var mm = today.getMinutes();
     var ss = today.getSeconds();
-    
+
     // Add '0' if it < 10 to see 14.08.06 instead of 14.6.8
     hh = hh == 0 ? '00' : hh < 10 ? '0' + hh : hh;
     mm = mm == 0 ? '00' : mm < 10 ? '0' + mm : mm;
     ss = ss == 0 ? '00' : ss < 10 ? '0' + ss : ss;
-    
+
     // set time 
     var time = hh + ':' + mm + ':' + ss;
-     
-    var div1 = div2 = ''; 
-     
+
+    var div1 = div2 = '';
+
     var console = $("#console");
     // Check if console is scrolled down? Or may be you are reading previous messages.
-    var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37); 
+    var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37);
 
     // Check if we set params and set it ????? instead of 'undefined' if not, also set dividers equal to ', ' 
-    if (typeof param1 == 'undefined') {param1 = '';}
-    if (typeof param2 == 'undefined') {param2 = '';} else {var div1 = ', ';}
-    if (typeof param3 == 'undefined') {param3 = '';} else {var div2 = ', ';} 
-    
+    if (typeof param1 == 'undefined') {
+        param1 = '';
+    }
+    if (typeof param2 == 'undefined') {
+        param2 = '';
+    } else {
+        var div1 = ', ';
+    }
+    if (typeof param3 == 'undefined') {
+        param3 = '';
+    } else {
+        var div2 = ', ';
+    }
+
     // Print message to console
     if (traceEnabled) {
-        console.append('<grey>' + time + ' - '  + '</grey>' + funcName + '<grey>' + '(' + param1 + div1 + param2 + div2 + param3 + ')' + '</grey>' + '<br>');
+        console.append('<grey>' + time + ' - ' + '</grey>' + funcName + '<grey>' + '(' + param1 + div1 + param2 + div2 + param3 + ')' + '</grey>' + '<br>');
     }
 
     //Autoscroll cosole if you are not reading previous messages
     if (isScrolled < 1) {
-        console[0].scrollTop = console[0].scrollHeight; 
+        console[0].scrollTop = console[0].scrollHeight;
     }
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     toLogOffState();
     openConnectingView("Loading...", 0);
     flashphonerLoader = new FlashphonerLoader();
@@ -86,9 +96,9 @@ function login() {
     connectingViewBeClosed = false;
 
     if ($("#outbound_proxy").val() == "") {
-      $("#outbound_proxy").val($("#domain").val());
+        $("#outbound_proxy").val($("#domain").val());
     }
-    
+
     var loginObject = {};
     loginObject.login = $('#username').val();
     loginObject.password = $('#password').val();
@@ -135,16 +145,16 @@ function call() {
         if (isMuted() == 1) {
             intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);call();}', 500);
             requestUnmute();
-        } else if (isMuted() == -1){
-            var result = flashphoner.call({callee: callee, visibleName:'Caller', hasVideo:false, inviteParameters:testInviteParameter});
+        } else if (isMuted() == -1) {
+            var result = flashphoner.call({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter});
             if (result == 0) {
                 toHangupState();
             } else {
                 openConnectingView("Callee number is wrong", 3000);
             }
-    	} else {
-    		openConnectingView("Microphone is not plugged in", 3000);
-    	}
+        } else {
+            openConnectingView("Microphone is not plugged in", 3000);
+        }
     } else {
         openLoginView();
     }
@@ -161,10 +171,10 @@ function answer(callId) {
     if (isMuted() == 1) {
         intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);answer(currentCall.id);}', 500);
         requestUnmute();
-    } else if (isMuted() == -1){
+    } else if (isMuted() == -1) {
         flashphoner.answer(callId);
     } else {
-    	openConnectingView("Microphone is not plugged in", 3000);
+        openConnectingView("Microphone is not plugged in", 3000);
     }
 }
 
@@ -253,7 +263,7 @@ function addLogMessage(message) {
 function notifyFlashReady() {
     flashphoner = flashphonerLoader.getFlashphoner();
     //todo refactoring
-	//$('#versionOfProduct').html(getVersion());
+    //$('#versionOfProduct').html(getVersion());
     if (flashphonerLoader.getToken()) {
         loginByToken(flashphonerLoader.getToken());
     } else {
@@ -267,7 +277,7 @@ function notifyRegisterRequired(registerR) {
 
 function notifyCloseConnection() {
     trace("notifyCloseConnection");
-    currentCall = null;    
+    currentCall = null;
     toLogOffState();
     toCallState();
     isLogged = false;
@@ -284,7 +294,7 @@ function notifyConnected() {
             openConnectingView("Waiting for registering...", 0);
         }
     } else {
-    	toLogState();
+        toLogState();
         callerLogin = getInfoAboutMe().login;
         getElement("callerLogin").innerHTML = callerLogin;
         isLogged = true;
@@ -357,13 +367,13 @@ function notifyCallbackHold(call, isHold) {
         currentCall = call;
         if (call.iHolded) {
             getElement('holdButton').style.background = "url(assets/unhold.png)";
-            getElement('holdButton').onclick = function() {
-               	setStatusHold(call.id, false);
+            getElement('holdButton').onclick = function () {
+                setStatusHold(call.id, false);
             }
         } else {
             getElement('holdButton').style.background = "url(assets/hold.png)";
-            getElement('holdButton').onclick = function() {
-               	setStatusHold(call.id, true);
+            getElement('holdButton').onclick = function () {
+                setStatusHold(call.id, true);
             }
         }
     }
@@ -378,53 +388,53 @@ function notifyError(error) {
 
     if (error == CONNECTION_ERROR) {
         openInfoView("Can`t connect to server.", 3000, 30);
-        
+
     } else if (error == AUTHENTICATION_FAIL) {
         openInfoView("Register fail, please check your SIP account details.", 3000, 30);
         window.setTimeout("logoff();", 3000);
-        
+
     } else if (error == USER_NOT_AVAILABLE) {
         openInfoView("User not available.", 3000, 30);
-        
-    /*  Deprecated error
-    
-        else if (error == TOO_MANY_REGISTER_ATTEMPTS) {
-        openInfoView("Connection error", 3000, 30);
-        toLoggedOffState();
-       */ 
-       
+
+        /*  Deprecated error
+
+         else if (error == TOO_MANY_REGISTER_ATTEMPTS) {
+         openInfoView("Connection error", 3000, 30);
+         toLoggedOffState();
+         */
+
     } else if (error == LICENSE_RESTRICTION) {
         openInfoView("You trying to connect too many users, or license is expired", 3000, 90);
-        
-	  } else if (error==LICENSE_NOT_FOUND){
-		    openInfoView("Please specify license in the flashphoner.properties (flashphoner.com/license)", 5000, 90);
-		
+
+    } else if (error == LICENSE_NOT_FOUND) {
+        openInfoView("Please specify license in the flashphoner.properties (flashphoner.com/license)", 5000, 90);
+
     } else if (error == INTERNAL_SIP_ERROR) {
         openInfoView("Unknown error. Please contact support.", 3000, 60);
-        
+
     } else if (error == REGISTER_EXPIRE) {
         openInfoView("No response from VOIP server during 15 seconds.", 3000, 60);
-        
+
     } else if (error == SIP_PORTS_BUSY) {
         openInfoView("SIP ports are busy. Please open SIP ports range (30000-31000 by default).", 3000, 90);
         connectingViewBeClosed = true;
         window.setTimeout("logoff();", 3000);
-        
+
     } else if (error == MEDIA_PORTS_BUSY) {
         openInfoView("Media ports are busy. Please open media ports range (31001-32000 by default).", 3000, 90);
-        
+
     } else if (error == WRONG_SIPPROVIDER_ADDRESS) {
         openInfoView("Wrong domain.", 3000, 30);
         connectingViewBeClosed = true;
         window.setTimeout("logoff();", 3000);
-        
+
     } else if (error == CALLEE_NAME_IS_NULL) {
         openInfoView("Callee name is empty.", 3000, 30);
-        
+
     } else if (error == WRONG_FLASHPHONER_XML) {
         openInfoView("Flashphoner.xml has errors. Please check it.", 3000, 60);
     }
-    
+
     closeConnectingView();
     toCallState();
 }
@@ -450,13 +460,13 @@ function notifyVideoFormat(call) {
     }
 }
 
-function notifyOpenVideoView(isViewed){
-	trace("notifyOpenVideoView", isViewed);
-	if (isViewed){
-		openVideoView();
-	}else{
-		closeVideoView();
-	}
+function notifyOpenVideoView(isViewed) {
+    trace("notifyOpenVideoView", isViewed);
+    if (isViewed) {
+        openVideoView();
+    } else {
+        closeVideoView();
+    }
 }
 
 function notifyMessage(messageObject) {
@@ -493,36 +503,36 @@ function notifyAddCall(call) {
     } else {
         currentCall = call;
         createCallView(currentCall);
-        if (call.incoming == true){
-        	openIncomingView(call);
-        	toHangupState();
-       	}
+        if (call.incoming == true) {
+            openIncomingView(call);
+            toHangupState();
+        }
     }
 }
 
 function createCallView(call) {
-  	openCallView();
-  	$('#caller').html(call.anotherSideUser);
-  
-	if (call.state == STATE_HOLD) {
-    	$('#callState').html('...Call on hold...');
+    openCallView();
+    $('#caller').html(call.anotherSideUser);
+
+    if (call.state == STATE_HOLD) {
+        $('#callState').html('...Call on hold...');
         enableHoldButton();
     } else if (call.state == STATE_TALK) {
         $('#callState').html('...Talking...');
         enableHoldButton();
     } else if (call.state == STATE_RING) {
         $('#callState').html('...Ringing...');
-    }  
+    }
 
-  	$('#holdButton').unbind('click');
-  	$('#holdButton').click(function() {
-    	setStatusHold(call.id, !call.isHolded);
-	});
+    $('#holdButton').unbind('click');
+    $('#holdButton').click(function () {
+        setStatusHold(call.id, !call.isHolded);
+    });
 
-  	$('#transferButton').unbind('click');
-  	$('#transferButton').click(function() {
-    	openTransferView(call);
-  	});
+    $('#transferButton').unbind('click');
+    $('#transferButton').click(function () {
+        openTransferView(call);
+    });
 }
 
 function removeCallView(call) {
@@ -541,8 +551,8 @@ function notifyRemoveCall(call) {
     }
 }
 
-function notifyVersion(version){
-	getElement('versionOfProduct').innerHTML = version;
+function notifyVersion(version) {
+    getElement('versionOfProduct').innerHTML = version;
 }
 /* ----------------------------------------------------------------------- */
 
@@ -579,12 +589,12 @@ function toCallState() {
 function disableCallButton() {
     trace("disableCallButton");
     var button = $('#callButton');
-    
+
     $('#callButton').addClass('disabled');
     window.setTimeout(enableCallButton, 3000);
 
     function enableCallButton() {
-      $('#callButton').removeClass('disabled');
+        $('#callButton').removeClass('disabled');
     }
 }
 
@@ -592,7 +602,7 @@ function disableCallButton() {
 function enableHoldButton() {
     trace("enableHoldButton");
     var button = $('#holdButton');
-   	button.css('visibility', 'inherit');
+    button.css('visibility', 'inherit');
 }
 
 function disableHoldButton() {
@@ -624,10 +634,10 @@ function closeLoginView() {
 
 function openConnectingView(str, timeout) {
     trace("openConnectingView: message - " + str + "; timeout - " + timeout);
-   	if (timeout != 0) {
+    if (timeout != 0) {
         window.setTimeout("closeConnectingView();", timeout);
     }
-   	getElement('connectingDiv').style.visibility = "visible";
+    getElement('connectingDiv').style.visibility = "visible";
     getElement('connectingText').innerHTML = str;
 }
 
@@ -636,11 +646,11 @@ function closeConnectingView() {
 }
 
 function openInfoView(str, timeout, height) {
-   	if (timeout != 0) {
+    if (timeout != 0) {
         window.setTimeout("closeInfoView();", timeout);
     }
-   	getElement('infoDiv').style.visibility = "visible";
-   	getElement('infoDiv').style.height = height+"px";
+    getElement('infoDiv').style.visibility = "visible";
+    getElement('infoDiv').style.height = height + "px";
     getElement('infoText').innerHTML = str;
 }
 
@@ -652,14 +662,14 @@ function openIncomingView(call) {
     trace("openIncomingView", call)// call.caller, call.visibleNameCaller
     $('#incomingDiv').show();
     $('#callerField').html(call.caller + " '" + call.visibleNameCaller + "'");
-    
+
     $('#answerButton').unbind('click');
-    $('#answerButton').click(function() {
+    $('#answerButton').click(function () {
         answer(call.id);
         closeIncomingView();
     });
     $('#hangupButton').unbind('click');
-    $('#hangupButton').click(function() {
+    $('#hangupButton').click(function () {
         hangup(call.id);
         closeIncomingView();
     });
@@ -687,7 +697,7 @@ function getElement(str) {
 
 function openVideoView() {
     trace("openVideoView");
-    if (isMuted() == -1){
+    if (isMuted() == -1) {
         viewVideo();
         $('#video_requestUnmuteDiv').removeClass().addClass('videoDiv');
         $('#closeButton_video_requestUnmuteDiv').css('visibility', 'visible');
@@ -698,9 +708,9 @@ function openVideoView() {
 
         if (proportion != 0) {
             //$('.videoDiv #video_requestUnmuteDiv').height($(this).width() * proportion);
-        	var newHeight = $('.videoDiv').width() * proportion + 40;
-        	$('.videoDiv').height(newHeight); //we resize video window for new proportion
-        	$('#jsSWFDiv').height(newHeight - 40); //and resize flash for new video window            
+            var newHeight = $('.videoDiv').width() * proportion + 40;
+            $('.videoDiv').height(newHeight); //we resize video window for new proportion
+            $('#jsSWFDiv').height(newHeight - 40); //and resize flash for new video window
         }
     } else {
         requestUnmute();
@@ -739,7 +749,7 @@ function closeCallView() {
 function openTransferView(call) {
     trace("openTransferView");
     $('#transferOk').unbind('click');
-    $('#transferOk').click(function() {
+    $('#transferOk').click(function () {
         transfer(currentCall.id, $('#transferInput').val());
         closeTransferView();
     });
@@ -791,7 +801,7 @@ function createChat(calleeName) {
 
         // Bind send message on click Enter in message inout field
 
-        $('#chat' + calleeName + ' .messageInput').keydown(function(event) {
+        $('#chat' + calleeName + ' .messageInput').keydown(function (event) {
             if (event.keyCode == '13') {
                 $(this).next().click(); // click on sendMessage button
             } else if (event.keyCode == '27') {
@@ -800,7 +810,7 @@ function createChat(calleeName) {
         });
 
         // Bind send message function
-        $('#chat' + calleeName + ' .messageSend').click(function() {
+        $('#chat' + calleeName + ' .messageSend').click(function () {
             var calleeName = $(this).parent().attr('id').substr(4); //parse id of current chatBox, take away chat word from the beginning
             var messageText = $(this).prev().val(); //parse text from input
             sendMessage(calleeName, messageText, 'text/plain'); //send message
@@ -808,7 +818,7 @@ function createChat(calleeName) {
         });
 
         // Bind selecting tab
-        $("#tab" + calleeName).bind("click", function() {
+        $("#tab" + calleeName).bind("click", function () {
             $("#tabul li").removeClass("ctab"); //hide all tabs
             $("#tab" + calleeName).addClass("ctab"); //select clicked tab
             $(".chatBox").hide(); //chide all chatBoxes
@@ -816,7 +826,7 @@ function createChat(calleeName) {
         });
 
         // Bind closing tab on click 
-        $("#close" + calleeName).click(function() {
+        $("#close" + calleeName).click(function () {
             //close this tab
             $(this).parent().hide();
             $("#chat" + calleeName).hide();
@@ -888,37 +898,37 @@ function close(element) {
 
 
 /* --------------------- On document load we do... ------------------ */
-$(function() {
+$(function () {
 
     // open login view
-    $("#loginMainButton").click(function() {
-      openLoginView();
+    $("#loginMainButton").click(function () {
+        openLoginView();
     });
-    
+
     // logout
-    $("#logoutButton").click(function() {
-      logoff();
-      $(this).hide();      
+    $("#logoutButton").click(function () {
+        logoff();
+        $(this).hide();
     });
 
     // login
-    $("#loginButton").click(function() {
+    $("#loginButton").click(function () {
         login();
     });
 
     // click on caller login show logout button
-    $("#callerLogin").click(function() {
-      $('#logoutButton').toggle()
+    $("#callerLogin").click(function () {
+        $('#logoutButton').toggle()
     });
 
     // every time when we change callee field - we set parameter callee
     // that parameter used around the code 
-    $("#calleeText").keyup(function() {
-      callee = $(this).val();
+    $("#calleeText").keyup(function () {
+        callee = $(this).val();
     });
 
     //Bind click on different buttons
-    $("#callButton").click(function() {
+    $("#callButton").click(function () {
         if ($("#callButton").html() == 'Call') {
             call();
         } else {
@@ -926,71 +936,93 @@ $(function() {
         }
     });
 
-    $("#cameraButtonInCallee").click(function() {
-      openVideoView();
+    $("#cameraButtonInCallee").click(function () {
+        openVideoView();
     });
 
-    $("#canselLoginDiv").click(function() {
-      closeLoginView();
+    $("#canselLoginDiv").click(function () {
+        closeLoginView();
     });
 
-    $("#sendVideo").click(function() {
-      sendVideoChangeState();
+    $("#sendVideo").click(function () {
+        sendVideoChangeState();
     });
 
-    $("#transferCansel").click(function() {
-      closeTransferView();
+    $("#transferCansel").click(function () {
+        closeTransferView();
     });
 
-    $(".iconButton").click(function() {
-      $(this).toggleClass('iconPressed');
+    $(".iconButton").click(function () {
+        $(this).toggleClass('iconPressed');
     });
-    
+
     //micButton opens mic slider
-    $("#micButton").click(function() {
-      if ($(this).hasClass('iconPressed')) {
-        $('#micSlider').show();
-        $('#micBack').show();
-      } else {
-        $('#micSlider').hide();
-        $('#micBack').hide();
-      }
+    $("#micButton").click(function () {
+        if ($(this).hasClass('iconPressed')) {
+            $('#micSlider').show();
+            $('#micBack').show();
+        } else {
+            $('#micSlider').hide();
+            $('#micBack').hide();
+        }
     });
-    
+
     //micButton opens mic slider
-    $("#soundButton").click(function() {
-      if ($(this).hasClass('iconPressed')) {
-        $('#speakerSlider').show();
-        $('#speakerBack').show();
-      } else {
-        $('#speakerSlider').hide();
-        $('#speakerBack').hide();
-      }
-    });    
-
-    $("#cameraButton").click(function() {
-      openVideoView();
+    $("#soundButton").click(function () {
+        if ($(this).hasClass('iconPressed')) {
+            $('#speakerSlider').show();
+            $('#speakerBack').show();
+        } else {
+            $('#speakerSlider').hide();
+            $('#speakerBack').hide();
+        }
     });
 
-    $("#closeButton_video_requestUnmuteDiv").click(function() {
-      closeVideoView();
+    $("#cameraButton").click(function () {
+        openVideoView();
     });
 
-    $(".closeButton").click(function() {
-      close($(this).parent());
+    $("#closeButton_video_requestUnmuteDiv").click(function () {
+        closeVideoView();
+    });
+
+    $(".closeButton").click(function () {
+        close($(this).parent());
     });
 
     //enable drag and resize objects
-    $("#loginDiv").draggable({handle: '.bar', stack:"#loginDiv"});
-    $("#incomingDiv").draggable({handle: '.bar', stack:"#incomingDiv"});
-    $("#settingsDiv").draggable({handle: '.bar', stack:"#settingsDiv"});
-    $("#transfer").draggable({handle: '.bar', stack:"#transfer"});
-    $("#chatDiv").draggable({handle: '.bar', stack:"#chatDiv"});
-    $("#video_requestUnmuteDiv").draggable({handle: '.bar', stack:"#video_requestUnmuteDiv"});
-    $("#video_requestUnmuteDiv").resizable({ minHeight: 180, minWidth: 215, aspectRatio: true});
+    $("#loginDiv").draggable({handle: '.bar', stack: "#loginDiv"});
+    $("#incomingDiv").draggable({handle: '.bar', stack: "#incomingDiv"});
+    $("#settingsDiv").draggable({handle: '.bar', stack: "#settingsDiv"});
+    $("#transfer").draggable({handle: '.bar', stack: "#transfer"});
+    $("#chatDiv").draggable({handle: '.bar', stack: "#chatDiv"});
+    $("#video_requestUnmuteDiv").draggable({handle: '.bar', stack: "#video_requestUnmuteDiv"});
+    $("#video_requestUnmuteDiv").resizable({ minWidth: 215, minHeight: 180, aspectRatio: true});
+
+    var all_videos = $('#localVideoPreview, #remoteVideo');
+    all_videos.each(function () {
+        var el = $(this);
+        el.attr('data-aspectRatio', el.height() / el.width());
+        var width = $("#video_requestUnmuteDiv").width();
+        el.attr('data-windowRatio', el.width() / (width == 1 ? 640 : width));
+    });
+
+    $("#video_requestUnmuteDiv").resize(function () {
+        all_videos.each(function () {
+            var width = $("#video_requestUnmuteDiv").width();
+            var el = $(this),
+                newWidth = width == 1 ? 640 : width;
+
+            el.removeAttr('height')
+                .removeAttr('width')
+                .width(newWidth * el.attr('data-windowRatio'))
+                .height(newWidth * el.attr('data-windowRatio') * el.attr('data-aspectRatio'));
+        });
+    })
+        .resize();
 
     //Bind click on number buttons
-    $(".numberButton").click(function() {
+    $(".numberButton").click(function () {
         if (currentCall != null && currentCall.state == STATE_TALK) {
             sendDTMF(currentCall.id, $(this).html());
         } else if (currentCall == null) {
@@ -1000,16 +1032,16 @@ $(function() {
     });
 
     // this function set changing in button styles when you press any button
-    $(".button").mousedown(function() {
-      $(this).addClass('pressed');
-    }).mouseup(function() {
-      $(this).removeClass('pressed');
-    }).mouseout(function() {
-      $(this).removeClass('pressed');
-    });
-    
+    $(".button").mousedown(function () {
+        $(this).addClass('pressed');
+    }).mouseup(function () {
+            $(this).removeClass('pressed');
+        }).mouseout(function () {
+            $(this).removeClass('pressed');
+        });
+
     // Bind click on chatButton
-    $("#chatButton").click(function() {
+    $("#chatButton").click(function () {
         if (isLogged) {
             if (callee != '') {
                 openChatView();
@@ -1023,44 +1055,43 @@ $(function() {
     });
 
     /* Autofill Aut. name field when you fill Login field */
-    $('#username').keyup(function() {
+    $('#username').keyup(function () {
         $('#authname').val($(this).val());
     });
-    
+
     /* Autofill Outb. proxy field when you fill "domain" field */
-    $('#domain').keyup(function() {
+    $('#domain').keyup(function () {
         $('#outbound_proxy').val($(this).val());
     });
 
     // this functions resize flash when you resize video window
-    $('#video_requestUnmuteDiv').resize(function() {
+    $('#video_requestUnmuteDiv').resize(function () {
         $('#jsSWFDiv').height($(this).height() - 40);
     });
-    
-    // Mic slider set mic volume when you slide it
-		$("#micSlider").slider({
-			orientation: "vertical",
-			range: "min",
-			min: 0,
-			max: 100,
-      value: 60,
-			slide: function(event, ui) {
-        flashphoner.setMicVolume(ui.value);
-      }
-		});
-	
-	  // Speaker slider set speaker volume when you slide it
-	  $("#speakerSlider").slider({
-			orientation: "vertical",
-			range: "min",
-			min: 0,
-			max: 100,
-			value: 60,
-      slide: function(event, ui) {  
-        flashphoner.setVolume(ui.value);      
-      }
-		});
 
+    // Mic slider set mic volume when you slide it
+    $("#micSlider").slider({
+        orientation: "vertical",
+        range: "min",
+        min: 0,
+        max: 100,
+        value: 60,
+        slide: function (event, ui) {
+            flashphoner.setMicVolume(ui.value);
+        }
+    });
+
+    // Speaker slider set speaker volume when you slide it
+    $("#speakerSlider").slider({
+        orientation: "vertical",
+        range: "min",
+        min: 0,
+        max: 100,
+        value: 60,
+        slide: function (event, ui) {
+            flashphoner.setVolume(ui.value);
+        }
+    });
 
 
 });

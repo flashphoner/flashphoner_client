@@ -5,6 +5,8 @@
             },
             close: function () {
             },
+            error: function () {
+            },
             message: function () {
             },
             options: {},
@@ -22,6 +24,7 @@
             $.extend($.websocketSettings, s);
             $(ws).bind('open', $.websocketSettings.open)
                 .bind('close', $.websocketSettings.close)
+                .bind('error', $.websocketSettings.error)
                 .bind('message', $.websocketSettings.message)
                 .bind('message', function (e) {
                     var m = $.evalJSON(e.originalEvent.data);
@@ -40,7 +43,7 @@
                 {
                     return false;
                 }
-            }
+            };
             $(window).unload(function () {
                 ws.close();
                 ws = null

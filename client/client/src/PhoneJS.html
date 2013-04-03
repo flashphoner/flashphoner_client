@@ -157,16 +157,15 @@
 
 <!-- Video + RequestUnmuted view -->
 <div id="video_requestUnmuteDiv" class="init">
-    <!--<div class="bar">&nbsp;&nbsp;Security panel</div>-->
-    <!--<div id="requestUnmuteText">Please allow access to devices</div>-->
-    <!--<div id="closeButton_video_requestUnmuteDiv"></div>-->
+    <div class="bar">&nbsp;&nbsp;Security panel</div>
+    <div id="requestUnmuteText">Please allow access to devices</div>
+    <div id="closeButton_video_requestUnmuteDiv"></div>
 
-    <!--<div id="jsSWFDiv">-->
-        <!--<a href="http://www.adobe.com/go/getflashplayer">-->
-            <!--<img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif"-->
-                 <!--alt="Get Adobe Flash player"/>-->
-        <!--</a>-->
-    <!--</div>-->
+    <div id="jsSWFDiv">
+        <video id="localVideoPreview" autoplay="autoplay" class="ui-widget-content" style="width:160px; height:120px;"></video>
+        <video id="remoteVideo" autoplay="autoplay" style="width:640px; height:480px;"></video>
+    </div>
+
 
     <input type="button" class="button" id="sendVideo" value="Send video"/>
 </div>
@@ -208,12 +207,6 @@
 <div id="console">
 </div>
 <!-- ******* -->
-
-<video id="localVideoPreview" autoplay="autoplay" class="ui-widget-content"
-       style="height:120px; width:160px; margin-top: 10px; margin-right: 600px; -webkit-transition-property: opacity;-webkit-transition-duration: 2s;"></video>
-<video id="remoteVideo" onDblClick="toggleFullScreen();" width="640px"
-       height="480px" autoplay="autoplay"
-       style="margin-top: 10px;-webkit-transition-property: opacity; -webkit-transition-duration: 2s;"></video>
 
 </body>
 </html>

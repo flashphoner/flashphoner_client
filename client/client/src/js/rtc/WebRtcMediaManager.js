@@ -27,7 +27,7 @@ WebRtcMediaManager.prototype.createPeerConnection = function () {
     var application = this;
     this.peerConnection = new webkitRTCPeerConnection({"iceServers": [
         {"url": "stun:stun.l.google.com:19302"}
-    ]}, null);
+    ]}, {"optional":[{"DtlsSrtpKeyAgreement":true}]});
 
     this.peerConnection.onaddstream = function (event) {
         application.onPeerConnectionOnAddStreamCallback(event);
@@ -72,7 +72,7 @@ WebRtcMediaManager.prototype.onPeerConnectionOnAddStreamCallback = function (eve
     if (this.peerConnection != null) {
         console.debug("WebRtcMediaManager:onPeerConnectionOnAddStreamCallback():this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("WebRtcMediaManager:onPeerConnectionOnAddStreamCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("WebRtcMediaManager:onPeerConnectionOnAddStreamCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("WebRtcMediaManager:onPeerConnectionOnAddStreamCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("WebRtcMediaManager:onPeerConnectionOnAddStreamCallback: this.peerConnectionState=" + this.peerConnectionState);
 
         this.remoteAudioVideoMediaStream = event.stream;
@@ -92,7 +92,7 @@ WebRtcMediaManager.prototype.onPeerConnectionOnRemoveStreamCallback = function (
     if (this.peerConnection != null) {
         console.debug("WebRtcMediaManager:onPeerConnectionOnRemoveStreamCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("WebRtcMediaManager:onPeerConnectionOnRemoveStreamCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("WebRtcMediaManager:onPeerConnectionOnRemoveStreamCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("WebRtcMediaManager:onPeerConnectionOnRemoveStreamCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("WebRtcMediaManager:onPeerConnectionOnRemoveStreamCallback: this.peerConnectionState=" + this.peerConnectionState);
 
         this.remoteAudioVideoMediaStream = null;
@@ -111,7 +111,7 @@ WebRtcMediaManager.prototype.onPeerConnectionOnOpenCallback = function (event) {
     if (this.peerConnection != null) {
         console.debug("WebRtcMediaManager:onPeerConnectionOnOpenCallback():this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("WebRtcMediaManager:onPeerConnectionOnOpenCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("WebRtcMediaManager:onPeerConnectionOnOpenCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("WebRtcMediaManager:onPeerConnectionOnOpenCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("WebRtcMediaManager:onPeerConnectionOnOpenCallback: this.peerConnectionState=" + this.peerConnectionState);
     }
     else {
@@ -124,7 +124,7 @@ WebRtcMediaManager.prototype.onPeerConnectionStateChangeCallback = function (eve
     if (this.peerConnection != null) {
         console.debug("WebRtcMediaManager:onPeerConnectionStateChangeCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("WebRtcMediaManager:onPeerConnectionStateChangeCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("WebRtcMediaManager:onPeerConnectionStateChangeCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("WebRtcMediaManager:onPeerConnectionStateChangeCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("WebRtcMediaManager:onPeerConnectionStateChangeCallback: this.peerConnectionState=" + this.peerConnectionState);
     }
     else {
@@ -136,7 +136,7 @@ WebRtcMediaManager.prototype.onPeerConnectionIceCandidateCallback = function (rt
     console.debug("WebRtcMediaManager:onPeerConnectionIceCandidateCallback(): rtcIceCandidateEvent=" + rtcIceCandidateEvent);
     console.debug("WebRtcMediaManager:onPeerConnectionIceCandidateCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
     console.debug("WebRtcMediaManager:onPeerConnectionIceCandidateCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-    console.debug("WebRtcMediaManager:onPeerConnectionIceCandidateCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+    console.debug("WebRtcMediaManager:onPeerConnectionIceCandidateCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
     console.debug("WebRtcMediaManager:onPeerConnectionIceCandidateCallback: this.peerConnectionState=" + this.peerConnectionState);
 
     if (this.peerConnection != null) {
@@ -172,7 +172,7 @@ WebRtcMediaManager.prototype.onPeerConnectionIceNegotationNeededCallback = funct
     if (this.peerConnection != null) {
         console.debug("WebRtcMediaManager:onPeerConnectionIceNegotationNeededCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("WebRtcMediaManager:onPeerConnectionIceNegotationNeededCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("WebRtcMediaManager:onPeerConnectionIceNegotationNeededCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("WebRtcMediaManager:onPeerConnectionIceNegotationNeededCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("WebRtcMediaManager:onPeerConnectionIceNegotationNeededCallback: this.peerConnectionState=" + this.peerConnectionState);
     }
     else {
@@ -185,7 +185,7 @@ WebRtcMediaManager.prototype.onPeerConnectionGatheringChangeCallback = function 
     if (this.peerConnection != null) {
         console.debug("WebRtcMediaManager:onPeerConnectionGatheringChangeCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("WebRtcMediaManager:onPeerConnectionGatheringChangeCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("WebRtcMediaManager:onPeerConnectionGatheringChangeCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("WebRtcMediaManager:onPeerConnectionGatheringChangeCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("WebRtcMediaManager:onPeerConnectionGatheringChangeCallback: this.peerConnectionState=" + this.peerConnectionState);
     }
     else {
@@ -198,7 +198,7 @@ WebRtcMediaManager.prototype.onPeerConnectionIceChangeCallback = function (event
     if (this.peerConnection != null) {
         console.debug("WebRtcMediaManager:onPeerConnectionIceChangeCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("WebRtcMediaManager:onPeerConnectionIceChangeCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("WebRtcMediaManager:onPeerConnectionIceChangeCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("WebRtcMediaManager:onPeerConnectionIceChangeCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("WebRtcMediaManager:onPeerConnectionIceChangeCallback: this.peerConnectionState=" + this.peerConnectionState);
     }
     else {
@@ -211,7 +211,7 @@ WebRtcMediaManager.prototype.onPeerConnectionIdentityResultCallback = function (
     if (this.peerConnection != null) {
         console.debug("WebRtcMediaManager:onPeerConnectionIdentityResultCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("WebRtcMediaManager:onPeerConnectionIdentityResultCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("WebRtcMediaManager:onPeerConnectionIdentityResultCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("WebRtcMediaManager:onPeerConnectionIdentityResultCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("WebRtcMediaManager:onPeerConnectionIdentityResultCallback: this.peerConnectionState=" + this.peerConnectionState);
     }
     else {
@@ -231,7 +231,7 @@ WebRtcMediaManager.prototype.createOffer = function (createCallFn) {
             application.onPeerConnectionCreateOfferSuccessCallback(offer);
         }, function (error) {
             application.onPeerConnectionCreateOfferErrorCallback(error);
-        });
+        },{"optional":[],"mandatory":{"OfferToReceiveAudio":true,"OfferToReceiveVideo":true}});
     }
     catch (exception) {
         console.error("WebRtcMediaManager:createOffer(): catched exception:" + exception);
@@ -251,6 +251,7 @@ WebRtcMediaManager.prototype.createAnswer = function (answerCallFn) {
             type: 'offer',
             sdp: application.lastReceivedSdp
         });
+        console.debug("WebRtcMediaManager:setRemoteSDP: offer=" + JSON.stringify(sdpOffer));
         this.peerConnectionState = 'offer-received';
         this.peerConnection.setRemoteDescription(sdpOffer, function() {
             application.onPeerConnectionSetRemoteDescriptionSuccessCallback();
@@ -267,14 +268,16 @@ WebRtcMediaManager.prototype.onPeerConnectionCreateOfferSuccessCallback = functi
     console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferSuccessCallback(): newOffer=" + offer);
     console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferSuccessCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
     console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferSuccessCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-    console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferSuccessCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+    console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferSuccessCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
     console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferSuccessCallback: this.peerConnectionState=" + this.peerConnectionState);
+    console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferSuccessCallback: offer=" + JSON.stringify(offer));
 
     if (this.peerConnection != null) {
         if (this.peerConnectionState == 'new') {
             // Preparing offer.
             var application = this;
             this.peerConnectionState = 'preparing-offer';
+
             this.peerConnection.setLocalDescription(offer, function () {
                 application.onPeerConnectionSetLocalDescriptionSuccessCallback();
             }, function (error) {
@@ -296,7 +299,7 @@ WebRtcMediaManager.prototype.onPeerConnectionCreateOfferErrorCallback = function
     if (this.peerConnection != null) {
         console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferErrorCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferErrorCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferErrorCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferErrorCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("WebRtcMediaManager:onPeerConnectionCreateOfferErrorCallback: this.peerConnectionState=" + this.peerConnectionState);
         // TODO Notify Error to INVITE state machine
     }
@@ -312,7 +315,7 @@ WebRtcMediaManager.prototype.onPeerConnectionSetLocalDescriptionSuccessCallback 
     if (this.peerConnection != null) {
         console.debug("WebRtcMediaManager:onPeerConnectionSetLocalDescriptionSuccessCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("WebRtcMediaManager:onPeerConnectionSetLocalDescriptionSuccessCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("WebRtcMediaManager:onPeerConnectionSetLocalDescriptionSuccessCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("WebRtcMediaManager:onPeerConnectionSetLocalDescriptionSuccessCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("WebRtcMediaManager:onPeerConnectionSetLocalDescriptionSuccessCallback: this.peerConnectionState=" + this.peerConnectionState);
         // Nothing to do, just waiting end ICE resolution
     }
@@ -326,7 +329,7 @@ WebRtcMediaManager.prototype.onPeerConnectionSetLocalDescriptionErrorCallback = 
     if (this.peerConnection != null) {
         console.debug("WebRtcMediaManager:onPeerConnectionSetLocalDescriptionErrorCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("WebRtcMediaManager:onPeerConnectionSetLocalDescriptionErrorCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("WebRtcMediaManager:onPeerConnectionSetLocalDescriptionErrorCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("WebRtcMediaManager:onPeerConnectionSetLocalDescriptionErrorCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("WebRtcMediaManager:onPeerConnectionSetLocalDescriptionErrorCallback: this.peerConnectionState=" + this.peerConnectionState);
         // TODO Notify Error to INVITE state machine
     }
@@ -346,6 +349,7 @@ WebRtcMediaManager.prototype.setRemoteSDP = function (sdp, isInitiator) {
         });
         var application = this;
         this.peerConnectionState = 'answer-received';
+        console.debug("WebRtcMediaManager:setRemoteSDP: answer=" + JSON.stringify(sdpAnswer));
         this.peerConnection.setRemoteDescription(sdpAnswer, function () {
             application.onPeerConnectionSetRemoteDescriptionSuccessCallback();
         }, function (error) {
@@ -362,7 +366,7 @@ WebRtcMediaManager.prototype.onPeerConnectionSetRemoteDescriptionSuccessCallback
     if (this.peerConnection != null) {
         console.debug("MobicentsWebRTCPhone:onPeerConnectionSetRemoteDescriptionSuccessCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("MobicentsWebRTCPhone:onPeerConnectionSetRemoteDescriptionSuccessCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("MobicentsWebRTCPhone:onPeerConnectionSetRemoteDescriptionSuccessCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("MobicentsWebRTCPhone:onPeerConnectionSetRemoteDescriptionSuccessCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("MobicentsWebRTCPhone:onPeerConnectionSetRemoteDescriptionSuccessCallback: this.peerConnectionState=" + this.peerConnectionState);
 
         if (this.peerConnectionState == 'answer-received') {
@@ -374,7 +378,9 @@ WebRtcMediaManager.prototype.onPeerConnectionSetRemoteDescriptionSuccessCallback
                 application.onPeerConnectionCreateAnswerSuccessCallback(answer);
             }, function (error) {
                 application.onPeerConnectionCreateAnswerErrorCallback(error);
-            });
+            },{'mandatory': {
+                'OfferToReceiveAudio':true,
+                'OfferToReceiveVideo':true }});
         }
         else {
             console.log("MobicentsWebRTCPhone:onPeerConnectionSetRemoteDescriptionSuccessCallback(): RTCPeerConnection bad state!");
@@ -391,7 +397,7 @@ WebRtcMediaManager.prototype.onPeerConnectionSetRemoteDescriptionErrorCallback =
     if (this.peerConnection != null) {
         console.debug("MobicentsWebRTCPhone:onPeerConnectionSetRemoteDescriptionErrorCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("MobicentsWebRTCPhone:onPeerConnectionSetRemoteDescriptionErrorCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("MobicentsWebRTCPhone:onPeerConnectionSetRemoteDescriptionErrorCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("MobicentsWebRTCPhone:onPeerConnectionSetRemoteDescriptionErrorCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("MobicentsWebRTCPhone:onPeerConnectionSetRemoteDescriptionErrorCallback: this.peerConnectionState=" + this.peerConnectionState);
         // TODO Notify Error to INVITE state machine
     }
@@ -408,8 +414,9 @@ WebRtcMediaManager.prototype.onPeerConnectionCreateAnswerSuccessCallback = funct
     if (this.peerConnection != null) {
         console.debug("MobicentsWebRTCPhone:onPeerConnectionCreateAnswerSuccessCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("MobicentsWebRTCPhone:onPeerConnectionCreateAnswerSuccessCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("MobicentsWebRTCPhone:onPeerConnectionCreateAnswerSuccessCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("MobicentsWebRTCPhone:onPeerConnectionCreateAnswerSuccessCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("MobicentsWebRTCPhone:onPeerConnectionCreateAnswerSuccessCallback: this.peerConnectionState=" + this.peerConnectionState);
+        console.debug("MobicentsWebRTCPhone:onPeerConnectionCreateAnswerSuccessCallback: answer=" + JSON.stringify(answer));
 
         if (this.peerConnectionState == 'offer-received') {
             // Prepare answer.
@@ -437,7 +444,7 @@ WebRtcMediaManager.prototype.onPeerConnectionCreateAnswerErrorCallback = functio
     if (this.peerConnection != null) {
         console.debug("MobicentsWebRTCPhone:onPeerConnectionCreateAnswerErrorCallback(): this.peerConnection.readyState=" + this.peerConnection.readyState);
         console.debug("MobicentsWebRTCPhone:onPeerConnectionCreateAnswerErrorCallback(): this.peerConnection.iceGatheringState=" + this.peerConnection.iceGatheringState);
-        console.debug("MobicentsWebRTCPhone:onPeerConnectionCreateAnswerErrorCallback(): this.peerConnection.iceState=" + this.peerConnection.iceState);
+        console.debug("MobicentsWebRTCPhone:onPeerConnectionCreateAnswerErrorCallback(): this.peerConnection.iceConnectionState=" + this.peerConnection.iceConnectionState);
         console.debug("MobicentsWebRTCPhone:onPeerConnectionCreateAnswerErrorCallback: this.peerConnectionState=" + this.peerConnectionState);
         // TODO Notify Error to INVITE state machin
     }
