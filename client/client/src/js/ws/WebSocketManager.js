@@ -4,7 +4,7 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
     me.calls = [];
     me.isOpened = false;
     me.configLoaded = false;
-    this.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
+    me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
     var rtcManager = this.webRtcMediaManager;
 
     var proccessCall = function(call){
@@ -65,7 +65,7 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
             proccessCall(call);
             notify(call);
             notifyRemoveCall(call);
-
+            rtcManager.close();
         },
 
         busy: function(call, sipHeader) {

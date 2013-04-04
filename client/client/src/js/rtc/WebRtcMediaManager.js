@@ -21,6 +21,20 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo, hasVideo) {
     navigator.webkitGetUserMedia({audio: true, video: true}, gotLocalAudioVideoStream, gotLocalAudioVideoFailed);
 };
 
+WebRtcMediaManager.prototype.close=function(){
+    if(this.peerConnection)
+    {
+        console.debug ("MobicentsWebRTCPhone:initPeerConnectionStateMachine(): force peerConnection close");
+        this.remoteVideo.pause();
+        this.remoteVideo.src= null;
+        this.peerConnection.close();
+    }
+
+    this.peerConnection = null;
+    this.peerConnectionState = 'new';
+    this.remoteAudioVideoMediaStream=null;
+}
+
 
 WebRtcMediaManager.prototype.createPeerConnection = function () {
     console.debug("WebRtcMediaManager:createPeerConnection()");
