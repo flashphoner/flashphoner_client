@@ -14,6 +14,7 @@ package com.flashphoner.phone_app;
 
 import com.flashphoner.sdk.rtmp.IRtmpClient;
 import com.flashphoner.sdk.rtmp.IRtmpClientsCollection;
+import com.flashphoner.sdk.softphone.ISoftphone;
 import com.wowza.wms.client.IClient;
 import com.wowza.wms.logging.WMSLogger;
 import com.wowza.wms.logging.WMSLoggerFactory;
@@ -111,15 +112,22 @@ public class RtmpClients implements IRtmpClientsCollection {
 
     @Override
     public IRtmpClient findByCalledInEstablishedCalls(String called) {
-        if (log.isDebugEnabled()){
-            log.info("findByCalledInEstablishedCalls called: "+called);
+        if (log.isDebugEnabled()) {
+            log.info("findByCalledInEstablishedCalls called: " + called);
         }
         Iterator<IRtmpClient> clients = rtmpClients.values().iterator();
         while (clients.hasNext()) {
             IRtmpClient client = clients.next();
-            boolean hasEstablishedCall = client.getSoftphone().hasEstablishedCall(called);
-            if (hasEstablishedCall) {
-                return client;
+            try {
+                ISoftphone softphone = client.getSoftphone();
+                if (softphone != null) {
+                    boolean hasEstablishedCall = softphone.hasEstablishedCall(called);
+                    if (hasEstablishedCall) {
+                        return client;
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error checking established call for client: " + client.getRtmpClientConfig().getLogin(), e);
             }
         }
         return null;

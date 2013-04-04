@@ -112,7 +112,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         // If we are logged by token - we will not send user data to client app, because this is security violation
         boolean loggedByToken = false;
-        log.info("onConnect " + params);
+        log.info("onConnect " + params+" clientId: "+client.getClientId());
 
         if (ALLOW_THIRD_PARTY_CONNECTIONS) {
             AMFData amfData = params.get(PARAM1);
