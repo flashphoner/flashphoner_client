@@ -21,22 +21,6 @@ body {
 img {
 	border: 0;
 }
-/*
-button::-moz-focus-inner,   input[type="reset"]::-moz-focus-inner,   input[type="button"]::-moz-focus-inner,   input[type="submit"]::-moz-focus-inner,   input[type="file"] > input[type="button"]::-moz-focus-inner {
-border: none;
-}
-#jsSWFDiv, #phoneDiv, #loginDiv, #incomingDiv, #infoDiv, #connectingDiv, #settingsDiv {
-	position: absolute;
-}
-*/
-
-/* -------- Background ------- */
-
-/*
-#settingsDiv, #loginDiv, #infoDiv, #connectingDiv, .login_link, #transferDiv, #incomingDiv, #newChat {
-background: #fff;
-}
-*/
 
 /* --------------  Main click2call view ------------- */
 #c2c {
@@ -333,7 +317,7 @@ height: 200px;
 	overflow: hidden;
 	position: absolute;
 }
-#jsSWFDiv {
+#video {
 	height: 138px;
 	position: absolute;
 	top: 0px;
@@ -470,11 +454,7 @@ input::-webkit-input-placeholder {
 #calleeText {
 	padding-left: 1px;
 }
-/*
-#jsSWFDiv {
-	height: 138px;
-}
-*/
+
 #phoneDiv {
 	left: 30px;
 	height: 240px;

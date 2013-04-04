@@ -66,7 +66,7 @@ FlashphonerLoader.prototype = {
             flashvars.config = "flashphoner.xml";
 
             if (this.hasFlash()) {
-                swfobject.embedSWF("flashphoner_js_api.swf", "jsSWFDiv", "100%", "100%", "11.2.202", "expressInstall.swf", flashvars, params, attributes, function (e) {
+                swfobject.embedSWF("flashphoner_js_api.swf", "videoDiv", "100%", "100%", "11.2.202", "expressInstall.swf", flashvars, params, attributes, function (e) {
                     me.flashphoner = e.ref;
                 });
             }

@@ -379,7 +379,7 @@ function notifyVideoFormat(call) {
         proportion = call.playerVideoHeight / call.playerVideoWidth; //set proportion of video picture, else it will be = 0
         var newHeight = 320 * proportion;
         $('.video').height(newHeight);
-        $('#jsSWFDiv').height(newHeight).width(320);
+        $('#video').height(newHeight).width(320);
         //$('#c2c').height(newHeight+40);
     }
 }
@@ -486,14 +486,14 @@ function openVideoView(size) {
             $('#flash').removeClass('init').addClass('video');
             var newHeight = 320 * proportion;
             $('.video').height(newHeight);
-            $('#jsSWFDiv').height(newHeight).width(320);
+            $('#video').height(newHeight).width(320);
             $('#c2c').height(newHeight + 40);
         } else if (size == 'small') {
             $('#flash').removeClass('init').addClass('videoMy');
-            $('#jsSWFDiv').height(240).width(320);
+            $('#video').height(240).width(320);
         } else {
             $('#flash').removeClass('init').addClass('video');
-            $('#jsSWFDiv').height(240).width(320);
+            $('#video').height(240).width(320);
 
         }
 

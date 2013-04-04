@@ -36,7 +36,7 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
 }
 
 /* ---------- Positions --------- */
-#jsSWFDiv,
+#video,
 #phoneDiv,
 #loginDiv,
 #incomingDiv,
@@ -98,9 +98,6 @@ input::-webkit-input-placeholder {
 }
 #calleeText {
     padding-left: 1px;
-}
-#jsSWFDiv {
-    height: 138px;
 }
 #phoneDiv {
     left: 30px;
@@ -410,16 +407,16 @@ input::-webkit-input-placeholder {
 }
 /* ------------ Video + Security settings view -------------- */
 #video_requestUnmuteDiv {
-    top: 50px;
-    left: 20px;
+    top: 32px;
+    left: 238px;
     overflow: hidden;
     padding-top: 20px;
 
 }
 .videoDiv {
     visibility: visible;
-    width: 642px;
-    height: 538px;
+    width: 640px;
+    height: 520px;
 }
 .securityDiv {
     visibility: visible;
@@ -877,9 +874,6 @@ cursor: pointer !important;
 #infoDiv {
     z-index: 30;
 }
-#jsSWFDiv {
-    z-index: 100;
-}
 #micBack, #speakerBack{
     z-index: 100;
 }
@@ -890,6 +884,3 @@ cursor: pointer !important;
     z-index: 101;
 }
 
-grey {
-    color: #888;
-}

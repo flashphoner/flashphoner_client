@@ -18,6 +18,78 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
         notifyAddCall(call);
     };
 
+    this.callbacks = {
+        getUserData: function(user) {
+            me.user = user;
+            notifyRegisterRequired(user.regRequired);
+        },
+
+        getVersion: function(version) {
+            notifyVersion(version);
+        },
+
+        registered: function(sipHeader) {
+            notifyRegistered();
+        },
+
+        ring: function(call, sipHeader) {
+            proccessCall(call);
+            notify(call);
+        },
+
+        sessionProgress: function(call, sipHeader) {
+            proccessCall(call);
+        },
+
+        setRemoteSDP: function(call, sdp, isInitiator, sipHeader) {
+            proccessCall(call);
+            rtcManager.setRemoteSDP(sdp, isInitiator);
+        },
+
+        talk: function(call, sipHeader) {
+            proccessCall(call);
+            notify(call);
+        },
+
+        hold: function(call, sipHeader) {
+            proccessCall(call);
+            notify(call);
+        },
+
+        callbackHold: function(call, isHold) {
+            proccessCall(call);
+            notifyCallbackHold(call);
+        },
+
+        finish: function(call, sipHeader) {
+            proccessCall(call);
+            notify(call);
+            notifyRemoveCall(call);
+
+        },
+
+        busy: function(call, sipHeader) {
+            proccessCall(call);
+            notify(call);
+        },
+
+        fail: function(errorCode, sipHeader) {
+            notifyError(errorCode);
+        },
+
+        notifyVideoFormat: function(call) {
+            proccessCall(call);
+            //notifyVideoFormat(call);
+        },
+
+        notifyMessage: function(message) {
+            notifyMessage(message);
+        },
+
+        notifyAudioCodec: function(codec) {
+        }
+    };
+
 
 };
 
@@ -40,76 +112,7 @@ WebSocketManager.prototype = {
             error:function () {
             },
             context:me,
-            events: {
-                getUserData: function(user) {
-                    me.user = user;
-                    notifyRegisterRequired(user.regRequired);
-                },
-
-                getVersion: function(version) {
-                    notifyVersion(version);
-                },
-
-                registered: function(sipHeader) {
-                    notifyRegistered();
-                },
-
-                ring: function(call, sipHeader) {
-                    proccessCall(call);
-                    notify(call);
-                },
-
-                sessionProgress: function(call, sipHeader) {
-                    proccessCall(call);
-                },
-
-                setRemoteSDP: function(call, sdp, isInitiator, sipHeader) {
-                    proccessCall(call);
-                    rtcManager.setRemoteSDP(sdp, isInitiator);
-                },
-
-                talk: function(call, sipHeader) {
-                    proccessCall(call);
-                    notify(call);
-                },
-
-                hold: function(call, sipHeader) {
-                    proccessCall(call);
-                    notify(call);
-                },
-
-                callbackHold: function(call, isHold) {
-                    proccessCall(call);
-                    notifyCallbackHold(call);
-                },
-
-                finish: function(call, sipHeader) {
-                    proccessCall(call);
-                    notify(call);
-                    notifyRemoveCall(call);
-                },
-
-                busy: function(call, sipHeader) {
-                    proccessCall(call);
-                    notify(call);
-                },
-
-                fail: function(errorCode, sipHeader) {
-                    notifyError(errorCode);
-                },
-
-                notifyVideoFormat: function(call) {
-                    proccessCall(call);
-                    //notifyVideoFormat(call);
-                },
-
-                notifyMessage: function(message) {
-                    notifyMessage(message);
-                },
-
-                notifyAudioCodec: function(codec) {
-                }
-            }
+            events: me.callbacks
         });
         return 0;
     },

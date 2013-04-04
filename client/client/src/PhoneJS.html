@@ -161,9 +161,12 @@
     <div id="requestUnmuteText">Please allow access to devices</div>
     <div id="closeButton_video_requestUnmuteDiv"></div>
 
-    <div id="jsSWFDiv">
-        <video id="localVideoPreview" autoplay="autoplay" class="ui-widget-content" style="width:160px; height:120px;"></video>
-        <video id="remoteVideo" autoplay="autoplay" style="width:640px; height:480px;"></video>
+    <div id="video">
+        <div id="videoDiv" style="width:100%; height:100%">
+            <video id="remoteVideo" autoplay="autoplay" style="background-color: #000000; width:640px; height:480px;"></video>
+            <video id="localVideoPreview" autoplay="autoplay" class="ui-widget-content"
+                   style="background-color: #000000; width: 160px; height: 120px; position: absolute; z-index: 40;top:0;left:0;"></video>
+        </div>
     </div>
 
 

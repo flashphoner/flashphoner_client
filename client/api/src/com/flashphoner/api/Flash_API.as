@@ -355,9 +355,10 @@ package com.flashphoner.api
 		 * @param visibleName name of logged user wich target user see
 		 * @param isVideoCall video call?(true/false)
 		 **/ 
-		public function call(callee:String, visibleName:String, isVideoCall:Boolean = false, inviteParameters:Object = null):int{
+		public function call(callObject:Object):int{
 			if (PhoneConfig.CHECK_VALIDATION_CALLEE){
 				var reg:RegExp = /[a-zа-яё]/i;
+				var callee = callObject.callee;
 				if (callee != null && callee != ""){
 						if ((callee.indexOf("sip:") == 0)){
 							if (callee.indexOf("@") == -1 || callee.indexOf("@") == callee.length-1){
@@ -371,23 +372,23 @@ package com.flashphoner.api
 								if (callee.indexOf(":") != -1){
 									return 1;
 								}
-								callee = "sip:"+callee+"@"+modelLocator.domain+":"+modelLocator.port;
+								callObject.callee = "sip:"+callee+"@"+modelLocator.domain+":"+modelLocator.port;
 							}
 						}
 				}else{
 					return 1;
 				}
 			}
-			if (visibleName != null){
-				visibleName.replace("\"","");
-				visibleName.replace("'","");
+			if (callObject.visibleName != null){
+				callObject.visibleName.replace("\"","");
+				callObject.visibleName.replace("'","");
 			}
 			for each (var tempCall:Call in calls){
 				if (tempCall.state == Call.STATE_TALK){
 					tempCall.setStatusHold(true);
 				}
 			}
-			phoneServerProxy.call(callee,visibleName, isVideoCall,inviteParameters);
+			phoneServerProxy.call(callObject);
 			return 0;
 		}
 		

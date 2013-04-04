@@ -67,9 +67,10 @@ package com.flashphoner.api
 		}
 		
 		public function login(loginObject:Object):int{
-			var username:String = loginObject.username;
+			var login:String = loginObject.login;
 			var authenticationName:String = loginObject.authenticationName;
 			var password:String = loginObject.password;
+			var domain:String = loginObject.domain;
 			var outboundProxy:String = loginObject.outboundProxy;
 			var port:String = loginObject.port;
 			var qValue:String = loginObject.qValue;
@@ -77,24 +78,16 @@ package com.flashphoner.api
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
 			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
-			if (username.indexOf("sip:") != 0 || username.indexOf("@") < 4){
-				return 1;
-			}	
-			username = username.substring(4);
-			obj.login = username.substring(0,username.indexOf("@"));
+			obj.login = login;
 			if (authenticationName == null || authenticationName == ""){
-				obj.authenticationName = username.substring(0,username.indexOf("@"));
+				obj.authenticationName = login;
 			}else{
 				obj.authenticationName = authenticationName; 
 			}
 			obj.password = password;
 			obj.width = PhoneConfig.VIDEO_WIDTH;
 			obj.height = PhoneConfig.VIDEO_HEIGHT;
-			var endIndex:int = username.indexOf(":");
-			if (endIndex == -1){
-				endIndex = username.length;
-			}
-			obj.domain = username.substring(username.indexOf("@")+1,endIndex);
+			obj.domain = domain;
 			obj.outboundProxy = outboundProxy;
 			obj.port = port;
 			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
@@ -141,9 +134,9 @@ package com.flashphoner.api
 		}
 		*/
 		
-		public function call(callee:String, visibleName:String, isVideoCall:Boolean, inviteParameters:Object):void{
+		public function call(callObject:Object):void{
 			Logger.info("PhoneServerProxy.call()");
-			nc.call("call", responder, callee, visibleName, isVideoCall, null, inviteParameters);
+			nc.call("call", responder, callObject);
 		}
 		
 		public function callByToken(token:String, isVideoCall:Boolean, inviteParameters:Object):void{

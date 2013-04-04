@@ -12,7 +12,8 @@
   This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 -->
 <flashphoner>
-	<rtmp_server>ws://87.226.225.59:8080</rtmp_server>
+	<rtmp_server>rtmfp://87.226.225.59:8080</rtmp_server>
+    <!--<rtmp_server>rtmfp://87.226.225.59:1935</rtmp_server>-->
 	<register_required>true</register_required>
     <!--<token>etgrtgrth</token>-->
 	<application>phone_app</application>

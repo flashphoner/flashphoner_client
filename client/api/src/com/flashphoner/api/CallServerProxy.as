@@ -62,7 +62,10 @@ package com.flashphoner.api
 		
 		public function answer(isVideoCall:Boolean):void{
 			Logger.info("CallServerProxy.answer() call.id: "+flashCall.id);
-			nc.call("answer",null,flashCall.id,isVideoCall);	
+			var answerObject:Object = new Object();
+			answerObject.callId = flashCall.id;
+			answerObject.hasVideo = isVideoCall;
+			nc.call("answer",null,answerObject);	
 		}
 		
 		public function publish(login:String):void{

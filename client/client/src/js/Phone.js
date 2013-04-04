@@ -456,7 +456,7 @@ function notifyVideoFormat(call) {
     if ($('div').is('.videoDiv') && proportion != 0) { //if video window opened and other side send video
         var newHeight = $('.videoDiv').width() * proportion + 40;
         $('.videoDiv').height(newHeight); //we resize video window for new proportion
-        $('#jsSWFDiv').height(newHeight - 40); //and resize flash for new video window
+        $('#video').height(newHeight - 40); //and resize flash for new video window
     }
 }
 
@@ -707,11 +707,10 @@ function openVideoView() {
         $('#video_requestUnmuteDiv .bar').html('&nbsp;&nbsp;Video');
 
         if (proportion != 0) {
-            //$('.videoDiv #video_requestUnmuteDiv').height($(this).width() * proportion);
             var newHeight = $('.videoDiv').width() * proportion + 40;
             $('.videoDiv').height(newHeight); //we resize video window for new proportion
-            $('#jsSWFDiv').height(newHeight - 40); //and resize flash for new video window
         }
+        $('#video_requestUnmuteDiv').resize();
     } else {
         requestUnmute();
         intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId); openVideoView();}', 500);
@@ -877,9 +876,9 @@ function requestUnmute() {
     $('#sendVideo').css('visibility', 'hidden');
     $('#requestUnmuteText').show();
 
-    getElement('jsSWFDiv').style.width = "214";
-    getElement('jsSWFDiv').style.height = "138";
-    getElement('jsSWFDiv').style.top = "35px";
+    $('#video').width(214);
+    $('#video').height(138);
+    getElement('video').style.top = "35px";
 
     viewAccessMessage();
 }
@@ -887,7 +886,7 @@ function requestUnmute() {
 function closeRequestUnmute() {
     trace("closeRequestUnmute");
     $('#video_requestUnmuteDiv').removeClass().addClass('closed');
-    getElement('jsSWFDiv').style.top = "20px";
+    getElement('video').style.top = "20px";
 }
 /* ------------------------- */
 
@@ -999,7 +998,7 @@ $(function () {
     $("#video_requestUnmuteDiv").draggable({handle: '.bar', stack: "#video_requestUnmuteDiv"});
     $("#video_requestUnmuteDiv").resizable({ minWidth: 215, minHeight: 180, aspectRatio: true});
 
-    var all_videos = $('#localVideoPreview, #remoteVideo');
+    var all_videos = $('#localVideoPreview, #remoteVideo, #video');
     all_videos.each(function () {
         var el = $(this);
         el.attr('data-aspectRatio', el.height() / el.width());
@@ -1008,18 +1007,18 @@ $(function () {
     });
 
     $("#video_requestUnmuteDiv").resize(function () {
+        var width = $("#video_requestUnmuteDiv").width();
+        var height = $("#video_requestUnmuteDiv").height();
+        var newWidth = width == 1 ? 640 : width;
+        $('#video').height((height == 1 ? 520 : height) - 40);
+        $('#remoteVideo').height((height == 1 ? 520 : height) - 40);
+        var localVideo = $('#localVideoPreview');
+        localVideo.height(newWidth * localVideo.attr('data-windowRatio') * localVideo.attr('data-aspectRatio'));
         all_videos.each(function () {
-            var width = $("#video_requestUnmuteDiv").width();
-            var el = $(this),
-                newWidth = width == 1 ? 640 : width;
-
-            el.removeAttr('height')
-                .removeAttr('width')
-                .width(newWidth * el.attr('data-windowRatio'))
-                .height(newWidth * el.attr('data-windowRatio') * el.attr('data-aspectRatio'));
+            var el = $(this);
+            el.width(newWidth * el.attr('data-windowRatio'));
         });
-    })
-        .resize();
+    }).resize();
 
     //Bind click on number buttons
     $(".numberButton").click(function () {
@@ -1062,11 +1061,6 @@ $(function () {
     /* Autofill Outb. proxy field when you fill "domain" field */
     $('#domain').keyup(function () {
         $('#outbound_proxy').val($(this).val());
-    });
-
-    // this functions resize flash when you resize video window
-    $('#video_requestUnmuteDiv').resize(function () {
-        $('#jsSWFDiv').height($(this).height() - 40);
     });
 
     // Mic slider set mic volume when you slide it

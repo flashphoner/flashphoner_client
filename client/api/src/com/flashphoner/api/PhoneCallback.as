@@ -169,16 +169,8 @@ package com.flashphoner.api
 				call.id = _call.id;	
 			}
 
-			if (_call.incoming == 'true'){
-				call.incoming = true;
-			}else{
-				call.incoming = false;
-			}
-			if (_call.isVideoCall == 'true'){
-				call.isVideoCall = true;
-			}else{
-				call.isVideoCall = false;
-			} 
+			call.incoming = _call.incoming;
+			call.isVideoCall = _call.isVideoCall;
 			call.callee = _call.callee;
 			call.caller = _call.caller;
 			if (call.incoming){
