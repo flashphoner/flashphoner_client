@@ -45,6 +45,7 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
     private static Map<String, String> streamMap = new HashMap<String, String>();
 
     private Timer timer = new Timer();
+    private static int streamMapMatchingTimer = 1000;
 
     static {
         String str = ClientConfig.getInstance().getProperty("stream_map");
@@ -52,6 +53,11 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
         if (str != null) {
             parse(str);
         }
+        try{
+            streamMapMatchingTimer = Integer.parseInt(ClientConfig.getInstance().getProperty("stream_map_matching_timer"));
+        }catch (Exception e){
+        }
+        log.info("streamMapMatchingTimer: "+streamMapMatchingTimer);
     }
 
     static void parse(String str) {
@@ -116,7 +122,7 @@ public class Rtmp2VoipStreamSourceFMS extends PhoneRtmp2VoipStream {
                 }
             }
         };
-        timer.schedule(task, 0, 5000);
+        timer.schedule(task, 0, streamMapMatchingTimer);
 
     }
 
