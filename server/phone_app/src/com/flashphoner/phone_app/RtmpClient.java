@@ -234,14 +234,8 @@ public class RtmpClient extends AbstractRtmpClient {
     }
 
     public void notifyMessage(InstantMessage instantMessage) {
-        log.info("notifyMessage: " + instantMessage);
-        AMFDataObj messageObj = new AMFDataObj();
-        messageObj.put("from", instantMessage.getFrom());
-        messageObj.put("to", instantMessage.getTo());
-        messageObj.put("body", instantMessage.getBody());
-        messageObj.put("contentType", instantMessage.getContentType());
-        messageObj.put("state", instantMessage.getState());
-        getClient().call("notifyMessage", null, messageObj);
+        log.info("notifyMessage: " + instantMessage);        
+        getClient().call("notifyMessage", null, instantMessage.toAmfDataObj());
     }
 
     //speex, pcma, pcmu

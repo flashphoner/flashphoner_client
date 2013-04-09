@@ -234,6 +234,7 @@ package com.flashphoner.api
 			instantMessageObj.to=instantMessage.to;
 			instantMessageObj.body=instantMessage.body;
 			instantMessageObj.contentType=instantMessage.contentType;
+			instantMessageObj.id = instantMessage.id;
 			
 			nc.call("sendInstantMessage",responder,instantMessageObj);
 		}

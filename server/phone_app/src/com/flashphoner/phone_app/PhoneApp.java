@@ -772,6 +772,7 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
         instantMessage.setBody(obj.getString("body"));
         instantMessage.setContentType(obj.getString("contentType"));
         instantMessage.setTo(obj.getString("to"));
+        instantMessage.setId(obj.getString("id"));
 
         try {
             rtmpClient.getSoftphone().sendInstantMessage(instantMessage);
