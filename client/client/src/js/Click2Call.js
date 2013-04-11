@@ -233,7 +233,11 @@ function addLogMessage(message) {
 function notifyFlashReady() {
 	trace("notifyFlashReady");
 	$('versionOfProduct').html(getVersion());
-	loginByToken(null);
+	if(flashvars.token != null) {
+        loginByToken(flashvars.token);
+    } else {
+        loginByToken(null);
+    }
   $("#micSlider").slider("option","value",getMicVolume());	
   $("#speakerSlider").slider("option","value",getVolume());
 }
