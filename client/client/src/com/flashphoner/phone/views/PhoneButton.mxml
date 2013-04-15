@@ -70,7 +70,10 @@ This code and accompanying materials also available under LGPL and MPL license f
 					}
 					viewAccessMessage();
 				} else if (flashAPI.isMuted() == -1){
-					var result:int = flashAPI.call(calleeNumber,flashAPI.modelLocator.visibleName);
+					var callObject:Object = new Object();
+					callObject.callee = calleeNumber;
+					callObject.visibleName = flashAPI.modelLocator.visibleName;
+					var result:int = flashAPI.call(callObject);
 					if (result == 0) {
 						delaythisEnabled(3000);
 					} else {
