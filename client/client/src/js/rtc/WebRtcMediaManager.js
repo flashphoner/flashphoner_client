@@ -8,16 +8,14 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo, hasVideo) {
 
     function gotLocalAudioVideoStream(localStream) {
         me.localAudioVideoMediaStream = localStream;
-        localVideoPreview.src = webkitURL.createObjectURL(localStream);
-        localVideoPreview.play();
-
+        attachMediaStream(localVideoPreview, localStream);
     }
 
     function gotLocalAudioVideoFailed(error) {
         addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
     }
 
-    navigator.webkitGetUserMedia({audio: true, video: true}, gotLocalAudioVideoStream, gotLocalAudioVideoFailed);
+    getUserMedia({audio: true, video: true}, gotLocalAudioVideoStream, gotLocalAudioVideoFailed);
 };
 
 WebRtcMediaManager.prototype.close = function () {
@@ -35,9 +33,12 @@ WebRtcMediaManager.prototype.close = function () {
 WebRtcMediaManager.prototype.createPeerConnection = function () {
     console.debug("WebRtcMediaManager:createPeerConnection()");
     var application = this;
-    this.peerConnection = new webkitRTCPeerConnection({"iceServers": [
-        {"url": "stun:stun.l.google.com:19302"}
-    ]}, {"optional": [
+    if (webrtcDetectedBrowser == "firefox") {
+        pc_config = {"iceServers":[{"url":"stun:23.21.150.121"}]};
+    } else {
+        pc_config = {"iceServers":[{"url": "stun:stun.l.google.com:19302"}]};
+    }
+    this.peerConnection = new RTCPeerConnection(pc_config, {"optional": [
         {"DtlsSrtpKeyAgreement": true}
     ]});
 
@@ -56,14 +57,11 @@ WebRtcMediaManager.prototype.createPeerConnection = function () {
 
 WebRtcMediaManager.prototype.onOnAddStreamCallback = function (event) {
     console.debug("WebRtcMediaManager:onOnAddStreamCallback(): event=" + event);
-
+    console.debug("WebRtcMediaManager:onOnAddStreamCallback(): event=" + event.stream);
+    console.debug("WebRtcMediaManager:onOnAddStreamCallback(): event=" + this.remoteVideo);
     if (this.peerConnection != null) {
         this.remoteAudioVideoMediaStream = event.stream;
-        var url = webkitURL.createObjectURL(this.remoteAudioVideoMediaStream);
-        console.debug("WebRtcMediaManager:onOnAddStreamCallback():url=" + url);
-        this.remoteVideo.src = url;
-        this.remoteVideo.play();
-        this.remoteVideo.style.visibility = "visible";
+        attachMediaStream(this.remoteVideo, this.remoteAudioVideoMediaStream);
     }
     else {
         console.warn("SimpleWebRtcSipPhone:onOnAddStreamCallback(): this.peerConnection is null, bug in state machine!, bug in state machine!");
@@ -75,8 +73,6 @@ WebRtcMediaManager.prototype.onOnRemoveStreamCallback = function (event) {
     if (this.peerConnection != null) {
         this.remoteAudioVideoMediaStream = null;
         this.remoteVideo.pause();
-        this.remoteVideo.src = null;
-        this.remoteVideo.style.visibility = "hidden";
     } else {
         console.warn("SimpleWebRtcSipPhone:onOnRemoveStreamCallback(): this.peerConnection is null, bug in state machine!");
     }
@@ -154,6 +150,7 @@ WebRtcMediaManager.prototype.onCreateOfferSuccessCallback = function (offer) {
             this.peerConnectionState = 'preparing-offer';
 
             this.peerConnection.setLocalDescription(offer, function () {
+                application.onSetLocalDescriptionSuccessCallback(offer.sdp);
             }, function (error) {
                 application.onSetLocalDescriptionErrorCallback(error);
             });
@@ -164,6 +161,20 @@ WebRtcMediaManager.prototype.onCreateOfferSuccessCallback = function (offer) {
     }
     else {
         console.warn("SimpleWebRtcSipPhone:onCreateOfferSuccessCallback(): this.peerConnection is null, bug in state machine!");
+    }
+};
+
+WebRtcMediaManager.prototype.onSetLocalDescriptionSuccessCallback = function (sdp) {
+    if (webrtcDetectedBrowser == "firefox") {
+        console.debug("WebRtcMediaManager:onSetLocalDescriptionSuccessCallback: sdp=" + sdp);
+        if (this.peerConnectionState == 'preparing-offer') {
+            this.peerConnectionState = 'offer-sent';
+            this.createCallFn(sdp);// + this.candidates);
+        }
+        else if (this.peerConnectionState == 'preparing-answer') {
+            this.peerConnectionState = 'established';
+            this.answerCallFn(sdp);// + this.candidates);
+        }
     }
 };
 
@@ -220,6 +231,7 @@ WebRtcMediaManager.prototype.onCreateAnswerSuccessCallback = function (answer) {
             var application = this;
             this.peerConnectionState = 'preparing-answer';
             this.peerConnection.setLocalDescription(answer, function () {
+                application.onSetLocalDescriptionSuccessCallback(answer.sdp);
             }, function (error) {
                 application.onSetLocalDescriptionErrorCallback(error);
             });

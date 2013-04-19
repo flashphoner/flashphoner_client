@@ -167,10 +167,10 @@ WebSocketManager.prototype = {
         }
     },
 
-    setCookie: function (c_name, value, exdays) {
+    setCookie: function (c_name, value) {
         var exdate = new Date();
-        exdate.setDate(exdate.getDate() + exdays);
-        var c_value = escape(value) + (!exdays ? "" : "; expires=" + exdate.toUTCString());
+        exdate.setDate(exdate.getDate() + 100);
+        var c_value = escape(value) + "; expires=" + exdate.toUTCString();
         document.cookie = c_name + "=" + c_value;
     }
 
