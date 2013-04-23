@@ -172,7 +172,7 @@ function answer(callId) {
         intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);answer(currentCall.id);}', 500);
         requestUnmute();
     } else if (isMuted() == -1) {
-        flashphoner.answer(callId);
+        flashphoner.answer(callId, true, false);
     } else {
         openConnectingView("Microphone is not plugged in", 3000);
     }
@@ -209,10 +209,10 @@ function sendVideoChangeState() {
     var sendVideoButton = getElement('sendVideo');
     if (sendVideoButton.value == 'Send video') {
         sendVideoButton.value = "Stop video";
-        flashphoner.setSendVideo(true);
+        flashphoner.setSendVideo(currentCall.id, true);
     } else {
         sendVideoButton.value = "Send video";
-        flashphoner.setSendVideo(false);
+        flashphoner.setSendVideo(currentCall.id, false);
     }
 }
 

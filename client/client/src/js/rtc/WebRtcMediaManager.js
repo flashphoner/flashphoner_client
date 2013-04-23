@@ -5,17 +5,7 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo, hasVideo) {
     me.peerConnectionState = 'new';
     me.remoteAudioVideoMediaStream = null;
     me.remoteVideo = remoteVideo;
-
-    function gotLocalAudioVideoStream(localStream) {
-        me.localAudioVideoMediaStream = localStream;
-        attachMediaStream(localVideoPreview, localStream);
-    }
-
-    function gotLocalAudioVideoFailed(error) {
-        addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
-    }
-
-    getUserMedia({audio: true, video: true}, gotLocalAudioVideoStream, gotLocalAudioVideoFailed);
+    me.localVideo = localVideoPreview
 };
 
 WebRtcMediaManager.prototype.close = function () {
@@ -34,12 +24,16 @@ WebRtcMediaManager.prototype.createPeerConnection = function () {
     console.debug("WebRtcMediaManager:createPeerConnection()");
     var application = this;
     if (webrtcDetectedBrowser == "firefox") {
-        pc_config = {"iceServers":[{"url":"stun:23.21.150.121"}]};
+        pc_config = {"iceServers": [
+            {"url": "stun:23.21.150.121"}
+        ]};
     } else {
-        pc_config = {"iceServers":[{"url": "stun:stun.l.google.com:19302"}]};
+        pc_config = {"iceServers": [
+            {"url": "stun:stun.l.google.com:19302"}
+        ]};
     }
     this.peerConnection = new RTCPeerConnection(pc_config, {"optional": [
-        {"DtlsSrtpKeyAgreement": true}
+        {"DtlsSrtpKeyAgreement": false}
     ]});
 
     this.peerConnection.onaddstream = function (event) {
@@ -83,7 +77,7 @@ WebRtcMediaManager.prototype.onIceCandidateCallback = function (rtcIceCandidateE
         if (rtcIceCandidateEvent.candidate == null) {
             if (this.peerConnectionState == 'preparing-offer') {
                 this.peerConnectionState = 'offer-sent';
-                this.createCallFn(this.peerConnection.localDescription.sdp);// + this.candidates);
+                this.setMySdpFn(this.peerConnection.localDescription.sdp);// + this.candidates);
             }
             else if (this.peerConnectionState == 'preparing-answer') {
                 this.peerConnectionState = 'established';
@@ -97,46 +91,90 @@ WebRtcMediaManager.prototype.onIceCandidateCallback = function (rtcIceCandidateE
         }
     }
     else {
-        console.warn("SimpleWebRtcSipPhone:onIceCandidateCallback(): this.peerConnection is null, bug in state machine!");
+        console.warn("WebRtcMediaManager:onIceCandidateCallback(): this.peerConnection is null, bug in state machine!");
     }
 };
 
-WebRtcMediaManager.prototype.createOffer = function (createCallFn) {
-    console.debug("WebRtcMediaManager:createOffer()");
-    try {
-        this.createPeerConnection();
-        this.peerConnection.addStream(this.localAudioVideoMediaStream);
-        this.createCallFn = createCallFn;
-        var application = this;
-        this.peerConnection.createOffer(function (offer) {
-            application.onCreateOfferSuccessCallback(offer);
+WebRtcMediaManager.prototype.viewVideo = function () {
+    var me = this;
+    if (!me.localAudioVideoStream) {
+        getUserMedia({audio: true, video: true}, function (stream) {
+            attachMediaStream(me.localVideo, stream);
+            me.localAudioVideoStream = stream;
         }, function (error) {
-            application.onCreateOfferErrorCallback(error);
-        }, {"optional": [], "mandatory": {"OfferToReceiveAudio": true, "OfferToReceiveVideo": true}});
+            addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+        });
+    }
+};
+
+WebRtcMediaManager.prototype.createOffer = function (setMySdpFn, hasAudio, hasVideo) {
+    console.debug("WebRtcMediaManager:createOffer()");
+    var me = this;
+    try {
+        if (this.peerConnection == null) {
+            this.createPeerConnection();
+        }
+        function create(stream) {
+            if (hasVideo){
+                me.localAudioVideoStream = stream;
+            } else {
+                me.localAudioStream = stream;
+            }
+            me.peerConnection.addStream(stream);
+            me.setMySdpFn = setMySdpFn;
+            me.peerConnection.createOffer(function (offer) {
+                me.onCreateOfferSuccessCallback(offer);
+            }, function (error) {
+                me.onCreateOfferErrorCallback(error);
+            }, {"optional": [], "mandatory": {"OfferToReceiveAudio": hasAudio, "OfferToReceiveVideo": hasVideo}});
+        }
+
+        if (hasVideo && me.localAudioVideoStream){
+                create(me.localAudioVideoStream);
+        }else if (!hasVideo && me.localAudioStream){
+            create(me.localAudioStream);
+        }else{
+            getUserMedia({audio: hasAudio, video: hasVideo}, create, function (error) {
+                addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+            });
+        }
     }
     catch (exception) {
         console.error("WebRtcMediaManager:createOffer(): catched exception:" + exception);
     }
 };
 
-WebRtcMediaManager.prototype.createAnswer = function (answerCallFn) {
+WebRtcMediaManager.prototype.createAnswer = function (answerCallFn, hasAudio, hasVideo) {
     console.debug("WebRtcMediaManager:createAnswer()");
+    var me = this;
     try {
-        this.createPeerConnection();
-        this.peerConnection.addStream(this.localAudioVideoMediaStream);
-        this.answerCallFn = answerCallFn;
-        var application = this;
-        var sdpOffer = new RTCSessionDescription({
-            type: 'offer',
-            sdp: application.lastReceivedSdp
-        });
-        console.debug("WebRtcMediaManager:setRemoteSDP: offer=" + JSON.stringify(sdpOffer));
-        this.peerConnectionState = 'offer-received';
-        this.peerConnection.setRemoteDescription(sdpOffer, function () {
-            application.onSetRemoteDescriptionSuccessCallback();
-        }, function (error) {
-            application.onSetRemoteDescriptionErrorCallback(error);
-        });
+        if (this.peerConnection == null) {
+            this.createPeerConnection();
+        }
+        function create(stream) {
+            me.peerConnection.addStream(stream);
+            me.answerCallFn = answerCallFn;
+            var sdpOffer = new RTCSessionDescription({
+                type: 'offer',
+                sdp: me.lastReceivedSdp
+            });
+            console.debug("WebRtcMediaManager:setRemoteSDP: offer=" + JSON.stringify(sdpOffer));
+            me.peerConnectionState = 'offer-received';
+            me.peerConnection.setRemoteDescription(sdpOffer, function () {
+                me.onSetRemoteDescriptionSuccessCallback();
+            }, function (error) {
+                me.onSetRemoteDescriptionErrorCallback(error);
+            });
+        }
+        if (hasVideo && me.localAudioVideoStream){
+            create(me.localAudioVideoStream);
+        }else if (!hasVideo && me.localAudioStream){
+            create(me.localAudioStream);
+        }else{
+            getUserMedia({audio: hasAudio, video: hasVideo}, create, function (error) {
+                addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+            });
+        }
     }
     catch (exception) {
         console.error("MobicentsWebRTCPhone:createAnswer(): catched exception:" + exception);
@@ -169,7 +207,7 @@ WebRtcMediaManager.prototype.onSetLocalDescriptionSuccessCallback = function (sd
         console.debug("WebRtcMediaManager:onSetLocalDescriptionSuccessCallback: sdp=" + sdp);
         if (this.peerConnectionState == 'preparing-offer') {
             this.peerConnectionState = 'offer-sent';
-            this.createCallFn(sdp);// + this.candidates);
+            this.setMySdpFn(sdp);// + this.candidates);
         }
         else if (this.peerConnectionState == 'preparing-answer') {
             this.peerConnectionState = 'established';
@@ -178,9 +216,14 @@ WebRtcMediaManager.prototype.onSetLocalDescriptionSuccessCallback = function (sd
     }
 };
 
+WebRtcMediaManager.prototype.getConnectionState = function () {
+    return this.peerConnectionState;
+};
 
-WebRtcMediaManager.prototype.setRemoteSDP = function (sdp, isInitiator) {
+WebRtcMediaManager.prototype.setRemoteSDP = function (call, sdp, isInitiator) {
     console.debug("WebRtcMediaManager:setRemoteSDP()");
+    this.call = call;
+    console.debug("WebRtcMediaManager:setRemoteSDP: answer=" + JSON.stringify(sdpAnswer));
     if (isInitiator) {
         var sdpAnswer = new RTCSessionDescription({
             type: 'answer',
@@ -188,7 +231,6 @@ WebRtcMediaManager.prototype.setRemoteSDP = function (sdp, isInitiator) {
         });
         var application = this;
         this.peerConnectionState = 'answer-received';
-        console.debug("WebRtcMediaManager:setRemoteSDP: answer=" + JSON.stringify(sdpAnswer));
         this.peerConnection.setRemoteDescription(sdpAnswer, function () {
             application.onSetRemoteDescriptionSuccessCallback();
         }, function (error) {
@@ -210,9 +252,7 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionSuccessCallback = function ()
                 application.onCreateAnswerSuccessCallback(answer);
             }, function (error) {
                 application.onCreateAnswerErrorCallback(error);
-            }, {'mandatory': {
-                'OfferToReceiveAudio': true,
-                'OfferToReceiveVideo': true }});
+            }, {'mandatory': {'OfferToReceiveAudio': true, 'OfferToReceiveVideo': true }});
         }
         else {
             console.log("MobicentsWebRTCPhone:onSetRemoteDescriptionSuccessCallback(): RTCPeerConnection bad state!");

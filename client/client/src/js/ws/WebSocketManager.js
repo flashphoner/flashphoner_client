@@ -43,7 +43,10 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
 
         setRemoteSDP: function(call, sdp, isInitiator, sipHeader) {
             proccessCall(call);
-            rtcManager.setRemoteSDP(sdp, isInitiator);
+            rtcManager.setRemoteSDP(call, sdp, isInitiator);
+            if (!isInitiator && rtcManager.getConnectionState() == "established"){
+                me.answer(call.id, true, false);
+            }
         },
 
         talk: function(call, sipHeader) {
@@ -126,15 +129,24 @@ WebSocketManager.prototype = {
         this.webRtcMediaManager.createOffer(function(sdp) {
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
-        });
+        }, true, false);
         return 0;
     },
 
-    answer: function(callId) {
+    setSendVideo: function (callId, hasVideo) {
+        var me = this;
+        this.webRtcMediaManager.createOffer(function(sdp) {
+            callRequest.sdp = sdp;
+            me.webSocket.send("changeMediaRequest", {callId:callId, sdp:sdp});
+        }, true, hasVideo);
+        return 0;
+    },
+
+    answer: function(callId, hasAudio, hasVideo) {
         var me = this;
         this.webRtcMediaManager.createAnswer(function(sdp) {
             me.webSocket.send("answer", {callId:callId, sdp:sdp});
-        });
+        }, hasAudio, hasVideo);
     },
 
     hangup: function(callId) {
@@ -142,6 +154,7 @@ WebSocketManager.prototype = {
     },
 
     viewVideo: function(){
+        this.webRtcMediaManager.viewVideo();
     },
 
     viewAccessMessage:function() {
@@ -149,7 +162,7 @@ WebSocketManager.prototype = {
     },
 
     isMuted: function(){
-        return this.webRtcMediaManager.localAudioVideoMediaStream != null ? -1 : 1;
+        return -1;
     },
 
     getInfoAboutMe: function () {
