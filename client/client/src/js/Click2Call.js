@@ -29,7 +29,7 @@ var isMutedMicButton = false;
 var isMutedSpeakerButton = false;
 var proportion = 0;
 var proportionStreamer = 0;
-var callToken = "";
+var callToken = "yourtokenhere";
 
 var timerHours = 0;
 var timerMinutes = 0;
