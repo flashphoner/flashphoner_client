@@ -136,9 +136,8 @@ WebSocketManager.prototype = {
     setSendVideo: function (callId, hasVideo) {
         var me = this;
         this.webRtcMediaManager.createOffer(function(sdp) {
-            callRequest.sdp = sdp;
             me.webSocket.send("changeMediaRequest", {callId:callId, sdp:sdp});
-        }, true, hasVideo);
+        }, false, hasVideo);
         return 0;
     },
 

@@ -14,6 +14,8 @@ WebRtcMediaManager.prototype.close = function () {
         this.remoteVideo.src = null;
         this.peerConnection.close();
     }
+    this.localVideoStream = null;
+    this.localAudioStream = null;
     this.peerConnection = null;
     this.peerConnectionState = 'new';
     this.remoteAudioVideoMediaStream = null;
@@ -43,10 +45,6 @@ WebRtcMediaManager.prototype.createPeerConnection = function () {
     this.peerConnection.onremovestream = function (event) {
         application.onOnRemoveStreamCallback(event);
     };
-
-    this.peerConnection.onicecandidate = function (rtcIceCandidateEvent) {
-        application.onIceCandidateCallback(rtcIceCandidateEvent);
-    };
 };
 
 WebRtcMediaManager.prototype.onOnAddStreamCallback = function (event) {
@@ -72,23 +70,30 @@ WebRtcMediaManager.prototype.onOnRemoveStreamCallback = function (event) {
     }
 };
 
-WebRtcMediaManager.prototype.onIceCandidateCallback = function (rtcIceCandidateEvent) {
-    if (this.peerConnection != null) {
-        if (rtcIceCandidateEvent.candidate == null) {
-            if (this.peerConnectionState == 'preparing-offer') {
-                this.peerConnectionState = 'offer-sent';
-                this.setMySdpFn(this.peerConnection.localDescription.sdp);// + this.candidates);
-            }
-            else if (this.peerConnectionState == 'preparing-answer') {
-                this.peerConnectionState = 'established';
-                this.answerCallFn(this.peerConnection.localDescription.sdp);// + this.candidates);
-            }
-            else if (this.peerConnectionState == 'established') {
-            }
-            else {
-                console.log("WebRtcMediaManager:onIceCandidateCallback(): RTCPeerConnection bad state!");
+WebRtcMediaManager.prototype.waitGatheringIce = function () {
+    var me = this;
+    if (me.peerConnection != null) {
+        sendSdp = function () {
+            console.debug("WebRtcMediaManager:waitGatheringIce() iceGatheringState=" + me.peerConnection.iceGatheringState);
+            if (me.peerConnection.iceGatheringState == "complete") {
+                if (me.peerConnectionState == 'preparing-offer') {
+                    me.peerConnectionState = 'offer-sent';
+                    me.setMySdpFn(me.peerConnection.localDescription.sdp);// + this.candidates);
+                }
+                else if (me.peerConnectionState == 'preparing-answer') {
+                    me.peerConnectionState = 'established';
+                    me.answerCallFn(me.peerConnection.localDescription.sdp);// + this.candidates);
+                }
+                else if (me.peerConnectionState == 'established') {
+                }
+                else {
+                    console.log("WebRtcMediaManager:onIceCandidateCallback(): RTCPeerConnection bad state!");
+                }
+                clearInterval(me.iceIntervalId);
             }
         }
+        me.iceIntervalId = setInterval(sendSdp, 500);
+
     }
     else {
         console.warn("WebRtcMediaManager:onIceCandidateCallback(): this.peerConnection is null, bug in state machine!");
@@ -97,10 +102,10 @@ WebRtcMediaManager.prototype.onIceCandidateCallback = function (rtcIceCandidateE
 
 WebRtcMediaManager.prototype.viewVideo = function () {
     var me = this;
-    if (!me.localAudioVideoStream) {
-        getUserMedia({audio: true, video: true}, function (stream) {
+    if (!me.localVideoStream) {
+        getUserMedia({audio: false, video: true}, function (stream) {
             attachMediaStream(me.localVideo, stream);
-            me.localAudioVideoStream = stream;
+            me.localVideoStream = stream;
         }, function (error) {
             addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
         });
@@ -115,8 +120,8 @@ WebRtcMediaManager.prototype.createOffer = function (setMySdpFn, hasAudio, hasVi
             this.createPeerConnection();
         }
         function create(stream) {
-            if (hasVideo){
-                me.localAudioVideoStream = stream;
+            if (hasVideo) {
+                me.localVideoStream = stream;
             } else {
                 me.localAudioStream = stream;
             }
@@ -129,11 +134,11 @@ WebRtcMediaManager.prototype.createOffer = function (setMySdpFn, hasAudio, hasVi
             }, {"optional": [], "mandatory": {"OfferToReceiveAudio": hasAudio, "OfferToReceiveVideo": hasVideo}});
         }
 
-        if (hasVideo && me.localAudioVideoStream){
-                create(me.localAudioVideoStream);
-        }else if (!hasVideo && me.localAudioStream){
+        if (hasVideo && me.localVideoStream) {
+            create(me.localVideoStream);
+        } else if (!hasVideo && me.localAudioStream) {
             create(me.localAudioStream);
-        }else{
+        } else {
             getUserMedia({audio: hasAudio, video: hasVideo}, create, function (error) {
                 addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
             });
@@ -152,6 +157,11 @@ WebRtcMediaManager.prototype.createAnswer = function (answerCallFn, hasAudio, ha
             this.createPeerConnection();
         }
         function create(stream) {
+            if (hasVideo) {
+                me.localVideoStream = stream;
+            } else {
+                me.localAudioStream = stream;
+            }
             me.peerConnection.addStream(stream);
             me.answerCallFn = answerCallFn;
             var sdpOffer = new RTCSessionDescription({
@@ -166,11 +176,12 @@ WebRtcMediaManager.prototype.createAnswer = function (answerCallFn, hasAudio, ha
                 me.onSetRemoteDescriptionErrorCallback(error);
             });
         }
-        if (hasVideo && me.localAudioVideoStream){
-            create(me.localAudioVideoStream);
-        }else if (!hasVideo && me.localAudioStream){
+
+        if (hasVideo && me.localVideoStream) {
+            create(me.localVideoStream);
+        } else if (!hasVideo && me.localAudioStream) {
             create(me.localAudioStream);
-        }else{
+        } else {
             getUserMedia({audio: hasAudio, video: hasVideo}, create, function (error) {
                 addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
             });
@@ -183,7 +194,7 @@ WebRtcMediaManager.prototype.createAnswer = function (answerCallFn, hasAudio, ha
 
 WebRtcMediaManager.prototype.onCreateOfferSuccessCallback = function (offer) {
     if (this.peerConnection != null) {
-        if (this.peerConnectionState == 'new') {
+        if (this.peerConnectionState == 'new' || this.peerConnectionState == 'established') {
             var application = this;
             this.peerConnectionState = 'preparing-offer';
 
@@ -213,6 +224,8 @@ WebRtcMediaManager.prototype.onSetLocalDescriptionSuccessCallback = function (sd
             this.peerConnectionState = 'established';
             this.answerCallFn(sdp);// + this.candidates);
         }
+    } else {
+        this.waitGatheringIce();
     }
 };
 
@@ -223,7 +236,7 @@ WebRtcMediaManager.prototype.getConnectionState = function () {
 WebRtcMediaManager.prototype.setRemoteSDP = function (call, sdp, isInitiator) {
     console.debug("WebRtcMediaManager:setRemoteSDP()");
     this.call = call;
-    console.debug("WebRtcMediaManager:setRemoteSDP: answer=" + JSON.stringify(sdpAnswer));
+    console.debug("WebRtcMediaManager:setRemoteSDP: answer=" + JSON.stringify(sdp));
     if (isInitiator) {
         var sdpAnswer = new RTCSessionDescription({
             type: 'answer',
