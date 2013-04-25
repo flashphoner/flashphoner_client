@@ -172,7 +172,7 @@ function answer(callId) {
         intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);answer(currentCall.id);}', 500);
         requestUnmute();
     } else if (isMuted() == -1) {
-        flashphoner.answer(callId, true, false);
+        flashphoner.answer(callId, true);
     } else {
         openConnectingView("Microphone is not plugged in", 3000);
     }
@@ -642,6 +642,7 @@ function openConnectingView(str, timeout) {
 }
 
 function closeConnectingView() {
+    trace("closeConnectingView");
     getElement('connectingDiv').style.visibility = "hidden";
 }
 
@@ -655,6 +656,7 @@ function openInfoView(str, timeout, height) {
 }
 
 function closeInfoView() {
+    trace("closeInfoView");
     getElement('infoDiv').style.visibility = "hidden";
 }
 

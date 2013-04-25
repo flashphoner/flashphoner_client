@@ -6,6 +6,7 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo, hasVideo) {
     me.remoteAudioVideoMediaStream = null;
     me.remoteVideo = remoteVideo;
     me.localVideo = localVideoPreview
+    me.hasVideo = false;
 };
 
 WebRtcMediaManager.prototype.close = function () {
@@ -78,11 +79,11 @@ WebRtcMediaManager.prototype.waitGatheringIce = function () {
             if (me.peerConnection.iceGatheringState == "complete") {
                 if (me.peerConnectionState == 'preparing-offer') {
                     me.peerConnectionState = 'offer-sent';
-                    me.setMySdpFn(me.peerConnection.localDescription.sdp);// + this.candidates);
+                    me.createOfferCallback(me.peerConnection.localDescription.sdp);// + this.candidates);
                 }
                 else if (me.peerConnectionState == 'preparing-answer') {
                     me.peerConnectionState = 'established';
-                    me.answerCallFn(me.peerConnection.localDescription.sdp);// + this.candidates);
+                    me.createAnswerCallback(me.peerConnection.localDescription.sdp);// + this.candidates);
                 }
                 else if (me.peerConnectionState == 'established') {
                 }
@@ -112,36 +113,59 @@ WebRtcMediaManager.prototype.viewVideo = function () {
     }
 };
 
-WebRtcMediaManager.prototype.createOffer = function (setMySdpFn, hasAudio, hasVideo) {
+WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVideo) {
     console.debug("WebRtcMediaManager:createOffer()");
     var me = this;
     try {
-        if (this.peerConnection == null) {
-            this.createPeerConnection();
-        }
-        function create(stream) {
-            if (hasVideo) {
-                me.localVideoStream = stream;
+        function create() {
+            if (me.peerConnection == null) {
+                me.createPeerConnection();
+                me.peerConnection.addStream(me.localAudioStream);
             } else {
-                me.localAudioStream = stream;
+                if (hasVideo) {
+                    me.peerConnection.addStream(me.localVideoStream);
+                    me.hasVideo = true;
+                } else {
+                    if (me.localVideoStream) {
+                        me.peerConnection.removeStream(me.localVideoStream);
+                    }
+                    me.hasVideo = false;
+                }
             }
-            me.peerConnection.addStream(stream);
-            me.setMySdpFn = setMySdpFn;
+            me.createOfferCallback = createOfferCallback;
             me.peerConnection.createOffer(function (offer) {
                 me.onCreateOfferSuccessCallback(offer);
             }, function (error) {
                 me.onCreateOfferErrorCallback(error);
-            }, {"optional": [], "mandatory": {"OfferToReceiveAudio": hasAudio, "OfferToReceiveVideo": hasVideo}});
+            }, {"optional": [], "mandatory": {"OfferToReceiveAudio": true, "OfferToReceiveVideo": true}});
         }
 
-        if (hasVideo && me.localVideoStream) {
-            create(me.localVideoStream);
-        } else if (!hasVideo && me.localAudioStream) {
-            create(me.localAudioStream);
+        var checkVideoAndCreate = function () {
+            if (hasVideo && !me.localVideoStream) {
+                getUserMedia({video: true}, function (stream) {
+                        me.localVideoStream = stream;
+                        create();
+                    }, function (error) {
+                        addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+                        closeInfoView();
+                    }
+                );
+            } else {
+                create();
+            }
+        };
+
+        if (!me.localAudioStream) {
+            getUserMedia({audio: true}, function (stream) {
+                    me.localAudioStream = stream;
+                    checkVideoAndCreate();
+                }, function (error) {
+                    addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+                    closeInfoView();
+                }
+            );
         } else {
-            getUserMedia({audio: hasAudio, video: hasVideo}, create, function (error) {
-                addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
-            });
+            checkVideoAndCreate();
         }
     }
     catch (exception) {
@@ -149,21 +173,27 @@ WebRtcMediaManager.prototype.createOffer = function (setMySdpFn, hasAudio, hasVi
     }
 };
 
-WebRtcMediaManager.prototype.createAnswer = function (answerCallFn, hasAudio, hasVideo) {
+WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback) {
     console.debug("WebRtcMediaManager:createAnswer()");
     var me = this;
+    var hasVideo = me.hasVideo;
     try {
-        if (this.peerConnection == null) {
-            this.createPeerConnection();
-        }
-        function create(stream) {
-            if (hasVideo) {
-                me.localVideoStream = stream;
+        function create() {
+            if (me.peerConnection == null) {
+                me.createPeerConnection();
+                me.peerConnection.addStream(me.localAudioStream);
             } else {
-                me.localAudioStream = stream;
+                if (hasVideo) {
+                    me.peerConnection.addStream(me.localVideoStream);
+                    me.hasVideo = true;
+                } else {
+                    if (me.localVideoStream) {
+                        me.peerConnection.removeStream(me.localVideoStream);
+                    }
+                    me.hasVideo = false;
+                }
             }
-            me.peerConnection.addStream(stream);
-            me.answerCallFn = answerCallFn;
+            me.createAnswerCallback = createAnswerCallback;
             var sdpOffer = new RTCSessionDescription({
                 type: 'offer',
                 sdp: me.lastReceivedSdp
@@ -177,14 +207,32 @@ WebRtcMediaManager.prototype.createAnswer = function (answerCallFn, hasAudio, ha
             });
         }
 
-        if (hasVideo && me.localVideoStream) {
-            create(me.localVideoStream);
-        } else if (!hasVideo && me.localAudioStream) {
-            create(me.localAudioStream);
+        var checkVideoAndCreate = function () {
+            if (hasVideo && !me.localVideoStream) {
+                getUserMedia({video: true}, function (stream) {
+                        me.localVideoStream = stream;
+                        create();
+                    }, function (error) {
+                        addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+                        closeInfoView();
+                    }
+                );
+            } else {
+                create();
+            }
+        }
+
+        if (!me.localAudioStream) {
+            getUserMedia({audio: true}, function (stream) {
+                    me.localAudioStream = stream;
+                    checkVideoAndCreate();
+                }, function (error) {
+                    addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+                    closeInfoView();
+                }
+            );
         } else {
-            getUserMedia({audio: hasAudio, video: hasVideo}, create, function (error) {
-                addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
-            });
+            checkVideoAndCreate();
         }
     }
     catch (exception) {
@@ -218,11 +266,11 @@ WebRtcMediaManager.prototype.onSetLocalDescriptionSuccessCallback = function (sd
         console.debug("WebRtcMediaManager:onSetLocalDescriptionSuccessCallback: sdp=" + sdp);
         if (this.peerConnectionState == 'preparing-offer') {
             this.peerConnectionState = 'offer-sent';
-            this.setMySdpFn(sdp);// + this.candidates);
+            this.createOfferCallback(sdp);// + this.candidates);
         }
         else if (this.peerConnectionState == 'preparing-answer') {
             this.peerConnectionState = 'established';
-            this.answerCallFn(sdp);// + this.candidates);
+            this.createAnswerCallback(sdp);// + this.candidates);
         }
     } else {
         this.waitGatheringIce();

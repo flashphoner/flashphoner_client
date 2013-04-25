@@ -185,8 +185,8 @@ package com.flashphoner.api
 		 *  Start/stop video stream
 		 * @param isSend true, if start(true/false)
 		 **/		
-		public function setSendVideo(isSend:Boolean):void{
-			var call:Call = getCurrentCall();
+		public function setSendVideo(callId:String, isSend:Boolean):void{
+			var call:Call = getCallById(callId);
 			if (call != null){
 				call.setSendVideo(isSend);
 			}

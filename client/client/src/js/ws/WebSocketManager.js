@@ -45,7 +45,7 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
             proccessCall(call);
             rtcManager.setRemoteSDP(call, sdp, isInitiator);
             if (!isInitiator && rtcManager.getConnectionState() == "established"){
-                me.answer(call.id, true, false);
+                me.answer(call.id, true);
             }
         },
 
@@ -126,10 +126,12 @@ WebSocketManager.prototype = {
 
     call: function (callRequest) {
         var me = this;
+        openInfoView("Configuring WebRTC connection...", 0, 60);
         this.webRtcMediaManager.createOffer(function(sdp) {
+            closeInfoView();
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
-        }, true, false);
+        }, false);
         return 0;
     },
 
@@ -137,15 +139,17 @@ WebSocketManager.prototype = {
         var me = this;
         this.webRtcMediaManager.createOffer(function(sdp) {
             me.webSocket.send("changeMediaRequest", {callId:callId, sdp:sdp});
-        }, false, hasVideo);
+        }, hasVideo);
         return 0;
     },
 
-    answer: function(callId, hasAudio, hasVideo) {
+    answer: function(callId, hasAudio) {
         var me = this;
+        openInfoView("Configuring WebRTC connection...", 0, 60);
         this.webRtcMediaManager.createAnswer(function(sdp) {
+            closeInfoView();
             me.webSocket.send("answer", {callId:callId, sdp:sdp});
-        }, hasAudio, hasVideo);
+        }, hasAudio);
     },
 
     hangup: function(callId) {
