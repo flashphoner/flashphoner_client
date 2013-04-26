@@ -4,33 +4,19 @@ var attachMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = null;
 
-function trace(text) {
-    // This function is used for logging.
-    if (text[text.length - 1] == '\n') {
-        text = text.substring(0, text.length - 1);
-    }
-    console.log((performance.now() / 1000).toFixed(3) + ": " + text);
-}
-
 if (navigator.mozGetUserMedia) {
     console.log("This appears to be Firefox");
 
     webrtcDetectedBrowser = "firefox";
 
-    // The RTCPeerConnection object.
     RTCPeerConnection = mozRTCPeerConnection;
 
-    // The RTCSessionDescription object.
     RTCSessionDescription = mozRTCSessionDescription;
 
-    // The RTCIceCandidate object.
     RTCIceCandidate = mozRTCIceCandidate;
 
-    // Get UserMedia (only difference is the prefix).
-    // Code from Adam Barth.
     getUserMedia = navigator.mozGetUserMedia.bind(navigator);
 
-    // Attach a media stream to an element.
     attachMediaStream = function(element, stream) {
         element.mozSrcObject = stream;
         element.play();
@@ -41,7 +27,6 @@ if (navigator.mozGetUserMedia) {
         to.play();
     };
 
-    // Fake get{Video,Audio}Tracks
     MediaStream.prototype.getVideoTracks = function() {
         return [];
     };
@@ -54,14 +39,10 @@ if (navigator.mozGetUserMedia) {
 
     webrtcDetectedBrowser = "chrome";
 
-    // The RTCPeerConnection object.
     RTCPeerConnection = webkitRTCPeerConnection;
 
-    // Get UserMedia (only difference is the prefix).
-    // Code from Adam Barth.
     getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
 
-    // Attach a media stream to an element.
     attachMediaStream = function(element, stream) {
         element.src = webkitURL.createObjectURL(stream);
         element.play();
@@ -72,8 +53,6 @@ if (navigator.mozGetUserMedia) {
         element.play();
     };
 
-    // The representation of tracks in a stream is changed in M26.
-    // Unify them for earlier Chrome versions in the coexisting period.
     if (!webkitMediaStream.prototype.getVideoTracks) {
         webkitMediaStream.prototype.getVideoTracks = function() {
             return this.videoTracks;

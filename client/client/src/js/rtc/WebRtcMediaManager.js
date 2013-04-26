@@ -5,7 +5,7 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo, hasVideo) {
     me.peerConnectionState = 'new';
     me.remoteAudioVideoMediaStream = null;
     me.remoteVideo = remoteVideo;
-    me.localVideo = localVideoPreview
+    me.localVideo = localVideoPreview;
     me.hasVideo = false;
 };
 
@@ -92,7 +92,7 @@ WebRtcMediaManager.prototype.waitGatheringIce = function () {
                 }
                 clearInterval(me.iceIntervalId);
             }
-        }
+        };
         me.iceIntervalId = setInterval(sendSdp, 500);
 
     }
@@ -220,7 +220,7 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback) {
             } else {
                 create();
             }
-        }
+        };
 
         if (!me.localAudioStream) {
             getUserMedia({audio: true}, function (stream) {
@@ -236,7 +236,7 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback) {
         }
     }
     catch (exception) {
-        console.error("MobicentsWebRTCPhone:createAnswer(): catched exception:" + exception);
+        console.error("WebRtcMediaManager:createAnswer(): catched exception:" + exception);
     }
 };
 
@@ -266,11 +266,11 @@ WebRtcMediaManager.prototype.onSetLocalDescriptionSuccessCallback = function (sd
         console.debug("WebRtcMediaManager:onSetLocalDescriptionSuccessCallback: sdp=" + sdp);
         if (this.peerConnectionState == 'preparing-offer') {
             this.peerConnectionState = 'offer-sent';
-            this.createOfferCallback(sdp);// + this.candidates);
+            this.createOfferCallback(sdp);
         }
         else if (this.peerConnectionState == 'preparing-answer') {
             this.peerConnectionState = 'established';
-            this.createAnswerCallback(sdp);// + this.candidates);
+            this.createAnswerCallback(sdp);
         }
     } else {
         this.waitGatheringIce();
@@ -316,7 +316,7 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionSuccessCallback = function ()
             }, {'mandatory': {'OfferToReceiveAudio': true, 'OfferToReceiveVideo': true }});
         }
         else {
-            console.log("MobicentsWebRTCPhone:onSetRemoteDescriptionSuccessCallback(): RTCPeerConnection bad state!");
+            console.log("WebRtcMediaManager:onSetRemoteDescriptionSuccessCallback(): RTCPeerConnection bad state!");
         }
     }
     else {
@@ -338,7 +338,7 @@ WebRtcMediaManager.prototype.onCreateAnswerSuccessCallback = function (answer) {
             });
         }
         else {
-            console.log("MobicentsWebRTCPhone:onCreateAnswerSuccessCallback(): RTCPeerConnection bad state!");
+            console.log("WebRtcMediaManager:onCreateAnswerSuccessCallback(): RTCPeerConnection bad state!");
         }
     }
     else {
