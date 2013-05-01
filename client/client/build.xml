@@ -94,6 +94,14 @@
         <copy todir="${DEPLOY_DIR}/js">
             <fileset dir="${basedir}/src/js"/>
         </copy>
+		
+		<!-- Copy sounds to deploy dir -->
+		
+		<mkdir dir="${DEPLOY_DIR}/sounds"/>
+
+        <copy todir="${DEPLOY_DIR}/sounds">
+            <fileset dir="${basedir}/src/sounds"/>
+        </copy>
 
         <!-- Copy all compiled result to release folder-->
 

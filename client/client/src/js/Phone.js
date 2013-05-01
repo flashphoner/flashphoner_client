@@ -717,13 +717,14 @@ function getElement(str) {
 
 //Creates HTML5 audio tag
 function initSound(src, loop){
-    //loop = typeof loop !== 'undefined' ? loop : false;
     if (typeof loop == 'undefined') {
         loop = false;
     }
     var audioTag = document.createElement("audio");
     audioTag.autoplay = false;
-    if (loop) audioTag.loop = true;
+    if (loop) {
+        audioTag.loop = true;
+    }
     //add src tag to audio tag
     audioTag.src = src;
     document.body.appendChild(audioTag);
@@ -733,8 +734,6 @@ function initSound(src, loop){
 //plays audio
 function playSound(audioTag) {
     audioTag.play();
-    //Due to a bug in Firefox, the audio needs to be played after a delay, need to check this
-//    setTimeout(function(){audioTag.play();},1);
 }
 
 //stops audio
