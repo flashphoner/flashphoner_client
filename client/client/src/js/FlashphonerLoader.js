@@ -17,6 +17,11 @@ FlashphonerLoader = function (config) {
     this.registerRequired = false;
     this.videoWidth = 320;
     this.videoHeight = 240;
+    this.ringSound = "CALL_OUT.mp3";
+    this.busySound = "BUSY.mp3";
+    this.registerSound = "REGISTER.mp3";
+    this.finishSound = "HANGUP.mp3";
+
     $.ajax({
         type: "GET",
         url: "flashphoner.xml",
@@ -49,6 +54,31 @@ FlashphonerLoader.prototype = {
         var videoHeight = $(xml).find("video_height");
         if (videoHeight.length){
             this.videoHeight = videoHeight.text();
+        }
+        //Sounds for WebRTC implementation
+        var ringSound = $(xml).find("ring_sound");
+        if (ringSound.length){
+            if (ringSound.text().length){
+                this.ringSound = ringSound.text();
+            }
+        }
+        var busySound = $(xml).find("busy_sound");
+        if (busySound.length){
+            if (busySound.text().length > 0 ) {
+                this.busySound = busySound.text();
+            }
+        }
+        var registerSound = $(xml).find("register_sound");
+        if (registerSound.length){
+            if (registerSound.text().length){
+                this.registerSound = registerSound.text();
+            }
+        }
+        var finishSound = $(xml).find("finish_sound");
+        if (finishSound.length){
+            if (finishSound.text().length){
+                this.finishSound = finishSound.text();
+            }
         }
 
         if (this.urlServer.indexOf("ws://") == 0) {

@@ -269,6 +269,14 @@ function notifyFlashReady() {
     } else {
         closeConnectingView();
     }
+    if ("webRtcMediaManager" in flashphoner) {
+        ringSound = initSound(flashphonerLoader.ringSound, true);
+        busySound = initSound(flashphonerLoader.busySound);
+        registerSound = initSound(flashphonerLoader.registerSound);
+        finishSound = initSound(flashphonerLoader.finishSound);
+    }
+    //playSound(finishSound);
+    //stopSound(finishSound);
 }
 
 function notifyRegisterRequired(registerR) {
@@ -313,6 +321,7 @@ function notifyRegistered() {
         isLogged = true;
         connectingViewBeClosed = true;
         closeConnectingView();
+        if (typeof registerSound != 'undefined') playSound(registerSound);
     }
 }
 
@@ -333,6 +342,7 @@ function notify(call) {
                 closeIncomingView();
                 closeVideoView();
                 toCallState();
+                if (typeof finishSound != 'undefined') playSound(finishSound);
             }
             getElement('sendVideo').value = "Send video";
             // or this just usual hangup during the call
@@ -342,8 +352,10 @@ function notify(call) {
         } else if (call.state == STATE_TALK) {
             $('#callState').html('...Talking...');
             enableHoldButton();
+            if (typeof ringSound != 'undefined') stopSound(ringSound);
         } else if (call.state == STATE_RING) {
             $('#callState').html('...Ringing...');
+            if (typeof ringSound != 'undefined') playSound(ringSound);
         }
     } else if (holdedCall.id == call.id) {
         if (call.state == STATE_FINISH) {
@@ -693,6 +705,34 @@ function closeSettingsView() {
 
 function getElement(str) {
     return document.getElementById(str);
+}
+
+/* ----- Functions to play sounds ----- */
+
+//Creates HTML5 audio tag
+function initSound(src, loop){
+    loop = typeof loop !== 'undefined' ? loop : false;
+    var audioTag = document.createElement("audio");
+    audioTag.autoplay = false;
+    if (loop) audioTag.loop = true;
+    //add src tag to audio tag
+    audioTag.src = src;
+    document.body.appendChild(audioTag);
+    return audioTag;
+}
+
+//plays audio
+function playSound(audioTag) {
+    debugger;
+    audioTag.play();
+    //Due to a bug in Firefox, the audio needs to be played after a delay
+//    setTimeout(function(){audioTag.play();},1000);
+}
+
+//stops audio
+function stopSound(audioTag) {
+    audioTag.pause();
+    audioTag.currentTime = 0;
 }
 
 /* ----- VIDEO ----- */
@@ -1088,6 +1128,8 @@ $(function () {
             flashphoner.setVolume(ui.value);
         }
     });
+
+
 
 
 });
