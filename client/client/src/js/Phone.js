@@ -275,8 +275,6 @@ function notifyFlashReady() {
         registerSound = initSound(flashphonerLoader.registerSound);
         finishSound = initSound(flashphonerLoader.finishSound);
     }
-    //playSound(finishSound);
-    //stopSound(finishSound);
 }
 
 function notifyRegisterRequired(registerR) {
@@ -321,7 +319,9 @@ function notifyRegistered() {
         isLogged = true;
         connectingViewBeClosed = true;
         closeConnectingView();
-        if (typeof registerSound != 'undefined') playSound(registerSound);
+        if (registerSound) {
+            playSound(registerSound);
+        }
     }
 }
 
@@ -342,7 +342,9 @@ function notify(call) {
                 closeIncomingView();
                 closeVideoView();
                 toCallState();
-                if (typeof finishSound != 'undefined') playSound(finishSound);
+                if (finishSound){
+                    playSound(finishSound);
+                }
             }
             getElement('sendVideo').value = "Send video";
             // or this just usual hangup during the call
@@ -352,10 +354,14 @@ function notify(call) {
         } else if (call.state == STATE_TALK) {
             $('#callState').html('...Talking...');
             enableHoldButton();
-            if (typeof ringSound != 'undefined') stopSound(ringSound);
+            if (ringSound){
+                stopSound(ringSound);
+            }
         } else if (call.state == STATE_RING) {
             $('#callState').html('...Ringing...');
-            if (typeof ringSound != 'undefined') playSound(ringSound);
+            if (ringSound){
+                playSound(ringSound);
+            }
         }
     } else if (holdedCall.id == call.id) {
         if (call.state == STATE_FINISH) {
@@ -711,7 +717,10 @@ function getElement(str) {
 
 //Creates HTML5 audio tag
 function initSound(src, loop){
-    loop = typeof loop !== 'undefined' ? loop : false;
+    //loop = typeof loop !== 'undefined' ? loop : false;
+    if (typeof loop == 'undefined') {
+        loop = false;
+    }
     var audioTag = document.createElement("audio");
     audioTag.autoplay = false;
     if (loop) audioTag.loop = true;
@@ -723,10 +732,9 @@ function initSound(src, loop){
 
 //plays audio
 function playSound(audioTag) {
-    debugger;
     audioTag.play();
-    //Due to a bug in Firefox, the audio needs to be played after a delay
-//    setTimeout(function(){audioTag.play();},1000);
+    //Due to a bug in Firefox, the audio needs to be played after a delay, need to check this
+//    setTimeout(function(){audioTag.play();},1);
 }
 
 //stops audio

@@ -64,7 +64,7 @@ FlashphonerLoader.prototype = {
         }
         var busySound = $(xml).find("busy_sound");
         if (busySound.length){
-            if (busySound.text().length > 0 ) {
+            if (busySound.text().length) {
                 this.busySound = busySound.text();
             }
         }
