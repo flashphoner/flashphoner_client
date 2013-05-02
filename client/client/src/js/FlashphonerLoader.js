@@ -17,10 +17,10 @@ FlashphonerLoader = function (config) {
     this.registerRequired = false;
     this.videoWidth = 320;
     this.videoHeight = 240;
-    this.ringSound = "CALL_OUT.ogg";
-    this.busySound = "BUSY.ogg";
-    this.registerSound = "REGISTER.ogg";
-    this.finishSound = "HANGUP.ogg";
+    this.ringSound = "sounds/CALL_OUT.ogg";
+    this.busySound = "sounds/BUSY.ogg";
+    this.registerSound = "sounds/REGISTER.ogg";
+    this.finishSound = "sounds/HANGUP.ogg";
 
     $.ajax({
         type: "GET",
