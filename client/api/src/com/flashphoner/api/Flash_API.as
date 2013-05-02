@@ -109,6 +109,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("getVersion",getVersion);
 			ExternalInterface.addCallback("sendInfo",sendInfo);
 			ExternalInterface.addCallback("setSpeexQuality",setSpeexQuality);
+			ExternalInterface.addCallback("playSound",playSound);
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -618,6 +619,12 @@ package com.flashphoner.api
 			soundControl.setSpeexQuality(quality);
 		}
 		
+		/**
+		 * Added for compatibility with WebRTC implementation
+		 **/
+		public function playSound(sound:String):void{
+			Logger.info("Received request for sound " + sound);
+		}
 
 	}
 }

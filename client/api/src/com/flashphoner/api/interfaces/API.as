@@ -34,5 +34,6 @@ package com.flashphoner.api.interfaces
 		function getVolume():int;
 		function setVolume(volume:int):void;
 		function logoff():void;
+		function playSound():void;
 	}
 }
