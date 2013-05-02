@@ -269,12 +269,6 @@ function notifyFlashReady() {
     } else {
         closeConnectingView();
     }
-    if ("webRtcMediaManager" in flashphoner) {
-        ringSound = initSound(flashphonerLoader.ringSound, true);
-        busySound = initSound(flashphonerLoader.busySound);
-        registerSound = initSound(flashphonerLoader.registerSound);
-        finishSound = initSound(flashphonerLoader.finishSound);
-    }
 }
 
 function notifyRegisterRequired(registerR) {
@@ -319,9 +313,7 @@ function notifyRegistered() {
         isLogged = true;
         connectingViewBeClosed = true;
         closeConnectingView();
-        if (registerSound) {
-            playSound(registerSound);
-        }
+        flashphoner.playSound("REGISTER");
     }
 }
 
@@ -342,9 +334,7 @@ function notify(call) {
                 closeIncomingView();
                 closeVideoView();
                 toCallState();
-                if (finishSound){
-                    playSound(finishSound);
-                }
+                flashphoner.playSound("FINISH");
             }
             getElement('sendVideo').value = "Send video";
             // or this just usual hangup during the call
@@ -354,14 +344,12 @@ function notify(call) {
         } else if (call.state == STATE_TALK) {
             $('#callState').html('...Talking...');
             enableHoldButton();
-            if (ringSound){
-                stopSound(ringSound);
-            }
+            flashphoner.stopSound("RING");
         } else if (call.state == STATE_RING) {
             $('#callState').html('...Ringing...');
-            if (ringSound){
-                playSound(ringSound);
-            }
+            flashphoner.playSound("RING");
+        } else if (call.state == STATE_BUSY) {
+            flashphoner.playSound("BUSY");
         }
     } else if (holdedCall.id == call.id) {
         if (call.state == STATE_FINISH) {
@@ -711,35 +699,6 @@ function closeSettingsView() {
 
 function getElement(str) {
     return document.getElementById(str);
-}
-
-/* ----- Functions to play sounds ----- */
-
-//Creates HTML5 audio tag
-function initSound(src, loop){
-    if (typeof loop == 'undefined') {
-        loop = false;
-    }
-    var audioTag = document.createElement("audio");
-    audioTag.autoplay = false;
-    if (loop) {
-        audioTag.loop = true;
-    }
-    //add src tag to audio tag
-    audioTag.src = src;
-    document.body.appendChild(audioTag);
-    return audioTag;
-}
-
-//plays audio
-function playSound(audioTag) {
-    audioTag.play();
-}
-
-//stops audio
-function stopSound(audioTag) {
-    audioTag.pause();
-    audioTag.currentTime = 0;
 }
 
 /* ----- VIDEO ----- */

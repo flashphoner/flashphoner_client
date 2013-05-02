@@ -6,8 +6,7 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
     me.configLoaded = false;
     me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
     var rtcManager = this.webRtcMediaManager;
-
-    var proccessCall = function(call){
+        var proccessCall = function(call){
         for (var i in me.calls) {
             if (call.id == me.calls[i].id){
                 me.calls[i] = call;
@@ -17,6 +16,12 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
         me.calls.push(call);
         notifyAddCall(call);
     };
+
+    //Init sounds
+    me.ringSound = me.initSound(flashphonerLoader.ringSound, true);
+    me.busySound = me.initSound(flashphonerLoader.busySound);
+    me.registerSound = me.initSound(flashphonerLoader.registerSound);
+    me.finishSound = me.initSound(flashphonerLoader.finishSound);
 
     this.callbacks = {
         getUserData: function(user) {
@@ -188,6 +193,57 @@ WebSocketManager.prototype = {
         exdate.setDate(exdate.getDate() + 100);
         var c_value = escape(value) + "; expires=" + exdate.toUTCString();
         document.cookie = c_name + "=" + c_value;
+    },
+
+    //Creates HTML5 audio tag
+    initSound: function (src, loop) {
+        if (typeof loop == 'undefined') {
+            loop = false;
+        }
+        var audioTag = document.createElement("audio");
+        audioTag.autoplay = false;
+        if (loop) {
+            audioTag.loop = true;
+        }
+        //add src tag to audio tag
+        audioTag.src = src;
+        document.body.appendChild(audioTag);
+        return audioTag;
+    },
+
+    //plays audio
+    playSound: function (soundName) {
+        switch (soundName) {
+            case "RING":
+                this.ringSound.play();
+                break
+            case "BUSY":
+                this.busySound.play();
+                break
+            case "REGISTER":
+                this.registerSound.play();
+                break
+            case "FINISH":
+                this.finishSound.play();
+                break
+            default:
+                console.error("Do not know what to play on " + soundName);
+
+        }
+    },
+
+    //stops audio
+    stopSound: function (soundName) {
+        switch (soundName) {
+            case "RING":
+                this.ringSound.pause();
+                this.ringSound.currentTime = 0;
+                break
+            default:
+                console.error("Do not know what to stop on " + soundName);
+
+        }
     }
+
 
 };
