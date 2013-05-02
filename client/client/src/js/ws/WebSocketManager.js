@@ -5,9 +5,7 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
     me.isOpened = false;
     me.configLoaded = false;
     me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
-    me.SoundControl = new SoundControl();
-    me.playSound = me.SoundControl.playSound;
-    me.stopSound = me.SoundControl.stopSound;
+    me.soundControl = new SoundControl();
     var rtcManager = this.webRtcMediaManager;
         var proccessCall = function(call){
         for (var i in me.calls) {
@@ -190,6 +188,14 @@ WebSocketManager.prototype = {
         exdate.setDate(exdate.getDate() + 100);
         var c_value = escape(value) + "; expires=" + exdate.toUTCString();
         document.cookie = c_name + "=" + c_value;
+    },
+
+    playSound: function (sound) {
+        me.soundControl.playSound(sound);
+    },
+
+    stopSound: function (sound) {
+        me.soundControl.stopSound(sound);
     }
 
 };
