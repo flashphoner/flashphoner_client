@@ -191,11 +191,11 @@ WebSocketManager.prototype = {
     },
 
     playSound: function (sound) {
-        me.soundControl.playSound(sound);
+        this.soundControl.playSound(sound);
     },
 
     stopSound: function (sound) {
-        me.soundControl.stopSound(sound);
+        this.soundControl.stopSound(sound);
     }
 
 };
