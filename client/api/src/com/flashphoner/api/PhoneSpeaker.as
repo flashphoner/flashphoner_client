@@ -22,7 +22,7 @@ package com.flashphoner.api
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
 	
-	import mx.core.UIComponent;
+	import mx.core.UIComponent;	
 	
 	/**
 	 * Phone speaker and video window implementation
@@ -33,7 +33,7 @@ package com.flashphoner.api
 		private var video:Video;
 		private var incomingStream:NetStream;
 		private var incomingVideoStream:NetStream;
-		private var netConnection:NetConnection;
+		private var netConnection:NetConnection;		
 		/**
 		 * Playing flag
 		 **/
@@ -61,51 +61,35 @@ package com.flashphoner.api
 		
 		private function nsOnStatus(infoObject:NetStatusEvent):void
 		{
-			Logger.info("PhoneSpeaker.nsOnStatus()");
+			Logger.info("PhoneSpeaker.nsOnStatus() "+infoObject.info.code);
 			
 			if (incomingStream==null){
 				return;
 			}			
 					
 			if (infoObject.info.code == "NetStream.Play.Start"){
-				playing = true;
+				playing = true;				
 				SoundControl.stopRingSound();				
 			}		
 					
 			else if (infoObject.info.code == "NetStream.Play.StreamNotFound" || infoObject.info.code == "NetStream.Play.Failed"||infoObject.info.code == "NetStream.Play.Stop"){
 				Logger.info("incomingStream.onStatus() "+infoObject.info.description);
-				playing = false;
+				playing = false;				
 			}
 				
-		}
-		
-		private function nsVideoOnStatus(infoObject:NetStatusEvent):void
-		{
-			Logger.info("PhoneSpeaker.nsVideoOnStatus()");
-			
-			if (incomingVideoStream==null){
-				return;
-			}			
-					
-			if (infoObject.info.code == "NetStream.Play.Start"){
+		}		
 
-			}		
-					
-			else if (infoObject.info.code == "NetStream.Play.StreamNotFound" || infoObject.info.code == "NetStream.Play.Failed"||infoObject.info.code == "NetStream.Play.Stop"){
-				Logger.info("incomingVideoStream.nsVideoOnStatus() "+infoObject.info.description);
-			}
-				
-		}
-		
 		/**
 		 * Stop playing audio stream for call
 		 * @param callId identifier for call
 		 **/
 		public function stop(callId:String):void{
-			Logger.info("PhoneSpeaker.stopAudio() - "+callId +"; current stream name - "+streamName);
-			if (incomingStream!=null && streamName.indexOf(callId) != -1){				
+			Logger.info("PhoneSpeaker.stop() - "+callId +"; current stream name - "+streamName);
+			if (incomingStream!=null && streamName.indexOf(callId) != -1){
+				incomingStream.removeEventListener(NetStatusEvent.NET_STATUS, nsOnStatus);
 				try{
 					incomingStream.play(false);
+					incomingStream.close();
 				}catch (e:Error){
 					Logger.error(e.message);
 				}
@@ -122,14 +106,14 @@ package com.flashphoner.api
 		 **/
 		public function play(streamName:String):void{
 			Logger.info("PhoneSpeaker play streamName="+streamName +"; currentStremName="+this.streamName);
-			if (this.streamName != streamName){
-				if (incomingStream != null){
-					stop(this.streamName);
-				}
-				incomingStream = startNewIncomingStream(streamName,nsOnStatus);
-				this.streamName = streamName;
-			}	
-		}
+			//If we have a new stream, we stop old and start new
+			//This is mandatory for reInvite and update to video session
+			if (incomingStream != null){
+				stop(this.streamName);
+			}
+			incomingStream = startNewIncomingStream(streamName,nsOnStatus);
+			this.streamName = streamName;	
+		}		
 
 		private function startNewIncomingStream(streamName:String, listener:Function):NetStream{
 			Logger.info("PhoneSpeaker startNewIncomingStream streamName="+streamName);
