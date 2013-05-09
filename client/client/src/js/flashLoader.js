@@ -32,9 +32,9 @@ flashvars.config = "flashphoner.xml";
 });*/
 
 function playerIsRight(){
-	return swfobject.hasFlashPlayerVersion("11.2"); 
+	return swfobject.hasFlashPlayerVersion("10.1"); 
 }
 
 if (playerIsRight()) {
-	swfobject.embedSWF("flashphoner_js_api.swf", "jsSWFDiv", "100%", "100%", "11.2.202", "expressInstall.swf", flashvars, params, attributes, positionStatus);
+	swfobject.embedSWF("flashphoner_js_api.swf", "jsSWFDiv", "100%", "100%", "10.1", "expressInstall.swf", flashvars, params, attributes, positionStatus);
 }

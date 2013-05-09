@@ -17,7 +17,7 @@ package com.flashphoner.api.management
 	
 	import flash.media.Camera;
 	
-	import flashx.textLayout.debug.assert;
+	//import flashx.textLayout.debug.assert;
 	
 	import mx.controls.Alert;
 	import mx.core.Application;

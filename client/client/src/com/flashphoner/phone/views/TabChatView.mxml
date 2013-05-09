@@ -27,7 +27,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 		   	<![CDATA[
 				import com.flashphoner.util.HashMap;
 				
-				import flashx.textLayout.operations.InsertInlineGraphicOperation;
+				//import flashx.textLayout.operations.InsertInlineGraphicOperation;
 				
 				import mx.containers.VBox;
 				import mx.controls.Button;
@@ -95,8 +95,8 @@ This code and accompanying materials also available under LGPL and MPL license f
 			   fillAlphas="[1.0, 1.0]" fillColors="[#39AF39, #109F10, #45D045, #17C917]"
 			   fontFamily="Arial" fontSize="16" fontStyle="normal" fontWeight="bold"
 			   textDecoration="none" themeColor="#009800" visible="false"/>
-	<mx:Button id="closeButton" x="140" y="2" width="16" height="16" label="X" click="close();"
-			   color="#FFFFFF" styleName="close"/>
+	<!--<mx:Button id="closeButton" x="140" y="2" width="16" height="16" label="X" click="close();"
+			   color="#FFFFFF" styleName="close"/>-->
 	<!--  
 	width="20" 
 	height="20"  

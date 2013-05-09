@@ -19,8 +19,9 @@ package com.flashphoner.api
 	import flash.events.AsyncErrorEvent;
 	import flash.events.NetStatusEvent;
 	import flash.media.Camera;
-	import flash.media.H264Profile;
-	import flash.media.H264VideoStreamSettings;
+	/* Compile for Flash Player 10.3 to get this settings */
+	//import flash.media.H264Profile;
+	//import flash.media.H264VideoStreamSettings;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
 	import flash.net.Responder;
@@ -72,9 +73,12 @@ package com.flashphoner.api
 				outStream.addEventListener(AsyncErrorEvent.ASYNC_ERROR,asyncErrorHandler);
 				outStream.addEventListener(NetStatusEvent.NET_STATUS,onNetStatus);									
 				outStream.attachAudio(flashCall.flash_API.soundControl.getMicrophone());
+
+				/* Compile for Flash Player 11 o get this settings */				
+				/*
 				outStream.audioReliable = PhoneConfig.AUDIO_RELIABLE;
 				outStream.videoReliable = PhoneConfig.VIDEO_RELIABLE;
-				
+				*/				
 				if (PhoneConfig.VIDEO_ENABLED && sendVideo){					
 					setVideoCompressionSettings(outStream);					
 				}		
@@ -87,10 +91,14 @@ package com.flashphoner.api
 		
 		private function setVideoCompressionSettings(outStream:NetStream):void{			
 			if (PhoneConfig.MAJOR_PLAYER_VERSION >= 11 && PhoneConfig.AVOID_FLV2H264_TRANSCODING){
+
+				/* Compile for Flash Player 11 o get this settings */	
+				/*
 				Logger.info("Player 11. Using h.264 compresstion settings...")
 				var settings:flash.media.H264VideoStreamSettings= new flash.media.H264VideoStreamSettings();					
 				settings.setProfileLevel(H264Profile.BASELINE, flash.media.H264Level.LEVEL_3);					
-				outStream.videoStreamSettings = settings;				
+				outStream.videoStreamSettings = settings;
+				*/
 			}
 			var cam:Camera = flashCall.flash_API.videoControl.getCam();
 			outStream.attachCamera(cam);

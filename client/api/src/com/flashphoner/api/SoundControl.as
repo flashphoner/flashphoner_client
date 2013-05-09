@@ -27,7 +27,7 @@ package com.flashphoner.api
 	import flash.net.URLRequest;
 	import flash.system.Capabilities;
 	
-	import flashx.textLayout.events.UpdateCompleteEvent;
+	//import flashx.textLayout.events.UpdateCompleteEvent;
 	
 	public class SoundControl
 	{
@@ -96,7 +96,9 @@ package com.flashphoner.api
 					Logger.info("majorVersion: "+PhoneConfig.MAJOR_PLAYER_VERSION);
 					Logger.info("Capabilities.language: "+Capabilities.language);
 					Logger.info("FORCE_ENHANCED_MIC: "+PhoneConfig.FORCE_ENHANCED_MIC);
-					return Microphone.getEnhancedMicrophone(index);				
+					return Microphone.getMicrophone(index);
+					/* Compile for Flash Player 10.3 to get this settings */	
+//					return Microphone.getEnhancedMicrophone(index);				
 				}else{					
 					for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 						apiNotify.addLogMessage("WARNING!!! Echo cancellation is turned off on your side (because your OS has no-english localization). Please use a headset to avoid echo for your interlocutor.");
@@ -293,13 +295,15 @@ package com.flashphoner.api
 				mic.rate = 16;
 				mic.encodeQuality = 6;
 			}else if (name=="ulaw" || name=="pcmu" ){
-				mic.codec = SoundCodec.PCMU;
-				mic.framesPerPacket = 2;
-				mic.rate = 8;
+				/* Compile for Flash Player 10.3 to get this settings */
+				//mic.codec = SoundCodec.PCMU;
+				//mic.framesPerPacket = 2;
+				//mic.rate = 8;
 			}else if (name=="alaw" || name=="pcma" ){
-				mic.codec = SoundCodec.PCMA;
-				mic.framesPerPacket = 2;
-				mic.rate = 8;
+				/* Compile for Flash Player 11 to get this settings */
+				//mic.codec = SoundCodec.PCMA;
+				//mic.framesPerPacket = 2;
+				//mic.rate = 8;
 			}
 		}
 		
