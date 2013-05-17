@@ -19,6 +19,8 @@ package com.flashphoner.api
 		{
 		}
 		
+		public var id:String;
+		
 		/**
 		 * Target of the message
 		 **/

@@ -595,11 +595,12 @@ package com.flashphoner.api
 		 * @param body content of the message
 		 * @param contentType type of content
 		 **/
-		public function sendMessage(to:String, body:String, contentType:String):void{
+		public function sendMessage(to:String, body:String, contentType:String, msgId:String):void{
 			var instantMessage:InstantMessage = new InstantMessage();
 			instantMessage.body = body;
 			instantMessage.to = to;
 			instantMessage.contentType = contentType;
+			instantMessage.id=msgId;
 			this.phoneServerProxy.sendInstantMessage(instantMessage);
 		}
 

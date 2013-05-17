@@ -29,11 +29,14 @@ This code and accompanying materials also available under LGPL and MPL license f
 			import com.flashphoner.api.Flash_API;
 			import com.flashphoner.api.InstantMessage;
 			import com.flashphoner.phone.DataPhone;
+			import com.flashphoner.util.HashMap;
 			
 			import mx.controls.Alert;
 			import mx.managers.PopUpManager;
+			import mx.utils.UIDUtil;
 			
 			private var toUser:String;
+			private var messages:HashMap = new HashMap();
 			
 			public function init(toUser:String):void{							
 				this.toUser = toUser;
@@ -59,13 +62,23 @@ This code and accompanying materials also available under LGPL and MPL license f
 				instantMessage.to = toUser;
 				instantMessage.body = body;
 				instantMessage.contentType = contentType;
+				instantMessage.id = UIDUtil.createUID();
+				messages.put(instantMessage.id,instantMessage);
 				
 				DataPhone.getInstance().flash_API.sendInstantMessage(instantMessage);
 			}
 			
 			public function  pushMessage(messageObject:Object):void {
 				var failNotification:String = (messageObject["state"]=="FAILED")?"[MESSAGE FAIL] ":" ";
-				var body:String = messageObject["body"];				
+				var body:String;
+				if (messageObject.state=="ACCEPTED" || messageObject.state=="FAILED"){
+					body = messages.getValue(messageObject.id).body;
+				}else if (messageObject.state=="RECEIVED"){
+					body = messageObject.body;
+				}else{
+					Logger.error("Unknown message state: "+messageObject.state);
+				}				
+								
 				chatTextArea.htmlText = messageObject["from"]+": "+failNotification+body+"\n"+chatTextArea.htmlText;		
 			
 			}			

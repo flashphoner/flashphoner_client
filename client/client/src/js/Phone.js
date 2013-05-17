@@ -32,6 +32,7 @@ var intervalId = -1;
 var isMutedMicButton = false;
 var isMutedSpeakerButton = false;
 var proportion = 0;
+var messages = new Object();
 
 var testInviteParameter = new Object;
 testInviteParameter['param1'] = "value1";
@@ -86,6 +87,31 @@ $(document).ready(function() {
     }
 });
 
+function addMessage(id,msgText){
+    messages[id]=msgText;
+}
+
+function removeMessage(id){
+    messages[id]=null;
+}
+
+function getMessageById(id){
+    return messages[id];
+}
+
+function createUUID() {
+    var s = [];
+    var hexDigits = "0123456789abcdef";
+    for (var i = 0; i < 36; i++) {
+        s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+    }
+    s[14] = "4";
+    s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);
+    s[8] = s[13] = s[18] = s[23] = "-";
+
+    var uuid = s.join("");
+    return uuid;
+}
 
 function login() {
     trace("login");
@@ -157,7 +183,13 @@ function call() {
 
 function sendMessage(to, body, contentType) {
     trace("sendMessage", to, body, contentType);
-    flashphoner.sendMessage(to, body, contentType);
+    var msgId = createUUID();
+    var msg = new Object();
+    msg.to = to;
+    msg.body = body;
+    msg.id = msgId;
+    addMessage(msgId, msg);
+    flashphoner.sendMessage(to, body, contentType, msgId);
 }
 
 
@@ -465,22 +497,45 @@ function notifyOpenVideoView(isViewed){
 }
 
 function notifyMessage(messageObject) {
-    trace('notifyMessage', messageObject);//messageObject.from + ': ' + messageObject.body);
+
+    trace('notifyMessage', messageObject);
     openChatView();
 
-    //if (messageObject.from == $('#callerLogin').html()) {
-    if (messageObject.from == callerLogin) { //check if it outcoming or incoming message
-        createChat(messageObject.to.toLowerCase());
-        var chatTextarea = $('#chat' + messageObject.to.toLowerCase() + ' .chatTextarea'); //set current textarea for
-        var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
-        chatTextarea.append('<div class=myNick>' + messageObject.from + '</div>' + messageObject.body + '<br>'); //add message to chat
-    } else {
-        createChat(messageObject.from.toLowerCase());
-        var chatTextarea = $('#chat' + messageObject.from.toLowerCase() + ' .chatTextarea'); //set current textarea
-        var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
-        chatTextarea.append('<div class=yourNick>' + messageObject.from + '</div>' + messageObject.body + '<br>'); //add message to chat
+    if (messageObject.state=="ACCEPTED"){
+        displayAcceptedMessage(messageObject);
+    }else if (messageObject.state=="RECEIVED"){
+        displayReceivedMessage(messageObject);
+    }else{
+        trace("Error, unknown message state: "+messageObject);
     }
 
+}
+
+function displayReceivedMessage(messageObject) {
+    var to = messageObject.to.toLowerCase();
+    var from = messageObject.from.toLowerCase();
+    createChat(from);
+    var chatTextarea = $('#chat' + from + ' .chatTextarea'); //set current textarea for
+    displayMessage(chatTextarea, messageObject.from, messageObject.body)
+}
+
+function displayAcceptedMessage(messageObject){
+    var msg = getMessageById(messageObject.id);
+    if (msg!=null){
+        var from = callerLogin.toLowerCase();
+        var to = msg.to;
+        createChat(to);
+        var chatTextarea = $('#chat' + to + ' .chatTextarea'); //set current textarea
+        displayMessage(chatTextarea, from, msg.body);
+        removeMessage(msg.id);
+    }else{
+        trace("Can not find message by id: "+messageObject.id);
+    }
+}
+
+function displayMessage(chatTextarea, from, body){
+    var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
+    chatTextarea.append('<div class=yourNick>' + from + '</div>' + body + '<br/>'); //add message to chat
     if (isScrolled == 1) {
         chatTextarea[0].scrollTop = chatTextarea[0].scrollHeight; //autoscroll if you are not reading previous messages
     }
