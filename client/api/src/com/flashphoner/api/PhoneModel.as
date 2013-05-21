@@ -231,7 +231,10 @@ package com.flashphoner.api
 			        }
 			        if (xml.finish_sound != null && xml.finish_sound.toString() != ""){
 				        SoundControl.FINISH_SOUND = xml.finish_sound;
-			        }										
+			        }
+					if (xml.load_balancer_url != null && xml.load_balancer_url.toString() !=""){
+						PhoneConfig.LOAD_BALANCER_URL = xml.load_balancer_url;
+					}
 					
 			        SoundControl.updateSounds();
 			    }

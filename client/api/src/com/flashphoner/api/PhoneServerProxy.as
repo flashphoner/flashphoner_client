@@ -55,6 +55,10 @@ package com.flashphoner.api
 		
 		private var keepAliveTimeoutTimer:Timer;
 		
+		private var connectionObject:Object = null;
+		
+		import flash.net.*;
+		
 		
 		public function PhoneServerProxy(responder:Responder,flash_API:Flash_API)
 		{		
@@ -99,10 +103,8 @@ package com.flashphoner.api
 			obj.port = port;
 			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
 			obj.visibleName = modelLocator.visibleName;
-			obj.qValue = qValue;
-						
-			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);	
-			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
+			obj.qValue = qValue;						
+			connect(obj);
 			return 0;			
 		}
 
@@ -120,12 +122,61 @@ package com.flashphoner.api
 			obj.token = token;
 			obj.pageUrl = pageUrl;
 			obj.width = PhoneConfig.VIDEO_WIDTH;
-			obj.height = PhoneConfig.VIDEO_HEIGHT;
+			obj.height = PhoneConfig.VIDEO_HEIGHT;			
+			connect(obj);
 			
+		}	
+		
+		
+		private function connect(obj:Object):void{
+			Logger.info("connect: "+obj);
+			this.connectionObject = obj;
+			if (PhoneConfig.LOAD_BALANCER_URL!=null){
+				connectByLoadBalancer();
+				return;
+			}else{
+				createConnection(PhoneConfig.SERVER_URL);
+			}
+		}
+		
+		private function createConnection(serverUrl:String):void {
+			Logger.info("createConnection serverUrl: "+serverUrl);
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
-			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
-			
-		}		
+			nc.connect(serverUrl+"/"+PhoneConfig.APP_NAME,connectionObject);
+		}
+		
+		private function connectByLoadBalancer():void {
+			Logger.info("connectByLoadBalancer "+PhoneConfig.LOAD_BALANCER_URL);
+			var request:URLRequest = new URLRequest(PhoneConfig.LOAD_BALANCER_URL);
+			var loader:URLLoader = new URLLoader();
+			loader.load(request);
+			loader.addEventListener(Event.COMPLETE, onLoadBalancerUrlComplete);
+			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR,loadBalancerUrlSeurityErrorHandler);
+			loader.addEventListener(IOErrorEvent.IO_ERROR, loadBalancerUrlIoErrorHandler);	
+		}
+		
+		private function onLoadBalancerUrlComplete(event:Event):void{			
+			var loader:URLLoader = event.target as URLLoader;
+			if (loader != null)
+			{
+				var server:String = loader.data;
+				Logger.info("onLoadBalancerUrlComplete server: "+server);
+				createConnection("rtmfp://"+server);				
+			}	
+		}
+		
+		private function loadBalancerUrlSeurityErrorHandler(event:Event):void{			
+			loadBalancerLoadingError(event.toString());
+		}
+		
+		private function loadBalancerUrlIoErrorHandler(event:Event):void{
+			loadBalancerLoadingError(event.toString());
+		}
+		
+		private function loadBalancerLoadingError(error:String):void{
+			Logger.info("Can not load loadbalancer data "+error+". Default connection url will be used: "+PhoneConfig.SERVER_URL);
+			createConnection(PhoneConfig.SERVER_URL);
+		}
 		
 		/*		
 		public function loginByTokenWithPageUrl(token:String = null, pageUrl:String):void{

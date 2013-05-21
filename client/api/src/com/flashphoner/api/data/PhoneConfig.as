@@ -104,7 +104,9 @@ package com.flashphoner.api.data
 		
 		public static var VIDEO_RELIABLE = false;
 		
-		public static var AUDIO_RELIABLE = false;		
+		public static var AUDIO_RELIABLE = false;
+		
+		public static var LOAD_BALANCER_URL = null;
 		
 		
 		/**
