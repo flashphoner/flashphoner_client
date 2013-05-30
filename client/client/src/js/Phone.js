@@ -334,6 +334,7 @@ function notify(call) {
                 closeIncomingView();
                 closeVideoView();
                 toCallState();
+				flashphoner.stopSound("RING");
                 flashphoner.playSound("FINISH");
             }
             getElement('sendVideo').value = "Send video";
