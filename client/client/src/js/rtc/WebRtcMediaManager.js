@@ -137,7 +137,7 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
                 me.onCreateOfferSuccessCallback(offer);
             }, function (error) {
                 me.onCreateOfferErrorCallback(error);
-            }, {"optional": [], "mandatory": {"OfferToReceiveAudio": true, "OfferToReceiveVideo": true}});
+            }, {"optional": [], "mandatory": {"OfferToReceiveAudio": true, "OfferToReceiveVideo": false}});
         }
 
         var checkVideoAndCreate = function () {
