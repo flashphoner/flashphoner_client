@@ -6,6 +6,7 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
     me.configLoaded = false;
     me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
     me.soundControl = new SoundControl();
+    me.messenger = new Messenger(this);
     var rtcManager = this.webRtcMediaManager;
         var proccessCall = function(call){
         for (var i in me.calls) {
@@ -85,8 +86,8 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
             //notifyVideoFormat(call);
         },
 
-        notifyMessage: function(message) {
-            notifyMessage(message);
+        notifyMessage: function(message, notificationResult, sipObject) {
+            me.messenger.notifyMessage(message, notificationResult, sipObject);
         },
 
         notifyAudioCodec: function(codec) {
@@ -196,6 +197,10 @@ WebSocketManager.prototype = {
 
     stopSound: function (sound) {
         this.soundControl.stopSound(sound);
+    },
+
+    sendMessage: function (message) {
+        this.messenger.sendMessage(message);
     }
 
 };

@@ -162,7 +162,12 @@ function call() {
 
 function sendMessage(to, body, contentType) {
     trace("sendMessage", to, body, contentType);
-    flashphoner.sendMessage(to, body, contentType);
+    var message = new Object();
+    message.from = callerLogin;
+    message.to = to;
+    message.body = body;
+    message.contentType = contentType;
+    flashphoner.sendMessage(message);
 }
 
 
@@ -334,7 +339,7 @@ function notify(call) {
                 closeIncomingView();
                 closeVideoView();
                 toCallState();
-				flashphoner.stopSound("RING");
+                flashphoner.stopSound("RING");
                 flashphoner.playSound("FINISH");
             }
             getElement('sendVideo').value = "Send video";
@@ -476,26 +481,47 @@ function notifyOpenVideoView(isViewed) {
     }
 }
 
-function notifyMessage(messageObject) {
-    trace('notifyMessage', messageObject);//messageObject.from + ': ' + messageObject.body);
+function notifyMessageReceived(messageObject){
     openChatView();
+    trace("notifyMessageReceived", messageObject);
+    createChat(messageObject.from.toLowerCase());
+    var chatDiv = $('#chat' + messageObject.from.toLowerCase() + ' .chatTextarea'); //set current textarea
+    addMessageToChat(chatDiv,messageObject.from, messageObject.body, "yourNick",messageObject.id);
+}
 
-    //if (messageObject.from == $('#callerLogin').html()) {
-    if (messageObject.from == callerLogin) { //check if it outcoming or incoming message
-        createChat(messageObject.to.toLowerCase());
-        var chatTextarea = $('#chat' + messageObject.to.toLowerCase() + ' .chatTextarea'); //set current textarea for
-        var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
-        chatTextarea.append('<div class=myNick>' + messageObject.from + '</div>' + messageObject.body + '<br>'); //add message to chat
-    } else {
-        createChat(messageObject.from.toLowerCase());
-        var chatTextarea = $('#chat' + messageObject.from.toLowerCase() + ' .chatTextarea'); //set current textarea
-        var isScrolled = (chatTextarea[0].scrollHeight - chatTextarea.height() + 1) / (chatTextarea[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
-        chatTextarea.append('<div class=yourNick>' + messageObject.from + '</div>' + messageObject.body + '<br>'); //add message to chat
-    }
-
+function addMessageToChat(chatDiv, from, body, className, messageId){
+    var idAttr=(messageId!=null)?"id='"+messageId+"'":"";
+    var isScrolled = (chatDiv[0].scrollHeight - chatDiv.height() + 1) / (chatDiv[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
+    var messageDiv = "<div "+idAttr+" class='"+className+"'>" + from +" "+ body + "</div>";
+    chatDiv.append(messageDiv); //add message to chat
     if (isScrolled == 1) {
-        chatTextarea[0].scrollTop = chatTextarea[0].scrollHeight; //autoscroll if you are not reading previous messages
+        chatDiv[0].scrollTop = chatDiv[0].scrollHeight; //autoscroll if you are not reading previous messages
     }
+}
+
+function notifyMessageSent(messageObject){
+    trace("notifyMessageSent", messageObject);
+    createChat(messageObject.to.toLowerCase());
+    var chatDiv = $('#chat' + messageObject.to.toLowerCase() + ' .chatTextarea'); //set current textarea for
+    addMessageToChat(chatDiv,messageObject.from, messageObject.body, "myNick",messageObject.id);
+}
+
+function notifyMessageAccepted(message){
+    trace("notifyMessageAccepted", message);
+    var messageDiv = $('#'+message.id);
+    messageDiv.addClass("myNick message_accepted");
+}
+
+function notifyMessageDelivered(message){
+    trace("notifyMessageDelivered", message);
+    var messageDiv = $('#'+message.id);
+    messageDiv.addClass("myNick message_delivered");
+}
+
+function notifyMessageFailed(message){
+    trace("notifyMessageFailed", message);
+    var messageDiv = $('#'+message.id);
+    messageDiv.addClass("myNick message_failed");
 }
 
 function notifyAddCall(call) {
@@ -1095,8 +1121,6 @@ $(function () {
             flashphoner.setVolume(ui.value);
         }
     });
-
-
 
 
 });

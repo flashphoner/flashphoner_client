@@ -554,6 +554,23 @@ div with zero size.
 .yourNick {
     color: #91c8ff;
 }
+
+.message_sent {
+    color: gray;
+}
+
+.message_accepted {
+    color: green;
+}
+
+.message_failed {
+    color: red;
+}
+
+. message_delivered {
+    color: black;
+}
+
 #tabul {
     padding: 0;
     margin: 0;
