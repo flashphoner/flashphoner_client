@@ -41,7 +41,7 @@ package com.flashphoner.api.management
 		 **/ 
 		public function init():void{			
 			if (cam != null){				
-				supportedResolutions("720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
+				supportedResolutions("1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
 				cam.setMode(PhoneConfig.VIDEO_WIDTH,PhoneConfig.VIDEO_HEIGHT,PhoneConfig.CAM_FPS,PhoneConfig.CAM_KEEP_RATIO);
 				cam.setKeyFrameInterval(PhoneConfig.CAM_KEY_INT);
 				cam.setQuality(0,PhoneConfig.CAM_QUALITY);
