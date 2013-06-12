@@ -567,7 +567,11 @@ div with zero size.
     color: red;
 }
 
-. message_delivered {
+.message_delivery_failed{
+    color:orange;
+}
+
+.message_delivered {
     color: black;
 }
 

@@ -13,6 +13,7 @@ var Messenger = function (webSocketManager) {
 Messenger.prototype = {
 
     notifyMessage: function (message, notificationResult, sipObject) {
+        trace("notifyMessage",message,notificationResult,sipObject);
         var sentMessage = this.sentMessages[message.id];
         if (sentMessage != null) {
             sentMessage.state = message.state;
@@ -20,20 +21,42 @@ Messenger.prototype = {
                 notifyMessageSent(sentMessage);
             } else if (sentMessage.state == "ACCEPTED") {
                 notifyMessageAccepted(sentMessage);
-            } else if (sentMessage.state == "FAILED"){
+                if (!sentMessage.deliveryNotification) {
+                    this.removeSentMessage(sentMessage);
+                }
+            } else if (sentMessage.state == "FAILED") {
                 notifyMessageFailed(sentMessage);
-            } else if (sentMessage.state == "DELIVERED"){
+                this.removeSentMessage(sentMessage);
+            } else if (sentMessage.state == "IMDN_DELIVERED") {
+                //send OK result on IMDN request
                 notifyMessageDelivered(sentMessage);
+                this.removeSentMessage(sentMessage);
+                this.sendOkResult(notificationResult);
+            } else if (sentMessage.state == "IMDN_FAILED" || sentMessage.state == "IMDN_FORBIDDEN" || sentMessage.state == "IMDN_ERROR") {
+                //send OK result on IMDN request
+                notifyMessageDeliveryFailed(sentMessage);
+                this.removeSentMessage(sentMessage);
+                this.sendOkResult(notificationResult);
             }
-        }else {
+        } else {
             //received message
+            //send OK result on MESSAGE request
             notifyMessageReceived(message);
-            notificationResult.status="OK";
-            this.sendResult(notificationResult);                         3
+            this.sendOkResult(notificationResult);
         }
     },
 
-    sendResult: function(result){
+
+    removeSentMessage: function (sentMessage) {
+        this.sentMessages[sentMessage.id] = null;
+    },
+
+    sendOkResult: function(notificationResult){
+        notificationResult.status = "OK";
+        this.sendResult(notificationResult);
+    },
+
+    sendResult: function (result) {
         this.webSocketManager.webSocket.send("notificationResult", result);
     },
 
