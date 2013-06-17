@@ -157,6 +157,10 @@ WebSocketManager.prototype = {
         this.webSocket.send("hangup", callId);
     },
 
+    setUseProxy:function(useProxy){
+        this.webSocket.send("setUseProxy", useProxy);
+    },
+
     viewVideo: function(){
         this.webRtcMediaManager.viewVideo();
     },

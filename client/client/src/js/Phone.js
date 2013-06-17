@@ -1134,5 +1134,12 @@ $(function () {
         }
     });
 
+    $("#checkboxUseProxy").change(function(){
+        if($(this).attr("checked")){
+            flashphoner.setUseProxy(true);
+        }else{
+            flashphoner.setUseProxy(false);
+        }});
+
 
 });
