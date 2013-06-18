@@ -15,8 +15,6 @@ WebRtcMediaManager.prototype.close = function () {
         this.remoteVideo.src = null;
         this.peerConnection.close();
     }
-    this.localVideoStream = null;
-    this.localAudioStream = null;
     this.peerConnection = null;
     this.peerConnectionState = 'new';
     this.remoteAudioVideoMediaStream = null;
