@@ -130,8 +130,8 @@ package com.flashphoner.api
 			}
 		}		
 		
-		public function callbackHold(_call:Object, isHold:Boolean):void{
-			var call:Call = process(_call);
+		public function callbackHold(callId:String, isHold:Boolean):void{
+			var call:Call = flash_API.getCallById(callId);
 			call.iHolded = isHold;
 			if (!isHold){
 				for each (var tempCall:Call in flash_API.calls){

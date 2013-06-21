@@ -158,7 +158,9 @@ WebSocketManager.prototype = {
     },
 
     setUseProxy:function(useProxy){
-        this.webSocket.send("setUseProxy", useProxy);
+        if (this.isOpened){
+            this.webSocket.send("setUseProxy", useProxy);
+        }
     },
 
     viewVideo: function(){

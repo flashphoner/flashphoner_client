@@ -75,6 +75,7 @@ WebRtcMediaManager.prototype.waitGatheringIce = function () {
         sendSdp = function () {
             console.debug("WebRtcMediaManager:waitGatheringIce() iceGatheringState=" + me.peerConnection.iceGatheringState);
             if (me.peerConnection.iceGatheringState == "complete") {
+                console.debug("WebRtcMediaManager:setLocalSDP: sdp=" + JSON.stringify(me.peerConnection.localDescription.sdp));
                 if (me.peerConnectionState == 'preparing-offer') {
                     me.peerConnectionState = 'offer-sent';
                     me.createOfferCallback(me.peerConnection.localDescription.sdp);// + this.candidates);
@@ -196,7 +197,6 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback) {
                 type: 'offer',
                 sdp: me.lastReceivedSdp
             });
-            console.debug("WebRtcMediaManager:setRemoteSDP: offer=" + JSON.stringify(sdpOffer));
             me.peerConnectionState = 'offer-received';
             me.peerConnection.setRemoteDescription(sdpOffer, function () {
                 me.onSetRemoteDescriptionSuccessCallback();
@@ -243,7 +243,6 @@ WebRtcMediaManager.prototype.onCreateOfferSuccessCallback = function (offer) {
         if (this.peerConnectionState == 'new' || this.peerConnectionState == 'established') {
             var application = this;
             this.peerConnectionState = 'preparing-offer';
-
             this.peerConnection.setLocalDescription(offer, function () {
                 application.onSetLocalDescriptionSuccessCallback(offer.sdp);
             }, function (error) {
@@ -280,9 +279,8 @@ WebRtcMediaManager.prototype.getConnectionState = function () {
 };
 
 WebRtcMediaManager.prototype.setRemoteSDP = function (call, sdp, isInitiator) {
-    console.debug("WebRtcMediaManager:setRemoteSDP()");
     this.call = call;
-    console.debug("WebRtcMediaManager:setRemoteSDP: answer=" + JSON.stringify(sdp));
+    console.debug("WebRtcMediaManager:setRemoteSDP: sdp=" + JSON.stringify(sdp));
     if (isInitiator) {
         var sdpAnswer = new RTCSessionDescription({
             type: 'answer',
