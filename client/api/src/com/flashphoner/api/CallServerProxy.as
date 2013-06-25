@@ -57,7 +57,10 @@ package com.flashphoner.api
 		
 		public function hold(isHold:Boolean):void{
 			Logger.info("CallServerProxy.setStatusHold() call.id: "+flashCall.id+";isHold: "+isHold);
-			nc.call("hold",null,flashCall.id,isHold);
+			var holdObject:Object = new Object();
+			holdObject.callId = flashCall.id;
+			holdObject.isHold = isHold;
+			nc.call("hold",null,holdObject);
 		}		
 		
 		public function answer(isVideoCall:Boolean):void{

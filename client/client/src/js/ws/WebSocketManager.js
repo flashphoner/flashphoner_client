@@ -157,6 +157,10 @@ WebSocketManager.prototype = {
         this.webSocket.send("hangup", callId);
     },
 
+    setStatusHold: function (callId, isHold){
+        this.webSocket.send("hold", {callId:callId, isHold:isHold});
+    },
+
     setUseProxy:function(useProxy){
         if (this.isOpened){
             this.webSocket.send("setUseProxy", useProxy);
