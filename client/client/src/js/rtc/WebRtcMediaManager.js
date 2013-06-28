@@ -278,8 +278,7 @@ WebRtcMediaManager.prototype.getConnectionState = function () {
     return this.peerConnectionState;
 };
 
-WebRtcMediaManager.prototype.setRemoteSDP = function (call, sdp, isInitiator) {
-    this.call = call;
+WebRtcMediaManager.prototype.setRemoteSDP = function (sdp, isInitiator) {
     console.debug("WebRtcMediaManager:setRemoteSDP: sdp=" + JSON.stringify(sdp));
     if (isInitiator) {
         var sdpAnswer = new RTCSessionDescription({

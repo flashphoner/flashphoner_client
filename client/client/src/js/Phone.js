@@ -380,16 +380,19 @@ function notifyCallbackHold(call, isHold) {
     trace("notifyCallbackHold", call, isHold);//callId - " + call.id + "; isHold - " + isHold);
     if (currentCall != null && currentCall.id == call.id) {
         currentCall = call;
-        if (call.iHolded) {
+        if (isHold) {
             getElement('holdButton').style.background = "url(assets/unhold.png)";
-            getElement('holdButton').onclick = function () {
+            $('#holdButton').unbind('click');
+            $('#holdButton').click(function () {
                 setStatusHold(call.id, false);
-            }
+            });
+
         } else {
             getElement('holdButton').style.background = "url(assets/hold.png)";
-            getElement('holdButton').onclick = function () {
+            $('#holdButton').unbind('click');
+            $('#holdButton').click(function () {
                 setStatusHold(call.id, true);
-            }
+            });
         }
     }
 }
@@ -568,7 +571,7 @@ function createCallView(call) {
 
     $('#holdButton').unbind('click');
     $('#holdButton').click(function () {
-        setStatusHold(call.id, !call.isHolded);
+        setStatusHold(call.id, true);
     });
 
     $('#transferButton').unbind('click');

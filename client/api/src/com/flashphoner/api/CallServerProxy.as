@@ -42,17 +42,23 @@ package com.flashphoner.api
 		
 		public function sendDtmf(dtmf:String):void{
 			Logger.info("CallServerProxy.sendDtmf() "+dtmf);
-			nc.call("sendDtmf",null,dtmf,flashCall.id);
+			var dtmfObject:Object = new Object();
+			dtmfObject.callId = flashCall.id;
+			dtmfObject.dtmf = dtmf;
+			nc.call("sendDtmf", null, dtmfObject);
 		}
 		
 		public function hangup():void{
 			Logger.info("CallServerProxy.hangup() call.id: "+ flashCall.id);
-			nc.call("hangup",null,flashCall.id);
+			nc.call("hangup", null, flashCall.id);
 		}
 		
 		public function transfer(callee:String):void{
 			Logger.info("CallServerProxy.transfer() call.id: "+flashCall.id+";callee: "+callee);
-			nc.call("transfer",null,flashCall.id,callee);
+			var transferObject:Object = new Object();
+			transferObject.callId = flashCall.id;
+			transferObject.callee = callee;			
+			nc.call("transfer", null, transferObject);
 		}		
 		
 		public function hold(isHold:Boolean):void{
