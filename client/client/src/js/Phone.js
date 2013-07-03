@@ -490,9 +490,42 @@ function notifyOpenVideoView(isViewed) {
 function notifyMessageReceived(messageObject){
     openChatView();
     trace("notifyMessageReceived", messageObject);
-    createChat(messageObject.from.toLowerCase());
-    var chatDiv = $('#chat' + removeNonDigitOrLetter(messageObject.from.toLowerCase()) + ' .chatTextarea'); //set current textarea
-    addMessageToChat(chatDiv,messageObject.from, messageObject.body, "yourNick",messageObject.id);
+    var from = findFrom(messageObject);
+    createChat(from);
+    var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
+    addMessageToChat(chatDiv,from, messageObject.body, "yourNick",messageObject.id);
+}
+
+function findFrom(messageObject) {
+    var from = messageObject.from.toLowerCase();
+    var exists = isChatTabExists(from);
+    if (!exists){
+        if (messageObject.pAssertedIdentity){
+            var pAssertedIdentity = parsePAssertedIdentity(messageObject.pAssertedIdentity);
+            //Looking for a tab by pAssertedIdentity
+            for (var key in pAssertedIdentity){
+                if (isChatTabExists(pAssertedIdentity[key])){
+                    from = pAssertedIdentity[key];
+                    break;
+                }
+            }
+        }
+    }
+    return from;
+}
+
+//Example: <sip:user@domain.com>,<tel:012345>
+function parsePAssertedIdentity(pAssertedIdentity){
+    var arr = pAssertedIdentity.split(",");
+    for (var i=0; i<arr.length; i++){
+        var pAssertedIdentityValue = arr[i];
+        arr[i] = pAssertedIdentityValue.replace("/</g","").replace("/>/g","");
+    }
+    return arr;
+}
+
+function isChatTabExists(calleeName){
+    return $('li').is('#tab' + removeNonDigitOrLetter(calleeName));
 }
 
 function addMessageToChat(chatDiv, from, body, className, messageId){
