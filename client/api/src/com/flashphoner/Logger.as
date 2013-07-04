@@ -90,7 +90,7 @@ package com.flashphoner
 			if (SEVERITY[severity] <= SEVERITY_VALUE ){
 				str = severity+':   ' + getTime() + str;
 				trace(str);
-				log += str + '';
+				log += str + "\n";
 			}
 		}
 		

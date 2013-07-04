@@ -190,6 +190,11 @@ package com.flashphoner.api
 					}
 					Logger.info("KEEP_ALIVE_INTERVAL: "+PhoneConfig.KEEP_ALIVE_INTERVAL);
 					
+					if (xml.push_log != null && xml.push_log.toString() != ""){
+						PhoneConfig.PUSH_LOG = (xml.push_log == "true");
+					}
+					Logger.info("PUSH_LOG: "+PhoneConfig.PUSH_LOG);
+					
 					if (xml.keep_alive_timeout !=null && xml.keep_alive_timeout.toString() !=""){
 						PhoneConfig.KEEP_ALIVE_TIMEOUT = int(xml.keep_alive_timeout);
 					}

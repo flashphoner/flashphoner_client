@@ -79,11 +79,17 @@ package com.flashphoner.api
 		}
 		
 		private function firePusher(event:TimerEvent):void {
-			if (nc.connected){
-				nc.call("pushLogs", responder, Logger.log);
+			if (nc.connected && Logger.log.length > 0){
+				nc.call("pushLogs", new Responder(pushLogsResponder), Logger.log);
 				Logger.clear();
 			}
 			logPusher.start();
+		}
+		
+		private function pushLogsResponder(pushLogsResult:Object):void {
+			/**
+			 * pushLogsResult is empty for now.
+			 **/
 		}
 		
 		public function login(loginObject:Object):int{
@@ -269,6 +275,9 @@ package com.flashphoner.api
 					initKeepAlive();
 					startKeepAlive();
 				}
+				if (PhoneConfig.PUSH_LOG){
+					initLogPusher();
+				}
 								
 			} else if(event.info.code == "NetConnection.Connect.Failed")
 			{
@@ -291,6 +300,9 @@ package com.flashphoner.api
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.DISCONNECT,flash_API));
 				hasDisconnectAttempt = false;
+				if (logPusher.running) {
+					logPusher.stop();
+				}
 			}		
 		}
 		
