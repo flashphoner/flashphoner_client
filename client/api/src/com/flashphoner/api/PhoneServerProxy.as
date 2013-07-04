@@ -57,6 +57,8 @@ package com.flashphoner.api
 		
 		private var connectionObject:Object = null;
 		
+		private var logPusher:Timer;
+		
 		import flash.net.*;
 		
 		
@@ -66,8 +68,22 @@ package com.flashphoner.api
 			this.responder = responder;
 			nc = new NetConnection();
 			nc.client = new PhoneCallback(flash_API);
-			phoneSpeaker = new PhoneSpeaker(nc,flash_API);	
+			phoneSpeaker = new PhoneSpeaker(nc,flash_API);		
 			
+		}
+		
+		private function initLogPusher():void {
+			logPusher = new Timer(1000);
+			logPusher.addEventListener(TimerEvent.TIMER, firePusher);
+			logPusher.start();
+		}
+		
+		private function firePusher(event:TimerEvent):void {
+			if (nc.connected){
+				nc.call("pushLogs", responder, Logger.log);
+				Logger.clear();
+			}
+			logPusher.start();
 		}
 		
 		public function login(loginObject:Object):int{

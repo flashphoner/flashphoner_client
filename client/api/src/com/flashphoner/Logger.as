@@ -93,6 +93,10 @@ package com.flashphoner
 				log += str + '';
 			}
 		}
+		
+		public static function clear():void {
+			log = new String();
+		}
 
 	
 	}
