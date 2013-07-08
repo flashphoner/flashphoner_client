@@ -185,7 +185,7 @@ WebSocketManager.prototype = {
     },
 
     sendDTMF: function (callId, dtmf) {
-        this.webSocket.send("hold", {callId: callId, dtmf: dtmf});
+        this.webSocket.send("sendDtmf", {callId: callId, dtmf: dtmf});
     },
 
     setUseProxy: function (useProxy) {
