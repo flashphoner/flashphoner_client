@@ -12,6 +12,7 @@
  */
 
 var flashphoner;
+var flashphoner_UI
 var flashphonerLoader;
 
 // One call become two calls during TRANSFER case
@@ -144,8 +145,8 @@ function call() {
     trace("call");
     if (isLogged) {
         if (isMuted() == 1) {
-            intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);call();}', 500);
-            requestUnmute();
+            intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId);call();}', 500);
+            flashphoner_UI.requestUnmute();
         } else if (isMuted() == -1) {
             var result = flashphoner.call({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter});
             if (result == 0) {
@@ -177,8 +178,8 @@ function sendMessage(to, body, contentType, deliveryNotification) {
 function answer(callId) {
     trace("answer", callId);
     if (isMuted() == 1) {
-        intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);answer(currentCall.id);}', 500);
-        requestUnmute();
+        intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId);answer(currentCall.id);}', 500);
+        flashphoner_UI.requestUnmute();
     } else if (isMuted() == -1) {
         flashphoner.answer(callId, true);
     } else {
@@ -228,11 +229,11 @@ function viewVideo() {
     trace("viewVideo");
     flashphoner.viewVideo();
 }
-
+/* function was moved to UI
 function viewAccessMessage() {
     trace("viewAccessMessage");
     flashphoner.viewAccessMessage();
-}
+} */
 
 function changeRelationMyVideo(relation) {
     trace("changeRelationMyVideo", relation);
@@ -270,6 +271,7 @@ function addLogMessage(message) {
 
 function notifyFlashReady() {
     flashphoner = flashphonerLoader.getFlashphoner();
+    flashphoner_UI = flashphonerLoader.getFlashphonerUI();
     //todo refactoring
     //$('#versionOfProduct').html(getVersion());
     if (flashphonerLoader.getToken()) {
@@ -792,8 +794,8 @@ function openVideoView() {
         }
         $('#video_requestUnmuteDiv').resize();
     } else {
-        requestUnmute();
-        intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId); openVideoView();}', 500);
+        flashphoner_UI.requestUnmute();
+        intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); openVideoView();}', 500);
     }
 }
 
@@ -952,6 +954,7 @@ function removeNonDigitOrLetter(calleeName){
  is ask allow use devices. This functions change size of window where swf is located.
  Sometimes this window use to show 'Request view', sometimes - to show 'Video view'
  */
+/*
 function requestUnmute() {
     trace("requestUnmute");
 
@@ -966,12 +969,12 @@ function requestUnmute() {
 
     viewAccessMessage();
 }
-
+function moved to UI manager
 function closeRequestUnmute() {
     trace("closeRequestUnmute");
     $('#video_requestUnmuteDiv').removeClass().addClass('closed');
     getElement('video').style.top = "20px";
-}
+} */
 /* ------------------------- */
 
 // functions closeView is simplifying of many close....View functions

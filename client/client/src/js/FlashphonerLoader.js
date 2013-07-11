@@ -12,6 +12,7 @@
  */
 FlashphonerLoader = function (config) {
     this.flashphoner = null;
+    this.flashphoner_UI = null;
     this.urlServer = null;
     this.token = null;
     this.registerRequired = false;
@@ -83,6 +84,7 @@ FlashphonerLoader.prototype = {
 
         if (this.urlServer.indexOf("ws://") == 0) {
             me.flashphoner = new WebSocketManager(this.urlServer, getElement('localVideoPreview'), getElement('remoteVideo'));
+            me.flashphoner_UI = new UIManagerWebRtc();
             notifyFlashReady();
         } else if (this.urlServer.indexOf("rtmfp://") == 0 || this.urlServer.indexOf("rtmp://") == 0) {
             var params = {};
@@ -98,6 +100,7 @@ FlashphonerLoader.prototype = {
             if (this.hasFlash()) {
                 swfobject.embedSWF("flashphoner_js_api.swf", "videoDiv", "100%", "100%", "11.2.202", "expressInstall.swf", flashvars, params, attributes, function (e) {
                     me.flashphoner = e.ref;
+                    me.flashphoner_UI = new UIManagerFlash();
                 });
             }
 
@@ -111,6 +114,10 @@ FlashphonerLoader.prototype = {
 
     getFlashphoner: function () {
         return this.flashphoner;
+    },
+
+    getFlashphonerUI: function () {
+        return this.flashphoner_UI;
     },
 
     getToken: function(){

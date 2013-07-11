@@ -58,7 +58,7 @@ if (navigator.mozGetUserMedia) {
             return this.videoTracks;
         };
     }
-
+	
     if (!webkitMediaStream.prototype.getAudioTracks) {
         webkitMediaStream.prototype.getAudioTracks = function() {
             return this.audioTracks;

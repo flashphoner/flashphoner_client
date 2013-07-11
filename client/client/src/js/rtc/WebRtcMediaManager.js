@@ -7,6 +7,7 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo, hasVideo) {
     me.remoteVideo = remoteVideo;
     me.localVideo = localVideoPreview;
     me.hasVideo = false;
+    me.isMuted = 1;
 };
 
 WebRtcMediaManager.prototype.close = function () {
@@ -100,6 +101,20 @@ WebRtcMediaManager.prototype.waitGatheringIce = function () {
     }
 };
 
+WebRtcMediaManager.prototype.viewAccessMessage = function () {
+    var me = this;
+    if (!me.localAudioStream) {
+        getUserMedia({audio: true}, function (stream) {
+                me.localAudioStream = stream;
+                me.isMuted = -1;
+            }, function (error) {
+                addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+                me.isMuted = 1;
+            }
+        );
+    }
+}
+
 WebRtcMediaManager.prototype.viewVideo = function () {
     var me = this;
     if (!me.localVideoStream) {
@@ -153,19 +168,8 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
                 create();
             }
         };
+        checkVideoAndCreate();
 
-        if (!me.localAudioStream) {
-            getUserMedia({audio: true}, function (stream) {
-                    me.localAudioStream = stream;
-                    checkVideoAndCreate();
-                }, function (error) {
-                    addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
-                    closeInfoView();
-                }
-            );
-        } else {
-            checkVideoAndCreate();
-        }
     }
     catch (exception) {
         console.error("WebRtcMediaManager:createOffer(): catched exception:" + exception);
@@ -219,19 +223,8 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback) {
                 create();
             }
         };
+        checkVideoAndCreate();
 
-        if (!me.localAudioStream) {
-            getUserMedia({audio: true}, function (stream) {
-                    me.localAudioStream = stream;
-                    checkVideoAndCreate();
-                }, function (error) {
-                    addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
-                    closeInfoView();
-                }
-            );
-        } else {
-            checkVideoAndCreate();
-        }
     }
     catch (exception) {
         console.error("WebRtcMediaManager:createAnswer(): catched exception:" + exception);
