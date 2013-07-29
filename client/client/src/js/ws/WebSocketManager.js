@@ -100,9 +100,8 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
             notifyError(errorCode);
         },
 
-        notifyVideoFormat: function (call) {
-            proccessCall(call);
-            //notifyVideoFormat(call);
+        notifyVideoFormat: function (videoFormat) {
+            //notifyVideoFormat(videoFormat);
         },
 
         notifyMessage: function (message, notificationResult, sipObject) {
