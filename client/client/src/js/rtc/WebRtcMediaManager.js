@@ -141,7 +141,7 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
                 me.onCreateOfferSuccessCallback(offer);
             }, function (error) {
                 me.onCreateOfferErrorCallback(error);
-            }, {"optional": [], "mandatory": {"OfferToReceiveAudio": true, "OfferToReceiveVideo": false}});
+            }, {"optional": [], "mandatory": {"OfferToReceiveAudio": true, "OfferToReceiveVideo": true}});
         }
 
         var checkVideoAndCreate = function () {
@@ -251,9 +251,10 @@ WebRtcMediaManager.prototype.onCreateOfferSuccessCallback = function (offer) {
     if (this.peerConnection != null) {
         if (this.peerConnectionState == 'new' || this.peerConnectionState == 'established') {
             var application = this;
+            offer.sdp = offer.sdp.replace("a=group","a=xxx");
             this.peerConnectionState = 'preparing-offer';
             this.peerConnection.setLocalDescription(offer, function () {
-                application.onSetLocalDescriptionSuccessCallback(offer.sdp);
+                application.onSetLocalDescriptionSuccessCallback(offer);
             }, function (error) {
                 application.onSetLocalDescriptionErrorCallback(error);
             });
@@ -317,7 +318,7 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionSuccessCallback = function ()
                 application.onCreateAnswerSuccessCallback(answer);
             }, function (error) {
                 application.onCreateAnswerErrorCallback(error);
-            }, {'mandatory': {'OfferToReceiveAudio': true, 'OfferToReceiveVideo': false }});
+            }, {'mandatory': {'OfferToReceiveAudio': true, 'OfferToReceiveVideo': true }});
         }
         else {
             console.log("WebRtcMediaManager:onSetRemoteDescriptionSuccessCallback(): RTCPeerConnection bad state!");
