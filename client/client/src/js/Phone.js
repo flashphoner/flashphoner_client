@@ -180,7 +180,7 @@ function answer(callId) {
         intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);answer(currentCall.id);}', 500);
         requestUnmute();
     } else if (isMuted() == -1) {
-        flashphoner.answer(callId, true);
+        flashphoner.answer(callId);
     } else {
         openConnectingView("Microphone is not plugged in", 3000);
     }
