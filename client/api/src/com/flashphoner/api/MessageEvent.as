@@ -25,6 +25,8 @@ package com.flashphoner.api
 		
 		public var flashAPI:Flash_API;	
 		public var messageObj:Object;	
+		public var notificationResult:Object;
+		public var sipObject:Object;
 		
 		public function MessageEvent(type:String,messageObj:Object, flashAPI:Flash_API ):void
 		{

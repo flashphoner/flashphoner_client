@@ -33,6 +33,8 @@ var testInviteParameter = {};
 testInviteParameter['param1'] = "value1";
 testInviteParameter['param2'] = "value2";
 
+var messenger;
+
 // trace log to the console in the demo page
 function trace(funcName, param1, param2, param3) {
 
@@ -161,6 +163,10 @@ function call() {
     }
 }
 
+function notifyMessage(message, notificationResult, sipObject) {
+    messenger.notifyMessage(message, notificationResult, sipObject);
+}
+
 function sendMessage(to, body, contentType, deliveryNotification) {
     trace("sendMessage", to, body, contentType);
     var message = new Object();
@@ -170,7 +176,7 @@ function sendMessage(to, body, contentType, deliveryNotification) {
     message.contentType = contentType;
     message.recipients = (message.to.indexOf(",")!=-1)?message.to:"";
     message.deliveryNotification = deliveryNotification;
-    flashphoner.sendMessage(message);
+    messenger.sendMessage(message);
 }
 
 
@@ -270,6 +276,7 @@ function addLogMessage(message) {
 
 function notifyFlashReady() {
     flashphoner = flashphonerLoader.getFlashphoner();
+    messenger = new Messenger(flashphoner);
     //todo refactoring
     //$('#versionOfProduct').html(getVersion());
     if (flashphonerLoader.getToken()) {
