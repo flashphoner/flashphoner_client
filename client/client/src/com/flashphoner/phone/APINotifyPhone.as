@@ -21,6 +21,7 @@ package com.flashphoner.phone
 	import mx.controls.Alert;
 	import mx.core.Application;
 	import mx.messaging.errors.MessagingError;
+	import mx.messaging.errors.NoChannelAvailableError;
 	import mx.utils.object_proxy;
 	
 	/**
@@ -118,7 +119,7 @@ package com.flashphoner.phone
 			}
 		}
 		
-		public function notifyMessage(messageObject:Object):void {
+		public function notifyMessage(messageObject:Object, notifyMessageResult:Object, sipObject:Object):void {
 			DataPhone.getInstance().viewController.pushMessageToInstantMessageChatView(messageObject);			
 		}	
 		

@@ -60,8 +60,8 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyOpenVideoView",isViewed);
 		}
 		
-		public function notifyMessage(messageObject:Object):void{
-			ExternalInterface.call("notifyMessage",messageObject);
+		public function notifyMessage(messageObject:Object, notifyMessageResult:Object, sipObject:Object):void{
+			ExternalInterface.call("notifyMessage",messageObject, notifyMessageResult, sipObject);
 		}
 		
 		public function notifyAddCall(call:Call):void{
