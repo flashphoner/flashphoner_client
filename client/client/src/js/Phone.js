@@ -270,6 +270,13 @@ function addLogMessage(message) {
 
 function notifyFlashReady() {
     flashphoner = flashphonerLoader.getFlashphoner();
+    if (flashphonerLoader.useWebRTC){
+        $('#checkboxUseProxyDiv').css('display', 'inline');
+        $('#cameraButton').css('visibility', 'hidden');
+    } else {
+        $('#checkboxUseProxyDiv').css('display', 'none');
+        $('#cameraButton').css('visibility', 'visible');
+    }
     //todo refactoring
     //$('#versionOfProduct').html(getVersion());
     if (flashphonerLoader.getToken()) {

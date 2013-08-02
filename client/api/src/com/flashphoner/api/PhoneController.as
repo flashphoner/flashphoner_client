@@ -35,12 +35,12 @@ package com.flashphoner.api
 			addCommand(CallEvent.BUSY, CallCommand);
 			addCommand(CallEvent.FINISH,CallCommand);
 			addCommand(CallEvent.SESSION_PROGRESS,CallCommand);
-			addCommand(CallEvent.VIDEO_FORMAT_CHANGED,CallCommand);
 			
 			addCommand(MainEvent.CONNECTED,MainCommand);	
 			addCommand(MainEvent.REGISTERED,MainCommand);
 			addCommand(MainEvent.DISCONNECT,MainCommand);
 			addCommand(MainEvent.AUDIO_CODEC_CHANGED_EVENT,MainCommand);
+			addCommand(MainEvent.VIDEO_FORMAT_CHANGED,MainCommand);
 			
 			addCommand(MessageEvent.MESSAGE_EVENT,MessageCommand);
 			

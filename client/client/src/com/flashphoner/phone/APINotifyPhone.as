@@ -107,7 +107,7 @@ package com.flashphoner.phone
 			}			
 		} 
 		
-		public function notifyVideoFormat(call:Call,_sipObject:Object = null):void{
+		public function notifyVideoFormat(videoFormat:Object,_sipObject:Object = null):void{
 		}
 		
 		public function notifyOpenVideoView(isViewed:Boolean):void{

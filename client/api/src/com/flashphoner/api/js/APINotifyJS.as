@@ -52,8 +52,8 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyError",error);
 		}
 		
-		public function notifyVideoFormat(call:Call,_sipObject:Object = null):void{
-			ExternalInterface.call("notifyVideoFormat",call);
+		public function notifyVideoFormat(videoFormat:Object,_sipObject:Object = null):void{
+			ExternalInterface.call("notifyVideoFormat",videoFormat);
 		}
 		
 		public function notifyOpenVideoView(isViewed:Boolean):void{
