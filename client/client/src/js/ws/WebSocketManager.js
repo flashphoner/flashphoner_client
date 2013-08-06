@@ -201,6 +201,14 @@ WebSocketManager.prototype = {
 
     },
 
+    getVolume: function () {
+        return this.webRtcMediaManager.remoteVideo.volume * 100;
+    },
+
+    setVolume:function(value){
+        this.webRtcMediaManager.remoteVideo.volume = value / 100;
+    },
+
     isMuted: function () {
         return -1;
     },

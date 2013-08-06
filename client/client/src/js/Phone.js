@@ -280,9 +280,11 @@ function notifyFlashReady() {
     if (flashphonerLoader.useWebRTC){
         $('#checkboxUseProxyDiv').css('display', 'inline');
         $('#cameraButton').css('visibility', 'hidden');
+        $('#micButton').css('visibility', 'hidden');
     } else {
         $('#checkboxUseProxyDiv').css('display', 'none');
         $('#cameraButton').css('visibility', 'visible');
+        $('#micButton').css('visibility', 'visible');
     }
     //todo refactoring
     //$('#versionOfProduct').html(getVersion());
