@@ -1031,7 +1031,11 @@ $(function () {
         if ($("#callButton").html() == 'Call') {
             call();
         } else {
-            hangup(currentCall.id);
+            if (currentCall){
+                hangup(currentCall.id);
+            } else {
+                hangup();
+            }
         }
     });
 

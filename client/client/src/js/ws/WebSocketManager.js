@@ -172,7 +172,15 @@ WebSocketManager.prototype = {
     },
 
     hangup: function (callId) {
-        this.webSocket.send("hangup", callId);
+        if (callId){
+            this.webSocket.send("hangup", callId);
+        } else {
+            if (this.calls.length == 0) {
+                closeInfoView();
+                toCallState();
+                this.webRtcMediaManager.close();
+            }
+        }
     },
 
     setStatusHold: function (callId, isHold) {
