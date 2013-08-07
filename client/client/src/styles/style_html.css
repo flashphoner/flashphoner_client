@@ -316,7 +316,7 @@ input::-webkit-input-placeholder {
 #connectingDiv {
     top: 120px;
     left: 10px;
-    height: 30px;
+    height: 40px;
     width: 200px;
     padding: 10px;
     float: left;
@@ -324,9 +324,11 @@ input::-webkit-input-placeholder {
     font: 16px Arial;
     color: #aaa;
     text-align: center;
-    line-height: 30px;
+    display: table;
 }
 #connectingText {
+    display: table-cell;
+    vertical-align: middle;
 }
 /* ------------------ Info ------------------------ */
 #infoDiv {

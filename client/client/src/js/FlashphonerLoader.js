@@ -37,48 +37,51 @@ FlashphonerLoader.prototype = {
     parseFlashphonerXml: function (xml) {
         var me = this;
         var urlServer = $(xml).find("rtmp_server");
-        if (urlServer.length){
-            this.urlServer = urlServer.text();
+        if (urlServer.length > 0){
+            this.urlServer = urlServer[0].textContent;
+        } else {
+            openConnectingView("Can not find 'rtmfp_server' in flashphoner.xml", 0);
+            return;
         }
         var token = $(xml).find("token");
-        if (token.length){
-             this.token = token.text();
+        if (token.length > 0){
+             this.token = token[0].textContent;
         }
         var registerRequired = $(xml).find("register_required");
-        if (registerRequired.length){
-            this.registerRequired = registerRequired.text();
+        if (registerRequired.length > 0){
+            this.registerRequired = registerRequired[0].textContent;
         }
         var videoWidth = $(xml).find("video_width");
-        if (videoWidth.length){
-            this.videoWidth = videoWidth.text();
+        if (videoWidth.length > 0){
+            this.videoWidth = videoWidth[0].textContent;
         }
         var videoHeight = $(xml).find("video_height");
-        if (videoHeight.length){
-            this.videoHeight = videoHeight.text();
+        if (videoHeight.length > 0){
+            this.videoHeight = videoHeight[0].textContent;
         }
         //Sounds for WebRTC implementation
         var ringSound = $(xml).find("ring_sound");
-        if (ringSound.length){
-            if (ringSound.text().length){
-                this.ringSound = ringSound.text();
+        if (ringSound.length > 0){
+            if (ringSound[0].textContent.length){
+                this.ringSound = ringSound[0].textContent;
             }
         }
         var busySound = $(xml).find("busy_sound");
-        if (busySound.length){
-            if (busySound.text().length) {
-                this.busySound = busySound.text();
+        if (busySound.length > 0){
+            if (busySound[0].textContent.length) {
+                this.busySound = busySound[0].textContent;
             }
         }
         var registerSound = $(xml).find("register_sound");
-        if (registerSound.length){
-            if (registerSound.text().length){
-                this.registerSound = registerSound.text();
+        if (registerSound.length > 0){
+            if (registerSound[0].textContent.length){
+                this.registerSound = registerSound[0].textContent;
             }
         }
         var finishSound = $(xml).find("finish_sound");
-        if (finishSound.length){
-            if (finishSound.text().length){
-                this.finishSound = finishSound.text();
+        if (finishSound.length > 0){
+            if (finishSound[0].textContent.length){
+                this.finishSound = finishSound[0].textContent;
             }
         }
 
