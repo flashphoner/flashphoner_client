@@ -28,7 +28,6 @@ package com.flashphoner.api
 		public static const BUSY:String = "BUSY";
 		public static const FINISH:String = "FINISH";
 		public static const SESSION_PROGRESS:String = "SESSION_PROGRESS";
-		public static const VIDEO_FORMAT_CHANGED:String = "VIDEO_FORMAT_CHANGED";
 		
 		public var call:Call;	
 				

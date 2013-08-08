@@ -12,6 +12,7 @@
  */
 FlashphonerLoader = function (config) {
     this.flashphoner = null;
+    this.useWebRTC = false;
     this.flashphoner_UI = null;
     this.urlServer = null;
     this.token = null;
@@ -83,10 +84,12 @@ FlashphonerLoader.prototype = {
         }
 
         if (this.urlServer.indexOf("ws://") == 0) {
+            me.useWebRTC = true;
             me.flashphoner = new WebSocketManager(this.urlServer, getElement('localVideoPreview'), getElement('remoteVideo'));
             me.flashphoner_UI = new UIManagerWebRtc();
             notifyFlashReady();
         } else if (this.urlServer.indexOf("rtmfp://") == 0 || this.urlServer.indexOf("rtmp://") == 0) {
+            me.useWebRTC = false;
             var params = {};
             params.menu = "true";
             params.swliveconnect = "true";

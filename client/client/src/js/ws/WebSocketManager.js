@@ -6,7 +6,6 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
     me.configLoaded = false;
     me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
     me.soundControl = new SoundControl();
-    me.messenger = new Messenger(this);
     var rtcManager = this.webRtcMediaManager;
     var proccessCall = function (call) {
         for (var i in me.calls) {
@@ -30,10 +29,10 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
     var removeCall = function (callId) {
         for (var i in me.calls) {
             if (callId == me.calls[i].id) {
-                me.calls.splice(i,1);
+                me.calls.splice(i, 1);
             }
         }
-        if (me.calls.length == 0){
+        if (me.calls.length == 0) {
             rtcManager.close();
         }
     };
@@ -65,7 +64,7 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
             proccessCall(call);
             rtcManager.setRemoteSDP(sdp, isInitiator);
             if (!isInitiator && rtcManager.getConnectionState() == "established") {
-                me.answer(call.id, true);
+                me.answer(call.id);
             }
         },
 
@@ -100,13 +99,12 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
             notifyError(errorCode);
         },
 
-        notifyVideoFormat: function (call) {
-            proccessCall(call);
-            //notifyVideoFormat(call);
+        notifyVideoFormat: function (videoFormat) {
+            //notifyVideoFormat(videoFormat);
         },
 
         notifyMessage: function (message, notificationResult, sipObject) {
-            me.messenger.notifyMessage(message, notificationResult, sipObject);
+            messenger.notifyMessage(message, notificationResult, sipObject);
         },
 
         notifyAudioCodec: function (codec) {
@@ -163,13 +161,14 @@ WebSocketManager.prototype = {
         return 0;
     },
 
-    answer: function (callId, hasAudio) {
+    answer: function (callId) {
         var me = this;
         openInfoView("Configuring WebRTC connection...", 0, 60);
         this.webRtcMediaManager.createAnswer(function (sdp) {
-            closeInfoView();
-            me.webSocket.send("answer", {callId: callId, sdp: sdp});
-        }, hasAudio);
+                closeInfoView();
+                me.webSocket.send("answer", {callId: callId, sdp: sdp});
+            }
+        );
     },
 
     hangup: function (callId) {
@@ -200,6 +199,14 @@ WebSocketManager.prototype = {
 
     viewAccessMessage: function () {
         this.webRtcMediaManager.viewAccessMessage();
+    },
+
+    getVolume: function () {
+        return this.webRtcMediaManager.remoteVideo.volume * 100;
+    },
+
+    setVolume:function(value){
+        this.webRtcMediaManager.remoteVideo.volume = value / 100;
     },
 
     isMuted: function () {
@@ -237,7 +244,11 @@ WebSocketManager.prototype = {
     },
 
     sendMessage: function (message) {
-        this.messenger.sendMessage(message);
+        this.webSocket.send("sendInstantMessage",message);
+    },
+
+    notificationResult: function (result) {
+        this.webSocket.send("notificationResult",result);
     }
 
 };

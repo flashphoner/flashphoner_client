@@ -68,11 +68,6 @@ package com.flashphoner.api
 				SoundControl.playRingSound();
 			}
 			
-			if (event.type == MainEvent.VIDEO_FORMAT_CHANGED){
-				flashAPI.videoControl.changeFormat(call.streamerVideoWidth,call.streamerVideoHeight);
-				//flashAPI.phoneServerProxy.phoneSpeaker.changeFormat(call.playerVideoWidth,call.playerVideoHeight);
-			}			
-			
 			if (event.type == CallEvent.BUSY){
 				SoundControl.playBusySound();		
 				SoundControl.stopRingSound();														

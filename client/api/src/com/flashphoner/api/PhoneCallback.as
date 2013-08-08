@@ -115,12 +115,13 @@ package com.flashphoner.api
 		}
 		
 		// Notify about CIF 352x288 or QCIF 176x144 video format 
-		public function notifyVideoFormat(_call:Object):void{
-			var call:Call = process(_call);
+		public function notifyVideoFormat(videoFormat:Object):void{
 			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
-				apiNotify.notifyVideoFormat(call);			
+				apiNotify.notifyVideoFormat(videoFormat);			
 			}
-			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.VIDEO_FORMAT_CHANGED, call));
+			var event:MainEvent = new MainEvent(MainEvent.VIDEO_FORMAT_CHANGED, flash_API);
+			event.obj = videoFormat;
+			CairngormEventDispatcher.getInstance().dispatchEvent(event);
 		}
 		
 		public function onVideoPlay(_call:Object, play:Boolean):void{
@@ -201,9 +202,12 @@ package com.flashphoner.api
 			return call;
 		}
 		
-		public function notifyMessage(messageObj:Object):void {
+		public function notifyMessage(messageObj:Object, notificationResult:Object, sipObject:Object):void {
 			Logger.info("Message has been accepted by other participant");
-			CairngormEventDispatcher.getInstance().dispatchEvent(new MessageEvent(MessageEvent.MESSAGE_EVENT,messageObj,flash_API));		
+			var messageEvent:MessageEvent = new MessageEvent(MessageEvent.MESSAGE_EVENT,messageObj,flash_API);
+			messageEvent.notificationResult = notificationResult;
+			messageEvent.sipObject = sipObject;
+			CairngormEventDispatcher.getInstance().dispatchEvent(messageEvent);		
 		}
 		
 		public function notifyAudioCodec(codec:Object):void {

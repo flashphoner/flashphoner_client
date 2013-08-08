@@ -36,12 +36,11 @@ package com.flashphoner.api
 		{	
 			Logger.info("MessageCommand.execute() event.type "+event.type);
 			
-			var flashAPI:Flash_API = (event as MessageEvent).flashAPI;					
-			var messageObject:Object = (event as MessageEvent).messageObj;
-			
+			var messageEvent:MessageEvent = event as MessageEvent;		
+			var flashAPI:Flash_API = messageEvent.flashAPI;			
 			if (event.type == MessageEvent.MESSAGE_EVENT){
 				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
-					apiNotify.notifyMessage(messageObject);
+					apiNotify.notifyMessage(messageEvent.messageObj,messageEvent.notificationResult,messageEvent.sipObject);
 				}
 			}	
 			

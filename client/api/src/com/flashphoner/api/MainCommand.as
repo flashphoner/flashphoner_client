@@ -62,6 +62,12 @@ package com.flashphoner.api
 				flashAPI.soundControl.changeAudioCodec(codec);
 			}
 			
+			if (event.type == MainEvent.VIDEO_FORMAT_CHANGED){
+				var mediaFormat:Object = (event as MainEvent).obj;
+				flashAPI.videoControl.changeFormat(mediaFormat.streamerVideoWidth,mediaFormat.streamerVideoHeight);
+				//flashAPI.phoneServerProxy.phoneSpeaker.changeFormat(call.playerVideoWidth,call.playerVideoHeight);
+			}				
+			
 		}
 	}
 }

@@ -220,14 +220,12 @@ package com.flashphoner.api
 			}		
 		}
 		
-		public function sendInstantMessage(instantMessage:InstantMessage):void{
-			
-			var instantMessageObj:Object = new Object();
-			instantMessageObj.to=instantMessage.to;
-			instantMessageObj.body=instantMessage.body;
-			instantMessageObj.contentType=instantMessage.contentType;
-			
-			nc.call("sendInstantMessage",null,instantMessageObj);
+		public function sendInstantMessage(msg:Object):void{		
+			nc.call("sendInstantMessage",null,msg);
+		}
+		
+		public function notificationResult(notificationResult:Object):void{		
+			nc.call("notificationResult", null, notificationResult);
 		}
 		
 		public function sendInfo(infoObject:Object):void{

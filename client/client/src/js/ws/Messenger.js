@@ -5,15 +5,14 @@
  * Time: 3:09 PM
  * To change this template use File | Settings | File Templates.
  */
-var Messenger = function (webSocketManager) {
-    this.webSocketManager = webSocketManager;
+var Messenger = function (flashphoner) {
     this.sentMessages = new Object();
 };
 
 Messenger.prototype = {
 
     notifyMessage: function (message, notificationResult, sipObject) {
-        trace("notifyMessage",message,notificationResult,sipObject);
+        trace("notifyMessage", message, notificationResult, sipObject);
         var sentMessage = this.sentMessages[message.id];
         if (sentMessage != null) {
             sentMessage.state = message.state;
@@ -51,18 +50,22 @@ Messenger.prototype = {
         this.sentMessages[sentMessage.id] = null;
     },
 
-    sendOkResult: function(notificationResult){
+    sendOkResult: function (notificationResult) {
         notificationResult.status = "OK";
         this.sendResult(notificationResult);
     },
 
     sendResult: function (result) {
-        this.webSocketManager.webSocket.send("notificationResult", result);
+        flashphoner.notificationResult(result);
     },
 
     sendMessage: function (message) {
         this.saveSentMessage(message);
-        this.webSocketManager.webSocket.send("sendInstantMessage", message);
+        try {
+            flashphoner.sendMessage(message);
+        } catch (error) {
+            trace(error);
+        }
     },
 
     saveSentMessage: function (message) {

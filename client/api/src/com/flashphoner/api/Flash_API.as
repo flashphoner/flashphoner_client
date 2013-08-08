@@ -28,6 +28,7 @@ package com.flashphoner.api
 	import flash.media.Microphone;
 	import flash.net.Responder;
 	import flash.net.SharedObject;
+	import flash.system.Security;
 	import flash.utils.Timer;
 	
 	import mx.collections.ArrayCollection;
@@ -76,6 +77,7 @@ package com.flashphoner.api
 		 * Initialize calls,modelLocato and initialize library
 		 */		
 		public function Flash_API(apiNotify:APINotify){
+			Security.allowDomain("*");
 			Logger.init();
 			apiNotifys = new ArrayCollection();
 			addAPINotify(apiNotify);
@@ -86,6 +88,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("logoff",logoff);
 			ExternalInterface.addCallback("getInfoAboutMe",getInfoAboutMe);			
 			ExternalInterface.addCallback("sendMessage",sendMessage);
+			ExternalInterface.addCallback("notificationResult",notificationResult);
 			ExternalInterface.addCallback("call",call);
 			ExternalInterface.addCallback("callByToken",callByToken);
 			ExternalInterface.addCallback("hangup",hangup);
@@ -596,12 +599,8 @@ package com.flashphoner.api
 		 * @param body content of the message
 		 * @param contentType type of content
 		 **/
-		public function sendMessage(to:String, body:String, contentType:String):void{
-			var instantMessage:InstantMessage = new InstantMessage();
-			instantMessage.body = body;
-			instantMessage.to = to;
-			instantMessage.contentType = contentType;
-			this.phoneServerProxy.sendInstantMessage(instantMessage);
+		public function sendMessage(msg:Object):void{			
+			this.phoneServerProxy.sendInstantMessage(msg);
 		}
 
 		/**
@@ -610,6 +609,11 @@ package com.flashphoner.api
 		 **/		
 		public function sendInstantMessage(instantMessage:InstantMessage):void{
 			this.phoneServerProxy.sendInstantMessage(instantMessage);
+		}
+		
+		public function notificationResult(notificationResult:Object):void{
+			Logger.info("notificationResult "+notificationResult);
+			this.phoneServerProxy.notificationResult(notificationResult);
 		}
 		
 		public function sendInfo(infoObj:Object):void {
