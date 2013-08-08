@@ -110,6 +110,7 @@ function login() {
     loginObject.port = $('#port').val();
     loginObject.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
     loginObject.qValue = "1.0";
+    loginObject.contactParams = "contactParamsString";
 
     var result = flashphoner.login(loginObject);
     closeLoginView();
