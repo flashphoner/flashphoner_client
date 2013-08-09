@@ -93,6 +93,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("callByToken",callByToken);
 			ExternalInterface.addCallback("hangup",hangup);
 			ExternalInterface.addCallback("answer",answer);
+			ExternalInterface.addCallback("subscribe",subscribe);
 			ExternalInterface.addCallback("sendDTMF",sendDTMF);
 			ExternalInterface.addCallback("setStatusHold",setStatusHold);
 			ExternalInterface.addCallback("transfer",transfer);
@@ -633,6 +634,10 @@ package com.flashphoner.api
 		
 		public function stopSound(sound:String):void{
 			Logger.info("Received request to stop sound " + sound);
+		}
+		
+		public function subscribe(subscribeObj:Object):void{
+			this.phoneServerProxy.subscribe(subscribeObj);
 		}
 
 	}

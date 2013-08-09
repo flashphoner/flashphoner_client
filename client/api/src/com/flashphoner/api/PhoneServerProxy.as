@@ -120,7 +120,12 @@ package com.flashphoner.api
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 			
-		}		
+		}	
+		
+		public function subscribe(subscribeObj:Object):void{
+			Logger.info("subscribe "+subscribeObj);
+			nc.call("subscribe",responder,subscribeObj);
+		}
 		
 		/*		
 		public function loginByTokenWithPageUrl(token:String = null, pageUrl:String):void{

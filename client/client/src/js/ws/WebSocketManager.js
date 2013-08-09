@@ -108,6 +108,10 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
         },
 
         notifyAudioCodec: function (codec) {
+        },
+
+        notifySubscription: function (subscriptionObject, sipObject){
+            notifySubscription(subscriptionObject);
         }
     };
 
@@ -140,6 +144,10 @@ WebSocketManager.prototype = {
 
     logoff: function () {
         this.webSocket.close();
+    },
+
+    subscribe: function (subscribeObject) {
+        this.webSocket.send("subscribe",subscribeObject);
     },
 
     call: function (callRequest) {

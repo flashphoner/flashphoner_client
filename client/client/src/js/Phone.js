@@ -341,6 +341,21 @@ function notifyRegistered() {
         closeConnectingView();
         flashphoner.playSound("REGISTER");
     }
+     //Enable if you need to subscribe on the 'reg' event
+    //subscribeReg();
+}
+
+function notifySubscription(subscriptionObject, sipObject){
+    trace("notify subscription");
+    trace("sipObject: "+sipObject.type+" "+sipObject.message.code+" "+sipObject.message.reason);
+    trace("sipObject raw: "+sipObject.message.raw);
+}
+
+function subscribeReg(){
+    var subscribeObj = new Object();
+    subscribeObj.event="reg";
+    subscribeObj.expires=3600;
+    flashphoner.subscribe(subscribeObj);
 }
 
 function notifyBalance(balance) {
