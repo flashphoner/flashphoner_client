@@ -112,6 +112,10 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
 
         notifySubscription: function (subscriptionObject, sipObject){
             notifySubscription(subscriptionObject);
+        },
+
+        notifyXcapResponse: function (xcapResponse){
+            notifyXcapResponse(xcapResponse);
         }
     };
 
@@ -148,6 +152,10 @@ WebSocketManager.prototype = {
 
     subscribe: function (subscribeObject) {
         this.webSocket.send("subscribe",subscribeObject);
+    },
+
+    sendXcapRequest: function (xcapUrl) {
+        this.webSocket.send("sendXcapRequest",xcapUrl);
     },
 
     call: function (callRequest) {

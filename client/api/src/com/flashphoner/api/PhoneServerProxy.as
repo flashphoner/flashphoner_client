@@ -239,5 +239,9 @@ package com.flashphoner.api
 			nc.call("sendInfo", null, infoObject);
 		}
 		
+		public function sendXcapRequest(xcapUrl:String):void{
+			nc.call("sendXcapRequest", null, xcapUrl);
+		}
+		
 	}
 }

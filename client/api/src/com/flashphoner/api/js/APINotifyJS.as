@@ -80,5 +80,9 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyVersion", version);
 		}
 		
+		public function notifyXcapResponse(xcapResponse:String):void{
+			ExternalInterface.call("notifyXcapResponse", xcapResponse);
+		}
+		
 	}
 }

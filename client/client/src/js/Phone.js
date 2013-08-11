@@ -343,12 +343,23 @@ function notifyRegistered() {
     }
      //Enable if you need to subscribe on the 'reg' event
     //subscribeReg();
+
+    //sendXcapRequest();
+
 }
 
 function notifySubscription(subscriptionObject, sipObject){
     trace("notify subscription");
     trace("sipObject: "+sipObject.type+" "+sipObject.message.code+" "+sipObject.message.reason);
     trace("sipObject raw: "+sipObject.message.raw);
+}
+
+function sendXcapRequest(){
+    flashphoner.sendXcapRequest("http://host:port/services/org.openmobilealliance.deferred-list/users/%username/deferred-list");
+}
+
+function notifyXcapResponse(xcapResponse){
+    trace("notifyXcapResponse\n"+xcapResponse);
 }
 
 function subscribeReg(){
