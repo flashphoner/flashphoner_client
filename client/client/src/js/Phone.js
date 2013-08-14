@@ -35,6 +35,13 @@ testInviteParameter['param2'] = "value2";
 
 var messenger;
 
+// Set correct XCAP HTTP URL to enable sending XCAP request after registration complete
+var XCAP_URL = null;//"http://%xcap_host:%xcap_port/services/org.openmobilealliance.deferred-list/users/%username/deferred-list";
+//Set correct MSRP callee URL to enable initiating MSRP call after registration complete
+var MSRP_CALLEE=null;//"sip:msrp_pull@domain.com";
+//Set to 'true' if you need to subscribe on the 'reg' event after registration complete
+var SUBSCRIBE_REG = false;//true
+
 // trace log to the console in the demo page
 function trace(funcName, param1, param2, param3) {
 
@@ -144,6 +151,11 @@ function logoff() {
     flashphoner.logoff();
 }
 
+function msrpCall(callee){
+    trace("msrpCall");
+    flashphoner.msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter, isMsrp: true});
+}
+
 function call() {
     trace("call");
     if (isLogged) {
@@ -151,7 +163,7 @@ function call() {
             intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);call();}', 500);
             requestUnmute();
         } else if (isMuted() == -1) {
-            var result = flashphoner.call({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter});
+            var result = flashphoner.call({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter, isMsrp: false});
             if (result == 0) {
                 toHangupState();
             } else {
@@ -341,26 +353,33 @@ function notifyRegistered() {
         closeConnectingView();
         flashphoner.playSound("REGISTER");
     }
-     //Enable if you need to subscribe on the 'reg' event
-    //subscribeReg();
 
-    //sendXcapRequest();
+    if (SUBSCRIBE_REG){
+        subscribeReg();
+    }
 
+    sendXcapRequest();
 }
 
 function notifySubscription(subscriptionObject, sipObject){
-    trace("notify subscription");
-    trace("sipObject: "+sipObject.type+" "+sipObject.message.code+" "+sipObject.message.reason);
-    trace("sipObject raw: "+sipObject.message.raw);
+    trace("notify subscription "+sipObject);
 }
 
 function sendXcapRequest(){
-    flashphoner.sendXcapRequest("http://host:port/services/org.openmobilealliance.deferred-list/users/%username/deferred-list");
+    if (XCAP_URL){
+        flashphoner.sendXcapRequest(XCAP_URL);
+    }
+
 }
 
 function notifyXcapResponse(xcapResponse){
     trace("notifyXcapResponse\n"+xcapResponse);
+    //Enable if you need to initiate msrp call after registration complete
+    if (MSRP_CALLEE){
+        msrpCall(MSRP_CALLEE);
+    }
 }
+
 
 function subscribeReg(){
     var subscribeObj = new Object();

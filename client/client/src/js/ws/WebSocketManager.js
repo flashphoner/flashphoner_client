@@ -169,6 +169,12 @@ WebSocketManager.prototype = {
         return 0;
     },
 
+    msrpCall: function (callRequest){
+        var me = this;
+        me.webSocket.send("msrpCall", callRequest);
+        return 0;
+    },
+
     setSendVideo: function (callId, hasVideo) {
         var me = this;
         this.webRtcMediaManager.createOffer(function (sdp) {
