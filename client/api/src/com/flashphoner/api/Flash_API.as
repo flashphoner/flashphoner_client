@@ -116,6 +116,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("playSound",playSound);
 			ExternalInterface.addCallback("stopSound", stopSound);
 			ExternalInterface.addCallback("sendXcapRequest", sendXcapRequest);
+			ExternalInterface.addCallback("openSettingsPanel",openSettingsPanel);
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -644,6 +645,9 @@ package com.flashphoner.api
 		public function sendXcapRequest(xcapUrl:String):void{
 			this.phoneServerProxy.sendXcapRequest(xcapUrl);
 		}
-
+		
+		public function openSettingsPanel():void{
+			Security.showSettings();
+		}
 	}
 }
