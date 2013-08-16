@@ -22,6 +22,12 @@ FlashphonerLoader = function (config) {
     this.busySound = "sounds/BUSY.ogg";
     this.registerSound = "sounds/REGISTER.ogg";
     this.finishSound = "sounds/HANGUP.ogg";
+    this.xcapUrl = null;
+    this.msrpCallee = null;
+    this.subscribeEvent = false;
+    this.contactParams = null;
+    this.multipartMessageService = null;
+
 
     $.ajax({
         type: "GET",
@@ -82,6 +88,41 @@ FlashphonerLoader.prototype = {
         if (finishSound.length > 0){
             if (finishSound[0].textContent.length){
                 this.finishSound = finishSound[0].textContent;
+            }
+        }
+
+        var xcapUrl = $(xml).find("xcap_url");
+        if (xcapUrl.length > 0){
+            if (xcapUrl[0].textContent.length){
+                this.xcapUrl = xcapUrl[0].textContent;
+            }
+        }
+
+        var msrpCallee = $(xml).find("msrp_callee");
+        if (msrpCallee.length > 0){
+            if (msrpCallee[0].textContent.length){
+                this.msrpCallee = msrpCallee[0].textContent;
+            }
+        }
+
+        var subscribeEvent = $(xml).find("subscribe_event");
+        if (subscribeEvent.length > 0){
+            if (subscribeEvent[0].textContent.length){
+                this.subscribeEvent = subscribeEvent[0].textContent;
+            }
+        }
+
+        var contactParams = $(xml).find("contact_params");
+        if (contactParams.length > 0){
+            if (contactParams[0].textContent.length){
+                this.contactParams = contactParams[0].textContent;
+            }
+        }
+
+        var multipartMessageService = $(xml).find("multipart_message_service");
+        if (multipartMessageService.length > 0){
+            if (multipartMessageService[0].textContent.length){
+                this.multipartMessageService = multipartMessageService[0].textContent;
             }
         }
 

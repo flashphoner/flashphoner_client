@@ -35,13 +35,6 @@ testInviteParameter['param2'] = "value2";
 
 var messenger;
 
-// Set correct XCAP HTTP URL to enable sending XCAP request after registration complete
-var XCAP_URL = null;//"http://%xcap_host:%xcap_port/services/org.openmobilealliance.deferred-list/users/%username/deferred-list";
-//Set correct MSRP callee URL to enable initiating MSRP call after registration complete
-var MSRP_CALLEE=null;//"sip:msrp_pull@domain.com";
-//Set to 'true' if you need to subscribe on the 'reg' event after registration complete
-var SUBSCRIBE_REG = false;//true
-
 // trace log to the console in the demo page
 function trace(funcName, param1, param2, param3) {
 
@@ -117,7 +110,9 @@ function login() {
     loginObject.port = $('#port').val();
     loginObject.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
     loginObject.qValue = "1.0";
-    loginObject.contactParams = "contactParamsString";
+    if (flashphonerLoader.contactParams!=null && flashphonerLoader.contactParams.length!=0){
+        loginObject.contactParams = flashphonerLoader.contactParams;
+    }
 
     var result = flashphoner.login(loginObject);
     closeLoginView();
@@ -188,7 +183,13 @@ function sendMessage(to, body, contentType, deliveryNotification) {
     message.to = to;
     message.body = body;
     message.contentType = contentType;
-    message.recipients = (message.to.indexOf(",")!=-1)?message.to:"";
+    if (flashphonerLoader.multipartMessageService !=null && flashphonerLoader.multipartMessageService.length!=0 ){
+        if (message.to.indexOf(",")!=-1){
+            message.recipients = message.to;
+            message.to = flashphonerLoader.multipartMessageService;
+            message.contentType = "multipart/mixed";
+        }
+    }
     message.deliveryNotification = deliveryNotification;
     messenger.sendMessage(message);
 }
@@ -354,7 +355,7 @@ function notifyRegistered() {
         flashphoner.playSound("REGISTER");
     }
 
-    if (SUBSCRIBE_REG){
+    if (flashphonerLoader.subscribeEvent!=null && flashphonerLoader.subscribeEvent.length!=0){
         subscribeReg();
     }
 
@@ -366,8 +367,8 @@ function notifySubscription(subscriptionObject, sipObject){
 }
 
 function sendXcapRequest(){
-    if (XCAP_URL){
-        flashphoner.sendXcapRequest(XCAP_URL);
+    if (flashphonerLoader.xcapUrl!=null && flashphonerLoader.xcapUrl.length!=0){
+        flashphoner.sendXcapRequest(flashphonerLoader.xcapUrl);
     }
 
 }
@@ -375,15 +376,15 @@ function sendXcapRequest(){
 function notifyXcapResponse(xcapResponse){
     trace("notifyXcapResponse\n"+xcapResponse);
     //Enable if you need to initiate msrp call after registration complete
-    if (MSRP_CALLEE){
-        msrpCall(MSRP_CALLEE);
+    if (flashphonerLoader.msrpCallee!=null && flashphonerLoader.msrpCallee.length!=0){
+        msrpCall(flashphonerLoader.msrpCallee);
     }
 }
 
 
 function subscribeReg(){
     var subscribeObj = new Object();
-    subscribeObj.event="reg";
+    subscribeObj.event = flashphonerLoader.subscribeEvent;
     subscribeObj.expires=3600;
     flashphoner.subscribe(subscribeObj);
 }
