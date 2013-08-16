@@ -32,5 +32,6 @@ package com.flashphoner.api.interfaces
 	
 		function addLogMessage(message:String):void;
 		function notifyVersion(version:String):void;
+		function notifyXcapResponse(xcapResponse:String):void;
 	}
 }

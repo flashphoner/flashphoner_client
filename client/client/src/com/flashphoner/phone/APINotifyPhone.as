@@ -139,5 +139,9 @@ package com.flashphoner.phone
 		public function notifyVersion(version:String):void{
 			DataPhone.getInstance().version = version;
 		}
+		
+		public function notifyXcapResponse(xcapResponse:String):void{
+		
+		}
 	}
 }

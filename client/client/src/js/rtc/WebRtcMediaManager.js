@@ -11,7 +11,8 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo, hasVideo) {
 };
 
 WebRtcMediaManager.prototype.close = function () {
-    this.terminated = true;
+    //Commented to prevent termination of rtcMediaManager after MSRP call
+    //this.terminated = true;
     if (this.peerConnection) {
         this.remoteVideo.pause();
         this.remoteVideo.src = null;

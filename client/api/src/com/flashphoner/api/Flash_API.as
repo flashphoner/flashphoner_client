@@ -93,6 +93,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("callByToken",callByToken);
 			ExternalInterface.addCallback("hangup",hangup);
 			ExternalInterface.addCallback("answer",answer);
+			ExternalInterface.addCallback("subscribe",subscribe);
 			ExternalInterface.addCallback("sendDTMF",sendDTMF);
 			ExternalInterface.addCallback("setStatusHold",setStatusHold);
 			ExternalInterface.addCallback("transfer",transfer);
@@ -114,6 +115,8 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("setSpeexQuality",setSpeexQuality);
 			ExternalInterface.addCallback("playSound",playSound);
 			ExternalInterface.addCallback("stopSound", stopSound);
+			ExternalInterface.addCallback("sendXcapRequest", sendXcapRequest);
+			ExternalInterface.addCallback("openSettingsPanel",openSettingsPanel);
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -634,6 +637,17 @@ package com.flashphoner.api
 		public function stopSound(sound:String):void{
 			Logger.info("Received request to stop sound " + sound);
 		}
-
+		
+		public function subscribe(subscribeObj:Object):void{
+			this.phoneServerProxy.subscribe(subscribeObj);
+		}
+		
+		public function sendXcapRequest(xcapUrl:String):void{
+			this.phoneServerProxy.sendXcapRequest(xcapUrl);
+		}
+		
+		public function openSettingsPanel():void{
+			Security.showSettings();
+		}
 	}
 }

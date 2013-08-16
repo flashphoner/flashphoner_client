@@ -108,6 +108,14 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
         },
 
         notifyAudioCodec: function (codec) {
+        },
+
+        notifySubscription: function (subscriptionObject, sipObject){
+            notifySubscription(subscriptionObject);
+        },
+
+        notifyXcapResponse: function (xcapResponse){
+            notifyXcapResponse(xcapResponse);
         }
     };
 
@@ -142,6 +150,14 @@ WebSocketManager.prototype = {
         this.webSocket.close();
     },
 
+    subscribe: function (subscribeObject) {
+        this.webSocket.send("subscribe",subscribeObject);
+    },
+
+    sendXcapRequest: function (xcapUrl) {
+        this.webSocket.send("sendXcapRequest",xcapUrl);
+    },
+
     call: function (callRequest) {
         var me = this;
         openInfoView("Configuring WebRTC connection...", 0, 60);
@@ -150,6 +166,12 @@ WebSocketManager.prototype = {
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
         }, false);
+        return 0;
+    },
+
+    msrpCall: function (callRequest){
+        var me = this;
+        me.webSocket.send("msrpCall", callRequest);
         return 0;
     },
 
