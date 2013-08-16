@@ -918,21 +918,22 @@ function createChat(calleeName) {
 
     //var closetab = '<a href="" id="close' + calleeName + '" class="close">&times;</a>';
     //$("#tabul").append('<li id="tab' + calleeName + '" class="ntabs">' + calleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
-    var calleeNameFull = calleeName;
-    var calleeNameId = removeNonDigitOrLetter(calleeName);
+    var shortCalleeName = calleeName;
+    var fullCalleeName = shortCalleeName;
+    var calleeNameId = removeNonDigitOrLetter(shortCalleeName);
     if (!$('li').is('#tab' + calleeNameId)) {
         var closetab = '<a href="" id="close' + calleeNameId + '" class="close">&times;</a>';
 
         // We will cut too long calleeNames to place it within chat tab
-        if (calleeNameFull.length > 21) {
-            calleeNameFull = calleeNameFull.substr(0, 21) + '...';
+        if (shortCalleeName.length > 21) {
+            shortCalleeName = shortCalleeName.substr(0, 21) + '...';
         }
 
 
-        $("#tabul").append('<li id="tab' + calleeNameId + '" class="ntabs">' + calleeNameFull + '&nbsp;' + closetab + '</li>'); //add tab with the close button
+        $("#tabul").append('<li id="tab' + calleeNameId + '" class="ntabs">' + shortCalleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
 
 
-        $('#tabcontent').append('<div class="chatBox" id="chat' + calleeNameId + '" title="'+calleeNameFull+'">'); //add chatBox
+        $('#tabcontent').append('<div class="chatBox" id="chat' + calleeNameId + '" title="'+shortCalleeName+'" fullCalleeName="'+fullCalleeName+'">'); //add chatBox
         $('#chat' + calleeNameId).append('<div class="chatTextarea"></div>')//add text area for chat messages
             .append('<input class="messageInput" type="textarea">')//add input field
             .append('<input class="messageSend" type="button" value="Send">'); //add send button
@@ -954,9 +955,9 @@ function createChat(calleeName) {
 
         // Bind send message function
         $('#chat' + calleeNameId + ' .messageSend').click(function () {
-            var calleeName = $(this).parent().attr('title'); //parse id of current chatBox, take away chat word from the beginning
+            var fullCalleeName = $(this).parent().attr('fullCalleeName'); //parse id of current chatBox, take away chat word from the beginning
             var messageText = $(this).prev().val(); //parse text from input
-            sendMessage(calleeName, messageText, 'message/cpim',true); //send message
+            sendMessage(calleeName, messageText, 'message/cpim',false); //send message
             $(this).prev().val(''); //clear message input
         });
 
