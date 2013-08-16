@@ -109,7 +109,6 @@ function login() {
     loginObject.outboundProxy = $('#outbound_proxy').val();
     loginObject.port = $('#port').val();
     loginObject.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
-    loginObject.qValue = "1.0";
     if (flashphonerLoader.contactParams!=null && flashphonerLoader.contactParams.length!=0){
         loginObject.contactParams = flashphonerLoader.contactParams;
     }
