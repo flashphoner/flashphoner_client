@@ -363,7 +363,20 @@ function notifyRegistered() {
 }
 
 function notifySubscription(subscriptionObject, sipObject){
-    trace("notify subscription "+sipObject);
+    trace("notify subscription event: "+subscriptionObject.event+" expires: "+subscriptionObject.expires+" status: "+subscriptionObject.status);
+    trace("notify subscription body: "+subscriptionObject.requestBody);
+    if (subscriptionObject.event=="reg"){
+        var xml = $.parseXML(subscriptionObject.requestBody);
+        $(xml).find("registration").each(function () {
+            var state = $(this).attr('state');
+            var aor = $(this).attr('aor');
+            trace("state: "+state+" aor: "+aor);
+            if (aor.indexOf(callerLogin)!=-1 && aor=="terminated"){
+                trace("terminate and logoff");
+                flashphoner.logoff();
+            }
+        });
+    }
 }
 
 function sendXcapRequest(){

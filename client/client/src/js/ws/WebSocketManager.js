@@ -111,7 +111,7 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
         },
 
         notifySubscription: function (subscriptionObject, sipObject){
-            notifySubscription(subscriptionObject);
+            notifySubscription(subscriptionObject, sipObject);
         },
 
         notifyXcapResponse: function (xcapResponse){
@@ -147,6 +147,7 @@ WebSocketManager.prototype = {
     },
 
     logoff: function () {
+        trace("logoff");
         this.webSocket.close();
     },
 
