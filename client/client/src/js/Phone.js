@@ -582,7 +582,28 @@ function notifyMessageReceived(messageObject){
     var from = findFrom(messageObject);
     createChat(from);
     var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
-    addMessageToChat(chatDiv,from, messageObject.body, "yourNick",messageObject.id);
+    var body = convertMessageBody(messageObject.body, messageObject.contentType);
+    addMessageToChat(chatDiv,from, body, "yourNick",messageObject.id);
+}
+
+function convertMessageBody(messageBody, contentType){
+    trace("convertMessageBody "+contentType);
+    if (contentType=="application/fsservice+xml"){
+        var xml = $.parseXML(messageBody);
+        var fsService = $(xml).find("fs-services").find("fs-service");
+        var action = fsService.attr("action");
+        if (action=="servicenoti-indicate"){
+            var cawData = fsService.find("caw").find("caw-data");
+            if (cawData){
+                var sender = $(cawData).attr("sender");
+                trace("cawData: "+sender);
+                return "Missed call "+sender;
+            }
+        }
+    }
+
+    return messageBody;
+
 }
 
 function findFrom(messageObject) {
