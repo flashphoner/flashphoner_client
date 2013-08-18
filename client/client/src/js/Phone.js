@@ -370,12 +370,25 @@ function notifySubscription(subscriptionObject, sipObject){
             var state = $(this).attr('state');
             var aor = $(this).attr('aor');
             trace("state: "+state+" aor: "+aor);
-            if (aor.indexOf(callerLogin)!=-1 && aor=="terminated"){
-                trace("terminate and logoff");
-                flashphoner.logoff();
+            if (aor.indexOf(callerLogin)!=-1 && state=="terminated"){
+                treminate();
+                return;
             }
+            $(this).find("contact").each(function(){
+                var contactState = $(this).attr('state');
+                trace("contactState: "+contactState);
+                if (contactState=="terminated"){
+                    terminate();
+                    return;
+                }
+            });
+
         });
     }
+}
+
+function terminate(){
+    trace("terminate and logoff");
 }
 
 function sendXcapRequest(){
