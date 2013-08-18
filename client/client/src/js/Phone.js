@@ -389,6 +389,7 @@ function notifySubscription(subscriptionObject, sipObject){
 
 function terminate(){
     trace("terminate and logoff");
+    logoff();
 }
 
 function sendXcapRequest(){
