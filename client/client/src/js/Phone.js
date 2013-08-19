@@ -580,7 +580,7 @@ function notifyOpenVideoView(isViewed) {
 function notifyMessageReceived(messageObject){
     openChatView();
     trace("notifyMessageReceived", messageObject);
-    var from = findFrom(messageObject);
+    var from = findMessageSender(messageObject);
     createChat(from);
     var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
     var body = convertMessageBody(messageObject.body, messageObject.contentType);
@@ -607,11 +607,10 @@ function convertMessageBody(messageBody, contentType){
 
 }
 
-function findFrom(messageObject) {
+function findMessageSender(messageObject) {
     var from = messageObject.from.toLowerCase();
-    var exists = isChatTabExists(from);
-    if (!exists){
-        if (messageObject.pAssertedIdentity){
+    if (flashphonerLoader.fetchCallerFromPai=="true"){
+        if ( messageObject.pAssertedIdentity!=null && messageObject.pAssertedIdentity.length!=0 ){
             var pAssertedIdentity = parsePAssertedIdentity(messageObject.pAssertedIdentity);
             //Looking for a tab by pAssertedIdentity
             for (var key in pAssertedIdentity){
@@ -620,6 +619,8 @@ function findFrom(messageObject) {
                     break;
                 }
             }
+        } else{
+            from = "Unknown/Anonymous";
         }
     }
     return from;
@@ -851,8 +852,12 @@ function closeInfoView() {
 
 function openIncomingView(call) {
     trace("openIncomingView", call)// call.caller, call.visibleNameCaller
+
+    var displayedCaller = call.caller + " '" + call.visibleNameCaller + "'";
+    displayedCaller = getDisplayedCallerByPai(displayedCaller);
+
     $('#incomingDiv').show();
-    $('#callerField').html(call.caller + " '" + call.visibleNameCaller + "'");
+    $('#callerField').html(displayedCaller);
 
     $('#answerButton').unbind('click');
     $('#answerButton').click(function () {
@@ -864,6 +869,19 @@ function openIncomingView(call) {
         hangup(call.id);
         closeIncomingView();
     });
+}
+
+function getDisplayedCallerByPai(displayedCaller){
+    var ret = displayedCaller;
+    if (flashphonerLoader.fetchCallerFromPai == "true"){
+        var pai = call.pAssertedIdentity;
+        if (pai!=null && pai.length!=0){
+            ret = parsePAssertedIdentity(pai)[0];
+        }else{
+            ret = "Unknown/Anonymous";
+        }
+    }
+    return ret;
 }
 
 function closeIncomingView() {
@@ -967,7 +985,7 @@ function createChat(calleeName) {
     //$("#tabul").append('<li id="tab' + calleeName + '" class="ntabs">' + calleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
     var shortCalleeName = calleeName;
     var fullCalleeName = shortCalleeName;
-    var calleeNameId = removeNonDigitOrLetter(shortCalleeName);
+    var calleeNameId = removeNonDigitOrLetter(fullCalleeName);
     if (!$('li').is('#tab' + calleeNameId)) {
         var closetab = '<a href="" id="close' + calleeNameId + '" class="close">&times;</a>';
 

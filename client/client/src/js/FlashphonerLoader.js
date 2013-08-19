@@ -27,6 +27,7 @@ FlashphonerLoader = function (config) {
     this.subscribeEvent = false;
     this.contactParams = null;
     this.multipartMessageService = null;
+    this.fetchCallerFromPai = null;
 
 
     $.ajax({
@@ -125,6 +126,14 @@ FlashphonerLoader.prototype = {
                 this.multipartMessageService = multipartMessageService[0].textContent;
             }
         }
+
+        var fetchCallerFromPai = $(xml).find("fetch_caller_from_pai");
+        if (fetchCallerFromPai.length > 0){
+            if (fetchCallerFromPai[0].textContent.length){
+                this.fetchCallerFromPai = fetchCallerFromPai[0].textContent;
+            }
+        }
+
 
         if (this.urlServer.indexOf("ws://") == 0) {
             me.useWebRTC = true;
