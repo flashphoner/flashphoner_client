@@ -401,9 +401,12 @@ function sendXcapRequest(){
 
 function notifyXcapResponse(xcapResponse){
     trace("notifyXcapResponse\n"+xcapResponse);
-    //Enable if you need to initiate msrp call after registration complete
-    if (flashphonerLoader.msrpCallee!=null && flashphonerLoader.msrpCallee.length!=0){
-        msrpCall(flashphonerLoader.msrpCallee);
+    var xml = $.parseXML(xcapResponse);
+    var history = $(xml).find("history-list").find("history");
+    if (history != null && history.length!=0 ){
+        if (flashphonerLoader.msrpCallee!=null && flashphonerLoader.msrpCallee.length!=0){
+            msrpCall(flashphonerLoader.msrpCallee);
+        }
     }
 }
 
