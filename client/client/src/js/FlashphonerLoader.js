@@ -18,6 +18,7 @@ FlashphonerLoader = function (config) {
     this.registerRequired = false;
     this.videoWidth = 320;
     this.videoHeight = 240;
+    this.pushLogEnabled = false;
     this.ringSound = "sounds/CALL_OUT.ogg";
     this.busySound = "sounds/BUSY.ogg";
     this.registerSound = "sounds/REGISTER.ogg";
@@ -56,6 +57,12 @@ FlashphonerLoader.prototype = {
         if (videoHeight.length){
             this.videoHeight = videoHeight.text();
         }
+
+        var pushLogEnabled = $(xml).find("push_log");
+        if (pushLogEnabled.length){
+            this.pushLogEnabled = pushLogEnabled.text();
+        }
+
         //Sounds for WebRTC implementation
         var ringSound = $(xml).find("ring_sound");
         if (ringSound.length){

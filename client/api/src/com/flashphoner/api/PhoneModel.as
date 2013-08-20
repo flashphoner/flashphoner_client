@@ -173,7 +173,12 @@ package com.flashphoner.api
 					if (xml.keep_alive_timeout !=null && xml.keep_alive_timeout.toString() !=""){
 						PhoneConfig.KEEP_ALIVE_TIMEOUT = int(xml.keep_alive_timeout);
 					}
-					Logger.info("KEEP_ALIVE_TIMEOUT: "+PhoneConfig.KEEP_ALIVE_TIMEOUT);					
+					Logger.info("KEEP_ALIVE_TIMEOUT: "+PhoneConfig.KEEP_ALIVE_TIMEOUT);
+
+                    if (xml.push_log != null && xml.push_log.toString() != ""){
+                        PhoneConfig.PUSH_LOG = (xml.push_log == "true");
+                    }
+                    Logger.info("PUSH_LOG: "+PhoneConfig.PUSH_LOG);
 					
 					if (xml.audio_codec != null && xml.audio_codec.toString() != ""){						
 						PhoneConfig.AUDIO_CODEC = xml.audio_codec;

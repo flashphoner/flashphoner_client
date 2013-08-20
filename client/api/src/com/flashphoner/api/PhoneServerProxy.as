@@ -55,6 +55,7 @@ package com.flashphoner.api
 		
 		private var keepAliveTimeoutTimer:Timer;
 		
+		private var isConnected:Boolean;
 		
 		public function PhoneServerProxy(responder:Responder,flash_API:Flash_API)
 		{		
@@ -62,7 +63,8 @@ package com.flashphoner.api
 			this.responder = responder;
 			nc = new NetConnection();
 			nc.client = new PhoneCallback(flash_API);
-			phoneSpeaker = new PhoneSpeaker(nc,flash_API);	
+			phoneSpeaker = new PhoneSpeaker(nc,flash_API);
+			isConnected = false;
 			
 		}
 		
@@ -195,6 +197,8 @@ package com.flashphoner.api
 					initKeepAlive();
 					startKeepAlive();
 				}
+				
+				isConnected = true;
 								
 			} else if(event.info.code == "NetConnection.Connect.Failed")
 			{
@@ -217,6 +221,7 @@ package com.flashphoner.api
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.DISCONNECT,flash_API));
 				hasDisconnectAttempt = false;
+				isConnected = false;
 			}		
 		}
 		
@@ -230,6 +235,27 @@ package com.flashphoner.api
 		
 		public function sendInfo(infoObject:Object):void{
 			nc.call("sendInfo", null, infoObject);
+		}
+		
+		public function pushLogs(logs:String):Boolean {
+			if(isConnected) {
+				//merge JS and FLASH logs
+				var logsToServer:String = Logger.merge(logs);
+
+				//clear FLASH logs
+				Logger.clear();
+
+				nc.call("pushLogs", new Responder(pushLogsResponder), logsToServer);
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		private function pushLogsResponder(pushLogsResult:Object):void {
+			/**
+			 * pushLogsResult is empty for now.
+			 **/
 		}
 		
 	}

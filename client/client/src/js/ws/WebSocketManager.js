@@ -193,6 +193,15 @@ WebSocketManager.prototype = {
         }
     },
 
+    pushLogs: function (logs) {
+        if(this.isOpened) {
+            this.webSocket.send("pushLogs", logs)
+            return true;
+        } else {
+            return false;
+        }
+    },
+
     viewVideo: function () {
         this.webRtcMediaManager.viewVideo();
     },

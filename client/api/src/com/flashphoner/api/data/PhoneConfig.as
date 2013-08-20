@@ -88,6 +88,8 @@ package com.flashphoner.api.data
 		
 		public static var KEEP_ALIVE_TIMEOUT:int = 5000;
 		
+		public static var PUSH_LOG:Boolean = false;
+		
 		public static var LOG_SEVERITY:String = "INFO";
 		
 		public static var MAJOR_PLAYER_VERSION:int = 11;

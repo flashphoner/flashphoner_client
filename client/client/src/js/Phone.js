@@ -35,6 +35,8 @@ testInviteParameter['param2'] = "value2";
 
 var messenger;
 
+var logs;
+
 // trace log to the console in the demo page
 function trace(funcName, param1, param2, param3) {
 
@@ -43,6 +45,7 @@ function trace(funcName, param1, param2, param3) {
     var hh = today.getHours();
     var mm = today.getMinutes();
     var ss = today.getSeconds();
+    var ms = today.getMilliseconds();
 
     // Add '0' if it < 10 to see 14.08.06 instead of 14.6.8
     hh = hh == 0 ? '00' : hh < 10 ? '0' + hh : hh;
@@ -50,7 +53,7 @@ function trace(funcName, param1, param2, param3) {
     ss = ss == 0 ? '00' : ss < 10 ? '0' + ss : ss;
 
     // set time 
-    var time = hh + ':' + mm + ':' + ss;
+    var time = hh + ':' + mm + ':' + ss + '.' + ms;
 
     var div1 = div2 = '';
 
@@ -73,8 +76,25 @@ function trace(funcName, param1, param2, param3) {
         var div2 = ', ';
     }
 
-    // Print message to console
+    // Print message to console and push it to server
     if (traceEnabled) {
+        //check if API already loaded
+        if(flashphoner !== undefined) {
+            //check if push_log enabled
+            if (flashphonerLoader.pushLogEnabled) {
+                var result = flashphoner.pushLogs(logs + time + ' - ' + funcName + '(' + param1 +  param2 + param3 + ')\n');
+                if(!result) {
+                    logs += time + ' - ' + funcName + '(' + param1 +  param2 + param3 + ')\n';
+                } else {
+                    logs = "";
+                }
+            } else {
+                logs = "";
+            }
+
+        } else {
+            logs += time + ' - ' + funcName + '(' + param1 +  param2 + param3 + ')\n';
+        }
         console.append('<grey>' + time + ' - ' + '</grey>' + funcName + '<grey>' + '(' + param1 + div1 + param2 + div2 + param3 + ')' + '</grey>' + '<br>');
     }
 
