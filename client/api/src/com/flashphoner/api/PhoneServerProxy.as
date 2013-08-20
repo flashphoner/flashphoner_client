@@ -76,6 +76,7 @@ package com.flashphoner.api
 			var outboundProxy:String = loginObject.outboundProxy;
 			var port:String = loginObject.port;
 			var qValue:String = loginObject.qValue;
+			var contactParams:String = loginObject.contactParams;
 			
 			var modelLocator:ModelLocator = flash_API.modelLocator;
 			var obj:Object = new Object();
@@ -95,6 +96,7 @@ package com.flashphoner.api
 			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
 			obj.visibleName = modelLocator.visibleName;
 			obj.qValue = qValue;
+			obj.contactParams = contactParams; 
 						
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);	
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
@@ -120,7 +122,12 @@ package com.flashphoner.api
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
 			
-		}		
+		}	
+		
+		public function subscribe(subscribeObj:Object):void{
+			Logger.info("subscribe "+subscribeObj);
+			nc.call("subscribe",responder,subscribeObj);
+		}
 		
 		/*		
 		public function loginByTokenWithPageUrl(token:String = null, pageUrl:String):void{
@@ -256,6 +263,10 @@ package com.flashphoner.api
 			/**
 			 * pushLogsResult is empty for now.
 			 **/
+		}
+		
+		public function sendXcapRequest(xcapUrl:String):void{
+			nc.call("sendXcapRequest", null, xcapUrl);
 		}
 		
 	}

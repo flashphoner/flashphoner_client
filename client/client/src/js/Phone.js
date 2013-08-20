@@ -129,6 +129,9 @@ function login() {
     loginObject.outboundProxy = $('#outbound_proxy').val();
     loginObject.port = $('#port').val();
     loginObject.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
+    if (flashphonerLoader.contactParams!=null && flashphonerLoader.contactParams.length!=0){
+        loginObject.contactParams = flashphonerLoader.contactParams;
+    }
 
     var result = flashphoner.login(loginObject);
     closeLoginView();
@@ -162,6 +165,11 @@ function logoff() {
     flashphoner.logoff();
 }
 
+function msrpCall(callee){
+    trace("msrpCall");
+    flashphoner.msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter, isMsrp: true});
+}
+
 function call() {
     trace("call");
     if (isLogged) {
@@ -169,7 +177,7 @@ function call() {
             intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);call();}', 500);
             requestUnmute();
         } else if (isMuted() == -1) {
-            var result = flashphoner.call({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter});
+            var result = flashphoner.call({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter, isMsrp: false});
             if (result == 0) {
                 toHangupState();
             } else {
@@ -194,7 +202,13 @@ function sendMessage(to, body, contentType, deliveryNotification) {
     message.to = to;
     message.body = body;
     message.contentType = contentType;
-    message.recipients = (message.to.indexOf(",")!=-1)?message.to:"";
+    if (flashphonerLoader.multipartMessageService !=null && flashphonerLoader.multipartMessageService.length!=0 ){
+        if (message.to.indexOf(",")!=-1){
+            message.recipients = message.to;
+            message.to = flashphonerLoader.multipartMessageService;
+            message.contentType = "multipart/mixed";
+        }
+    }
     message.deliveryNotification = deliveryNotification;
     messenger.sendMessage(message);
 }
@@ -359,6 +373,69 @@ function notifyRegistered() {
         closeConnectingView();
         flashphoner.playSound("REGISTER");
     }
+
+    if (flashphonerLoader.subscribeEvent!=null && flashphonerLoader.subscribeEvent.length!=0){
+        subscribeReg();
+    }
+
+    sendXcapRequest();
+}
+
+function notifySubscription(subscriptionObject, sipObject){
+    trace("notify subscription event: "+subscriptionObject.event+" expires: "+subscriptionObject.expires+" status: "+subscriptionObject.status);
+    trace("notify subscription body: "+subscriptionObject.requestBody);
+    if (subscriptionObject.event=="reg"){
+        var xml = $.parseXML(subscriptionObject.requestBody);
+        $(xml).find("registration").each(function () {
+            var state = $(this).attr('state');
+            var aor = $(this).attr('aor');
+            trace("state: "+state+" aor: "+aor);
+            if (aor.indexOf(callerLogin)!=-1 && state=="terminated"){
+                treminate();
+                return;
+            }
+            $(this).find("contact").each(function(){
+                var contactState = $(this).attr('state');
+                trace("contactState: "+contactState);
+                if (contactState=="terminated"){
+                    terminate();
+                    return;
+                }
+            });
+
+        });
+    }
+}
+
+function terminate(){
+    trace("terminate and logoff");
+    logoff();
+}
+
+function sendXcapRequest(){
+    if (flashphonerLoader.xcapUrl!=null && flashphonerLoader.xcapUrl.length!=0){
+        flashphoner.sendXcapRequest(flashphonerLoader.xcapUrl);
+    }
+
+}
+
+function notifyXcapResponse(xcapResponse){
+    trace("notifyXcapResponse\n"+xcapResponse);
+    var xml = $.parseXML(xcapResponse);
+    var history = $(xml).find("history-list").find("history");
+    if (history != null && history.length!=0 ){
+        if (flashphonerLoader.msrpCallee!=null && flashphonerLoader.msrpCallee.length!=0){
+            msrpCall(flashphonerLoader.msrpCallee);
+        }
+    }
+}
+
+
+function subscribeReg(){
+    var subscribeObj = new Object();
+    subscribeObj.event = flashphonerLoader.subscribeEvent;
+    subscribeObj.expires=3600;
+    flashphoner.subscribe(subscribeObj);
 }
 
 function notifyBalance(balance) {
@@ -526,17 +603,37 @@ function notifyOpenVideoView(isViewed) {
 function notifyMessageReceived(messageObject){
     openChatView();
     trace("notifyMessageReceived", messageObject);
-    var from = findFrom(messageObject);
+    var from = findMessageSender(messageObject);
     createChat(from);
     var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
-    addMessageToChat(chatDiv,from, messageObject.body, "yourNick",messageObject.id);
+    var body = convertMessageBody(messageObject.body, messageObject.contentType);
+    addMessageToChat(chatDiv,from, body, "yourNick",messageObject.id);
 }
 
-function findFrom(messageObject) {
+function convertMessageBody(messageBody, contentType){
+    trace("convertMessageBody "+contentType);
+    if (contentType=="application/fsservice+xml"){
+        var xml = $.parseXML(messageBody);
+        var fsService = $(xml).find("fs-services").find("fs-service");
+        var action = fsService.attr("action");
+        if (action=="servicenoti-indicate"){
+            var cawData = fsService.find("caw").find("caw-data");
+            if (cawData){
+                var sender = $(cawData).attr("sender");
+                trace("cawData: "+sender);
+                return "Missed call "+sender;
+            }
+        }
+    }
+
+    return messageBody;
+
+}
+
+function findMessageSender(messageObject) {
     var from = messageObject.from.toLowerCase();
-    var exists = isChatTabExists(from);
-    if (!exists){
-        if (messageObject.pAssertedIdentity){
+    if (flashphonerLoader.fetchCallerFromPai=="true"){
+        if ( messageObject.pAssertedIdentity!=null && messageObject.pAssertedIdentity.length!=0 ){
             var pAssertedIdentity = parsePAssertedIdentity(messageObject.pAssertedIdentity);
             //Looking for a tab by pAssertedIdentity
             for (var key in pAssertedIdentity){
@@ -545,6 +642,8 @@ function findFrom(messageObject) {
                     break;
                 }
             }
+        } else{
+            from = "Unknown/Anonymous";
         }
     }
     return from;
@@ -776,8 +875,12 @@ function closeInfoView() {
 
 function openIncomingView(call) {
     trace("openIncomingView", call)// call.caller, call.visibleNameCaller
+
+    var displayedCaller = call.caller + " '" + call.visibleNameCaller + "'";
+    displayedCaller = getDisplayedCallerByPai(displayedCaller);
+
     $('#incomingDiv').show();
-    $('#callerField').html(call.caller + " '" + call.visibleNameCaller + "'");
+    $('#callerField').html(displayedCaller);
 
     $('#answerButton').unbind('click');
     $('#answerButton').click(function () {
@@ -789,6 +892,19 @@ function openIncomingView(call) {
         hangup(call.id);
         closeIncomingView();
     });
+}
+
+function getDisplayedCallerByPai(displayedCaller){
+    var ret = displayedCaller;
+    if (flashphonerLoader.fetchCallerFromPai == "true"){
+        var pai = call.pAssertedIdentity;
+        if (pai!=null && pai.length!=0){
+            ret = parsePAssertedIdentity(pai)[0];
+        }else{
+            ret = "Unknown/Anonymous";
+        }
+    }
+    return ret;
 }
 
 function closeIncomingView() {
@@ -890,21 +1006,22 @@ function createChat(calleeName) {
 
     //var closetab = '<a href="" id="close' + calleeName + '" class="close">&times;</a>';
     //$("#tabul").append('<li id="tab' + calleeName + '" class="ntabs">' + calleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
-    var calleeNameFull = calleeName;
-    var calleeNameId = removeNonDigitOrLetter(calleeName);
+    var shortCalleeName = calleeName;
+    var fullCalleeName = shortCalleeName;
+    var calleeNameId = removeNonDigitOrLetter(fullCalleeName);
     if (!$('li').is('#tab' + calleeNameId)) {
         var closetab = '<a href="" id="close' + calleeNameId + '" class="close">&times;</a>';
 
         // We will cut too long calleeNames to place it within chat tab
-        if (calleeNameFull.length > 21) {
-            calleeNameFull = calleeNameFull.substr(0, 21) + '...';
+        if (shortCalleeName.length > 21) {
+            shortCalleeName = shortCalleeName.substr(0, 21) + '...';
         }
 
 
-        $("#tabul").append('<li id="tab' + calleeNameId + '" class="ntabs">' + calleeNameFull + '&nbsp;' + closetab + '</li>'); //add tab with the close button
+        $("#tabul").append('<li id="tab' + calleeNameId + '" class="ntabs">' + shortCalleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
 
 
-        $('#tabcontent').append('<div class="chatBox" id="chat' + calleeNameId + '" title="'+calleeNameFull+'">'); //add chatBox
+        $('#tabcontent').append('<div class="chatBox" id="chat' + calleeNameId + '" title="'+shortCalleeName+'" fullCalleeName="'+fullCalleeName+'">'); //add chatBox
         $('#chat' + calleeNameId).append('<div class="chatTextarea"></div>')//add text area for chat messages
             .append('<input class="messageInput" type="textarea">')//add input field
             .append('<input class="messageSend" type="button" value="Send">'); //add send button
@@ -926,9 +1043,9 @@ function createChat(calleeName) {
 
         // Bind send message function
         $('#chat' + calleeNameId + ' .messageSend').click(function () {
-            var calleeName = $(this).parent().attr('title'); //parse id of current chatBox, take away chat word from the beginning
+            var fullCalleeName = $(this).parent().attr('fullCalleeName'); //parse id of current chatBox, take away chat word from the beginning
             var messageText = $(this).prev().val(); //parse text from input
-            sendMessage(calleeName, messageText, 'message/cpim',true); //send message
+            sendMessage(calleeName, messageText, 'message/cpim',false); //send message
             $(this).prev().val(''); //clear message input
         });
 
@@ -1051,7 +1168,11 @@ $(function () {
         if ($("#callButton").html() == 'Call') {
             call();
         } else {
-            hangup(currentCall.id);
+            if (currentCall){
+                hangup(currentCall.id);
+            } else {
+                hangup();
+            }
         }
     });
 

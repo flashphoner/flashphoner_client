@@ -7,9 +7,12 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo, hasVideo) {
     me.remoteVideo = remoteVideo;
     me.localVideo = localVideoPreview;
     me.hasVideo = false;
+    me.terminated = false;
 };
 
 WebRtcMediaManager.prototype.close = function () {
+    //Commented to prevent termination of rtcMediaManager after MSRP call
+    //this.terminated = true;
     if (this.peerConnection) {
         this.remoteVideo.pause();
         this.remoteVideo.src = null;
@@ -74,22 +77,26 @@ WebRtcMediaManager.prototype.waitGatheringIce = function () {
     var me = this;
     if (me.peerConnection != null) {
         sendSdp = function () {
-            console.debug("WebRtcMediaManager:waitGatheringIce() iceGatheringState=" + me.peerConnection.iceGatheringState);
-            if (me.peerConnection.iceGatheringState == "complete") {
-                console.debug("WebRtcMediaManager:setLocalSDP: sdp=" + me.peerConnection.localDescription.sdp);
-                if (me.peerConnectionState == 'preparing-offer') {
-                    me.peerConnectionState = 'offer-sent';
-                    me.createOfferCallback(me.peerConnection.localDescription.sdp);// + this.candidates);
+            if (me.peerConnection != null) {
+                console.debug("WebRtcMediaManager:waitGatheringIce() iceGatheringState=" + me.peerConnection.iceGatheringState);
+                if (me.peerConnection.iceGatheringState == "complete") {
+                    console.debug("WebRtcMediaManager:setLocalSDP: sdp=" + me.peerConnection.localDescription.sdp);
+                    if (me.peerConnectionState == 'preparing-offer') {
+                        me.peerConnectionState = 'offer-sent';
+                        me.createOfferCallback(me.peerConnection.localDescription.sdp);// + this.candidates);
+                    }
+                    else if (me.peerConnectionState == 'preparing-answer') {
+                        me.peerConnectionState = 'established';
+                        me.createAnswerCallback(me.peerConnection.localDescription.sdp);// + this.candidates);
+                    }
+                    else if (me.peerConnectionState == 'established') {
+                    }
+                    else {
+                        console.log("WebRtcMediaManager:onIceCandidateCallback(): RTCPeerConnection bad state!");
+                    }
+                    clearInterval(me.iceIntervalId);
                 }
-                else if (me.peerConnectionState == 'preparing-answer') {
-                    me.peerConnectionState = 'established';
-                    me.createAnswerCallback(me.peerConnection.localDescription.sdp);// + this.candidates);
-                }
-                else if (me.peerConnectionState == 'established') {
-                }
-                else {
-                    console.log("WebRtcMediaManager:onIceCandidateCallback(): RTCPeerConnection bad state!");
-                }
+            } else {
                 clearInterval(me.iceIntervalId);
             }
         };
@@ -123,7 +130,7 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
                 me.peerConnection.addStream(me.localAudioStream);
             } else {
                 if (hasVideo) {
-                    if (me.localAudioStream){
+                    if (me.localAudioStream) {
                         //me.peerConnection.removeStream(me.localAudioStream);
                     }
                     me.peerConnection.addStream(me.localAudioVideoStream);
@@ -147,11 +154,14 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
         var checkVideoAndCreate = function () {
             if (hasVideo && !me.localAudioVideoStream) {
                 getUserMedia({video: true}, function (stream) {
-                        me.localAudioVideoStream = stream;
-                        create();
+                        if (!me.terminated){
+                            me.localAudioVideoStream = stream;
+                            create();
+                        }
                     }, function (error) {
                         addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
                         closeInfoView();
+                        toCallState();
                     }
                 );
             } else {
@@ -161,11 +171,14 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
 
         if (!me.localAudioStream) {
             getUserMedia({audio: true}, function (stream) {
+                if (!me.terminated){
                     me.localAudioStream = stream;
                     checkVideoAndCreate();
+                }
                 }, function (error) {
                     addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
                     closeInfoView();
+                    toCallState();
                 }
             );
         } else {
@@ -188,7 +201,7 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback) {
                 me.peerConnection.addStream(me.localAudioStream);
             } else {
                 if (hasVideo) {
-                    if (me.localAudioStream){
+                    if (me.localAudioStream) {
                         me.peerConnection.removeStream(me.localAudioStream);
                     }
                     me.peerConnection.addStream(me.localAudioVideoStream);
@@ -216,12 +229,15 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback) {
 
         var checkVideoAndCreate = function () {
             if (hasVideo && !me.localAudioVideoStream) {
-                getUserMedia({audio:true, video: true}, function (stream) {
+                getUserMedia({audio: true, video: true}, function (stream) {
+                    if (!me.terminated){
                         me.localAudioVideoStream = stream;
                         create();
+                    }
                     }, function (error) {
                         addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
                         closeInfoView();
+                        toCallState();
                     }
                 );
             } else {
@@ -231,11 +247,14 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback) {
 
         if (!me.localAudioStream) {
             getUserMedia({audio: true}, function (stream) {
+                if (!me.terminated){
                     me.localAudioStream = stream;
                     checkVideoAndCreate();
+                }
                 }, function (error) {
                     addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
                     closeInfoView();
+                    toCallState();
                 }
             );
         } else {

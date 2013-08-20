@@ -62,6 +62,7 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
 
         setRemoteSDP: function (call, sdp, isInitiator, sipHeader) {
             proccessCall(call);
+            this.stopSound("RING");
             rtcManager.setRemoteSDP(sdp, isInitiator);
             if (!isInitiator && rtcManager.getConnectionState() == "established") {
                 me.answer(call.id);
@@ -108,6 +109,14 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
         },
 
         notifyAudioCodec: function (codec) {
+        },
+
+        notifySubscription: function (subscriptionObject, sipObject){
+            notifySubscription(subscriptionObject, sipObject);
+        },
+
+        notifyXcapResponse: function (xcapResponse){
+            notifyXcapResponse(xcapResponse);
         }
     };
 
@@ -139,7 +148,16 @@ WebSocketManager.prototype = {
     },
 
     logoff: function () {
+        trace("logoff");
         this.webSocket.close();
+    },
+
+    subscribe: function (subscribeObject) {
+        this.webSocket.send("subscribe",subscribeObject);
+    },
+
+    sendXcapRequest: function (xcapUrl) {
+        this.webSocket.send("sendXcapRequest",xcapUrl);
     },
 
     call: function (callRequest) {
@@ -150,6 +168,12 @@ WebSocketManager.prototype = {
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
         }, false);
+        return 0;
+    },
+
+    msrpCall: function (callRequest){
+        var me = this;
+        me.webSocket.send("msrpCall", callRequest);
         return 0;
     },
 
@@ -172,7 +196,15 @@ WebSocketManager.prototype = {
     },
 
     hangup: function (callId) {
-        this.webSocket.send("hangup", callId);
+        if (callId){
+            this.webSocket.send("hangup", callId);
+        } else {
+            if (this.calls.length == 0) {
+                closeInfoView();
+                toCallState();
+                this.webRtcMediaManager.close();
+            }
+        }
     },
 
     setStatusHold: function (callId, isHold) {
