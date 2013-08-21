@@ -116,25 +116,27 @@ package com.flashphoner
 			for each (s in logsJSArray) {
 				result = s.match(timePattern);
 				if (result != null) {
-					resultingArray[logTimeToInt(result[0])] ="[JS]\t" + s;
+					resultingArray.push([logTimeToInt(result[0]) , "[JS]\t" + s]);
 				}
 			}
 
 			for each (s in logArray) {
 				result = s.match(timePattern);
 				if (result != null) {
-					resultingArray[logTimeToInt(result[0])] = "[FLASH]\t" + s;
+					resultingArray.push([logTimeToInt(result[0]), "[FLASH]\t" + s]);
 				}
 			}
 			
-			//Array.toString() will hang FlashPlayer, using for each to convert Array
+			//sort array based on time
+			resultingArray.sortOn("0");
+			
 			var resultingLogs:String = new String();
-			for each (s in resultingArray) {
-				resultingLogs += s + "\n";
+			var i:Array;
+			for each (i in resultingArray) {
+				resultingLogs += i[1] + "\n";
 			}
 			
 			return resultingLogs;
-			
 		}
 		
 		private static function logTimeToInt(s:String):int {
