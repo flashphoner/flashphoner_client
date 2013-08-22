@@ -24,10 +24,10 @@ FlashphonerLoader = function (config) {
     this.finishSound = "sounds/HANGUP.ogg";
     this.xcapUrl = null;
     this.msrpCallee = null;
-    this.subscribeEvent = false;
+    this.subscribeEvent = "reg";
     this.contactParams = null;
-    this.multipartMessageService = null;
     this.fetchCallerFromPai = null;
+    this.imdnEnabled = false;
 
 
     $.ajax({
@@ -120,17 +120,17 @@ FlashphonerLoader.prototype = {
             }
         }
 
-        var multipartMessageService = $(xml).find("multipart_message_service");
-        if (multipartMessageService.length > 0){
-            if (multipartMessageService[0].textContent.length){
-                this.multipartMessageService = multipartMessageService[0].textContent;
-            }
-        }
-
         var fetchCallerFromPai = $(xml).find("fetch_caller_from_pai");
         if (fetchCallerFromPai.length > 0){
             if (fetchCallerFromPai[0].textContent.length){
                 this.fetchCallerFromPai = fetchCallerFromPai[0].textContent;
+            }
+        }
+
+        var imdnEnabled = $(xml).find("imdn_enabled");
+        if (imdnEnabled.length > 0){
+            if (imdnEnabled[0].textContent.length){
+                this.imdnEnabled = Boolean(imdnEnabled[0].textContent);
             }
         }
 

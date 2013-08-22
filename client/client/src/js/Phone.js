@@ -175,21 +175,14 @@ function notifyMessage(message, notificationResult, sipObject) {
     messenger.notifyMessage(message, notificationResult, sipObject);
 }
 
-function sendMessage(to, body, contentType, deliveryNotification) {
+function sendMessage(to, body, contentType) {
     trace("sendMessage", to, body, contentType);
     var message = new Object();
     message.from = callerLogin;
     message.to = to;
     message.body = body;
     message.contentType = contentType;
-    if (flashphonerLoader.multipartMessageService !=null && flashphonerLoader.multipartMessageService.length!=0 ){
-        if (message.to.indexOf(",")!=-1){
-            message.recipients = message.to;
-            message.to = flashphonerLoader.multipartMessageService;
-            message.contentType = "multipart/mixed";
-        }
-    }
-    message.deliveryNotification = deliveryNotification;
+    message.deliveryNotification = flashphonerLoader.imdnEnabled;
     messenger.sendMessage(message);
 }
 
@@ -676,6 +669,7 @@ function notifyMessageDeliveryFailed(message){
     trace("notifyMessageDeliveryFailed", message);
     var messageDiv = $('#'+message.id);
     messageDiv.addClass("myNick message_delivery_failed");
+    messageDiv.innerHTML = messageDiv.innerHTML+"- Delivery failed to "+message.recipients;
 }
 
 function notifyMessageFailed(message){
@@ -1025,7 +1019,7 @@ function createChat(calleeName) {
         $('#chat' + calleeNameId + ' .messageSend').click(function () {
             var fullCalleeName = $(this).parent().attr('fullCalleeName'); //parse id of current chatBox, take away chat word from the beginning
             var messageText = $(this).prev().val(); //parse text from input
-            sendMessage(calleeName, messageText, 'message/cpim',false); //send message
+            sendMessage(calleeName, messageText, 'message/cpim'); //send message
             $(this).prev().val(''); //clear message input
         });
 
