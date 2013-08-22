@@ -115,6 +115,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("setSpeexQuality",setSpeexQuality);
 			ExternalInterface.addCallback("playSound",playSound);
 			ExternalInterface.addCallback("stopSound", stopSound);
+			ExternalInterface.addCallback("pushLogs", pushLogs);
 			ExternalInterface.addCallback("sendXcapRequest", sendXcapRequest);
 			ExternalInterface.addCallback("openSettingsPanel",openSettingsPanel);
 			calls = new ArrayCollection();
@@ -637,6 +638,17 @@ package com.flashphoner.api
 		public function stopSound(sound:String):void{
 			Logger.info("Received request to stop sound " + sound);
 		}
+		
+		public function pushLogs(logs:String):Boolean {
+			//check if push_log enabled
+			if (PhoneConfig.PUSH_LOG) {
+				var pushResult:Boolean = phoneServerProxy.pushLogs(logs);
+				return pushResult;
+			} else {
+				return false;
+			}
+		}
+
 		
 		public function subscribe(subscribeObj:Object):void{
 			this.phoneServerProxy.subscribe(subscribeObj);

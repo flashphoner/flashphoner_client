@@ -35,26 +35,31 @@ testInviteParameter['param2'] = "value2";
 
 var messenger;
 
+var logs;
+
 // trace log to the console in the demo page
 function trace(funcName, param1, param2, param3) {
 
     var today = new Date();
     // get hours, minutes and seconds
-    var hh = today.getHours();
-    var mm = today.getMinutes();
-    var ss = today.getSeconds();
+    var hh = today.getUTCHours().toString();
+    var mm = today.getUTCMinutes().toString();
+    var ss = today.getUTCSeconds().toString();
+    var ms = today.getUTCMilliseconds().toString();
 
-    // Add '0' if it < 10 to see 14.08.06 instead of 14.6.8
-    hh = hh == 0 ? '00' : hh < 10 ? '0' + hh : hh;
-    mm = mm == 0 ? '00' : mm < 10 ? '0' + mm : mm;
-    ss = ss == 0 ? '00' : ss < 10 ? '0' + ss : ss;
+    // Add leading '0' to see 14:08:06.001 instead of 14:8:6.1
+    hh = hh.length == 1 ? "0" + hh : hh;
+    mm = mm.length == 1 ? "0" + mm : mm;
+    ss = ss.length == 1 ? "0" + ss : ss;
+    ms = ms.length == 1 ? "00" + ms : ms.length == 2 ? "0" + ms : ms;
 
-    // set time 
-    var time = hh + ':' + mm + ':' + ss;
+    // set time
+    var time = "UTC " + hh + ':' + mm + ':' + ss + '.' + ms;
 
     var div1 = div2 = '';
 
     var console = $("#console");
+
     // Check if console is scrolled down? Or may be you are reading previous messages.
     var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37);
 
@@ -73,9 +78,26 @@ function trace(funcName, param1, param2, param3) {
         var div2 = ', ';
     }
 
-    // Print message to console
+    // Print message to console and push it to server
     if (traceEnabled) {
-        console.append('<grey>' + time + ' - ' + '</grey>' + funcName + '<grey>' + '(' + param1 + div1 + param2 + div2 + param3 + ')' + '</grey>' + '<br>');
+        //check if API already loaded
+        if(flashphoner !== undefined) {
+            //check if push_log enabled
+            if (flashphonerLoader.pushLogEnabled) {
+                var result = flashphoner.pushLogs(logs + time + ' - ' + funcName + ' ' + + param1 + div1 + param2 + div2 + param3 + '\n');
+                if(!result) {
+                    logs += time + ' - ' + funcName + ' ' + param1 + div1 + param2 + div2 + param3 + '\n';
+                } else {
+                    logs = "";
+                }
+            } else {
+                logs = "";
+            }
+
+        } else {
+            logs += time + ' - ' + funcName + ' ' + param1 + div1 + param2 + div2 + param3 + '\n';
+        }
+        console.append('<grey>' + time + ' - ' + '</grey>' + funcName + '<grey>' + ' ' + param1 + div1 + param2 + div2 + param3 + ' ' + '</grey>' + '<br>');
     }
 
     //Autoscroll cosole if you are not reading previous messages

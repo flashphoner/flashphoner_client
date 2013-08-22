@@ -21,10 +21,7 @@ package com.flashphoner.api
 	import com.flashphoner.api.management.VideoControl;
 	
 	import flash.events.*;
-	import flash.net.NetConnection;
-	import flash.net.NetStream;
-	import flash.net.Responder;
-	import flash.net.SharedObject;
+	import flash.net.*;
 	import flash.system.Security;
 	import flash.system.SecurityPanel;
 	import flash.utils.Timer;
@@ -55,6 +52,9 @@ package com.flashphoner.api
 		
 		private var keepAliveTimeoutTimer:Timer;
 		
+		private var connectionObject:Object = null;
+		
+		private var isConnected:Boolean;
 		
 		public function PhoneServerProxy(responder:Responder,flash_API:Flash_API)
 		{		
@@ -62,7 +62,8 @@ package com.flashphoner.api
 			this.responder = responder;
 			nc = new NetConnection();
 			nc.client = new PhoneCallback(flash_API);
-			phoneSpeaker = new PhoneSpeaker(nc,flash_API);	
+			phoneSpeaker = new PhoneSpeaker(nc,flash_API);
+			isConnected = false;
 			
 		}
 		
@@ -96,8 +97,7 @@ package com.flashphoner.api
 			obj.qValue = qValue;
 			obj.contactParams = contactParams; 
 						
-			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);	
-			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
+			connect(obj);
 			return 0;			
 		}
 
@@ -117,10 +117,61 @@ package com.flashphoner.api
 			obj.width = PhoneConfig.VIDEO_WIDTH;
 			obj.height = PhoneConfig.VIDEO_HEIGHT;
 			
-			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
-			nc.connect(PhoneConfig.SERVER_URL+"/"+PhoneConfig.APP_NAME,obj);
+			connect(obj);
 			
-		}	
+		}
+		
+		private function connect(obj:Object):void{
+			Logger.info("connect: "+obj);
+			this.connectionObject = obj;
+			if (PhoneConfig.LOAD_BALANCER_URL!=null){
+				connectByLoadBalancer();
+				return;
+			}else{
+				var serverUrl:String = "rtmfp://"+PhoneConfig.SERVER_URL+":"+PhoneConfig.SERVER_PORT+"/"+PhoneConfig.APP_NAME;
+				createConnection(serverUrl);
+			}
+		}
+		
+		private function createConnection(serverUrl:String):void {
+			Logger.info("createConnection serverUrl: "+serverUrl);
+			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
+			nc.connect(serverUrl,connectionObject);
+		}
+		
+		private function connectByLoadBalancer():void {
+			Logger.info("connectByLoadBalancer "+PhoneConfig.LOAD_BALANCER_URL);
+			var request:URLRequest = new URLRequest(PhoneConfig.LOAD_BALANCER_URL);
+			var loader:URLLoader = new URLLoader();
+			loader.load(request);
+			loader.addEventListener(Event.COMPLETE, onLoadBalancerUrlComplete);
+			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR,loadBalancerUrlSecurityErrorHandler);
+			loader.addEventListener(IOErrorEvent.IO_ERROR, loadBalancerUrlIoErrorHandler);	
+		}
+		
+		private function onLoadBalancerUrlComplete(event:Event):void{			
+			var loader:URLLoader = event.target as URLLoader;
+			if (loader != null)
+			{
+				var jsonObject:Object = JSON.parse(loader.data);
+				Logger.info("onLoadBalancerUrlComplete server: " + jsonObject.server + ":" + jsonObject.flash);
+				createConnection("rtmfp://" + jsonObject.server + ":" + jsonObject.flash+ "/" + PhoneConfig.APP_NAME);				
+			}	
+		}
+		
+		private function loadBalancerUrlSecurityErrorHandler(event:Event):void{			
+			loadBalancerLoadingError(event.toString());
+		}
+		
+		private function loadBalancerUrlIoErrorHandler(event:Event):void{
+			loadBalancerLoadingError(event.toString());
+		}
+		
+		private function loadBalancerLoadingError(error:String):void{
+			var serverUrl:String = "rtmfp://"+PhoneConfig.SERVER_URL+":"+PhoneConfig.SERVER_PORT+"/"+PhoneConfig.APP_NAME;
+			Logger.info("Can not load loadbalancer data "+error+". Default connection url will be used: "+serverUrl);
+			createConnection(serverUrl);
+		}
 		
 		public function subscribe(subscribeObj:Object):void{
 			Logger.info("subscribe "+subscribeObj);
@@ -202,6 +253,8 @@ package com.flashphoner.api
 					initKeepAlive();
 					startKeepAlive();
 				}
+				
+				isConnected = true;
 								
 			} else if(event.info.code == "NetConnection.Connect.Failed")
 			{
@@ -224,6 +277,7 @@ package com.flashphoner.api
 				}
 				CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.DISCONNECT,flash_API));
 				hasDisconnectAttempt = false;
+				isConnected = false;
 			}		
 		}
 		
@@ -237,6 +291,27 @@ package com.flashphoner.api
 		
 		public function sendInfo(infoObject:Object):void{
 			nc.call("sendInfo", null, infoObject);
+		}
+		
+		public function pushLogs(logs:String):Boolean {
+			if(isConnected) {
+				//merge JS and FLASH logs
+				var logsToServer:String = Logger.merge(logs);
+
+				//clear FLASH logs
+				Logger.clear();
+
+				nc.call("pushLogs", new Responder(pushLogsResponder), logsToServer);
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
+		private function pushLogsResponder(pushLogsResult:Object):void {
+			/**
+			 * pushLogsResult is empty for now.
+			 **/
 		}
 		
 		public function sendXcapRequest(xcapUrl:String):void{

@@ -127,6 +127,36 @@ WebSocketManager.prototype = {
 
     login: function (loginObject) {
         var me = this;
+
+        //get load balancer url if load balancing enabled
+        if (flashphonerLoader.loadBalancerUrl != null) {
+            trace("Retrieve server url from load balancer");
+            var loadBalancerData;
+            $.ajax({
+                type: "GET",
+                url: flashphonerLoader.loadBalancerUrl,
+                dataType: "jsonp",
+                data: loadBalancerData,
+                success: function (loadBalancerData) {
+                    me.url = "ws://" + loadBalancerData.server + ":" + loadBalancerData.ws;
+                    trace("Server url from load balancer: " + me.url);
+                    me.connect(loginObject);
+                },
+                error: function(event) {
+                    trace("Error occurred while retrieving url from load balancer,\n" +
+                        " using url: " + me.url + " for connect.")
+                }
+
+            });
+        } else {
+            me.connect(loginObject);
+        }
+
+        return 0;
+    },
+
+    connect: function(loginObject) {
+        var me = this;
         me.webSocket = $.websocket(me.url, {
             open: function () {
                 me.isOpened = true;
@@ -144,7 +174,7 @@ WebSocketManager.prototype = {
             context: me,
             events: me.callbacks
         });
-        return 0;
+
     },
 
     logoff: function () {
@@ -222,6 +252,15 @@ WebSocketManager.prototype = {
     setUseProxy: function (useProxy) {
         if (this.isOpened) {
             this.webSocket.send("setUseProxy", useProxy);
+        }
+    },
+
+    pushLogs: function (logs) {
+        if(this.isOpened) {
+            this.webSocket.send("pushLogs", logs)
+            return true;
+        } else {
+            return false;
         }
     },
 
