@@ -3,66 +3,79 @@ var getUserMedia = null;
 var attachMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = null;
+var isWebRTCAvailable = false;
 
 if (navigator.mozGetUserMedia) {
     console.log("This appears to be Firefox");
 
-    webrtcDetectedBrowser = "firefox";
+    if(typeof(mozRTCPeerConnection) === undefined) {
+        console.log("Please, update your browser to use WebRTC");
+    } else {
+        isWebRTCAvailable = true;
 
-    RTCPeerConnection = mozRTCPeerConnection;
+        webrtcDetectedBrowser = "firefox";
 
-    RTCSessionDescription = mozRTCSessionDescription;
+        RTCPeerConnection = mozRTCPeerConnection;
 
-    RTCIceCandidate = mozRTCIceCandidate;
+        RTCSessionDescription = mozRTCSessionDescription;
 
-    getUserMedia = navigator.mozGetUserMedia.bind(navigator);
+        RTCIceCandidate = mozRTCIceCandidate;
 
-    attachMediaStream = function(element, stream) {
-        element.mozSrcObject = stream;
-        element.play();
-    };
+        getUserMedia = navigator.mozGetUserMedia.bind(navigator);
 
-    reattachMediaStream = function(to, from) {
-        to.mozSrcObject = from.mozSrcObject;
-        to.play();
-    };
+        attachMediaStream = function(element, stream) {
+            element.mozSrcObject = stream;
+            element.play();
+        };
 
-    MediaStream.prototype.getVideoTracks = function() {
-        return [];
-    };
+        reattachMediaStream = function(to, from) {
+            to.mozSrcObject = from.mozSrcObject;
+            to.play();
+        };
 
-    MediaStream.prototype.getAudioTracks = function() {
-        return [];
-    };
+        MediaStream.prototype.getVideoTracks = function() {
+            return [];
+        };
+
+        MediaStream.prototype.getAudioTracks = function() {
+            return [];
+        };
+    }
 } else if (navigator.webkitGetUserMedia) {
     console.log("This appears to be Chrome");
 
-    webrtcDetectedBrowser = "chrome";
+    if (typeof(webkitRTCPeerConnection) === undefined) {
+        console.log("Please, update your browser to use WebRTC");
+    } else {
+        isWebRTCAvailable = true;
 
-    RTCPeerConnection = webkitRTCPeerConnection;
+        webrtcDetectedBrowser = "chrome";
 
-    getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
+        RTCPeerConnection = webkitRTCPeerConnection;
 
-    attachMediaStream = function(element, stream) {
-        element.src = webkitURL.createObjectURL(stream);
-        //element.play();
-    };
+        getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
 
-    reattachMediaStream = function(to, from) {
-        to.src = from.src;
-        element.play();
-    };
-
-    if (!webkitMediaStream.prototype.getVideoTracks) {
-        webkitMediaStream.prototype.getVideoTracks = function() {
-            return this.videoTracks;
+        attachMediaStream = function(element, stream) {
+            element.src = webkitURL.createObjectURL(stream);
+            //element.play();
         };
-    }
 
-    if (!webkitMediaStream.prototype.getAudioTracks) {
-        webkitMediaStream.prototype.getAudioTracks = function() {
-            return this.audioTracks;
+        reattachMediaStream = function(to, from) {
+            to.src = from.src;
+            element.play();
         };
+
+        if (!webkitMediaStream.prototype.getVideoTracks) {
+            webkitMediaStream.prototype.getVideoTracks = function() {
+                return this.videoTracks;
+            };
+        }
+
+        if (!webkitMediaStream.prototype.getAudioTracks) {
+            webkitMediaStream.prototype.getAudioTracks = function() {
+                return this.audioTracks;
+            };
+        }
     }
 } else {
     console.log("Browser does not appear to be WebRTC-capable");

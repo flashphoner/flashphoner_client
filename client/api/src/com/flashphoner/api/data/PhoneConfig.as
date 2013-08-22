@@ -26,6 +26,11 @@ package com.flashphoner.api.data
 		public static var SERVER_URL:String = "";
 		
 		/**
+		 * WCS server port to connect to
+		 **/
+		public static var SERVER_PORT:String = "1935";
+		
+		/**
 		 * Name of application in Wowza Media Server
 		 **/
 		public static var APP_NAME:String ="phone_app";
@@ -98,8 +103,9 @@ package com.flashphoner.api.data
 		
 		public static var VIDEO_RELIABLE = false;
 		
-		public static var AUDIO_RELIABLE = false;		
+		public static var AUDIO_RELIABLE = false;
 		
+		public static var LOAD_BALANCER_URL = null;
 		
 		/**
 		 * Current version of Flashphoner product

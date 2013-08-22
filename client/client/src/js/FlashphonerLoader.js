@@ -14,6 +14,8 @@ FlashphonerLoader = function (config) {
     this.flashphoner = null;
     this.useWebRTC = false;
     this.urlServer = null;
+    this.wsPort = "8080";
+    this.loadBalancerUrl = null;
     this.token = null;
     this.registerRequired = false;
     this.videoWidth = 320;
@@ -44,12 +46,20 @@ FlashphonerLoader.prototype = {
 
     parseFlashphonerXml: function (xml) {
         var me = this;
-        var urlServer = $(xml).find("rtmp_server");
+        var urlServer = $(xml).find("wcs_server");
         if (urlServer.length > 0){
             this.urlServer = urlServer[0].textContent;
         } else {
-            openConnectingView("Can not find 'rtmfp_server' in flashphoner.xml", 0);
+            openConnectingView("Can not find 'wcs_server' in flashphoner.xml", 0);
             return;
+        }
+        var wsPort = $(xml).find("ws_port");
+        if(wsPort.length > 0) {
+            this.wsPort = wsPort[0].textContent;
+        }
+        var loadBalancerUrl = $(xml).find("load_balancer_url");
+        if(loadBalancerUrl.length > 0) {
+            this.loadBalancerUrl = loadBalancerUrl[0].textContent;
         }
         var token = $(xml).find("token");
         if (token.length > 0){
@@ -142,11 +152,12 @@ FlashphonerLoader.prototype = {
         }
 
 
-        if (this.urlServer.indexOf("ws://") == 0) {
+        if (isWebRTCAvailable) {
             me.useWebRTC = true;
+            this.urlServer = "ws://" + this.urlServer + ":" + this.wsPort;
             me.flashphoner = new WebSocketManager(this.urlServer, getElement('localVideoPreview'), getElement('remoteVideo'));
             notifyFlashReady();
-        } else if (this.urlServer.indexOf("rtmfp://") == 0 || this.urlServer.indexOf("rtmp://") == 0) {
+        } else {
             me.useWebRTC = false;
             var params = {};
             params.menu = "true";

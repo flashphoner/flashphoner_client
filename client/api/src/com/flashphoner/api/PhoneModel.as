@@ -126,12 +126,18 @@ package com.flashphoner.api
 						parameters[node] = String(xml[node]); 
 					}
 			        
-			        PhoneConfig.SERVER_URL = xml.rtmp_server;
+			        PhoneConfig.SERVER_URL = xml.wcs_server;
 					if (PhoneConfig.SERVER_URL == null) {
 						for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 							apiNotify.notifyError(ErrorCodes.WRONG_FLASHPHONER_XML);
 						}
 					}
+					
+					var serverPort:String = xml.rtmfp_port;
+					if (serverPort != null) {
+						PhoneConfig.SERVER_PORT = serverPort;
+					}
+					trace("Server port: " + PhoneConfig.SERVER_PORT)
 					
 			        PhoneConfig.APP_NAME = xml.application;
 					var check_validation_callee:String = xml.check_validation_callee;
@@ -216,7 +222,11 @@ package com.flashphoner.api
 			        }
 			        if (xml.finish_sound != null && xml.finish_sound.toString() != ""){
 				        SoundControl.FINISH_SOUND = xml.finish_sound;
-			        }										
+			        }
+					
+					if (xml.load_balancer_url != null && xml.load_balancer_url.toString() !=""){
+			            PhoneConfig.LOAD_BALANCER_URL = xml.load_balancer_url;
+					}
 					
 			        SoundControl.updateSounds();
 			    }
