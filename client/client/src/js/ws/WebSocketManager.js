@@ -62,6 +62,7 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
 
         setRemoteSDP: function (call, sdp, isInitiator, sipHeader) {
             proccessCall(call);
+            this.stopSound("RING");
             rtcManager.setRemoteSDP(sdp, isInitiator);
             if (!isInitiator && rtcManager.getConnectionState() == "established") {
                 me.answer(call.id);
@@ -111,7 +112,7 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
         },
 
         notifySubscription: function (subscriptionObject, sipObject){
-            notifySubscription(subscriptionObject);
+            notifySubscription(subscriptionObject, sipObject);
         },
 
         notifyXcapResponse: function (xcapResponse){
@@ -125,6 +126,36 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
 WebSocketManager.prototype = {
 
     login: function (loginObject) {
+        var me = this;
+
+        //get load balancer url if load balancing enabled
+        if (flashphonerLoader.loadBalancerUrl != null) {
+            trace("Retrieve server url from load balancer");
+            var loadBalancerData;
+            $.ajax({
+                type: "GET",
+                url: flashphonerLoader.loadBalancerUrl,
+                dataType: "jsonp",
+                data: loadBalancerData,
+                success: function (loadBalancerData) {
+                    me.url = "ws://" + loadBalancerData.server + ":" + loadBalancerData.ws;
+                    trace("Server url from load balancer: " + me.url);
+                    me.connect(loginObject);
+                },
+                error: function(event) {
+                    trace("Error occurred while retrieving url from load balancer,\n" +
+                        " using url: " + me.url + " for connect.")
+                }
+
+            });
+        } else {
+            me.connect(loginObject);
+        }
+
+        return 0;
+    },
+
+    connect: function(loginObject) {
         var me = this;
         me.webSocket = $.websocket(me.url, {
             open: function () {
@@ -143,10 +174,11 @@ WebSocketManager.prototype = {
             context: me,
             events: me.callbacks
         });
-        return 0;
+
     },
 
     logoff: function () {
+        trace("logoff");
         this.webSocket.close();
     },
 
@@ -220,6 +252,15 @@ WebSocketManager.prototype = {
     setUseProxy: function (useProxy) {
         if (this.isOpened) {
             this.webSocket.send("setUseProxy", useProxy);
+        }
+    },
+
+    pushLogs: function (logs) {
+        if(this.isOpened) {
+            this.webSocket.send("pushLogs", logs)
+            return true;
+        } else {
+            return false;
         }
     },
 

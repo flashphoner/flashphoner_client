@@ -14,14 +14,24 @@ FlashphonerLoader = function (config) {
     this.flashphoner = null;
     this.useWebRTC = false;
     this.urlServer = null;
+    this.wsPort = "8080";
+    this.loadBalancerUrl = null;
     this.token = null;
     this.registerRequired = false;
     this.videoWidth = 320;
     this.videoHeight = 240;
+    this.pushLogEnabled = false;
     this.ringSound = "sounds/CALL_OUT.ogg";
     this.busySound = "sounds/BUSY.ogg";
     this.registerSound = "sounds/REGISTER.ogg";
     this.finishSound = "sounds/HANGUP.ogg";
+    this.xcapUrl = null;
+    this.msrpCallee = null;
+    this.subscribeEvent = "reg";
+    this.contactParams = null;
+    this.fetchCallerFromPai = null;
+    this.imdnEnabled = false;
+
 
     $.ajax({
         type: "GET",
@@ -36,12 +46,20 @@ FlashphonerLoader.prototype = {
 
     parseFlashphonerXml: function (xml) {
         var me = this;
-        var urlServer = $(xml).find("rtmp_server");
+        var urlServer = $(xml).find("wcs_server");
         if (urlServer.length > 0){
             this.urlServer = urlServer[0].textContent;
         } else {
-            openConnectingView("Can not find 'rtmfp_server' in flashphoner.xml", 0);
+            openConnectingView("Can not find 'wcs_server' in flashphoner.xml", 0);
             return;
+        }
+        var wsPort = $(xml).find("ws_port");
+        if(wsPort.length > 0) {
+            this.wsPort = wsPort[0].textContent;
+        }
+        var loadBalancerUrl = $(xml).find("load_balancer_url");
+        if(loadBalancerUrl.length > 0) {
+            this.loadBalancerUrl = loadBalancerUrl[0].textContent;
         }
         var token = $(xml).find("token");
         if (token.length > 0){
@@ -59,6 +77,12 @@ FlashphonerLoader.prototype = {
         if (videoHeight.length > 0){
             this.videoHeight = videoHeight[0].textContent;
         }
+
+        var pushLogEnabled = $(xml).find("push_log");
+        if (pushLogEnabled.length){
+            this.pushLogEnabled = pushLogEnabled.text();
+        }
+
         //Sounds for WebRTC implementation
         var ringSound = $(xml).find("ring_sound");
         if (ringSound.length > 0){
@@ -85,11 +109,55 @@ FlashphonerLoader.prototype = {
             }
         }
 
-        if (this.urlServer.indexOf("ws://") == 0) {
+        var xcapUrl = $(xml).find("xcap_url");
+        if (xcapUrl.length > 0){
+            if (xcapUrl[0].textContent.length){
+                this.xcapUrl = xcapUrl[0].textContent;
+            }
+        }
+
+        var msrpCallee = $(xml).find("msrp_callee");
+        if (msrpCallee.length > 0){
+            if (msrpCallee[0].textContent.length){
+                this.msrpCallee = msrpCallee[0].textContent;
+            }
+        }
+
+        var subscribeEvent = $(xml).find("subscribe_event");
+        if (subscribeEvent.length > 0){
+            if (subscribeEvent[0].textContent.length){
+                this.subscribeEvent = subscribeEvent[0].textContent;
+            }
+        }
+
+        var contactParams = $(xml).find("contact_params");
+        if (contactParams.length > 0){
+            if (contactParams[0].textContent.length){
+                this.contactParams = contactParams[0].textContent;
+            }
+        }
+
+        var fetchCallerFromPai = $(xml).find("fetch_caller_from_pai");
+        if (fetchCallerFromPai.length > 0){
+            if (fetchCallerFromPai[0].textContent.length){
+                this.fetchCallerFromPai = fetchCallerFromPai[0].textContent;
+            }
+        }
+
+        var imdnEnabled = $(xml).find("imdn_enabled");
+        if (imdnEnabled.length > 0){
+            if (imdnEnabled[0].textContent.length){
+                this.imdnEnabled = Boolean(imdnEnabled[0].textContent);
+            }
+        }
+
+
+        if (isWebRTCAvailable) {
             me.useWebRTC = true;
+            this.urlServer = "ws://" + this.urlServer + ":" + this.wsPort;
             me.flashphoner = new WebSocketManager(this.urlServer, getElement('localVideoPreview'), getElement('remoteVideo'));
             notifyFlashReady();
-        } else if (this.urlServer.indexOf("rtmfp://") == 0 || this.urlServer.indexOf("rtmp://") == 0) {
+        } else {
             me.useWebRTC = false;
             var params = {};
             params.menu = "true";

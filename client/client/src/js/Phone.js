@@ -35,33 +35,31 @@ testInviteParameter['param2'] = "value2";
 
 var messenger;
 
-// Set correct XCAP HTTP URL to enable sending XCAP request after registration complete
-var XCAP_URL = null;//"http://%xcap_host:%xcap_port/services/org.openmobilealliance.deferred-list/users/%username/deferred-list";
-//Set correct MSRP callee URL to enable initiating MSRP call after registration complete
-var MSRP_CALLEE=null;//"sip:msrp_pull@domain.com";
-//Set to 'true' if you need to subscribe on the 'reg' event after registration complete
-var SUBSCRIBE_REG = false;//true
+var logs;
 
 // trace log to the console in the demo page
 function trace(funcName, param1, param2, param3) {
 
     var today = new Date();
     // get hours, minutes and seconds
-    var hh = today.getHours();
-    var mm = today.getMinutes();
-    var ss = today.getSeconds();
+    var hh = today.getUTCHours().toString();
+    var mm = today.getUTCMinutes().toString();
+    var ss = today.getUTCSeconds().toString();
+    var ms = today.getUTCMilliseconds().toString();
 
-    // Add '0' if it < 10 to see 14.08.06 instead of 14.6.8
-    hh = hh == 0 ? '00' : hh < 10 ? '0' + hh : hh;
-    mm = mm == 0 ? '00' : mm < 10 ? '0' + mm : mm;
-    ss = ss == 0 ? '00' : ss < 10 ? '0' + ss : ss;
+    // Add leading '0' to see 14:08:06.001 instead of 14:8:6.1
+    hh = hh.length == 1 ? "0" + hh : hh;
+    mm = mm.length == 1 ? "0" + mm : mm;
+    ss = ss.length == 1 ? "0" + ss : ss;
+    ms = ms.length == 1 ? "00" + ms : ms.length == 2 ? "0" + ms : ms;
 
-    // set time 
-    var time = hh + ':' + mm + ':' + ss;
+    // set time
+    var time = "UTC " + hh + ':' + mm + ':' + ss + '.' + ms;
 
     var div1 = div2 = '';
 
     var console = $("#console");
+
     // Check if console is scrolled down? Or may be you are reading previous messages.
     var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37);
 
@@ -80,9 +78,26 @@ function trace(funcName, param1, param2, param3) {
         var div2 = ', ';
     }
 
-    // Print message to console
+    // Print message to console and push it to server
     if (traceEnabled) {
-        console.append('<grey>' + time + ' - ' + '</grey>' + funcName + '<grey>' + '(' + param1 + div1 + param2 + div2 + param3 + ')' + '</grey>' + '<br>');
+        //check if API already loaded
+        if(flashphoner !== undefined) {
+            //check if push_log enabled
+            if (flashphonerLoader.pushLogEnabled) {
+                var result = flashphoner.pushLogs(logs + time + ' - ' + funcName + ' ' + + param1 + div1 + param2 + div2 + param3 + '\n');
+                if(!result) {
+                    logs += time + ' - ' + funcName + ' ' + param1 + div1 + param2 + div2 + param3 + '\n';
+                } else {
+                    logs = "";
+                }
+            } else {
+                logs = "";
+            }
+
+        } else {
+            logs += time + ' - ' + funcName + ' ' + param1 + div1 + param2 + div2 + param3 + '\n';
+        }
+        console.append('<grey>' + time + ' - ' + '</grey>' + funcName + '<grey>' + ' ' + param1 + div1 + param2 + div2 + param3 + ' ' + '</grey>' + '<br>');
     }
 
     //Autoscroll cosole if you are not reading previous messages
@@ -116,8 +131,9 @@ function login() {
     loginObject.outboundProxy = $('#outbound_proxy').val();
     loginObject.port = $('#port').val();
     loginObject.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
-    loginObject.qValue = "1.0";
-    loginObject.contactParams = "contactParamsString";
+    if (flashphonerLoader.contactParams!=null && flashphonerLoader.contactParams.length!=0){
+        loginObject.contactParams = flashphonerLoader.contactParams;
+    }
 
     var result = flashphoner.login(loginObject);
     closeLoginView();
@@ -181,15 +197,14 @@ function notifyMessage(message, notificationResult, sipObject) {
     messenger.notifyMessage(message, notificationResult, sipObject);
 }
 
-function sendMessage(to, body, contentType, deliveryNotification) {
+function sendMessage(to, body, contentType) {
     trace("sendMessage", to, body, contentType);
     var message = new Object();
     message.from = callerLogin;
     message.to = to;
     message.body = body;
     message.contentType = contentType;
-    message.recipients = (message.to.indexOf(",")!=-1)?message.to:"";
-    message.deliveryNotification = deliveryNotification;
+    message.deliveryNotification = flashphonerLoader.imdnEnabled;
     messenger.sendMessage(message);
 }
 
@@ -354,7 +369,7 @@ function notifyRegistered() {
         flashphoner.playSound("REGISTER");
     }
 
-    if (SUBSCRIBE_REG){
+    if (flashphonerLoader.subscribeEvent!=null && flashphonerLoader.subscribeEvent.length!=0){
         subscribeReg();
     }
 
@@ -362,28 +377,58 @@ function notifyRegistered() {
 }
 
 function notifySubscription(subscriptionObject, sipObject){
-    trace("notify subscription "+sipObject);
+    trace("notify subscription event: "+subscriptionObject.event+" expires: "+subscriptionObject.expires+" status: "+subscriptionObject.status);
+    trace("notify subscription body: "+subscriptionObject.requestBody);
+    if (subscriptionObject.event=="reg"){
+        var xml = $.parseXML(subscriptionObject.requestBody);
+        $(xml).find("registration").each(function () {
+            var state = $(this).attr('state');
+            var aor = $(this).attr('aor');
+            trace("state: "+state+" aor: "+aor);
+            if (aor.indexOf(callerLogin)!=-1 && state=="terminated"){
+                treminate();
+                return;
+            }
+            $(this).find("contact").each(function(){
+                var contactState = $(this).attr('state');
+                trace("contactState: "+contactState);
+                if (contactState=="terminated"){
+                    terminate();
+                    return;
+                }
+            });
+
+        });
+    }
+}
+
+function terminate(){
+    trace("terminate and logoff");
+    logoff();
 }
 
 function sendXcapRequest(){
-    if (XCAP_URL){
-        flashphoner.sendXcapRequest(XCAP_URL);
+    if (flashphonerLoader.xcapUrl!=null && flashphonerLoader.xcapUrl.length!=0){
+        flashphoner.sendXcapRequest(flashphonerLoader.xcapUrl);
     }
 
 }
 
 function notifyXcapResponse(xcapResponse){
     trace("notifyXcapResponse\n"+xcapResponse);
-    //Enable if you need to initiate msrp call after registration complete
-    if (MSRP_CALLEE){
-        msrpCall(MSRP_CALLEE);
+    var xml = $.parseXML(xcapResponse);
+    var history = $(xml).find("history-list").find("history");
+    if (history != null && history.length!=0 ){
+        if (flashphonerLoader.msrpCallee!=null && flashphonerLoader.msrpCallee.length!=0){
+            msrpCall(flashphonerLoader.msrpCallee);
+        }
     }
 }
 
 
 function subscribeReg(){
     var subscribeObj = new Object();
-    subscribeObj.event="reg";
+    subscribeObj.event = flashphonerLoader.subscribeEvent;
     subscribeObj.expires=3600;
     flashphoner.subscribe(subscribeObj);
 }
@@ -553,17 +598,37 @@ function notifyOpenVideoView(isViewed) {
 function notifyMessageReceived(messageObject){
     openChatView();
     trace("notifyMessageReceived", messageObject);
-    var from = findFrom(messageObject);
+    var from = findMessageSender(messageObject);
     createChat(from);
     var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
-    addMessageToChat(chatDiv,from, messageObject.body, "yourNick",messageObject.id);
+    var body = convertMessageBody(messageObject.body, messageObject.contentType);
+    addMessageToChat(chatDiv,from, body, "yourNick",messageObject.id);
 }
 
-function findFrom(messageObject) {
+function convertMessageBody(messageBody, contentType){
+    trace("convertMessageBody "+contentType);
+    if (contentType=="application/fsservice+xml"){
+        var xml = $.parseXML(messageBody);
+        var fsService = $(xml).find("fs-services").find("fs-service");
+        var action = fsService.attr("action");
+        if (action=="servicenoti-indicate"){
+            var cawData = fsService.find("caw").find("caw-data");
+            if (cawData){
+                var sender = $(cawData).attr("sender");
+                trace("cawData: "+sender);
+                return "Missed call "+sender;
+            }
+        }
+    }
+
+    return messageBody;
+
+}
+
+function findMessageSender(messageObject) {
     var from = messageObject.from.toLowerCase();
-    var exists = isChatTabExists(from);
-    if (!exists){
-        if (messageObject.pAssertedIdentity){
+    if (flashphonerLoader.fetchCallerFromPai=="true"){
+        if ( messageObject.pAssertedIdentity!=null && messageObject.pAssertedIdentity.length!=0 ){
             var pAssertedIdentity = parsePAssertedIdentity(messageObject.pAssertedIdentity);
             //Looking for a tab by pAssertedIdentity
             for (var key in pAssertedIdentity){
@@ -572,6 +637,8 @@ function findFrom(messageObject) {
                     break;
                 }
             }
+        } else{
+            from = "Unknown/Anonymous";
         }
     }
     return from;
@@ -624,6 +691,7 @@ function notifyMessageDeliveryFailed(message){
     trace("notifyMessageDeliveryFailed", message);
     var messageDiv = $('#'+message.id);
     messageDiv.addClass("myNick message_delivery_failed");
+    messageDiv.innerHTML = messageDiv.innerHTML+"- Delivery failed to "+message.recipients;
 }
 
 function notifyMessageFailed(message){
@@ -803,8 +871,12 @@ function closeInfoView() {
 
 function openIncomingView(call) {
     trace("openIncomingView", call)// call.caller, call.visibleNameCaller
+
+    var displayedCaller = call.caller + " '" + call.visibleNameCaller + "'";
+    displayedCaller = getDisplayedCallerByPai(displayedCaller);
+
     $('#incomingDiv').show();
-    $('#callerField').html(call.caller + " '" + call.visibleNameCaller + "'");
+    $('#callerField').html(displayedCaller);
 
     $('#answerButton').unbind('click');
     $('#answerButton').click(function () {
@@ -816,6 +888,19 @@ function openIncomingView(call) {
         hangup(call.id);
         closeIncomingView();
     });
+}
+
+function getDisplayedCallerByPai(displayedCaller){
+    var ret = displayedCaller;
+    if (flashphonerLoader.fetchCallerFromPai == "true"){
+        var pai = call.pAssertedIdentity;
+        if (pai!=null && pai.length!=0){
+            ret = parsePAssertedIdentity(pai)[0];
+        }else{
+            ret = "Unknown/Anonymous";
+        }
+    }
+    return ret;
 }
 
 function closeIncomingView() {
@@ -917,21 +1002,22 @@ function createChat(calleeName) {
 
     //var closetab = '<a href="" id="close' + calleeName + '" class="close">&times;</a>';
     //$("#tabul").append('<li id="tab' + calleeName + '" class="ntabs">' + calleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
-    var calleeNameFull = calleeName;
-    var calleeNameId = removeNonDigitOrLetter(calleeName);
+    var shortCalleeName = calleeName;
+    var fullCalleeName = shortCalleeName;
+    var calleeNameId = removeNonDigitOrLetter(fullCalleeName);
     if (!$('li').is('#tab' + calleeNameId)) {
         var closetab = '<a href="" id="close' + calleeNameId + '" class="close">&times;</a>';
 
         // We will cut too long calleeNames to place it within chat tab
-        if (calleeNameFull.length > 21) {
-            calleeNameFull = calleeNameFull.substr(0, 21) + '...';
+        if (shortCalleeName.length > 21) {
+            shortCalleeName = shortCalleeName.substr(0, 21) + '...';
         }
 
 
-        $("#tabul").append('<li id="tab' + calleeNameId + '" class="ntabs">' + calleeNameFull + '&nbsp;' + closetab + '</li>'); //add tab with the close button
+        $("#tabul").append('<li id="tab' + calleeNameId + '" class="ntabs">' + shortCalleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
 
 
-        $('#tabcontent').append('<div class="chatBox" id="chat' + calleeNameId + '" title="'+calleeNameFull+'">'); //add chatBox
+        $('#tabcontent').append('<div class="chatBox" id="chat' + calleeNameId + '" title="'+shortCalleeName+'" fullCalleeName="'+fullCalleeName+'">'); //add chatBox
         $('#chat' + calleeNameId).append('<div class="chatTextarea"></div>')//add text area for chat messages
             .append('<input class="messageInput" type="textarea">')//add input field
             .append('<input class="messageSend" type="button" value="Send">'); //add send button
@@ -953,9 +1039,9 @@ function createChat(calleeName) {
 
         // Bind send message function
         $('#chat' + calleeNameId + ' .messageSend').click(function () {
-            var calleeName = $(this).parent().attr('title'); //parse id of current chatBox, take away chat word from the beginning
+            var fullCalleeName = $(this).parent().attr('fullCalleeName'); //parse id of current chatBox, take away chat word from the beginning
             var messageText = $(this).prev().val(); //parse text from input
-            sendMessage(calleeName, messageText, 'message/cpim',true); //send message
+            sendMessage(calleeName, messageText, 'message/cpim'); //send message
             $(this).prev().val(''); //clear message input
         });
 

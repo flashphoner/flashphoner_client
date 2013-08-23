@@ -126,12 +126,18 @@ package com.flashphoner.api
 						parameters[node] = String(xml[node]); 
 					}
 			        
-			        PhoneConfig.SERVER_URL = xml.rtmp_server;
+			        PhoneConfig.SERVER_URL = xml.wcs_server;
 					if (PhoneConfig.SERVER_URL == null) {
 						for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 							apiNotify.notifyError(ErrorCodes.WRONG_FLASHPHONER_XML);
 						}
 					}
+					
+					var serverPort:String = xml.rtmfp_port;
+					if (serverPort != null) {
+						PhoneConfig.SERVER_PORT = serverPort;
+					}
+					trace("Server port: " + PhoneConfig.SERVER_PORT)
 					
 			        PhoneConfig.APP_NAME = xml.application;
 					var check_validation_callee:String = xml.check_validation_callee;
@@ -173,7 +179,12 @@ package com.flashphoner.api
 					if (xml.keep_alive_timeout !=null && xml.keep_alive_timeout.toString() !=""){
 						PhoneConfig.KEEP_ALIVE_TIMEOUT = int(xml.keep_alive_timeout);
 					}
-					Logger.info("KEEP_ALIVE_TIMEOUT: "+PhoneConfig.KEEP_ALIVE_TIMEOUT);					
+					Logger.info("KEEP_ALIVE_TIMEOUT: "+PhoneConfig.KEEP_ALIVE_TIMEOUT);
+
+                    if (xml.push_log != null && xml.push_log.toString() != ""){
+                        PhoneConfig.PUSH_LOG = (xml.push_log == "true");
+                    }
+                    Logger.info("PUSH_LOG: "+PhoneConfig.PUSH_LOG);
 					
 					if (xml.audio_codec != null && xml.audio_codec.toString() != ""){						
 						PhoneConfig.AUDIO_CODEC = xml.audio_codec;
@@ -211,7 +222,11 @@ package com.flashphoner.api
 			        }
 			        if (xml.finish_sound != null && xml.finish_sound.toString() != ""){
 				        SoundControl.FINISH_SOUND = xml.finish_sound;
-			        }										
+			        }
+					
+					if (xml.load_balancer_url != null && xml.load_balancer_url.toString() !=""){
+			            PhoneConfig.LOAD_BALANCER_URL = xml.load_balancer_url;
+					}
 					
 			        SoundControl.updateSounds();
 			    }

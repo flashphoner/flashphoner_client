@@ -16,38 +16,73 @@ Messenger.prototype = {
         var sentMessage = this.sentMessages[message.id];
         if (sentMessage != null) {
             sentMessage.state = message.state;
-            if (sentMessage.state == "SENT") {
-                notifyMessageSent(sentMessage);
-            } else if (sentMessage.state == "ACCEPTED") {
-                notifyMessageAccepted(sentMessage);
-                if (!sentMessage.deliveryNotification) {
-                    this.removeSentMessage(sentMessage);
-                }
-            } else if (sentMessage.state == "FAILED") {
-                notifyMessageFailed(sentMessage);
-                this.removeSentMessage(sentMessage);
-            } else if (sentMessage.state == "IMDN_DELIVERED") {
-                //send OK result on IMDN request
-                notifyMessageDelivered(sentMessage);
-                this.removeSentMessage(sentMessage);
-                this.sendOkResult(notificationResult);
-            } else if (sentMessage.state == "IMDN_FAILED" || sentMessage.state == "IMDN_FORBIDDEN" || sentMessage.state == "IMDN_ERROR") {
-                //send OK result on IMDN request
-                notifyMessageDeliveryFailed(sentMessage);
-                this.removeSentMessage(sentMessage);
-                this.sendOkResult(notificationResult);
-            }
-        } else {
-            //received message
-            //send OK result on MESSAGE request
-            notifyMessageReceived(message);
+        }
+        if (message.state == "SENT") {
+            this.notifySent(sentMessage);
+        } else if (message.state == "ACCEPTED") {
+            this.notifyAccepted(sentMessage);
+        } else if (message.state == "FAILED") {
+            this.notifyFailed(sentMessage);
+        } else if (message.state == "IMDN_DELIVERED") {
+            this.notifyDelivered(message, notificationResult);
+        } else if (message.state == "IMDN_FAILED" || message.state == "IMDN_FORBIDDEN" || message.state == "IMDN_ERROR") {
+            this.notifyDeliveryFailed(message.notificationResult);
+        } else if (message.state == "RECEIVED") {
+            this.notifyReceived(message, notificationResult);
+        }
+    },
+
+    notifyReceived: function (message, notificationResult) {
+        //received message
+        //send OK result on MESSAGE request
+        notifyMessageReceived(message);
+        this.sendOkResult(notificationResult);
+    },
+
+    notifyDeliveryFailed: function (sentMessage, notificationResult) {
+        if (sentMessage != null) {
+            //send OK result on IMDN request
+            notifyMessageDeliveryFailed(sentMessage);
+            this.removeSentMessage(sentMessage);
             this.sendOkResult(notificationResult);
         }
     },
 
+    notifyDelivered: function (sentMessage, notificationResult) {
+        if (sentMessage != null) {
+            //send OK result on IMDN request
+            notifyMessageDelivered(sentMessage);
+            this.removeSentMessage(sentMessage);
+            this.sendOkResult(notificationResult);
+        }
+    },
+
+    notifyFailed: function (sentMessage) {
+        if (sentMessage != null) {
+            notifyMessageFailed(sentMessage);
+            this.removeSentMessage(sentMessage);
+        }
+    },
+
+    notifySent: function (sentMessage) {
+        if (sentMessage != null) {
+            notifyMessageSent(sentMessage);
+        }
+    },
+
+    notifyAccepted: function (sentMessage) {
+        if (sentMessage != null) {
+            notifyMessageAccepted(sentMessage);
+            if (!sentMessage.deliveryNotification) {
+                this.removeSentMessage(sentMessage);
+            }
+        }
+    },
 
     removeSentMessage: function (sentMessage) {
-        this.sentMessages[sentMessage.id] = null;
+        setTimeout(function () {
+            messenger.sentMessages[sentMessage.id] = null;
+        }, 5000);
     },
 
     sendOkResult: function (notificationResult) {
@@ -85,6 +120,7 @@ Messenger.prototype = {
         s[8] = s[13] = s[18] = s[23] = "-";
 
         var uuid = s.join("");
-        return uuid;
+
+        return uuid.substring(0, 18);
     }
 }
