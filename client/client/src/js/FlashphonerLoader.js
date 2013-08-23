@@ -14,8 +14,12 @@ FlashphonerLoader = function (config) {
     this.flashphoner = null;
     this.useWebRTC = false;
     this.urlServer = null;
+    this.wcsIP = null;
     this.wsPort = "8080";
+    this.flashPort = "1935";
+    this.appName = "phone_app";
     this.loadBalancerUrl = null;
+    this.jsonpSuccess = false;
     this.token = null;
     this.registerRequired = false;
     this.videoWidth = 320;
@@ -46,9 +50,9 @@ FlashphonerLoader.prototype = {
 
     parseFlashphonerXml: function (xml) {
         var me = this;
-        var urlServer = $(xml).find("wcs_server");
-        if (urlServer.length > 0){
-            this.urlServer = urlServer[0].textContent;
+        var wcsIP = $(xml).find("wcs_server");
+        if (wcsIP.length > 0){
+            this.wcsIP = wcsIP[0].textContent;
         } else {
             openConnectingView("Can not find 'wcs_server' in flashphoner.xml", 0);
             return;
@@ -56,6 +60,14 @@ FlashphonerLoader.prototype = {
         var wsPort = $(xml).find("ws_port");
         if(wsPort.length > 0) {
             this.wsPort = wsPort[0].textContent;
+        }
+        var flashPort = $(xml).find("flash_port");
+        if(flashPort.length > 0) {
+            this.flashPort = flashPort[0].textContent;
+        }
+        var appName = $(xml).find("application");
+        if(appName.length > 0) {
+            this.appName = appName[0].textContent;
         }
         var loadBalancerUrl = $(xml).find("load_balancer_url");
         if(loadBalancerUrl.length > 0) {
@@ -151,14 +163,55 @@ FlashphonerLoader.prototype = {
             }
         }
 
+        //get load balancer url if load balancing enabled
+        if (me.loadBalancerUrl != null) {
+            trace("Retrieve server url from load balancer");
 
+            /*
+             * this timeout is a workaround to catch errors from ajax request
+             * Unfortunately jQuery do not support error callback in case of JSONP
+             */
+            setTimeout(function () {
+                //check status of ajax request
+                if (!this.jsonpSuccess) {
+                    trace("Error occurred while retrieving load balancer data, please check your load balancer url " +
+                        me.loadBalancerUrl);
+                    me.loadAPI();
+                }
+            }, 10000)
+            var loadBalancerData = null;
+            $.ajax({
+                type: "GET",
+                url: me.loadBalancerUrl,
+                dataType: "jsonp",
+                data: loadBalancerData,
+                success: function (loadBalancerData) {
+                    this.wcsIP = loadBalancerData.server;
+                    this.wsPort = loadBalancerData.ws;
+                    this.flashPort = loadBalancerData.flash;
+                    this.jsonpSuccess = true;
+                    trace("Connection data from load balancer: "
+                        + "wcsIP " + loadBalancerData.server
+                        + ", wsPort " + loadBalancerData.ws
+                        + ", flashPort " + loadBalancerData.flash);
+                    me.loadAPI();
+                }
+            });
+        } else {
+            me.loadAPI();
+        }
+    },
+
+    loadAPI: function () {
+        var me = this;
         if (isWebRTCAvailable) {
             me.useWebRTC = true;
-            this.urlServer = "ws://" + this.urlServer + ":" + this.wsPort;
-            me.flashphoner = new WebSocketManager(this.urlServer, getElement('localVideoPreview'), getElement('remoteVideo'));
+            me.urlServer = "ws://" + this.wcsIP + ":" + this.wsPort;
+            me.flashphoner = new WebSocketManager(getElement('localVideoPreview'), getElement('remoteVideo'));
             notifyFlashReady();
         } else {
             me.useWebRTC = false;
+            me.urlServer = "rtmfp://" + this.wcsIP + ":" + this.flashPort + "/" + this.appName;
             var params = {};
             params.menu = "true";
             params.swliveconnect = "true";

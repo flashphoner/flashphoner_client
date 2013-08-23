@@ -21,21 +21,6 @@ package com.flashphoner.api.data
 	public class PhoneConfig
 	{
 		/**
-		 * Url to connect Wowza Media Server
-		 **/
-		public static var SERVER_URL:String = "";
-		
-		/**
-		 * WCS server port to connect to
-		 **/
-		public static var SERVER_PORT:String = "1935";
-		
-		/**
-		 * Name of application in Wowza Media Server
-		 **/
-		public static var APP_NAME:String ="phone_app";
-		
-		/**
 		 * Width of outgoing video
 		 **/
 		public static var VIDEO_WIDTH:int = 176;		

@@ -337,9 +337,9 @@ package com.flashphoner.api
 		 * @param username sip format username (example: sip:...)
 		 * @param password Password for user
 		 **/
-		public function login(loginObject:Object):int{
+		public function login(loginObject:Object, WCSUrl:String):int{
 			videoControl.init();
-			return phoneServerProxy.login(loginObject);							
+			return phoneServerProxy.login(loginObject, WCSUrl);							
 		}
 		
 		/**
@@ -347,7 +347,7 @@ package com.flashphoner.api
 		 * @param token Token for auth server
 		 * @param password Password for user
 		 **/		
-		public function loginByToken(token:String = null, pageUrl:String = null):void{
+		public function loginByToken(WCSUrl:String, token:String = null, pageUrl:String = null):void{
 			
 			/** 
 			 * pageUrl need here by that reason = WSP-1855 "Problem with pageUrl in Firefox"
@@ -355,7 +355,7 @@ package com.flashphoner.api
 			 */
 			Logger.info("loginByToken: " + token + ", pageUrl: " + pageUrl);
 			videoControl.init();
-			phoneServerProxy.loginByToken(token, pageUrl);
+			phoneServerProxy.loginByToken(WCSUrl, token, pageUrl);
 		}
 		
 		/**

@@ -1,6 +1,5 @@
-var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
+var WebSocketManager = function (localVideoPreview, remoteVideo) {
     var me = this;
-    me.url = url;
     me.calls = [];
     me.isOpened = false;
     me.configLoaded = false;
@@ -125,39 +124,9 @@ var WebSocketManager = function (url, localVideoPreview, remoteVideo) {
 
 WebSocketManager.prototype = {
 
-    login: function (loginObject) {
+    login: function (loginObject, WCSUrl) {
         var me = this;
-
-        //get load balancer url if load balancing enabled
-        if (flashphonerLoader.loadBalancerUrl != null) {
-            trace("Retrieve server url from load balancer");
-            var loadBalancerData;
-            $.ajax({
-                type: "GET",
-                url: flashphonerLoader.loadBalancerUrl,
-                dataType: "jsonp",
-                data: loadBalancerData,
-                success: function (loadBalancerData) {
-                    me.url = "ws://" + loadBalancerData.server + ":" + loadBalancerData.ws;
-                    trace("Server url from load balancer: " + me.url);
-                    me.connect(loginObject);
-                },
-                error: function(event) {
-                    trace("Error occurred while retrieving url from load balancer,\n" +
-                        " using url: " + me.url + " for connect.")
-                }
-
-            });
-        } else {
-            me.connect(loginObject);
-        }
-
-        return 0;
-    },
-
-    connect: function(loginObject) {
-        var me = this;
-        me.webSocket = $.websocket(me.url, {
+        me.webSocket = $.websocket(WCSUrl, {
             open: function () {
                 me.isOpened = true;
                 me.webSocket.send("connect", loginObject);
@@ -174,7 +143,7 @@ WebSocketManager.prototype = {
             context: me,
             events: me.callbacks
         });
-
+        return 0;
     },
 
     logoff: function () {

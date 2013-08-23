@@ -135,7 +135,7 @@ function login() {
         loginObject.contactParams = flashphonerLoader.contactParams;
     }
 
-    var result = flashphoner.login(loginObject);
+    var result = flashphoner.login(loginObject, flashphonerLoader.urlServer);
     closeLoginView();
     if (result == 0) {
         openConnectingView("Connecting...", 0);
@@ -151,7 +151,7 @@ function login() {
 function loginByToken(token) {
     trace("loginByToken", token);
     connectingViewBeClosed = false;
-    var result = flashphoner.loginByToken(token);
+    var result = flashphoner.loginByToken(flashphonerLoader.urlServer, token, null);
 
     closeLoginView();
     openConnectingView("Connecting...", 0);

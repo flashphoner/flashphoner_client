@@ -59,7 +59,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 				loginObject.authenticationName = authName.text;
 				loginObject.outboundProxy = outboundProxy.text;
 				loginObject.port = port.text;
-				if (DataPhone.getInstance().flash_API.login(loginObject) == 0){
+				if (DataPhone.getInstance().flash_API.login(loginObject, "rtmfp://192.168.1.5:1935/phone_app") == 0){
 					save();
 				}
 			}

@@ -126,23 +126,6 @@ package com.flashphoner.api
 						parameters[node] = String(xml[node]); 
 					}
 			        
-			        PhoneConfig.SERVER_URL = xml.wcs_server;
-					if (PhoneConfig.SERVER_URL == null) {
-						for each (var apiNotify:APINotify in Flash_API.apiNotifys){
-							apiNotify.notifyError(ErrorCodes.WRONG_FLASHPHONER_XML);
-						}
-					}
-					
-					var serverPort:String = xml.rtmfp_port;
-					if (serverPort != null) {
-						PhoneConfig.SERVER_PORT = serverPort;
-					}
-					trace("Server port: " + PhoneConfig.SERVER_PORT)
-					
-			        PhoneConfig.APP_NAME = xml.application;
-					var check_validation_callee:String = xml.check_validation_callee;
-					PhoneConfig.CHECK_VALIDATION_CALLEE = (check_validation_callee == "true");
-					
 					var use_enhanced_mic:String = xml.use_enhanced_mic;
 					
 					if (use_enhanced_mic!=null && use_enhanced_mic.length!=0){
