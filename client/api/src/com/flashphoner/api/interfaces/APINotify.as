@@ -29,6 +29,7 @@ package com.flashphoner.api.interfaces
 		function notifyMessage(messageObject:Object, notifyMessageResult:Object, sipObject:Object):void;		
 		function notifyAddCall(call:Call):void;
 		function notifyRemoveCall(call:Call):void;
+		function notifySubscription(subscribtionObj:Object, sipObj:Object):void;
 	
 		function addLogMessage(message:String):void;
 		function notifyVersion(version:String):void;
