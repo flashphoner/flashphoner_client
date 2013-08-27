@@ -146,6 +146,31 @@ WebSocketManager.prototype = {
         return 0;
     },
 
+    loginByToken: function (WCSUrl, token, pageUrl) {
+        var me = this;
+        var obj = {};
+        obj.token = token;
+        obj.pageUrl = pageUrl;
+        me.webSocket = $.websocket(WCSUrl, {
+            open: function () {
+                me.isOpened = true;
+                me.webSocket.send("connect", obj);
+            },
+            close: function (event) {
+                me.isOpened = false;
+                if (!event.originalEvent.wasClean) {
+                    notifyError(CONNECTION_ERROR);
+                }
+                notifyCloseConnection();
+            },
+            error: function () {
+            },
+            context: me,
+            events: me.callbacks
+        });
+        return 0;
+    },
+
     logoff: function () {
         trace("logoff");
         this.webSocket.close();
