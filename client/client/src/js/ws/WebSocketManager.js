@@ -151,23 +151,8 @@ WebSocketManager.prototype = {
         var obj = {};
         obj.token = token;
         obj.pageUrl = pageUrl;
-        me.webSocket = $.websocket(WCSUrl, {
-            open: function () {
-                me.isOpened = true;
-                me.webSocket.send("connect", obj);
-            },
-            close: function (event) {
-                me.isOpened = false;
-                if (!event.originalEvent.wasClean) {
-                    notifyError(CONNECTION_ERROR);
-                }
-                notifyCloseConnection();
-            },
-            error: function () {
-            },
-            context: me,
-            events: me.callbacks
-        });
+
+        me.login(obj, WCSUrl);
         return 0;
     },
 
