@@ -238,7 +238,7 @@ WebSocketManager.prototype = {
     },
 
     viewAccessMessage: function () {
-
+        this.webRtcMediaManager.viewAccessMessage();
     },
 
     getVolume: function () {
@@ -250,7 +250,7 @@ WebSocketManager.prototype = {
     },
 
     isMuted: function () {
-        return -1;
+        return this.webRtcMediaManager.isMuted;
     },
 
     getInfoAboutMe: function () {
