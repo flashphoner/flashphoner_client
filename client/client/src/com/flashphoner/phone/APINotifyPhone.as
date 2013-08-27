@@ -130,7 +130,10 @@ package com.flashphoner.phone
 		}
 		
 		public function notifyRemoveCall(call:Call):void{
-		}			
+		}
+		
+		public function notifySubscription(subscriptionObj:Object, sipObj:Object):void {
+		}
 
 		public function addLogMessage(message:String):void{
 			

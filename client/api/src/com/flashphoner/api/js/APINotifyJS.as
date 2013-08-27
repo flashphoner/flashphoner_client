@@ -72,6 +72,10 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyRemoveCall",call);
 		}
 		
+		public function notifySubscription(subscribtionObj:Object, sipObj:Object):void {
+			ExternalInterface.call("notifySubscription", subscribtionObj, sipObj);
+		}
+		
 		public function addLogMessage(message:String):void{
 			ExternalInterface.call("addLogMessage", message);
 		}

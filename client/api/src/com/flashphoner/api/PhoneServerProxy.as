@@ -127,7 +127,7 @@ package com.flashphoner.api
 		
 		public function subscribe(subscribeObj:Object):void{
 			Logger.info("subscribe "+subscribeObj);
-			nc.call("subscribe",responder,subscribeObj);
+			nc.call("subscribe",null,subscribeObj);
 		}
 		
 		/*		
@@ -253,17 +253,11 @@ package com.flashphoner.api
 				//clear FLASH logs
 				Logger.clear();
 
-				nc.call("pushLogs", new Responder(pushLogsResponder), logsToServer);
+				nc.call("pushLogs", null, logsToServer);
 				return true;
 			} else {
 				return false;
 			}
-		}
-		
-		private function pushLogsResponder(pushLogsResult:Object):void {
-			/**
-			 * pushLogsResult is empty for now.
-			 **/
 		}
 		
 		public function sendXcapRequest(xcapUrl:String):void{

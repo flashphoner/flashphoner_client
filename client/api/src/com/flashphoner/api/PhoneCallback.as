@@ -222,6 +222,12 @@ package com.flashphoner.api
 			return 200;
 		}
 		
+		public function notifySubscription(subscribtionObj:Object, sipObj:Object):void {
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				apiNotify.notifySubscription(subscribtionObj,sipObj);
+			}
+		}
+		
 		public function notifyXcapResponse(xcapResponse:String):void{
 			Logger.info("notifyXcapResponse:\n"+xcapResponse);
 			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
