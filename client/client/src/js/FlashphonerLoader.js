@@ -34,7 +34,6 @@ FlashphonerLoader = function (config) {
     this.msrpCallee = null;
     this.subscribeEvent = "reg";
     this.contactParams = null;
-    this.fetchCallerFromPai = null;
     this.imdnEnabled = false;
 
 
@@ -147,13 +146,6 @@ FlashphonerLoader.prototype = {
         if (contactParams.length > 0) {
             if (contactParams[0].textContent.length) {
                 this.contactParams = contactParams[0].textContent;
-            }
-        }
-
-        var fetchCallerFromPai = $(xml).find("fetch_caller_from_pai");
-        if (fetchCallerFromPai.length > 0) {
-            if (fetchCallerFromPai[0].textContent.length) {
-                this.fetchCallerFromPai = fetchCallerFromPai[0].textContent;
             }
         }
 

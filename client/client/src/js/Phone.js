@@ -603,7 +603,7 @@ function notifyOpenVideoView(isViewed) {
 function notifyMessageReceived(messageObject) {
     openChatView();
     trace("notifyMessageReceived", messageObject);
-    var from = findMessageSender(messageObject);
+    var from = messageObject.from.toLowerCase();
     createChat(from);
     var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
     var body = convertMessageBody(messageObject.body, messageObject.contentType);
@@ -628,39 +628,6 @@ function convertMessageBody(messageBody, contentType) {
 
     return messageBody;
 
-}
-
-function findMessageSender(messageObject) {
-    var from = messageObject.from.toLowerCase();
-    if (flashphonerLoader.fetchCallerFromPai == "true") {
-        if (messageObject.pAssertedIdentity != null && messageObject.pAssertedIdentity.length != 0) {
-            var pAssertedIdentity = parsePAssertedIdentity(messageObject.pAssertedIdentity);
-            //Looking for a tab by pAssertedIdentity
-            for (var key in pAssertedIdentity) {
-                if (isChatTabExists(pAssertedIdentity[key])) {
-                    from = pAssertedIdentity[key];
-                    break;
-                }
-            }
-        } else {
-            from = "Unknown/Anonymous";
-        }
-    }
-    return from;
-}
-
-//Example: <sip:user@domain.com>,<tel:012345>
-function parsePAssertedIdentity(pAssertedIdentity) {
-    var arr = pAssertedIdentity.split(",");
-    for (var i = 0; i < arr.length; i++) {
-        var pAssertedIdentityValue = arr[i];
-        arr[i] = pAssertedIdentityValue.replace("/</g", "").replace("/>/g", "");
-    }
-    return arr;
-}
-
-function isChatTabExists(calleeName) {
-    return $('li').is('#tab' + removeNonDigitOrLetter(calleeName));
 }
 
 function addMessageToChat(chatDiv, from, body, className, messageId) {
@@ -895,19 +862,6 @@ function openIncomingView(call) {
         hangup(call.id);
         closeIncomingView();
     });
-}
-
-function getDisplayedCallerByPai(displayedCaller) {
-    var ret = displayedCaller;
-    if (flashphonerLoader.fetchCallerFromPai == "true") {
-        var pai = call.pAssertedIdentity;
-        if (pai != null && pai.length != 0) {
-            ret = parsePAssertedIdentity(pai)[0];
-        } else {
-            ret = "Unknown/Anonymous";
-        }
-    }
-    return ret;
 }
 
 function closeIncomingView() {
