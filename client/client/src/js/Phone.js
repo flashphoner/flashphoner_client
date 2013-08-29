@@ -847,7 +847,6 @@ function openIncomingView(call) {
     trace("openIncomingView", call)// call.caller, call.visibleNameCaller
 
     var displayedCaller = call.caller + " '" + call.visibleNameCaller + "'";
-    displayedCaller = getDisplayedCallerByPai(displayedCaller);
 
     $('#incomingDiv').show();
     $('#callerField').html(displayedCaller);
