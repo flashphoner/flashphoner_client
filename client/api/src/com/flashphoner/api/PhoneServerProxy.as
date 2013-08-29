@@ -66,57 +66,22 @@ package com.flashphoner.api
 		}
 		
 		public function login(loginObject:Object, WCSUrl:String):int{
-			var login:String = loginObject.login;
-			var authenticationName:String = loginObject.authenticationName;
-			var password:String = loginObject.password;
-			var domain:String = loginObject.domain;
-			var outboundProxy:String = loginObject.outboundProxy;
-			var port:String = loginObject.port;
-			var qValue:String = loginObject.qValue;
-			var contactParams:String = loginObject.contactParams;
 			
 			var modelLocator:ModelLocator = flash_API.modelLocator;
-			var obj:Object = new Object();
-			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
-			obj.login = login;
-			if (authenticationName == null || authenticationName == ""){
-				obj.authenticationName = login;
-			}else{
-				obj.authenticationName = authenticationName; 
-			}
-			obj.password = password;
-			obj.width = PhoneConfig.VIDEO_WIDTH;
-			obj.height = PhoneConfig.VIDEO_HEIGHT;
-			obj.domain = domain;
-			obj.outboundProxy = outboundProxy;
-			obj.port = port;
-			obj.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
-			obj.visibleName = modelLocator.visibleName;
-			obj.qValue = qValue;
-			obj.contactParams = contactParams; 
-						
-			createConnection(obj, WCSUrl);
-			return 0;			
-		}
+			loginObject.registerRequired = PhoneConfig.REGISTER_REQUIRED;
 
-		
-		public function loginByToken(WCSUrl:String, token:String = null, pageUrl:String = null):void{
+			loginObject.width = PhoneConfig.VIDEO_WIDTH;
+			loginObject.height = PhoneConfig.VIDEO_HEIGHT;
+			loginObject.supportedResolutions = PhoneConfig.SUPPORTED_RESOLUTIONS;
 			
-			/** 
-			 * pageUrl need here by that reason = WSP-1855 "Problem with pageUrl in Firefox"
-			 * if client broswer is Firefox, default pageUrl not works, and we send from js special pageUrl 
-			 */
-			
-			var modelLocator:ModelLocator = flash_API.modelLocator;
-			var obj:Object = new Object();
-			obj.registerRequired = PhoneConfig.REGISTER_REQUIRED;
-			obj.token = token;
-			obj.pageUrl = pageUrl;
-			obj.width = PhoneConfig.VIDEO_WIDTH;
-			obj.height = PhoneConfig.VIDEO_HEIGHT;
-			
-			createConnection(obj, WCSUrl);
-			
+			if (loginObject.token == null) { 
+				if (loginObject.authenticationName == null || loginObject.authenticationName == ""){
+					loginObject.authenticationName = loginObject.login;
+				}
+				loginObject.visibleName = modelLocator.visibleName;
+			}			
+			createConnection(loginObject, WCSUrl);
+			return 0;			
 		}
 		
 		private function createConnection(obj:Object, WCSUrl:String):void {

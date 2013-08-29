@@ -146,6 +146,16 @@ WebSocketManager.prototype = {
         return 0;
     },
 
+    loginByToken: function (WCSUrl, token, pageUrl) {
+        var me = this;
+        var obj = {};
+        obj.token = token;
+        obj.pageUrl = pageUrl;
+
+        me.login(obj, WCSUrl);
+        return 0;
+    },
+
     logoff: function () {
         trace("logoff");
         this.webSocket.close();

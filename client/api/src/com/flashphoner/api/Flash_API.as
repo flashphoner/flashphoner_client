@@ -354,8 +354,12 @@ package com.flashphoner.api
 			 * if client broswer is Firefox, default pageUrl not works, and we send from js special pageUrl 
 			 */
 			Logger.info("loginByToken: " + token + ", pageUrl: " + pageUrl);
+			var obj:Object = {};
+			obj.token = token;
+			obj.pageUrl = pageUrl;
+			
 			videoControl.init();
-			phoneServerProxy.loginByToken(WCSUrl, token, pageUrl);
+			phoneServerProxy.login(obj, WCSUrl);
 		}
 		
 		/**
