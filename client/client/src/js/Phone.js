@@ -601,6 +601,10 @@ function notifyOpenVideoView(isViewed) {
 }
 
 function notifyMessageReceived(messageObject) {
+    //ignore application/im-iscomposing+xml RFC3994
+    if (messageObject.contentType == "application/im-iscomposing+xml") {
+        return;
+    }
     openChatView();
     trace("notifyMessageReceived", messageObject);
     var from = messageObject.from.toLowerCase();
