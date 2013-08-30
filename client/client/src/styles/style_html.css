@@ -749,10 +749,10 @@ div with zero size.
     border-top: none;
 }
 #micBack {
-    left: -1px;
+    left: 23px;
 }
 #speakerBack {
-    left: 23px;
+    left: -1px;
 }
 #micSlider {
     left: 8px;
@@ -765,11 +765,11 @@ div with zero size.
     height: 80px !important;
     border: 1px solid #999 !important;
     background-color: #ddd !important;
-    box-shadow: inset 0px 0px 1px #777 !important;*/
+    box-shadow: inset 0px 0px 1px #777 !important;
     }
 .ui-slider-handle {
     left: -5px !important;
-    border-radius: 8px !important;*/
+    border-radius: 8px !important;
 cursor: pointer !important;
 border: 1px solid #888 !important;
 box-shadow: inset 0px 1px 0px #fff, 0px 0px 1px #777;
