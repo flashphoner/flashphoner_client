@@ -23,7 +23,6 @@ UIManagerWebRtc.prototype = {
     },
 
     closeRequestUnmute: function() {
-        closeInfoView();
     },
 
     viewAccessMessage: function() {

@@ -826,6 +826,7 @@ function closeConnectingView() {
 }
 
 function openInfoView(str, timeout, height) {
+    trace("openInfoView", str, timeout);
     if (timeout != 0) {
         window.setTimeout("closeInfoView();", timeout);
     }
