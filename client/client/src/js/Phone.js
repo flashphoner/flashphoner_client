@@ -716,7 +716,7 @@ function createCallView(call) {
 
     $('#transferButton').unbind('click');
     $('#transferButton').click(function () {
-        openTransferView(currentCall);
+        openTransferView();
     });
 }
 
@@ -940,22 +940,22 @@ function closeCallView() {
 }
 /*-----------------*/
 /* ----- TRANSFER ----- */
-function openTransferView(call) {
+function openTransferView() {
     trace("openTransferView");
     $('#transferOk').unbind('click');
     $('#transferOk').click(function () {
-        if (call.state == STATE_HOLD) {
+        if (currentCall.state == STATE_HOLD) {
             transfer(currentCall.id, $('#transferInput').val());
             closeTransferView();
         } else {
             needOpenTransferView = true;
-            setStatusHold(call.id, true);
+            setStatusHold(currentCall.id, true);
         }
     });
 
     if (call.state != STATE_HOLD) {
         needOpenTransferView = true;
-        setStatusHold(call.id, true);
+        setStatusHold(currentCall.id, true);
     } else {
         getElement('transfer').style.visibility = "visible";
     }
