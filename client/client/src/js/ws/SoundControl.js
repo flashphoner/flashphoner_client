@@ -13,21 +13,22 @@
 var SoundControl = function () {
     me = this;
     //Init sounds
-    me.ringSound = me.initSound(flashphonerLoader.ringSound, true);
-    me.busySound = me.initSound(flashphonerLoader.busySound);
-    me.registerSound = me.initSound(flashphonerLoader.registerSound);
-    me.finishSound = me.initSound(flashphonerLoader.finishSound);
+    me.registerSound = me.initSound(flashphonerLoader.registerSound, false, "auto");
+    me.ringSound = me.initSound(flashphonerLoader.ringSound, true, "none");
+    me.busySound = me.initSound(flashphonerLoader.busySound,false, "none");
+    me.finishSound = me.initSound(flashphonerLoader.finishSound,false, "none");
 };
 
 SoundControl.prototype = {
 
     //Creates HTML5 audio tag
-    initSound: function (src, loop) {
+    initSound: function (src, loop, preload) {
         if (typeof loop == 'undefined') {
             loop = false;
         }
         var audioTag = document.createElement("audio");
         audioTag.autoplay = false;
+        audioTag.preload = preload;
         if (loop) {
             audioTag.loop = true;
         }
