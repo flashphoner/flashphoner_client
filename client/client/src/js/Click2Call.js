@@ -12,6 +12,8 @@
  Other license versions by negatiation. Write us support@flashphoner.com with any questions.
  */
 var flashphoner;
+var flashphoner_UI;
+var flashphonerLoader;
 
 // One call become two calls during TRANSFER case
 // there is why we need at least two kinds of calls here
@@ -39,55 +41,6 @@ var timerTimeout;
 var testInviteParameter = new Object;
 testInviteParameter['param1'] = "value1";
 testInviteParameter['param2'] = "value2";
-
-// trace log to the console in the demo page
-function trace(funcName, param1, param2, param3) {
-
-    var today = new Date();
-    // get hours, minutes and seconds
-    var hh = today.getHours();
-    var mm = today.getMinutes();
-    var ss = today.getSeconds();
-
-    // Add '0' if it < 10 to see 14.08.06 instead of 14.6.8
-    hh = hh == 0 ? '00' : hh < 10 ? '0' + hh : hh;
-    mm = mm == 0 ? '00' : mm < 10 ? '0' + mm : mm;
-    ss = ss == 0 ? '00' : ss < 10 ? '0' + ss : ss;
-
-    // set time 
-    var time = hh + ':' + mm + ':' + ss;
-
-    var div1 = div2 = '';
-
-    var console = $("#console");
-    // Check if console is scrolled down? Or may be you are reading previous messages.
-    var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37);
-
-    // Check if we set params and set it ????? instead of 'undefined' if not, also set dividers equal to ', ' 
-    if (typeof param1 == 'undefined') {
-        param1 = '';
-    }
-    if (typeof param2 == 'undefined') {
-        param2 = '';
-    } else {
-        var div1 = ', ';
-    }
-    if (typeof param3 == 'undefined') {
-        param3 = '';
-    } else {
-        var div2 = ', ';
-    }
-
-    // Print message to console
-    if (traceEnabled) {
-        console.append('<grey>' + time + ' - ' + '</grey>' + funcName + '<grey>' + '(' + param1 + div1 + param2 + div2 + param3 + ')' + '</grey>' + '<br>');
-    }
-
-    //Autoscroll cosole if you are not reading previous messages
-    if (isScrolled < 1) {
-        console[0].scrollTop = console[0].scrollHeight;
-    }
-}
 
 function timer() {
 
@@ -125,12 +78,8 @@ function timer() {
 }
 
 $(document).ready(function () {
-    if (playerIsRight()) {
-        $('#callState').html('...Loading...');
-    } else {
-        $('#callState').html('You have old flash player');
-        trace("Download flash player from: http://get.adobe.com/flashplayer/");
-    }
+    $('#callState').html('...Loading...');
+    flashphonerLoader = new FlashphonerLoader();
 });
 
 
@@ -143,7 +92,7 @@ function loginByToken(token) {
         trace("Client browser is Firefox");
     }
 
-    var result = flashphoner.loginByToken(token, pageUrl);
+    var result = flashphoner.loginByToken(flashphonerLoader.urlServer, token, pageUrl);
 }
 
 function getInfoAboutMe() {
@@ -254,6 +203,8 @@ function addLogMessage(message) {
 
 function notifyFlashReady() {
     trace("notifyFlashReady");
+    flashphoner = flashphonerLoader.getFlashphoner();
+    flashphoner_UI = flashphonerLoader.getFlashphonerUI();
     $('versionOfProduct').html(getVersion());
     loginByToken(null);
     $("#micSlider").slider("option", "value", getMicVolume());
@@ -287,7 +238,14 @@ function notifyRegistered() {
     if (registerRequired) {
         isLogged = true;
         callByToken(callToken);
+        flashphoner.playSound("REGISTER");
     }
+
+    if (flashphonerLoader.subscribeEvent != null && flashphonerLoader.subscribeEvent.length != 0) {
+        subscribeReg();
+    }
+
+    sendXcapRequest();
 }
 
 function notifyBalance(balance) {
@@ -568,8 +526,8 @@ $(function () {
     }).mouseup(function () {
             $(this).removeClass('pressed');
         }).mouseover(function () {
-        $(this).removeClass('pressed');
-    });
+            $(this).removeClass('pressed');
+        });
 
     // dialpad button opens dialpad
     $("#dialpadButton").click(function () {
