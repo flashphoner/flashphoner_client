@@ -31,7 +31,7 @@ var isMutedMicButton = false;
 var isMutedSpeakerButton = false;
 var proportion = 0;
 var proportionStreamer = 0;
-var callToken = "";
+var callToken = "testcalltoken";
 
 var timerHours = 0;
 var timerMinutes = 0;
@@ -41,6 +41,8 @@ var timerTimeout;
 var testInviteParameter = new Object;
 testInviteParameter['param1'] = "value1";
 testInviteParameter['param2'] = "value2";
+
+var logs;
 
 function timer() {
 
@@ -205,10 +207,14 @@ function notifyFlashReady() {
     trace("notifyFlashReady");
     flashphoner = flashphonerLoader.getFlashphoner();
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
-    $('versionOfProduct').html(getVersion());
-    loginByToken(null);
-    $("#micSlider").slider("option", "value", getMicVolume());
-    $("#speakerSlider").slider("option", "value", getVolume());
+    if (flashphonerLoader.getToken()) {
+        loginByToken(flashphonerLoader.getToken());
+    } else {
+        console.log("Please, specify token in flashphoner.xml!");
+    }
+    //todo decide what we should do in case of webrtc
+//    $("#micSlider").slider("option", "value", getMicVolume());
+//    $("#speakerSlider").slider("option", "value", getVolume());
 }
 
 function notifyRegisterRequired(registerR) {
@@ -241,11 +247,13 @@ function notifyRegistered() {
         flashphoner.playSound("REGISTER");
     }
 
-    if (flashphonerLoader.subscribeEvent != null && flashphonerLoader.subscribeEvent.length != 0) {
+    //todo decide if we need subscribeReg in c2c implementation
+    /*if (flashphonerLoader.subscribeEvent != null && flashphonerLoader.subscribeEvent.length != 0) {
         subscribeReg();
     }
 
     sendXcapRequest();
+    */
 }
 
 function notifyBalance(balance) {
@@ -272,6 +280,8 @@ function notify(call) {
             initSendVideoButton();
             $('#callState').html('Finished');
             toCallState();
+            flashphoner.stopSound("RING");
+            flashphoner.playSound("FINISH");
 
             timerMinutes = 0;
             timerHours = 0;
@@ -284,11 +294,13 @@ function notify(call) {
             // or if call is started talk
         } else if (call.state == STATE_TALK) {
             $('#callState').html('...Talking...');
+            flashphoner.stopSound("RING");
             timer();
             $("#timer").show();
             // or if we just ringing
         } else if (call.state == STATE_RING) {
             $('#callState').html('...Ringing...');
+            flashphoner.playSound("RING");
         }
     }
 }
