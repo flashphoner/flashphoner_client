@@ -111,10 +111,15 @@ function callByToken(token) {
     trace("callByToken", token);
     if (isLogged) {
         if (isMuted() == 1) {
-            intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId);callByToken(callToken);}', 500);
-            requestUnmute();
+            intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId);callByToken(callToken);}', 500);
+            flashphoner_UI.requestUnmute();
         } else if (isMuted() == -1) {
-            var result = flashphoner.callByToken(token, false, testInviteParameter);
+            var callRequest = {};
+            callRequest.token = token;
+            callRequest.inviteParameters = testInviteParameter;
+            callRequest.isMsrp = false;
+            callRequest.hasVideo = false;
+            var result = flashphoner.callByToken(callRequest);
             if (result == 0) {
                 $('#callState').html('...Calling...');
                 toHangupState();
@@ -207,14 +212,20 @@ function notifyFlashReady() {
     trace("notifyFlashReady");
     flashphoner = flashphonerLoader.getFlashphoner();
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
+    if (flashphonerLoader.useWebRTC) {
+        $('#cameraButton').css('visibility', 'hidden');
+        $('#micButton').css('visibility', 'hidden');
+    }
+
     if (flashphonerLoader.getToken()) {
         loginByToken(flashphonerLoader.getToken());
     } else {
         console.log("Please, specify token in flashphoner.xml!");
     }
-    //todo decide what we should do in case of webrtc
-//    $("#micSlider").slider("option", "value", getMicVolume());
-//    $("#speakerSlider").slider("option", "value", getVolume());
+    if (!flashphonerLoader.useWebRTC) {
+        $("#micSlider").slider("option", "value", getMicVolume());
+    }
+    $("#speakerSlider").slider("option", "value", getVolume());
 }
 
 function notifyRegisterRequired(registerR) {

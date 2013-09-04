@@ -156,15 +156,10 @@ WebSocketManager.prototype = {
         return 0;
     },
 
-    callByToken: function (callToken, isVideoCall, inviteParameters) {
+    callByToken: function (callRequest) {
         var me = this;
         openInfoView("Configuring WebRTC connection...", 0, 60);
         this.webRtcMediaManager.createOffer(function (sdp) {
-            var callRequest = {};
-            callRequest.token = callToken;
-            callRequest.inviteParameters = inviteParameters;
-            callRequest.isMsrp = false;
-            callRequest.hasVideo = isVideoCall;
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
         }, false);

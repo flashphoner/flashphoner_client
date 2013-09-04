@@ -114,9 +114,9 @@ package com.flashphoner.api
 			nc.call("call", responder, callObject);
 		}
 		
-		public function callByToken(token:String, isVideoCall:Boolean, inviteParameters:Object):void{
+		public function callByToken(callObject:Object):void{
 			Logger.info("PhoneServerProxy.callByToken()");
-			nc.call("call",responder, null, null, isVideoCall, token,inviteParameters);
+			nc.call("call",responder, callObject);
 		}		
 		
 		public function disconnect():void {

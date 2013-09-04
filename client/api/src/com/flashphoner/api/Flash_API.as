@@ -409,8 +409,8 @@ package com.flashphoner.api
 		 * Create new call by URL
 		 * @param isVideoCall video call?(true/false)
 		 **/ 		
-		public function callByToken(token:String, isVideoCall:Boolean = true, inviteParameters:Object = null):int{
-			phoneServerProxy.callByToken(token,isVideoCall, inviteParameters);
+		public function callByToken(callObject:Object):int{
+			phoneServerProxy.callByToken(callObject);
 			return 0;
 		}
 			

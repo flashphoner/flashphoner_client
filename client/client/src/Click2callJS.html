@@ -1,6 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-<head>
 <!--
 Copyright (c) 2011 Flashphoner
 All rights reserved. This Code and the accompanying materials
@@ -13,37 +12,38 @@ Contributors:
 
 This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 -->
+<head>
 
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-<!-- JQuery -->
-<script type="text/javascript" src="js/jquery/jquery.js"></script>
-<script type="text/javascript" src="js/jquery/jquery-ui.js"></script>
-<script type="text/javascript" src="js/jquery/jquery.websocket.js"></script>
-<script type="text/javascript" src="js/jquery/jquery.json.js"></script>
-<!-- ****** -->
+    <!-- JQuery -->
+    <script type="text/javascript" src="js/jquery/jquery.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="js/jquery/jquery.json.js"></script>
+    <!-- ****** -->
 
-<!-- Styles -->
-<link rel="stylesheet" type="text/css" href="styles/trackbar.css" />
-<link rel="stylesheet" type="text/css" href="styles/style_html_c2c.css" />
-<link rel="stylesheet" type="text/css" href="styles/style_jquery_ui_1.8.15.css" />
-<!-- ****** -->
+    <!-- Styles -->
+    <link rel="stylesheet" type="text/css" href="styles/trackbar.css" />
+    <link rel="stylesheet" type="text/css" href="styles/style_html_c2c.css" />
+    <link rel="stylesheet" type="text/css" href="styles/style_jquery_ui_1.8.15.css" />
+    <!-- ****** -->
 
-<!-- Other scripts -->
-<script type="text/javascript" src="js/swf/swfobject.js"></script>
-<script type="text/javascript" src="js/trackbar.js"></script>
-<script type="text/javascript" src="js/rtc/WebRtcMediaManager.js"></script>
-<script type="text/javascript" src="js/ws/SoundControl.js"></script>
-<script type="text/javascript" src="js/ws/Messenger.js"></script>
-<script type="text/javascript" src="js/rtc/Adapter.js"></script>
-<script type="text/javascript" src="js/ui/UIManagerWebRtc.js"></script>
-<script type="text/javascript" src="js/ui/UIManagerFlash.js"></script>
-<script type="text/javascript" src="js/ws/WebSocketManager.js"></script>
-<script type="text/javascript" src="js/StaticData.js"></script>
-<script type="text/javascript" src="js/Click2Call.js"></script>
-<script type="text/javascript" src="js/FlashphonerLoader.js"></script>
-<!-- ************* -->
-<title>Click2Call</title>
+    <!-- Other scripts -->
+    <script type="text/javascript" src="js/swf/swfobject.js"></script>
+    <script type="text/javascript" src="js/trackbar.js"></script>
+    <script type="text/javascript" src="js/rtc/WebRtcMediaManager.js"></script>
+    <script type="text/javascript" src="js/ws/SoundControl.js"></script>
+    <script type="text/javascript" src="js/ws/Messenger.js"></script>
+    <script type="text/javascript" src="js/rtc/Adapter.js"></script>
+    <script type="text/javascript" src="js/ui/UIManagerWebRtc.js"></script>
+    <script type="text/javascript" src="js/ui/UIManagerFlash.js"></script>
+    <script type="text/javascript" src="js/ws/WebSocketManager.js"></script>
+    <script type="text/javascript" src="js/StaticData.js"></script>
+    <script type="text/javascript" src="js/Click2Call.js"></script>
+    <script type="text/javascript" src="js/FlashphonerLoader.js"></script>
+    <!-- ************* -->
+    <title>Click2Call</title>
 </head>
 <body>
 
@@ -65,28 +65,28 @@ This code and accompanying materials also available under LGPL and MPL license f
   
     <!-- ************** Dialpad ************ -->  
     <div class="dialPad" id="dialPad">  
-    <div class="dialScreen"></div>  
-    <div class="dialButtonLine">   
-      <div class="button dialButton" id="1b">1</div>    
-      <div class="button dialButton" id="2b">2</div>    
-      <div class="button dialButton" id="3b">3</div>  
-    </div>  
-    <div class="dialButtonLine">    
-      <div class="button dialButton" id="4b">4</div>    
-      <div class="button dialButton" id="5b">5</div>    
-      <div class="button dialButton" id="6b">6</div>  
-    </div>  
-    <div class="dialButtonLine">    
-      <div class="button dialButton" id="7b">7</div>    
-      <div class="button dialButton" id="8b">8</div>    
-      <div class="button dialButton" id="9b">9</div>  
-    </div>     
-    <div class="dialButtonLine">       
-      <div class="button dialButton" id="asterisk">*</div>                     
-      <div class="button dialButton" id="0b">0</div>    
-      <div class="button dialButton" id="hash">#</div>  
+        <div class="dialScreen"></div>
+        <div class="dialButtonLine">
+          <div class="button dialButton" id="1b">1</div>
+          <div class="button dialButton" id="2b">2</div>
+          <div class="button dialButton" id="3b">3</div>
+        </div>
+        <div class="dialButtonLine">
+          <div class="button dialButton" id="4b">4</div>
+          <div class="button dialButton" id="5b">5</div>
+          <div class="button dialButton" id="6b">6</div>
+        </div>
+        <div class="dialButtonLine">
+          <div class="button dialButton" id="7b">7</div>
+          <div class="button dialButton" id="8b">8</div>
+          <div class="button dialButton" id="9b">9</div>
+        </div>
+        <div class="dialButtonLine">
+          <div class="button dialButton" id="asterisk">*</div>
+          <div class="button dialButton" id="0b">0</div>
+          <div class="button dialButton" id="hash">#</div>
+        </div>
     </div>
-    </div>  
          
     <!-- **************** Slider ***************** --> 
     <div id="micSlider"></div>
@@ -95,28 +95,29 @@ This code and accompanying materials also available under LGPL and MPL license f
     <div id="speakerBack"></div>
   
   </div>
-<!-- ****** Request ***** -->
-<div class="back"></div>
-<div class="request">
-  Click "Allow" to continue
-</div>
-<!-- **************** -->
+
+  <!-- ****** Request ***** -->
+  <div class="back"></div>
+  <div class="request">
+    Click "Allow" to continue
+  </div>
+  <!-- **************** -->
 
 
-<!-- ***** Flash ******* -->
-<div id="flash" class="init">
-    <div id="video">
-        <div id="videoDiv" style="width:100%; height:100%">
-            <video id="remoteVideo" autoplay style="background-color: #000000; width:640px; height:480px;"></video>
-            <video id="localVideoPreview" autoplay class="ui-widget-content"
-                   style="background-color: #000000; width: 160px; height: 120px; position: absolute; z-index: 40;top:0;left:0;"></video>
-        </div>
-    </div>
-</div>
-<!-- **************** -->
+  <!-- ***** Flash ******* -->
+  <div id="flash" class="init">
+      <div id="video">
+          <div id="videoDiv" style="width:100%; height:100%">
+              <video id="remoteVideo" autoplay style="background-color: #000000; width:640px; height:480px;"></video>
+              <video id="localVideoPreview" autoplay class="ui-widget-content"
+                     style="background-color: #000000; width: 160px; height: 120px; position: absolute; z-index: 40;top:0;left:0;"></video>
+          </div>
+      </div>
+  </div>
+  <!-- **************** -->
 
-<!-- // TODO change img to background -->
-<div class="sendVideoButton"><img id="sendVideoButtonImage" src="assets/c2c_play.png"/></div>
+  <!-- // TODO change img to background -->
+  <div class="sendVideoButton"><img id="sendVideoButtonImage" src="assets/c2c_play.png"/></div>
 
 </div> <!-- end of c2c -->
 

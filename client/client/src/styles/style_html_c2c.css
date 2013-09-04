@@ -161,8 +161,8 @@ img {
 }
 #soundButton {
 	left: 49px;
-  background-image: url('../assets/c2c_speaker.png');
-  -pie-background: url(assets/c2c_speaker.png) no-repeat center, linear-gradient(#555555, #444444);
+  background-image: url('../assets/c2c_sound.png');
+  -pie-background: url(assets/c2c_sound.png) no-repeat center, linear-gradient(#555555, #444444);
 }
 #dialpadButton {
 	right: 6px;
