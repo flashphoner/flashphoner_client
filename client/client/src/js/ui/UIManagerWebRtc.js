@@ -22,7 +22,15 @@ UIManagerWebRtc.prototype = {
 
     },
 
+    requestUnmuteC2C: function() {
+        this.requestUnmute();
+    },
+
     closeRequestUnmute: function() {
+    },
+
+    closeRequestUnmuteC2C: function() {
+        this.closeRequestUnmute();
     },
 
     viewAccessMessage: function() {

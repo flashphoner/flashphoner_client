@@ -158,8 +158,9 @@ WebSocketManager.prototype = {
 
     callByToken: function (callRequest) {
         var me = this;
-        openInfoView("Configuring WebRTC connection...", 0, 60);
+        openInfoView("Configuring WebRTC connection...", 0);
         this.webRtcMediaManager.createOffer(function (sdp) {
+            closeInfoView();
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
         }, false);

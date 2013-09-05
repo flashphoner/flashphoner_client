@@ -31,10 +31,25 @@ UIManagerFlash.prototype = {
 
     },
 
+    requestUnmuteC2C: function() {
+        trace("requestUnmuteC2C");
+        $('.back').show();
+        $('.request').show();
+        $('#flash').removeClass('init').addClass('security');
+        this.viewAccessMessage();
+    },
+
     closeRequestUnmute: function() {
         trace("closeRequestUnmute");
         $('#video_requestUnmuteDiv').removeClass().addClass('closed');
         getElement('video').style.top = "20px";
+    },
+
+    closeRequestUnmuteC2C: function() {
+        trace("closeRequestUnmuteC2C");
+        $('.back').hide();
+        $('.request').hide();
+        $('#flash').addClass('init').removeClass('security');
     },
 
     viewAccessMessage: function() {

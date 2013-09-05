@@ -558,15 +558,16 @@ position: absolute;
 /* -------------------------------------- */
 /* ------------------ Info ------------------------ */
 #infoDiv {
-	top: 120px;
-	left: 10px;
-	height: 30px;
+	top: 50px;
+	height: auto;
 	width: 200px;
+    margin: 0 auto;
+    position: relative;
 	padding: 10px;
-	float: left;
 	visibility: hidden;
 	font: 16px Arial;
-	color: #aaa;
+	color: #000000;
+    background-color: #FFFFFF;
 	text-align: center;
 	line-height: 30px;
 	-moz-opacity: 0.95;

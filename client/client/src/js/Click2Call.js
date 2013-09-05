@@ -80,14 +80,14 @@ function timer() {
 }
 
 $(document).ready(function () {
-    $('#callState').html('...Loading...');
+    changeCallStateInfo("...Loading...");
     flashphonerLoader = new FlashphonerLoader();
 });
 
 
 function loginByToken(token) {
     trace("loginByToken", window.location, token);
-    $('#callState').html('...Calling...');
+    changeCallStateInfo("...Registering...");
 
     if (navigator.userAgent.indexOf("Firefox") != -1) {
         var pageUrl = window.location.toString();
@@ -111,17 +111,18 @@ function callByToken(token) {
     trace("callByToken", token);
     if (isLogged) {
         if (isMuted() == 1) {
-            intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId);callByToken(callToken);}', 500);
-            flashphoner_UI.requestUnmute();
+            intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmuteC2C(); clearInterval(intervalId);callByToken(callToken);}', 500);
+            flashphoner_UI.requestUnmuteC2C();
         } else if (isMuted() == -1) {
             var callRequest = {};
             callRequest.token = token;
             callRequest.inviteParameters = testInviteParameter;
+            callRequest.callee = null;
             callRequest.isMsrp = false;
             callRequest.hasVideo = false;
             var result = flashphoner.callByToken(callRequest);
             if (result == 0) {
-                $('#callState').html('...Calling...');
+                changeCallStateInfo("...Calling...");
                 toHangupState();
             }
         } else {
@@ -215,15 +216,14 @@ function notifyFlashReady() {
     if (flashphonerLoader.useWebRTC) {
         $('#cameraButton').css('visibility', 'hidden');
         $('#micButton').css('visibility', 'hidden');
+    } else {
+        $("#micSlider").slider("option", "value", getMicVolume());
     }
 
     if (flashphonerLoader.getToken()) {
         loginByToken(flashphonerLoader.getToken());
     } else {
         console.log("Please, specify token in flashphoner.xml!");
-    }
-    if (!flashphonerLoader.useWebRTC) {
-        $("#micSlider").slider("option", "value", getMicVolume());
     }
     $("#speakerSlider").slider("option", "value", getVolume());
 }
@@ -239,7 +239,7 @@ function notifyCloseConnection() {
     isLogged = false;
     closeVideoView();
     initSendVideoButton();
-    $('#callState').html('Finished');
+    changeCallStateInfo("Finished");
 }
 
 function notifyConnected() {
@@ -253,9 +253,9 @@ function notifyConnected() {
 function notifyRegistered() {
     trace("notifyRegistered");
     if (registerRequired) {
+        changeCallStateInfo("Registered");
         isLogged = true;
         callByToken(callToken);
-        flashphoner.playSound("REGISTER");
     }
 
     //todo decide if we need subscribeReg in c2c implementation
@@ -280,7 +280,7 @@ function notify(call) {
                 $('#caller').css('font-size', 20);
                 $('#caller').css('top', 95);
             }
-            $('#caller').html(currentCall.visibleNameCallee);
+            $('#caller').html(currentCall.visibleNameCallee.replace(/^<|>$/g, ""));
         } else {
             $('#caller').html(currentCall.callee);
         }
@@ -289,7 +289,7 @@ function notify(call) {
             proportion = 0;
             closeVideoView();
             initSendVideoButton();
-            $('#callState').html('Finished');
+            changeCallStateInfo("Finished");
             toCallState();
             flashphoner.stopSound("RING");
             flashphoner.playSound("FINISH");
@@ -301,17 +301,20 @@ function notify(call) {
             clearTimeout(timerTimeout);
             // if call is holded
         } else if (call.state == STATE_HOLD) {
-            $('#callState').html('...Holded...');
+            changeCallStateInfo("...Holded...");
             // or if call is started talk
         } else if (call.state == STATE_TALK) {
-            $('#callState').html('...Talking...');
+            changeCallStateInfo("...Talking...");
             flashphoner.stopSound("RING");
             timer();
             $("#timer").show();
             // or if we just ringing
         } else if (call.state == STATE_RING) {
-            $('#callState').html('...Ringing...');
+            changeCallStateInfo("...Ringing...");
             flashphoner.playSound("RING");
+        } else if (call.state == STATE_BUSY) {
+            flashphoner.playSound("BUSY");
+            changeCallStateInfo("Busy");
         }
     }
 }
@@ -402,14 +405,23 @@ function notifyVersion(version) {
 
 function openInfoView(str, timeout) {
     if (timeout != 0) {
-        window.setTimeout("$('#callState').html('...Finished...');", timeout);
+        window.setTimeout("closeInfoView();", timeout);
     }
+    getElement('infoDiv').style.visibility = "visible";
+    getElement('infoDiv').innerHTML = str;
+}
+
+function changeCallStateInfo(str) {
     $('#callState').html(str);
 }
 
-function closeInfoView() {
+function closeInfoView(timeout) {
     trace("closeInfoView");
-    getElement('infoDiv').style.visibility = "hidden";
+    if (timeout != 0) {
+        window.setTimeout("getElement('infoDiv').style.visibility = 'hidden';", timeout);
+    } else {
+        getElement('infoDiv').style.visibility = "hidden";
+    }
 }
 
 function openSettingsView() {
@@ -480,8 +492,8 @@ function openVideoView(size) {
 
         // or if we did not access the devices yet
     } else {
-        requestUnmute();
-        intervalId = setInterval('if (isMuted() == -1){closeRequestUnmute(); clearInterval(intervalId); openVideoView("small");}', 500);
+        flashphoner_UI.requestUnmuteC2C();
+        intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmuteC2C(); clearInterval(intervalId); openVideoView("small");}', 500);
     }
 }
 
@@ -496,27 +508,6 @@ function closeVideoView() {
     // unpressed camerabutton
     $('#cameraButton').removeClass('pressed');
 }
-
-/* 
- This functions need to show window with the Adobe security panel when
- is ask allow use devices. This functions change size of window where swf is located.
- Sometimes this window use to show 'Request view', sometimes - to show 'Video view'
- */
-function requestUnmute() {
-    trace("requestUnmute");
-    $('.back').show();
-    $('.request').show();
-    $('#flash').removeClass('init').addClass('security');
-    viewAccessMessage();
-}
-
-function closeRequestUnmute() {
-    trace("closeRequestUnmute");
-    $('.back').hide();
-    $('.request').hide();
-    $('#flash').addClass('init').removeClass('security');
-}
-/* ------------------------- */
 
 // functions closeView is simplifying of many close....View functions
 function close(element) {
