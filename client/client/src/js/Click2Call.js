@@ -257,14 +257,6 @@ function notifyRegistered() {
         isLogged = true;
         callByToken(callToken);
     }
-
-    //todo decide if we need subscribeReg in c2c implementation
-    /*if (flashphonerLoader.subscribeEvent != null && flashphonerLoader.subscribeEvent.length != 0) {
-        subscribeReg();
-    }
-
-    sendXcapRequest();
-    */
 }
 
 function notifyBalance(balance) {
