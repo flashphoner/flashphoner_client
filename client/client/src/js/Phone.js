@@ -84,7 +84,7 @@ function login() {
 function loginByToken(token) {
     trace("loginByToken", token);
     connectingViewBeClosed = false;
-    var result = flashphoner.loginByToken(flashphonerLoader.urlServer, token, null);
+    var result = flashphoner.loginByToken(flashphonerLoader.urlServer, token, document.URL);
 
     closeLoginView();
     openConnectingView("Connecting...", 0);

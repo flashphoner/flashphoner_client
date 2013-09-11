@@ -86,14 +86,10 @@ $(document).ready(function () {
 
 
 function loginByToken(token) {
-    trace("loginByToken", window.location, token);
+    trace("loginByToken", document.URL, token);
     changeCallStateInfo("...Registering...");
 
-    if (navigator.userAgent.indexOf("Firefox") != -1) {
-        var pageUrl = window.location.toString();
-        trace("Client browser is Firefox");
-    }
-
+    var pageUrl = document.URL;
     var result = flashphoner.loginByToken(flashphonerLoader.urlServer, token, pageUrl);
 }
 
