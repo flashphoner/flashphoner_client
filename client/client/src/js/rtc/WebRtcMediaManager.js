@@ -20,11 +20,15 @@ WebRtcMediaManager.prototype.init = function () {
 
 WebRtcMediaManager.prototype.close = function () {
     //Commented to prevent termination of rtcMediaManager after MSRP call
-    this.peerConnectionState = 'finished';
-    if (this.peerConnection) {
-        this.remoteVideo.pause();
-        this.remoteVideo.src = null;
-        this.peerConnection.close();
+    if (this.peerConnectionState != 'finished') {
+        this.peerConnectionState = 'finished';
+        if (this.peerConnection) {
+            this.remoteVideo.pause();
+            this.remoteVideo.src = null;
+            this.peerConnection.close();
+        }
+    } else {
+        console.log("peerConnection already closed, do nothing!");
     }
 };
 

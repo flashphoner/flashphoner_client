@@ -265,6 +265,10 @@ function notifyBalance(balance) {
 // This functions invoked every time when call state changed
 function notify(call) {
     trace('notify', call.id, call.anotherSideUser);
+    if (call.incoming) {
+        //do nothing because we already hangup this call in notifyAddCall()
+        return;
+    }
     if (currentCall.id == call.id) {
         currentCall = call;
         if (currentCall.visibleNameCallee != null) {
