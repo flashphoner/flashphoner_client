@@ -40,6 +40,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         getUserData: function (user) {
             me.user = user;
             notifyRegisterRequired(user.regRequired);
+            notifyConnected();
         },
 
         getVersion: function (version) {
