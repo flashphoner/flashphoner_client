@@ -495,6 +495,8 @@ function notifyError(error) {
 
     } else if (error == WRONG_FLASHPHONER_XML) {
         openInfoView("Flashphoner.xml has errors. Please check it.", 3000, 60);
+    } else if (error == PAYMENT_REQUIRED) {
+        openInfoView("Payment required, please check your balance.", 3000, 60);
     }
 
     closeConnectingView();

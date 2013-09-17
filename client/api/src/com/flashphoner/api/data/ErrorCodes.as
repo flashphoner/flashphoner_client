@@ -71,6 +71,13 @@ package com.flashphoner.api.data
 		 * Application can`t load flashphoner.xml properly
 		 **/ 
 		public static const WRONG_FLASHPHONER_XML:String = "WRONG_FLASHPHONER_XML";
-		
+		/**
+		 * Callee name is null.
+		 **/ 
+		public static const CALLEE_NAME_IS_NULL:String = "CALLEE_NAME_IS_NULL";
+		/**
+		 * Payments required from user. SIP 402 Payment Required
+		 **/ 
+		public static const PAYMENT_REQUIRED:String = "PAYMENT_REQUIRED";
 	}
 }
