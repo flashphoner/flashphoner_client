@@ -15,8 +15,8 @@ var SoundControl = function () {
     //Init sounds
     me.registerSound = me.initSound(flashphonerLoader.registerSound, false, "auto");
     me.ringSound = me.initSound(flashphonerLoader.ringSound, true, "none");
-    me.busySound = me.initSound(flashphonerLoader.busySound,false, "none");
-    me.finishSound = me.initSound(flashphonerLoader.finishSound,false, "none");
+    me.busySound = me.initSound(flashphonerLoader.busySound, false, "none");
+    me.finishSound = me.initSound(flashphonerLoader.finishSound, false, "none");
 };
 
 SoundControl.prototype = {
@@ -63,9 +63,11 @@ SoundControl.prototype = {
     stopSound: function (soundName) {
         switch (soundName) {
             case "RING":
-                me.ringSound.pause();
-                me.ringSound.currentTime = 0;
-                break
+                if (!me.ringSound.paused) {
+                    me.ringSound.pause();
+                    me.ringSound.currentTime = 0;
+                }
+                break;
             default:
                 console.error("Do not know what to stop on " + soundName);
 
