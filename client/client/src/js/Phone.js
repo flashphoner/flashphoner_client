@@ -240,7 +240,6 @@ function notifyFlashReady() {
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
     messenger = new Messenger(flashphoner);
     if (flashphonerLoader.useWebRTC) {
-        $('#checkboxUseProxyDiv').css('display', 'inline');
         $('#cameraButton').css('visibility', 'hidden');
         $('#micButton').css('visibility', 'hidden');
     } else {
