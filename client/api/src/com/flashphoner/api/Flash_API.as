@@ -91,6 +91,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("notificationResult",notificationResult);
 			ExternalInterface.addCallback("call",call);
 			ExternalInterface.addCallback("callByToken",callByToken);
+			ExternalInterface.addCallback("msrpCall",msrpCall);
 			ExternalInterface.addCallback("hangup",hangup);
 			ExternalInterface.addCallback("answer",answer);
 			ExternalInterface.addCallback("subscribe",subscribe);
@@ -415,6 +416,15 @@ package com.flashphoner.api
 		 **/ 		
 		public function callByToken(callObject:Object):int{
 			phoneServerProxy.callByToken(callObject);
+			return 0;
+		}
+		
+		/**
+		 * Create new msrp call
+		 * @param call object
+		 **/
+		public function msrpCall(callObject:Object):int{
+			phoneServerProxy.msrpCall(callObject);
 			return 0;
 		}
 			
