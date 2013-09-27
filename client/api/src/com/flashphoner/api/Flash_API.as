@@ -377,6 +377,10 @@ package com.flashphoner.api
 							if (callee.indexOf("@") == -1 || callee.indexOf("@") == callee.length-1){
 								return 1;
 							}
+						}else if (callee.indexOf("tel:") == 0){
+							if (callee.substring(4).search(reg) != -1){
+								return 1;
+							}
 						}else{
 							if (callee.search(reg) != -1){
 								if (callee.indexOf("@") != -1){
