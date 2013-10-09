@@ -14,6 +14,8 @@
 <flashphoner>
 	<wcs_server>192.168.1.5</wcs_server>
 	<ws_port>8080</ws_port>
+    <wss_port>8443</wss_port>
+    <use_wss>false</use_wss>
 	<rtmfp_port>1935</rtmfp_port>
 	<register_required>true</register_required>
 	<!--<token>etgrtgrth</token>-->

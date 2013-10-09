@@ -61,6 +61,15 @@ FlashphonerLoader.prototype = {
         if (wsPort.length > 0) {
             this.wsPort = wsPort[0].textContent;
         }
+        var wssPort = $(xml).find("wss_port");
+        if (wssPort.length > 0) {
+            this.wssPort = wssPort[0].textContent;
+        }
+        var useWss= $(xml).find("use_wss");
+        if (useWss.length > 0) {
+            this.useWss = "true" == useWss[0].textContent;
+        }
+
         var flashPort = $(xml).find("flash_port");
         if (flashPort.length > 0) {
             this.flashPort = flashPort[0].textContent;
@@ -199,7 +208,13 @@ FlashphonerLoader.prototype = {
         var me = this;
         if (isWebRTCAvailable) {
             me.useWebRTC = true;
-            me.urlServer = "ws://" + this.wcsIP + ":" + this.wsPort;
+            var protocol = "ws://";
+            var port = this.wsPort;
+            if (this.useWss){
+                protocol = "wss://";
+                port = this.wssPort;
+            }
+            me.urlServer = protocol + this.wcsIP + ":" + port;
             me.flashphoner = new WebSocketManager(getElement('localVideoPreview'), getElement('remoteVideo'));
             me.flashphoner_UI = new UIManagerWebRtc();
             notifyConfigLoaded();
