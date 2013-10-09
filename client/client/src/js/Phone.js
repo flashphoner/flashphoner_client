@@ -293,7 +293,7 @@ function notifyConnected() {
     //flashphoner.setSpeexQuality(10);
 }
 
-function notifyRegistered() {
+function notifyRegistered(sipObject) {
     trace("notifyRegistered");
     if (registerRequired) {
         toLogState();
