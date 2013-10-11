@@ -111,6 +111,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("sendInfo",sendInfo);
 			ExternalInterface.addCallback("setSpeexQuality",setSpeexQuality);
 			ExternalInterface.addCallback("openSettingsPanel",openSettingsPanel);
+			ExternalInterface.addCallback("requestSound",requestSound);
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -622,6 +623,13 @@ package com.flashphoner.api
 		
 		public function openSettingsPanel():void{
 			Security.showSettings();
+		}
+		
+		public function requestSound(callId:String, soundName:String):void {
+			var requestObject:Object = new Object();
+			requestObject.callId = callId;
+			requestObject.sound = soundName;
+			this.phoneServerProxy.requestSound(requestObject);
 		}
 		
 

@@ -321,5 +321,9 @@ package com.flashphoner.api
 			nc.call("sendInfo", null, infoObject);
 		}
 		
+		public function requestSound(requestObject:Object):void {
+			nc.call("requestSound", null, requestObject);
+		}
+		
 	}
 }
