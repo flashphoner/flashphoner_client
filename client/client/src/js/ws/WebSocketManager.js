@@ -256,12 +256,12 @@ WebSocketManager.prototype = {
         }
     },
 
-    viewVideo: function () {
-        this.webRtcMediaManager.viewVideo();
+    getAccessToAudio: function () {
+        this.webRtcMediaManager.getAccessToAudio();
     },
 
-    viewAccessMessage: function () {
-        this.webRtcMediaManager.viewAccessMessage();
+    getAccessToVideo: function () {
+        this.webRtcMediaManager.getAccessToVideo();
     },
 
     getVolume: function () {
@@ -272,8 +272,14 @@ WebSocketManager.prototype = {
         this.webRtcMediaManager.remoteVideo.volume = value / 100;
     },
 
-    isMuted: function () {
-        return this.webRtcMediaManager.isMuted;
+
+    hasAccessToAudio: function () {
+        return this.webRtcMediaManager.isAudioMuted;
+    },
+
+
+    hasAccessToVideo: function () {
+        return this.webRtcMediaManager.isVideoMuted;
     },
 
     getInfoAboutMe: function () {

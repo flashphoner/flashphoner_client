@@ -15,15 +15,22 @@ var UIManagerWebRtc = function () {
 }
 
 UIManagerWebRtc.prototype = {
-    requestUnmute: function() {
+    requestUnmuteC2C: function() {
         trace("requestUnmute");
         openInfoView("Please allow access to media devices", 0, 60);
-        this.viewAccessMessage();
-
+        flashphoner.getAccessToAudio();
     },
 
-    requestUnmuteC2C: function() {
-        this.requestUnmute();
+    getAccessToAudio: function() {
+        trace("getAccessToAudio");
+        openInfoView("Please allow access to audio devices", 0, 60);
+        flashphoner.getAccessToAudio();
+    },
+
+    getAccessToVideo: function() {
+        trace("getAccessToVideo");
+        openInfoView("Please allow access to video device", 0, 60);
+        flashphoner.getAccessToVideo();
     },
 
     closeRequestUnmute: function() {
@@ -31,12 +38,5 @@ UIManagerWebRtc.prototype = {
 
     closeRequestUnmuteC2C: function() {
         this.closeRequestUnmute();
-    },
-
-    viewAccessMessage: function() {
-        trace("viewAccessMessage");
-        flashphoner.viewAccessMessage();
-
     }
-
 }

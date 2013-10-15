@@ -12,7 +12,7 @@
   This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 -->
 <flashphoner>
-	<wcs_server>192.168.1.5</wcs_server>
+	<wcs_server>87.226.225.59</wcs_server>
 	<ws_port>8080</ws_port>
 	<rtmfp_port>1935</rtmfp_port>
 	<register_required>true</register_required>

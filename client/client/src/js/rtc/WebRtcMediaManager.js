@@ -6,7 +6,9 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo, hasVideo) {
     me.remoteAudioVideoMediaStream = null;
     me.remoteVideo = remoteVideo;
     me.localVideo = localVideoPreview;
-    me.isMuted = 1;
+    me.localVideo.volume = 0;
+    me.isAudioMuted = 1;
+    me.isVideoMuted = 1;
 };
 
 WebRtcMediaManager.prototype.init = function () {
@@ -117,31 +119,33 @@ WebRtcMediaManager.prototype.waitGatheringIce = function () {
     }
 };
 
-WebRtcMediaManager.prototype.viewAccessMessage = function () {
+WebRtcMediaManager.prototype.getAccessToAudio = function () {
     var me = this;
     if (!me.localAudioStream) {
         getUserMedia({audio: true}, function (stream) {
                 me.localAudioStream = stream;
-                me.isMuted = -1;
+                me.isAudioMuted = -1;
             }, function (error) {
                 addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
                 closeInfoView(3000);
-                me.isMuted = 1;
+                me.isAudioMuted = 1;
             }
         );
     }
 };
 
-WebRtcMediaManager.prototype.viewVideo = function () {
+WebRtcMediaManager.prototype.getAccessToVideo = function () {
     var me = this;
-//    if (!me.localVideoStream) {
-//        getUserMedia({video: true}, function (stream) {
-//            attachMediaStream(me.localVideo, stream);
-//            me.localVideoStream = stream;
-//        }, function (error) {
-//            addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
-//        });
-//    }
+    if (!me.localVideoStream) {
+        getUserMedia({video: true}, function (stream) {
+            attachMediaStream(me.localVideo, stream);
+            me.localVideoStream = stream;
+            me.isVideoMuted = -1;
+        }, function (error) {
+            addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+            me.isVideoMuted = 1;
+        });
+    }
 };
 
 WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVideo) {
@@ -157,16 +161,12 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
                 me.peerConnection.addStream(me.localAudioStream);
             } else {
                 if (hasVideo) {
-                    if (me.localAudioStream) {
-                        //me.peerConnection.removeStream(me.localAudioStream);
-                    }
-                    me.peerConnection.addStream(me.localAudioVideoStream);
+                    me.peerConnection.addStream(me.localVideoStream);
                     me.hasVideo = true;
                 } else {
-                    if (me.localAudioVideoStream) {
-                        me.peerConnection.removeStream(me.localAudioVideoStream);
+                    if (me.localVideoStream) {
+                        me.peerConnection.removeStream(me.localVideoStream);
                     }
-                    me.peerConnection.addStream(me.localAudioStream);
                     me.hasVideo = false;
                 }
             }
@@ -175,14 +175,14 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
                 me.onCreateOfferSuccessCallback(offer);
             }, function (error) {
                 me.onCreateOfferErrorCallback(error);
-            }, {"optional": [], "mandatory": {"OfferToReceiveAudio": true, "OfferToReceiveVideo": false}});
+            }, {"mandatory": {"OfferToReceiveVideo": true}});
         }
 
         var checkVideoAndCreate = function () {
-            if (hasVideo && !me.localAudioVideoStream) {
+            if (hasVideo && !me.localVideoStream) {
                 getUserMedia({video: true}, function (stream) {
                         if (me.peerConnectionState != "finished") {
-                            me.localAudioVideoStream = stream;
+                            me.localVideoStream = stream;
                             create();
                         }
                     }, function (error) {
@@ -217,16 +217,12 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback) {
                 me.peerConnection.addStream(me.localAudioStream);
             } else {
                 if (hasVideo) {
-                    if (me.localAudioStream) {
-                        me.peerConnection.removeStream(me.localAudioStream);
-                    }
-                    me.peerConnection.addStream(me.localAudioVideoStream);
+                      me.peerConnection.addStream(me.localVideoStream);
                     me.hasVideo = true;
                 } else {
-                    if (me.localAudioVideoStream) {
-                        me.peerConnection.removeStream(me.localAudioVideoStream);
+                    if (me.localVideoStream) {
+                        me.peerConnection.removeStream(me.localVideoStream);
                     }
-                    me.peerConnection.addStream(me.localAudioStream);
                     me.hasVideo = false;
                 }
             }
@@ -244,10 +240,10 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback) {
         }
 
         var checkVideoAndCreate = function () {
-            if (hasVideo && !me.localAudioVideoStream) {
+            if (hasVideo && !me.localVideoStream) {
                 getUserMedia({audio: true, video: true}, function (stream) {
                         if (me.peerConnectionState != "finished") {
-                            me.localAudioVideoStream = stream;
+                            me.localVideoStream = stream;
                             create();
                         }
                     }, function (error) {
@@ -337,7 +333,7 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionSuccessCallback = function ()
                 application.onCreateAnswerSuccessCallback(answer);
             }, function (error) {
                 application.onCreateAnswerErrorCallback(error);
-            }, {'mandatory': {'OfferToReceiveAudio': true, 'OfferToReceiveVideo': false }});
+            });
         }
         else {
             console.log("WebRtcMediaManager:onSetRemoteDescriptionSuccessCallback(): RTCPeerConnection bad state!");

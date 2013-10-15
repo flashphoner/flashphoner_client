@@ -108,12 +108,12 @@ function msrpCall(callee) {
 function call() {
     trace("call");
     if (isLogged) {
-        if (isMuted() == 1) {
+        if (hasAccessToAudio() == 1) {
             if (intervalId == -1) {
-                intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; call();}', 500);
+                intervalId = setInterval('if (hasAccessToAudio() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; call();}', 500);
             }
-            flashphoner_UI.requestUnmute();
-        } else if (isMuted() == -1) {
+            flashphoner_UI.getAccessToAudio();
+        } else if (hasAccessToAudio() == -1) {
             var result = flashphoner.call({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter, isMsrp: false});
             if (result == 0) {
                 toHangupState();
@@ -146,12 +146,12 @@ function sendMessage(to, body, contentType) {
 
 function answer(callId) {
     trace("answer", callId);
-    if (isMuted() == 1) {
+    if (hasAccessToAudio() == 1) {
         if (intervalId == -1) {
-            intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; answer(currentCall.id);}', 500);
+            intervalId = setInterval('if (hasAccessToAudio() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; answer(currentCall.id);}', 500);
         }
-        flashphoner_UI.requestUnmute();
-    } else if (isMuted() == -1) {
+        flashphoner_UI.getAccessToAudio();
+    } else if (hasAccessToAudio() == -1) {
         flashphoner.answer(callId);
     } else {
         openConnectingView("Microphone is not plugged in", 3000);
@@ -179,10 +179,14 @@ function transfer(callId, target) {
     flashphoner.transfer(callId, target);
 }
 
-function isMuted() {
-    var isMute = flashphoner.isMuted();
-    return isMute;
+function hasAccessToAudio() {
+    return flashphoner.hasAccessToAudio();
 }
+
+function hasAccessToVideo() {
+    return flashphoner.hasAccessToVideo();
+}
+
 
 function sendVideoChangeState() {
     trace("sendVideoChangeState");
@@ -194,11 +198,6 @@ function sendVideoChangeState() {
         sendVideoButton.value = "Send video";
         flashphoner.setSendVideo(currentCall.id, false);
     }
-}
-
-function viewVideo() {
-    trace("viewVideo");
-    flashphoner.viewVideo();
 }
 
 function changeRelationMyVideo(relation) {
@@ -240,11 +239,8 @@ function notifyFlashReady() {
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
     messenger = new Messenger(flashphoner);
     if (flashphonerLoader.useWebRTC) {
-        $('#cameraButton').css('visibility', 'hidden');
         $('#micButton').css('visibility', 'hidden');
     } else {
-        $('#checkboxUseProxyDiv').css('display', 'none');
-        $('#cameraButton').css('visibility', 'visible');
         $('#micButton').css('visibility', 'visible');
     }
     //todo refactoring
@@ -822,8 +818,7 @@ function getElement(str) {
 
 function openVideoView() {
     trace("openVideoView");
-    if (isMuted() == -1) {
-        viewVideo();
+    if (hasAccessToVideo() == -1) {
         $('#video_requestUnmuteDiv').removeClass().addClass('videoDiv');
         $('#closeButton_video_requestUnmuteDiv').css('visibility', 'visible');
 
@@ -837,9 +832,9 @@ function openVideoView() {
         }
         $('#video_requestUnmuteDiv').resize();
     } else {
-        flashphoner_UI.requestUnmute();
+        flashphoner_UI.getAccessToVideo();
         if (intervalId == -1) {
-            intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; openVideoView();}', 500);
+            intervalId = setInterval('if (hasAccessToVideo() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; openVideoView();}', 500);
         }
     }
 }

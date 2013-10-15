@@ -11,11 +11,7 @@
  This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
  */
 var UIManagerFlash = function () {
-
-}
-
-UIManagerFlash.prototype = {
-    requestUnmute: function() {
+    this.requestUnmute = function() {
         trace("requestUnmute");
 
         $('#video_requestUnmuteDiv').removeClass().addClass('securityDiv');
@@ -27,16 +23,25 @@ UIManagerFlash.prototype = {
         $('#video').height(138);
         getElement('video').style.top = "35px";
 
-        this.viewAccessMessage();
+        flashphoner.getAccessToAudio();
+    };
+}
 
-    },
-
+UIManagerFlash.prototype = {
     requestUnmuteC2C: function() {
         trace("requestUnmuteC2C");
         $('.back').show();
         $('.request').show();
         $('#flash').removeClass('init').addClass('security');
-        this.viewAccessMessage();
+        flashphoner.getAccessToAudio();
+    },
+
+    getAccessToAudio: function() {
+        this.requestUnmute();
+    },
+
+    getAccessToVideo: function() {
+        this.requestUnmute();
     },
 
     closeRequestUnmute: function() {
@@ -50,12 +55,5 @@ UIManagerFlash.prototype = {
         $('.back').hide();
         $('.request').hide();
         $('#flash').addClass('init').removeClass('security');
-    },
-
-    viewAccessMessage: function() {
-        trace("viewAccessMessage");
-        flashphoner.viewAccessMessage();
-
     }
-
-}
+ };

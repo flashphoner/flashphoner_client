@@ -166,7 +166,7 @@ function initSendVideoButton() {
     var sendVideoButtonImage = $('#sendVideoButtonImage');
     if (sendVideoButton.hasClass('on')) {
         sendVideoButton.toggleClass('on');
-        sendVideoButtonImage.attr('src', 'assets/c2c_play.png')
+        sendVideoButtonImage.attr('src', 'assets/c2c_play.png');
         flashphoner.setSendVideo(false);
     }
 }
@@ -174,11 +174,6 @@ function initSendVideoButton() {
 function viewVideo() {
     trace("viewVideo");
     flashphoner.viewVideo();
-}
-
-function viewAccessMessage() {
-    trace("viewAccessMessage");
-    flashphoner.viewAccessMessage();
 }
 
 function changeRelationMyVideo(relation) {
