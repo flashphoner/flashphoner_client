@@ -35,6 +35,7 @@ FlashphonerLoader = function (config) {
     this.subscribeEvent = "reg";
     this.contactParams = null;
     this.imdnEnabled = false;
+    this.msgContentType = "text/plain";
 
 
     $.ajax({
@@ -163,6 +164,13 @@ FlashphonerLoader.prototype = {
             if (imdnEnabled[0].textContent.length) {
                 this.imdnEnabled = Boolean(imdnEnabled[0].textContent);
             }
+        }
+
+        //Message content type by default "text/plain", can be "message/cpim"
+        var msgContentType = $(xml).find("msg_content_type");
+        if (msgContentType.length > 0) {
+            this.msgContentType = msgContentType.text();
+            console.log("Message content type: " + this.msgContentType);
         }
 
         //variable participating in api load, can bee null, webrtc, flash
