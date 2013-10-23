@@ -1,4 +1,4 @@
-var WebRtcMediaManager = function (localVideoPreview, remoteVideo, hasVideo) {
+var WebRtcMediaManager = function (localVideoPreview, remoteVideo) {
     var me = this;
 
     me.peerConnection = null;
@@ -119,6 +119,24 @@ WebRtcMediaManager.prototype.waitGatheringIce = function () {
     }
 };
 
+WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
+    var me = this;
+    if (!me.localAudioVideoStream) {
+        getUserMedia({audio: true, video: true}, function (stream) {
+                me.localAudioVideoStream = stream;
+                me.isAudioMuted = -1;
+                me.isVideoMuted = -1;
+            }, function (error) {
+                addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+                closeInfoView(3000);
+                me.isAudioMuted = 1;
+                me.isVideoMuted = 1;
+            }
+        );
+    }
+};
+
+
 WebRtcMediaManager.prototype.getAccessToAudio = function () {
     var me = this;
     if (!me.localAudioStream) {
@@ -155,108 +173,64 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
         if (me.getConnectionState() != "established") {
             me.init();
         }
-        function create() {
-            if (me.peerConnection == null) {
-                me.createPeerConnection();
+        if (me.peerConnection == null) {
+            me.createPeerConnection();
+            if (hasVideo) {
                 me.peerConnection.addStream(me.localAudioStream);
             } else {
-                if (hasVideo) {
-                    me.peerConnection.addStream(me.localVideoStream);
-                    me.hasVideo = true;
-                } else {
-                    if (me.localVideoStream) {
-                        me.peerConnection.removeStream(me.localVideoStream);
-                    }
-                    me.hasVideo = false;
-                }
+                me.peerConnection.addStream(me.localAudioVideoStream);
             }
-            me.createOfferCallback = createOfferCallback;
-            me.peerConnection.createOffer(function (offer) {
-                me.onCreateOfferSuccessCallback(offer);
-            }, function (error) {
-                me.onCreateOfferErrorCallback(error);
-            }, {"mandatory": {"OfferToReceiveVideo": true}});
         }
+        me.createOfferCallback = createOfferCallback;
+        me.peerConnection.createOffer(function (offer) {
+            me.onCreateOfferSuccessCallback(offer);
+        }, function (error) {
+            me.onCreateOfferErrorCallback(error);
+        }, {"mandatory": {"OfferToReceiveVideo": true}});
 
-        var checkVideoAndCreate = function () {
-            if (hasVideo && !me.localVideoStream) {
-                getUserMedia({video: true}, function (stream) {
-                        if (me.peerConnectionState != "finished") {
-                            me.localVideoStream = stream;
-                            create();
-                        }
-                    }, function (error) {
-                        addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
-                        closeInfoView();
-                        toCallState();
-                    }
-                );
-            } else {
-                create();
-            }
-        };
-
-        checkVideoAndCreate();
     }
     catch (exception) {
         console.error("WebRtcMediaManager:createOffer(): catched exception:" + exception);
     }
 };
 
-WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback) {
+WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback, hasVideo) {
     console.debug("WebRtcMediaManager:createAnswer()");
     var me = this;
-    var hasVideo = me.hasVideo;
     if (me.getConnectionState() != "established") {
         me.init();
     }
     try {
-        function create() {
-            if (me.peerConnection == null) {
-                me.createPeerConnection();
-                me.peerConnection.addStream(me.localAudioStream);
-            } else {
-                if (hasVideo) {
-                      me.peerConnection.addStream(me.localVideoStream);
-                    me.hasVideo = true;
-                } else {
-                    if (me.localVideoStream) {
-                        me.peerConnection.removeStream(me.localVideoStream);
-                    }
-                    me.hasVideo = false;
-                }
-            }
-            me.createAnswerCallback = createAnswerCallback;
-            var sdpOffer = new RTCSessionDescription({
-                type: 'offer',
-                sdp: me.lastReceivedSdp
-            });
-            me.peerConnectionState = 'offer-received';
-            me.peerConnection.setRemoteDescription(sdpOffer, function () {
-                me.onSetRemoteDescriptionSuccessCallback();
-            }, function (error) {
-                me.onSetRemoteDescriptionErrorCallback(error);
-            });
-        }
 
-        var checkVideoAndCreate = function () {
-            if (hasVideo && !me.localVideoStream) {
-                getUserMedia({audio: true, video: true}, function (stream) {
-                        if (me.peerConnectionState != "finished") {
-                            me.localVideoStream = stream;
-                            create();
-                        }
-                    }, function (error) {
-                        addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
-                        closeInfoView();
-                        toCallState();
-                    }
-                );
+        if (me.peerConnection == null) {
+            me.createPeerConnection();
+            if (hasVideo) {
+                me.peerConnection.addStream(me.localAudioVideoStream);
             } else {
-                create();
+                me.peerConnection.addStream(me.localAudioStream);
             }
-        };
-        checkVideoAndCreate();
+        } else {
+            if (hasVideo) {
+                me.peerConnection.addStream(me.localVideoStream);
+                me.hasVideo = true;
+            } else {
+                if (me.localVideoStream) {
+                    me.peerConnection.removeStream(me.localVideoStream);
+                }
+                me.hasVideo = false;
+            }
+        }
+        me.createAnswerCallback = createAnswerCallback;
+        var sdpOffer = new RTCSessionDescription({
+            type: 'offer',
+            sdp: me.lastReceivedSdp
+        });
+        me.peerConnectionState = 'offer-received';
+        me.peerConnection.setRemoteDescription(sdpOffer, function () {
+            me.onSetRemoteDescriptionSuccessCallback();
+        }, function (error) {
+            me.onSetRemoteDescriptionErrorCallback(error);
+        });
     }
     catch (exception) {
         console.error("WebRtcMediaManager:createAnswer(): catched exception:" + exception);
@@ -333,7 +307,7 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionSuccessCallback = function ()
                 application.onCreateAnswerSuccessCallback(answer);
             }, function (error) {
                 application.onCreateAnswerErrorCallback(error);
-            });
+            }, {"mandatory": {"OfferToReceiveVideo": true}});
         }
         else {
             console.log("WebRtcMediaManager:onSetRemoteDescriptionSuccessCallback(): RTCPeerConnection bad state!");

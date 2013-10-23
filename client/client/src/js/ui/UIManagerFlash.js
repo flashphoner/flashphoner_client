@@ -23,7 +23,7 @@ var UIManagerFlash = function () {
         $('#video').height(138);
         getElement('video').style.top = "35px";
 
-        flashphoner.getAccessToAudio();
+        flashphoner.getAccessToAudioAndVideo();
     };
 }
 
@@ -33,7 +33,11 @@ UIManagerFlash.prototype = {
         $('.back').show();
         $('.request').show();
         $('#flash').removeClass('init').addClass('security');
-        flashphoner.getAccessToAudio();
+        flashphoner.getAccessToAudioAndVideo();
+    },
+
+    getAccessToAudioAndVideo: function() {
+        this.requestUnmute();
     },
 
     getAccessToAudio: function() {
@@ -42,6 +46,30 @@ UIManagerFlash.prototype = {
 
     getAccessToVideo: function() {
         this.requestUnmute();
+    },
+
+
+    openVideoView: function() {
+        if (flashphoner.hasAccessToVideo()) {
+            flashphoner.viewVideo();
+            $('#video_requestUnmuteDiv').removeClass().addClass('videoDiv');
+            $('#closeButton_video_requestUnmuteDiv').css('visibility', 'visible');
+
+            $('#sendVideo').css('visibility', 'visible');
+            $('#requestUnmuteText').hide();
+            $('#video_requestUnmuteDiv .bar').html('&nbsp;&nbsp;Video');
+
+            if (proportion != 0) {
+                var newHeight = $('.videoDiv').width() * proportion + 40;
+                $('.videoDiv').height(newHeight); //we resize video window for new proportion
+            }
+            $('#video_requestUnmuteDiv').resize();
+        } else {
+            this.requestUnmute();
+            if (intervalId == -1) {
+                intervalId = setInterval('if (flashphoner.hasAccessToVideo()){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; flashphoner_UI.openVideoView();}', 500);
+            }
+        }
     },
 
     closeRequestUnmute: function() {

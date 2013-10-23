@@ -171,11 +171,6 @@ function initSendVideoButton() {
     }
 }
 
-function viewVideo() {
-    trace("viewVideo");
-    flashphoner.viewVideo();
-}
-
 function changeRelationMyVideo(relation) {
     trace("changeRelationMyVideo", relation);
     flashphoner.changeRelationMyVideo(relation);

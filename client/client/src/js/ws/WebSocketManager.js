@@ -207,14 +207,13 @@ WebSocketManager.prototype = {
         return 0;
     },
 
-    answer: function (callId) {
+    answer: function (callId, hasVideo) {
         var me = this;
         openInfoView("Configuring WebRTC connection...", 0, 60);
         this.webRtcMediaManager.createAnswer(function (sdp) {
                 closeInfoView();
                 me.webSocket.send("answer", {callId: callId, sdp: sdp});
-            }
-        );
+            }, hasVideo);
     },
 
     hangup: function (callId) {
@@ -256,6 +255,10 @@ WebSocketManager.prototype = {
         }
     },
 
+    getAccessToAudioAndVideo: function () {
+        this.webRtcMediaManager.getAccessToAudioAndVideo();
+    },
+
     getAccessToAudio: function () {
         this.webRtcMediaManager.getAccessToAudio();
     },
@@ -272,14 +275,12 @@ WebSocketManager.prototype = {
         this.webRtcMediaManager.remoteVideo.volume = value / 100;
     },
 
-
     hasAccessToAudio: function () {
-        return this.webRtcMediaManager.isAudioMuted;
+        return this.webRtcMediaManager.isAudioMuted == -1;
     },
 
-
     hasAccessToVideo: function () {
-        return this.webRtcMediaManager.isVideoMuted;
+        return this.webRtcMediaManager.isVideoMuted == -1;
     },
 
     getInfoAboutMe: function () {

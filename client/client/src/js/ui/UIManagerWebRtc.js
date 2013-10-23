@@ -21,22 +21,46 @@ UIManagerWebRtc.prototype = {
         flashphoner.getAccessToAudio();
     },
 
+    getAccessToAudioAndVideo: function() {
+        trace("getAccessToAudio");
+        openInfoView("Please allow access to audio and video devices", 0, 60);
+        flashphoner.getAccessToAudioAndVideo();
+    },
+
     getAccessToAudio: function() {
         trace("getAccessToAudio");
-        openInfoView("Please allow access to audio devices", 0, 60);
+        openInfoView("Please allow access to audio device", 0, 60);
         flashphoner.getAccessToAudio();
     },
 
-    getAccessToVideo: function() {
-        trace("getAccessToVideo");
-        openInfoView("Please allow access to video device", 0, 60);
-        flashphoner.getAccessToVideo();
+    openVideoView: function() {
+        trace("openVideoView");
+        if (!flashphoner.hasAccessToVideo()){
+            openInfoView("Please allow access to video device", 0, 60);
+            flashphoner.getAccessToVideo();
+            if (intervalId == -1) {
+                intervalId = setInterval('if (flashphoner.hasAccessToVideo()){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; }', 500);
+            }
+        }
+
+        $('#video_requestUnmuteDiv').removeClass().addClass('videoDiv');
+        $('#closeButton_video_requestUnmuteDiv').css('visibility', 'visible');
+
+        $('#requestUnmuteText').hide();
+        $('#video_requestUnmuteDiv .bar').html('&nbsp;&nbsp;Video');
+
+        if (proportion != 0) {
+            var newHeight = $('.videoDiv').width() * proportion + 40;
+            $('.videoDiv').height(newHeight); //we resize video window for new proportion
+        }
+        $('#video_requestUnmuteDiv').resize();
     },
 
     closeRequestUnmute: function() {
+        closeInfoView();
     },
 
     closeRequestUnmuteC2C: function() {
         this.closeRequestUnmute();
     }
-}
+};

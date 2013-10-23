@@ -104,6 +104,19 @@ package com.flashphoner.api.management
 				cam.setMode(width,height,FPS,KEEP_RATIO);
 			}			
 		}
+		
+		public function isMuted():int{
+			if (cam == null){
+				return 0;
+			}else{
+				if (cam.muted){
+					return 1;
+				}else{
+					return -1;
+				}
+				
+			}
+		}		
 
   		/**
 		 * change current camera to used Flashphoner

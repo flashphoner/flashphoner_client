@@ -102,7 +102,8 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("setMicVolume",setMicVolume);
 			ExternalInterface.addCallback("getVolume",getVolume);
 			ExternalInterface.addCallback("setVolume",setVolume);
-			ExternalInterface.addCallback("isMuted",isMuted);
+			ExternalInterface.addCallback("hasAccessToAudio",hasAccessToAudio);
+			ExternalInterface.addCallback("hasAccessToVideo",hasAccessToVideo);
 			ExternalInterface.addCallback("getMicropones",getMicropones);
 			ExternalInterface.addCallback("setMicrophone",setMicrophone);
 			ExternalInterface.addCallback("getCameras",getCameras);
@@ -495,9 +496,17 @@ package com.flashphoner.api
 		/**
 		 * Check access to the devices (mic,camera)
 		 **/
-		public function isMuted():int{
-			return soundControl.isMuted();
+		public function hasAccessToAudio():Boolean{
+			return soundControl.isMuted() == -1;
 		}
+		
+		/**
+		 * Check access to the devices (mic,camera)
+		 **/
+		public function hasAccessToVideo():Boolean{
+			return videoControl.isMuted() == -1;
+		}
+		
 		
 		/**
 		 * Get list of cameras

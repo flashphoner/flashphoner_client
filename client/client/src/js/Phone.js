@@ -43,8 +43,6 @@ $(document).ready(function () {
     toLogOffState();
     openConnectingView("Loading...", 0);
     flashphonerLoader = new FlashphonerLoader();
-// 	openConnectingView("You have old flash player", 0);
-//  trace("Download flash player from: http://get.adobe.com/flashplayer/");
 });
 
 
@@ -108,13 +106,23 @@ function msrpCall(callee) {
 function call() {
     trace("call");
     if (isLogged) {
-        if (hasAccessToAudio() == 1) {
+        var hasAccess;
+        if (isVideoCall()){
+            hasAccess = hasAccessToAudioAndVideo;
+        } else {
+            hasAccess = hasAccessToAudio;
+        }
+        if (!hasAccess()) {
             if (intervalId == -1) {
-                intervalId = setInterval('if (hasAccessToAudio() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; call();}', 500);
+                intervalId = setInterval('if (isVideoCall() ? hasAccessToAudioAndVideo() : hasAccessToAudio()){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; call();}', 500);
             }
-            flashphoner_UI.getAccessToAudio();
-        } else if (hasAccessToAudio() == -1) {
-            var result = flashphoner.call({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter, isMsrp: false});
+            if (isVideoCall()){
+                flashphoner_UI.getAccessToAudioAndVideo();
+            } else {
+                flashphoner_UI.getAccessToAudio();
+            }
+        } else if (hasAccess()) {
+            var result = flashphoner.call({callee: callee, visibleName: 'Caller', hasVideo: isVideoCall(), inviteParameters: testInviteParameter, isMsrp: false});
             if (result == 0) {
                 toHangupState();
             } else {
@@ -146,13 +154,23 @@ function sendMessage(to, body, contentType) {
 
 function answer(callId) {
     trace("answer", callId);
-    if (hasAccessToAudio() == 1) {
+    var hasAccess;
+    if (isVideoCall()){
+        hasAccess = hasAccessToAudioAndVideo;
+    } else {
+        hasAccess = hasAccessToAudio;
+    }
+    if (!hasAccess()) {
         if (intervalId == -1) {
-            intervalId = setInterval('if (hasAccessToAudio() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; answer(currentCall.id);}', 500);
+            intervalId = setInterval('if (isVideoCall() ? hasAccessToAudioAndVideo() : hasAccessToAudio()){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; answer(currentCall.id);}', 500);
         }
-        flashphoner_UI.getAccessToAudio();
-    } else if (hasAccessToAudio() == -1) {
-        flashphoner.answer(callId);
+        if (isVideoCall()){
+            flashphoner_UI.getAccessToAudioAndVideo();
+        } else {
+            flashphoner_UI.getAccessToAudio();
+        }
+    } else if (hasAccess()) {
+        flashphoner.answer(callId, isVideoCall());
     } else {
         openConnectingView("Microphone is not plugged in", 3000);
     }
@@ -177,6 +195,10 @@ function setStatusHold(callId, isHold) {
 function transfer(callId, target) {
     trace("transfer", callId, target);
     flashphoner.transfer(callId, target);
+}
+
+function hasAccessToAudioAndVideo() {
+    return hasAccessToAudio() && hasAccessToVideo();
 }
 
 function hasAccessToAudio() {
@@ -240,8 +262,10 @@ function notifyFlashReady() {
     messenger = new Messenger(flashphoner);
     if (flashphonerLoader.useWebRTC) {
         $('#micButton').css('visibility', 'hidden');
+        $('#sendVideo').css('visibility', 'hidden');
     } else {
         $('#micButton').css('visibility', 'visible');
+        $('#sendVideo').css('visibility', 'visible');
     }
     //todo refactoring
     //$('#versionOfProduct').html(getVersion());
@@ -817,26 +841,7 @@ function getElement(str) {
 /* ----- VIDEO ----- */
 
 function openVideoView() {
-    trace("openVideoView");
-    if (hasAccessToVideo() == -1) {
-        $('#video_requestUnmuteDiv').removeClass().addClass('videoDiv');
-        $('#closeButton_video_requestUnmuteDiv').css('visibility', 'visible');
-
-        $('#sendVideo').css('visibility', 'visible');
-        $('#requestUnmuteText').hide();
-        $('#video_requestUnmuteDiv .bar').html('&nbsp;&nbsp;Video');
-
-        if (proportion != 0) {
-            var newHeight = $('.videoDiv').width() * proportion + 40;
-            $('.videoDiv').height(newHeight); //we resize video window for new proportion
-        }
-        $('#video_requestUnmuteDiv').resize();
-    } else {
-        flashphoner_UI.getAccessToVideo();
-        if (intervalId == -1) {
-            intervalId = setInterval('if (hasAccessToVideo() == -1){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; openVideoView();}', 500);
-        }
-    }
+    flashphoner_UI.openVideoView();
 }
 
 function closeVideoView() {
@@ -893,10 +898,13 @@ function closeTransferView() {
     needOpenTransferView = false;
     getElement('transfer').style.visibility = "hidden";
 }
+
 /*-----------------*/
 
 /* ------------- Additional interface functions --------- */
-
+function isVideoCall(){
+    return $('#checkboxVideoCall').attr("checked") ? true : false;
+}
 // Functions createChat creates chat with the callee. 
 // It contains all chat window functionality including send message function 
 
