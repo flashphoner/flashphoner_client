@@ -198,7 +198,7 @@ FlashphonerLoader.prototype = {
              */
             setTimeout(function () {
                 //check status of ajax request
-                if (!this.jsonpSuccess) {
+                if (!me.jsonpSuccess) {
                     trace("Error occurred while retrieving load balancer data, please check your load balancer url " +
                         me.loadBalancerUrl);
                     me.loadAPI();
@@ -211,10 +211,10 @@ FlashphonerLoader.prototype = {
                 dataType: "jsonp",
                 data: loadBalancerData,
                 success: function (loadBalancerData) {
-                    this.wcsIP = loadBalancerData.server;
-                    this.wsPort = loadBalancerData.ws;
-                    this.flashPort = loadBalancerData.flash;
-                    this.jsonpSuccess = true;
+                    me.wcsIP = loadBalancerData.server;
+                    me.wsPort = loadBalancerData.ws;
+                    me.flashPort = loadBalancerData.flash;
+                    me.jsonpSuccess = true;
                     trace("Connection data from load balancer: "
                         + "wcsIP " + loadBalancerData.server
                         + ", wsPort " + loadBalancerData.ws
