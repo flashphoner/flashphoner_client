@@ -63,13 +63,13 @@ This code and accompanying materials also available under LGPL and MPL license f
 					PopUpManager.centerPopUp(infoView);
 					return;
 				}
-				if (flashAPI.isMuted() == 1) {
+				if (flashAPI.soundControl.isMuted() == 1) {
 					if (!timerChangeStatus.running){
 						timerChangeStatus.addEventListener(TimerEvent.TIMER, onChangeStatus);
 						timerChangeStatus.start();
 					}
 					viewAccessMessage();
-				} else if (flashAPI.isMuted() == -1){
+				} else if (flashAPI.soundControl.isMuted() == -1){
 					var callObject:Object = new Object();
 					callObject.callee = calleeNumber;
 					callObject.visibleName = flashAPI.modelLocator.visibleName;
@@ -103,7 +103,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			}
 			
 			private function onChangeStatus(event:TimerEvent){
-				if (flashAPI.isMuted() == -1){
+				if (flashAPI.soundControl.isMuted() == -1){
 					PopUpManager.removePopUp(accessView); 
 					timerChangeStatus.stop();
 					callHandler();

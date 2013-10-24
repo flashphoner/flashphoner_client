@@ -200,11 +200,11 @@ WebSocketManager.prototype = {
     },
 
     setSendVideo: function (callId, hasVideo) {
-        var me = this;
-        this.webRtcMediaManager.createOffer(function (sdp) {
-            me.webSocket.send("changeMediaRequest", {callId: callId, sdp: sdp});
-        }, hasVideo);
-        return 0;
+//        var me = this;
+//        this.webRtcMediaManager.createOffer(function (sdp) {
+//            me.webSocket.send("changeMediaRequest", {callId: callId, sdp: sdp});
+//        }, hasVideo);
+//        return 0;
     },
 
     answer: function (callId, hasVideo) {

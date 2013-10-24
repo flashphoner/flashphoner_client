@@ -41,13 +41,13 @@ This code and accompanying materials also available under LGPL and MPL license f
 			}
 			
 			private function answer():void{
-				if (flash_API.isMuted() == 1) {
+				if (flash_API.soundControl.isMuted() == 1) {
 					if (!timerChangeStatus.running){
 						timerChangeStatus.addEventListener(TimerEvent.TIMER, onChangeStatus);
 						timerChangeStatus.start();
 					}
 					viewAccessMessage();
-				} else if (flash_API.isMuted() == -1){
+				} else if (flash_API.soundControl.isMuted() == -1){
 					call.answer();
 					close();
 				} else {
@@ -71,7 +71,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			}
 			
 			private function onChangeStatus(event:TimerEvent){
-				if (flash_API.isMuted() == -1){
+				if (flash_API.soundControl.isMuted() == -1){
 					PopUpManager.removePopUp(accessView); 
 					timerChangeStatus.stop();
 					answer();
