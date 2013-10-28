@@ -184,7 +184,7 @@ FlashphonerLoader.prototype = {
                 isWebRTCAvailable = false;
             } else {
                 console.log("Bad streaming property " + streamingType.text() +
-                    ", can be wertc or flash. Using default behaviour!")
+                    ", can be webrtc or flash. Using default behaviour!")
             }
         }
 
@@ -213,11 +213,13 @@ FlashphonerLoader.prototype = {
                 success: function (loadBalancerData) {
                     me.wcsIP = loadBalancerData.server;
                     me.wsPort = loadBalancerData.ws;
+					me.wssPort = loadBalancerData.wss;
                     me.flashPort = loadBalancerData.flash;
                     me.jsonpSuccess = true;
                     trace("Connection data from load balancer: "
                         + "wcsIP " + loadBalancerData.server
                         + ", wsPort " + loadBalancerData.ws
+                        + ", wssPort " + loadBalancerData.wss
                         + ", flashPort " + loadBalancerData.flash);
                     me.loadAPI();
                 }
