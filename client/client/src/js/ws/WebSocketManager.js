@@ -5,6 +5,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
     me.configLoaded = false;
     me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
     me.soundControl = new SoundControl();
+    me.stripCodecs = new Array();
     var rtcManager = this.webRtcMediaManager;
     var proccessCall = function (call) {
         for (var i in me.calls) {
@@ -187,6 +188,11 @@ WebSocketManager.prototype = {
         openInfoView("Configuring WebRTC connection...", 0, 60);
         this.webRtcMediaManager.createOffer(function (sdp) {
             closeInfoView();
+            //here we will strip codecs from SDP if requested
+            if (me.stripCodecs.length) {
+                sdp = me.stripCodecsSDP(sdp);
+                console.log("New SDP: " + sdp);
+            }
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
         }, false);
@@ -312,6 +318,62 @@ WebSocketManager.prototype = {
 
     notificationResult: function (result) {
         this.webSocket.send("notificationResult",result);
+    },
+
+    setStripCodecs: function (array) {
+        this.stripCodecs = array;
+    },
+
+    stripCodecsSDP: function (sdp) {
+        var sdpArray = sdp.split("\n");
+        console.dir(this.stripCodecs);
+
+        //search and delete codecs line
+        var pt = [];
+        for (p = 0; p < this.stripCodecs.length; p++) {
+            console.log("Searching for codec " + this.stripCodecs[p]);
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i].search(this.stripCodecs[p]) != -1) {
+                    console.log(this.stripCodecs[p] + " detected");
+                    pt.push(sdpArray[i].match(/[0-9]+/)[0]);
+                    sdpArray[i] = "";
+                }
+            }
+        }
+
+        if (pt.length) {
+            //searching for fmtp
+            for (p = 0; p < pt.length; p++) {
+                for (i = 0; i < sdpArray.length; i++){
+                    if (sdpArray[i].search("a=fmtp:"+pt[p]) != -1) {
+                        console.log("PT "+pt[p]+" detected");
+                        sdpArray[i] = "";
+                    }
+                }
+            }
+
+            //delete entries from m= line
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i].search("m=audio") != -1) {
+                    console.log("m line detected " + sdpArray[i]);
+                    for (p = 0; p < pt.length; p++) {
+                        sdpArray[i] = sdpArray[i].replace(" "+pt[p], "");
+                    }
+                    console.log("Resulting m= line is: " + sdpArray[i]);
+                    break;
+                }
+            }
+        }
+
+        //normalize sdp after modifications
+        var result = "";
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i] != "") {
+                result += sdpArray[i] + "\n";
+            }
+        }
+
+        return result;
     }
 
 };
