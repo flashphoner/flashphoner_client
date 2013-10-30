@@ -24,8 +24,6 @@
 	<video_height>144</video_height>
 	<check_validation_callee>true</check_validation_callee>
 	<use_enhanced_mic>true</use_enhanced_mic>
-    <strip_codec>CN</strip_codec>
-    <strip_codec>ISAC</strip_codec>
 	<ring_sound></ring_sound>
 	<busy_sound></busy_sound>
 	<register_sound></register_sound>
