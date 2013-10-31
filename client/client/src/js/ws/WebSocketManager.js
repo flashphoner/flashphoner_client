@@ -163,6 +163,11 @@ WebSocketManager.prototype = {
         openInfoView("Configuring WebRTC connection...", 0);
         this.webRtcMediaManager.createOffer(function (sdp) {
             closeInfoView();
+            //here we will strip codecs from SDP if requested
+            if (me.stripCodecs.length) {
+                sdp = me.stripCodecsSDP(sdp);
+                console.log("New SDP: " + sdp);
+            }
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
         }, false);
