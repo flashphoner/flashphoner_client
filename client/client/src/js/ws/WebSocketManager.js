@@ -379,6 +379,10 @@ WebSocketManager.prototype = {
         }
 
         return result;
+    },
+
+    setStunServer: function(server) {
+        this.webRtcMediaManager.setStunServer(server);
     }
 
 };
