@@ -90,7 +90,7 @@ FlashphonerLoader.prototype = {
         }
         var registerRequired = $(xml).find("register_required");
         if (registerRequired.length > 0) {
-            this.registerRequired = registerRequired[0].textContent;
+            this.registerRequired = (registerRequired[0].textContent === "true");
         }
         var videoWidth = $(xml).find("video_width");
         if (videoWidth.length > 0) {
