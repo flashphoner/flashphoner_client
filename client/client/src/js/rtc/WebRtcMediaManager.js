@@ -25,9 +25,10 @@ WebRtcMediaManager.prototype.close = function () {
     if (this.peerConnectionState != 'finished') {
         this.peerConnectionState = 'finished';
         if (this.peerConnection) {
+            console.debug("WebRtcMediaManager:PeerConnection will be closed");
+            this.peerConnection.close();
             this.remoteVideo.pause();
             this.remoteVideo.src = null;
-            this.peerConnection.close();
         }
     } else {
         console.log("peerConnection already closed, do nothing!");
