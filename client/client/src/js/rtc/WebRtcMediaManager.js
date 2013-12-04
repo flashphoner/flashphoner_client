@@ -22,6 +22,7 @@ WebRtcMediaManager.prototype.init = function () {
 
 WebRtcMediaManager.prototype.close = function () {
     //Commented to prevent termination of rtcMediaManager after MSRP call
+    console.debug("WebRtcMediaManager:close()");
     if (this.peerConnectionState != 'finished') {
         this.peerConnectionState = 'finished';
         if (this.peerConnection) {
@@ -48,7 +49,7 @@ WebRtcMediaManager.prototype.createPeerConnection = function () {
         ]};
     }
     this.peerConnection = new RTCPeerConnection(pc_config, {"optional": [
-        {"DtlsSrtpKeyAgreement": true}
+        {"DtlsSrtpKeyAgreement": false}
     ]});
 
     this.peerConnection.onaddstream = function (event) {
@@ -186,7 +187,9 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
             me.onCreateOfferSuccessCallback(offer);
         }, function (error) {
             me.onCreateOfferErrorCallback(error);
-        }, {"mandatory": {"OfferToReceiveVideo": true}});
+        }, {"optional": [], 'mandatory': {
+            'OfferToReceiveAudio': true,
+            'OfferToReceiveVideo': true }});
 
     }
     catch (exception) {
@@ -307,7 +310,9 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionSuccessCallback = function ()
                 application.onCreateAnswerSuccessCallback(answer);
             }, function (error) {
                 application.onCreateAnswerErrorCallback(error);
-            }, {"mandatory": {"OfferToReceiveVideo": true}});
+            }, {'mandatory': {
+                'OfferToReceiveAudio': true,
+                'OfferToReceiveVideo': true }});
         }
         else {
             console.log("WebRtcMediaManager:onSetRemoteDescriptionSuccessCallback(): RTCPeerConnection bad state!");

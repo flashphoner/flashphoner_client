@@ -138,6 +138,7 @@ WebSocketManager.prototype = {
                     notifyError(CONNECTION_ERROR);
                 }
                 notifyCloseConnection();
+                this.webRtcMediaManager.close();
             },
             error: function () {
             },
@@ -212,7 +213,7 @@ WebSocketManager.prototype = {
         openInfoView("Configuring WebRTC connection...", 0, 60);
         this.webRtcMediaManager.createAnswer(function (sdp) {
                 closeInfoView();
-                me.webSocket.send("answer", {callId: callId, sdp: sdp});
+                me.webSocket.send("answer", {callId: callId, hasVideo: hasVideo, sdp: sdp});
             }, hasVideo);
     },
 

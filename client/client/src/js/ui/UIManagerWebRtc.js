@@ -35,13 +35,13 @@ UIManagerWebRtc.prototype = {
 
     openVideoView: function() {
         trace("openVideoView");
-        if (!flashphoner.hasAccessToVideo()){
-            openInfoView("Please allow access to video device", 0, 60);
-            flashphoner.getAccessToVideo();
-            if (intervalId == -1) {
-                intervalId = setInterval('if (flashphoner.hasAccessToVideo()){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; }', 500);
-            }
-        }
+//        if (!flashphoner.hasAccessToVideo()){
+//            openInfoView("Please allow access to video device", 0, 60);
+//            flashphoner.getAccessToVideo();
+//            if (intervalId == -1) {
+//                intervalId = setInQ.terval('if (flashphoner.hasAccessToVideo()){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; }', 500);
+//            }
+//        }
 
         $('#video_requestUnmuteDiv').removeClass().addClass('videoDiv');
         $('#closeButton_video_requestUnmuteDiv').css('visibility', 'visible');
