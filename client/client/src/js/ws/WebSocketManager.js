@@ -221,11 +221,29 @@ WebSocketManager.prototype = {
     answer: function (callId) {
         var me = this;
         openInfoView("Configuring WebRTC connection...", 0, 60);
-        this.webRtcMediaManager.createAnswer(function (sdp) {
+        /**
+         * If we receive INVITE without SDP, we should send answer with SDP based on webRtcMediaManager.createOffer because we do not have remoteSdp here
+         */
+        if (this.webRtcMediaManager.lastReceivedSdp !== null &&  this.webRtcMediaManager.lastReceivedSdp.length==0){
+            this.webRtcMediaManager.createOffer(function (sdp) {
                 closeInfoView();
+                //here we will strip codecs from SDP if requested
+                if (me.stripCodecs.length) {
+                    sdp = me.stripCodecsSDP(sdp);
+                    console.log("New SDP: " + sdp);
+                }
                 me.webSocket.send("answer", {callId: callId, sdp: sdp});
-            }
-        );
+            }, false);
+        } else{
+            /**
+             * If we receive a normal INVITE with SDP we should create answering SDP using normal createAnswer method because we already have remoteSdp here.
+             */
+            this.webRtcMediaManager.createAnswer(function (sdp) {
+                    closeInfoView();
+                    me.webSocket.send("answer", {callId: callId, sdp: sdp});
+                }
+            );
+        }
     },
 
     hangup: function (callId) {
