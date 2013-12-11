@@ -92,6 +92,10 @@ package com.flashphoner.api.data
 		
 		public static var LOAD_BALANCER_URL = null;
 		
+		public static var WCS_SERVER:String = "192.168.1.5";
+		
+		public static var RTMFP_PORT:int = 1935;
+		
 		/**
 		 * Current version of Flashphoner product
 		 **/		
