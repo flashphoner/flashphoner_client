@@ -342,7 +342,7 @@ WebSocketManager.prototype = {
         for (p = 0; p < this.stripCodecs.length; p++) {
             console.log("Searching for codec " + this.stripCodecs[p]);
             for (i = 0; i < sdpArray.length; i++) {
-                if (sdpArray[i].search(this.stripCodecs[p]) != -1) {
+                if (sdpArray[i].search(this.stripCodecs[p]) != -1 && sdpArray[i].indexOf("a=rtpmap") == 0) {
                     console.log(this.stripCodecs[p] + " detected");
                     pt.push(sdpArray[i].match(/[0-9]+/)[0]);
                     sdpArray[i] = "";
@@ -365,8 +365,12 @@ WebSocketManager.prototype = {
             for (i = 0; i < sdpArray.length; i++) {
                 if (sdpArray[i].search("m=audio") != -1) {
                     console.log("m line detected " + sdpArray[i]);
-                    for (p = 0; p < pt.length; p++) {
-                        sdpArray[i] = sdpArray[i].replace(" "+pt[p], "");
+                    var mLineSplitted = sdpArray[i].split(" ");
+                    var newMLine = "";
+                    for (m = 0; m < mLineSplitted.length; m++) {
+                        if (pt.indexOf(mLineSplitted[m]) == -1 || m <= 2){
+                            newMLine += " " + mLineSplitted[m];
+                        }
                     }
                     console.log("Resulting m= line is: " + sdpArray[i]);
                     break;
