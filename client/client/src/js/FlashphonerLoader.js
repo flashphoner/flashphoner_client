@@ -156,6 +156,21 @@ FlashphonerLoader.prototype = {
             }
         }
 
+        //variable participating in api load, can bee null, webrtc, flash
+        var streamingType = $(xml).find("streaming");
+        if (streamingType.length > 0) {
+            if (streamingType.text() == "webrtc") {
+                console.log("Force WebRTC usage!");
+                isWebRTCAvailable = true;
+            } else if (streamingType.text() == "flash") {
+                console.log("Force Flash usage!");
+                isWebRTCAvailable = false;
+            } else {
+                console.log("Bad streaming property " + streamingType.text() +
+                    ", can be wertc or flash. Using default behaviour!")
+            }
+        }
+
         //get load balancer url if load balancing enabled
         if (me.loadBalancerUrl != null) {
             trace("Retrieve server url from load balancer");
