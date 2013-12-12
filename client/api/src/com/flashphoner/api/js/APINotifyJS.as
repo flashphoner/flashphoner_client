@@ -32,7 +32,7 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyConnected");
 		}
 		public function notifyRegistered(_sipObject:Object):void{
-			ExternalInterface.call("notifyRegistered");
+			ExternalInterface.call("notifyRegistered", _sipObject);
 		}
 		public function notifyBalance(balance:Number,_sipObject:Object):void{
 			ExternalInterface.call("notifyBalance",String(balance));

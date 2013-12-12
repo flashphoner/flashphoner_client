@@ -48,7 +48,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         },
 
         registered: function (sipHeader) {
-            notifyRegistered();
+            notifyRegistered(sipHeader);
         },
 
         ring: function (call, sipHeader) {
