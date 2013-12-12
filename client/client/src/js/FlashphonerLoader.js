@@ -36,6 +36,7 @@ FlashphonerLoader = function (config) {
     this.contactParams = null;
     this.imdnEnabled = false;
     this.msgContentType = "text/plain";
+    this.stripCodecs = new Array();
 
     $.ajax({
         type: "GET",
@@ -172,6 +173,14 @@ FlashphonerLoader.prototype = {
             console.log("Message content type: " + this.msgContentType);
         }
 
+        var stripCodecs = $(xml).find("strip_codec");
+        if (stripCodecs.length > 0) {
+            for (i = 0; i < stripCodecs.length; i++) {
+                if (stripCodecs[i].textContent.length) this.stripCodecs[i] = stripCodecs[i].textContent;
+                console.log("Codec " + stripCodecs[i].textContent + " will be removed from SDP!");
+            }
+        }
+
         //variable participating in api load, can bee null, webrtc, flash
         var streamingType = $(xml).find("streaming");
         if (streamingType.length > 0) {
@@ -240,6 +249,7 @@ FlashphonerLoader.prototype = {
             }
             me.urlServer = protocol + this.wcsIP + ":" + port;
             me.flashphoner = new WebSocketManager(getElement('localVideoPreview'), getElement('remoteVideo'));
+            if (me.stripCodecs.length) me.flashphoner.setStripCodecs(me.stripCodecs);
             me.flashphoner_UI = new UIManagerWebRtc();
             notifyConfigLoaded();
         } else {
