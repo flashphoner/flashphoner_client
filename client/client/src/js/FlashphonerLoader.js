@@ -241,7 +241,12 @@ FlashphonerLoader.prototype = {
             params.swliveconnect = "true";
             params.allowfullscreen = "true";
             params.allowscriptaccess = "always";
-            params.wmode = "transparent";
+            //in case of Safari wmode should be "window"
+            if((navigator.userAgent.indexOf("Safari") > -1) && !(navigator.userAgent.indexOf("Chrome") > -1)) {
+                params.wmode = "window";
+            } else {
+                params.wmode = "transparent";
+            }
             var attributes = {};
             var flashvars = {};
             flashvars.config = "flashphoner.xml";
