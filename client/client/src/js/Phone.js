@@ -964,7 +964,7 @@ function createChat(calleeName) {
         $('#chat' + calleeNameId + ' .messageSend').click(function () {
             var fullCalleeName = $(this).parent().attr('fullCalleeName'); //parse id of current chatBox, take away chat word from the beginning
             var messageText = $(this).prev().val(); //parse text from input
-            sendMessage(calleeName, messageText, 'text/plain'); //send message
+            sendMessage(calleeName, messageText, flashphonerLoader.msgContentType); //send message
             $(this).prev().val(''); //clear message input
         });
 
