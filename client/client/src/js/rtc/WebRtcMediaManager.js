@@ -10,7 +10,8 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo) {
     me.isAudioMuted = 1;
     me.isVideoMuted = 1;
     //stun server by default
-    me.stunServer = "stun.l.google.com:19302";
+    //commented to speedup WebRTC call establishment
+    //me.stunServer = "stun.l.google.com:19302";
 };
 
 WebRtcMediaManager.prototype.init = function () {
