@@ -34,7 +34,7 @@ Messenger.prototype = {
                 message.from = fromList[0];
             }
             //Don't show service message to user
-            if (message.contentType.toLowerCase() == "message/fsservice+xml") {
+            if (message.contentType.toLowerCase() == "message/fsservice+xml" || message.contentType.toLowerCase() == "application/fsservice+xml") {
                 console.log("Received service message");
             } else {
                 this.notifyReceived(message, notificationResult);
