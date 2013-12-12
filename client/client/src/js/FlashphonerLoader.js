@@ -202,7 +202,7 @@ FlashphonerLoader.prototype = {
             me.urlServer = "ws://" + this.wcsIP + ":" + this.wsPort;
             me.flashphoner = new WebSocketManager(getElement('localVideoPreview'), getElement('remoteVideo'));
             me.flashphoner_UI = new UIManagerWebRtc();
-            notifyFlashReady();
+            notifyConfigLoaded();
         } else {
             me.useWebRTC = false;
             me.urlServer = "rtmfp://" + this.wcsIP + ":" + this.flashPort + "/" + this.appName;
@@ -221,6 +221,8 @@ FlashphonerLoader.prototype = {
                     me.flashphoner = e.ref;
                     me.flashphoner_UI = new UIManagerFlash();
                 });
+            } else {
+                notifyFlashNotFound();
             }
 
         }

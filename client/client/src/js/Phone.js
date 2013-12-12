@@ -256,7 +256,13 @@ function addLogMessage(message) {
     trace(message);
 }
 
-function notifyFlashReady() {
+function notifyFlashNotFound() {
+    closeConnectingView();
+    getElement('phoneScreen2').innerHTML = "<a href='http://www.adobe.com/go/getflashplayer' style='margin-left: 17px;'><img src='http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player'/></a>";
+}
+
+function notifyConfigLoaded() {
+    notifyReady();
     flashphoner = flashphonerLoader.getFlashphoner();
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
     messenger = new Messenger(flashphoner);
@@ -1017,7 +1023,7 @@ function close(element) {
 
 
 /* --------------------- On document load we do... ------------------ */
-$(function () {
+function notifyReady() {
 
     // open login view
     $("#loginMainButton").click(function () {
@@ -1220,4 +1226,4 @@ $(function () {
     });
 
 
-});
+};
