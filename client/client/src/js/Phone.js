@@ -590,7 +590,11 @@ function convertMessageBody(messageBody, contentType) {
             }else{
                 missedCallNotification = parseMsn(fsService,"mcn");
             }
-            return missedCallNotification;        }
+        } else if (action == "serviceinfo-confirm") {
+            //service status confirmation
+            missedCallNotification = "Service status: " + $(fsService.find("mcn").find("mcn-data")).attr("status");
+        }
+        if(missedCallNotification !== undefined) return missedCallNotification;
     }
 
     return messageBody;
