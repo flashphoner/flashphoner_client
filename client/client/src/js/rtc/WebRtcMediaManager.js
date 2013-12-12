@@ -9,6 +9,8 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo) {
     me.localVideo.volume = 0;
     me.isAudioMuted = 1;
     me.isVideoMuted = 1;
+    //stun server by default
+    me.stunServer = "stun.l.google.com:19302";
 };
 
 WebRtcMediaManager.prototype.init = function () {
@@ -41,11 +43,11 @@ WebRtcMediaManager.prototype.createPeerConnection = function () {
     var application = this;
     if (webrtcDetectedBrowser == "firefox") {
         pc_config = {"iceServers": [
-            {"url": "stun:23.21.150.121"}
+            {"url": "stun:" + application.stunServer}
         ]};
     } else {
         pc_config = {"iceServers": [
-            {"url": "stun:stun.l.google.com:19302"}
+            {"url": "stun:" + application.stunServer}
         ]};
     }
     this.peerConnection = new RTCPeerConnection(pc_config, {"optional": [
@@ -345,6 +347,9 @@ WebRtcMediaManager.prototype.onCreateAnswerSuccessCallback = function (answer) {
     }
 };
 
+WebRtcMediaManager.prototype.setStunServer = function (server) {
+    this.stunServer = server;
+}
 
 WebRtcMediaManager.prototype.onCreateAnswerErrorCallback = function (error) {
     console.error("WebRtcMediaManager:onCreateAnswerErrorCallback(): error: " + error);

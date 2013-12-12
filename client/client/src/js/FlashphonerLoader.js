@@ -37,6 +37,7 @@ FlashphonerLoader = function (config) {
     this.imdnEnabled = false;
     this.msgContentType = "text/plain";
     this.stripCodecs = new Array();
+    this.stunServer = "";
 
     $.ajax({
         type: "GET",
@@ -182,6 +183,13 @@ FlashphonerLoader.prototype = {
             }
         }
 
+        //stun server address
+        var stunServer = $(xml).find("stun_server");
+        if (stunServer.length > 0) {
+            this.stunServer = stunServer.text();
+            console.log("Stun server: " + this.stunServer);
+        }
+
         //variable participating in api load, can bee null, webrtc, flash
         var streamingType = $(xml).find("streaming");
         if (streamingType.length > 0) {
@@ -251,6 +259,7 @@ FlashphonerLoader.prototype = {
             me.urlServer = protocol + this.wcsIP + ":" + port;
             me.flashphoner = new WebSocketManager(getElement('localVideoPreview'), getElement('remoteVideo'));
             if (me.stripCodecs.length) me.flashphoner.setStripCodecs(me.stripCodecs);
+            if (me.stunServer != "") me.flashphoner.setStunServer(me.stunServer);
             me.flashphoner_UI = new UIManagerWebRtc();
             notifyConfigLoaded();
         } else {

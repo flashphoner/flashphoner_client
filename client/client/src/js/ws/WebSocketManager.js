@@ -6,6 +6,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
     me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
     me.soundControl = new SoundControl();
     me.stripCodecs = new Array();
+
     var rtcManager = this.webRtcMediaManager;
     var proccessCall = function (call) {
         for (var i in me.calls) {
@@ -382,6 +383,10 @@ WebSocketManager.prototype = {
         }
 
         return result;
+    },
+
+    setStunServer: function(server) {
+        this.webRtcMediaManager.setStunServer(server);
     }
 
 };
