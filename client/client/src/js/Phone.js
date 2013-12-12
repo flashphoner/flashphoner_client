@@ -398,6 +398,7 @@ function notifyBalance(balance) {
 function notify(call) {
     trace("notify", call); //: callId " + call.id + " --- " + call.anotherSideUser);
     if (currentCall.id == call.id) { //if we have some call now and notify is about exactly our call
+        trace("currentCall.id == call.id "+call.id);
         currentCall = call;
         if (call.state == STATE_FINISH) {
             // if that hangup during transfer procedure?
@@ -432,6 +433,7 @@ function notify(call) {
             flashphoner.playSound("BUSY");
         }
     } else if (holdedCall.id == call.id) {
+        trace("holdedCall.id == call.id "+call.id);
         if (call.state == STATE_FINISH) {
             /* that mean if
              - user1 call user2
@@ -665,8 +667,10 @@ function notifyAddCall(call) {
     trace("notifyAddCall", call); // call.id, call.anotherSideUser
 
     if (currentCall != null && call.incoming == true) {
+        trace("currentCall != null && call.incoming == true");
         hangup(call.id);
     } else if (currentCall != null && call.incoming == false) {
+        trace("currentCall != null && call.incoming == false");
         holdedCall = currentCall;
         currentCall = call;
         createCallView(currentCall);
