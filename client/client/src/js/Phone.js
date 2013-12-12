@@ -813,7 +813,10 @@ function closeInfoView(timeout) {
 function openIncomingView(call) {
     trace("openIncomingView", call)// call.caller, call.visibleNameCaller
 
-    var displayedCaller = call.caller + " '" + call.visibleNameCaller + "'";
+    //form Caller-ID information displayed to user
+    var displayedCaller = "";
+    if (call.caller !== undefined) displayedCaller += call.caller;
+    if (call.visibleNameCaller !== undefined) displayedCaller += " '" + call.visibleNameCaller + "'";
 
     $('#incomingDiv').show();
     $('#callerField').html(displayedCaller);
