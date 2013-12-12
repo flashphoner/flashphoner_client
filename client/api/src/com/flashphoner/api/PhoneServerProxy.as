@@ -116,9 +116,13 @@ package com.flashphoner.api
 		
 		public function callByToken(callObject:Object):void{
 			Logger.info("PhoneServerProxy.callByToken()");
-			nc.call("call",responder, callObject);
-		}		
+			nc.call("call", responder, callObject);
+		}
 		
+		public function msrpCall(callObject:Object):void{
+			Logger.info("PhoneServerProxy.msrpCall()");
+			nc.call("msrpCall", responder, callObject);
+		}		
 		public function disconnect():void {
 			hasDisconnectAttempt = true;
 			nc.close();
