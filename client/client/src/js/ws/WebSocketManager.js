@@ -62,7 +62,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
 
         setRemoteSDP: function (call, sdp, isInitiator, sipHeader) {
             proccessCall(call);
-            //this.stopSound("RING");
+            this.stopSound("RING");
             rtcManager.setRemoteSDP(sdp, isInitiator);
             if (!isInitiator && rtcManager.getConnectionState() == "established") {
                 me.answer(call.id);
