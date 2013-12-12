@@ -173,11 +173,12 @@ FlashphonerLoader.prototype = {
             console.log("Message content type: " + this.msgContentType);
         }
 
-        var stripCodecs = $(xml).find("strip_codec");
+        var stripCodecs = $(xml).find("strip_codecs");
         if (stripCodecs.length > 0) {
-            for (i = 0; i < stripCodecs.length; i++) {
-                if (stripCodecs[i].textContent.length) this.stripCodecs[i] = stripCodecs[i].textContent;
-                console.log("Codec " + stripCodecs[i].textContent + " will be removed from SDP!");
+            var tempCodecs = stripCodecs[0].textContent.split(",");
+            for (i = 0; i < tempCodecs.length; i++) {
+                if (tempCodecs[i].length) this.stripCodecs[i] = tempCodecs[i];
+                console.log("Codec " + tempCodecs[i] + " will be removed from SDP!");
             }
         }
 
