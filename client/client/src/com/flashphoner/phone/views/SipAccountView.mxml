@@ -19,6 +19,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			import com.adobe.cairngorm.control.CairngormEventDispatcher;
 			import com.flashphoner.Logger;
 			import com.flashphoner.api.Flash_API;
+			import com.flashphoner.api.data.PhoneConfig;			
 			import com.flashphoner.phone.DataPhone;
 			
 			import mx.controls.Alert;
@@ -54,12 +55,14 @@ This code and accompanying materials also available under LGPL and MPL license f
 				
 				DataPhone.getInstance().viewController.showConnectingView();
 				var loginObject:Object = new Object();
-				loginObject.username = "sip:"+username.text+"@"+domain.text;
+				loginObject.login = username.text;
 				loginObject.password = password.text;
 				loginObject.authenticationName = authName.text;
 				loginObject.outboundProxy = outboundProxy.text;
+				loginObject.domain = domain.text;				
 				loginObject.port = port.text;
-				if (DataPhone.getInstance().flash_API.login(loginObject, "rtmfp://192.168.1.5:1935/phone_app") == 0){
+				loginObject.registerRequired = PhoneConfig.REGISTER_REQUIRED;
+				if (DataPhone.getInstance().flash_API.login(loginObject, "rtmfp://"+PhoneConfig.WCS_SERVER+":"+PhoneConfig.RTMFP_PORT+"/phone_app") == 0){
 					save();
 				}
 			}

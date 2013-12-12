@@ -126,6 +126,18 @@ package com.flashphoner.api
 						parameters[node] = String(xml[node]); 
 					}
 			        
+					var wcs_server:String = xml.wcs_server;					
+					if (wcs_server!=null && wcs_server.length!=0){
+						PhoneConfig.WCS_SERVER = wcs_server;
+					}
+					Logger.info("WCS_SERVER: "+PhoneConfig.WCS_SERVER);
+					
+					var rtmfp_port:String = xml.rtmfp_port;					
+					if (rtmfp_port!=null && rtmfp_port.length!=0){
+						PhoneConfig.RTMFP_PORT = int(rtmfp_port);
+					}
+					Logger.info("RTMFP_PORT: "+PhoneConfig.RTMFP_PORT);
+										
 					var use_enhanced_mic:String = xml.use_enhanced_mic;
 					
 					if (use_enhanced_mic!=null && use_enhanced_mic.length!=0){
