@@ -579,21 +579,39 @@ function notifyMessageReceived(messageObject) {
 function convertMessageBody(messageBody, contentType) {
     trace("convertMessageBody " + contentType);
     if (contentType == "application/fsservice+xml") {
+        var missedCallNotification;
         var xml = $.parseXML(messageBody);
         var fsService = $(xml).find("fs-services").find("fs-service");
         var action = fsService.attr("action");
         if (action == "servicenoti-indicate") {
-            var cawData = fsService.find("caw").find("caw-data");
-            if (cawData) {
-                var sender = $(cawData).attr("sender");
-                trace("cawData: " + sender);
-                return "Missed call " + sender;
+            var caw = parseMsn(fsService,"caw");
+            if (!!caw){
+                missedCallNotification = caw;
+            }else{
+                missedCallNotification = parseMsn(fsService,"mcn");
             }
-        }
+            return missedCallNotification;        }
     }
 
     return messageBody;
 
+}
+
+function parseMsn(fsService,mcn){
+    trace("parseMcn: "+mcn);
+    var caw = fsService.find(mcn);
+    var ret = null;
+    if (!!caw){
+        var cawData = caw.find(mcn+"-data");
+        if (!!cawData) {
+            var sender = $(cawData).attr("sender");
+            if (!!sender){
+                trace("Missed call: " + sender);
+                ret = "Missed call from " + sender;
+            }
+        }
+    }
+    return ret;
 }
 
 function addMessageToChat(chatDiv, from, body, className, messageId) {
@@ -1161,6 +1179,10 @@ function notifyReady() {
             $("#calleeText").val($("#calleeText").val() + $(this).html());
             callee = callee + $(this).html();
         }
+    });
+
+    $(".testButton").click(function () {
+        startUnitTests();
     });
 
     // this function set changing in button styles when you press any button

@@ -185,6 +185,7 @@ input::-webkit-input-placeholder {
     right: 27px;
     visibility:hidden;
 }
+
 .holdImage {
     background: url(../assets/hold_big.png);
     right: 55px;
@@ -407,6 +408,22 @@ input::-webkit-input-placeholder {
     margin: 10px 0 0 15px;
     width: 80px;
 }
+
+#testButton {
+    position: absolute;
+    top: 330px;
+    left: 250px;
+    height: 20px;
+    width: 80px;
+    float: left;
+    background-color: green;
+    font: 14px Courier;
+    color: #ffffff;
+    padding: 1px;
+    visibility: hidden;
+    text-align: center;
+}
+
 /* ------------ Video + Security settings view -------------- */
 #video_requestUnmuteDiv {
     top: 32px;
