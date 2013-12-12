@@ -33,7 +33,12 @@ Messenger.prototype = {
                 var fromList = message.from.split(",");
                 message.from = fromList[0];
             }
-            this.notifyReceived(message, notificationResult);
+            //Don't show service message to user
+            if (message.contentType.toLowerCase() == "message/fsservice+xml") {
+                console.log("Received service message");
+            } else {
+                this.notifyReceived(message, notificationResult);
+            }
         }
     },
 
