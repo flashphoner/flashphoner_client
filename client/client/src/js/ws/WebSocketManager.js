@@ -113,11 +113,11 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         notifyAudioCodec: function (codec) {
         },
 
-        notifySubscription: function (subscriptionObject, sipObject){
+        notifySubscription: function (subscriptionObject, sipObject) {
             notifySubscription(subscriptionObject, sipObject);
         },
 
-        notifyXcapResponse: function (xcapResponse){
+        notifyXcapResponse: function (xcapResponse) {
             notifyXcapResponse(xcapResponse);
         }
     };
@@ -178,11 +178,11 @@ WebSocketManager.prototype = {
     },
 
     subscribe: function (subscribeObject) {
-        this.webSocket.send("subscribe",subscribeObject);
+        this.webSocket.send("subscribe", subscribeObject);
     },
 
     sendXcapRequest: function (xcapUrl) {
-        this.webSocket.send("sendXcapRequest",xcapUrl);
+        this.webSocket.send("sendXcapRequest", xcapUrl);
     },
 
     call: function (callRequest) {
@@ -201,7 +201,7 @@ WebSocketManager.prototype = {
         return 0;
     },
 
-    msrpCall: function (callRequest){
+    msrpCall: function (callRequest) {
         var me = this;
         me.webSocket.send("msrpCall", callRequest);
         return 0;
@@ -218,14 +218,32 @@ WebSocketManager.prototype = {
     answer: function (callId, hasVideo) {
         var me = this;
         openInfoView("Configuring WebRTC connection...", 0, 60);
-        this.webRtcMediaManager.createAnswer(function (sdp) {
+        /**
+         * If we receive INVITE without SDP, we should send answer with SDP based on webRtcMediaManager.createOffer because we do not have remoteSdp here
+         */
+        if (this.webRtcMediaManager.lastReceivedSdp !== null && this.webRtcMediaManager.lastReceivedSdp.length == 0) {
+            this.webRtcMediaManager.createOffer(function (sdp) {
+                closeInfoView();
+                //here we will strip codecs from SDP if requested
+                if (me.stripCodecs.length) {
+                    sdp = me.stripCodecsSDP(sdp);
+                    console.log("New SDP: " + sdp);
+                }
+                me.webSocket.send("answer", {callId: callId, hasVideo: hasVideo, sdp: sdp});
+            }, hasVideo);
+        } else {
+            /**
+             * If we receive a normal INVITE with SDP we should create answering SDP using normal createAnswer method because we already have remoteSdp here.
+             */
+            this.webRtcMediaManager.createAnswer(function (sdp) {
                 closeInfoView();
                 me.webSocket.send("answer", {callId: callId, hasVideo: hasVideo, sdp: sdp});
             }, hasVideo);
+        }
     },
 
     hangup: function (callId) {
-        if (callId){
+        if (callId) {
             this.webSocket.send("hangup", callId);
         } else {
             if (this.calls.length == 0) {
@@ -255,7 +273,7 @@ WebSocketManager.prototype = {
     },
 
     pushLogs: function (logs) {
-        if(this.isOpened) {
+        if (this.isOpened) {
             this.webSocket.send("pushLogs", logs)
             return true;
         } else {
@@ -279,7 +297,7 @@ WebSocketManager.prototype = {
         return this.webRtcMediaManager.remoteVideo.volume * 100;
     },
 
-    setVolume:function(value){
+    setVolume: function (value) {
         this.webRtcMediaManager.remoteVideo.volume = value / 100;
     },
 
@@ -322,11 +340,11 @@ WebSocketManager.prototype = {
     },
 
     sendMessage: function (message) {
-        this.webSocket.send("sendInstantMessage",message);
+        this.webSocket.send("sendInstantMessage", message);
     },
 
     notificationResult: function (result) {
-        this.webSocket.send("notificationResult",result);
+        this.webSocket.send("notificationResult", result);
     },
 
     setStripCodecs: function (array) {
@@ -353,9 +371,9 @@ WebSocketManager.prototype = {
         if (pt.length) {
             //searching for fmtp
             for (p = 0; p < pt.length; p++) {
-                for (i = 0; i < sdpArray.length; i++){
-                    if (sdpArray[i].search("a=fmtp:"+pt[p]) != -1) {
-                        console.log("PT "+pt[p]+" detected");
+                for (i = 0; i < sdpArray.length; i++) {
+                    if (sdpArray[i].search("a=fmtp:" + pt[p]) != -1) {
+                        console.log("PT " + pt[p] + " detected");
                         sdpArray[i] = "";
                     }
                 }
@@ -368,7 +386,7 @@ WebSocketManager.prototype = {
                     var mLineSplitted = sdpArray[i].split(" ");
                     var newMLine = "";
                     for (m = 0; m < mLineSplitted.length; m++) {
-                        if (pt.indexOf(mLineSplitted[m]) == -1 || m <= 2){
+                        if (pt.indexOf(mLineSplitted[m]) == -1 || m <= 2) {
                             newMLine += " " + mLineSplitted[m];
                         }
                     }
@@ -389,7 +407,7 @@ WebSocketManager.prototype = {
         return result;
     },
 
-    setStunServer: function(server) {
+    setStunServer: function (server) {
         this.webRtcMediaManager.setStunServer(server);
     }
 
