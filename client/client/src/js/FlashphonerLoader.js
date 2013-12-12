@@ -273,6 +273,8 @@ FlashphonerLoader.prototype = {
             //in case of Safari wmode should be "window"
             if((navigator.userAgent.indexOf("Safari") > -1) && !(navigator.userAgent.indexOf("Chrome") > -1)) {
                 params.wmode = "window";
+                //workaround for safari browser, FPNR-403
+                swfobject.switchOffAutoHideShow();
             } else {
                 params.wmode = "transparent";
             }
