@@ -197,7 +197,7 @@ WebSocketManager.prototype = {
             }
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
-        }, false);
+        }, callRequest.hasVideo);
         return 0;
     },
 
