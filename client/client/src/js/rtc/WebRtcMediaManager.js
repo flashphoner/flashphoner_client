@@ -184,9 +184,9 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
             console.debug("peerConnection is null");
             me.createPeerConnection();
             if (hasVideo) {
-                me.peerConnection.addStream(me.localAudioStream);
-            } else {
                 me.peerConnection.addStream(me.localAudioVideoStream);
+            } else {
+                me.peerConnection.addStream(me.localAudioStream);
             }
         }
         me.createOfferCallback = createOfferCallback;
