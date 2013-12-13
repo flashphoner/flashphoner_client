@@ -194,9 +194,7 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
             me.onCreateOfferSuccessCallback(offer);
         }, function (error) {
             me.onCreateOfferErrorCallback(error);
-        }, {"optional": [], 'mandatory': {
-            'OfferToReceiveAudio': true,
-            'OfferToReceiveVideo': true }});
+        });
 
     }
     catch (exception) {
@@ -324,9 +322,7 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionSuccessCallback = function ()
                 application.onCreateAnswerSuccessCallback(answer);
             }, function (error) {
                 application.onCreateAnswerErrorCallback(error);
-            }, {'mandatory': {
-                'OfferToReceiveAudio': true,
-                'OfferToReceiveVideo': true }});
+            });
         }
         else {
             console.log("WebRtcMediaManager:onSetRemoteDescriptionSuccessCallback(): RTCPeerConnection bad state!");
