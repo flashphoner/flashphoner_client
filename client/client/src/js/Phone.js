@@ -1158,7 +1158,7 @@ function notifyReady() {
     $("#video_requestUnmuteDiv").draggable({handle: '.bar', stack: "#video_requestUnmuteDiv"});
     $("#video_requestUnmuteDiv").resizable({ minWidth: 215, minHeight: 180, aspectRatio: true});
 
-    var all_videos = $('#localVideoPreview, #remoteVideo, #video');
+    var all_videos = $('#localVideoPreview, #remoteVideo');
     all_videos.each(function () {
         var el = $(this);
         el.attr('data-aspectRatio', el.height() / el.width());
@@ -1171,6 +1171,7 @@ function notifyReady() {
         var height = $("#video_requestUnmuteDiv").height();
         var newWidth = width == 1 ? 640 : width;
         $('#video').height((height == 1 ? 520 : height) - 40);
+        $('#video').width(width == 1 ? 640 : width);
         $('#remoteVideo').height((height == 1 ? 520 : height) - 40);
         var localVideo = $('#localVideoPreview');
         localVideo.height(newWidth * localVideo.attr('data-windowRatio') * localVideo.attr('data-aspectRatio'));
