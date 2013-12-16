@@ -289,10 +289,6 @@ WebSocketManager.prototype = {
         this.webRtcMediaManager.getAccessToAudio();
     },
 
-    getAccessToVideo: function () {
-        this.webRtcMediaManager.getAccessToVideo();
-    },
-
     getVolume: function () {
         return this.webRtcMediaManager.remoteVideo.volume * 100;
     },

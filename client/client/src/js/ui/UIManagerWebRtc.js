@@ -37,7 +37,7 @@ UIManagerWebRtc.prototype = {
         trace("openVideoView");
         if (!flashphoner.hasAccessToVideo()){
             openInfoView("Please allow access to video device", 0, 60);
-            flashphoner.getAccessToVideo();
+            flashphoner.getAccessToAudioAndVideo();
             if (intervalId == -1) {
                 intervalId = setInterval('if (flashphoner.hasAccessToVideo()){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; }', 500);
             }

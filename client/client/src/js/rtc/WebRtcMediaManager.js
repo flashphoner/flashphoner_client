@@ -129,6 +129,7 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
     var me = this;
     if (!me.localAudioVideoStream) {
         getUserMedia({audio: true, video: true}, function (stream) {
+                attachMediaStream(me.localVideo, stream);
                 me.localAudioVideoStream = stream;
                 me.isAudioMuted = -1;
                 me.isVideoMuted = -1;
@@ -155,20 +156,6 @@ WebRtcMediaManager.prototype.getAccessToAudio = function () {
                 me.isAudioMuted = 1;
             }
         );
-    }
-};
-
-WebRtcMediaManager.prototype.getAccessToVideo = function () {
-    var me = this;
-    if (!me.localVideoStream) {
-        getUserMedia({video: true}, function (stream) {
-            attachMediaStream(me.localVideo, stream);
-            me.localVideoStream = stream;
-            me.isVideoMuted = -1;
-        }, function (error) {
-            addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
-            me.isVideoMuted = 1;
-        });
     }
 };
 
