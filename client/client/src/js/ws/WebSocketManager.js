@@ -140,7 +140,7 @@ WebSocketManager.prototype = {
                     notifyError(CONNECTION_ERROR);
                 }
                 notifyCloseConnection();
-                this.webRtcMediaManager.close();
+                me.webRtcMediaManager.close();
             },
             error: function () {
             },
