@@ -830,7 +830,7 @@ function openInfoView(str, timeout, height) {
 
 function closeInfoView(timeout) {
     trace("closeInfoView");
-    if (timeout != 0) {
+    if (timeout) {
         window.setTimeout("getElement('infoDiv').style.visibility = 'hidden';", timeout);
     } else {
         getElement('infoDiv').style.visibility = "hidden";
