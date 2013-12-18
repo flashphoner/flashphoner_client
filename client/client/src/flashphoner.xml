@@ -19,7 +19,6 @@
 	<rtmfp_port>1935</rtmfp_port>
 	<register_required>true</register_required>
 	<!--<token>etgrtgrth</token>-->
-	<strip_codecs>opus, CN</strip_codecs>
 	<application>phone_app</application>
 	<video_width>176</video_width>
 	<video_height>144</video_height>
