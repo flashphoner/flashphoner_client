@@ -195,6 +195,7 @@ WebSocketManager.prototype = {
                 sdp = me.stripCodecsSDP(sdp);
                 console.log("New SDP: " + sdp);
             }
+            sdp = me.removeCandidatesFromSDP(sdp);
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
         }, callRequest.hasVideo);
@@ -229,6 +230,7 @@ WebSocketManager.prototype = {
                     sdp = me.stripCodecsSDP(sdp);
                     console.log("New SDP: " + sdp);
                 }
+                sdp = me.removeCandidatesFromSDP(sdp);
                 me.webSocket.send("answer", {callId: callId, hasVideo: hasVideo, sdp: sdp});
             }, hasVideo);
         } else {
@@ -347,9 +349,35 @@ WebSocketManager.prototype = {
         this.stripCodecs = array;
     },
 
+    removeCandidatesFromSDP: function (sdp) {
+        var sdpArray = sdp.split("\n");
+
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i].search("a=candidate:") != -1) {
+                sdpArray[i] = "";
+            }
+        }
+
+        //normalize sdp after modifications
+        var result = "";
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i] != "") {
+                result += sdpArray[i] + "\n";
+            }
+        }
+
+        return result;
+    },
+
     stripCodecsSDP: function (sdp) {
         var sdpArray = sdp.split("\n");
         console.dir(this.stripCodecs);
+
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i].search("a=candidate:") != -1) {
+                sdpArray[i] = "";
+            }
+        }
 
         //search and delete codecs line
         var pt = [];
@@ -370,6 +398,9 @@ WebSocketManager.prototype = {
                 for (i = 0; i < sdpArray.length; i++) {
                     if (sdpArray[i].search("a=fmtp:" + pt[p]) != -1) {
                         console.log("PT " + pt[p] + " detected");
+                        sdpArray[i] = "";
+                    }
+                    if (sdpArray[i].search("a=candidate:") != -1) {
                         sdpArray[i] = "";
                     }
                 }
