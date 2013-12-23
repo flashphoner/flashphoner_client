@@ -373,12 +373,6 @@ WebSocketManager.prototype = {
         var sdpArray = sdp.split("\n");
         console.dir(this.stripCodecs);
 
-        for (i = 0; i < sdpArray.length; i++) {
-            if (sdpArray[i].search("a=candidate:") != -1) {
-                sdpArray[i] = "";
-            }
-        }
-
         //search and delete codecs line
         var pt = [];
         for (p = 0; p < this.stripCodecs.length; p++) {
