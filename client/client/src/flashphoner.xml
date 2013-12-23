@@ -18,6 +18,7 @@
     <use_wss>false</use_wss>
 	<rtmfp_port>1935</rtmfp_port>
 	<register_required>true</register_required>
+    <use_dtls>true</use_dtls>
 	<!--<token>etgrtgrth</token>-->
 	<application>phone_app</application>
 	<video_width>176</video_width>

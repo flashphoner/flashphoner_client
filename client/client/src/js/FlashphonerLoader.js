@@ -23,6 +23,7 @@ FlashphonerLoader = function (config) {
     this.jsonpSuccess = false;
     this.token = null;
     this.registerRequired = true;
+    this.useDTLS = true;
     this.videoWidth = 320;
     this.videoHeight = 240;
     this.pushLogEnabled = false;
@@ -92,6 +93,12 @@ FlashphonerLoader.prototype = {
         if (registerRequired.length > 0) {
             this.registerRequired = (registerRequired[0].textContent === "true");
         }
+
+        var useDTLS = $(xml).find("use_dtls");
+        if (useDTLS.length > 0) {
+            this.useDTLS = (useDTLS[0].textContent === "true");
+        }
+
         var videoWidth = $(xml).find("video_width");
         if (videoWidth.length > 0) {
             this.videoWidth = videoWidth[0].textContent;

@@ -54,7 +54,7 @@ WebRtcMediaManager.prototype.createPeerConnection = function () {
         ]};
     }
     this.peerConnection = new RTCPeerConnection(pc_config, {"optional": [
-        {"DtlsSrtpKeyAgreement": false}
+        {"DtlsSrtpKeyAgreement": flashphonerLoader.useDTLS}
     ]});
 
     this.peerConnection.onaddstream = function (event) {
