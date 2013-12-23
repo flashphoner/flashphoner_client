@@ -51,7 +51,7 @@ WebRtcMediaManager.prototype.createPeerConnection = function () {
         ]};
     }
     this.peerConnection = new RTCPeerConnection(pc_config, {"optional": [
-        {"DtlsSrtpKeyAgreement": true}
+        {"DtlsSrtpKeyAgreement": false}
     ]});
 
     this.peerConnection.onaddstream = function (event) {
