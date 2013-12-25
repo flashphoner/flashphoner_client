@@ -40,7 +40,7 @@ function extend(Child, Parent) {
     Child.superclass = Parent.prototype
 }
 
-function trace(funcName, param1, param2, param3) {
+function trace(logMessage) {
 
     var today = new Date();
     // get hours, minutes and seconds
@@ -58,27 +58,12 @@ function trace(funcName, param1, param2, param3) {
     // set time
     var time = "UTC " + hh + ':' + mm + ':' + ss + '.' + ms;
 
-    var div1 = div2 = '';
-
     var console = $("#console");
 
     // Check if console is scrolled down? Or may be you are reading previous messages.
     var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37);
 
-    // Check if we set params and set it ????? instead of 'undefined' if not, also set dividers equal to ', '
-    if (typeof param1 == 'undefined') {
-        param1 = '';
-    }
-    if (typeof param2 == 'undefined') {
-        param2 = '';
-    } else {
-        var div1 = ', ';
-    }
-    if (typeof param3 == 'undefined') {
-        param3 = '';
-    } else {
-        var div2 = ', ';
-    }
+    var logMessage =  time + ' - ' + logMessage;
 
     // Print message to console and push it to server
     if (traceEnabled) {
@@ -86,9 +71,9 @@ function trace(funcName, param1, param2, param3) {
         if (flashphoner !== undefined) {
             //check if push_log enabled
             if (flashphonerLoader.pushLogEnabled) {
-                var result = flashphoner.pushLogs(logs + time + ' - ' + funcName + ' ' + +param1 + div1 + param2 + div2 + param3 + '\n');
+                var result = flashphoner.pushLogs(logs + logMessage+'\n');
                 if (!result) {
-                    logs += time + ' - ' + funcName + ' ' + param1 + div1 + param2 + div2 + param3 + '\n';
+                    logs += logMessage+'\n';
                 } else {
                     logs = "";
                 }
@@ -97,9 +82,12 @@ function trace(funcName, param1, param2, param3) {
             }
 
         } else {
-            logs += time + ' - ' + funcName + ' ' + param1 + div1 + param2 + div2 + param3 + '\n';
+            logs += logMessage+'\n';
         }
-        console.append('<grey>' + time + ' - ' + '</grey>' + funcName + '<grey>' + ' ' + param1 + div1 + param2 + div2 + param3 + ' ' + '</grey>' + '<br>');
+
+        console.append(logMessage+'<br>');
+        window.console.debug(logMessage);
+
     }
 
     //Autoscroll cosole if you are not reading previous messages

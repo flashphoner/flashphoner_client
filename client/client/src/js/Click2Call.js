@@ -42,7 +42,7 @@ var testInviteParameter = new Object;
 testInviteParameter['param1'] = "value1";
 testInviteParameter['param2'] = "value2";
 
-var logs;
+var logs="";
 
 function timer() {
 
@@ -86,7 +86,7 @@ $(document).ready(function () {
 
 
 function loginByToken(token) {
-    trace("loginByToken", document.URL, token);
+    trace("Click2Call - loginByToken url: "+ document.URL+" token: "+ token);
     changeCallStateInfo("...Registering...");
 
     var pageUrl = document.URL;
@@ -94,17 +94,17 @@ function loginByToken(token) {
 }
 
 function getInfoAboutMe() {
-    trace("getInfoAboutMe");
+    trace("Click2Call - getInfoAboutMe");
     return flashphoner.getInfoAboutMe();
 }
 
 function logoff() {
-    trace("logoff");
+    trace("Click2Call - logoff");
     flashphoner.logoff();
 }
 
 function callByToken(token) {
-    trace("callByToken", token);
+    trace("Click2Call - callByToken "+ token);
     if (isLogged) {
         if (isMuted() == 1) {
             intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmuteC2C(); clearInterval(intervalId);callByToken(callToken);}', 500);
@@ -130,12 +130,12 @@ function callByToken(token) {
 }
 
 function hangup(callId) {
-    trace("hangup", callId);
+    trace("Click2Call - hangup "+ callId);
     flashphoner.hangup(callId);
 }
 
 function sendDTMF(callId, dtmf) {
-    trace("sendDTMF", callId, dtmf);
+    trace("Click2Call - sendDTMF callId: "+ callId+" dtmf: "+ dtmf);
     flashphoner.sendDTMF(callId, dtmf);
 }
 
@@ -146,7 +146,7 @@ function isMuted() {
 
 // TODO change img to background
 function sendVideoChangeState() {
-    trace("sendVideoChangeState");
+    trace("Click2Call - sendVideoChangeState");
     var sendVideoButton = $('.sendVideoButton');
     var sendVideoButtonImage = $('#sendVideoButtonImage');
 
@@ -172,31 +172,34 @@ function initSendVideoButton() {
 }
 
 function changeRelationMyVideo(relation) {
-    trace("changeRelationMyVideo", relation);
+    trace("Click2Call - changeRelationMyVideo "+ relation);
     flashphoner.changeRelationMyVideo(relation);
 }
 
 function getMicVolume() {
-    trace("getMicVolume");
-    return flashphoner.getMicVolume();
+    var ret = flashphoner.getMicVolume();
+    trace("Click2Call - getMicVolume "+ret);
+    return ret;
 }
 function getVolume() {
-    trace("getVolume");
-    return flashphoner.getVolume();
+    var ret = flashphoner.getVolume();
+    trace("Click2Call - getVolume "+ret);
+    return ret;
 }
 
 function getVersion() {
-    trace("getVersion");
-    return flashphoner.getVersion();
+    var ret = flashphoner.getVersion();
+    trace("Click2Call - getVersion "+ret);
+    return ret;
 }
 /* ------------------ Notify functions ----------------- */
 
 function addLogMessage(message) {
-    trace('addLogMessage', message);
+    trace('Click2Call - addLogMessage '+ message);
 }
 
 function notifyConfigLoaded() {
-    trace("notifyConfigLoaded");
+    trace("Click2Call - notifyConfigLoaded");
     flashphoner = flashphonerLoader.getFlashphoner();
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
     if (flashphonerLoader.useWebRTC) {
@@ -219,7 +222,7 @@ function notifyRegisterRequired(registerR) {
 }
 
 function notifyCloseConnection() {
-    trace("notifyCloseConnection");
+    trace("Click2Call - notifyCloseConnection");
     currentCall = null;
     toCallState();
     isLogged = false;
@@ -229,7 +232,7 @@ function notifyCloseConnection() {
 }
 
 function notifyConnected() {
-    trace("notifyConnected");
+    trace("Click2Call - notifyConnected");
     if (!registerRequired) {
         isLogged = true;
         callByToken(callToken);
@@ -237,7 +240,7 @@ function notifyConnected() {
 }
 
 function notifyRegistered() {
-    trace("notifyRegistered");
+    trace("Click2Call - notifyRegistered");
     if (registerRequired) {
         changeCallStateInfo("Registered");
         isLogged = true;
@@ -250,7 +253,7 @@ function notifyBalance(balance) {
 
 // This functions invoked every time when call state changed
 function notify(call) {
-    trace('notify', call.id, call.anotherSideUser);
+    trace('Click2Call - notify call_id: '+ call.id +' call.anotherSideUser: '+ call.anotherSideUser);
     if (call.incoming) {
         //do nothing because we already hangup this call in notifyAddCall()
         return;
@@ -309,7 +312,7 @@ function notifyCost(cost) {
 
 function notifyError(error) {
 
-    trace("notifyError", error);
+    trace("Click2Call - notifyError "+ error);
 
     if (error == CONNECTION_ERROR || error == TOO_MANY_REGISTER_ATTEMPTS ||
         error == LICENSE_RESTRICTION || error == LICENSE_NOT_FOUND ||
@@ -328,7 +331,7 @@ function notifyError(error) {
 }
 
 function notifyVideoFormat(call) {
-    trace("notifyVideoFormat", call.id);
+    trace("Click2Call - notifyVideoFormat "+ call.id);
 
     // proportionStreamer allow us change proportion of small video window (myself preview video)
     if (call.streamerVideoWidth != 0) {
@@ -351,7 +354,7 @@ function notifyVideoFormat(call) {
 }
 
 function notifyOpenVideoView(isViewed) {
-    trace("notifyOpenVideoView: isViewed = " + isViewed);
+    trace("Click2Call - notifyOpenVideoView: isViewed: " + isViewed);
     if (isViewed) {
         openVideoView('big');
     } else {
@@ -360,11 +363,11 @@ function notifyOpenVideoView(isViewed) {
 }
 
 function notifyMessage(messageObject) {
-    trace('notifyMessage', messageObject.from, messageObject.body);
+    trace('Click2Call - notifyMessage from: '+ messageObject.from+' body: '+ messageObject.body);
 }
 
 function notifyAddCall(call) {
-    trace("notifyAddCall", call.id, call.anotherSideUser);
+    trace("Click2Call - notifyAddCall call.id: "+ call.id +" call.anotherSideUser: "+ call.anotherSideUser);
     if (call.incoming == true) {
         hangup(call.id);
     } else {
@@ -374,7 +377,7 @@ function notifyAddCall(call) {
 }
 
 function notifyRemoveCall(call) {
-    trace("notifyRemoveCall", call.id);
+    trace("Click2Call - notifyRemoveCall "+ call.id);
     if (currentCall != null && currentCall.id == call.id) {
         currentCall = null;
     }
@@ -398,7 +401,7 @@ function changeCallStateInfo(str) {
 }
 
 function closeInfoView(timeout) {
-    trace("closeInfoView");
+    trace("Click2Call - closeInfoView "+timeout);
     if (timeout != 0) {
         window.setTimeout("getElement('infoDiv').style.visibility = 'hidden';", timeout);
     } else {
@@ -407,11 +410,11 @@ function closeInfoView(timeout) {
 }
 
 function openSettingsView() {
-    trace("openSettingsView");
+    trace("Click2Call - openSettingsView");
     getElement('settingsDiv').style.visibility = "visible";
 }
 function closeSettingsView() {
-    trace("closeSettingsView");
+    trace("Click2Call - closeSettingsView");
     getElement('settingsDiv').style.visibility = "hidden";
 }
 
@@ -420,19 +423,19 @@ function getElement(str) {
 }
 
 function toHangupState() {
-    trace("toHangupState");
+    trace("Click2Call - toHangupState");
     $('#callButton').html('Hangup').addClass('hangup').removeClass('call');
     disableCallButton();
 }
 
 function toCallState() {
-    trace("toCallState");
+    trace("Click2Call - toCallState");
     $('#callButton').html('Call').addClass('call').removeClass('hangup');
     disableCallButton();
 }
 
 function disableCallButton() {
-    trace("disableCallButton");
+    trace("Click2Call - disableCallButton");
     var button = $('#callButton');
 
     $('#callButton').addClass('disabled');
@@ -446,7 +449,7 @@ function disableCallButton() {
 /* ----- VIDEO ----- */
 
 function openVideoView(size) {
-    trace("openVideoView", size);
+    trace("Click2Call - openVideoView "+ size);
     viewVideo();
     $('#cameraButton').addClass('pressed');
     // if we already give access to devices when trying to open video view
@@ -480,7 +483,7 @@ function openVideoView(size) {
 }
 
 function closeVideoView() {
-    trace("closeVideoView");
+    trace("Click2Call - closeVideoView");
     // turn flash div back to init size
     $('#flash').removeClass().removeAttr('style').addClass('init');
     // turn c2c div back to init size  
@@ -676,12 +679,12 @@ $(function () {
 
     $("#micSelector").change(function () {
         flashphoner.setMicrophone($(this).val());
-        trace('Microphone changed to ', $(this).val());
+        trace('Click2Call - Microphone was changed to '+ $(this).val());
     });
 
     $("#camSelector").change(function () {
         flashphoner.setCamera($(this).val());
-        trace('Camera changed to ', $(this).val());
+        trace('Click2Call - Camera was changed to '+ $(this).val());
     });
 
     $("#settingsOkButton").click(function () {

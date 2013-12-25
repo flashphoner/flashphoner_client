@@ -173,7 +173,7 @@ WebSocketManager.prototype = {
     },
 
     logoff: function () {
-        trace("logoff");
+        trace("WebSocketManager - logoff");
         this.webSocket.close();
     },
 

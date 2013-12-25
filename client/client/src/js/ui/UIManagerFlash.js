@@ -12,7 +12,7 @@
  */
 var UIManagerFlash = function () {
     this.requestUnmute = function() {
-        trace("requestUnmute");
+        trace("UIManagerFlash - requestUnmute");
 
         $('#video_requestUnmuteDiv').removeClass().addClass('securityDiv');
         $('#closeButton_video_requestUnmuteDiv').css('visibility', 'hidden');
@@ -29,7 +29,7 @@ var UIManagerFlash = function () {
 
 UIManagerFlash.prototype = {
     requestUnmuteC2C: function() {
-        trace("requestUnmuteC2C");
+        trace("UIManagerFlash - requestUnmuteC2C");
         $('.back').show();
         $('.request').show();
         $('#flash').removeClass('init').addClass('security');
@@ -73,13 +73,13 @@ UIManagerFlash.prototype = {
     },
 
     closeRequestUnmute: function() {
-        trace("closeRequestUnmute");
+        trace("UIManagerFlash - closeRequestUnmute");
         $('#video_requestUnmuteDiv').removeClass().addClass('closed');
         getElement('video').style.top = "20px";
     },
 
     closeRequestUnmuteC2C: function() {
-        trace("closeRequestUnmuteC2C");
+        trace("UIManagerFlash - closeRequestUnmuteC2C");
         $('.back').hide();
         $('.request').hide();
         $('#flash').addClass('init').removeClass('security');

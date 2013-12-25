@@ -12,7 +12,7 @@ var Messenger = function (flashphoner) {
 Messenger.prototype = {
 
     notifyMessage: function (message, notificationResult, sipObject) {
-        trace("notifyMessage", message, notificationResult, sipObject);
+        trace("Messenger - notifyMessage message: "+ message+" notificationResult: "+ notificationResult+" sipObject: "+ sipObject);
         var sentMessage = this.sentMessages[message.id];
         if (sentMessage != null) {
             sentMessage.state = message.state;
@@ -109,7 +109,7 @@ Messenger.prototype = {
         try {
             flashphoner.sendMessage(message);
         } catch (error) {
-            trace(error);
+            trace("Messenger - sending message error: "+error);
         }
     },
 
