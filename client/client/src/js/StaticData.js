@@ -86,7 +86,11 @@ function trace(logMessage) {
         }
 
         console.append(logMessage+'<br>');
-        window.console.debug(logMessage);
+        try {
+            window.console.debug(logMessage);
+        } catch(err) {
+            //Not supported. For example IE
+        }
 
     }
 
