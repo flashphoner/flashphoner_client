@@ -120,6 +120,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("pushLogs", pushLogs);
 			ExternalInterface.addCallback("sendXcapRequest", sendXcapRequest);
 			ExternalInterface.addCallback("openSettingsPanel",openSettingsPanel);
+			ExternalInterface.addCallback("submitBugReport",submitBugReport);
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -687,6 +688,11 @@ package com.flashphoner.api
 		
 		public function openSettingsPanel():void{
 			Security.showSettings();
+		}
+		
+		public function submitBugReport(reportObj:Object):Boolean {
+			phoneServerProxy.submitBugReport(reportObj);
+			return true;
 		}
 	}
 }
