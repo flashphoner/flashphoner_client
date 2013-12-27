@@ -283,6 +283,15 @@ WebSocketManager.prototype = {
         }
     },
 
+    submitBugReport: function (reportObject) {
+        if (this.isOpened) {
+            this.webSocket.send("submitBugReport", reportObject)
+            return true;
+        } else {
+            return false;
+        }
+    },
+
     getAccessToAudioAndVideo: function () {
         this.webRtcMediaManager.getAccessToAudioAndVideo();
     },

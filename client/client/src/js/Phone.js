@@ -68,6 +68,8 @@ function login() {
         loginObject.contactParams = flashphonerLoader.contactParams;
     }
 
+    trace("Phone - loginObject login: "+loginObject.login+" authenticationName: "+loginObject.authenticationName+" registerRequired: "+registerRequired+" useDTLS: "+loginObject.useDTLS);
+
     var result = flashphoner.login(loginObject, flashphonerLoader.urlServer);
     closeLoginView();
     if (result == 0) {
@@ -213,7 +215,7 @@ function hasAccessToVideo() {
 
 
 function sendVideoChangeState() {
-    trace("Phone - sendVideoChangeState");
+    trace("Phone - sendVideoChangeState currentCall: "+currentCall.id);
     var sendVideoButton = getElement('sendVideo');
     if (sendVideoButton.value == 'Send video') {
         sendVideoButton.value = "Stop video";
@@ -321,7 +323,7 @@ function notifyConnected() {
 }
 
 function notifyRegistered(sipObject) {
-    trace("Phone - notifyRegistered "+sipObject);
+    trace("Phone - notifyRegistered "+sipObject.message.raw);
     if (registerRequired) {
         toLogState();
         callerLogin = getInfoAboutMe().login;
@@ -340,28 +342,12 @@ function notifyRegistered(sipObject) {
 }
 
 function notifySubscription(subscriptionObject, sipObject) {
-    trace("Phone - notify subscription event: " + subscriptionObject.event + " expires: " + subscriptionObject.expires + " status: " + subscriptionObject.status);
+    trace("Phone - notify subscription event: " + subscriptionObject.event + " expires: " + subscriptionObject.expires + " status: " + subscriptionObject.status+" terminate: "+subscriptionObject.terminate);
     trace("Phone - notify subscription body: " + subscriptionObject.requestBody);
     if (subscriptionObject.event == "reg") {
-        var xml = $.parseXML(subscriptionObject.requestBody);
-        $(xml).find("registration").each(function () {
-            var state = $(this).attr('state');
-            var aor = $(this).attr('aor');
-            trace("Phone - state: " + state + " aor: " + aor);
-            if (aor.indexOf(callerLogin) != -1 && state == "terminated") {
-                treminate();
-                return;
-            }
-            $(this).find("contact").each(function () {
-                var contactState = $(this).attr('state');
-                trace("Phone - contactState: " + contactState);
-                if (contactState == "terminated") {
-                    terminate();
-                    return;
-                }
-            });
-
-        });
+        if (subscriptionObject.terminate){
+            terminate();
+        }
     }
 }
 
@@ -399,46 +385,55 @@ function subscribeReg() {
 function notifyBalance(balance) {
 }
 
-function notify(call) {
-    trace("Phone - notify "+ call); //: callId " + call.id + " --- " + call.anotherSideUser);
-    if (currentCall.id == call.id) { //if we have some call now and notify is about exactly our call
-        trace("Phone - currentCall.id == call.id "+call.id);
-        currentCall = call;
-        if (call.state == STATE_FINISH) {
-            // if that hangup during transfer procedure?
-            if (holdedCall != null) {
-                currentCall = holdedCall; //holded call become current
-                holdedCall = null; //make variable null
-                createCallView(currentCall);
-            } else {
-                closeIncomingView();
-                closeVideoView();
-                toCallState();
-                flashphoner.stopSound("RING");
-                flashphoner.playSound("FINISH");
-            }
-            getElement('sendVideo').value = "Send video";
-            // or this just usual hangup during the call
-        } else if (call.state == STATE_HOLD) {
-            $('#callState').html('...Call on hold...');
-            enableHoldButton();
-        } else if (call.state == STATE_TALK) {
-            $('#callState').html('...Talking...');
-            enableHoldButton();
-            flashphoner.stopSound("RING");
-            var sendVideoButton = getElement('sendVideo');
-            if (isVideoCall() && call.state_video == "sendrecv" && sendVideoButton.value == 'Send video'){
-                sendVideoChangeState();
-            }
-        } else if (call.state == STATE_RING) {
-            $('#callState').html('...Ringing...');
-            flashphoner.playSound("RING");
-        } else if (call.state == STATE_BUSY) {
-            flashphoner.playSound("BUSY");
+function onCallFinished(){
+    trace("Phone - onCallFinished");
+    // if that hangup during transfer procedure?
+    if (holdedCall != null) {
+        trace("Phone - Existing holdedCall detected: "+holdedCall.id+" currentCall: "+currentCall.id);
+        currentCall = holdedCall; //holded call become current
+        holdedCall = null; //make variable null
+        createCallView(currentCall);
+    } else {
+        trace("Phone - no existing holdedCall. Just close call states.")
+        closeIncomingView();
+        closeVideoView();
+        toCallState();
+        flashphoner.stopSound("RING");
+        flashphoner.playSound("FINISH");
+    }
+    getElement('sendVideo').value = "Send video";
+    // or this just usual hangup during the call
+}
+
+function onCurrentCallNotify(call){
+    trace("Phone - onCurrentCallNotify: "+currentCall.id);
+    currentCall = call;
+    if (call.state == STATE_FINISH) {
+        onCallFinished();
+    } else if (call.state == STATE_HOLD) {
+        $('#callState').html('...Call on hold...');
+        enableHoldButton();
+    } else if (call.state == STATE_TALK) {
+        $('#callState').html('...Talking...');
+        enableHoldButton();
+        flashphoner.stopSound("RING");
+        var sendVideoButton = getElement('sendVideo');
+        if (isVideoCall() && call.state_video == "sendrecv" && sendVideoButton.value == 'Send video'){
+            sendVideoChangeState();
         }
-    } else if (holdedCall.id == call.id) {
-        trace("Phone - holdedCall.id == call.id "+call.id);
+    } else if (call.state == STATE_RING) {
+        $('#callState').html('...Ringing...');
+        flashphoner.playSound("RING");
+    } else if (call.state == STATE_BUSY) {
+        flashphoner.playSound("BUSY");
+    }
+}
+
+function onNotCurrentCallNotify(call){
+    trace("Phone - onNotCurrentCallNotify call.id: "+call.id+" holdedCall: "+holdedCall.id+" call.state: "+call.state);
+    if (holdedCall.id == call.id) {
         if (call.state == STATE_FINISH) {
+            trace("It seems we received FINISH state on holdedCall. Just do null the holdedCall.");
             /* that mean if
              - user1 call user2
              - user2 transfer to user3
@@ -453,8 +448,18 @@ function notify(call) {
     }
 }
 
+function notify(call) {
+    trace("Phone - notify call id: "+ call.id+" state: "+call.state+" callee: "+call.callee+" caller: "+call.caller+" incoming: "+call.incoming+" isVideoCall: "+call.isVideoCall);
+    trace("Phone - currentCall.id: "+currentCall.id);
+    if (currentCall.id == call.id) {
+        onCurrentCallNotify(call);
+    } else {
+        onNotCurrentCallNotify(call);
+    }
+}
+
 function notifyCallbackHold(call, isHold) {
-    trace("Phone - notifyCallbackHold call: "+ call +" isHold: "+ isHold);//callId - " + call.id + "; isHold - " + isHold);
+    trace("Phone - notifyCallbackHold call: "+ call +" isHold: "+ isHold);
     if (currentCall != null && currentCall.id == call.id) {
         currentCall = call;
         if (needOpenTransferView) {
@@ -505,7 +510,7 @@ function notifyError(error) {
         openInfoView("You trying to connect too many users, or license is expired", 3000, 90);
 
     } else if (error == LICENSE_NOT_FOUND) {
-        openInfoView("Please specify license in the flashphoner.properties (flashphoner.com/license)", 5000, 90);
+        openInfoView("Please get a valid license or contact Flashphoner support", 5000, 90);
 
     } else if (error == INTERNAL_SIP_ERROR) {
         openInfoView("Unknown error. Please contact support.", 3000, 60);
@@ -626,6 +631,7 @@ function parseMsn(fsService,mcn){
 }
 
 function addMessageToChat(chatDiv, from, body, className, messageId) {
+    trace("Phone - addMessageToChat: messageId: "+messageId+" from: "+from);
     var idAttr = (messageId != null) ? "id='" + messageId + "'" : "";
     var isScrolled = (chatDiv[0].scrollHeight - chatDiv.height() + 1) / (chatDiv[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
     var messageDiv = "<div " + idAttr + " class='" + className + "'>" + from + " " + body + "</div>";
@@ -668,16 +674,12 @@ function notifyMessageFailed(message) {
 }
 
 function notifyAddCall(call) {
-    trace("Phone - notifyAddCall "+ call); // call.id, call.anotherSideUser
-
-    if (currentCall != null && call.incoming == true) {
-        trace("Phone - currentCall != null && call.incoming == true");
-        hangup(call.id);
-    } else if (currentCall != null && call.incoming == false) {
-        trace("Phone - currentCall != null && call.incoming == false");
+    trace("Phone - notifyAddCall "+ call.id+" call.incoming: "+call.incoming);
+    if (currentCall!=null && !call.incoming){
         holdedCall = currentCall;
         currentCall = call;
         createCallView(currentCall);
+        trace("Phone - It seems like a hold: holdedCall: "+holdedCall.id+" currentCall: "+currentCall.id);
     } else {
         currentCall = call;
         createCallView(currentCall);
@@ -685,10 +687,12 @@ function notifyAddCall(call) {
             openIncomingView(call);
             toHangupState();
         }
+        trace("Phone - It seems like a new call currentCall: "+currentCall.id);
     }
 }
 
 function createCallView(call) {
+    trace("createCallView call: "+call.id+" state: "+call.state);
     openCallView();
     $('#caller').html(call.anotherSideUser);
 
@@ -720,10 +724,13 @@ function removeCallView(call) {
     $('#holdButton').css('background', 'url(assets/hold.png)');
 }
 
+function isCurrentCall(call) {
+    return currentCall != null && currentCall.id == call.id;
+}
 
 function notifyRemoveCall(call) {
-    trace("Phone - notifyRemoveCall "+ call); // call.id
-    if (currentCall != null && currentCall.id == call.id) {
+    trace("Phone - notifyRemoveCall "+ call.id+" currentCall: "+currentCall.id);
+    if (isCurrentCall(call)) {
         currentCall = null;
         removeCallView(call)
     }
@@ -859,6 +866,7 @@ function openIncomingView(call) {
     });
     $('#hangupButton').unbind('click');
     $('#hangupButton').click(function () {
+        trace("Phone - openIncomingView hangup "+call.id);
         hangup(call.id);
         closeIncomingView();
     });
@@ -941,6 +949,14 @@ function closeTransferView() {
     trace("Phone - closeTransferView");
     needOpenTransferView = false;
     getElement('transfer').style.visibility = "hidden";
+}
+
+function submitBugReport(){
+    var bugReportText = getElement('bugReportText').value;
+    trace("submitBugReport "+bugReportText);
+    if (flashphoner){
+        flashphoner.submitBugReport({text:bugReportText});
+    }
 }
 
 /*-----------------*/
@@ -1092,8 +1108,10 @@ function notifyReady() {
             call();
         } else {
             if (currentCall) {
+                trace("Phone - Hangup current call by click: "+currentCall.id);
                 hangup(currentCall.id);
             } else {
+                trace("Phone - Hangup call by click");
                 hangup();
             }
         }
@@ -1197,6 +1215,10 @@ function notifyReady() {
 
     $(".testButton").click(function () {
         startUnitTests();
+    });
+
+    $(".bugReportButton").click(function () {
+        submitBugReport();
     });
 
     // this function set changing in button styles when you press any button
