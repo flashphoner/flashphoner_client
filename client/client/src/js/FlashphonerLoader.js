@@ -214,7 +214,7 @@ FlashphonerLoader.prototype = {
 
         //get load balancer url if load balancing enabled
         if (me.loadBalancerUrl != null) {
-            trace("Retrieve server url from load balancer");
+            trace("FlashphonerLoader - Retrieve server url from load balancer");
 
             /*
              * this timeout is a workaround to catch errors from ajax request
@@ -223,7 +223,7 @@ FlashphonerLoader.prototype = {
             setTimeout(function () {
                 //check status of ajax request
                 if (!me.jsonpSuccess) {
-                    trace("Error occurred while retrieving load balancer data, please check your load balancer url " +
+                    trace("FlashphonerLoader - Error occurred while retrieving load balancer data, please check your load balancer url " +
                         me.loadBalancerUrl);
                     me.loadAPI();
                 }
@@ -240,7 +240,7 @@ FlashphonerLoader.prototype = {
                     me.wssPort = loadBalancerData.wss;
                     me.flashPort = loadBalancerData.flash;
                     me.jsonpSuccess = true;
-                    trace("Connection data from load balancer: "
+                    trace("FlashphonerLoader - Connection data from load balancer: "
                         + "wcsIP " + loadBalancerData.server
                         + ", wsPort " + loadBalancerData.ws
                         + ", wssPort " + loadBalancerData.wss

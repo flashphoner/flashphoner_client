@@ -229,6 +229,12 @@ package com.flashphoner.api
 			}
 		}
 		
+		public function submitBugReport(reportObj:Object){
+			if (isConnected){
+				nc.call("submitBugReport",null,reportObj);
+			}
+		}
+		
 		public function sendXcapRequest(xcapUrl:String):void{
 			nc.call("sendXcapRequest", null, xcapUrl);
 		}

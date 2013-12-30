@@ -16,25 +16,25 @@ var UIManagerWebRtc = function () {
 
 UIManagerWebRtc.prototype = {
     requestUnmuteC2C: function() {
-        trace("requestUnmute");
+        trace("UIManagerWebRTC - requestUnmute");
         openInfoView("Please allow access to media devices", 0, 60);
         flashphoner.getAccessToAudio();
     },
 
     getAccessToAudioAndVideo: function() {
-        trace("getAccessToAudio");
+        trace("UIManagerWebRTC - getAccessToAudio");
         openInfoView("Please allow access to audio and video devices", 0, 60);
         flashphoner.getAccessToAudioAndVideo();
     },
 
     getAccessToAudio: function() {
-        trace("getAccessToAudio");
+        trace("UIManagerWebRTC - getAccessToAudio");
         openInfoView("Please allow access to audio device", 0, 60);
         flashphoner.getAccessToAudio();
     },
 
     openVideoView: function() {
-        trace("openVideoView");
+        trace("UIManagerWebRTC - openVideoView");
         if (!flashphoner.hasAccessToVideo()){
             openInfoView("Please allow access to video device", 0, 60);
             flashphoner.getAccessToAudioAndVideo();

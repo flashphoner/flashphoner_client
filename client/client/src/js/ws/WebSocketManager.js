@@ -173,7 +173,7 @@ WebSocketManager.prototype = {
     },
 
     logoff: function () {
-        trace("logoff");
+        trace("WebSocketManager - logoff");
         this.webSocket.close();
     },
 
@@ -277,6 +277,15 @@ WebSocketManager.prototype = {
     pushLogs: function (logs) {
         if (this.isOpened) {
             this.webSocket.send("pushLogs", logs)
+            return true;
+        } else {
+            return false;
+        }
+    },
+
+    submitBugReport: function (reportObject) {
+        if (this.isOpened) {
+            this.webSocket.send("submitBugReport", reportObject)
             return true;
         } else {
             return false;
