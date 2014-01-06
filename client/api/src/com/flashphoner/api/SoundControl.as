@@ -294,11 +294,11 @@ package com.flashphoner.api
 				mic.encodeQuality = 6;
 			}else if (name=="ulaw" || name=="pcmu" ){
 				mic.codec = SoundCodec.PCMU;
-				mic.framesPerPacket = 2;
+				mic.framesPerPacket = PhoneConfig.G711_FRAMES_PER_PACKET;
 				mic.rate = 8;
 			}else if (name=="alaw" || name=="pcma" ){
 				mic.codec = SoundCodec.PCMA;
-				mic.framesPerPacket = 2;
+				mic.framesPerPacket = PhoneConfig.G711_FRAMES_PER_PACKET;
 				mic.rate = 8;
 			}
 		}
