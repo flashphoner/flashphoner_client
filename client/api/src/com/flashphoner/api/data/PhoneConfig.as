@@ -97,6 +97,13 @@ package com.flashphoner.api.data
 		public static var RTMFP_PORT:int = 1935;
 		
 		/**
+		 * 1 - 10 ms
+		 * 2 - 20 ms by default
+		 * The setting may be required if you need to change ptime interval for G.711.
+		 **/
+		public static var G711_FRAMES_PER_PACKET:int = 2;
+		
+		/**
 		 * Current version of Flashphoner product
 		 **/		
 		public static function getFullVersion():String{

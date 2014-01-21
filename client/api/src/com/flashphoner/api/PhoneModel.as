@@ -186,6 +186,11 @@ package com.flashphoner.api
 					}
 					Logger.info("AUDIO_CODEC: "+PhoneConfig.AUDIO_CODEC);
 					
+					if (xml.g711_frames_per_packet != null && xml.g711_frames_per_packet.toString() != ""){						
+						PhoneConfig.G711_FRAMES_PER_PACKET = xml.g711_frames_per_packet;
+					}
+					Logger.info("G711_FRAMES_PER_PACKET: "+PhoneConfig.G711_FRAMES_PER_PACKET);
+					
 					if (xml.avoid_flv2h264_transcoding != null && xml.avoid_flv2h264_transcoding.toString() != ""){
 						PhoneConfig.AVOID_FLV2H264_TRANSCODING = (xml.avoid_flv2h264_transcoding == "true");
 					}
