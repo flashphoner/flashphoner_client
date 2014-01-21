@@ -45,6 +45,7 @@ package com.flashphoner.api
 
 				call.startTimer();
 				call.publish();
+				flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
 			}
 			
 			if (event.type==CallEvent.HOLD){
@@ -60,12 +61,10 @@ package com.flashphoner.api
 			
 			if (event.type==CallEvent.IN){
 				SoundControl.playRingSound();
-				flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
 			}
 			
 			if (event.type ==CallEvent.OUT){
 				SoundControl.playRingSound();
-				flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
 			}
 			
 			if (event.type == CallEvent.BUSY){
