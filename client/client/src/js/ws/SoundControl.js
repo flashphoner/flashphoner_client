@@ -61,9 +61,10 @@ SoundControl.prototype = {
 
     //stops audio
     stopSound: function (soundName) {
+        trace("stopSound soundName: "+soundName+" me: "+me+" me.ringSound: "+me.ringSound);
         switch (soundName) {
             case "RING":
-                if (!me.ringSound.paused) {
+                if (me.ringSound && !me.ringSound.paused) {
                     me.ringSound.pause();
                     me.ringSound.currentTime = 0;
                 }
