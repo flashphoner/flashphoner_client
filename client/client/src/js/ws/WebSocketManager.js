@@ -39,6 +39,10 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
     };
 
     this.callbacks = {
+        ping: function () {
+            me.webSocket.send("pong");
+        },
+
         getUserData: function (user) {
             me.user = user;
             notifyRegisterRequired(user.regRequired);
