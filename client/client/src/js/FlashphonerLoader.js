@@ -39,6 +39,7 @@ FlashphonerLoader = function (config) {
     this.msgContentType = "text/plain";
     this.stripCodecs = new Array();
     this.stunServer = "";
+    this.disableLocalRing = false;
 
     $.ajax({
         type: "GET",
@@ -173,6 +174,14 @@ FlashphonerLoader.prototype = {
                 this.imdnEnabled = Boolean(imdnEnabled[0].textContent);
             }
         }
+
+        var disableLocalRing = $(xml).find("disable_local_ring");
+        if (disableLocalRing.length > 0) {
+            if (disableLocalRing[0].textContent.length) {
+                this.disableLocalRing = Boolean(disableLocalRing[0].textContent);
+            }
+        }
+        console.log("disableLocalRing: "+this.disableLocalRing);
 
         //Message content type by default "text/plain", can be "message/cpim"
         var msgContentType = $(xml).find("msg_content_type");
