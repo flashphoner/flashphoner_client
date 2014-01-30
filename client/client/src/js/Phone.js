@@ -406,7 +406,7 @@ function onCallFinished(){
 }
 
 function onCurrentCallNotify(call){
-    trace("Phone - onCurrentCallNotify: "+currentCall.id);
+    trace("Phone - onCurrentCallNotify: "+currentCall.id+" state: "+call.state);
     currentCall = call;
     if (call.state == STATE_FINISH) {
         onCallFinished();
@@ -424,8 +424,14 @@ function onCurrentCallNotify(call){
     } else if (call.state == STATE_RING) {
         $('#callState').html('...Ringing...');
         flashphoner.playSound("RING");
+    } else if (call.state == STATE_RING_MEDIA){
+        $('#callState').html('...Ringing...');
+        flashphoner.stopSound("RING");
     } else if (call.state == STATE_BUSY) {
         flashphoner.playSound("BUSY");
+    } else if (call.state == STATE_SESSION_PROGRESS){
+        $('#callState').html('...Call in Progress...');
+        flashphoner.stopSound("RING");
     }
 }
 
@@ -674,7 +680,7 @@ function notifyMessageFailed(message) {
 }
 
 function notifyAddCall(call) {
-    trace("Phone - notifyAddCall "+ call.id+" call.incoming: "+call.incoming);
+    trace("Phone - notifyAddCall "+ call.id+" call.incoming: "+call.incoming+" call.state: "+call.state);
     if (currentCall!=null && !call.incoming){
         holdedCall = currentCall;
         currentCall = call;
@@ -687,7 +693,7 @@ function notifyAddCall(call) {
             openIncomingView(call);
             toHangupState();
         }
-        trace("Phone - It seems like a new call currentCall: "+currentCall.id);
+        trace("Phone - It seems like a new call currentCall: "+currentCall.id +" state: "+currentCall.state);
     }
 }
 

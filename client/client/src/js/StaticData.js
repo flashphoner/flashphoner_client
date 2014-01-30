@@ -11,6 +11,7 @@ Contributors:
 This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 */
 var STATE_RING = "RING";
+var STATE_RING_MEDIA = "RING_MEDIA";
 var STATE_HOLD = "HOLD";
 var STATE_TALK = "TALK";
 var STATE_FINISH = "FINISH";

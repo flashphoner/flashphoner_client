@@ -58,12 +58,15 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         },
 
         ring: function (call, sipHeader) {
+            trace("ring call.state: "+call.state+" call.id: "+call.id )
             proccessCall(call);
             notify(call);
         },
 
         sessionProgress: function (call, sipHeader) {
+            trace("sessionProgress call.state: "+call.state+" call.id: "+call.id )
             proccessCall(call);
+            notify(call);
         },
 
         setRemoteSDP: function (call, sdp, isInitiator, sipHeader) {
