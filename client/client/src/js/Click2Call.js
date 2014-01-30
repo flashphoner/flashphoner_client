@@ -27,8 +27,6 @@ var micVolume = 100;
 var speakerVolume = 100;
 var traceEnabled = true;
 var intervalId = -1;
-var isMutedMicButton = false;
-var isMutedSpeakerButton = false;
 var proportion = 0;
 var proportionStreamer = 0;
 var callToken = "testcalltoken";
@@ -106,14 +104,13 @@ function logoff() {
 function callByToken(token) {
     trace("Click2Call - callByToken "+ token);
     if (isLogged) {
-        if (isMuted() == 1) {
-            intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmuteC2C(); clearInterval(intervalId);callByToken(callToken);}', 500);
+        if (!hasAccessToAudio()) {
+            intervalId = setInterval('if (hasAccessToAudio()){flashphoner_UI.closeRequestUnmuteC2C(); clearInterval(intervalId);callByToken(callToken);}', 500);
             flashphoner_UI.requestUnmuteC2C();
-        } else if (isMuted() == -1) {
+        } else if (hasAccessToAudio()) {
             var callRequest = {};
             callRequest.token = token;
             callRequest.inviteParameters = testInviteParameter;
-            callRequest.callee = null;
             callRequest.isMsrp = false;
             callRequest.hasVideo = false;
             var result = flashphoner.callByToken(callRequest);
@@ -125,7 +122,11 @@ function callByToken(token) {
             openInfoView("Microphone is not plugged in", 3000);
         }
     } else {
-        loginByToken(null);
+        if (flashphonerLoader.getToken()) {
+            loginByToken(flashphonerLoader.getToken());
+        } else {
+            console.log("Please, specify token in flashphoner.xml!");
+        }
     }
 }
 
@@ -137,11 +138,6 @@ function hangup(callId) {
 function sendDTMF(callId, dtmf) {
     trace("Click2Call - sendDTMF callId: "+ callId+" dtmf: "+ dtmf);
     flashphoner.sendDTMF(callId, dtmf);
-}
-
-function isMuted() {
-    var isMute = flashphoner.isMuted();
-    return isMute;
 }
 
 // TODO change img to background
@@ -191,6 +187,18 @@ function getVersion() {
     var ret = flashphoner.getVersion();
     trace("Click2Call - getVersion "+ret);
     return ret;
+}
+
+function hasAccessToAudioAndVideo() {
+    return hasAccessToAudio() && hasAccessToVideo();
+}
+
+function hasAccessToAudio() {
+    return flashphoner.hasAccessToAudio();
+}
+
+function hasAccessToVideo() {
+    return flashphoner.hasAccessToVideo();
 }
 /* ------------------ Notify functions ----------------- */
 
@@ -450,10 +458,10 @@ function disableCallButton() {
 
 function openVideoView(size) {
     trace("Click2Call - openVideoView "+ size);
-    viewVideo();
+    flashphoner_UI.openVideoView();
     $('#cameraButton').addClass('pressed');
     // if we already give access to devices when trying to open video view
-    if (isMuted() == -1) {
+    if (hasAccessToVideo()) {
 
         // show send my video button
         $('.sendVideoButton').show();
@@ -467,7 +475,7 @@ function openVideoView(size) {
             $('#video').height(newHeight).width(320);
             $('#c2c').height(newHeight + 40);
         } else if (size == 'small') {
-            $('#flash').removeClass('init').addClass('videoMy');
+            $('#flash').removeClass('init').addClass('video');
             $('#video').height(240).width(320);
         } else {
             $('#flash').removeClass('init').addClass('video');
@@ -478,7 +486,7 @@ function openVideoView(size) {
         // or if we did not access the devices yet
     } else {
         flashphoner_UI.requestUnmuteC2C();
-        intervalId = setInterval('if (isMuted() == -1){flashphoner_UI.closeRequestUnmuteC2C(); clearInterval(intervalId); openVideoView("small");}', 500);
+        intervalId = setInterval('if (hasAccessToVideo()){flashphoner_UI.closeRequestUnmuteC2C(); clearInterval(intervalId); openVideoView("small");}', 500);
     }
 }
 
