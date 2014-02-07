@@ -100,6 +100,10 @@ package com.flashphoner.api.data
 		
 		public static var H264_LEVEL = H264Level.LEVEL_3;
 		
+		public static var SEPARATE_INCOMING_AV:Boolean = true;
+		
+		public static var PUBLISH_STREAM_NAME_FORMAT:String = "{callId}"; //Example: {login}_{callId}
+		
 		/**
 		 * Current version of Flashphoner product
 		 **/		

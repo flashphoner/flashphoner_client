@@ -83,11 +83,10 @@ package com.flashphoner.api
 				
 				if (PhoneConfig.VIDEO_ENABLED && sendVideo){					
 					setVideoCompressionSettings(outStream);					
-				}		
-				/* outStream.publish(login+"_"+flashCall.id);
-				WSP-1703 - Removed "login_" from stream name. No need now.
-				*/
-				outStream.publish(flashCall.id);
+				}
+				var streamName:String = PhoneConfig.PUBLISH_STREAM_NAME_FORMAT.replace("{login}", login).replace("{callId}",flashCall.id);				
+				Logger.info("Start publishing of stream: "+streamName);				
+				outStream.publish(streamName);
 			}					
 		}
 		

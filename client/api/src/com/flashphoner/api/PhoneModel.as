@@ -186,6 +186,12 @@ package com.flashphoner.api
 					}
 					Logger.info("ALLOW_PUBLISH_STREAMS: "+PhoneConfig.ALLOW_PUBLISH_STREAMS);
 					
+					var separateIncomingAv:String = xml.separate_incoming_av;
+					if (separateIncomingAv=="false"){
+						PhoneConfig.SEPARATE_INCOMING_AV = false;
+					}
+					Logger.info("SEPARATE_INCOMING_AV: "+PhoneConfig.SEPARATE_INCOMING_AV);
+					
 					
 					if (xml.avoid_flv2h264_transcoding != null && xml.avoid_flv2h264_transcoding.toString() != ""){
 						PhoneConfig.AVOID_FLV2H264_TRANSCODING = (xml.avoid_flv2h264_transcoding == "true");
@@ -197,6 +203,12 @@ package com.flashphoner.api
 						PhoneConfig.H264_LEVEL = h264Level;	
 					}
 					Logger.info("H264_LEVEL: "+PhoneConfig.H264_LEVEL);
+					
+					var publishStreamNameFormat = xml.publish_stream_name_format;
+					if (publishStreamNameFormat!=null && publishStreamNameFormat.length!=0){
+						PhoneConfig.PUBLISH_STREAM_NAME_FORMAT = publishStreamNameFormat;
+					}
+					Logger.info("PUBLISH_STREAM_NAME_FORMAT: "+PhoneConfig.PUBLISH_STREAM_NAME_FORMAT);
 					
 					
 			        if (xml.ring_sound != null && xml.ring_sound.toString() != ""){

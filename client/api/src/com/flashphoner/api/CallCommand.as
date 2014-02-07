@@ -46,7 +46,7 @@ package com.flashphoner.api
 				call.startTimer();
 				call.publish();						
 				flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
-				if (PhoneConfig.VIDEO_ENABLED){
+				if (PhoneConfig.VIDEO_ENABLED && PhoneConfig.SEPARATE_INCOMING_AV){
 					flashAPI.phoneServerProxy.phoneSpeaker.playVideo("VIDEO_INCOMING_"+modelLocator.login+"_"+call.id);
 				}
 			}
