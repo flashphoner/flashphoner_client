@@ -20,18 +20,12 @@ import com.flashphoner.sdk.rtmp.RtmpClientConfig;
 import com.flashphoner.sdk.sip.SipMessageObject;
 import com.flashphoner.sdk.softphone.ISoftphoneCall;
 import com.flashphoner.sdk.softphone.InstantMessage;
-import com.flashphoner.sdk.softphone.exception.LicenseRestictionException;
-import com.flashphoner.sdk.softphone.exception.SoftphoneException;
 import com.wowza.wms.amf.AMFDataObj;
 import com.wowza.wms.client.IClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sip.message.Request;
-
 import javax.sip.RequestEvent;
-import java.util.Map;
-import java.util.Timer;
 
 /**
  * Implementation of IRtmpClient class via {@link AbstractRtmpClient}.<br/>
@@ -44,12 +38,15 @@ public class RtmpClient extends AbstractRtmpClient {
 
     private OptionsCallResult optionsCallResult;
 
+    protected Recorder recorder;
+
     /**
      * @param rtmpClientConfig config contains all parameters for the instance creation
      * @param iClient
      */
     public RtmpClient(RtmpClientConfig rtmpClientConfig, IClient iClient) {
         super(rtmpClientConfig, iClient);
+        this.recorder = new Recorder(this);
     }
 
     /**
@@ -132,7 +129,7 @@ public class RtmpClient extends AbstractRtmpClient {
         if (sipHeader == null) {
             sipHeader = new SipMessageObject();
         }
-        getClient().call("talk", null, call.toAMFDataObj(), sipHeader.toAMFObj());
+        getClient().call("talk", new TalkCallResult(this), call.toAMFDataObj(), sipHeader.toAMFObj());
     }
 
     /**
@@ -174,6 +171,7 @@ public class RtmpClient extends AbstractRtmpClient {
         streamAudioStop(call.getId());
         streamVideoStop(call.getId());
         getClient().call("finish", null, call.toAMFDataObj(), sipHeader.toAMFObj());
+        recorder.stopRecording();
     }
 
     /**
@@ -234,7 +232,7 @@ public class RtmpClient extends AbstractRtmpClient {
     }
 
     public void notifyMessage(InstantMessage instantMessage) {
-        log.info("notifyMessage: " + instantMessage);        
+        log.info("notifyMessage: " + instantMessage);
         getClient().call("notifyMessage", null, instantMessage.toAmfDataObj());
     }
 
@@ -261,5 +259,12 @@ public class RtmpClient extends AbstractRtmpClient {
     @Override
     public void notifyRecordComplete(RecordReport recordReport) {
         log.info("notifyRecordComplete: " + recordReport.getMixedFilename());
+    }
+
+    public void startRecording() {
+        if (log.isDebugEnabled()) {
+            log.debug("startRecording");
+        }
+        recorder.startRecording();
     }
 }

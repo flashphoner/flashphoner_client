@@ -98,12 +98,13 @@ package com.flashphoner.api
 			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.SESSION_PROGRESS,call));
 		}
 		
-		public function talk(_call:Object,_sipObject:Object):void{
+		public function talk(_call:Object,_sipObject:Object):int {
 			var call:Call = process(_call);
 			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notify(call,_sipObject);
 			}
 			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.TALK,call));
+			return 0;
 		}
 		
 		public function hold(_call:Object, _sipObject:Object):void{
