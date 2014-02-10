@@ -139,13 +139,13 @@ package com.flashphoner.api
 					
 					var use_enhanced_mic:String = xml.use_enhanced_mic;
 					
-					if (use_enhanced_mic!=null && use_enhanced_mic.length!=0){
+					if (use_enhanced_mic!=null && use_enhanced_mic.toString() != ""){
 						PhoneConfig.USE_ENHANCED_MIC = (use_enhanced_mic == "true");
 					}
 					Logger.info("USE_ENHANCED_MIC: "+PhoneConfig.USE_ENHANCED_MIC);
 					
 					var forceEnhancedMic:String = xml.force_enhanced_mic;
-					if (forceEnhancedMic!=null && forceEnhancedMic.length!=0){
+					if (forceEnhancedMic!=null && forceEnhancedMic.toString() != ""){
 						PhoneConfig.FORCE_ENHANCED_MIC= (forceEnhancedMic=="true");
 					}
 					Logger.info("FORCE_ENHANCED_MIC: "+PhoneConfig.FORCE_ENHANCED_MIC);
@@ -199,13 +199,13 @@ package com.flashphoner.api
 					Logger.info("AVOID_H264_TRANSCODING: "+PhoneConfig.AVOID_FLV2H264_TRANSCODING);
 					
 					var h264Level:String = xml.h264_level;
-					if (h264Level != null && h264Level.length!=0) {
+					if (h264Level != null && h264Level.toString() != "") {
 						PhoneConfig.H264_LEVEL = h264Level;	
 					}
 					Logger.info("H264_LEVEL: "+PhoneConfig.H264_LEVEL);
 					
 					var publishStreamNameFormat = xml.publish_stream_name_format;
-					if (publishStreamNameFormat!=null && publishStreamNameFormat.length!=0){
+					if (publishStreamNameFormat!=null && publishStreamNameFormat.toString()!=""){
 						PhoneConfig.PUBLISH_STREAM_NAME_FORMAT = publishStreamNameFormat;
 					}
 					Logger.info("PUBLISH_STREAM_NAME_FORMAT: "+PhoneConfig.PUBLISH_STREAM_NAME_FORMAT);
