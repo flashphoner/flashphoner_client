@@ -72,7 +72,7 @@ public class Recorder {
             log.debug("Recording folder is ready: " + folderPath);
         }
 
-        byte recordingBitMask = findRecordingBitMask(login);
+        byte recordingBitMask = findRecordingBitMask(login+"@"+rtmpClient.getRtmpClientConfig().getDomain());
         if (recordingBitMask == 0) {
             if (log.isDebugEnabled()) {
                 log.debug("No recordingBitMask for login: " + login);
