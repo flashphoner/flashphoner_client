@@ -171,7 +171,7 @@ public class RtmpClient extends AbstractRtmpClient {
         streamAudioStop(call.getId());
         streamVideoStop(call.getId());
         getClient().call("finish", null, call.toAMFDataObj(), sipHeader.toAMFObj());
-        recorder.stopRecording();
+        recorder.stopRecording(call.getId());
     }
 
     /**

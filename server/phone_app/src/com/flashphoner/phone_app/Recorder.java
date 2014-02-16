@@ -8,7 +8,6 @@ import com.wowza.wms.livestreamrecord.model.ILiveStreamRecord;
 import com.wowza.wms.livestreamrecord.model.LiveStreamRecorderFLV;
 import com.wowza.wms.stream.IMediaStream;
 import com.wowza.wms.stream.MediaStreamMap;
-import com.wowza.wms.stream.live.MediaStreamLive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +24,8 @@ import java.util.*;
 public class Recorder {
 
     private static Map<String, String> streamMap = new HashMap<String, String>();
+
+    private static Set<String> recordingCallIds = new HashSet<String>();
 
     static {
         String streamMapSetting = ClientConfig.getInstance().getProperty("stream_map");
@@ -61,8 +62,16 @@ public class Recorder {
         String callee = call.getCallee();
         log.info("talk callId: " + callId + " login: " + login + " caller: " + caller + " callee: " + callee);
 
+        synchronized (recordingCallIds) {
+            if (recordingCallIds.contains(callId)) {
+                log.info("The call is already in recording process: " + callId);
+                return;
+            } else {
+                recordingCallIds.add(callId);
+            }
+        }
 
-        String folder = caller + "-" + callee + "-" + System.currentTimeMillis();
+        String folder = caller + "-" + callee + "-" + callId;
         String folderPath = Config.WOWZA_HOME + "/content/" + folder;
         if (!(new File(folderPath).mkdir())) {
             log.error("Can't create dir: " + folderPath);
@@ -72,7 +81,7 @@ public class Recorder {
             log.debug("Recording folder is ready: " + folderPath);
         }
 
-        byte recordingBitMask = findRecordingBitMask(login+"@"+rtmpClient.getRtmpClientConfig().getDomain());
+        byte recordingBitMask = findRecordingBitMask(login + "@" + rtmpClient.getRtmpClientConfig().getDomain());
         if (recordingBitMask == 0) {
             if (log.isDebugEnabled()) {
                 log.debug("No recordingBitMask for login: " + login);
@@ -88,7 +97,7 @@ public class Recorder {
             if (isRecordingAllowed(stream, callId, login, recordingBitMask)) {
                 record(caller, callee, stream, folderPath);
             } else {
-                log.info("Recording is not allowed: caller: " + caller + " callee: " + callee + " stream: " + stream.getName() + " streamObj: " + stream+" recordingBitMask: "+recordingBitMask);
+                log.info("Recording is not allowed: caller: " + caller + " callee: " + callee + " stream: " + stream.getName() + " streamObj: " + stream + " recordingBitMask: " + recordingBitMask);
             }
         }
 
@@ -101,19 +110,18 @@ public class Recorder {
         boolean recordIncomingAudio = (recordingBitMask >> 1 & 0x01) == 1;
         boolean recordIncomingVideo = (recordingBitMask & 0x01) == 1;
 
-        log.info("recordOutgoingAudioVideo: " + recordOutgoingAudioVideo + " recordIncomingAudio: " + recordIncomingAudio + " recordIncomingVideo: " + recordIncomingVideo);
-
+        log.info("isRecordingAllowed recordOutgoingAudioVideo: " + recordOutgoingAudioVideo + " recordIncomingAudio: " + recordIncomingAudio + " recordIncomingVideo: " + recordIncomingVideo+" stream: "+stream.getName()+" callId: "+callId+" login: "+login+" mask: "+recordingBitMask);
 
         String streamName = stream.getName();
         if (stream.getStreamType().equalsIgnoreCase("live")) {
-            if (streamName.matches("VIDEO_INCOMING.*") && recordIncomingVideo) {
+            if (streamName.indexOf("VIDEO_INCOMING_" + login) != -1 && recordIncomingVideo) {
                 return true;
-            }else if (streamName.matches("INCOMING_.*") && recordIncomingAudio){
+            } else if (streamName.indexOf("INCOMING_" + login) != -1 && recordIncomingAudio) {
                 return true;
             }
         } else if (stream instanceof PhoneRtmp2VoipStream) {
             if (streamName.equalsIgnoreCase(callId)) {
-                return true;
+                return recordOutgoingAudioVideo;
             } else {
                 String mappedTo = streamMap.get(streamName);
                 if (mappedTo != null && mappedTo.indexOf(login) != -1) {
@@ -177,13 +185,14 @@ public class Recorder {
         return bitMask;
     }
 
-    protected void stopRecording() {
+    protected void stopRecording(String callId) {
         String login = rtmpClient.getRtmpClientConfig().getAuthenticationName();
         log.info("stopRecording login: " + login);
         Iterator<ILiveStreamRecord> it = recordingMap.values().iterator();
         while (it.hasNext()) {
             it.next().stopRecording();
         }
+        recordingCallIds.remove(callId);
     }
 
 }
