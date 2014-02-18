@@ -58,14 +58,16 @@ public class TalkCallResult implements IModuleCallResult {
                 MediaStreamMap map = rtmpClient.getClient().getAppInstance().getStreams();
                 for (int i = 0; i < 10; i++) {
                     if (call != null) {
-                        IMediaStream stream = map.getStream(call.getId());
+
+                        String publishStreamName = rtmpClient.getRtmpClientConfig().getLogin()+"_"+call.getId();
+                        IMediaStream stream = map.getStream(publishStreamName);
 
                         if (stream != null) {
 
                             long audioTC = stream.getAudioTC();
 
                             if (log.isDebugEnabled()) {
-                                log.debug("Checking stream tc: " + audioTC + " stream: " + call.getId());
+                                log.debug("Checking stream tc: " + audioTC + " stream: " + publishStreamName);
                             }
 
                             if (audioTC != 0) {
@@ -73,7 +75,7 @@ public class TalkCallResult implements IModuleCallResult {
                                 return;
                             }
                         } else{
-                            log.debug("Stream not found "+call.getId());
+                            log.debug("Stream not found "+publishStreamName);
                         }
                     }
 
