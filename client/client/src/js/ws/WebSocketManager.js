@@ -109,6 +109,10 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         notifyVideoFormat: function (videoFormat) {
             //notifyVideoFormat(videoFormat);
         },
+        
+        notifyBugReport: function (filename) {
+            trace("WebSocketManager - created bug report; filename - " + filename);
+        },
 
         notifyMessage: function (message, notificationResult, sipObject) {
             messenger.notifyMessage(message, notificationResult, sipObject);
