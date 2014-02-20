@@ -42,7 +42,9 @@ SoundControl.prototype = {
     playSound: function (soundName) {
         switch (soundName) {
             case "RING":
-                me.ringSound.play();
+                if (!flashphonerLoader.disableLocalRing){
+                    me.ringSound.play();
+                }
                 break
             case "BUSY":
                 me.busySound.play();
