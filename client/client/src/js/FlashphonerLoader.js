@@ -13,7 +13,7 @@
 FlashphonerLoader = function (config) {
     this.flashphoner = null;
     this.flashphoner_UI = null;
-    this.flashphonerListener = null;
+    this.flashphonerListener = new DefaultListener();
     this.useWebRTC = false;
     this.urlServer = null;
     this.wcsIP = null;

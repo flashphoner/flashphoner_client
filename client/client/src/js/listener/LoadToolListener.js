@@ -51,16 +51,16 @@ LoadToolListener.prototype = {
         flashphoner.setLTState("idle");
     },
 
-onRegistered: function () {
-    trace("LoadToolListener: onRegistered");
-    flashphoner.setLTState("idle");
-},
+    onRegistered: function () {
+        trace("LoadToolListener: onRegistered");
+        flashphoner.setLTState("idle");
+    },
 
-onRemoveCall: function () {
-    trace("LoadToolListener: onRemoveCall");
-    flashphoner.setLTState("idle");
-    if (flashphonerLoader.getToken() == "caller" && flashphonerLoader.callLT != 0) {
-        setTimeout(function(){callByToken(callToken);}, flashphonerLoader.callLT*1000);
+    onRemoveCall: function () {
+        trace("LoadToolListener: onRemoveCall");
+        flashphoner.setLTState("idle");
+        if (flashphonerLoader.getToken() == "caller" && flashphonerLoader.callLT != 0) {
+            setTimeout(function(){callByToken(callToken);}, flashphonerLoader.callLT*1000);
+        }
     }
-}
 }
