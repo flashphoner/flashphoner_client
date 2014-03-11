@@ -30,6 +30,7 @@ LoadToolListener.prototype = {
 
     onAnswer: function (callId) {
         trace("LoadToolListener: onAnswer");
+        closeIncomingView();
         flashphoner.setLTState("active");
         if (flashphonerLoader.hangupLT != 0) {
             setTimeout(function(){hangup(callId);}, flashphonerLoader.hangupLT*1000);
@@ -39,23 +40,27 @@ LoadToolListener.prototype = {
     onError: function () {
         trace("LoadToolListener: onError");
         flashphoner.setLTState("idle");
-    },
-
-    onHangup: function () {
-        trace("LoadToolListener: onHangup");
-        flashphoner.setLTState("idle");
+        //if this is error at caller side, renew call attempt
         if (flashphonerLoader.getToken() == "caller" && flashphonerLoader.callLT != 0) {
             setTimeout(function(){callByToken(callToken);}, flashphonerLoader.callLT*1000);
         }
     },
 
-    onRegistered: function () {
-        trace("LoadToolListener: onRegistered");
+    onHangup: function () {
+        trace("LoadToolListener: onHangup");
         flashphoner.setLTState("idle");
     },
 
-    onRemoveCall: function () {
-        trace("LoadToolListener: onRemoveCall");
-        flashphoner.setLTState("idle");
+onRegistered: function () {
+    trace("LoadToolListener: onRegistered");
+    flashphoner.setLTState("idle");
+},
+
+onRemoveCall: function () {
+    trace("LoadToolListener: onRemoveCall");
+    flashphoner.setLTState("idle");
+    if (flashphonerLoader.getToken() == "caller" && flashphonerLoader.callLT != 0) {
+        setTimeout(function(){callByToken(callToken);}, flashphonerLoader.callLT*1000);
     }
+}
 }

@@ -213,6 +213,7 @@ function notifyConfigLoaded() {
     trace("Click2Call - notifyConfigLoaded");
     flashphoner = flashphonerLoader.getFlashphoner();
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
+    flashphonerListener = flashphonerLoader.getFlashphonerListener();
     if (flashphonerLoader.useWebRTC) {
         $('#cameraButton').css('visibility', 'hidden');
         $('#micButton').css('visibility', 'hidden');
@@ -340,6 +341,7 @@ function notifyError(error) {
         openInfoView("Unknown error", 3000);
     }
     toCallState();
+    flashphonerListener.onError();
 }
 
 function notifyVideoFormat(call) {
