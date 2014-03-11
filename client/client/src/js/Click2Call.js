@@ -14,6 +14,7 @@
 var flashphoner;
 var flashphoner_UI;
 var flashphonerLoader;
+var flashphonerListener;
 
 // One call become two calls during TRANSFER case
 // there is why we need at least two kinds of calls here
@@ -117,6 +118,7 @@ function callByToken(token) {
             if (result == 0) {
                 changeCallStateInfo("...Calling...");
                 toHangupState();
+                flashphonerListener.onCall();
             }
         } else {
             openInfoView("Microphone is not plugged in", 3000);
@@ -133,6 +135,7 @@ function callByToken(token) {
 function hangup(callId) {
     trace("Click2Call - hangup "+ callId);
     flashphoner.hangup(callId);
+    flashphonerListener.onHangup();
 }
 
 function sendDTMF(callId, dtmf) {
@@ -252,6 +255,7 @@ function notifyRegistered() {
     if (registerRequired) {
         changeCallStateInfo("Registered");
         isLogged = true;
+        flashphonerListener.onRegistered();
         callByToken(callToken);
     }
 }
@@ -388,6 +392,7 @@ function notifyRemoveCall(call) {
     trace("Click2Call - notifyRemoveCall "+ call.id);
     if (currentCall != null && currentCall.id == call.id) {
         currentCall = null;
+        flashphonerListener.onRemoveCall();
     }
 }
 

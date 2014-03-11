@@ -177,7 +177,7 @@ function answer(callId) {
         }
     } else if (hasAccess()) {
         flashphoner.answer(callId, isVideoCall());
-        flashphonerListener.onAnswer();
+        flashphonerListener.onAnswer(callId);
     } else {
         openConnectingView("Microphone is not plugged in", 3000);
     }
@@ -699,6 +699,7 @@ function notifyAddCall(call) {
         if (call.incoming == true) {
             openIncomingView(call);
             toHangupState();
+            flashphonerListener.onIncomingCall(call.id);
         }
         trace("Phone - It seems like a new call currentCall: "+currentCall.id +" state: "+currentCall.state);
     }

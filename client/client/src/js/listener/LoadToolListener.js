@@ -21,9 +21,19 @@ LoadToolListener.prototype = {
         flashphoner.setLTState("active");
     },
 
-    onAnswer: function () {
+    onIncomingCall: function (callId) {
+        trace("LoadToolListener: onIncomingCall");
+        if (flashphonerLoader.answerLT != 0) {
+            setTimeout(function(){answer(callId);}, flashphonerLoader.answerLT*1000);
+        }
+    },
+
+    onAnswer: function (callId) {
         trace("LoadToolListener: onAnswer");
         flashphoner.setLTState("active");
+        if (flashphonerLoader.hangupLT != 0) {
+            setTimeout(function(){hangup(callId);}, flashphonerLoader.hangupLT*1000);
+        }
     },
 
     onError: function () {
@@ -34,6 +44,9 @@ LoadToolListener.prototype = {
     onHangup: function () {
         trace("LoadToolListener: onHangup");
         flashphoner.setLTState("idle");
+        if (flashphonerLoader.getToken() == "caller" && flashphonerLoader.callLT != 0) {
+            setTimeout(function(){callByToken(callToken);}, flashphonerLoader.callLT*1000);
+        }
     },
 
     onRegistered: function () {
