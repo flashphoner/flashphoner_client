@@ -276,6 +276,7 @@ function notifyConfigLoaded() {
     notifyReady();
     flashphoner = flashphonerLoader.getFlashphoner();
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
+    flashphonerListener = flashphonerLoader.getFlashphonerListener();
     messenger = new Messenger(flashphoner);
     if (flashphonerLoader.useWebRTC) {
         $('#micButton').css('visibility', 'hidden');
