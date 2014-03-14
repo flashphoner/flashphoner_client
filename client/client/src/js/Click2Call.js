@@ -14,6 +14,7 @@
 var flashphoner;
 var flashphoner_UI;
 var flashphonerLoader;
+var flashphonerListener;
 
 // One call become two calls during TRANSFER case
 // there is why we need at least two kinds of calls here
@@ -117,6 +118,7 @@ function callByToken(token) {
             if (result == 0) {
                 changeCallStateInfo("...Calling...");
                 toHangupState();
+                flashphonerListener.onCall();
             }
         } else {
             openInfoView("Microphone is not plugged in", 3000);
@@ -133,6 +135,7 @@ function callByToken(token) {
 function hangup(callId) {
     trace("Click2Call - hangup "+ callId);
     flashphoner.hangup(callId);
+    flashphonerListener.onHangup();
 }
 
 function sendDTMF(callId, dtmf) {
@@ -210,6 +213,7 @@ function notifyConfigLoaded() {
     trace("Click2Call - notifyConfigLoaded");
     flashphoner = flashphonerLoader.getFlashphoner();
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
+    flashphonerListener = flashphonerLoader.getFlashphonerListener();
     if (flashphonerLoader.useWebRTC) {
         $('#cameraButton').css('visibility', 'hidden');
         $('#micButton').css('visibility', 'hidden');
@@ -252,6 +256,7 @@ function notifyRegistered() {
     if (registerRequired) {
         changeCallStateInfo("Registered");
         isLogged = true;
+        flashphonerListener.onRegistered();
         callByToken(callToken);
     }
 }
@@ -336,6 +341,7 @@ function notifyError(error) {
         openInfoView("Unknown error", 3000);
     }
     toCallState();
+    flashphonerListener.onError();
 }
 
 function notifyVideoFormat(call) {
@@ -388,6 +394,7 @@ function notifyRemoveCall(call) {
     trace("Click2Call - notifyRemoveCall "+ call.id);
     if (currentCall != null && currentCall.id == call.id) {
         currentCall = null;
+        flashphonerListener.onRemoveCall();
     }
 }
 

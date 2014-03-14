@@ -14,6 +14,7 @@
 var flashphoner;
 var flashphoner_UI;
 var flashphonerLoader;
+var flashphonerListener;
 
 // One call become two calls during TRANSFER case
 // there is why we need at least two kinds of calls here
@@ -129,6 +130,7 @@ function call() {
             var result = flashphoner.call({callee: callee, visibleName: 'Caller', hasVideo: isVideoCall(), inviteParameters: testInviteParameter, isMsrp: false});
             if (result == 0) {
                 toHangupState();
+                flashphonerListener.onCall();
             } else {
                 openConnectingView("Callee number is wrong", 3000);
             }
@@ -175,6 +177,7 @@ function answer(callId) {
         }
     } else if (hasAccess()) {
         flashphoner.answer(callId, isVideoCall());
+        flashphonerListener.onAnswer(callId);
     } else {
         openConnectingView("Microphone is not plugged in", 3000);
     }
@@ -183,6 +186,7 @@ function answer(callId) {
 function hangup(callId) {
     trace("Phone - hangup "+ callId);
     flashphoner.hangup(callId);
+    flashphonerListener.onHangup();
 }
 
 function sendDTMF(callId, dtmf) {
@@ -272,6 +276,7 @@ function notifyConfigLoaded() {
     notifyReady();
     flashphoner = flashphonerLoader.getFlashphoner();
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
+    flashphonerListener = flashphonerLoader.getFlashphonerListener();
     messenger = new Messenger(flashphoner);
     if (flashphonerLoader.useWebRTC) {
         $('#micButton').css('visibility', 'hidden');
@@ -332,6 +337,7 @@ function notifyRegistered(sipObject) {
         connectingViewBeClosed = true;
         closeConnectingView();
         flashphoner.playSound("REGISTER");
+        flashphonerListener.onRegistered();
     }
 
     if (flashphonerLoader.subscribeEvent != null && flashphonerLoader.subscribeEvent.length != 0) {
@@ -546,6 +552,7 @@ function notifyError(error) {
         openInfoView("Payment required, please check your balance.", 3000, 60);
     }
 
+    flashphonerListener.onError();
     closeConnectingView();
     toCallState();
 }
@@ -692,6 +699,7 @@ function notifyAddCall(call) {
         if (call.incoming == true) {
             openIncomingView(call);
             toHangupState();
+            flashphonerListener.onIncomingCall(call.id);
         }
         trace("Phone - It seems like a new call currentCall: "+currentCall.id +" state: "+currentCall.state);
     }
@@ -739,6 +747,7 @@ function notifyRemoveCall(call) {
     if (isCurrentCall(call)) {
         currentCall = null;
         removeCallView(call)
+        flashphonerListener.onRemoveCall();
     }
 }
 

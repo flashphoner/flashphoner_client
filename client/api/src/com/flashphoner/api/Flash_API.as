@@ -121,6 +121,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("sendXcapRequest", sendXcapRequest);
 			ExternalInterface.addCallback("openSettingsPanel",openSettingsPanel);
 			ExternalInterface.addCallback("submitBugReport",submitBugReport);
+			ExternalInterface.addCallback("setLTState",setLTState);
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -693,6 +694,12 @@ package com.flashphoner.api
 		public function submitBugReport(reportObj:Object):Boolean {
 			phoneServerProxy.submitBugReport(reportObj);
 			return true;
+		}
+		
+		public function setLTState(state:String):void{
+			var obj:Object = new Object();
+			obj.state = state;
+			this.phoneServerProxy.setLTState(obj);
 		}
 	}
 }

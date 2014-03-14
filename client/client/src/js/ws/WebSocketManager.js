@@ -303,6 +303,11 @@ WebSocketManager.prototype = {
         }
     },
 
+    setLTState: function (state) {
+        trace("setLTState: " + state);
+        this.webSocket.send("setLTState", {state: state});
+    },
+
     getAccessToAudioAndVideo: function () {
         this.webRtcMediaManager.getAccessToAudioAndVideo();
     },

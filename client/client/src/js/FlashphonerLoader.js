@@ -13,6 +13,7 @@
 FlashphonerLoader = function (config) {
     this.flashphoner = null;
     this.flashphoner_UI = null;
+    this.flashphonerListener = new DefaultListener();
     this.useWebRTC = false;
     this.urlServer = null;
     this.wcsIP = null;
@@ -40,6 +41,10 @@ FlashphonerLoader = function (config) {
     this.stripCodecs = new Array();
     this.stunServer = "";
     this.disableLocalRing = false;
+    this.modeLT = false;
+    this.hangupLT = 0;
+    this.answerLT = 0;
+    this.callLT = 0;
 
     $.ajax({
         type: "GET",
@@ -221,6 +226,33 @@ FlashphonerLoader.prototype = {
             }
         }
 
+        //Load Tool mode on/off
+        var modeLT = $(xml).find("modeLT");
+        if (modeLT.length > 0) {
+            if (modeLT[0].textContent.length) {
+                this.modeLT = Boolean(modeLT[0].textContent);
+            }
+        }
+
+        //call duration in seconds when Load Tool is enabled, callee will hangup after this timeout.
+        // Hangup will not occur in case of 0 timeout.
+        var hangupLT = $(xml).find("hangupLT");
+        if (hangupLT.length > 0) {
+            this.hangupLT = hangupLT[0].textContent;
+        }
+
+        //Answer timeout when Load Tool is enabled, if greater than 0 callee answer the call after specified amount of seconds
+        var answerLT = $(xml).find("answerLT");
+        if (answerLT.length > 0) {
+            this.answerLT = answerLT[0].textContent;
+        }
+
+        //Recall timeout when Load Tool is enabled, specifies how long caller must wait after hangup to place another call.
+        var callLT = $(xml).find("callLT");
+        if (callLT.length > 0) {
+            this.callLT = callLT[0].textContent;
+        }
+
         //get load balancer url if load balancing enabled
         if (me.loadBalancerUrl != null) {
             trace("FlashphonerLoader - Retrieve server url from load balancer");
@@ -277,6 +309,7 @@ FlashphonerLoader.prototype = {
             if (me.stripCodecs.length) me.flashphoner.setStripCodecs(me.stripCodecs);
             if (me.stunServer != "") me.flashphoner.setStunServer(me.stunServer);
             me.flashphoner_UI = new UIManagerWebRtc();
+            if (me.modeLT) me.flashphonerListener = new LoadToolListener();
             notifyConfigLoaded();
         } else {
             me.useWebRTC = false;
@@ -302,6 +335,7 @@ FlashphonerLoader.prototype = {
                 swfobject.embedSWF("flashphoner_js_api.swf", "videoDiv", "100%", "100%", "11.2.202", "expressInstall.swf", flashvars, params, attributes, function (e) {
                     me.flashphoner = e.ref;
                     me.flashphoner_UI = new UIManagerFlash();
+                    if (me.modeLT) me.flashphonerListener = new LoadToolListener();
                 });
             } else {
                 notifyFlashNotFound();
@@ -321,6 +355,10 @@ FlashphonerLoader.prototype = {
 
     getFlashphonerUI: function () {
         return this.flashphoner_UI;
+    },
+
+    getFlashphonerListener: function () {
+        return this.flashphonerListener;
     },
 
     getToken: function () {

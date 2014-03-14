@@ -235,6 +235,10 @@ package com.flashphoner.api
 			}
 		}
 		
+		public function setLTState(stateObj:Object):void{
+			nc.call("setLTState", null,  stateObj);
+		}
+		
 		public function sendXcapRequest(xcapUrl:String):void{
 			nc.call("sendXcapRequest", null, xcapUrl);
 		}
