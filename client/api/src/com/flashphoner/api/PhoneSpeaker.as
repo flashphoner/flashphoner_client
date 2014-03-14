@@ -111,6 +111,9 @@ package com.flashphoner.api
 			//If we have a new stream, we stop old and start new
 			//This is mandatory for reInvite and update to video session
 			if (incomingStream != null){
+				if (this.streamName == streamName){
+					return;
+				}
 				stop(this.streamName);
 			}
 			incomingStream = startNewIncomingStream(streamName,nsOnStatus);

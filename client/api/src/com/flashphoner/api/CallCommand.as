@@ -30,6 +30,11 @@ package com.flashphoner.api
 		public function CallCommand()
 		{
 		}	
+		
+		private function getStreamName(modelLocator:ModelLocator, call:Call) : String
+		{
+			return "INCOMING_"+modelLocator.login+"_"+call.id;			
+		}
 				
 		public function execute( event : CairngormEvent ) : void
 		{	
@@ -45,7 +50,7 @@ package com.flashphoner.api
 
 				call.startTimer();
 				call.publish();
-				flashAPI.phoneServerProxy.phoneSpeaker.play("INCOMING_"+modelLocator.login+"_"+call.id);
+				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
 			}
 			
 			if (event.type==CallEvent.HOLD){
@@ -55,15 +60,16 @@ package com.flashphoner.api
 			if (event.type == CallEvent.SESSION_PROGRESS){
 				Logger.info("MainEvent.SESSION_PROGRESS");
 		 		SoundControl.stopRingSound();
-				
-				call.publish();	 		
+				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
 		 	}
 			
 			if (event.type==CallEvent.IN){
+				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
 				SoundControl.playRingSound();
 			}
 			
 			if (event.type ==CallEvent.OUT){
+				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
 				SoundControl.playRingSound();
 			}
 			
