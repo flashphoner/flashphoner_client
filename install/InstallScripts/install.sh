@@ -126,14 +126,14 @@ echo ""
 
 echo "DETECTING Wowza home..."
 
-WOWZA_HOME=/usr/local/WowzaMediaServer
+WOWZA_HOME=/usr/local/WowzaStreamingEngine
 
-if [ ! -f $WOWZA_HOME/conf/Server.xml ]; then
+if [ ! -f $WOWZA_HOME/lib/wms-server.jar ]; then
     echo "- Please specify Wowza home directory"
     get_wowza_home () {
     read in
     if [ ! -z "$in" ];then 
-	if [ ! -f $in/conf/Server.xml ]; then
+	if [ ! -f $in/lib/wms-server.jar ]; then
 	    echo "- Wrong Wowza home path: $in."
 	    get_wowza_home
 	fi
@@ -207,10 +207,15 @@ echo ""
 
 echo "CONFIGURING Wowza (Server.xml, Streams.xml)..."
 
+#getting Wowza conf files from jar
+cd $WOWZA_HOME/lib/
+jar xf wms-server.jar com/wowza/wms/conf/Server.xml
+jar xf wms-server.jar com/wowza/wms/conf/Streams.xml
+
 cd $INSTALLER_DIR/server/WowzaMediaServer/bin
 
-SERVER_XML=$WOWZA_HOME/conf/Server.xml
-STREAMS_XML=$WOWZA_HOME/conf/Streams.xml
+SERVER_XML=$WOWZA_HOME/lib/com/wowza/wms/conf/Server.xml
+STREAMS_XML=$WOWZA_HOME/lib/com/wowza/wms/conf/Streams.xml
 
 
 SERVER_LISTENER="$INSTALLER_DIR/server/WowzaMediaServer/conf/ServerListener.xml"
@@ -228,6 +233,13 @@ java -cp $WOWZA_HOME/bin/tbs-flashphoner-configurator.jar  com.flashphoner.confi
 java -cp $WOWZA_HOME/bin/tbs-flashphoner-configurator.jar  com.flashphoner.configurator.xpath.XPath removeNode $STREAMS_XML null $RTMP2VOIP_STREAM_XPATH null
 java -cp $WOWZA_HOME/bin/tbs-flashphoner-configurator.jar  com.flashphoner.configurator.xpath.XPath addNodeFromFile $STREAMS_XML $RTMP2VOIP_STREAM $RTMP2VOIP_STREAM_XPATH $STREAMS_XPATH
 
+#push files to wowza jar
+cd $WOWZA_HOME/lib/
+jar uf wms-server.jar com/wowza/wms/conf/Server.xml
+jar uf wms-server.jar com/wowza/wms/conf/Streams.xml
+
+#delete com directory
+rm -rf com
 echo "- Wowza configuring completed."
 echo ""
 
