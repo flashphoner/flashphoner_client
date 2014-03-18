@@ -124,6 +124,12 @@ else
 fi
 echo ""
 
+#checking jar command
+JAR_COMMAND=`which jar 2>/dev/null`
+if ! test -f "$JAR_COMMAND" ; then
+	ln -sf $JDK_HOME/bin/jar /usr/bin/jar
+fi
+
 echo "DETECTING Wowza home..."
 
 WOWZA_HOME=/usr/local/WowzaStreamingEngine
