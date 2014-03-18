@@ -2,3 +2,16 @@ Flashphoner-client is an open-source part of Flashphoner product.
 You can use it for customization.
 
 Builds: http://flashphoner.com/downloads/builds/flashphoner_client/
+
+requirement:
+DETECTING java command...
+- Java command found successfully.
+
+DETECTING JVM architecture...
+- 64-Bit architecture detected successfully.
+
+DETECTING JDK home...
+- JDK home detected successfully: /usr/java/default.
+
+DETECTING ANT...
+- Error: ANT is not found
