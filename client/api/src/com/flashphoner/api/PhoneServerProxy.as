@@ -235,6 +235,10 @@ package com.flashphoner.api
 			}
 		}
 		
+		public function pong(){
+			nc.call("pong",null);		
+		}
+		
 		public function setLTState(stateObj:Object):void{
 			nc.call("setLTState", null,  stateObj);
 		}

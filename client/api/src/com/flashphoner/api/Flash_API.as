@@ -696,6 +696,10 @@ package com.flashphoner.api
 			return true;
 		}
 		
+		public function pong():void {
+			phoneServerProxy.pong();
+		}		
+		
 		public function setLTState(state:String):void{
 			var obj:Object = new Object();
 			obj.state = state;

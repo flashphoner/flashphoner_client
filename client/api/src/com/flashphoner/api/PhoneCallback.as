@@ -32,6 +32,10 @@ package com.flashphoner.api
 			this.flash_API = flashAPI; 
 		}
 		
+		public function ping():void{
+			this.flash_API.pong();
+		}
+		
 		public function notifyBalance(balance:Number,_sipObject:Object):void{
 			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notifyBalance(balance,_sipObject);
