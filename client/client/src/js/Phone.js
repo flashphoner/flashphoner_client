@@ -603,7 +603,12 @@ function notifyVersion(version){
 }
 
 function notifyAutoSendVideo() {
-    sendVideoChangeState();
+    trace("notifyAutoSendVideo");
+    var sendVideoButton = getElement('sendVideo');
+    if (sendVideoButton.value == 'Send video') {
+        sendVideoButton.value = "Stop video";
+        flashphoner.setSendVideo(true);
+    }
 }
 /* ----------------------------------------------------------------------- */
 
