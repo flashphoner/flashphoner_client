@@ -103,6 +103,14 @@ package com.flashphoner.api
 			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notify(call,_sipObject);
 			}
+			
+			//Stream video upon talk
+			if (PhoneConfig.AUTO_VIDEO_STREAMING) {
+				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+					apiNotify.notifyAutoSendVideo();
+				}
+			}
+			
 			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.TALK,call));
 			return 0;
 		}

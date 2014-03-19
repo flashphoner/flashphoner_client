@@ -601,6 +601,10 @@ function notifyRemoveCall(call) {
 function notifyVersion(version){
 	getElement('versionOfProduct').innerHTML = version;
 }
+
+function notifyAutoSendVideo() {
+    sendVideoChangeState();
+}
 /* ----------------------------------------------------------------------- */
 
 /* --------------- Additional functions ------------------- */

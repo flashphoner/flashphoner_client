@@ -138,5 +138,10 @@ package com.flashphoner.phone
 		public function notifyVersion(version:String):void{
 			DataPhone.getInstance().version = version;
 		}
+		
+		//automate send video
+		public function notifyAutoSendVideo():void {
+			//Todo implement auto send video
+		}
 	}
 }

@@ -80,5 +80,10 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyVersion", version);
 		}
 		
+		//automate send video
+		public function notifyAutoSendVideo():void {
+			ExternalInterface.call("notifyAutoSendVideo");
+		}
+		
 	}
 }

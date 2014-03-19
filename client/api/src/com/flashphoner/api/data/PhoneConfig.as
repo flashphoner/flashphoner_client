@@ -104,6 +104,9 @@ package com.flashphoner.api.data
 		
 		public static var PUBLISH_STREAM_NAME_FORMAT:String = "{callId}"; //Example: {login}_{callId}
 		
+		//If true client will start video stream upon call answer
+		public static var AUTO_VIDEO_STREAMING:Boolean = false;
+		
 		/**
 		 * Current version of Flashphoner product
 		 **/		

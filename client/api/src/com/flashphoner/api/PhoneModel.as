@@ -210,6 +210,11 @@ package com.flashphoner.api
 					}
 					Logger.info("PUBLISH_STREAM_NAME_FORMAT: "+PhoneConfig.PUBLISH_STREAM_NAME_FORMAT);
 					
+					if (xml.auto_video_streaming != null && xml.auto_video_streaming.toString() != ""){
+						PhoneConfig.AUTO_VIDEO_STREAMING = (xml.auto_video_streaming == "true");
+					}
+					Logger.info("AUTO_VIDEO_STREAMING: "+PhoneConfig.AUTO_VIDEO_STREAMING);
+					
 					
 			        if (xml.ring_sound != null && xml.ring_sound.toString() != ""){
 			        	SoundControl.RING_SOUND = xml.ring_sound;
