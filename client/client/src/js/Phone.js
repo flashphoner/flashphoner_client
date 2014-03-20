@@ -970,7 +970,7 @@ function submitBugReport(){
     var bugReportText = getElement('bugReportText').value;
     trace("submitBugReport "+bugReportText);
     if (flashphoner){
-        flashphoner.submitBugReport({text:bugReportText});
+        flashphoner.submitBugReport({text:bugReportText, type: "no_media"});
     }
 }
 
