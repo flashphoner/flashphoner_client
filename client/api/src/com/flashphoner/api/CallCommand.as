@@ -64,13 +64,13 @@ package com.flashphoner.api
 		 	}
 			
 			if (event.type==CallEvent.IN){
-				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
 				SoundControl.playRingSound();
+				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
 			}
 			
 			if (event.type ==CallEvent.OUT){
-				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
 				SoundControl.playRingSound();
+				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
 			}
 			
 			if (event.type == CallEvent.BUSY){

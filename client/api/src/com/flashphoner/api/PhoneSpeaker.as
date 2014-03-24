@@ -69,6 +69,9 @@ package com.flashphoner.api
 					
 			if (infoObject.info.code == "NetStream.Play.Start"){
 				playing = true;
+			}
+			
+			if (infoObject.info.code == "NetStream.Play.PublishNotify"){
 				SoundControl.stopRingSound();				
 			}		
 					
