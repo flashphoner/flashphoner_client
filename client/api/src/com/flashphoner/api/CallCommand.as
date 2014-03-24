@@ -50,7 +50,7 @@ package com.flashphoner.api
 
 				call.startTimer();
 				call.publish();
-				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
+				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call), true);
 			}
 			
 			if (event.type==CallEvent.HOLD){
@@ -60,17 +60,17 @@ package com.flashphoner.api
 			if (event.type == CallEvent.SESSION_PROGRESS){
 				Logger.info("MainEvent.SESSION_PROGRESS");
 		 		SoundControl.stopRingSound();
-				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
+				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call), true);
 		 	}
 			
 			if (event.type==CallEvent.IN){
 				SoundControl.playRingSound();
-				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
+				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call), false);
 			}
 			
 			if (event.type ==CallEvent.OUT){
 				SoundControl.playRingSound();
-				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call));
+				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call), false);
 			}
 			
 			if (event.type == CallEvent.BUSY){

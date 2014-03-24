@@ -41,6 +41,7 @@ package com.flashphoner.api
 
 		private  var currentVolume:int = 100;
 		private var streamName:String;
+		private var rePlay:Boolean = false;
 		
 		private var flashAPI:Flash_API;
 		
@@ -109,12 +110,14 @@ package com.flashphoner.api
 		 * Play audio stream
 		 * @param streamName name of audio stream
 		 **/
-		public function play(streamName:String):void{
+		public function play(streamName:String, rePlay:Boolean):void{
 			Logger.info("PhoneSpeaker play streamName="+streamName +"; currentStremName="+this.streamName);
 			//If we have a new stream, we stop old and start new
 			//This is mandatory for reInvite and update to video session
+			var needReplay:Boolean = this.rePlay;  
+			this.rePlay = rePlay;
 			if (incomingStream != null){
-				if (this.streamName == streamName){
+				if (this.streamName == streamName && !needReplay){
 					return;
 				}
 				stop(this.streamName);
