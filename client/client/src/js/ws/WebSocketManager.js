@@ -433,9 +433,13 @@ WebSocketManager.prototype = {
                     var newMLine = "";
                     for (m = 0; m < mLineSplitted.length; m++) {
                         if (pt.indexOf(mLineSplitted[m]) == -1 || m <= 2) {
-                            newMLine += " " + mLineSplitted[m];
-                        }
+                            newMLine += mLineSplitted[m];
+                    	    if ( m < mLineSplitted.length-1 ){
+                    		newMLine = newMLine + " ";            
+                    	    }
+                        }                        
                     }
+                    sdpArray[i]=newMLine;
                     console.log("Resulting m= line is: " + sdpArray[i]);
                     break;
                 }
