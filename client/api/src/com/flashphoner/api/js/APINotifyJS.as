@@ -38,7 +38,7 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyBalance",String(balance));
 		}
 		public function notify(call:Call,_sipObject:Object):void{
-			ExternalInterface.call("notify",call);
+			ExternalInterface.call("notify",call, _sipObject);
 		}
 		public function notifyCallbackHold(call:Call,isHold:Boolean):void{
 			ExternalInterface.call("notifyCallbackHold",call,isHold);
