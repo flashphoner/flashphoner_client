@@ -460,9 +460,10 @@ function onNotCurrentCallNotify(call){
     }
 }
 
-function notify(call) {
+function notify(call,sipObject) {
     trace("Phone - notify call id: "+ call.id+" state: "+call.state+" callee: "+call.callee+" caller: "+call.caller+" incoming: "+call.incoming+" isVideoCall: "+call.isVideoCall);
     trace("Phone - currentCall.id: "+currentCall.id);
+    trace("Phone - sipObject: "+sipObject);
     if (currentCall.id == call.id) {
         onCurrentCallNotify(call);
     } else {
