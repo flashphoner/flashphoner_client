@@ -258,12 +258,12 @@ public class RtmpClient extends AbstractRtmpClient {
 
     @Override
     public void notifyRecordComplete(RecordReport recordReport) {
-        log.info("notifyRecordComplete: " + recordReport.getMixedFilename());
+        log.info("notifyRecordComplete for clientID + " + getClient().getClientId() + ", " + recordReport.getMixedFilename());
     }
 
     public void startRecording() {
         if (log.isDebugEnabled()) {
-            log.debug("startRecording");
+            log.debug("startRecording clientID " + getClient().getClientId());
         }
         recorder.startRecording();
     }

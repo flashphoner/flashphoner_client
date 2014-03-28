@@ -35,6 +35,7 @@ public class Recorder {
     }
 
     private static Logger log = LoggerFactory.getLogger("Recorder");
+    private static Logger isRecordingAllowedLog = LoggerFactory.getLogger("isRecordingAllowed.Recorder");
 
     protected static Map<IMediaStream, ILiveStreamRecord> recordingMap = new HashMap<IMediaStream, ILiveStreamRecord>();
 
@@ -47,7 +48,7 @@ public class Recorder {
 
     protected void startRecording() {
 
-        log.info("startRecording rtmpClient: " + rtmpClient);
+        log.info("startRecording rtmpClientID: " + rtmpClient.getClient().getClientId());
 
         String login = rtmpClient.getRtmpClientConfig().getAuthenticationName();
 
@@ -83,15 +84,18 @@ public class Recorder {
             log.debug("Recording folder is ready: " + folderPath);
         }
 
-        MediaStreamMap mediaStreamMap = rtmpClient.getClient().getVHost().getApplication(rtmpClient.getRtmpClientConfig().getApplicationName()).getAppInstance("_definst_").getStreams();
+        MediaStreamMap mediaStreamMap = rtmpClient.getClient().getAppInstance().getStreams();
         List<IMediaStream> streams = mediaStreamMap.getStreams();
 
-
         for (IMediaStream stream : streams) {
-            if (isRecordingAllowed(stream, callId, caller, callee, recordingBitMask)) {
-                record(stream, folderPath);
-            } else {
-                log.info("Recording is not allowed: caller: " + caller + " callee: " + callee + " stream: " + stream.getName() + " streamObj: " + stream + " recordingBitMask: " + recordingBitMask);
+            //check stream clientID, can be -1
+            if (stream.getClientId() == rtmpClient.getClient().getClientId()) {
+                //check if recording allowed
+                if (isRecordingAllowed(stream, callId, caller, callee, recordingBitMask)) {
+                    record(stream, folderPath);
+                } else {
+                    log.info("Recording is not allowed: caller: " + caller + " callee: " + callee + " stream: " + stream.getName() + " streamObj: " + stream + " recordingBitMask: " + recordingBitMask);
+                }
             }
         }
 
@@ -108,9 +112,9 @@ public class Recorder {
         boolean recordCalleeIncomingAudio = (recordingBitMask >> 1 & 0x01) == 1;
         boolean recordCalleeIncomingVideo = (recordingBitMask >> 0 & 0x01) == 1;
 
-        log.info("isRecordingAllowed stream: " + stream.getName() + " callId: " + callId + " caller: " + caller + "callee: " + callee + " mask: " + recordingBitMask);
-        log.info("isRecordingAllowed for CALLER recordCallerOutgoingAudioVideo: " + recordCallerOutgoingAudioVideo + " recordCallerIncomingAudio: " + recordCallerIncomingAudio + " recordCallerIncomingVideo: " + recordCallerIncomingVideo);
-        log.info("isRecordingAllowed for CALLEE recordCalleeOutgoingAudioVideo: " + recordCalleeOutgoingAudioVideo + " recordCalleeIncomingAudio: " + recordCalleeIncomingAudio + " recordCalleeIncomingVideo: " + recordCalleeIncomingVideo);
+        isRecordingAllowedLog.debug("isRecordingAllowed stream: " + stream.getName() + " callId: " + callId + " caller: " + caller + "callee: " + callee + " mask: " + recordingBitMask);
+        isRecordingAllowedLog.debug("isRecordingAllowed for CALLER recordCallerOutgoingAudioVideo: " + recordCallerOutgoingAudioVideo + " recordCallerIncomingAudio: " + recordCallerIncomingAudio + " recordCallerIncomingVideo: " + recordCallerIncomingVideo);
+        isRecordingAllowedLog.debug("isRecordingAllowed for CALLEE recordCalleeOutgoingAudioVideo: " + recordCalleeOutgoingAudioVideo + " recordCalleeIncomingAudio: " + recordCalleeIncomingAudio + " recordCalleeIncomingVideo: " + recordCalleeIncomingVideo);
 
         String streamName = stream.getName();
         if (stream.getStreamType().equalsIgnoreCase("live")) {

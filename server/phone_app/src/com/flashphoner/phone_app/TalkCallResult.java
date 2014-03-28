@@ -33,7 +33,7 @@ public class TalkCallResult implements IModuleCallResult {
 
     @Override
     public void onResult(final IClient iClient, RequestFunction requestFunction, AMFDataList amfDataList) {
-        log.info("onResult rtmpClient: " + rtmpClient);
+        log.info("onResult rtmpClientID: " + rtmpClient.getClient().getClientId());
         startRecording(iClient);
     }
 
@@ -55,6 +55,7 @@ public class TalkCallResult implements IModuleCallResult {
                 if (log.isDebugEnabled()) {
                     log.debug("currentCall: " + call);
                 }
+
                 MediaStreamMap map = rtmpClient.getClient().getAppInstance().getStreams();
                 for (int i = 0; i < 10; i++) {
                     if (call != null) {
@@ -63,14 +64,7 @@ public class TalkCallResult implements IModuleCallResult {
                         IMediaStream stream = map.getStream(publishStreamName);
 
                         if (stream != null) {
-
-                            long audioTC = stream.getAudioTC();
-
-                            if (log.isDebugEnabled()) {
-                                log.debug("Checking stream tc: " + audioTC + " stream: " + publishStreamName);
-                            }
-
-                            if (audioTC != 0) {
+                            if (checkStreamTC(stream)) {
                                 rtmpClient.startRecording();
                                 return;
                             }
@@ -92,5 +86,27 @@ public class TalkCallResult implements IModuleCallResult {
         t.start();
 
 
+    }
+
+    private Boolean checkStreamTC(IMediaStream stream) {
+        Boolean triggerOnVideo = Config.getInstance().getBooleanProperty("trigger_record_on_video", false);
+        Boolean result = false;
+
+        long videoTC = stream.getVideoTC();
+        long audioTC = stream.getAudioTC();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Checking stream audioTC: " + audioTC + " videoTC: " + videoTC + " stream: " + stream.getName());
+        }
+
+        if (audioTC != 0 && !triggerOnVideo) {
+            log.debug("CheckStreamTC audioTC is present, triggerOnVideo " + triggerOnVideo + ", returning true");
+            result = true;
+        } else if (audioTC != 0 && videoTC != 0 && triggerOnVideo) {
+            log.debug("CheckStreamTC audioTC and videoTC are present, triggerOnVideo " + triggerOnVideo + ", returning true");
+            result = true;
+        }
+
+        return result;
     }
 }

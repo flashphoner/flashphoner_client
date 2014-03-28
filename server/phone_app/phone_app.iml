@@ -7,9 +7,15 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="wowza" level="project" />
-    <orderEntry type="module" module-name="flashphoner" />
-    <orderEntry type="library" name="slf4j" level="project" />
+    <orderEntry type="library" exported="" name="wowza" level="project" />
+    <orderEntry type="module" module-name="flashphoner" exported="" />
+    <orderEntry type="library" exported="" name="slf4j" level="project" />
+    <orderEntry type="library" exported="" name="tbs-flashphoner" level="project" />
+    <orderEntry type="library" name="jain-sip" level="project" />
+    <orderEntry type="library" name="slf4j-api-1.6.4" level="project" />
+    <orderEntry type="library" name="wms-server" level="project" />
+    <orderEntry type="library" name="wms-stream-live" level="project" />
+    <orderEntry type="library" name="wms-stream-publish" level="project" />
   </component>
 </module>
 
