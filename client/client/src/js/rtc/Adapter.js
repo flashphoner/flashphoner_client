@@ -47,7 +47,7 @@ if (navigator.mozGetUserMedia) {
     if (typeof(webkitRTCPeerConnection) === undefined) {
         console.log("Please, update your browser to use WebRTC");
     } else {
-        //isWebRTCAvailable = true;
+        isWebRTCAvailable = true;
 
         webrtcDetectedBrowser = "chrome";
 
