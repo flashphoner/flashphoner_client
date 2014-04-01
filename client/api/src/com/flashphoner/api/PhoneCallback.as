@@ -42,6 +42,12 @@ package com.flashphoner.api
 			}
 		}	
 		
+		public function notifyBugReport(filename:String):void{
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				apiNotify.notifyBugReport(filename);
+			}
+		}	
+				
 		public function getVersion(version:String):void{
 			PhoneConfig.VERSION_OF_SERVER = version;
 			for each (var apiNotify:APINotify in Flash_API.apiNotifys){

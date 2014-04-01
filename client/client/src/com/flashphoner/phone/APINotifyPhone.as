@@ -60,6 +60,10 @@ package com.flashphoner.phone
 		public function notifyBalance(balance:Number,_sipObject:Object):void{
 			
 		}
+		
+		public function notifyBugReport(filename:String):void{
+		}
+		
 		public function notify(call:Call,_sipObject:Object):void{
 			if (call.state == Call.STATE_FINISH){
 				DataPhone.getInstance().viewController.hideIncomingView();	

@@ -23,6 +23,7 @@ package com.flashphoner.api.interfaces
 		function notify(call:Call,_sipObject:Object):void;
 		function notifyCost(call:Call,cost:Number):void;
 		function notifyBalance(balance:Number,_sipObject:Object):void;
+		function notifyBugReport(filename:String):void;
 		function notifyError(error:String,_sipObject:Object = null):void; 	
 		function notifyVideoFormat(videoFormat:Object,_sipObject:Object = null):void;
 		function notifyOpenVideoView(isViewed:Boolean):void;

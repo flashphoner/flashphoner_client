@@ -323,6 +323,10 @@ function notifyCallbackHold(call, isHold) {
 function notifyCost(cost) {
 }
 
+function notifyBugReport(filename) {
+    trace("Created bug report; filename - " + filename);
+}
+
 function notifyError(error) {
 
     trace("Click2Call - notifyError "+ error);
