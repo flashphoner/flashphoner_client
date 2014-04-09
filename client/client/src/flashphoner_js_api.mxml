@@ -22,10 +22,10 @@ This code and accompanying materials also available under LGPL and MPL license f
 			import com.adobe.cairngorm.control.CairngormEventDispatcher;
 			import com.flashphoner.Logger;
 			import com.flashphoner.api.Flash_API;
+			import com.flashphoner.api.PhoneSpeaker;
 			import com.flashphoner.api.SoundControl;
 			import com.flashphoner.api.data.PhoneConfig;
 			import com.flashphoner.api.js.APINotifyJS;
-			import com.flashphoner.api.PhoneSpeaker;
 			
 			import flash.utils.setTimeout;
 			
@@ -76,13 +76,24 @@ This code and accompanying materials also available under LGPL and MPL license f
 			}			
 			
 			public function getAccessToAudioAndVideo():void{
-				if (flashAPI.soundControl.isMuted() == 1){ 
-					flashAPI.soundControl.getMicrophone().setLoopBack(true);
+				if (flashAPI.soundControl.isMuted() == 1){
+					var mic:Microphone = flashAPI.soundControl.getMicrophone();
+					//flashAPI.soundControl.getMicrophone().setLoopBack(true);
+					mic.setLoopBack(true);
+					mic.addEventListener(StatusEvent.STATUS, onMicrophoneStatus);
 					timer.addEventListener(TimerEvent.TIMER, timerTick);
 					timer.start();
 				}
 				videoPartner.visible = false;
 				videoMy.visible = false;
+			}
+			
+			private function onMicrophoneStatus(event:StatusEvent):void {
+				var result:Boolean = false;
+				if (event.code == "Microphone.Unmuted") {
+					result = true;
+				}
+				ExternalInterface.call("notifyRequestUnmuteResult", result);
 			}
 			
 			private function timerTick(event:TimerEvent){
