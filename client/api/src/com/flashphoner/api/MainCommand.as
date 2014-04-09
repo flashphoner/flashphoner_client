@@ -41,12 +41,14 @@ package com.flashphoner.api
 			
 			if (event.type == MainEvent.CONNECTED){				
 				if (!PhoneConfig.REGISTER_REQUIRED){				
-					modelLocator.logged = true;		
+					modelLocator.logged = true;
+					SoundControl.playRegisterSound();
 				}						
 			}
 			if (event.type == MainEvent.REGISTERED){
 				modelLocator.logged = true;		
 				flashAPI.dropRegisteredTimer();
+				SoundControl.playRegisterSound();
 			}	
 			
 			if (event.type == MainEvent.DISCONNECT){
