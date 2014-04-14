@@ -7,43 +7,20 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
     me.isOpened = false;
     me.webSocket = null;
     me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
+    me.streams = [];
 
     this.callbacks = {
         ping: function () {
             me.webSocket.send("pong");
         },
 
-        setRemoteSDP: function (call, sdp, isInitiator, sipHeader) {
-            proccessCall(call);
-            this.stopSound("RING");
-            rtcManager.setRemoteSDP(sdp, isInitiator);
-            if (!isInitiator && rtcManager.getConnectionState() == "established") {
-                me.answer(call.id);
-            }
-        },
-
-        talk: function (call, sipHeader) {
-            proccessCall(call);
-            notify(call);
-        },
-
-        finish: function (call, sipHeader) {
-            proccessCall(call);
-            notify(call);
-            notifyRemoveCall(call);
-            removeCall(call.id);
-        },
-
-        fail: function (errorCode, sipHeader) {
-            notifyError(errorCode);
+        setRemoteSDP: function (sdp, isInitiator) {
+            console.log("setRemoteSDP: " + sdp);
+            me.webRtcMediaManager.setRemoteSDP(sdp, isInitiator);
         },
 
         notifyVideoFormat: function (videoFormat) {
             //notifyVideoFormat(videoFormat);
-        },
-
-        notifyMessage: function (message, notificationResult, sipObject) {
-            messenger.notifyMessage(message, notificationResult, sipObject);
         },
 
         notifyAudioCodec: function (codec) {
@@ -79,9 +56,99 @@ WebSocketManager.prototype = {
         return 0;
     },
 
-    disconnect: function () {
+    disconnect: function() {
         console.log("WebSocketManager - disconnect!");
         this.webSocket.close();
+    },
+
+    publish: function() {
+        var me = this;
+        this.webRtcMediaManager.createOffer(function (sdp) {
+            var object = {};
+            object.sdp = me.removeCandidatesFromSDP(sdp);
+            object.streamName = me.generateId();
+            object.hasVideo = true;
+            me.streams.push(object.streamName);
+            console.log("Publish streamName " + object.streamName);
+            me.webSocket.send("publish", object);
+        }, true);
+    },
+
+    unpublish: function(streamName) {
+        var me = this;
+        var object = {};
+        if (streamName == "" || streamName == null) {
+            streamName = me.streams[0];
+        }
+        object.streamName = streamName;
+        console.log("Unpublish stream " + streamName);
+        me.webSocket.send("unPublish", object);
+    },
+
+    subscribe: function(streamName) {
+        var me = this;
+        this.webRtcMediaManager.createOffer(function (sdp) {
+            var object = {};
+            object.sdp = me.removeCandidatesFromSDP(sdp);
+            object.streamName = streamName;
+            object.hasVideo = true;
+            me.streams.push(object.streamName);
+            console.log("subscribe streamName " + object.streamName);
+            me.webSocket.send("subscribe", object);
+        }, true);
+    },
+
+    unSubscribe: function(streamName) {
+        var me = this;
+        var object = {};
+        if (streamName == "" || streamName == null) {
+            streamName = me.streams[0];
+        }
+        object.streamName = streamName;
+        console.log("unSubscribe stream " + streamName);
+        me.webSocket.send("unSubscribe", object);
+    },
+
+    getAccessToAudioAndVideo: function() {
+        this.webRtcMediaManager.getAccessToAudioAndVideo();
+    },
+
+    hasAccessToAudio: function () {
+        return this.webRtcMediaManager.isAudioMuted == -1;
+    },
+
+    hasAccessToVideo: function () {
+        return this.webRtcMediaManager.isVideoMuted == -1;
+    },
+
+    removeCandidatesFromSDP: function (sdp) {
+        var sdpArray = sdp.split("\n");
+
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i].search("a=candidate:") != -1) {
+                sdpArray[i] = "";
+            }
+        }
+
+        //normalize sdp after modifications
+        var result = "";
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i] != "") {
+                result += sdpArray[i] + "\n";
+            }
+        }
+
+        return result;
+    },
+
+    generateId: function() {
+        var id = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        for( var i=0; i < 30; i++ ) {
+            id += possible.charAt(Math.floor(Math.random() * possible.length));
+        }
+        return id;
     }
 };
 

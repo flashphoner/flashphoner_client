@@ -42,3 +42,12 @@
     width: 400px;
 
 }
+
+.textInput {
+    type: text-input;
+    width: 100px;
+    height: 20px;
+    font: Arial;
+    font-size: 12px;
+    border: solid 1px;
+}
