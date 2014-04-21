@@ -15,8 +15,8 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         },
 
         setRemoteSDP: function (sdp, isInitiator) {
-            console.log("setRemoteSDP: " + sdp);
             me.webRtcMediaManager.setRemoteSDP(sdp, isInitiator);
+            info(me.streams[0]);
         },
 
         notifyVideoFormat: function (videoFormat) {
@@ -83,6 +83,8 @@ WebSocketManager.prototype = {
         object.streamName = streamName;
         console.log("Unpublish stream " + streamName);
         me.webSocket.send("unPublish", object);
+        me.streams[0] = "";
+        me.webRtcMediaManager.close();
     },
 
     subscribe: function(streamName) {
@@ -107,6 +109,12 @@ WebSocketManager.prototype = {
         object.streamName = streamName;
         console.log("unSubscribe stream " + streamName);
         me.webSocket.send("unSubscribe", object);
+        me.streams[0] = "";
+        me.webRtcMediaManager.close();
+    },
+
+    getActiveStream: function() {
+        return this.streams[0];
     },
 
     getAccessToAudioAndVideo: function() {
@@ -127,6 +135,36 @@ WebSocketManager.prototype = {
         for (i = 0; i < sdpArray.length; i++) {
             if (sdpArray[i].search("a=candidate:") != -1) {
                 sdpArray[i] = "";
+            }
+        }
+
+        //normalize sdp after modifications
+        var result = "";
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i] != "") {
+                result += sdpArray[i] + "\n";
+            }
+        }
+
+        return result;
+    },
+
+    modifyRTCP: function(sdp) {
+        var sdpArray = sdp.split("\n");
+        var pt = "*";
+
+        //get pt of VP8
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i].search("VP8/90000") != -1) {
+                pt = sdpArray[i].match(/[0-9]+/)[0];
+                console.log("pt is " + pt);
+            }
+        }
+
+        //modify rtcp advert
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i].search("a=rtcp-fb:") != -1) {
+                sdpArray[i] = "a=rtcp-fb:"+pt+" ccm fir\na=rtcp-fb:"+pt+" nack\na=rtcp-fb:"+pt+" nack pli";
             }
         }
 

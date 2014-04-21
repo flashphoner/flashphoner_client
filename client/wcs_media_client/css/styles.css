@@ -38,14 +38,14 @@
 
 .info {
     border: 1px solid;
-    height: 400px;
-    width: 400px;
+    height: 20px;
+    width: 640px;
 
 }
 
 .textInput {
     type: text-input;
-    width: 100px;
+    width: 640px;
     height: 20px;
     font: Arial;
     font-size: 12px;

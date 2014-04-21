@@ -10,6 +10,11 @@ flashphoner = null;
 /* onclick events */
 $(window).load(function(){
     console.log("document ready");
+    $("#streamName").click(function() {
+        if ($("#streamName").text() == "Subscribe stream name") {
+            $("#streamName").text("");
+        }
+    });
     $("#connectButton").click(function() {
         console.log( "Pressed connectButton" );
         if ($("#connectButton").text() == "Connect") {
@@ -79,13 +84,19 @@ function subscribe() {
 
 function unpublish() {
     flashphoner.unpublish();
+    info("");
 }
 
 function unsubscribe() {
     flashphoner.unSubscribe($("#streamName").text());
+    info("");
 }
 
 function hasAccess() {
     return (flashphoner.hasAccessToAudio() && flashphoner.hasAccessToVideo());
+}
+
+function info(text) {
+    $("#info").text(text);
 }
 
