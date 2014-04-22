@@ -156,7 +156,7 @@ WebRtcMediaManager.prototype.getAccessToAudio = function () {
     }
 };
 
-WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVideo) {
+WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, streamAudio, streamVideo) {
     console.log("WebRtcMediaManager - createOffer()");
     var me = this;
     try {
@@ -167,9 +167,9 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
         if (me.peerConnection == null) {
             console.log("peerConnection is null");
             me.createPeerConnection();
-            if (hasVideo) {
+            if (streamAudio && streamVideo) {
                 me.peerConnection.addStream(me.localAudioVideoStream);
-            } else {
+            } else if (streamAudio){
                 me.peerConnection.addStream(me.localAudioStream);
             }
         }
@@ -178,7 +178,7 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
             me.onCreateOfferSuccessCallback(offer);
         }, function (error) {
             me.onCreateOfferErrorCallback(error);
-        });
+        }, {optional: [], mandatory: { OfferToReceiveAudio: true, OfferToReceiveVideo: true}});
 
     }
     catch (exception) {

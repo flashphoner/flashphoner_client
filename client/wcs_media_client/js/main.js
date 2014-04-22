@@ -8,15 +8,15 @@ flashphoner = null;
 
 
 /* onclick events */
-$(window).load(function(){
+$(window).load(function () {
     console.log("document ready");
-    $("#streamName").click(function() {
+    $("#streamName").click(function () {
         if ($("#streamName").text() == "Subscribe stream name") {
             $("#streamName").text("");
         }
     });
-    $("#connectButton").click(function() {
-        console.log( "Pressed connectButton" );
+    $("#connectButton").click(function () {
+        console.log("Pressed connectButton");
         if ($("#connectButton").text() == "Connect") {
             $("#connectButton").text("Disconnect");
             connect();
@@ -26,8 +26,8 @@ $(window).load(function(){
         }
     });
 
-    $("#publishButton").click(function() {
-        console.log( "Pressed publishButton" );
+    $("#publishButton").click(function () {
+        console.log("Pressed publishButton");
         if ($("#publishButton").text() == "Publish") {
             $("#publishButton").text("Unpublish");
             publish();
@@ -37,8 +37,8 @@ $(window).load(function(){
         }
     });
 
-    $("#subscribeButton").click(function() {
-        console.log( "Pressed subscribeButton" );
+    $("#subscribeButton").click(function () {
+        console.log("Pressed subscribeButton");
         if ($("#subscribeButton").text() == "Subscribe") {
             $("#subscribeButton").text("Unsubscribe");
             subscribe();
@@ -49,7 +49,7 @@ $(window).load(function(){
     });
 });
 
-$(document).ready(function() {
+$(document).ready(function () {
     config = new Config();
     flashphoner = new WebSocketManager(document.getElementById("localVideoPreview"), document.getElementById("remoteVideo"));
 });
@@ -73,13 +73,8 @@ function publish() {
 }
 
 function subscribe() {
-    if (!hasAccess()) {
-        intervalId = setInterval('if (hasAccess()){clearInterval(intervalId); intervalId = -1; subscribe();}', 500);
-        flashphoner.getAccessToAudioAndVideo();
-    } else {
-        console.log("Streamname " + $("#streamName").text());
-        flashphoner.subscribe($("#streamName").text());
-    }
+    console.log("Streamname " + $("#streamName").text());
+    flashphoner.subscribe($("#streamName").text());
 }
 
 function unpublish() {

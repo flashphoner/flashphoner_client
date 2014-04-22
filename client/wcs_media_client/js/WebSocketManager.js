@@ -71,7 +71,7 @@ WebSocketManager.prototype = {
             me.streams.push(object.streamName);
             console.log("Publish streamName " + object.streamName);
             me.webSocket.send("publish", object);
-        }, true);
+        }, true, true);
     },
 
     unpublish: function(streamName) {
@@ -97,7 +97,7 @@ WebSocketManager.prototype = {
             me.streams.push(object.streamName);
             console.log("subscribe streamName " + object.streamName);
             me.webSocket.send("subscribe", object);
-        }, true);
+        }, false, false);
     },
 
     unSubscribe: function(streamName) {
