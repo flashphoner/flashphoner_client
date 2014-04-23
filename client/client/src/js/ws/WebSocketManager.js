@@ -114,7 +114,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         },
         
         notifyBugReport: function (filename) {
-            trace("WebSocketManager - created bug report; filename - " + filename);
+            notifyBugReport(filename);
         },
 
         notifyMessage: function (message, notificationResult, sipObject) {

@@ -294,6 +294,11 @@ function notifyConfigLoaded() {
     }
 }
 
+function notifyRequestUnmuteResult(accessGranted) {
+    console.log("Access to microphone granted: " + accessGranted);
+}
+
+
 function notifyRegisterRequired(registerR) {
     registerRequired = registerR;
 }
@@ -496,6 +501,10 @@ function notifyCallbackHold(call, isHold) {
 }
 
 function notifyCost(cost) {
+}
+
+function notifyBugReport(filename) {
+    trace("Created bug report; filename - " + filename);
 }
 
 function notifyError(error) {
