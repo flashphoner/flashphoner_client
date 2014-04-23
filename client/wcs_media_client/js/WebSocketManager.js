@@ -7,7 +7,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
     me.isOpened = false;
     me.webSocket = null;
     me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
-    me.streams = [];
+    me.streamName = "";
 
     this.callbacks = {
         ping: function () {
@@ -16,7 +16,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
 
         setRemoteSDP: function (sdp, isInitiator) {
             me.webRtcMediaManager.setRemoteSDP(sdp, isInitiator);
-            info(me.streams[0]);
+            setPublishStreamName(me.streamName);
         },
 
         notifyVideoFormat: function (videoFormat) {
@@ -24,6 +24,14 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         },
 
         notifyAudioCodec: function (codec) {
+        },
+
+        notifySubscribeError: function () {
+            notifySubscribeError();
+        },
+
+        notifyPublishError: function () {
+            notifyPublishError();
         }
 
     };
@@ -31,7 +39,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
 };
 
 WebSocketManager.prototype = {
-    connect: function(WCSUrl) {
+    connect: function (WCSUrl) {
         var me = this;
         me.webSocket = $.websocket(WCSUrl, {
             open: function () {
@@ -39,12 +47,14 @@ WebSocketManager.prototype = {
                 //fake login object
                 var loginObject = {};
                 me.webSocket.send("connect", loginObject);
+                notifyOpenConnection();
             },
             close: function (event) {
                 me.isOpened = false;
                 if (!event.originalEvent.wasClean) {
-                    console.dir(CONNECTION_ERROR);
+                    console.dir("CONNECTION_ERROR");
                 }
+                notifyCloseConnection();
                 me.webRtcMediaManager.close();
             },
             error: function () {
@@ -56,68 +66,74 @@ WebSocketManager.prototype = {
         return 0;
     },
 
-    disconnect: function() {
+    disconnect: function () {
         console.log("WebSocketManager - disconnect!");
         this.webSocket.close();
     },
 
-    publish: function() {
+    publish: function () {
         var me = this;
         this.webRtcMediaManager.createOffer(function (sdp) {
             var object = {};
             object.sdp = me.removeCandidatesFromSDP(sdp);
             object.streamName = me.generateId();
             object.hasVideo = true;
-            me.streams.push(object.streamName);
+            me.streamName = object.streamName;
             console.log("Publish streamName " + object.streamName);
             me.webSocket.send("publish", object);
         }, true, true);
     },
 
-    unpublish: function(streamName) {
+    unpublish: function (streamName) {
         var me = this;
         var object = {};
         if (streamName == "" || streamName == null) {
-            streamName = me.streams[0];
+            streamName = me.streamName;
         }
         object.streamName = streamName;
         console.log("Unpublish stream " + streamName);
         me.webSocket.send("unPublish", object);
-        me.streams[0] = "";
+        me.streamName = "";
         me.webRtcMediaManager.close();
     },
 
-    subscribe: function(streamName) {
+    subscribe: function (streamName) {
         var me = this;
         this.webRtcMediaManager.createOffer(function (sdp) {
             var object = {};
             object.sdp = me.removeCandidatesFromSDP(sdp);
             object.streamName = streamName;
             object.hasVideo = true;
-            me.streams.push(object.streamName);
+            me.streamName = object.streamName;
             console.log("subscribe streamName " + object.streamName);
             me.webSocket.send("subscribe", object);
         }, false, false);
     },
 
-    unSubscribe: function(streamName) {
+    unSubscribe: function (streamName) {
         var me = this;
         var object = {};
         if (streamName == "" || streamName == null) {
-            streamName = me.streams[0];
+            streamName = me.streamName;
         }
         object.streamName = streamName;
         console.log("unSubscribe stream " + streamName);
         me.webSocket.send("unSubscribe", object);
-        me.streams[0] = "";
+        me.streamName = "";
         me.webRtcMediaManager.close();
     },
 
-    getActiveStream: function() {
+    closeMediaSession:function() {
+        var me = this;
+        me.streamName = "";
+        me.webRtcMediaManager.close();
+    },
+
+    getActiveStream: function () {
         return this.streams[0];
     },
 
-    getAccessToAudioAndVideo: function() {
+    getAccessToAudioAndVideo: function () {
         this.webRtcMediaManager.getAccessToAudioAndVideo();
     },
 
@@ -149,7 +165,7 @@ WebSocketManager.prototype = {
         return result;
     },
 
-    modifyRTCP: function(sdp) {
+    modifyRTCP: function (sdp) {
         var sdpArray = sdp.split("\n");
         var pt = "*";
 
@@ -164,7 +180,7 @@ WebSocketManager.prototype = {
         //modify rtcp advert
         for (i = 0; i < sdpArray.length; i++) {
             if (sdpArray[i].search("a=rtcp-fb:") != -1) {
-                sdpArray[i] = "a=rtcp-fb:"+pt+" ccm fir\na=rtcp-fb:"+pt+" nack\na=rtcp-fb:"+pt+" nack pli";
+                sdpArray[i] = "a=rtcp-fb:" + pt + " ccm fir\na=rtcp-fb:" + pt + " nack\na=rtcp-fb:" + pt + " nack pli";
             }
         }
 
@@ -179,11 +195,11 @@ WebSocketManager.prototype = {
         return result;
     },
 
-    generateId: function() {
+    generateId: function () {
         var id = "";
         var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        for( var i=0; i < 30; i++ ) {
+        for (var i = 0; i < 30; i++) {
             id += possible.charAt(Math.floor(Math.random() * possible.length));
         }
         return id;

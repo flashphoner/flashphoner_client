@@ -34,13 +34,32 @@
     background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
     background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
     text-decoration: none;
+    cursor: pointer !important;
+}
+
+.buttonDisabled {
+    background: #98989a;
+    background-image: -webkit-linear-gradient(top, #98989a, #717172);
+    background-image: -moz-linear-gradient(top, #98989a, #717172);
+    background-image: -ms-linear-gradient(top, #98989a, #717172);
+    background-image: -o-linear-gradient(top, #98989a, #717172);
+    background-image: linear-gradient(to bottom, #98989a, #717172);
+    -webkit-border-radius: 28;
+    -moz-border-radius: 28;
+    border-radius: 28px;
+    font-family: Arial;
+    color: #ffffff;
+    font-size: 12px;
+    padding: 10px 20px 10px 20px;
+    text-decoration: none;
+    display: inline;
 }
 
 .info {
-    border: 1px solid;
+    border: solid 1px;
     height: 20px;
     width: 640px;
-
+    background: #ccc;
 }
 
 .textInput {

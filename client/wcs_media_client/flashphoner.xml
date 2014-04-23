@@ -1,5 +1,5 @@
 <flashphoner>
-    <wcs_server>192.168.56.2</wcs_server>
+    <wcs_server>87.226.225.59</wcs_server>
     <ws_port>8080</ws_port>
     <video_width>176</video_width>
     <video_height>144</video_height>
