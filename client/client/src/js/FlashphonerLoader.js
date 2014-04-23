@@ -32,6 +32,7 @@ FlashphonerLoader = function (config) {
     this.busySound = "sounds/BUSY.ogg";
     this.registerSound = "sounds/REGISTER.ogg";
     this.finishSound = "sounds/HANGUP.ogg";
+    this.messageSound = "sounds/MESSAGE.ogg";
     this.xcapUrl = null;
     this.msrpCallee = null;
     this.subscribeEvent = null;
@@ -136,6 +137,12 @@ FlashphonerLoader.prototype = {
         if (registerSound.length > 0) {
             if (registerSound[0].textContent.length) {
                 this.registerSound = registerSound[0].textContent;
+            }
+        }
+        var messageSound = $(xml).find("message_sound");
+        if (messageSound.length > 0) {
+            if (messageSound[0].textContent.length) {
+                this.messageSound = messageSound[0].textContent;
             }
         }
         var finishSound = $(xml).find("finish_sound");

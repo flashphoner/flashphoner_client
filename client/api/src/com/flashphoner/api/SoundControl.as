@@ -40,11 +40,14 @@ package com.flashphoner.api
 		private static var registerClass:Class;
 		[Embed(source="/sounds/HANGUP.mp3")]
 		private static var finishClass:Class;
+		[Embed(source="/sounds/MESSAGE.mp3")]
+		private static var messageClass:Class;
 
 		private static var ringSound:Sound;		
 		private static var busySound:Sound;
 		private static var registerSound:Sound;
 		private static var finishSound:Sound;
+		private static var messageSound:Sound;
 		private static var ringSoundChannel:SoundChannel;
 
 		/**
@@ -63,6 +66,8 @@ package com.flashphoner.api
 		 * Path to sound for finish call
 		 **/		
 		public static var FINISH_SOUND:String = null;
+		
+		public static var MESSAGE_SOUND:String = null;
 				
 		private static var soundControl:SoundControl;
 		
@@ -118,6 +123,7 @@ package com.flashphoner.api
 			busySound = Sound(new busyClass());
 			registerSound = Sound(new registerClass());
 			finishSound = Sound(new finishClass());	
+			messageSound = Sound(new messageClass());
 			
 			// Create new sounds. We will not check if links != 0, because we plus "" there. 
 			// So it will not create error. Just will empty sounds.
@@ -136,6 +142,10 @@ package com.flashphoner.api
 			
 			if (SoundControl.FINISH_SOUND!=null && SoundControl.FINISH_SOUND.length!=0){				
 				updateSound(new Sound(new URLRequest(SoundControl.FINISH_SOUND)));
+			}
+			
+			if (SoundControl.MESSAGE_SOUND!=null && SoundControl.MESSAGE_SOUND.length!=0){				
+				updateSound(new Sound(new URLRequest(SoundControl.MESSAGE_SOUND)));
 			}
 						 		
 	    }
@@ -179,6 +189,10 @@ package com.flashphoner.api
 				finishSound = localSound;
 			}
 			
+			if (localSound.url.indexOf(SoundControl.MESSAGE_SOUND) >= 0) {
+				messageSound = localSound;
+			}
+			
 			Logger.info("onUpdateSoundComplete :"+localSound.url);			
 		} 
 
@@ -202,7 +216,12 @@ package com.flashphoner.api
 		public static function playRegisterSound():void{
 			Logger.info("playRegisterSound "+registerSound.url);
 			registerSound.play(0,1);		
-		}			
+		}	
+		
+		public static function playMessageSound():void{
+			Logger.info("playMessageSound "+messageSound.url);
+			messageSound.play(0,1);		
+		}
 		
 		/**
 		 * Stop ring sound

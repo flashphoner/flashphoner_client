@@ -600,6 +600,7 @@ function notifyMessageReceived(messageObject) {
     var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
     var body = convertMessageBody(messageObject.body, messageObject.contentType);
     addMessageToChat(chatDiv, from, body, "yourNick", messageObject.id);
+    flashphoner.playSound("MESSAGE");
 }
 
 function convertMessageBody(messageBody, contentType) {

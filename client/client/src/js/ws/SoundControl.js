@@ -14,6 +14,7 @@ var SoundControl = function () {
     me = this;
     //Init sounds
     me.registerSound = me.initSound(flashphonerLoader.registerSound, false, "auto");
+    me.messageSound = me.initSound(flashphonerLoader.messageSound, false, "auto");
     me.ringSound = me.initSound(flashphonerLoader.ringSound, true, "none");
     me.busySound = me.initSound(flashphonerLoader.busySound, false, "none");
     me.finishSound = me.initSound(flashphonerLoader.finishSound, false, "none");
@@ -54,6 +55,9 @@ SoundControl.prototype = {
                 break
             case "FINISH":
                 me.finishSound.play();
+                break
+            case "MESSAGE":
+                me.messageSound.play();
                 break
             default:
                 console.error("Do not know what to play on " + soundName);
