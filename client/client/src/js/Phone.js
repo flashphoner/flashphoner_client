@@ -598,10 +598,12 @@ function notifyOpenVideoView(isViewed) {
 }
 
 function notifyMessageReceived(messageObject) {
-    //ignore application/im-iscomposing+xml RFC3994
-    if (messageObject.contentType == "application/im-iscomposing+xml") {
+
+    if (messageObject.contentType == "application/im-iscomposing+xml" || messageObject.contentType == "application/vnd.oma.push") {
+        trace("ignore message: "+messageObject.body);
         return;
     }
+
     openChatView();
     trace("Phone - notifyMessageReceived "+ messageObject);
     var from = messageObject.from.toLowerCase();
