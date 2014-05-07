@@ -599,18 +599,18 @@ function notifyOpenVideoView(isViewed) {
 
 function notifyMessageReceived(messageObject) {
 
-    if (messageObject.contentType == "application/im-iscomposing+xml" || messageObject.contentType == "application/vnd.oma.push") {
+    if (messageObject.contentType == "application/im-iscomposing+xml") {
         trace("ignore message: "+messageObject.body);
         return;
     }
 
     trace("Phone - notifyMessageReceived "+ messageObject);
     var from = messageObject.from.toLowerCase();
-    var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
     var body = convertMessageBody(messageObject.body, messageObject.contentType);
     if (body) {
         openChatView();
         createChat(from);
+        var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
         addMessageToChat(chatDiv, from, body, "yourNick", messageObject.id);
         flashphoner.playSound("MESSAGE");
     } else {
