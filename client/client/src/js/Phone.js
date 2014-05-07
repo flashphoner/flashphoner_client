@@ -604,21 +604,25 @@ function notifyMessageReceived(messageObject) {
         return;
     }
 
-    openChatView();
     trace("Phone - notifyMessageReceived "+ messageObject);
     var from = messageObject.from.toLowerCase();
-    createChat(from);
     var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
     var body = convertMessageBody(messageObject.body, messageObject.contentType);
-    addMessageToChat(chatDiv, from, body, "yourNick", messageObject.id);
-    flashphoner.playSound("MESSAGE");
+    if (body) {
+        openChatView();
+        createChat(from);
+        addMessageToChat(chatDiv, from, body, "yourNick", messageObject.id);
+        flashphoner.playSound("MESSAGE");
+    } else {
+        trace("Not displaying message " + messageObject.body + ", body is null after convert");
+    }
 }
 
 function convertMessageBody(messageBody, contentType) {
     trace("Phone - convertMessageBody " + contentType);
+    var xml = $.parseXML(messageBody);
     if (contentType == "application/fsservice+xml") {
         var missedCallNotification;
-        var xml = $.parseXML(messageBody);
         var fsService = $(xml).find("fs-services").find("fs-service");
         var action = fsService.attr("action");
         if (action == "servicenoti-indicate") {
@@ -633,6 +637,22 @@ function convertMessageBody(messageBody, contentType) {
             missedCallNotification = "Service status: " + $(fsService.find("mcn").find("mcn-data")).attr("status");
         }
         if(missedCallNotification !== undefined) return missedCallNotification;
+
+    } else if (contentType == "application/vnd.oma.push") {
+        /**
+         * application/vnd.oma.push will contain xml with app information
+         * Try to handle this information or discard xml
+         */
+        var content;
+        if ($(xml).find("ums-service")) {
+            //voice mail service message
+            content = $(xml).find("ni-data").attr("content");
+        }
+        if (content == undefined) {
+            //discard xml
+            return;
+        }
+        return content;
     }
 
     return messageBody;
