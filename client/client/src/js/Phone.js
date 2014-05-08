@@ -598,24 +598,38 @@ function notifyOpenVideoView(isViewed) {
 }
 
 function notifyMessageReceived(messageObject) {
+    trace("Phone - notifyMessageReceived "+ messageObject);
 
-    if (messageObject.contentType == "application/im-iscomposing+xml") {
+    if (messageObject.contentType == "application/im-iscomposing+xml" || messageObject.contentType == "message/fsservice+xml") {
         trace("ignore message: "+messageObject.body);
+        if (flashphonerLoader.disableUnknownMsgFiltering) {
+            messageObject.body = escapeXmlTags(messageObject.body);
+            showMessage(messageObject);
+        }
         return;
     }
 
-    trace("Phone - notifyMessageReceived "+ messageObject);
-    var from = messageObject.from.toLowerCase();
+    //convert body
     var body = convertMessageBody(messageObject.body, messageObject.contentType);
     if (body) {
-        openChatView();
-        createChat(from);
-        var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
-        addMessageToChat(chatDiv, from, body, "yourNick", messageObject.id);
-        flashphoner.playSound("MESSAGE");
+        messageObject.body = body;
+        showMessage(messageObject);
     } else {
         trace("Not displaying message " + messageObject.body + ", body is null after convert");
+        if (flashphonerLoader.disableUnknownMsgFiltering) {
+            messageObject.body = escapeXmlTags(messageObject.body);
+            showMessage(messageObject);
+        }
     }
+}
+
+function showMessage(messageObject) {
+    var from = messageObject.from.toLowerCase();
+    openChatView();
+    createChat(from);
+    var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
+    addMessageToChat(chatDiv, from, messageObject.body, "yourNick", messageObject.id);
+    flashphoner.playSound("MESSAGE");
 }
 
 function convertMessageBody(messageBody, contentType) {
@@ -648,10 +662,6 @@ function convertMessageBody(messageBody, contentType) {
             //voice mail service message
             content = $(xml).find("ni-data").attr("content");
         }
-        if (content == undefined) {
-            //discard xml
-            return;
-        }
         return content;
     }
 
@@ -677,7 +687,7 @@ function parseMsn(fsService,mcn){
 }
 
 function addMessageToChat(chatDiv, from, body, className, messageId) {
-    trace("Phone - addMessageToChat: messageId: "+messageId+" from: "+from);
+    trace("Phone - addMessageToChat: messageId: "+messageId+" from: "+from+" message body: "+body);
     var idAttr = (messageId != null) ? "id='" + messageId + "'" : "";
     var isScrolled = (chatDiv[0].scrollHeight - chatDiv.height() + 1) / (chatDiv[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
     var messageDiv = "<div " + idAttr + " class='" + className + "'>" + from + " " + body + "</div>";
@@ -1110,6 +1120,10 @@ function createChat(calleeName) {
 
 function removeNonDigitOrLetter(calleeName) {
     return calleeName.replace(/\W/g, '')
+}
+
+function escapeXmlTags(stringXml) {
+    return stringXml.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 /* ---------------------------------------------------- */

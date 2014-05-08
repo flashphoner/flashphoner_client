@@ -1,8 +1,9 @@
 function startUnitTests() {
     testConvertMessageBody();
+    testUnknownMsgFiltering();
 }
 
-function testConvertMessageBody(){
+function testConvertMessageBody() {
     var messageBodies = [
         ["<?xml version=\"1.0\" encoding=\"UTF-8\"?><fs-services xmlns=\"urn:vas:params:xml:ns:fs-services\"><fs-service action=\"servicenoti-indicate\"><mcn><mcn-data sender_sip=\"user@domain\" sender=\"0154100509\" time=\"2013-10-30T12:57:04+08:00\"/></mcn></fs-service></fs-services>", "application/fsservice+xml"],
         ["<fs-services xmlns=\"urn:vas:params:xml:ns:fs-services\"><fs-service action=\"serviceinfo-confirm\"><mcn><mcn-data status=\"subscriber_reg\"/></mcn></fs-service></fs-services>", "application/fsservice+xml"],
@@ -11,7 +12,6 @@ function testConvertMessageBody(){
     ];
 
     for (i = 0; i < messageBodies.length; i++) {
-        console.log(messageBodies[i][0]);
         var res = convertMessageBody(messageBodies[i][0],messageBodies[i][1]);
         if (res) {
             trace("Phone - testConvertMessageBody "+res);
@@ -19,4 +19,18 @@ function testConvertMessageBody(){
             trace("Phone - message discarded");
         }
     }
+}
+
+function testUnknownMsgFiltering() {
+    var messageObj = new Object();
+    messageObj.from = "tel:0123456789";
+    messageObj.body = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><ums-services xmlns=\"urn:vas:params:xml:ns:ums-services\"><ums-service action=\"notification\"></ums-service></ums-services>";
+    messageObj.contentType = "application/vnd.oma.push";
+    notifyMessageReceived(messageObj);
+
+    var messageObj = new Object();
+    messageObj.from = "tel:0123456789";
+    messageObj.body = "text message";
+    messageObj.contentType = "text/plain";
+    notifyMessageReceived(messageObj);
 }

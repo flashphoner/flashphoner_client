@@ -46,6 +46,7 @@ FlashphonerLoader = function (config) {
     this.hangupLT = 0;
     this.answerLT = 0;
     this.callLT = 0;
+    this.disableUnknownMsgFiltering = false;
 
     $.ajax({
         type: "GET",
@@ -258,6 +259,11 @@ FlashphonerLoader.prototype = {
         var callLT = $(xml).find("callLT");
         if (callLT.length > 0) {
             this.callLT = callLT[0].textContent;
+        }
+
+        var disableUnknownMsgFiltering = $(xml).find("disable_unknown_msg_filtering");
+        if (disableUnknownMsgFiltering.length > 0) {
+            this.disableUnknownMsgFiltering = (disableUnknownMsgFiltering[0].textContent === "true");
         }
 
         //get load balancer url if load balancing enabled

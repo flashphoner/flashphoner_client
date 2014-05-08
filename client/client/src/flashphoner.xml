@@ -12,10 +12,10 @@
   This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 -->
 <flashphoner>
-	<wcs_server>87.226.225.59</wcs_server>
+	<wcs_server>87.226.225.52</wcs_server>
 	<ws_port>8080</ws_port>
     <wss_port>8443</wss_port>
-    <use_wss>false</use_wss>
+    <use_wss>true</use_wss>
 	<rtmfp_port>1935</rtmfp_port>
 	<register_required>true</register_required>
     <use_dtls>true</use_dtls>
@@ -29,4 +29,5 @@
 	<busy_sound></busy_sound>
 	<register_sound></register_sound>
 	<finish_sound></finish_sound>
+    <disable_unknown_msg_filtering>true</disable_unknown_msg_filtering>
 </flashphoner>
