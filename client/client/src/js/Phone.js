@@ -634,8 +634,8 @@ function showMessage(messageObject) {
 
 function convertMessageBody(messageBody, contentType) {
     trace("Phone - convertMessageBody " + contentType);
-    var xml = $.parseXML(messageBody);
     if (contentType == "application/fsservice+xml") {
+        var xml = $.parseXML(messageBody);
         var missedCallNotification;
         var fsService = $(xml).find("fs-services").find("fs-service");
         var action = fsService.attr("action");
@@ -653,6 +653,7 @@ function convertMessageBody(messageBody, contentType) {
         if(missedCallNotification !== undefined) return missedCallNotification;
 
     } else if (contentType == "application/vnd.oma.push") {
+        var xml = $.parseXML(messageBody);
         /**
          * application/vnd.oma.push will contain xml with app information
          * Try to handle this information or discard xml
