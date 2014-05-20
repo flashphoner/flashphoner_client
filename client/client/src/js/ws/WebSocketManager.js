@@ -124,6 +124,10 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         notifyAudioCodec: function (codec) {
         },
 
+        notifyRecordComplete: function (reportObject) {
+            notifyRecordComplete(reportObject);
+        },
+
         notifySubscription: function (subscriptionObject, sipObject) {
             notifySubscription(subscriptionObject, sipObject);
         },

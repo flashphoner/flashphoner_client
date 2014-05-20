@@ -33,6 +33,28 @@ var CALLEE_NAME_IS_NULL = "CALLEE_NAME_IS_NULL";
 var WRONG_FLASHPHONER_XML = "WRONG_FLASHPHONER_XML";
 var PAYMENT_REQUIRED = "PAYMENT_REQUIRED";
 
+var isMobile = {
+    Android: function() {
+        return navigator.userAgent.match(/Android/i);
+    },
+    BlackBerry: function() {
+        return navigator.userAgent.match(/BlackBerry/i);
+    },
+    iOS: function() {
+        return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+    },
+    Opera: function() {
+        return navigator.userAgent.match(/Opera Mini/i);
+    },
+    Windows: function() {
+        return navigator.userAgent.match(/IEMobile/i);
+    },
+    any: function() {
+        return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+    }
+
+};
+
 function extend(Child, Parent) {
     var F = function() { }
     F.prototype = Parent.prototype

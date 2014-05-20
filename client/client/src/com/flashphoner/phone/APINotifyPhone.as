@@ -136,6 +136,9 @@ package com.flashphoner.phone
 		public function notifyRemoveCall(call:Call):void{
 		}
 		
+		public function notifyRecordComplete(recordReport:Object):void {
+		}
+		
 		public function notifySubscription(subscriptionObj:Object, sipObj:Object):void {
 		}
 

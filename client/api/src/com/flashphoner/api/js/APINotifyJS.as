@@ -75,6 +75,10 @@ package com.flashphoner.api.js
 			ExternalInterface.call("notifyRemoveCall",call);
 		}
 		
+		public function notifyRecordComplete(recordReport:Object):void {
+			ExternalInterface.call("notifyRecordComplete", recordReport);
+		}
+		
 		public function notifySubscription(subscribtionObj:Object, sipObj:Object):void {
 			ExternalInterface.call("notifySubscription", subscribtionObj, sipObj);
 		}

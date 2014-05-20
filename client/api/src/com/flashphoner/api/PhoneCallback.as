@@ -232,6 +232,12 @@ package com.flashphoner.api
 			return 200;
 		}
 		
+		public function notifyRecordComplete(recordReport:Object):void {
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				apiNotify.notifyRecordComplete(recordReport);
+			}
+		}
+		
 		public function notifySubscription(subscribtionObj:Object, sipObj:Object):void {
 			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notifySubscription(subscribtionObj,sipObj);

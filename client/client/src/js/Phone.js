@@ -65,6 +65,7 @@ function login() {
     loginObject.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
     loginObject.registerRequired = flashphonerLoader.registerRequired;
     loginObject.useDTLS = flashphonerLoader.useDTLS;
+    loginObject.useSelfSigned = !isMobile.any();
     if (flashphonerLoader.contactParams != null && flashphonerLoader.contactParams.length != 0) {
         loginObject.contactParams = flashphonerLoader.contactParams;
     }
@@ -346,6 +347,11 @@ function notifyRegistered(sipObject) {
 
     sendXcapRequest();
 }
+
+function notifyRecordComplete(recordReport) {
+    trace("Phone - notify record complete: " + recordReport.mixedFilename);
+}
+
 
 function notifySubscription(subscriptionObject, sipObject) {
     trace("Phone - notify subscription event: " + subscriptionObject.event + " expires: " + subscriptionObject.expires + " status: " + subscriptionObject.status+" terminate: "+subscriptionObject.terminate);
