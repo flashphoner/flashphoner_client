@@ -295,6 +295,11 @@ function notifyConfigLoaded() {
     }
 }
 
+function notifyRequestUnmuteResult(accessGranted) {
+    console.log("Access to microphone granted: " + accessGranted);
+}
+
+
 function notifyRegisterRequired(registerR) {
     registerRequired = registerR;
 }
@@ -599,24 +604,45 @@ function notifyOpenVideoView(isViewed) {
 }
 
 function notifyMessageReceived(messageObject) {
-    //ignore application/im-iscomposing+xml RFC3994
-    if (messageObject.contentType == "application/im-iscomposing+xml") {
+    trace("Phone - notifyMessageReceived "+ messageObject);
+
+    if (messageObject.contentType == "application/im-iscomposing+xml" || messageObject.contentType == "message/fsservice+xml") {
+        trace("ignore message: "+messageObject.body);
+        if (flashphonerLoader.disableUnknownMsgFiltering) {
+            messageObject.body = escapeXmlTags(messageObject.body);
+            showMessage(messageObject);
+        }
         return;
     }
-    openChatView();
-    trace("Phone - notifyMessageReceived "+ messageObject);
+
+    //convert body
+    var body = convertMessageBody(messageObject.body, messageObject.contentType);
+    if (body) {
+        messageObject.body = body;
+        showMessage(messageObject);
+    } else {
+        trace("Not displaying message " + messageObject.body + ", body is null after convert");
+        if (flashphonerLoader.disableUnknownMsgFiltering) {
+            messageObject.body = escapeXmlTags(messageObject.body);
+            showMessage(messageObject);
+        }
+    }
+}
+
+function showMessage(messageObject) {
     var from = messageObject.from.toLowerCase();
+    openChatView();
     createChat(from);
     var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
-    var body = convertMessageBody(messageObject.body, messageObject.contentType);
-    addMessageToChat(chatDiv, from, body, "yourNick", messageObject.id);
+    addMessageToChat(chatDiv, from, messageObject.body, "yourNick", messageObject.id);
+    flashphoner.playSound("MESSAGE");
 }
 
 function convertMessageBody(messageBody, contentType) {
     trace("Phone - convertMessageBody " + contentType);
     if (contentType == "application/fsservice+xml") {
-        var missedCallNotification;
         var xml = $.parseXML(messageBody);
+        var missedCallNotification;
         var fsService = $(xml).find("fs-services").find("fs-service");
         var action = fsService.attr("action");
         if (action == "servicenoti-indicate") {
@@ -631,6 +657,19 @@ function convertMessageBody(messageBody, contentType) {
             missedCallNotification = "Service status: " + $(fsService.find("mcn").find("mcn-data")).attr("status");
         }
         if(missedCallNotification !== undefined) return missedCallNotification;
+
+    } else if (contentType == "application/vnd.oma.push") {
+        var xml = $.parseXML(messageBody);
+        /**
+         * application/vnd.oma.push will contain xml with app information
+         * Try to handle this information or discard xml
+         */
+        var content;
+        if ($(xml).find("ums-service")) {
+            //voice mail service message
+            content = $(xml).find("ni-data").attr("content");
+        }
+        return content;
     }
 
     return messageBody;
@@ -655,7 +694,7 @@ function parseMsn(fsService,mcn){
 }
 
 function addMessageToChat(chatDiv, from, body, className, messageId) {
-    trace("Phone - addMessageToChat: messageId: "+messageId+" from: "+from);
+    trace("Phone - addMessageToChat: messageId: "+messageId+" from: "+from+" message body: "+body);
     var idAttr = (messageId != null) ? "id='" + messageId + "'" : "";
     var isScrolled = (chatDiv[0].scrollHeight - chatDiv.height() + 1) / (chatDiv[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
     var messageDiv = "<div " + idAttr + " class='" + className + "'>" + from + " " + body + "</div>";
@@ -1088,6 +1127,10 @@ function createChat(calleeName) {
 
 function removeNonDigitOrLetter(calleeName) {
     return calleeName.replace(/\W/g, '')
+}
+
+function escapeXmlTags(stringXml) {
+    return stringXml.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 /* ---------------------------------------------------- */

@@ -36,7 +36,11 @@ package com.flashphoner.api
 		{	
 			Logger.info("MessageCommand.execute() event.type "+event.type);
 			
-			var messageEvent:MessageEvent = event as MessageEvent;		
+			var messageEvent:MessageEvent = event as MessageEvent;
+			Logger.info("message state: "+messageEvent.messageObj.state);
+			if (messageEvent.messageObj.state=="RECEIVED"){
+				SoundControl.playMessageSound();
+			}
 			var flashAPI:Flash_API = messageEvent.flashAPI;			
 			if (event.type == MessageEvent.MESSAGE_EVENT){
 				for each (var apiNotify:APINotify in Flash_API.apiNotifys){

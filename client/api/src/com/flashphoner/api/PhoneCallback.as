@@ -105,6 +105,9 @@ package com.flashphoner.api
 		
 		public function sessionProgress(_call:Object,_sipObject:Object):void{
 			var call:Call = process(_call);
+			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+				apiNotify.notify(call,_sipObject);
+			}
 			CairngormEventDispatcher.getInstance().dispatchEvent(new CallEvent(CallEvent.SESSION_PROGRESS,call));
 		}
 		
