@@ -44,14 +44,12 @@ WebRtcMediaManager.prototype.close = function () {
 WebRtcMediaManager.prototype.createPeerConnection = function () {
     trace("WebRtcMediaManager - createPeerConnection()");
     var application = this;
-    if (webrtcDetectedBrowser == "firefox") {
+    if (application.stunServer !== undefined && application.stunServer.length > 0) {
         pc_config = {"iceServers": [
             {"url": "stun:" + application.stunServer}
         ]};
     } else {
-        pc_config = {"iceServers": [
-            {"url": "stun:" + application.stunServer}
-        ]};
+        pc_config = {"iceServers": []};
     }
     this.peerConnection = new RTCPeerConnection(pc_config, {"optional": [
         {"DtlsSrtpKeyAgreement": flashphonerLoader.useDTLS}
