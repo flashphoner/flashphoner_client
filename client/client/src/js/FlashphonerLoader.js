@@ -47,6 +47,7 @@ FlashphonerLoader = function (config) {
     this.answerLT = 0;
     this.callLT = 0;
     this.disableUnknownMsgFiltering = false;
+    this.suppressRingOnActiveAudioStream = false;
 
     $.ajax({
         type: "GET",
@@ -264,6 +265,11 @@ FlashphonerLoader.prototype = {
         var disableUnknownMsgFiltering = $(xml).find("disable_unknown_msg_filtering");
         if (disableUnknownMsgFiltering.length > 0) {
             this.disableUnknownMsgFiltering = (disableUnknownMsgFiltering[0].textContent === "true");
+        }
+
+        var suppressRingOnActiveAudioStream = $(xml).find("suppress_ring_on_active_audio_stream");
+        if (suppressRingOnActiveAudioStream.length > 0) {
+            this.suppressRingOnActiveAudioStream = (suppressRingOnActiveAudioStream[0].textContent === "true");
         }
 
         //get load balancer url if load balancing enabled

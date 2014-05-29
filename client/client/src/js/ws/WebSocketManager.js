@@ -336,6 +336,10 @@ WebSocketManager.prototype = {
         return this.webRtcMediaManager.isVideoMuted == -1;
     },
 
+    hasActiveAudioStream: function(){
+        return this.webRtcMediaManager.hasActiveAudioStream();
+    },
+
     getInfoAboutMe: function () {
         return this.user;
     },

@@ -440,7 +440,9 @@ function onCurrentCallNotify(call){
         }
     } else if (call.state == STATE_RING) {
         $('#callState').html('...Ringing...');
-        flashphoner.playSound("RING");
+        if (isRingSoundAllowed()){
+            flashphoner.playSound("RING");
+        }
     } else if (call.state == STATE_RING_MEDIA){
         $('#callState').html('...Ringing...');
         flashphoner.stopSound("RING");
@@ -450,6 +452,18 @@ function onCurrentCallNotify(call){
         $('#callState').html('...Call in Progress...');
         flashphoner.stopSound("RING");
     }
+}
+
+function isRingSoundAllowed(){
+    try{
+        if (flashphonerLoader.suppressRingOnActiveAudioStream && flashphoner.hasActiveAudioStream()){
+            trace("Phone - isRingSoundAllowed false");
+            return false;
+        }
+    }catch(error){
+    }
+    trace("Phone - isRingSoundAllowed true");
+    return true;
 }
 
 function onNotCurrentCallNotify(call){

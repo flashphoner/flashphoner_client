@@ -358,3 +358,17 @@ WebRtcMediaManager.prototype.onSetLocalDescriptionErrorCallback = function (erro
 WebRtcMediaManager.prototype.onSetRemoteDescriptionErrorCallback = function (error) {
     console.error("WebRtcMediaManager - onSetRemoteDescriptionErrorCallback(): error: " + error);
 };
+
+WebRtcMediaManager.prototype.hasActiveAudioStream = function () {
+    if (!this.remoteAudioVideoMediaStream){
+        trace("WebRtcMediaManager - no audio tracks");
+        return false;
+    }
+    var l = this.remoteAudioVideoMediaStream.getAudioTracks().length;
+    trace("WebRtcMediaManager - hasAudio length: "+l);
+    if (l){
+        return true;
+    }else{
+        return false;
+    }
+};
