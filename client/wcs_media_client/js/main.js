@@ -157,7 +157,7 @@ function notifySubscribeError() {
 }
 
 function notifyPublishError() {
-    $info("Publish media session problem; Closing media session...");
+    info("Publish media session problem; Closing media session...");
     flashphoner.closeMediaSession();
     onUnpublish();
 }
@@ -180,6 +180,8 @@ function notifyRtspError(uri) {
 }
 
 function notifyRtspReady(streamName) {
+    info("Subscribing to stream " + streamName);
     subscribe(streamName);
+    onSubscribe();
 }
 
