@@ -105,6 +105,7 @@ package com.flashphoner.api
 		
 		public function sessionProgress(_call:Object,_sipObject:Object):void{
 			var call:Call = process(_call);
+			call.sessionProgressReceived = true;
 			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 				apiNotify.notify(call,_sipObject);
 			}
@@ -180,7 +181,7 @@ package com.flashphoner.api
 			var call:Call = flash_API.getCallById(_call.id);
 			if (call==null){
 				call = new Call(flash_API);
-				call.id = _call.id;	
+				call.id = _call.id;
 			}
 
 			call.incoming = _call.incoming;

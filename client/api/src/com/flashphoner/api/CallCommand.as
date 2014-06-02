@@ -69,8 +69,13 @@ package com.flashphoner.api
 			}
 			
 			if (event.type ==CallEvent.OUT){
-				SoundControl.playRingSound();
-				flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call), false);
+				//check if we already received session progress, if so no need to play ring sound
+				if (!call.sessionProgressReceived) {
+					SoundControl.playRingSound();
+					flashAPI.phoneServerProxy.phoneSpeaker.play(getStreamName(modelLocator, call), false);
+				} else {
+					Logger.info("Received ring request while in session progress, ignoring");
+				}
 			}
 			
 			if (event.type == CallEvent.BUSY){

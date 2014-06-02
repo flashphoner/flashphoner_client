@@ -45,7 +45,11 @@ package com.flashphoner.api
 		/**
 		 * State of call (RING,HOLD,TALK,FINISH,BUSY,SESSION_PROGRESS)
 		 **/
-		public var state:String;	
+		public var state:String;
+		/**
+		 * Indicates if call received SESSION_PROGRESS 
+		 **/
+		public var sessionProgressReceived:Boolean;
 		/**
 		 * Flag on execute hold operation
 		 * true - if user execute call.hold(true)
