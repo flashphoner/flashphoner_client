@@ -72,7 +72,11 @@ function onUnsubscribe() {
 subscribeButtonListener = function () {
     console.log("Pressed subscribeButton");
     if ($("#subscribeButton").text() == "Subscribe") {
-        subscribe();
+        if ($("#streamName").text().indexOf("rtsp") != -1) {
+            prepareRtspSession($("#streamName").text());
+            return;
+        }
+        subscribe($("#streamName").text());
         onSubscribe();
     } else {
         unsubscribe();
@@ -112,10 +116,10 @@ function publish() {
     }
 }
 
-function subscribe() {
+function subscribe(streamName) {
     info("");
-    console.log("Streamname " + $("#streamName").text());
-    flashphoner.subscribe($("#streamName").text());
+    console.log("Streamname " + streamName);
+    flashphoner.subscribe(streamName);
 }
 
 function unpublish() {
@@ -126,6 +130,11 @@ function unpublish() {
 function unsubscribe() {
     flashphoner.unSubscribe($("#streamName").text());
     setPublishStreamName("");
+}
+
+function prepareRtspSession(uri) {
+    info("Waiting for RTSP stream");
+    flashphoner.prepareRtspSession(uri);
 }
 
 function hasAccess() {
@@ -164,5 +173,13 @@ function notifyCloseConnection() {
     onUnpublish();
     onUnsubscribe();
     setPublishStreamName("");
+}
+
+function notifyRtspError(uri) {
+    info("Failed to get streams from uri " + uri);
+}
+
+function notifyRtspReady(streamName) {
+    subscribe(streamName);
 }
 
