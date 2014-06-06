@@ -20,15 +20,21 @@
 
     <html>
     <head>
-        <title>Flashphoner</title>
+        <title>WebRTC Live Video And Broadcasting Client For Live events and Webinars</title>
     </head>
     <body>
 
     <div id="video" class="video">
+
         <div class="text-previu"><span></span></div>
+
+        <!-- Main div for video -->
         <div id="videoDiv" class="videoDiv">
+
+            <!-- Just black TV window without any elements -->
             <div class="black-window"></div>
 
+            <!-- Play stream again if the stream has been stopped -->
             <div class="play-stop">
                 <div class="button-play-stop">
                     <span></span>
@@ -38,6 +44,7 @@
                 <div class="info-anchor"><span id="tarop" data-clipboard-text=""></span></div>
             </div>
 
+            <!-- WebRTC session is established and inbound stream is playing back -->
             <div class="visit-translation">
                 <div class="icon-visit">
                     <span></span>
@@ -55,6 +62,7 @@
                 </div>
             </div>
 
+            <!-- WebRTC session is established and outbound stream is being publishing -->
             <div class="publish-translation">
                 <div class="icon-translation">
                     <span></span>
@@ -68,6 +76,8 @@
                     </div>
                 </div>
             </div>
+
+            <!-- WebRTC session establishment pre-loader for inbound playback stream -->
             <div id="preload-visit" class="preload-visit">
                 <img src="images/preloader3.gif">
 
@@ -80,6 +90,7 @@
                 </div>
             </div>
 
+            <!-- WebRTC session establishment pre-loader for outbound publishing stream-->
             <div id="preload-connect" class="preload-connect">
                 <img src="images/preloader2.gif">
 
@@ -92,21 +103,31 @@
                 </div>
             </div>
 
+            <!-- The pre-loader is being used while Websocket connection -->
             <div class="preload-intro">
                 <img src="images/preloader.gif">
                 <span>Connecting...</span>
             </div>
+
+            <!-- Allow camera and microphone or cancel -->
             <div id="allow" class="access-video">
                 <div class="access-img"></div>
                 <span></span>
             </div>
+
+            <!-- Window with 'Start' stream button -->
             <div class="connect-translation">
                 <span></span>
-
                 <div class="connect-img" id="publishButton"></div>
             </div>
+
+            <!-- Flashphoner logo -->
             <div class="flash-img" flag="ok" scrybe="ok"><img src="images/flashphoner.png"></div>
+
+            <!-- Remote video-->
             <video id="remoteVideo" autoplay class="player-communication-2"></video>
+
+            <!-- Local video preview-->
             <video id="localVideoPreview" autoplay class="player-communication"></video>
         </div>
     </div>
@@ -117,12 +138,14 @@
                 document.mozCancelFullScreen;
         var elem = document.getElementById("videoDiv");
         function enterFullScreen() {
-
             if (elem.webkitRequestFullScreen) {
                 elem.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
             } else {
                 elem.mozRequestFullScreen();
             }
+            /**
+             * On ESC pressed
+             */
             $(document).keyup(function (e) {
                 if (e.keyCode == 27) {
                     $('.videoDiv').css({'height': '480px', 'width': '640px'});
@@ -130,7 +153,11 @@
                     $('#full').removeClass('ex-size-min').addClass('ex-size');
                 }
             });
-            document.getElementById('full').onclick = exitFullscreen;
+            /**
+             * Full screen button
+             *
+             */
+            document.getElementById('full').onclick = exitFullScreen;
             var marHeight = screen.height - 41;
             var playHeight = screen.height - 298;
             var videoH = screen.height;
@@ -140,7 +167,10 @@
             $('.info-anchor').css('margin-top', '' + playHeight + 'px');
             $('#full').removeClass('ex-size').addClass('ex-size-min');
         }
-        function exitFullscreen() {
+        /**
+         * Full screen
+         */
+        function exitFullScreen() {
             document.cancelFullScreen();
             $('.videoDiv').css({'height': '480px', 'width': '640px'});
             $('.panel-visit').css('margin-top', '439px');

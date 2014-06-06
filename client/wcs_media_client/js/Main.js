@@ -7,13 +7,8 @@ config = null;
 flashphoner = null;
 
 function onDisconnect() {
-
-
     $("#subscribeButton").unbind("click");
-
-
     $("#publishButton").unbind("click");
-
 }
 function onConnect() {
 
@@ -30,9 +25,7 @@ connectButtonListener = function () {
     if ($('.flash-img').attr("flag") === 'ok') {
         connect();
         $('.flash-img').attr("flag", "no");
-
     } else {
-
         disconnect();
         $('.flash-img').attr("flag", "ok");
     }
