@@ -171,7 +171,7 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, stream
             me.createPeerConnection();
             if (streamAudio && streamVideo) {
                 me.peerConnection.addStream(me.localAudioVideoStream);
-            } else if (streamAudio){
+            } else if (streamAudio) {
                 me.peerConnection.addStream(me.localAudioStream);
             }
         }
@@ -190,7 +190,7 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, stream
 
 WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback, hasVideo) {
     var me = this;
-    console.log("WebRtcMediaManager - createAnswer() me.getConnectionState(): "+me.getConnectionState()+" me.hasVideo: "+me.hasVideo);
+    console.log("WebRtcMediaManager - createAnswer() me.getConnectionState(): " + me.getConnectionState() + " me.hasVideo: " + me.hasVideo);
     if (me.getConnectionState() != "established") {
         me.init();
     }
@@ -232,7 +232,7 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback, hasV
 };
 
 WebRtcMediaManager.prototype.onCreateOfferSuccessCallback = function (offer) {
-    console.log("WebRtcMediaManager - onCreateOfferSuccessCallback this.peerConnection: "+this.peerConnection+" this.peerConnectionState: "+this.peerConnectionState);
+    console.log("WebRtcMediaManager - onCreateOfferSuccessCallback this.peerConnection: " + this.peerConnection + " this.peerConnectionState: " + this.peerConnectionState);
     if (this.peerConnection != null) {
         if (this.peerConnectionState == 'new' || this.peerConnectionState == 'established') {
             var application = this;
@@ -276,7 +276,7 @@ WebRtcMediaManager.prototype.getConnectionState = function () {
 };
 
 WebRtcMediaManager.prototype.setRemoteSDP = function (sdp, isInitiator) {
-    console.log("WebRtcMediaManager - setRemoteSDP: isInitiator: "+isInitiator+" sdp=" + sdp);
+    console.log("WebRtcMediaManager - setRemoteSDP: isInitiator: " + isInitiator + " sdp=" + sdp);
     if (isInitiator) {
         var sdpAnswer = new RTCSessionDescription({
             type: 'answer',
@@ -298,11 +298,11 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionSuccessCallback = function ()
     console.log("onSetRemoteDescriptionSuccessCallback");
     if (this.peerConnection != null) {
         if (this.peerConnectionState == 'answer-received') {
-            console.log("Current PeerConnectionState is 'answer-received' changing the PeerConnectionState to 'established'");//здесь поставить конец прелоадера
-             $('.preload-visit').css('display','none');
-             if($('.player-communication-2').css('display') !== 'none'){
-            $('.visit-translation').css('display','block');
-            $('.text-previu>span').text('Your stream is playing back.');
+            console.log("Current PeerConnectionState is 'answer-received' changing the PeerConnectionState to 'established'");//End of pre-loader
+            $('.preload-visit').css('display', 'none');
+            if ($('.player-communication-2').css('display') !== 'none') {
+                $('.visit-translation').css('display', 'block');
+                $('.text-previu>span').text('Your stream is playing back');
             }
             this.peerConnectionState = 'established';
         }
@@ -326,7 +326,7 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionSuccessCallback = function ()
 
 
 WebRtcMediaManager.prototype.onCreateAnswerSuccessCallback = function (answer) {
-    console.log("onCreateAnswerSuccessCallback "+this.peerConnection);
+    console.log("onCreateAnswerSuccessCallback " + this.peerConnection);
     if (this.peerConnection != null) {
         if (this.peerConnectionState == 'offer-received') {
             console.log("Current PeerConnectionState is 'offer-received', preparing answer...");
