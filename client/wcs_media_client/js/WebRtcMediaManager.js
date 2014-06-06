@@ -126,6 +126,8 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
     var me = this;
     if (!me.localAudioVideoStream) {
         getUserMedia({audio: true, video: true}, function (stream) {
+                document.getElementById('allow').style.display = "none";
+                document.getElementById('preload-connect').style.display = "block";//Here is beginning of pre-loader
                 attachMediaStream(me.localVideo, stream);
                 me.localAudioVideoStream = stream;
                 me.isAudioMuted = -1;
@@ -296,7 +298,12 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionSuccessCallback = function ()
     console.log("onSetRemoteDescriptionSuccessCallback");
     if (this.peerConnection != null) {
         if (this.peerConnectionState == 'answer-received') {
-            console.log("Current PeerConnectionState is 'answer-received' changing the PeerConnectionState to 'established'");
+            console.log("Current PeerConnectionState is 'answer-received' changing the PeerConnectionState to 'established'");//здесь поставить конец прелоадера
+             $('.preload-visit').css('display','none');
+             if($('.player-communication-2').css('display') !== 'none'){
+            $('.visit-translation').css('display','block');
+            $('.text-previu>span').text('Your stream is playing back.');
+            }
             this.peerConnectionState = 'established';
         }
         else if (this.peerConnectionState == 'offer-received') {

@@ -17,6 +17,12 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         setRemoteSDP: function (sdp, isInitiator) {
             me.webRtcMediaManager.setRemoteSDP(sdp, isInitiator);
             setPublishStreamName(me.streamName);
+            document.getElementById('preload-connect').style.display = "none";
+            if(!kindTrans()){
+            $('.publish-translation').css('display','block');
+            $('.text-previu>span').text("You can share the stream using the link below. Press 'Copy' to copy the link to clipboard.");
+            $('.flash-img').attr("connect-x","ok");
+            }
         },
 
         notifyVideoFormat: function (videoFormat) {
@@ -32,14 +38,6 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
 
         notifyPublishError: function () {
             notifyPublishError();
-        },
-
-        notifyRtspError: function (uri) {
-            notifyRtspError(uri);
-        },
-
-        onReadyToPlay: function (streamName) {
-            notifyRtspReady(streamName);
         }
 
     };
@@ -129,14 +127,6 @@ WebSocketManager.prototype = {
         me.webSocket.send("unSubscribe", object);
         me.streamName = "";
         me.webRtcMediaManager.close();
-    },
-
-    prepareRtspSession: function (rtspUri) {
-        var me = this;
-        var object = {};
-        object.rtspUri = rtspUri;
-        console.log("prepareRtspSession " + rtspUri)
-        me.webSocket.send("prepareRtspSession", object);
     },
 
     closeMediaSession:function() {
