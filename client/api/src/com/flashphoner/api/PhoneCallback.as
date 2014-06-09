@@ -91,6 +91,11 @@ package com.flashphoner.api
 			CairngormEventDispatcher.getInstance().dispatchEvent(new MainEvent(MainEvent.REGISTERED,flash_API));
 		}
 		
+		public function notifyTryingResponse(_call:Object,_sipObject:Object):void{
+			var call:Call = process(_call);
+			Logger.info("PhoneCallback.notifyTryingResponse() " + call.id);
+		}
+		
 		public function ring(_call:Object,_sipObject:Object):void{
 			var call:Call = process(_call);
 			for each (var apiNotify:APINotify in Flash_API.apiNotifys){

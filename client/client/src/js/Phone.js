@@ -1194,8 +1194,7 @@ function notifyReady() {
                 trace("Phone - Hangup current call by click: "+currentCall.id);
                 hangup(currentCall.id);
             } else {
-                trace("Phone - Hangup call by click");
-                hangup();
+                trace("Phone - ignore hangup command, provisional message from server not received yet");
             }
         }
     });

@@ -57,8 +57,13 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
             notifyRegistered(sipHeader);
         },
 
+        notifyTryingResponse: function (call, sipHeader) {
+            trace("notifyTryingResponse call.id:" + call.id);
+            proccessCall(call);
+        },
+
         ring: function (call, sipHeader) {
-            trace("ring call.state: "+call.state+" call.id: "+call.id )
+            trace("ring call.state: "+call.state+" call.id: "+call.id);
             proccessCall(call);
             notify(call);
         },
@@ -262,12 +267,6 @@ WebSocketManager.prototype = {
     hangup: function (callId) {
         if (callId) {
             this.webSocket.send("hangup", callId);
-        } else {
-            if (this.calls.length == 0) {
-                closeInfoView();
-                toCallState();
-                this.webRtcMediaManager.close();
-            }
         }
     },
 
