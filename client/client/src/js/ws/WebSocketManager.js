@@ -377,6 +377,10 @@ WebSocketManager.prototype = {
         this.webSocket.send("notificationResult", result);
     },
 
+    getStats: function () {
+        this.webRtcMediaManager.requestStats();
+    },
+
     setStripCodecs: function (array) {
         this.stripCodecs = array;
     },

@@ -402,6 +402,11 @@ function subscribeReg() {
 function notifyBalance(balance) {
 }
 
+//callback for flashphoner.getStats();
+function notifyStats(stats) {
+    console.log(JSON.stringify(stats, null, '\t'));
+}
+
 function onCallFinished(){
     trace("Phone - onCallFinished");
     // if that hangup during transfer procedure?

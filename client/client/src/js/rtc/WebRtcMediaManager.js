@@ -346,6 +346,70 @@ WebRtcMediaManager.prototype.setStunServer = function (server) {
     this.stunServer = server;
 }
 
+WebRtcMediaManager.prototype.requestStats = function () {
+    var me = this;
+    if (this.peerConnection && this.peerConnection.getRemoteStreams()[0] && webrtcDetectedBrowser == "chrome") {
+        if (this.peerConnection.getStats) {
+            this.peerConnection.getStats(function (rawStats) {
+                var results = rawStats.result();
+                var result = {};
+                for (var i = 0; i < results.length; ++i) {
+                    var resultPart = me.processRtcStatsReport(results[i]);
+                    if (resultPart != null) {
+                        if (resultPart.type == "googCandidatePair") {
+                            result.activeCandidate = resultPart;
+                        } else if (resultPart.type == "ssrc") {
+                            if (resultPart.packetsLost == -1) {
+                                result.outgoingStream = resultPart;
+                            } else {
+                                result.incomingStream = resultPart;
+                            }
+                        }
+                    }
+                }
+                notifyStats(result);
+            }, function(error) {
+                console.log("Error received " + error);
+            });
+
+        }
+    }
+}
+
+WebRtcMediaManager.prototype.processRtcStatsReport = function (report) {
+    /**
+     * Report types: googComponent, googCandidatePair, googCertificate, googLibjingleSession, googTrack, ssrc
+     */
+    var gotResult = false;
+    var result = null;
+    if (report.type && report.type == "googCandidatePair") {
+        //check if this is active pair
+        if (report.stat("googActiveConnection") == "true") {
+            gotResult = true;
+        }
+    }
+
+    if (report.type && report.type == "ssrc") {
+        gotResult = true;
+    }
+
+    if (gotResult) {
+        //prepare object
+        result = {};
+        result.timestamp = report.timestamp;
+        result.id = report.id;
+        result.type = report.type;
+        if (report.names) {
+            var names = report.names();
+            for (var i = 0; i < names.length; ++i) {
+                var attrName = names[i];
+                result[attrName] = report.stat(attrName);
+            }
+        }
+    }
+    return result;
+}
+
 WebRtcMediaManager.prototype.onCreateAnswerErrorCallback = function (error) {
     console.error("WebRtcMediaManager - onCreateAnswerErrorCallback(): error: " + error);
 };
