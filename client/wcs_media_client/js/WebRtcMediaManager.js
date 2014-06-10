@@ -41,15 +41,7 @@ WebRtcMediaManager.prototype.close = function () {
 WebRtcMediaManager.prototype.createPeerConnection = function () {
     console.log("WebRtcMediaManager - createPeerConnection()");
     var application = this;
-    if (webrtcDetectedBrowser == "firefox") {
-        pc_config = {"iceServers": [
-            {"url": "stun:" + application.stunServer}
-        ]};
-    } else {
-        pc_config = {"iceServers": [
-            {"url": "stun:" + application.stunServer}
-        ]};
-    }
+    pc_config = {"iceServers": []};
     this.peerConnection = new RTCPeerConnection(pc_config, {"optional": [
         {"DtlsSrtpKeyAgreement": true}
     ]});

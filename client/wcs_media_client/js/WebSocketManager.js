@@ -38,6 +38,14 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
 
         notifyPublishError: function () {
             notifyPublishError();
+        },
+
+        notifyRtspError: function (uri) {
+            notifyRtspError(uri);
+        },
+
+        onReadyToPlay: function (streamName) {
+            notifyRtspReady(streamName);
         }
 
     };
@@ -127,6 +135,14 @@ WebSocketManager.prototype = {
         me.webSocket.send("unSubscribe", object);
         me.streamName = "";
         me.webRtcMediaManager.close();
+    },
+
+    prepareRtspSession: function (rtspUri) {
+        var me = this;
+        var object = {};
+        object.rtspUri = rtspUri;
+        console.log("prepareRtspSession " + rtspUri)
+        me.webSocket.send("prepareRtspSession", object);
     },
 
     closeMediaSession:function() {

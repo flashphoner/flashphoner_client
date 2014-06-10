@@ -98,7 +98,7 @@ subscribeButtonListener = function () {
 function parseUrlId() {
     var idTrans = [];
     var address = window.location.toString();
-    var pattern = /https?:\/\/.*\?id\=(\w+)/;
+    var pattern = /https?:\/\/.*\?id\=(.*)/;
     idTrans = address.match(pattern);
     return idTrans[1];
 }
@@ -130,7 +130,7 @@ $(window).load(function () {
         if ($('.player-communication-2').css('display') !== 'none') {
 
 
-            setTimeout(subscribeButtonListener, 2000);
+            setTimeout(subscribeButtonListener, 3000);
             $('.preload-visit').css('display', 'block');
             textId();
             //$('.visit-translation').css('display','block');
@@ -247,8 +247,13 @@ function publish() {
 function subscribe() {
     info("");
     var codeText = parseUrlId();
-    console.log("Streamname " + $("#streamName").text());
-    flashphoner.subscribe(codeText);
+    console.log("Streamname " + codeText);
+    if (codeText.indexOf("rtsp://") != -1) {
+        var url = codeText.split("&");
+        flashphoner.prepareRtspSession(url[0]);
+    } else {
+        flashphoner.subscribe(codeText);
+    }
 
 }
 
@@ -306,6 +311,16 @@ function notifyCloseConnection() {
     onUnpublish();
     onUnsubscribe();
     setPublishStreamName("");
+}
+
+function notifyRtspError(uri) {
+    info("Failed to get streams from uri " + uri);
+    flashphoner.closeMediaSession();
+    onUnsubscribe();
+}
+
+function notifyRtspReady(streamName) {
+    flashphoner.subscribe(streamName);
 }
 
 

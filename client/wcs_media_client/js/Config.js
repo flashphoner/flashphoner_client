@@ -22,8 +22,6 @@ Config.prototype = {
 
     parseFlashphonerXML: function(xml) {
 
-        console.log("HERE");
-
         var wcsIP = $(xml).find("wcs_server");
         if (wcsIP.length > 0) {
             this.wcsIP = wcsIP[0].textContent;
