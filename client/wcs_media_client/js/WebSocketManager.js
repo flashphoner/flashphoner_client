@@ -32,16 +32,16 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         notifyAudioCodec: function (codec) {
         },
 
-        notifySubscribeError: function () {
-            notifySubscribeError();
+        notifySubscribeError: function (message) {
+            notifySubscribeError(message);
         },
 
-        notifyPublishError: function () {
-            notifyPublishError();
+        notifyPublishError: function (message) {
+            notifyPublishError(message);
         },
 
-        notifyRtspError: function (uri) {
-            notifyRtspError(uri);
+        notifyRtspError: function (message) {
+            notifyRtspError(message);
         },
 
         onReadyToPlay: function (streamName) {

@@ -284,18 +284,19 @@ function setPublishStreamName(text) {
 }
 
 function info(text) {
-    $("#info").text(text);
+    //todo view message for client
+    $("#info").text($("#info").text() + text);
 }
 
 
-function notifySubscribeError() {
-    info("Subscribe media session problem; Closing media session...");
+function notifySubscribeError(message) {
+    info(message);
     flashphoner.closeMediaSession();
     onUnsubscribe();
 }
 
-function notifyPublishError() {
-    $info("Publish media session problem; Closing media session...");
+function notifyPublishError(message) {
+    info(message);
     flashphoner.closeMediaSession();
     onUnpublish();
 }
@@ -313,8 +314,8 @@ function notifyCloseConnection() {
     setPublishStreamName("");
 }
 
-function notifyRtspError(uri) {
-    info("Failed to get streams from uri " + uri);
+function notifyRtspError(message) {
+    info(message);
     flashphoner.closeMediaSession();
     onUnsubscribe();
 }
