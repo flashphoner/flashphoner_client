@@ -116,8 +116,12 @@ WebRtcMediaManager.prototype.waitGatheringIce = function () {
 
 WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
     var me = this;
+    var constrains = [
+        {minWidth:config.videoWidth},
+        {minHeight:config.videoHeight}
+    ];
     if (!me.localAudioVideoStream) {
-        getUserMedia({audio: true, video: true}, function (stream) {
+        getUserMedia({audio: true, video: {mandatory:{}, optional:constrains}}, function (stream) {
                 document.getElementById('allow').style.display = "none";
                 document.getElementById('preload-connect').style.display = "block";//Here is beginning of pre-loader
                 attachMediaStream(me.localVideo, stream);
