@@ -67,9 +67,11 @@ WebSocketManager.prototype = {
                 me.isOpened = false;
                 if (!event.originalEvent.wasClean) {
                     console.dir("CONNECTION_ERROR");
+                    notifyConnectionError("CONNECTION_ERROR");
+                } else {
+                    notifyCloseConnection();
+                    me.webRtcMediaManager.close();
                 }
-                notifyCloseConnection();
-                me.webRtcMediaManager.close();
             },
             error: function () {
                 console.log("Error occured!");
