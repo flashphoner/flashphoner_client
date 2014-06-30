@@ -46,6 +46,11 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
 
         onReadyToPlay: function (streamName) {
             notifyRtspReady(streamName);
+        },
+
+        notifyRtspSwitchingProtocols: function (streamName) {
+            console.log("notifyRtspSwitchingProtocols");
+            me.unSubscribe(streamName);
         }
 
     };
