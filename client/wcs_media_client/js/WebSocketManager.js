@@ -60,7 +60,7 @@ WebSocketManager.prototype = {
                 me.isOpened = true;
                 //fake login object
                 var loginObject = {};
-                me.webSocket.send("connect", loginObject);
+                me.webSocket.send("connect", loginObject, "media");
                 notifyOpenConnection();
             },
             close: function (event) {

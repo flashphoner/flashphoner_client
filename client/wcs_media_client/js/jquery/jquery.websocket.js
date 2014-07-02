@@ -33,11 +33,18 @@
                 });
 
             ws._send = ws.send;
-            ws.send = function (message, data) {
+            ws.send = function (message) {
                 if (ws.readyState == 1) {
+                    var index, arg;
                     var m = {message: message};
                     m = $.extend(true, m, $.extend(true, {}, $.websocketSettings.options, m));
-                    if (!(data == null || typeof data === "undefined")) m['data'] = [data];
+                    m['data'] = [];
+
+                    for (index = 1; index < arguments.length; index++){
+                        arg = arguments[index];
+                        if (!(arg == null || typeof arg === "undefined")) m['data'].push(arg);
+                    }
+
                     return this._send($.toJSON(m));
                 }
                 {
