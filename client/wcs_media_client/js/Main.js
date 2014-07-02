@@ -9,15 +9,41 @@ flashphoner = null;
 function onDisconnect() {
     $("#subscribeButton").unbind("click");
     $("#publishButton").unbind("click");
+    $('.preload-intro').css({'display': 'none'});
+    $('.connect-img').css({'display': 'none'});
 }
 function onConnect() {
-
     $("#publishButton").click(publishButtonListener);
-    $('.preload-intro').css({'display': 'none'});
-    if ($('.player-communication-2').css('display') === 'none')
-        $('.connect-translation').css({'display': 'block'});
-    $('.text-previu>span').text('You have connected to Flashphoner WebRTC server. Would you like to start your stream?');
     $("#subscribeButton").click(subscribeButtonListener);
+    $('.preload-intro').css({'display': 'none'});
+    if ($('.player-communication-2').css('display') === 'none') {
+        $('.connect-translation').css({'display': 'block'});
+        $('.text-previu>span').text('You have connected to Flashphoner WebRTC server. Would you like to start your stream?');
+    } else {
+        setTimeout(subscribeButtonListener, 1000);
+        $('.preload-visit').css('display', 'block');
+        textId();
+        //$('.visit-translation').css('display','block');
+        $('.connect-translation').css('display', 'none');
+        $('.stop-y').click(function () {
+
+            subscribeButtonListener();
+            connectButtonListener;
+            $('.visit-translation').css('display', 'none');
+            $('.black-window').css({'display': 'block'});
+            $('.play-stop').css({'display': 'block'});
+            $('.text-previu>span').text('Video is stopped. Would you like to continue playback?');
+            $('.button-play-stop>div').click(function () {
+                connectButtonListener;
+                subscribeButtonListener();
+                $('.black-window').css({'display': 'none'});
+                $('.play-stop').css({'display': 'none'});
+                $('.text-previu>span').text('Your stream is playing back');
+                $('.visit-translation').css('display', 'block');
+
+            });
+        });
+    }
 
 }
 connectButtonListener = function () {
@@ -125,38 +151,6 @@ $(window).load(function () {
 
     loadWindow();
     var startConnect = setTimeout(connectButtonListener, 1000);
-    if (startConnect) {
-
-        if ($('.player-communication-2').css('display') !== 'none') {
-
-
-            setTimeout(subscribeButtonListener, 3000);
-            $('.preload-visit').css('display', 'block');
-            textId();
-            //$('.visit-translation').css('display','block');
-            $('.connect-translation').css('display', 'none');
-            $('.stop-y').click(function () {
-
-                subscribeButtonListener();
-                connectButtonListener;
-                $('.visit-translation').css('display', 'none');
-                $('.black-window').css({'display': 'block'});
-                $('.play-stop').css({'display': 'block'});
-                $('.text-previu>span').text('Video is stopped. Would you like to continue playback?');
-                $('.button-play-stop>div').click(function () {
-                    connectButtonListener;
-                    subscribeButtonListener();
-                    $('.black-window').css({'display': 'none'});
-                    $('.play-stop').css({'display': 'none'});
-                    $('.text-previu>span').text('Your stream is playing back');
-                    $('.visit-translation').css('display', 'block');
-
-                });
-            });
-
-
-        }
-    }
 
     $('.stop-x').hover(
         function () {
@@ -284,8 +278,8 @@ function setPublishStreamName(text) {
 }
 
 function info(text) {
-    //todo view message for client
-    $("#info").text($("#info").text() + text);
+    console.log("INFO " + text);
+    $('.info-previu>span').text(text);
 }
 
 
@@ -296,6 +290,7 @@ function notifySubscribeError(message) {
 }
 
 function notifyPublishError(message) {
+    console.log("notifyPublishError");
     info(message);
     flashphoner.closeMediaSession();
     onUnpublish();
@@ -312,6 +307,11 @@ function notifyCloseConnection() {
     onUnpublish();
     onUnsubscribe();
     setPublishStreamName("");
+}
+
+function notifyConnectionError(message) {
+    info(message);
+    onDisconnect();
 }
 
 function notifyRtspError(message) {

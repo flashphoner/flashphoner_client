@@ -46,6 +46,11 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
 
         onReadyToPlay: function (streamName) {
             notifyRtspReady(streamName);
+        },
+
+        notifyRtspSwitchingProtocols: function (streamName) {
+            console.log("notifyRtspSwitchingProtocols");
+            me.unSubscribe(streamName);
         }
 
     };
@@ -67,9 +72,11 @@ WebSocketManager.prototype = {
                 me.isOpened = false;
                 if (!event.originalEvent.wasClean) {
                     console.dir("CONNECTION_ERROR");
+                    notifyConnectionError("CONNECTION_ERROR");
+                } else {
+                    notifyCloseConnection();
+                    me.webRtcMediaManager.close();
                 }
-                notifyCloseConnection();
-                me.webRtcMediaManager.close();
             },
             error: function () {
                 console.log("Error occured!");

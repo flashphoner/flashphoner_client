@@ -441,6 +441,17 @@ background:url(../images/stop2.png);
     width: 640px;
 	
 }
+.info-previu{
+    width:640px;
+    margin:5px auto;
+}
+.info-previu>span{
+    display: block;
+    font: 13px Verdana;
+    text-align: center;
+    width: 640px;
+    color: red;
+}
 .preload-visit{
     display: none;
     height: 353px;
