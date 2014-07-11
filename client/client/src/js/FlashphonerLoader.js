@@ -343,6 +343,8 @@ FlashphonerLoader.prototype = {
                 params.wmode = "window";
                 //workaround for safari browser, FPNR-403
                 swfobject.switchOffAutoHideShow();
+            } else if ((navigator.userAgent.indexOf("Mozilla") > -1) && (navigator.userAgent.indexOf("Firefox") > -1)) {
+                params.wmode = "window";
             } else {
                 params.wmode = "transparent";
             }
