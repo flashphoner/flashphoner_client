@@ -354,7 +354,7 @@ WebRtcMediaManager.prototype.requestStats = function () {
                 var results = rawStats.result();
                 var result = {};
                 for (var i = 0; i < results.length; ++i) {
-                    var resultPart = me.processRtcStatsReport(results[i]);
+                    var resultPart = me.processGoogRtcStatsReport(results[i]);
                     if (resultPart != null) {
                         if (resultPart.type == "googCandidatePair") {
                             result.activeCandidate = resultPart;
@@ -373,10 +373,48 @@ WebRtcMediaManager.prototype.requestStats = function () {
             });
 
         }
+    } else if (this.peerConnection && this.peerConnection.getRemoteStreams()[0] && webrtcDetectedBrowser == "firefox") {
+        if (this.peerConnection.getStats) {
+            this.peerConnection.getStats(null, function (rawStats) {
+                var result = {};
+                for (var k in rawStats) {
+                    if (rawStats.hasOwnProperty(k)) {
+                        var resultPart = me.processRtcStatsReport(rawStats[k]);
+                        if (resultPart != null) {
+                            if (resultPart.type == "outboundrtp") {
+                                result.outgoingStream = resultPart;
+                            } else if (resultPart.type == "inboundrtp") {
+                                result.incomingStream = resultPart;
+                            }
+                        }
+                    }
+                }
+                notifyStats(result);
+            }, function(error) {
+                console.log("Error received " + error);
+            });
+        }
     }
 }
 
 WebRtcMediaManager.prototype.processRtcStatsReport = function (report) {
+    /**
+     * RTCStatsReport http://mxr.mozilla.org/mozilla-central/source/dom/webidl/RTCStatsReport.webidl
+     */
+    var result = null;
+    if (report.type && (report.type == "outboundrtp" || report.type == "inboundrtp") && report.id.indexOf("rtcp") == -1) {
+        result = {};
+        for (var k in report) {
+            if (report.hasOwnProperty(k)) {
+                result[k] = report[k];
+            }
+        }
+    }
+
+    return result;
+}
+
+WebRtcMediaManager.prototype.processGoogRtcStatsReport = function (report) {
     /**
      * Report types: googComponent, googCandidatePair, googCertificate, googLibjingleSession, googTrack, ssrc
      */
