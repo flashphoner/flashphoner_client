@@ -21,8 +21,8 @@
     <use_dtls>true</use_dtls>
 	<!--<token>token</token>-->
 	<application>phone_app</application>
-	<video_width>176</video_width>
-	<video_height>144</video_height>
+	<video_width>640</video_width>
+	<video_height>480</video_height>
 	<check_validation_callee>true</check_validation_callee>
 	<use_enhanced_mic>true</use_enhanced_mic>
 	<ring_sound></ring_sound>
