@@ -440,7 +440,7 @@ function onCurrentCallNotify(call){
         enableHoldButton();
         flashphoner.stopSound("RING");
         var sendVideoButton = getElement('sendVideo');
-        if (isVideoCall() && call.state_video == "sendrecv" && sendVideoButton.value == 'Send video'){
+        if (isVideoCall() && (call.state_video == "sendrecv" || call.state_video == "sendonly") && sendVideoButton.value == 'Send video'){
             sendVideoChangeState();
         }
     } else if (call.state == STATE_RING) {
