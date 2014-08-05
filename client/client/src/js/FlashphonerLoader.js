@@ -60,61 +60,65 @@ FlashphonerLoader = function (config) {
 
 FlashphonerLoader.prototype = {
 
+    getText: function (el){
+        return el.textContent || el.text || "";
+    },
+
     parseFlashphonerXml: function (xml) {
         var me = this;
         var wcsIP = $(xml).find("wcs_server");
         if (wcsIP.length > 0) {
-            this.wcsIP = wcsIP[0].textContent;
+            this.wcsIP = this.getText(wcsIP[0]);
         } else {
             openConnectingView("Can not find 'wcs_server' in flashphoner.xml", 0);
             return;
         }
         var wsPort = $(xml).find("ws_port");
         if (wsPort.length > 0) {
-            this.wsPort = wsPort[0].textContent;
+            this.wsPort = this.getText(wsPort[0]);
         }
         var wssPort = $(xml).find("wss_port");
         if (wssPort.length > 0) {
-            this.wssPort = wssPort[0].textContent;
+            this.wssPort = this.getText(wssPort[0]);
         }
         var useWss= $(xml).find("use_wss");
         if (useWss.length > 0) {
-            this.useWss = "true" == useWss[0].textContent;
+            this.useWss = "true" == this.getText(useWss[0]);
         }
 
         var flashPort = $(xml).find("flash_port");
         if (flashPort.length > 0) {
-            this.flashPort = flashPort[0].textContent;
+            this.flashPort = this.getText(flashPort[0]);
         }
         var appName = $(xml).find("application");
         if (appName.length > 0) {
-            this.appName = appName[0].textContent;
+            this.appName = this.getText(appName[0]);
         }
         var loadBalancerUrl = $(xml).find("load_balancer_url");
         if (loadBalancerUrl.length > 0) {
-            this.loadBalancerUrl = loadBalancerUrl[0].textContent;
+            this.loadBalancerUrl = this.getText(loadBalancerUrl[0]);
         }
         var token = $(xml).find("token");
         if (token.length > 0) {
-            this.token = token[0].textContent;
+            this.token = this.getText(token[0]);
         }
         var registerRequired = $(xml).find("register_required");
         if (registerRequired.length > 0) {
-            this.registerRequired = (registerRequired[0].textContent === "true");
+            this.registerRequired = (this.getText(registerRequired[0]) === "true");
         }
 
         var useDTLS = $(xml).find("use_dtls");
         if (useDTLS.length > 0) {
-            this.useDTLS = (useDTLS[0].textContent === "true");
+            this.useDTLS = (this.getText(useDTLS[0]) === "true");
         }
 
         var videoWidth = $(xml).find("video_width");
         if (videoWidth.length > 0) {
-            this.videoWidth = videoWidth[0].textContent;
+            this.videoWidth = this.getText(videoWidth[0]);
         }
         var videoHeight = $(xml).find("video_height");
         if (videoHeight.length > 0) {
-            this.videoHeight = videoHeight[0].textContent;
+            this.videoHeight = this.getText(videoHeight[0]);
         }
 
         var pushLogEnabled = $(xml).find("push_log");
@@ -125,74 +129,74 @@ FlashphonerLoader.prototype = {
         //Sounds for WebRTC implementation
         var ringSound = $(xml).find("ring_sound");
         if (ringSound.length > 0) {
-            if (ringSound[0].textContent.length) {
-                this.ringSound = ringSound[0].textContent;
+            if (this.getText(ringSound[0]).length) {
+                this.ringSound = this.getText(ringSound[0]);
             }
         }
         var busySound = $(xml).find("busy_sound");
         if (busySound.length > 0) {
-            if (busySound[0].textContent.length) {
-                this.busySound = busySound[0].textContent;
+            if (this.getText(busySound[0]).length) {
+                this.busySound = this.getText(busySound[0]);
             }
         }
         var registerSound = $(xml).find("register_sound");
         if (registerSound.length > 0) {
-            if (registerSound[0].textContent.length) {
-                this.registerSound = registerSound[0].textContent;
+            if (this.getText(registerSound[0]).length) {
+                this.registerSound = this.getText(registerSound[0]);
             }
         }
         var messageSound = $(xml).find("message_sound");
         if (messageSound.length > 0) {
-            if (messageSound[0].textContent.length) {
-                this.messageSound = messageSound[0].textContent;
+            if (this.getText(messageSound[0]).length) {
+                this.messageSound = this.getText(messageSound[0]);
             }
         }
         var finishSound = $(xml).find("finish_sound");
         if (finishSound.length > 0) {
-            if (finishSound[0].textContent.length) {
-                this.finishSound = finishSound[0].textContent;
+            if (this.getText(finishSound[0]).length) {
+                this.finishSound = this.getText(finishSound[0]);
             }
         }
 
         var xcapUrl = $(xml).find("xcap_url");
         if (xcapUrl.length > 0) {
-            if (xcapUrl[0].textContent.length) {
-                this.xcapUrl = xcapUrl[0].textContent;
+            if (this.getText(xcapUrl[0]).length) {
+                this.xcapUrl = this.getText(xcapUrl[0]);
             }
         }
 
         var msrpCallee = $(xml).find("msrp_callee");
         if (msrpCallee.length > 0) {
-            if (msrpCallee[0].textContent.length) {
-                this.msrpCallee = msrpCallee[0].textContent;
+            if (this.getText(msrpCallee[0]).length) {
+                this.msrpCallee = this.getText(msrpCallee[0]);
             }
         }
 
         var subscribeEvent = $(xml).find("subscribe_event");
         if (subscribeEvent.length > 0) {
-            if (subscribeEvent[0].textContent.length) {
-                this.subscribeEvent = subscribeEvent[0].textContent;
+            if (this.getText(subscribeEvent[0]).length) {
+                this.subscribeEvent = this.getText(subscribeEvent[0]);
             }
         }
 
         var contactParams = $(xml).find("contact_params");
         if (contactParams.length > 0) {
-            if (contactParams[0].textContent.length) {
-                this.contactParams = contactParams[0].textContent;
+            if (this.getText(contactParams[0]).length) {
+                this.contactParams = this.getText(contactParams[0]);
             }
         }
 
         var imdnEnabled = $(xml).find("imdn_enabled");
         if (imdnEnabled.length > 0) {
-            if (imdnEnabled[0].textContent.length) {
-                this.imdnEnabled = Boolean(imdnEnabled[0].textContent);
+            if (this.getText(imdnEnabled[0]).length) {
+                this.imdnEnabled = Boolean(this.getText(imdnEnabled[0]));
             }
         }
 
         var disableLocalRing = $(xml).find("disable_local_ring");
         if (disableLocalRing.length > 0) {
-            if (disableLocalRing[0].textContent.length) {
-                this.disableLocalRing = Boolean(disableLocalRing[0].textContent);
+            if (this.getText(disableLocalRing[0]).length) {
+                this.disableLocalRing = Boolean(this.getText(disableLocalRing[0]));
             }
         }
         console.log("disableLocalRing: "+this.disableLocalRing);
@@ -206,7 +210,7 @@ FlashphonerLoader.prototype = {
 
         var stripCodecs = $(xml).find("strip_codecs");
         if (stripCodecs.length > 0) {
-            var tempCodecs = stripCodecs[0].textContent.split(",");
+            var tempCodecs = this.getText(stripCodecs[0]).split(",");
             for (i = 0; i < tempCodecs.length; i++) {
                 if (tempCodecs[i].length) this.stripCodecs[i] = tempCodecs[i];
                 console.log("Codec " + tempCodecs[i] + " will be removed from SDP!");
@@ -238,8 +242,8 @@ FlashphonerLoader.prototype = {
         //Load Tool mode on/off
         var modeLT = $(xml).find("modeLT");
         if (modeLT.length > 0) {
-            if (modeLT[0].textContent.length) {
-                this.modeLT = Boolean(modeLT[0].textContent);
+            if (this.getText(modeLT[0]).length) {
+                this.modeLT = Boolean(this.getText(modeLT[0]));
             }
         }
 
@@ -247,29 +251,29 @@ FlashphonerLoader.prototype = {
         // Hangup will not occur in case of 0 timeout.
         var hangupLT = $(xml).find("hangupLT");
         if (hangupLT.length > 0) {
-            this.hangupLT = hangupLT[0].textContent;
+            this.hangupLT = this.getText(hangupLT[0]);
         }
 
         //Answer timeout when Load Tool is enabled, if greater than 0 callee answer the call after specified amount of seconds
         var answerLT = $(xml).find("answerLT");
         if (answerLT.length > 0) {
-            this.answerLT = answerLT[0].textContent;
+            this.answerLT = this.getText(answerLT[0]);
         }
 
         //Recall timeout when Load Tool is enabled, specifies how long caller must wait after hangup to place another call.
         var callLT = $(xml).find("callLT");
         if (callLT.length > 0) {
-            this.callLT = callLT[0].textContent;
+            this.callLT = this.getText(callLT[0]);
         }
 
         var disableUnknownMsgFiltering = $(xml).find("disable_unknown_msg_filtering");
         if (disableUnknownMsgFiltering.length > 0) {
-            this.disableUnknownMsgFiltering = (disableUnknownMsgFiltering[0].textContent === "true");
+            this.disableUnknownMsgFiltering = (this.getText(disableUnknownMsgFiltering[0]) === "true");
         }
 
         var suppressRingOnActiveAudioStream = $(xml).find("suppress_ring_on_active_audio_stream");
         if (suppressRingOnActiveAudioStream.length > 0) {
-            this.suppressRingOnActiveAudioStream = (suppressRingOnActiveAudioStream[0].textContent === "true");
+            this.suppressRingOnActiveAudioStream = (this.getText(suppressRingOnActiveAudioStream[0]) === "true");
         }
 
         //get load balancer url if load balancing enabled
