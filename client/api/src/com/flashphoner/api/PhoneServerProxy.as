@@ -183,6 +183,8 @@ package com.flashphoner.api
 				flash_API.dropRegisteredTimer();
 				for each (var apiNotify:APINotify in Flash_API.apiNotifys){
 					apiNotify.notifyError(ErrorCodes.CONNECTION_ERROR);
+					//Force Flash API behave same as WS API
+					apiNotify.notifyCloseConnection();
 				}
 				hasDisconnectAttempt = false;
 			} else if (event.info.code == 'NetConnection.Connect.Rejected')
