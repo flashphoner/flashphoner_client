@@ -66,6 +66,7 @@ function login() {
     loginObject.registerRequired = flashphonerLoader.registerRequired;
     loginObject.useDTLS = flashphonerLoader.useDTLS;
     loginObject.useSelfSigned = !isMobile.any();
+    loginObject.appKey = "defaultVoIPApp";
     if (flashphonerLoader.contactParams != null && flashphonerLoader.contactParams.length != 0) {
         loginObject.contactParams = flashphonerLoader.contactParams;
     }
