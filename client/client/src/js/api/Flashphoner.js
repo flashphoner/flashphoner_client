@@ -1,168 +1,178 @@
-var WebSocketManager = function (localVideoPreview, remoteVideo) {
-    var me = this;
-    me.calls = [];
-    me.isOpened = false;
-    me.configLoaded = false;
-    me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
-    me.soundControl = new SoundControl();
-    me.stripCodecs = new Array();
+function Flashphoner() {
+    if (arguments.callee.instance) {
+        return arguments.callee.instance;
+    }
+    arguments.callee.instance = this;
 
-    var rtcManager = this.webRtcMediaManager;
-    var proccessCall = function (call) {
-        for (var i in me.calls) {
-            if (call.id == me.calls[i].id) {
-                me.calls[i] = call;
-                return;
-            }
-        }
-        me.calls.push(call);
-        notifyAddCall(call);
-    };
+    this.connection = null;
+    this.calls = new DataMap();
+    this.isOpened = false;
+    this.stripCodecs = [];
+    this.listeners = {};
+    this.version = undefined;
+}
 
-    var getCall = function (callId) {
-        for (var i in me.calls) {
-            if (callId == me.calls[i].id) {
-                return me.calls[i];
-            }
-        }
-    };
-
-    var removeCall = function (callId) {
-        for (var i in me.calls) {
-            if (callId == me.calls[i].id) {
-                me.calls.splice(i, 1);
-            }
-        }
-        if (me.calls.length == 0) {
-            rtcManager.close();
-        }
-    };
-
-    this.callbacks = {
-        ping: function () {
-            me.webSocket.send("pong");
-        },
-
-        getUserData: function (user) {
-            me.user = user;
-            notifyRegisterRequired(user.regRequired);
-            notifyConnected();
-        },
-
-        getVersion: function (version) {
-            notifyVersion(version);
-        },
-
-        registered: function (sipHeader) {
-            notifyRegistered(sipHeader);
-        },
-
-        notifyTryingResponse: function (call, sipHeader) {
-            trace("notifyTryingResponse call.id:" + call.id);
-            proccessCall(call);
-        },
-
-        ring: function (call, sipHeader) {
-            trace("ring call.state: "+call.state+" call.id: "+call.id);
-            proccessCall(call);
-            notify(call);
-        },
-
-        sessionProgress: function (call, sipHeader) {
-            trace("sessionProgress call.state: "+call.state+" call.id: "+call.id )
-            proccessCall(call);
-            notify(call);
-        },
-
-        setRemoteSDP: function (call, sdp, isInitiator, sipHeader) {
-            proccessCall(call);
-            this.stopSound("RING");
-            rtcManager.setRemoteSDP(sdp, isInitiator);
-            if (!isInitiator && rtcManager.getConnectionState() == "established") {
-                me.answer(call.id);
-            }
-        },
-
-        talk: function (call, sipHeader) {
-            proccessCall(call);
-            notify(call);
-        },
-
-        hold: function (call, sipHeader) {
-            proccessCall(call);
-            notify(call);
-        },
-
-        callbackHold: function (callId, isHold) {
-            var call = getCall(callId);
-            notifyCallbackHold(call, isHold);
-        },
-
-        finish: function (call, sipHeader) {
-            proccessCall(call);
-            notify(call);
-            notifyRemoveCall(call);
-            removeCall(call.id);
-        },
-
-        busy: function (call, sipHeader) {
-            proccessCall(call);
-            notify(call);
-        },
-
-        fail: function (errorCode, sipHeader) {
-            notifyError(errorCode);
-        },
-
-        notifyVideoFormat: function (videoFormat) {
-            //notifyVideoFormat(videoFormat);
-        },
-        
-        notifyBugReport: function (filename) {
-            notifyBugReport(filename);
-        },
-
-        notifyMessage: function (message, notificationResult, sipObject) {
-            messenger.notifyMessage(message, notificationResult, sipObject);
-        },
-
-        notifyAudioCodec: function (codec) {
-        },
-
-        notifyRecordComplete: function (reportObject) {
-            notifyRecordComplete(reportObject);
-        },
-
-        notifySubscription: function (subscriptionObject, sipObject) {
-            notifySubscription(subscriptionObject, sipObject);
-        },
-
-        notifyXcapResponse: function (xcapResponse) {
-            notifyXcapResponse(xcapResponse);
-        }
-    };
-
-
+Flashphoner.getInstance = function () {
+    return new Flashphoner();
 };
 
-WebSocketManager.prototype = {
+Flashphoner.prototype = {
 
-    login: function (loginObject, WCSUrl) {
+    addListener: function(event, listener, thisArg) {
+        this.listeners[event] = {func: listener, thisArg: thisArg};
+    },
+
+    invokeListener: function(event, argsArray) {
+        var listener = this.listeners[event];
+        if (listener){
+            listener.func.apply(listener.thisArg, argsArray);
+        }
+    },
+
+    init: function (localVideoPreview, remoteVideo) {
         var me = this;
-        me.webSocket = $.websocket(WCSUrl, {
+        me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
+
+        var addOrUpdateCall = function (call) {
+            if (me.calls.get(call.id)) {
+                me.calls.update(call);
+            } else {
+                me.calls.add(call);
+                me.invokeListener(WCSEvent.OnCallEvent, [{call:call}]);
+            }
+        };
+
+        this.callbacks = {
+            ping: function () {
+                me.webSocket.send("pong");
+            },
+
+            getUserData: function (user) {
+                me.user = user;
+                for (var prop in user){
+                    me.connection[prop] = me.user[prop];
+                }
+                me.connection.status = ConnectionStatus.Established;
+                me.invokeListener(WCSEvent.ConnectionStatusEvent, [{connection:me.connection}]);
+            },
+
+            getVersion: function (version) {
+                me.version= version;
+            },
+
+            registered: function (sipHeader) {
+                me.invokeListener(WCSEvent.OnRegistrationEvent, [{connection:me.connection, sipObject:sipHeader}]);
+            },
+
+            notifyTryingResponse: function (call, sipHeader) {
+                trace("notifyTryingResponse call.id:" + call.id);
+                addOrUpdateCall(call);
+            },
+
+            ring: function (call, sipHeader) {
+                trace("ring call.state: " + call.state + " call.id: " + call.id);
+                addOrUpdateCall(call);
+                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+            },
+
+            sessionProgress: function (call, sipHeader) {
+                trace("sessionProgress call.state: " + call.state + " call.id: " + call.id);
+                addOrUpdateCall(call);
+                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+            },
+
+            setRemoteSDP: function (call, sdp, isInitiator, sipHeader) {
+                addOrUpdateCall(call);
+                SoundControl.getInstance().stopSound("RING");
+                me.webRtcMediaManager.setRemoteSDP(sdp, isInitiator);
+                if (!isInitiator && me.webRtcMediaManager.getConnectionState() == "established") {
+                    me.answer(call.id);
+                }
+            },
+
+            talk: function (call, sipHeader) {
+                addOrUpdateCall(call);
+                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+            },
+
+            hold: function (call, sipHeader) {
+                addOrUpdateCall(call);
+                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+            },
+
+            finish: function (call, sipHeader) {
+                me.calls.remove(call.id);
+                if (me.calls.length == 0) {
+                    me.webRtcMediaManager.close();
+                }
+                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+            },
+
+            busy: function (call, sipHeader) {
+                addOrUpdateCall(call);
+                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+            },
+
+            fail: function (errorCode, sipHeader) {
+                me.invokeListener(WCSEvent.OnErrorEvent, [{code:errorCode, sipObject: sipHeader}]);
+            },
+
+            notifyVideoFormat: function (videoFormat) {
+            },
+
+            notifyBugReport: function (filename) {
+                notifyBugReport(filename);
+            },
+
+            notifyMessage: function (message, notificationResult, sipObject) {
+                messenger.notifyMessage(message, notificationResult, sipObject);
+            },
+
+            notifyAudioCodec: function (codec) {
+            },
+
+            notifyRecordComplete: function (reportObject) {
+                notifyRecordComplete(reportObject);
+            },
+
+            notifySubscription: function (subscriptionObject, sipObject) {
+                notifySubscription(subscriptionObject, sipObject);
+            },
+
+            notifyXcapResponse: function (xcapResponse) {
+                notifyXcapResponse(xcapResponse);
+            }
+        };
+    },
+
+    connect: function (connection) {
+        var me = this;
+        me.connection = connection;
+        var configuration = Configuration.getInstance();
+        me.connection.registerRequired = configuration.registerRequired;
+        me.connection.useDTLS = configuration.useDTLS;
+        if (configuration.contactParams != null && configuration.contactParams.length != 0) {
+            me.connection.contactParams = configuration.contactParams;
+        }
+        me.connection.status = ConnectionStatus.Pending;
+        me.webSocket = $.websocket(configuration.urlServer, {
             open: function () {
                 me.isOpened = true;
-                me.webSocket.send("connect", loginObject);
+                me.webSocket.send("connect", me.connection);
             },
             close: function (event) {
                 me.isOpened = false;
                 if (!event.originalEvent.wasClean) {
-                    notifyError(CONNECTION_ERROR);
+                    me.connection.status = ConnectionStatus.Error;
+                } else {
+                    me.connection.status = ConnectionStatus.Disconnected;
                 }
-                notifyCloseConnection();
+                me.invokeListener(WCSEvent.ConnectionStatusEvent, [{connection:me.connection}]);
                 me.webRtcMediaManager.close();
             },
             error: function () {
+                me.connection.status = ConnectionStatus.Error;
+                me.invokeListener(WCSEvent.ConnectionStatusEvent, [{connection:me.connection}]);
             },
             context: me,
             events: me.callbacks
@@ -170,21 +180,20 @@ WebSocketManager.prototype = {
         return 0;
     },
 
-    loginByToken: function (WCSUrl, token, pageUrl) {
+    loginByToken: function (token, pageUrl) {
         var me = this;
         var obj = {};
         obj.token = token;
         obj.pageUrl = pageUrl;
 
-        me.login(obj, WCSUrl);
+        me.connect(obj);
         return 0;
     },
 
     callByToken: function (callRequest) {
         var me = this;
-        openInfoView("Configuring WebRTC connection...", 0);
+        trace("Configuring WebRTC connection...");
         this.webRtcMediaManager.createOffer(function (sdp) {
-            closeInfoView();
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
         }, false);
@@ -192,8 +201,8 @@ WebSocketManager.prototype = {
 
     },
 
-    logoff: function () {
-        trace("WebSocketManager - logoff");
+    disconnect: function () {
+        trace("WebSocketManager - disconnect");
         this.webSocket.close();
     },
 
@@ -207,9 +216,8 @@ WebSocketManager.prototype = {
 
     call: function (callRequest) {
         var me = this;
-        openInfoView("Configuring WebRTC connection...", 0, 60);
+        trace("Configuring WebRTC connection...");
         this.webRtcMediaManager.createOffer(function (sdp) {
-            closeInfoView();
             //here we will strip codecs from SDP if requested
             if (me.stripCodecs.length) {
                 sdp = me.stripCodecsSDP(sdp);
@@ -228,7 +236,7 @@ WebSocketManager.prototype = {
         return 0;
     },
 
-    setSendVideo: function (callId, hasVideo) {
+    setSendVideo: function (hasVideo) {
 //        var me = this;
 //        this.webRtcMediaManager.createOffer(function (sdp) {
 //            me.webSocket.send("changeMediaRequest", {callId: callId, sdp: sdp});
@@ -238,13 +246,12 @@ WebSocketManager.prototype = {
 
     answer: function (callId, hasVideo) {
         var me = this;
-        openInfoView("Configuring WebRTC connection...", 0, 60);
+        trace("Configuring WebRTC connection...");
         /**
          * If we receive INVITE without SDP, we should send answer with SDP based on webRtcMediaManager.createOffer because we do not have remoteSdp here
          */
         if (this.webRtcMediaManager.lastReceivedSdp !== null && this.webRtcMediaManager.lastReceivedSdp.length == 0) {
             this.webRtcMediaManager.createOffer(function (sdp) {
-                closeInfoView();
                 //here we will strip codecs from SDP if requested
                 if (me.stripCodecs.length) {
                     sdp = me.stripCodecsSDP(sdp);
@@ -258,7 +265,6 @@ WebSocketManager.prototype = {
              * If we receive a normal INVITE with SDP we should create answering SDP using normal createAnswer method because we already have remoteSdp here.
              */
             this.webRtcMediaManager.createAnswer(function (sdp) {
-                closeInfoView();
                 me.webSocket.send("answer", {callId: callId, hasVideo: hasVideo, sdp: sdp});
             }, hasVideo);
         }
@@ -270,7 +276,7 @@ WebSocketManager.prototype = {
         }
     },
 
-    setStatusHold: function (callId, isHold) {
+    hold: function (callId, isHold) {
         this.webSocket.send("hold", {callId: callId, isHold: isHold});
     },
 
@@ -299,7 +305,7 @@ WebSocketManager.prototype = {
 
     submitBugReport: function (reportObject) {
         if (this.isOpened) {
-            this.webSocket.send("submitBugReport", reportObject)
+            this.webSocket.send("submitBugReport", reportObject);
             return true;
         } else {
             return false;
@@ -335,38 +341,8 @@ WebSocketManager.prototype = {
         return this.webRtcMediaManager.isVideoMuted == -1;
     },
 
-    hasActiveAudioStream: function(){
+    hasActiveAudioStream: function () {
         return this.webRtcMediaManager.hasActiveAudioStream();
-    },
-
-    getInfoAboutMe: function () {
-        return this.user;
-    },
-
-    getCookie: function (c_name) {
-        var i, x, y, ARRcookies = document.cookie.split(";");
-        for (i = 0; i < ARRcookies.length; i++) {
-            x = ARRcookies[i].substr(0, ARRcookies[i].indexOf("="));
-            x = x.replace(/^\s+|\s+$/g, "");
-            if (x == c_name) {
-                return ARRcookies[i].substr(ARRcookies[i].indexOf("=") + 1);
-            }
-        }
-    },
-
-    setCookie: function (c_name, value) {
-        var exdate = new Date();
-        exdate.setDate(exdate.getDate() + 100);
-        var c_value = escape(value) + "; expires=" + exdate.toUTCString();
-        document.cookie = c_name + "=" + c_value;
-    },
-
-    playSound: function (sound) {
-        this.soundControl.playSound(sound);
-    },
-
-    stopSound: function (sound) {
-        this.soundControl.stopSound(sound);
     },
 
     sendMessage: function (message) {
@@ -445,12 +421,12 @@ WebSocketManager.prototype = {
                     for (m = 0; m < mLineSplitted.length; m++) {
                         if (pt.indexOf(mLineSplitted[m]) == -1 || m <= 2) {
                             newMLine += mLineSplitted[m];
-                    	    if ( m < mLineSplitted.length-1 ){
-                    		newMLine = newMLine + " ";            
-                    	    }
-                        }                        
+                            if (m < mLineSplitted.length - 1) {
+                                newMLine = newMLine + " ";
+                            }
+                        }
                     }
-                    sdpArray[i]=newMLine;
+                    sdpArray[i] = newMLine;
                     console.log("Resulting m= line is: " + sdpArray[i]);
                     break;
                 }

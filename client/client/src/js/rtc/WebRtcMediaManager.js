@@ -52,7 +52,7 @@ WebRtcMediaManager.prototype.createPeerConnection = function () {
         pc_config = {"iceServers": []};
     }
     this.peerConnection = new RTCPeerConnection(pc_config, {"optional": [
-        {"DtlsSrtpKeyAgreement": flashphonerLoader.useDTLS}
+        {"DtlsSrtpKeyAgreement": Configuration.getInstance().useDTLS}
     ]});
 
     this.peerConnection.onaddstream = function (event) {
@@ -132,7 +132,7 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
                 me.isAudioMuted = -1;
                 me.isVideoMuted = -1;
             }, function (error) {
-                addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+                trace("Failed to get access to local media. Error code was " + error.code + ".");
                 closeInfoView(3000);
                 me.isAudioMuted = 1;
                 me.isVideoMuted = 1;
@@ -149,7 +149,7 @@ WebRtcMediaManager.prototype.getAccessToAudio = function () {
                 me.localAudioStream = stream;
                 me.isAudioMuted = -1;
             }, function (error) {
-                addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+                trace("Failed to get access to local media. Error code was " + error.code + ".");
                 closeInfoView(3000);
                 me.isAudioMuted = 1;
             }
@@ -344,7 +344,7 @@ WebRtcMediaManager.prototype.onCreateAnswerSuccessCallback = function (answer) {
 
 WebRtcMediaManager.prototype.setStunServer = function (server) {
     this.stunServer = server;
-}
+};
 
 WebRtcMediaManager.prototype.requestStats = function () {
     var me = this;
@@ -367,7 +367,7 @@ WebRtcMediaManager.prototype.requestStats = function () {
                         }
                     }
                 }
-                notifyStats(result);
+                console.log(JSON.stringify(stats, null, '\t'));
             }, function(error) {
                 console.log("Error received " + error);
             });
@@ -389,7 +389,7 @@ WebRtcMediaManager.prototype.requestStats = function () {
                         }
                     }
                 }
-                notifyStats(result);
+                console.log(JSON.stringify(stats, null, '\t'));
             }, function(error) {
                 console.log("Error received " + error);
             });

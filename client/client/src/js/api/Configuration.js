@@ -10,8 +10,20 @@
 
  This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
  */
-FlashphonerLoader = function (config) {
-    this.flashphoner = null;
+Configuration = function (configLoadedListener) {
+    if (arguments.callee.instance) {
+        var instance = arguments.callee.instance;
+        if (configLoadedListener) {
+            instance.configLoadedListener = configLoadedListener;
+        }
+        return instance;
+    }
+    arguments.callee.instance = this;
+    if (configLoadedListener) {
+        this.configLoadedListener = configLoadedListener;
+    }
+
+
     this.flashphoner_UI = null;
     this.flashphonerListener = new DefaultListener();
     this.useWebRTC = false;
@@ -58,7 +70,11 @@ FlashphonerLoader = function (config) {
     });
 };
 
-FlashphonerLoader.prototype = {
+Configuration.getInstance = function(configLoadedListener) {
+    return new Configuration(configLoadedListener);
+};
+
+Configuration.prototype = {
 
     getText: function (el){
         return el.textContent || el.text || "";
@@ -70,7 +86,7 @@ FlashphonerLoader.prototype = {
         if (wcsIP.length > 0) {
             this.wcsIP = this.getText(wcsIP[0]);
         } else {
-            openConnectingView("Can not find 'wcs_server' in flashphoner.xml", 0);
+            trace("Can not find 'wcs_server' in flashphoner.xml", 0);
             return;
         }
         var wsPort = $(xml).find("ws_port");
@@ -278,7 +294,7 @@ FlashphonerLoader.prototype = {
 
         //get load balancer url if load balancing enabled
         if (me.loadBalancerUrl != null) {
-            trace("FlashphonerLoader - Retrieve server url from load balancer");
+            trace("Configuration - Retrieve server url from load balancer");
 
             /*
              * this timeout is a workaround to catch errors from ajax request
@@ -287,7 +303,7 @@ FlashphonerLoader.prototype = {
             setTimeout(function () {
                 //check status of ajax request
                 if (!me.jsonpSuccess) {
-                    trace("FlashphonerLoader - Error occurred while retrieving load balancer data, please check your load balancer url " +
+                    trace("Configuration - Error occurred while retrieving load balancer data, please check your load balancer url " +
                         me.loadBalancerUrl);
                     me.loadAPI();
                 }
@@ -304,7 +320,7 @@ FlashphonerLoader.prototype = {
                     me.wssPort = loadBalancerData.wss;
                     me.flashPort = loadBalancerData.flash;
                     me.jsonpSuccess = true;
-                    trace("FlashphonerLoader - Connection data from load balancer: "
+                    trace("Configuration - Connection data from load balancer: "
                         + "wcsIP " + loadBalancerData.server
                         + ", wsPort " + loadBalancerData.ws
                         + ", wssPort " + loadBalancerData.wss
@@ -328,12 +344,14 @@ FlashphonerLoader.prototype = {
                 port = this.wssPort;
             }
             me.urlServer = protocol + this.wcsIP + ":" + port;
-            me.flashphoner = new WebSocketManager(getElement('localVideoPreview'), getElement('remoteVideo'));
+            me.flashphoner = Flashphoner.getInstance();
+            me.flashphoner.init(getElement('localVideoPreview'), getElement('remoteVideo'));
             if (me.stripCodecs.length) me.flashphoner.setStripCodecs(me.stripCodecs);
             if (me.stunServer != "") me.flashphoner.setStunServer(me.stunServer);
             me.flashphoner_UI = new UIManagerWebRtc();
             if (me.modeLT) me.flashphonerListener = new LoadToolListener();
-            notifyConfigLoaded();
+            //todo use events
+            me.configLoadedListener.apply(this);
         } else {
             me.useWebRTC = false;
             me.urlServer = "rtmfp://" + this.wcsIP + ":" + this.flashPort + "/" + this.appName;
@@ -372,10 +390,6 @@ FlashphonerLoader.prototype = {
 
     hasFlash: function () {
         return swfobject.hasFlashPlayerVersion("11.2");
-    },
-
-    getFlashphoner: function () {
-        return this.flashphoner;
     },
 
     getFlashphonerUI: function () {

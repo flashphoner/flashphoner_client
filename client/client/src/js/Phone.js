@@ -11,51 +11,39 @@
  This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
  */
 
-var flashphoner;
-var flashphoner_UI;
-var flashphonerLoader;
-var flashphonerListener;
+var Phone = function () {
+    this.flashphonerListener = null;
+    this.flashphoner_UI = null;
+    this.currentCall = null;
+    this.holdedCall = null;
+    this.messenger = null;
+    this.logs = "";
+    this.intervalId = -1;
+};
 
-// One call become two calls during TRANSFER case
-// there is why we need at least two kinds of calls here
-var holdedCall = null;
-var currentCall = null;
-// not sure if "callee" is reserved word so I will use callee /Pavel
-var callee = '';
-var callerLogin = '';
-var registerRequired;
-var isLogged = false;
+Phone.prototype.init = function () {
+    this.flashphoner_UI = Configuration.getInstance().getFlashphonerUI();
+    this.flashphonerListener = Configuration.getInstance().getFlashphonerListener();
+    this.messenger = new Messenger();
 
-var needOpenTransferView = false;
-var connectingViewBeClosed = false;
-var traceEnabled = true;
-var intervalId = -1;
-var proportion = 0;
+    Flashphoner.getInstance().addListener(WCSEvent.OnErrorEvent, this.onErrorListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.ConnectionStatusEvent, this.connectionStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.OnRegistrationEvent, this.onRegistrationListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.OnCallEvent, this.onCallListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.CallStatusEvent, this.callStatusListener, this);
 
-var testInviteParameter = {};
-testInviteParameter['param1'] = "value1";
-testInviteParameter['param2'] = "value2";
-
-var messenger;
-
-var logs="";
-
-$(document).ready(function () {
-    toLogOffState();
-    openConnectingView("Loading...", 0);
-    flashphonerLoader = new FlashphonerLoader();
-});
+    if (Configuration.getInstance().getToken()) {
+        this.loginByToken(Configuration.getInstance().getToken());
+    }
+};
 
 
-function login() {
-    trace("Phone - login");
-    connectingViewBeClosed = false;
-
+Phone.prototype.connect = function () {
     if ($("#outbound_proxy").val() == "") {
         $("#outbound_proxy").val($("#domain").val());
     }
 
-    var loginObject = {};
+    var loginObject = new Connection();
     loginObject.login = $('#username').val();
     loginObject.password = $('#password').val();
     loginObject.authenticationName = $('#authname').val();
@@ -63,602 +51,354 @@ function login() {
     loginObject.outboundProxy = $('#outbound_proxy').val();
     loginObject.port = $('#port').val();
     loginObject.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
-    loginObject.registerRequired = flashphonerLoader.registerRequired;
-    loginObject.useDTLS = flashphonerLoader.useDTLS;
     loginObject.useSelfSigned = !isMobile.any();
     loginObject.appKey = "defaultVoIPApp";
-    if (flashphonerLoader.contactParams != null && flashphonerLoader.contactParams.length != 0) {
-        loginObject.contactParams = flashphonerLoader.contactParams;
-    }
 
-    trace("Phone - loginObject login: "+loginObject.login+" authenticationName: "+loginObject.authenticationName+" registerRequired: "+registerRequired+" useDTLS: "+loginObject.useDTLS);
-
-    var result = flashphoner.login(loginObject, flashphonerLoader.urlServer);
-    closeLoginView();
+    var result = Flashphoner.getInstance().connect(loginObject);
     if (result == 0) {
-        openConnectingView("Connecting...", 0);
-        setCookie("login", $('#username').val());
-        setCookie("authName", $('#authname').val());
-        setCookie("pwd", $('#password').val());
-        setCookie("domain", $('#domain').val());
-        setCookie("outbound_proxy", $('#outbound_proxy').val());
-        setCookie("port", $('#port').val());
+        trace("Phone - connecting");
     }
-}
+};
 
-function loginByToken(token) {
-    trace("Phone - loginByToken "+ token);
-    connectingViewBeClosed = false;
-    var result = flashphoner.loginByToken(flashphonerLoader.urlServer, token, document.URL);
+Phone.prototype.disconnect = function () {
+    trace("Phone - disconnect");
+    Flashphoner.getInstance().disconnect();
+};
 
-    closeLoginView();
-    openConnectingView("Connecting...", 0);
-}
+Phone.prototype.msrpCall = function (callee) {
+    trace("Phone - msrpCall " + callee);
+    Flashphoner.getInstance().msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter, isMsrp: true});
+};
 
-function getInfoAboutMe() {
-    trace("Phone - getInfoAboutMe");
-    return flashphoner.getInfoAboutMe();
-}
-
-function logoff() {
-    trace("Phone - logoff");
-    flashphoner.logoff();
-}
-
-function msrpCall(callee) {
-    trace("Phone - msrpCall "+callee);
-    flashphoner.msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter, isMsrp: true});
-}
-
-function call() {
-    trace("Phone - call "+callee);
-    if (isLogged) {
-        var hasAccess;
-        if (isVideoCall()){
-            hasAccess = hasAccessToAudioAndVideo;
-        } else {
-            hasAccess = hasAccessToAudio;
+Phone.prototype.call = function (callee) {
+    trace("Phone - call " + callee);
+    var me = this;
+    var hasAccess;
+    if (me.isVideoCall()) {
+        hasAccess = me.hasAccessToAudioAndVideo;
+    } else {
+        hasAccess = me.hasAccessToAudio;
+    }
+    if (!hasAccess()) {
+        if (me.intervalId == -1) {
+            var checkAccessFunc = function () {
+                if (hasAccess()) {
+                    me.flashphoner_UI.closeRequestUnmute();
+                    clearInterval(me.intervalId);
+                    me.intervalId = -1;
+                    me.call(callee);
+                }
+            };
+            me.intervalId = setInterval(checkAccessFunc, 500);
         }
-        if (!hasAccess()) {
-            if (intervalId == -1) {
-                intervalId = setInterval('if (isVideoCall() ? hasAccessToAudioAndVideo() : hasAccessToAudio()){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; call();}', 500);
-            }
-            if (isVideoCall()){
-                flashphoner_UI.getAccessToAudioAndVideo();
-            } else {
-                flashphoner_UI.getAccessToAudio();
-            }
-        } else if (hasAccess()) {
-            var result = flashphoner.call({callee: callee, visibleName: 'Caller', hasVideo: isVideoCall(), inviteParameters: testInviteParameter, isMsrp: false});
-            if (result == 0) {
-                toHangupState();
-                flashphonerListener.onCall();
-            } else {
-                openConnectingView("Callee number is wrong", 3000);
-            }
+        if (me.isVideoCall()) {
+            me.flashphoner_UI.getAccessToAudioAndVideo();
         } else {
-            openConnectingView("Microphone is not plugged in", 3000);
+            me.flashphoner_UI.getAccessToAudio();
+        }
+    } else if (hasAccess()) {
+        var result = Flashphoner.getInstance().call({callee: callee, visibleName: 'Caller', hasVideo: me.isVideoCall(), inviteParameters: {param1: "value1", param2: "value2"}, isMsrp: false});
+        if (result == 0) {
+            this.flashphonerListener.onCall();
+        } else {
+            trace("Callee number is wrong");
         }
     } else {
-        openLoginView();
+        trace("Microphone is not plugged in");
     }
-}
+};
 
-function notifyMessage(message, notificationResult, sipObject) {
-    messenger.notifyMessage(message, notificationResult, sipObject);
-}
-
-function sendMessage(to, body, contentType) {
-    trace("Phone - sendMessage "+ to+" body: "+ body+" contentType: "+ contentType);
-    var message = new Object();
+Phone.prototype.sendMessage = function (to, body, contentType) {
+    trace("Phone - sendMessage " + to + " body: " + body + " contentType: " + contentType);
+    var message = [];
     message.from = callerLogin;
     message.to = to;
     message.body = body;
     message.contentType = contentType;
-    message.deliveryNotification = flashphonerLoader.imdnEnabled;
-    messenger.sendMessage(message);
-}
+    message.deliveryNotification = Configuration.getInstance().imdnEnabled;
+    this.messenger.sendMessage(message);
+};
 
 
-function answer(callId) {
-    trace("Phone - answer "+ callId);
+Phone.prototype.answer = function (callId) {
+    trace("Phone - answer " + callId);
     var hasAccess;
-    if (isVideoCall()){
-        hasAccess = hasAccessToAudioAndVideo;
+    var me = this;
+    if (me.isVideoCall()) {
+        hasAccess = me.hasAccessToAudioAndVideo;
     } else {
-        hasAccess = hasAccessToAudio;
+        hasAccess = me.hasAccessToAudio;
     }
     if (!hasAccess()) {
-        if (intervalId == -1) {
-            intervalId = setInterval('if (isVideoCall() ? hasAccessToAudioAndVideo() : hasAccessToAudio()){flashphoner_UI.closeRequestUnmute(); clearInterval(intervalId); intervalId = -1; answer(currentCall.id);}', 500);
+        if (me.intervalId == -1) {
+            var checkAccessFunc = function () {
+                if (hasAccess()) {
+                    me.flashphoner_UI.closeRequestUnmute();
+                    clearInterval(me.intervalId);
+                    me.intervalId = -1;
+                    me.answer(callId);
+                }
+            };
+            me.intervalId = setInterval(checkAccessFunc, 500);
         }
-        if (isVideoCall()){
-            flashphoner_UI.getAccessToAudioAndVideo();
+        if (me.isVideoCall()) {
+            me.flashphoner_UI.getAccessToAudioAndVideo();
         } else {
-            flashphoner_UI.getAccessToAudio();
+            me.flashphoner_UI.getAccessToAudio();
         }
     } else if (hasAccess()) {
-        flashphoner.answer(callId, isVideoCall());
-        flashphonerListener.onAnswer(callId);
+        Flashphoner.getInstance().answer(callId, me.isVideoCall());
+        this.flashphonerListener.onAnswer(callId);
     } else {
-        openConnectingView("Microphone is not plugged in", 3000);
+        trace("Microphone is not plugged in");
     }
-}
+};
 
-function hangup(callId) {
-    trace("Phone - hangup "+ callId);
-    flashphoner.hangup(callId);
-    flashphonerListener.onHangup();
-}
+Phone.prototype.hangup = function (callId) {
+    trace("Phone - hangup " + callId);
+    Flashphoner.getInstance().hangup(callId);
+    this.flashphonerListener.onHangup();
+};
 
-function sendDTMF(callId, dtmf) {
-    trace("Phone - sendDTMF callId: "+ callId +" dtmf: "+ dtmf);
-    flashphoner.sendDTMF(callId, dtmf);
-}
+Phone.prototype.sendDTMF = function (callId, dtmf) {
+    trace("Phone - sendDTMF callId: " + callId + " dtmf: " + dtmf);
+    Flashphoner.getInstance().sendDTMF(callId, dtmf);
+};
 
-function setStatusHold(callId, isHold) {
-    trace("Phone - setStatusHold callId: "+ callId+" isHold: "+ isHold);
-    flashphoner.setStatusHold(callId, isHold);
-    disableHoldButton();
-}
+Phone.prototype.hold = function (callId, isHold) {
+    trace("Phone - hold callId: " + callId + " isHold: " + isHold);
+    Flashphoner.getInstance().hold(callId, isHold);
+};
 
-function transfer(callId, target) {
-    trace("Phone - transfer callId: "+ callId+" target: "+ target);
-    flashphoner.transfer(callId, target);
-}
+Phone.prototype.transfer = function (callId, target) {
+    trace("Phone - transfer callId: " + callId + " target: " + target);
+    Flashphoner.getInstance().transfer(callId, target);
+};
 
-function hasAccessToAudioAndVideo() {
-    return hasAccessToAudio() && hasAccessToVideo();
-}
-
-function hasAccessToAudio() {
-    return flashphoner.hasAccessToAudio();
-}
-
-function hasAccessToVideo() {
-    return flashphoner.hasAccessToVideo();
-}
-
-
-function sendVideoChangeState() {
-    trace("Phone - sendVideoChangeState currentCall: "+currentCall.id);
-    var sendVideoButton = getElement('sendVideo');
-    if (sendVideoButton.value == 'Send video') {
-        sendVideoButton.value = "Stop video";
-        flashphoner.setSendVideo(currentCall.id, true);
-    } else {
-        sendVideoButton.value = "Send video";
-        flashphoner.setSendVideo(currentCall.id, false);
+Phone.prototype.sendXcapRequest = function () {
+    if (Configuration.getInstance().xcapUrl != null && Configuration.getInstance().xcapUrl.length != 0) {
+        Flashphoner.getInstance().sendXcapRequest(Configuration.getInstance().xcapUrl);
     }
-}
+};
 
-function changeRelationMyVideo(relation) {
-    trace("Phone - changeRelationMyVideo "+ relation);
-    flashphoner.changeRelationMyVideo(relation);
-}
+Phone.prototype.subscribeReg = function () {
+    var subscribeObj = {};
+    subscribeObj.event = Configuration.getInstance().subscribeEvent;
+    subscribeObj.expires = 3600;
+    Flashphoner.getInstance().subscribe(subscribeObj);
+};
 
-function getMicVolume() {
-    var ret = flashphoner.getMicVolume();
-    trace("Phone - getMicVolume "+ret);
-    return ret;
-}
-function getVolume() {
-    var ret = flashphoner.getVolume();
-    trace("Phone - getVolume "+ret);
-    return ret;
-}
 
-function setCookie(key, value) {
-    trace("Phone - setCookie key: "+ key+" value: "+ value);
-    flashphoner.setCookie(key, value);
-}
+Phone.prototype.hasAccessToAudioAndVideo = function () {
+    return Flashphoner.getInstance().hasAccessToAudio() && Flashphoner.getInstance().hasAccessToVideo();
+};
 
-function getCookie(key) {
-    trace("Phone - getCookie "+ key);
-    return flashphoner.getCookie(key);
-}
+Phone.prototype.hasAccessToAudio = function () {
+    return Flashphoner.getInstance().hasAccessToAudio();
+};
 
-function getVersion() {
-    var ret = flashphoner.getVersion();
-    trace("Phone - getVersion "+ret);
-    return ret;
-}
+Phone.prototype.hasAccessToVideo = function () {
+    return Flashphoner.getInstance().hasAccessToVideo();
+};
+
+
+Phone.prototype.sendVideoChangeState = function (videoEnabled) {
+    trace("Phone - sendVideoChangeState currentCall: " + currentCall.id);
+    Flashphoner.getInstance().setSendVideo(currentCall.id, videoEnabled);
+};
+
+Phone.prototype.changeRelationMyVideo = function (relation) {
+    trace("Phone - changeRelationMyVideo " + relation);
+    Flashphoner.getInstance().changeRelationMyVideo(relation);
+};
+
+Phone.prototype.submitBugReport = function () {
+    var bugReportText = getElement('bugReportText').value;
+    trace("submitBugReport " + bugReportText);
+    Flashphoner.getInstance().submitBugReport({text: bugReportText, type: "no_media"});
+};
+
 /* ------------------ Notify functions ----------------- */
 
-function addLogMessage(message) {
-    trace("Phone - addLogMessage: "+message);
-}
-
-function notifyFlashNotFound() {
-    closeConnectingView();
-    getElement('phoneScreen2').innerHTML = "<a href='http://www.adobe.com/go/getflashplayer' style='margin-left: 17px;'><img src='http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player'/></a>";
-}
-
-function notifyConfigLoaded() {
-    notifyReady();
-    flashphoner = flashphonerLoader.getFlashphoner();
-    flashphoner_UI = flashphonerLoader.getFlashphonerUI();
-    flashphonerListener = flashphonerLoader.getFlashphonerListener();
-    messenger = new Messenger(flashphoner);
-    if (flashphonerLoader.useWebRTC) {
-        $('#micButton').css('visibility', 'hidden');
-        $('#sendVideo').css('visibility', 'hidden');
-    } else {
-        $('#micButton').css('visibility', 'visible');
-        $('#sendVideo').css('visibility', 'visible');
+Phone.prototype.connectionStatusListener = function (event) {
+    trace("Phone - Connection status " + event.connection.status);
+    if (event.connection.status == ConnectionStatus.Disconnected ||
+        event.connection.status == ConnectionStatus.Error) {
+        this.currentCall = null;
+        this.holdedCall = null;
     }
-    //todo refactoring
-    //$('#versionOfProduct').html(getVersion());
-    if (flashphonerLoader.getToken()) {
-        loginByToken(flashphonerLoader.getToken());
-    } else {
-        closeConnectingView();
+};
+
+Phone.prototype.onRegistrationListener = function (event) {
+    var connection = event.connection;
+    var sipObject = event.sipObject;
+    trace("Phone - onRegistrationListener " + connection.login);
+    SoundControl.getInstance().playSound("REGISTER");
+    this.flashphonerListener.onRegistered();
+
+    if (Configuration.getInstance().subscribeEvent != null && Configuration.getInstance().subscribeEvent.length != 0) {
+        this.subscribeReg();
     }
-}
 
-function notifyRequestUnmuteResult(accessGranted) {
-    console.log("Access to microphone granted: " + accessGranted);
-}
+    this.sendXcapRequest();
+};
 
+Phone.prototype.onCallListener = function (event) {
+    var call = event.call;
+    trace("Phone - onCallListener " + call.id + " call.incoming: " + call.incoming + " call.state: " + call.state);
+    if (this.currentCall != null && !call.incoming) {
+        this.holdedCall = this.currentCall;
+        this.currentCall = call;
+        trace("Phone - It seems like a hold: holdedCall: " + this.holdedCall.id + " currentCall: " + this.currentCall.id);
+    } else {
+        this.currentCall = call;
+        if (call.incoming == true) {
+            this.flashphonerListener.onIncomingCall(call.id);
+        }
+        trace("Phone - It seems like a new call currentCall: " + this.currentCall.id + " state: " + this.currentCall.state);
+    }
+};
 
-function notifyRegisterRequired(registerR) {
-    registerRequired = registerR;
-}
-
-function notifyCloseConnection() {
-    trace("Phone - notifyCloseConnection");
-    currentCall = null;
-    toLogOffState();
-    toCallState();
-    isLogged = false;
-    closeIncomingView();
-    closeVideoView();
-    closeCallView();
-    getElement('sendVideo').value = "Send video";
-}
-
-function notifyConnected() {
-    trace("Phone - notifyConnected");
-    if (registerRequired) {
-        if (!connectingViewBeClosed) {
-            openConnectingView("Waiting for registering...", 0);
+Phone.prototype.callStatusListener = function (event) {
+    var sipObject = event.sipObject;
+    var call = event.call;
+    trace("Phone - callStatusListener call id: " + call.id + " state: " + call.state + " incoming: " + call.incoming);
+    if (this.currentCall.id == call.id) {
+        if (call.state == STATE_FINISH) {
+            trace("Phone - ... Call is finished...");
+            if (this.holdedCall != null) {
+                this.currentCall = this.holdedCall;
+                this.holdedCall = null;
+            } else if (this.isCurrentCall(call)) {
+                this.currentCall = null;
+                this.flashphonerListener.onRemoveCall();
+                SoundControl.getInstance().stopSound("RING");
+                SoundControl.getInstance().playSound("FINISH");
+            }
+        } else if (call.state == STATE_HOLD) {
+            trace('Phone - ...Call on hold...');
+        } else if (call.state == STATE_TALK) {
+            trace('Phone - ...Talking...');
+            SoundControl.getInstance().stopSound("RING");
+        } else if (call.state == STATE_RING) {
+            trace('Phone - ...Ringing...');
+            if (this.isRingSoundAllowed()) {
+                SoundControl.getInstance().playSound("RING");
+            }
+        } else if (call.state == STATE_RING_MEDIA) {
+            trace('Phone - ...Ringing...');
+            SoundControl.getInstance().stopSound("RING");
+        } else if (call.state == STATE_BUSY) {
+            SoundControl.getInstance().playSound("BUSY");
+        } else if (call.state == STATE_SESSION_PROGRESS) {
+            trace('Phone - ...Call in Progress...');
+            SoundControl.getInstance().stopSound("RING");
         }
     } else {
-        toLogState();
-        callerLogin = getInfoAboutMe().login;
-        getElement("callerLogin").innerHTML = callerLogin;
-        isLogged = true;
-        closeConnectingView();
+        if (this.holdedCall.id == call.id) {
+            if (call.state == STATE_FINISH) {
+                trace("It seems we received FINISH state on holdedCall. Just do null the holdedCall.");
+                this.holdedCall = null;
+            }
+        }
     }
-    //You can set speex quality here
-    //flashphoner.setSpeexQuality(10);
-}
+};
 
-function notifyRegistered(sipObject) {
-    trace("Phone - notifyRegistered "+sipObject.message.raw);
-    if (registerRequired) {
-        toLogState();
-        callerLogin = getInfoAboutMe().login;
-        getElement("callerLogin").innerHTML = callerLogin;
-        isLogged = true;
-        connectingViewBeClosed = true;
-        closeConnectingView();
-        flashphoner.playSound("REGISTER");
-        flashphonerListener.onRegistered();
-    }
-
-    if (flashphonerLoader.subscribeEvent != null && flashphonerLoader.subscribeEvent.length != 0) {
-        subscribeReg();
-    }
-
-    sendXcapRequest();
-}
-
-function notifyRecordComplete(recordReport) {
+Phone.prototype.notifyRecordComplete = function (recordReport) {
     trace("Phone - notify record complete: " + recordReport.mixedFilename);
-}
+};
 
-
-function notifySubscription(subscriptionObject, sipObject) {
-    trace("Phone - notify subscription event: " + subscriptionObject.event + " expires: " + subscriptionObject.expires + " status: " + subscriptionObject.status+" terminate: "+subscriptionObject.terminate);
+Phone.prototype.notifySubscription = function (subscriptionObject, sipObject) {
+    trace("Phone - notify subscription event: " + subscriptionObject.event + " expires: " + subscriptionObject.expires + " status: " + subscriptionObject.status + " terminate: " + subscriptionObject.terminate);
     trace("Phone - notify subscription body: " + subscriptionObject.requestBody);
     if (subscriptionObject.event == "reg") {
-        if (subscriptionObject.terminate){
-            terminate();
+        if (subscriptionObject.terminate) {
+            this.disconnect();
         }
     }
-}
+};
 
-function terminate() {
-    trace("Phone - terminate and logoff");
-    logoff();
-}
-
-function sendXcapRequest() {
-    if (flashphonerLoader.xcapUrl != null && flashphonerLoader.xcapUrl.length != 0) {
-        flashphoner.sendXcapRequest(flashphonerLoader.xcapUrl);
-    }
-
-}
-
-function notifyXcapResponse(xcapResponse) {
+Phone.prototype.notifyXcapResponse = function (xcapResponse) {
     trace("Phone - notifyXcapResponse " + xcapResponse);
     var xml = $.parseXML(xcapResponse);
     var history = $(xml).find("history-list").find("history");
     if (history != null && history.length != 0) {
-        if (flashphonerLoader.msrpCallee != null && flashphonerLoader.msrpCallee.length != 0) {
-            msrpCall(flashphonerLoader.msrpCallee);
+        if (Configuration.getInstance().msrpCallee != null && Configuration.getInstance().msrpCallee.length != 0) {
+            this.msrpCall(Configuration.getInstance().msrpCallee);
         }
     }
-}
+};
 
-
-function subscribeReg() {
-    var subscribeObj = new Object();
-    subscribeObj.event = flashphonerLoader.subscribeEvent;
-    subscribeObj.expires = 3600;
-    flashphoner.subscribe(subscribeObj);
-}
-
-function notifyBalance(balance) {
-}
-
-//callback for flashphoner.getStats();
-function notifyStats(stats) {
-    console.log(JSON.stringify(stats, null, '\t'));
-}
-
-function onCallFinished(){
-    trace("Phone - onCallFinished");
-    // if that hangup during transfer procedure?
-    if (holdedCall != null) {
-        trace("Phone - Existing holdedCall detected: "+holdedCall.id+" currentCall: "+currentCall.id);
-        currentCall = holdedCall; //holded call become current
-        holdedCall = null; //make variable null
-        createCallView(currentCall);
-    } else {
-        trace("Phone - no existing holdedCall. Just close call states.")
-        closeIncomingView();
-        closeVideoView();
-        toCallState();
-        flashphoner.stopSound("RING");
-        flashphoner.playSound("FINISH");
-    }
-    getElement('sendVideo').value = "Send video";
-    // or this just usual hangup during the call
-}
-
-function onCurrentCallNotify(call){
-    trace("Phone - onCurrentCallNotify: "+currentCall.id+" state: "+call.state);
-    currentCall = call;
-    if (call.state == STATE_FINISH) {
-        onCallFinished();
-    } else if (call.state == STATE_HOLD) {
-        $('#callState').html('...Call on hold...');
-        enableHoldButton();
-    } else if (call.state == STATE_TALK) {
-        $('#callState').html('...Talking...');
-        enableHoldButton();
-        flashphoner.stopSound("RING");
-        var sendVideoButton = getElement('sendVideo');
-        if (isVideoCall() && (call.state_video == "sendrecv" || call.state_video == "sendonly") && sendVideoButton.value == 'Send video'){
-            sendVideoChangeState();
-        }
-    } else if (call.state == STATE_RING) {
-        $('#callState').html('...Ringing...');
-        if (isRingSoundAllowed()){
-            flashphoner.playSound("RING");
-        }
-    } else if (call.state == STATE_RING_MEDIA){
-        $('#callState').html('...Ringing...');
-        flashphoner.stopSound("RING");
-    } else if (call.state == STATE_BUSY) {
-        flashphoner.playSound("BUSY");
-    } else if (call.state == STATE_SESSION_PROGRESS){
-        $('#callState').html('...Call in Progress...');
-        flashphoner.stopSound("RING");
-    }
-}
-
-function isRingSoundAllowed(){
-    try{
-        if (flashphonerLoader.suppressRingOnActiveAudioStream && flashphoner.hasActiveAudioStream()){
-            trace("Phone - isRingSoundAllowed false");
-            return false;
-        }
-    }catch(error){
-    }
-    trace("Phone - isRingSoundAllowed true");
-    return true;
-}
-
-function onNotCurrentCallNotify(call){
-    trace("Phone - onNotCurrentCallNotify call.id: "+call.id+" holdedCall: "+holdedCall.id+" call.state: "+call.state);
-    if (holdedCall.id == call.id) {
-        if (call.state == STATE_FINISH) {
-            trace("It seems we received FINISH state on holdedCall. Just do null the holdedCall.");
-            /* that mean if
-             - user1 call user2
-             - user2 transfer to user3
-             - user3 just thinking (not answer, not hangup)
-             - user2 hangup during him thinking
-             then we delete old holded call from user1 memory
-             */
-            holdedCall = null;
-            getElement('sendVideo').value = "Send video";
-        }
-        enableHoldButton();
-    }
-}
-
-function notify(call,sipObject) {
-    trace("Phone - notify call id: "+ call.id+" state: "+call.state+" callee: "+call.callee+" caller: "+call.caller+" incoming: "+call.incoming+" isVideoCall: "+call.isVideoCall);
-    trace("Phone - currentCall.id: "+currentCall.id);
-    trace("Phone - sipObject: "+sipObject);
-    if (currentCall.id == call.id) {
-        onCurrentCallNotify(call);
-    } else {
-        onNotCurrentCallNotify(call);
-    }
-}
-
-function notifyCallbackHold(call, isHold) {
-    trace("Phone - notifyCallbackHold call: "+ call +" isHold: "+ isHold);
-    if (currentCall != null && currentCall.id == call.id) {
-        currentCall = call;
-        if (needOpenTransferView) {
-            getElement('transfer').style.visibility = "visible";
-        }
-        if (isHold) {
-            getElement('holdButton').style.background = "url(assets/unhold.png)";
-            $('#holdButton').unbind('click');
-            $('#holdButton').click(function () {
-                setStatusHold(call.id, false);
-            });
-
-        } else {
-            getElement('holdButton').style.background = "url(assets/hold.png)";
-            $('#holdButton').unbind('click');
-            $('#holdButton').click(function () {
-                setStatusHold(call.id, true);
-            });
-        }
-    }
-}
-
-function notifyCost(cost) {
-}
-
-function notifyBugReport(filename) {
+Phone.prototype.notifyBugReport = function (filename) {
     trace("Created bug report; filename - " + filename);
-}
+};
 
-function notifyError(error) {
+Phone.prototype.onErrorListener = function (event) {
+    var code = event.code;
+    var sipObject = event.sipObject;
+    trace("Phone - onErrorListener " + code);
 
-    trace("Phone - notifyError "+ error);
-
-    if (error == CONNECTION_ERROR) {
-        openInfoView("Can`t connect to server.", 3000, 30);
-
-    } else if (error == AUTHENTICATION_FAIL) {
-        openInfoView("Register fail, please check your SIP account details.", 3000, 30);
-        window.setTimeout("logoff();", 3000);
-
-    } else if (error == USER_NOT_AVAILABLE) {
-        openInfoView("User not available.", 3000, 30);
-
-        /*  Deprecated error
-
-         else if (error == TOO_MANY_REGISTER_ATTEMPTS) {
-         openInfoView("Connection error", 3000, 30);
-         toLoggedOffState();
-         */
-
-    } else if (error == LICENSE_RESTRICTION) {
-        openInfoView("You trying to connect too many users, or license is expired", 3000, 90);
-
-    } else if (error == LICENSE_NOT_FOUND) {
-        openInfoView("Please get a valid license or contact Flashphoner support", 5000, 90);
-
-    } else if (error == INTERNAL_SIP_ERROR) {
-        openInfoView("Unknown error. Please contact support.", 3000, 60);
-
-    } else if (error == REGISTER_EXPIRE) {
-        openInfoView("No response from VOIP server during 15 seconds.", 3000, 60);
-
-    } else if (error == SIP_PORTS_BUSY) {
-        openInfoView("SIP ports are busy. Please open SIP ports range (30000-31000 by default).", 3000, 90);
-        connectingViewBeClosed = true;
-        window.setTimeout("logoff();", 3000);
-
-    } else if (error == MEDIA_PORTS_BUSY) {
-        openInfoView("Media ports are busy. Please open media ports range (31001-32000 by default).", 3000, 90);
-
-    } else if (error == WRONG_SIPPROVIDER_ADDRESS) {
-        openInfoView("Wrong domain.", 3000, 30);
-        connectingViewBeClosed = true;
-        window.setTimeout("logoff();", 3000);
-
-    } else if (error == CALLEE_NAME_IS_NULL) {
-        openInfoView("Callee name is empty.", 3000, 30);
-
-    } else if (error == WRONG_FLASHPHONER_XML) {
-        openInfoView("Flashphoner.xml has errors. Please check it.", 3000, 60);
-    } else if (error == PAYMENT_REQUIRED) {
-        openInfoView("Payment required, please check your balance.", 3000, 60);
+    if (code == WCSError.CONNECTION_ERROR) {
+        trace("Phone - ERROR - Can`t connect to server.");
+    } else if (code == WCSError.AUTHENTICATION_FAIL) {
+        trace("Phone - ERROR - Register fail, please check your SIP account details.");
+        window.setTimeout("disconnect();", 3000);
+    } else if (code == WCSError.USER_NOT_AVAILABLE) {
+        trace("Phone - ERROR - User not available.");
+    } else if (code == WCSError.LICENSE_RESTRICTION) {
+        trace("Phone - ERROR - You trying to connect too many users, or license is expired");
+    } else if (code == WCSError.LICENSE_NOT_FOUND) {
+        trace("Phone - ERROR - Please get a valid license or contact Flashphoner support");
+    } else if (code == WCSError.INTERNAL_SIP_ERROR) {
+        trace("Phone - ERROR - Unknown error. Please contact support.");
+    } else if (code == WCSError.REGISTER_EXPIRE) {
+        trace("Phone - ERROR - No response from VOIP server during 15 seconds.");
+    } else if (code == WCSError.SIP_PORTS_BUSY) {
+        trace("Phone - ERROR - SIP ports are busy. Please open SIP ports range (30000-31000 by default).");
+        window.setTimeout("disconnect();", 3000);
+    } else if (code == WCSError.MEDIA_PORTS_BUSY) {
+        trace("Phone - ERROR - Media ports are busy. Please open media ports range (31001-32000 by default).");
+    } else if (code == WCSError.WRONG_SIPPROVIDER_ADDRESS) {
+        trace("Phone - ERROR - Wrong domain.");
+        window.setTimeout("disconnect();", 3000);
+    } else if (code == WCSError.CALLEE_NAME_IS_NULL) {
+        trace("Phone - ERROR - Callee name is empty.");
+    } else if (code == WCSError.WRONG_FLASHPHONER_XML) {
+        trace("Phone - ERROR - Flashphoner.xml has errors. Please check it.");
+    } else if (code == WCSError.PAYMENT_REQUIRED) {
+        trace("Phone - ERROR - Payment required, please check your balance.");
     }
 
-    flashphonerListener.onError();
-    closeConnectingView();
-    toCallState();
-}
+    this.flashphonerListener.onError();
+};
 
-function notifyVideoFormat(call) {
-    trace("Phone - notifyVideoFormat "+ call);
-
-    if (call.streamerVideoWidth != 0) {
-        proportionStreamer = call.streamerVideoHeight / call.streamerVideoWidth;
-        if (proportionStreamer != 0) {
-            changeRelationMyVideo(proportionStreamer);
-        }
-    }
-
-    if (!call.playerVideoHeight == 0) { //that mean if user really send me video
-        proportion = call.playerVideoHeight / call.playerVideoWidth; //set proportion of video picture, else it will be = 0
-    }
-
-    if ($('div').is('.videoDiv') && proportion != 0) { //if video window opened and other side send video
-        var newHeight = $('.videoDiv').width() * proportion + 40;
-        $('.videoDiv').height(newHeight); //we resize video window for new proportion
-        $('#video').height(newHeight - 40); //and resize flash for new video window
-    }
-}
-
-function notifyOpenVideoView(isViewed) {
-    trace("Phone - notifyOpenVideoView "+ isViewed);
-    if (isViewed) {
-        openVideoView();
-    } else {
-        closeVideoView();
-    }
-}
-
-function notifyMessageReceived(messageObject) {
-    trace("Phone - notifyMessageReceived "+ messageObject);
+Phone.prototype.notifyMessageReceived = function (messageObject) {
+    trace("Phone - notifyMessageReceived " + messageObject);
 
     if (messageObject.contentType == "application/im-iscomposing+xml" || messageObject.contentType == "message/fsservice+xml") {
-        trace("ignore message: "+messageObject.body);
-        if (flashphonerLoader.disableUnknownMsgFiltering) {
-            messageObject.body = escapeXmlTags(messageObject.body);
-            showMessage(messageObject);
+        trace("ignore message: " + messageObject.body);
+        if (Configuration.getInstance().disableUnknownMsgFiltering) {
+            messageObject.body = this.escapeXmlTags(messageObject.body);
+            SoundControl.getInstance().playSound("MESSAGE");
         }
         return;
     }
 
     //convert body
-    var body = convertMessageBody(messageObject.body, messageObject.contentType);
+    var body = this.convertMessageBody(messageObject.body, messageObject.contentType);
     if (body) {
         messageObject.body = body;
-        showMessage(messageObject);
+        SoundControl.getInstance().playSound("MESSAGE");
     } else {
         trace("Not displaying message " + messageObject.body + ", body is null after convert");
-        if (flashphonerLoader.disableUnknownMsgFiltering) {
-            messageObject.body = escapeXmlTags(messageObject.body);
-            showMessage(messageObject);
+        if (Configuration.getInstance().disableUnknownMsgFiltering) {
+            messageObject.body = this.escapeXmlTags(messageObject.body);
+            SoundControl.getInstance().playSound("MESSAGE");
         }
     }
-}
+};
 
-function showMessage(messageObject) {
-    var from = messageObject.from.toLowerCase();
-    openChatView();
-    createChat(from);
-    var chatDiv = $('#chat' + removeNonDigitOrLetter(from) + ' .chatTextarea'); //set current textarea
-    addMessageToChat(chatDiv, from, messageObject.body, "yourNick", messageObject.id);
-    flashphoner.playSound("MESSAGE");
-}
-
-function convertMessageBody(messageBody, contentType) {
+Phone.prototype.convertMessageBody = function (messageBody, contentType) {
     trace("Phone - convertMessageBody " + contentType);
     if (contentType == "application/fsservice+xml") {
         var xml = $.parseXML(messageBody);
@@ -666,17 +406,17 @@ function convertMessageBody(messageBody, contentType) {
         var fsService = $(xml).find("fs-services").find("fs-service");
         var action = fsService.attr("action");
         if (action == "servicenoti-indicate") {
-            var caw = parseMsn(fsService,"caw");
-            if (!!caw){
+            var caw = this.parseMsn(fsService, "caw");
+            if (!!caw) {
                 missedCallNotification = caw;
-            }else{
-                missedCallNotification = parseMsn(fsService,"mcn");
+            } else {
+                missedCallNotification = parseMsn(fsService, "mcn");
             }
         } else if (action == "serviceinfo-confirm") {
             //service status confirmation
             missedCallNotification = "Service status: " + $(fsService.find("mcn").find("mcn-data")).attr("status");
         }
-        if(missedCallNotification !== undefined) return missedCallNotification;
+        if (missedCallNotification !== undefined) return missedCallNotification;
 
     } else if (contentType == "application/vnd.oma.push") {
         var xml = $.parseXML(messageBody);
@@ -694,685 +434,62 @@ function convertMessageBody(messageBody, contentType) {
 
     return messageBody;
 
-}
+};
 
-function parseMsn(fsService,mcn){
-    trace("Phone - parseMcn: "+mcn);
+Phone.prototype.parseMsn = function (fsService, mcn) {
+    trace("Phone - parseMcn: " + mcn);
     var caw = fsService.find(mcn);
     var ret = null;
-    if (!!caw){
-        var cawData = caw.find(mcn+"-data");
+    if (!!caw) {
+        var cawData = caw.find(mcn + "-data");
         if (!!cawData) {
             var sender = $(cawData).attr("sender");
-            if (!!sender){
+            if (!!sender) {
                 trace("Phone - Missed call: " + sender);
                 ret = "Missed call from " + sender;
             }
         }
     }
     return ret;
-}
+};
 
-function addMessageToChat(chatDiv, from, body, className, messageId) {
-    trace("Phone - addMessageToChat: messageId: "+messageId+" from: "+from+" message body: "+body);
-    var idAttr = (messageId != null) ? "id='" + messageId + "'" : "";
-    var isScrolled = (chatDiv[0].scrollHeight - chatDiv.height() + 1) / (chatDiv[0].scrollTop + 1); // is chat scrolled down? or may be you are reading previous messages.
-    var messageDiv = "<div " + idAttr + " class='" + className + "'>" + from + " " + body + "</div>";
-    chatDiv.append(messageDiv); //add message to chat
-    if (isScrolled == 1) {
-        chatDiv[0].scrollTop = chatDiv[0].scrollHeight; //autoscroll if you are not reading previous messages
-    }
-}
+Phone.prototype.notifyMessageSent = function (messageObject) {
+    trace("Phone - notifyMessageSent " + messageObject);
+};
 
-function notifyMessageSent(messageObject) {
-    trace("Phone - notifyMessageSent "+ messageObject);
-    createChat(messageObject.to.toLowerCase());
-    var chatDiv = $('#chat' + removeNonDigitOrLetter(messageObject.to.toLowerCase()) + ' .chatTextarea'); //set current textarea for
-    addMessageToChat(chatDiv, messageObject.from, messageObject.body, "myNick", messageObject.id);
-}
+Phone.prototype.notifyMessageAccepted = function (message) {
+    trace("Phone - notifyMessageAccepted " + message);
+};
 
-function notifyMessageAccepted(message) {
-    trace("Phone - notifyMessageAccepted "+ message);
-    var messageDiv = $('#' + message.id);
-    messageDiv.addClass("myNick message_accepted");
-}
+Phone.prototype.notifyMessageDelivered = function (message) {
+    trace("Phone - notifyMessageDelivered " + message);
+};
 
-function notifyMessageDelivered(message) {
-    trace("Phone - notifyMessageDelivered "+ message);
-    var messageDiv = $('#' + message.id);
-    messageDiv.addClass("myNick message_delivered");
-}
+Phone.prototype.notifyMessageDeliveryFailed = function (message) {
+    trace("Phone - notifyMessageDeliveryFailed " + message);
+};
 
-function notifyMessageDeliveryFailed(message) {
-    trace("Phone - notifyMessageDeliveryFailed "+ message);
-    var messageDiv = $('#' + message.id);
-    messageDiv.addClass("myNick message_delivery_failed");
-    messageDiv.innerHTML = messageDiv.innerHTML + "- Delivery failed to " + message.recipients;
-}
-
-function notifyMessageFailed(message) {
-    trace("Phone - notifyMessageFailed "+ message);
-    var messageDiv = $('#' + message.id);
-    messageDiv.addClass("myNick message_failed");
-}
-
-function notifyAddCall(call) {
-    trace("Phone - notifyAddCall "+ call.id+" call.incoming: "+call.incoming+" call.state: "+call.state);
-    if (currentCall!=null && !call.incoming){
-        holdedCall = currentCall;
-        currentCall = call;
-        createCallView(currentCall);
-        trace("Phone - It seems like a hold: holdedCall: "+holdedCall.id+" currentCall: "+currentCall.id);
-    } else {
-        currentCall = call;
-        createCallView(currentCall);
-        if (call.incoming == true) {
-            openIncomingView(call);
-            toHangupState();
-            flashphonerListener.onIncomingCall(call.id);
-        }
-        trace("Phone - It seems like a new call currentCall: "+currentCall.id +" state: "+currentCall.state);
-    }
-}
-
-function createCallView(call) {
-    trace("createCallView call: "+call.id+" state: "+call.state);
-    openCallView();
-    $('#caller').html(call.anotherSideUser);
-
-    if (call.state == STATE_HOLD) {
-        $('#callState').html('...Call on hold...');
-        enableHoldButton();
-    } else if (call.state == STATE_TALK) {
-        $('#callState').html('...Talking...');
-        enableHoldButton();
-    } else if (call.state == STATE_RING) {
-        $('#callState').html('...Ringing...');
-    }
-
-    $('#holdButton').unbind('click');
-    $('#holdButton').click(function () {
-        setStatusHold(call.id, true);
-    });
-
-    $('#transferButton').unbind('click');
-    $('#transferButton').click(function () {
-        openTransferView();
-    });
-}
-
-function removeCallView(call) {
-    closeCallView();
-    $('#caller').html('');
-    $('#callState').html('');
-    $('#holdButton').css('background', 'url(assets/hold.png)');
-}
-
-function isCurrentCall(call) {
-    return currentCall != null && currentCall.id == call.id;
-}
-
-function notifyRemoveCall(call) {
-    trace("Phone - notifyRemoveCall "+ call.id+" currentCall: "+currentCall.id);
-    if (isCurrentCall(call)) {
-        currentCall = null;
-        removeCallView(call)
-        flashphonerListener.onRemoveCall();
-    }
-}
-
-function notifyVersion(version) {
-    getElement('versionOfProduct').innerHTML = version;
-}
-/* ----------------------------------------------------------------------- */
-
-/* --------------- Additional functions ------------------- */
-
-function toLogState() {
-    trace("Phone - toLogState");
-    $("#callerLogin").show().html(callerLogin);
-    $("#loginMainButton").hide();
-}
-
-function toLogOffState() {
-    trace("Phone - toLogOffState");
-    $("#loginMainButton").show();
-    $('#callerLogin').hide().html('');
-}
-
-function toHangupState() {
-    trace("Phone - toHangupState");
-    $('#callButton').html("Hangup");
-    /*$('#callButton').css('background', '#C00');*/
-    $('#callButton').removeClass('call').addClass('hangup');
-    disableCallButton();
-}
-
-function toCallState() {
-    trace("Phone - toCallState");
-    $('#callButton').html("Call");
-    /*$('#callButton').css('background', '#090');*/
-    $('#callButton').removeClass('hangup').addClass('call');
-    disableCallButton();
-}
-
-function disableCallButton() {
-    trace("Phone - disableCallButton");
-    $('#callButton').addClass('disabled');
-    window.setTimeout(enableCallButton, 3000);
-
-    function enableCallButton() {
-        $('#callButton').removeClass('disabled');
-    }
-}
-
-
-function enableHoldButton() {
-    trace("Phone - enableHoldButton");
-    var button = $('#holdButton');
-    button.css('visibility', 'inherit');
-}
-
-function disableHoldButton() {
-    trace("Phone - disableHoldButton");
-    var button = $('#holdButton');
-    button.css('visibility', 'hidden');
-}
-
-
-function openLoginView() {
-    if (flashphonerLoader.getToken()) {
-        loginByToken(flashphonerLoader.getToken());
-    } else {
-        trace("Phone - openLoginView");
-        $('#loginDiv').css('visibility', 'visible');
-        $('#username').val(getCookie('login'));
-        $('#authname').val(getCookie('authName'));
-        $('#password').val(getCookie('pwd'));
-        $('#domain').val(getCookie('domain'));
-        $('#outbound_proxy').val(getCookie('outbound_proxy'));
-        $('#port').val(getCookie('port'));
-    }
-
-}
-
-function closeLoginView() {
-    $('#loginDiv').css('visibility', 'hidden');
-}
-
-function openConnectingView(str, timeout) {
-    trace("Phone - openConnectingView: message - " + str + "; timeout - " + timeout);
-    if (timeout != 0) {
-        window.setTimeout("closeConnectingView();", timeout);
-    }
-    getElement('connectingDiv').style.visibility = "visible";
-    getElement('connectingText').innerHTML = str;
-}
-
-function closeConnectingView() {
-    trace("Phone - closeConnectingView");
-    getElement('connectingDiv').style.visibility = "hidden";
-}
-
-function openInfoView(str, timeout, height) {
-    trace("Phone - openInfoView str: "+ str+" timeout: "+ timeout);
-    if (timeout != 0) {
-        window.setTimeout("closeInfoView();", timeout);
-    }
-    getElement('infoDiv').style.visibility = "visible";
-    getElement('infoDiv').style.height = height + "px";
-    getElement('infoText').innerHTML = str;
-}
-
-function closeInfoView(timeout) {
-    trace("Phone - closeInfoView "+timeout);
-    if (timeout) {
-        window.setTimeout("getElement('infoDiv').style.visibility = 'hidden';", timeout);
-    } else {
-        getElement('infoDiv').style.visibility = "hidden";
-    }
-}
-
-function openIncomingView(call) {
-    trace("Phone - openIncomingView "+ call)// call.caller, call.visibleNameCaller
-
-    //form Caller-ID information displayed to user
-    var displayedCaller = "";
-    if (call.caller !== undefined) displayedCaller += call.caller;
-    if (call.visibleNameCaller !== undefined) displayedCaller += " '" + call.visibleNameCaller + "'";
-
-    $('#incomingDiv').show();
-    $('#callerField').html(displayedCaller);
-
-    $('#answerButton').unbind('click');
-    $('#answerButton').click(function () {
-        answer(call.id);
-        closeIncomingView();
-    });
-    $('#hangupButton').unbind('click');
-    $('#hangupButton').click(function () {
-        trace("Phone - openIncomingView hangup "+call.id);
-        hangup(call.id);
-        closeIncomingView();
-    });
-}
-
-function closeIncomingView() {
-    trace("Phone - closeIncomingView");
-    $('#incomingDiv').hide();
-}
-
-function openSettingsView() {
-    trace("Phone - openSettingsView");
-    getElement('settingsDiv').style.visibility = "visible";
-}
-function closeSettingsView() {
-    trace("Phone - closeSettingsView");
-    getElement('settingsDiv').style.visibility = "hidden";
-}
-
-function getElement(str) {
-    return document.getElementById(str);
-}
-
-/* ----- VIDEO ----- */
-
-function openVideoView() {
-    flashphoner_UI.openVideoView();
-}
-
-function closeVideoView() {
-    trace("Phone - closeVideoView");
-    $('#video_requestUnmuteDiv').removeClass().addClass('closed');
-}
-
-/* ----- CHAT ----- */
-
-function openChatView() {
-    trace("Phone - openChatView");
-    $('#chatDiv').css('visibility', 'visible');
-}
-function closeChatView() {
-    trace("Phone - closeChatView");
-    $('#chatDiv').css('visibility', 'hidden');
-}
-/*-----------------*/
-
-/* ----- CALL ----- */
-function openCallView() {
-    trace("Phone - openCallView");
-    $('#callDiv').css('visibility', 'visible');
-}
-function closeCallView() {
-    trace("Phone - closeCallView");
-    $('#callDiv').css('visibility', 'hidden');
-}
-/*-----------------*/
-/* ----- TRANSFER ----- */
-function openTransferView() {
-    trace("Phone - openTransferView");
-    $('#transferOk').unbind('click');
-    $('#transferOk').click(function () {
-        if (currentCall.state == STATE_HOLD) {
-            transfer(currentCall.id, $('#transferInput').val());
-            closeTransferView();
-        } else {
-            needOpenTransferView = true;
-            setStatusHold(currentCall.id, true);
-        }
-    });
-
-    if (call.state != STATE_HOLD) {
-        needOpenTransferView = true;
-        setStatusHold(currentCall.id, true);
-    } else {
-        getElement('transfer').style.visibility = "visible";
-    }
-}
-
-function closeTransferView() {
-    trace("Phone - closeTransferView");
-    needOpenTransferView = false;
-    getElement('transfer').style.visibility = "hidden";
-}
-
-function submitBugReport(){
-    var bugReportText = getElement('bugReportText').value;
-    trace("submitBugReport "+bugReportText);
-    if (flashphoner){
-        flashphoner.submitBugReport({text:bugReportText, type: "no_media"});
-    }
-}
-
-/*-----------------*/
+Phone.prototype.notifyMessageFailed = function (message) {
+    trace("Phone - notifyMessageFailed " + message);
+};
 
 /* ------------- Additional interface functions --------- */
-function isVideoCall(){
+Phone.prototype.isCurrentCall = function (call) {
+    return this.currentCall != null && this.currentCall.id == call.id;
+};
+
+Phone.prototype.isVideoCall = function () {
     return $('#checkboxVideoCall').attr("checked") ? true : false;
-}
-// Functions createChat creates chat with the callee. 
-// It contains all chat window functionality including send message function 
+};
 
-function createChat(calleeName) {
-
-    //var closetab = '<a href="" id="close' + calleeName + '" class="close">&times;</a>';
-    //$("#tabul").append('<li id="tab' + calleeName + '" class="ntabs">' + calleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
-    var shortCalleeName = calleeName;
-    var fullCalleeName = shortCalleeName;
-    var calleeNameId = removeNonDigitOrLetter(fullCalleeName);
-    if (!$('li').is('#tab' + calleeNameId)) {
-        var closetab = '<a href="" id="close' + calleeNameId + '" class="close">&times;</a>';
-
-        // We will cut too long calleeNames to place it within chat tab
-        if (shortCalleeName.length > 21) {
-            shortCalleeName = shortCalleeName.substr(0, 21) + '...';
+Phone.prototype.isRingSoundAllowed = function () {
+    try {
+        if (Configuration.getInstance().suppressRingOnActiveAudioStream && Flashphoner.getInstance().hasActiveAudioStream()) {
+            trace("Phone - isRingSoundAllowed false");
+            return false;
         }
-
-
-        $("#tabul").append('<li id="tab' + calleeNameId + '" class="ntabs">' + shortCalleeName + '&nbsp;' + closetab + '</li>'); //add tab with the close button
-
-
-        $('#tabcontent').append('<div class="chatBox" id="chat' + calleeNameId + '" title="' + shortCalleeName + '" fullCalleeName="' + fullCalleeName + '">'); //add chatBox
-        $('#chat' + calleeNameId).append('<div class="chatTextarea"></div>')//add text area for chat messages
-            .append('<input class="messageInput" type="textarea">')//add input field
-            .append('<input class="messageSend" type="button" value="Send">'); //add send button
-
-        $("#tabul li").removeClass("ctab"); //remove select from all tabs
-        $("#tab" + calleeNameId).addClass("ctab"); //select new tab
-        $(".chatBox").hide(); //hide all chatBoxes
-        $("#chat" + calleeNameId).show(); //show new chatBox
-
-        // Bind send message on click Enter in message inout field
-
-        $('#chat' + calleeNameId + ' .messageInput').keydown(function (event) {
-            if (event.keyCode == '13') {
-                $(this).next().click(); // click on sendMessage button
-            } else if (event.keyCode == '27') {
-                $(this).val('');
-            }
-        });
-
-        // Bind send message function
-        $('#chat' + calleeNameId + ' .messageSend').click(function () {
-            var fullCalleeName = $(this).parent().attr('fullCalleeName'); //parse id of current chatBox, take away chat word from the beginning
-            var messageText = $(this).prev().val(); //parse text from input
-            sendMessage(calleeName, messageText, flashphonerLoader.msgContentType); //send message
-            $(this).prev().val(''); //clear message input
-        });
-
-        // Bind selecting tab
-        $("#tab" + calleeNameId).bind("click", function () {
-            $("#tabul li").removeClass("ctab"); //hide all tabs
-            $("#tab" + calleeNameId).addClass("ctab"); //select clicked tab
-            $(".chatBox").hide(); //chide all chatBoxes
-            $("#chat" + calleeNameId).show(); //show new chatBox
-        });
-
-        // Bind closing tab on click 
-        $("#close" + calleeNameId).click(function () {
-            //close this tab
-            $(this).parent().hide();
-            $("#chat" + calleeNameId).hide();
-
-            var prevVisibleTab = $(this).parent().prevAll().filter(':visible').filter(':first'); //set prev visible tab
-            var nextVisibleTab = $(this).parent().nextAll().filter(':visible').filter(':first'); //set next visible tab
-
-            if ($(this).parent().is('.ctab')) { //but what if this tab was selected?
-                $(this).parent().removeClass("ctab"); //we will unselect this
-                if (prevVisibleTab.is('.ntabs')) { //and if there is prev tab
-                    prevVisibleTab.addClass('ctab'); //then select prev tab
-                    $('#chat' + prevVisibleTab.attr('id').substr(3)).show(); //and show accoring chat
-
-                } else if (nextVisibleTab.is('.ntabs')) { //or if there is next tab
-                    nextVisibleTab.addClass('ctab'); //then select next tab
-                    $('#chat' + nextVisibleTab.attr('id').substr(3)).show(); //and show accoring chat
-
-                } else {
-                    $('#chatDiv').css('visibility', 'hidden'); //else simply close all chat
-                }
-            }
-            ;
-            return false; // i don`t know why it need
-        });
-    } else {
-        $("#tabul li").removeClass("ctab"); //remove select from all tabs
-        $("#tab" + calleeNameId).show(); //show our tab
-        $("#tab" + calleeNameId).addClass("ctab"); //select our tab
-        $(".chatBox").hide(); //hide all chatboxes
-        $("#chat" + calleeNameId).show(); //show our chatBox
-
+    } catch (error) {
     }
-
-}
-
-function removeNonDigitOrLetter(calleeName) {
-    return calleeName.replace(/\W/g, '')
-}
-
-function escapeXmlTags(stringXml) {
-    return stringXml.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-/* ---------------------------------------------------- */
-
-// functions closeView is simplifying of many close....View functions
-function close(element) {
-    element.css('visibility', 'hidden');
-}
-
-
-/* --------------------- On document load we do... ------------------ */
-function notifyReady() {
-
-    // open login view
-    $("#loginMainButton").click(function () {
-        openLoginView();
-    });
-
-    // logout
-    $("#logoutButton").click(function () {
-        logoff();
-        $(this).hide();
-    });
-
-    // login
-    $("#loginButton").click(function () {
-        login();
-    });
-
-    // click on caller login show logout button
-    $("#callerLogin").click(function () {
-        $('#logoutButton').toggle()
-    });
-
-    // every time when we change callee field - we set parameter callee
-    // that parameter used around the code 
-    $("#calleeText").keyup(function () {
-        callee = $(this).val();
-    });
-
-    //Bind click on different buttons
-    $("#callButton").click(function () {
-        if ($("#callButton").html() == 'Call') {
-            call();
-        } else {
-            if (currentCall) {
-                trace("Phone - Hangup current call by click: "+currentCall.id);
-                hangup(currentCall.id);
-            } else {
-                trace("Phone - ignore hangup command, provisional message from server not received yet");
-            }
-        }
-    });
-
-    $("#cameraButtonInCallee").click(function () {
-        openVideoView();
-    });
-
-    $("#canselLoginDiv").click(function () {
-        closeLoginView();
-    });
-
-    $("#sendVideo").click(function () {
-        sendVideoChangeState();
-    });
-
-    $("#transferCansel").click(function () {
-        closeTransferView();
-    });
-
-    $(".iconButton").click(function () {
-        $(this).toggleClass('iconPressed');
-    });
-
-    //micButton opens mic slider
-    $("#micButton").click(function () {
-        if ($(this).hasClass('iconPressed')) {
-            $('#micSlider').show();
-            $('#micBack').show();
-        } else {
-            $('#micSlider').hide();
-            $('#micBack').hide();
-        }
-    });
-
-    //micButton opens mic slider
-    $("#soundButton").click(function () {
-        if ($(this).hasClass('iconPressed')) {
-            $('#speakerSlider').show();
-            $('#speakerBack').show();
-        } else {
-            $('#speakerSlider').hide();
-            $('#speakerBack').hide();
-        }
-    });
-
-    $("#cameraButton").click(function () {
-        openVideoView();
-    });
-
-    $("#closeButton_video_requestUnmuteDiv").click(function () {
-        closeVideoView();
-    });
-
-    $(".closeButton").click(function () {
-        close($(this).parent());
-    });
-
-    //enable drag and resize objects
-    $("#loginDiv").draggable({handle: '.bar', stack: "#loginDiv"});
-    $("#incomingDiv").draggable({handle: '.bar', stack: "#incomingDiv"});
-    $("#settingsDiv").draggable({handle: '.bar', stack: "#settingsDiv"});
-    $("#transfer").draggable({handle: '.bar', stack: "#transfer"});
-    $("#chatDiv").draggable({handle: '.bar', stack: "#chatDiv"});
-    $("#video_requestUnmuteDiv").draggable({handle: '.bar', stack: "#video_requestUnmuteDiv"});
-    $("#video_requestUnmuteDiv").resizable({ minWidth: 215, minHeight: 180, aspectRatio: true});
-
-    var all_videos = $('#localVideoPreview, #remoteVideo');
-    all_videos.each(function () {
-        var el = $(this);
-        el.attr('data-aspectRatio', el.height() / el.width());
-        var width = $("#video_requestUnmuteDiv").width();
-        el.attr('data-windowRatio', el.width() / (width == 1 ? 640 : width));
-    });
-
-    $("#video_requestUnmuteDiv").resize(function () {
-        var width = $("#video_requestUnmuteDiv").width();
-        var height = $("#video_requestUnmuteDiv").height();
-        var newWidth = width == 1 ? 640 : width;
-        $('#video').height((height == 1 ? 520 : height) - 40);
-        $('#video').width(width == 1 ? 640 : width);
-        $('#remoteVideo').height((height == 1 ? 520 : height) - 40);
-        var localVideo = $('#localVideoPreview');
-        localVideo.height(newWidth * localVideo.attr('data-windowRatio') * localVideo.attr('data-aspectRatio'));
-        all_videos.each(function () {
-            var el = $(this);
-            el.width(newWidth * el.attr('data-windowRatio'));
-        });
-    }).resize();
-
-    //Bind click on number buttons
-    $(".numberButton").click(function () {
-        if (currentCall != null && currentCall.state == STATE_TALK) {
-            sendDTMF(currentCall.id, $(this).html());
-        } else if (currentCall == null) {
-            $("#calleeText").val($("#calleeText").val() + $(this).html());
-            callee = callee + $(this).html();
-        }
-    });
-
-    $(".testButton").click(function () {
-        startUnitTests();
-    });
-
-    $(".bugReportButton").click(function () {
-        submitBugReport();
-    });
-
-    // this function set changing in button styles when you press any button
-    $(".button").mousedown(function () {
-        $(this).addClass('pressed');
-    }).mouseup(function () {
-            $(this).removeClass('pressed');
-        }).mouseout(function () {
-            $(this).removeClass('pressed');
-        });
-
-    // Bind click on chatButton
-    $("#chatButton").click(function () {
-        if (isLogged) {
-            if (callee != '') {
-                openChatView();
-                createChat(callee.toLowerCase());
-            } else {
-                openConnectingView("Callee number is wrong", 3000);
-            }
-        } else {
-            openLoginView();
-        }
-    });
-
-    /* Autofill Aut. name field when you fill Login field */
-    $('#username').keyup(function () {
-        $('#authname').val($(this).val());
-    });
-
-    /* Autofill Outb. proxy field when you fill "domain" field */
-    $('#domain').keyup(function () {
-        $('#outbound_proxy').val($(this).val());
-    });
-
-    // Mic slider set mic volume when you slide it
-    $("#micSlider").slider({
-        orientation: "vertical",
-        range: "min",
-        min: 0,
-        max: 100,
-        value: 60,
-        slide: function (event, ui) {
-            flashphoner.setMicVolume(ui.value);
-        }
-    });
-
-    // Speaker slider set speaker volume when you slide it
-    $("#speakerSlider").slider({
-        orientation: "vertical",
-        range: "min",
-        min: 0,
-        max: 100,
-        value: 60,
-        slide: function (event, ui) {
-            flashphoner.setVolume(ui.value);
-        }
-    });
-
-    $("#checkboxUseProxy").change(function () {
-        if ($(this).attr("checked")) {
-            flashphoner.setUseProxy(true);
-        } else {
-            flashphoner.setUseProxy(false);
-        }
-    });
-
-
+    trace("Phone - isRingSoundAllowed true");
+    return true;
 };

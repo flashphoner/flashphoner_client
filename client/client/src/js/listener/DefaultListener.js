@@ -13,7 +13,7 @@
  */
 var DefaultListener = function () {
 
-}
+};
 
 DefaultListener.prototype = {
     onCall: function () {
