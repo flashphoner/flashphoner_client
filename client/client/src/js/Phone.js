@@ -32,6 +32,10 @@ Phone.prototype.init = function () {
     Flashphoner.getInstance().addListener(WCSEvent.OnCallEvent, this.onCallListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.CallStatusEvent, this.callStatusListener, this);
 
+    Flashphoner.getInstance().addListener(WCSEvent.OnMessageEvent, this.onMessageListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.MessageStatusEvent, this.messageStatusListener, this);
+
+
     if (Configuration.getInstance().getToken()) {
         this.loginByToken(Configuration.getInstance().getToken());
     }
@@ -67,7 +71,7 @@ Phone.prototype.disconnect = function () {
 
 Phone.prototype.msrpCall = function (callee) {
     trace("Phone - msrpCall " + callee);
-    Flashphoner.getInstance().msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: testInviteParameter, isMsrp: true});
+    Flashphoner.getInstance().msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: {param1: "value1", param2: "value2"}, isMsrp: true});
 };
 
 Phone.prototype.call = function (callee) {
@@ -110,13 +114,11 @@ Phone.prototype.call = function (callee) {
 
 Phone.prototype.sendMessage = function (to, body, contentType) {
     trace("Phone - sendMessage " + to + " body: " + body + " contentType: " + contentType);
-    var message = [];
-    message.from = callerLogin;
+    var message = new Message();
     message.to = to;
     message.body = body;
     message.contentType = contentType;
-    message.deliveryNotification = Configuration.getInstance().imdnEnabled;
-    this.messenger.sendMessage(message);
+    Flashphoner.getInstance().sendMessage(message);
 };
 
 
@@ -203,8 +205,8 @@ Phone.prototype.hasAccessToVideo = function () {
 
 
 Phone.prototype.sendVideoChangeState = function (videoEnabled) {
-    trace("Phone - sendVideoChangeState currentCall: " + currentCall.id);
-    Flashphoner.getInstance().setSendVideo(currentCall.id, videoEnabled);
+    trace("Phone - sendVideoChangeState currentCall: " + me.currentCall.id);
+    Flashphoner.getInstance().setSendVideo(me.currentCall.id, videoEnabled);
 };
 
 Phone.prototype.changeRelationMyVideo = function (relation) {
@@ -218,7 +220,7 @@ Phone.prototype.submitBugReport = function () {
     Flashphoner.getInstance().submitBugReport({text: bugReportText, type: "no_media"});
 };
 
-/* ------------------ Notify functions ----------------- */
+/* ------------------ LISTENERS ----------------- */
 
 Phone.prototype.connectionStatusListener = function (event) {
     trace("Phone - Connection status " + event.connection.status);
@@ -304,6 +306,94 @@ Phone.prototype.callStatusListener = function (event) {
     }
 };
 
+Phone.prototype.messageStatusListener = function (event) {
+    var message = event.message;
+    trace("Phone - messageStatusListener id = " +message.id + " status = " + message.status);
+};
+
+Phone.prototype.onMessageListener = function (event) {
+    var message = event.message;
+
+    if (message.contentType == "application/im-iscomposing+xml" || message.contentType == "message/fsservice+xml") {
+        trace("ignore message: " + message.body);
+        if (Configuration.getInstance().disableUnknownMsgFiltering) {
+            message.body = escapeXmlTags(message.body);
+            SoundControl.getInstance().playSound("MESSAGE");
+        }
+        return;
+    }
+
+    //convert body
+    var body = this.convertMessageBody(message.body, message.contentType);
+    if (body) {
+        message.body = body;
+        SoundControl.getInstance().playSound("MESSAGE");
+    } else {
+        trace("Not displaying message " + message.body + ", body is null after convert");
+        if (Configuration.getInstance().disableUnknownMsgFiltering) {
+            message.body = escapeXmlTags(message.body);
+            SoundControl.getInstance().playSound("MESSAGE");
+        }
+    }
+
+    trace("Phone - onMessageListener id = " +message.id + " body = " + message.body);
+};
+
+Phone.prototype.convertMessageBody = function (messageBody, contentType) {
+    trace("Phone - convertMessageBody " + contentType);
+    if (contentType == "application/fsservice+xml") {
+        var xml = $.parseXML(messageBody);
+        var missedCallNotification;
+        var fsService = $(xml).find("fs-services").find("fs-service");
+        var action = fsService.attr("action");
+        if (action == "servicenoti-indicate") {
+            var caw = this.parseMsn(fsService, "caw");
+            if (!!caw) {
+                missedCallNotification = caw;
+            } else {
+                missedCallNotification = parseMsn(fsService, "mcn");
+            }
+        } else if (action == "serviceinfo-confirm") {
+            //service status confirmation
+            missedCallNotification = "Service status: " + $(fsService.find("mcn").find("mcn-data")).attr("status");
+        }
+        if (missedCallNotification !== undefined) return missedCallNotification;
+
+    } else if (contentType == "application/vnd.oma.push") {
+        var xml = $.parseXML(messageBody);
+        /**
+         * application/vnd.oma.push will contain xml with app information
+         * Try to handle this information or discard xml
+         */
+        var content;
+        if ($(xml).find("ums-service")) {
+            //voice mail service message
+            content = $(xml).find("ni-data").attr("content");
+        }
+        return content;
+    }
+
+    return messageBody;
+
+};
+
+Phone.prototype.parseMsn = function (fsService, mcn) {
+    trace("Phone - parseMcn: " + mcn);
+    var caw = fsService.find(mcn);
+    var ret = null;
+    if (!!caw) {
+        var cawData = caw.find(mcn + "-data");
+        if (!!cawData) {
+            var sender = $(cawData).attr("sender");
+            if (!!sender) {
+                trace("Phone - Missed call: " + sender);
+                ret = "Missed call from " + sender;
+            }
+        }
+    }
+    return ret;
+};
+
 Phone.prototype.notifyRecordComplete = function (recordReport) {
     trace("Phone - notify record complete: " + recordReport.mixedFilename);
 };
@@ -370,107 +460,6 @@ Phone.prototype.onErrorListener = function (event) {
     }
 
     this.flashphonerListener.onError();
-};
-
-Phone.prototype.notifyMessageReceived = function (messageObject) {
-    trace("Phone - notifyMessageReceived " + messageObject);
-
-    if (messageObject.contentType == "application/im-iscomposing+xml" || messageObject.contentType == "message/fsservice+xml") {
-        trace("ignore message: " + messageObject.body);
-        if (Configuration.getInstance().disableUnknownMsgFiltering) {
-            messageObject.body = this.escapeXmlTags(messageObject.body);
-            SoundControl.getInstance().playSound("MESSAGE");
-        }
-        return;
-    }
-
-    //convert body
-    var body = this.convertMessageBody(messageObject.body, messageObject.contentType);
-    if (body) {
-        messageObject.body = body;
-        SoundControl.getInstance().playSound("MESSAGE");
-    } else {
-        trace("Not displaying message " + messageObject.body + ", body is null after convert");
-        if (Configuration.getInstance().disableUnknownMsgFiltering) {
-            messageObject.body = this.escapeXmlTags(messageObject.body);
-            SoundControl.getInstance().playSound("MESSAGE");
-        }
-    }
-};
-
-Phone.prototype.convertMessageBody = function (messageBody, contentType) {
-    trace("Phone - convertMessageBody " + contentType);
-    if (contentType == "application/fsservice+xml") {
-        var xml = $.parseXML(messageBody);
-        var missedCallNotification;
-        var fsService = $(xml).find("fs-services").find("fs-service");
-        var action = fsService.attr("action");
-        if (action == "servicenoti-indicate") {
-            var caw = this.parseMsn(fsService, "caw");
-            if (!!caw) {
-                missedCallNotification = caw;
-            } else {
-                missedCallNotification = parseMsn(fsService, "mcn");
-            }
-        } else if (action == "serviceinfo-confirm") {
-            //service status confirmation
-            missedCallNotification = "Service status: " + $(fsService.find("mcn").find("mcn-data")).attr("status");
-        }
-        if (missedCallNotification !== undefined) return missedCallNotification;
-
-    } else if (contentType == "application/vnd.oma.push") {
-        var xml = $.parseXML(messageBody);
-        /**
-         * application/vnd.oma.push will contain xml with app information
-         * Try to handle this information or discard xml
-         */
-        var content;
-        if ($(xml).find("ums-service")) {
-            //voice mail service message
-            content = $(xml).find("ni-data").attr("content");
-        }
-        return content;
-    }
-
-    return messageBody;
-
-};
-
-Phone.prototype.parseMsn = function (fsService, mcn) {
-    trace("Phone - parseMcn: " + mcn);
-    var caw = fsService.find(mcn);
-    var ret = null;
-    if (!!caw) {
-        var cawData = caw.find(mcn + "-data");
-        if (!!cawData) {
-            var sender = $(cawData).attr("sender");
-            if (!!sender) {
-                trace("Phone - Missed call: " + sender);
-                ret = "Missed call from " + sender;
-            }
-        }
-    }
-    return ret;
-};
-
-Phone.prototype.notifyMessageSent = function (messageObject) {
-    trace("Phone - notifyMessageSent " + messageObject);
-};
-
-Phone.prototype.notifyMessageAccepted = function (message) {
-    trace("Phone - notifyMessageAccepted " + message);
-};
-
-Phone.prototype.notifyMessageDelivered = function (message) {
-    trace("Phone - notifyMessageDelivered " + message);
-};
-
-Phone.prototype.notifyMessageDeliveryFailed = function (message) {
-    trace("Phone - notifyMessageDeliveryFailed " + message);
-};
-
-Phone.prototype.notifyMessageFailed = function (message) {
-    trace("Phone - notifyMessageFailed " + message);
 };
 
 /* ------------- Additional interface functions --------- */

@@ -6,10 +6,12 @@ function Flashphoner() {
 
     this.connection = null;
     this.calls = new DataMap();
+    this.messages = {};
     this.isOpened = false;
     this.stripCodecs = [];
     this.listeners = {};
     this.version = undefined;
+    this.messenger = new Messenger();
 }
 
 Flashphoner.getInstance = function () {
@@ -18,13 +20,13 @@ Flashphoner.getInstance = function () {
 
 Flashphoner.prototype = {
 
-    addListener: function(event, listener, thisArg) {
+    addListener: function (event, listener, thisArg) {
         this.listeners[event] = {func: listener, thisArg: thisArg};
     },
 
-    invokeListener: function(event, argsArray) {
+    invokeListener: function (event, argsArray) {
         var listener = this.listeners[event];
-        if (listener){
+        if (listener) {
             listener.func.apply(listener.thisArg, argsArray);
         }
     },
@@ -38,7 +40,9 @@ Flashphoner.prototype = {
                 me.calls.update(call);
             } else {
                 me.calls.add(call);
-                me.invokeListener(WCSEvent.OnCallEvent, [{call:call}]);
+                me.invokeListener(WCSEvent.OnCallEvent, [
+                    {call: call}
+                ]);
             }
         };
 
@@ -49,19 +53,23 @@ Flashphoner.prototype = {
 
             getUserData: function (user) {
                 me.user = user;
-                for (var prop in user){
+                for (var prop in user) {
                     me.connection[prop] = me.user[prop];
                 }
                 me.connection.status = ConnectionStatus.Established;
-                me.invokeListener(WCSEvent.ConnectionStatusEvent, [{connection:me.connection}]);
+                me.invokeListener(WCSEvent.ConnectionStatusEvent, [
+                    {connection: me.connection}
+                ]);
             },
 
             getVersion: function (version) {
-                me.version= version;
+                me.version = version;
             },
 
             registered: function (sipHeader) {
-                me.invokeListener(WCSEvent.OnRegistrationEvent, [{connection:me.connection, sipObject:sipHeader}]);
+                me.invokeListener(WCSEvent.OnRegistrationEvent, [
+                    {connection: me.connection, sipObject: sipHeader}
+                ]);
             },
 
             notifyTryingResponse: function (call, sipHeader) {
@@ -72,13 +80,17 @@ Flashphoner.prototype = {
             ring: function (call, sipHeader) {
                 trace("ring call.state: " + call.state + " call.id: " + call.id);
                 addOrUpdateCall(call);
-                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+                me.invokeListener(WCSEvent.CallStatusEvent, [
+                    {call: call, sipObject: sipHeader}
+                ]);
             },
 
             sessionProgress: function (call, sipHeader) {
                 trace("sessionProgress call.state: " + call.state + " call.id: " + call.id);
                 addOrUpdateCall(call);
-                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+                me.invokeListener(WCSEvent.CallStatusEvent, [
+                    {call: call, sipObject: sipHeader}
+                ]);
             },
 
             setRemoteSDP: function (call, sdp, isInitiator, sipHeader) {
@@ -92,12 +104,16 @@ Flashphoner.prototype = {
 
             talk: function (call, sipHeader) {
                 addOrUpdateCall(call);
-                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+                me.invokeListener(WCSEvent.CallStatusEvent, [
+                    {call: call, sipObject: sipHeader}
+                ]);
             },
 
             hold: function (call, sipHeader) {
                 addOrUpdateCall(call);
-                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+                me.invokeListener(WCSEvent.CallStatusEvent, [
+                    {call: call, sipObject: sipHeader}
+                ]);
             },
 
             finish: function (call, sipHeader) {
@@ -105,16 +121,22 @@ Flashphoner.prototype = {
                 if (me.calls.length == 0) {
                     me.webRtcMediaManager.close();
                 }
-                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+                me.invokeListener(WCSEvent.CallStatusEvent, [
+                    {call: call, sipObject: sipHeader}
+                ]);
             },
 
             busy: function (call, sipHeader) {
                 addOrUpdateCall(call);
-                me.invokeListener(WCSEvent.CallStatusEvent, [{call:call, sipObject: sipHeader}]);
+                me.invokeListener(WCSEvent.CallStatusEvent, [
+                    {call: call, sipObject: sipHeader}
+                ]);
             },
 
             fail: function (errorCode, sipHeader) {
-                me.invokeListener(WCSEvent.OnErrorEvent, [{code:errorCode, sipObject: sipHeader}]);
+                me.invokeListener(WCSEvent.OnErrorEvent, [
+                    {code: errorCode, sipObject: sipHeader}
+                ]);
             },
 
             notifyVideoFormat: function (videoFormat) {
@@ -125,7 +147,41 @@ Flashphoner.prototype = {
             },
 
             notifyMessage: function (message, notificationResult, sipObject) {
-                messenger.notifyMessage(message, notificationResult, sipObject);
+                var sentMessage = me.messages[message.id];
+                if (sentMessage != null) {
+                    sentMessage.status = message.status;
+                }
+                if (message.status == MessageStatus.RECEIVED) {
+                    //here we will choose what to display on multiple contacts in "from".
+                    if (message.from.indexOf(",") != -1) {
+                        var fromList = message.from.split(",");
+                        message.from = fromList[0];
+                    }
+                    notificationResult.status = "OK";
+                    me.notificationResult(notificationResult);
+                    me.invokeListener(WCSEvent.OnMessageEvent, [
+                        {message: message, sipObject:sipObject}
+                    ]);
+                } else {
+                    if (message.status == MessageStatus.ACCEPTED) {
+                        if (!sentMessage.isImdnRequired) {
+                            me.removeSentMessage(sentMessage);
+                        }
+                    } else if (message.status == MessageStatus.FAILED) {
+                        me.removeSentMessage(sentMessage);
+                    } else if (message.status == MessageStatus.IMDN_DELIVERED) {
+                        me.removeSentMessage(sentMessage);
+                        notificationResult.status = "OK";
+                        me.notificationResult(notificationResult);
+                    } else if (message.status == MessageStatus.IMDN_FAILED || message.status == MessageStatus.IMDN_FORBIDDEN || message.status == MessageStatus.IMDN_ERROR) {
+                        me.removeSentMessage(sentMessage);
+                        notificationResult.status = "OK";
+                        me.notificationResult(notificationResult);
+                    }
+                    me.invokeListener(WCSEvent.MessageStatusEvent, [
+                        {message: message, sipObject:sipObject}
+                    ]);
+                }
             },
 
             notifyAudioCodec: function (codec) {
@@ -144,6 +200,14 @@ Flashphoner.prototype = {
             }
         };
     },
+
+    removeSentMessage: function (sentMessage) {
+        var me = this;
+        setTimeout(function () {
+            me.messages[sentMessage.id] = null;
+        }, 5000);
+    },
+
 
     connect: function (connection) {
         var me = this;
@@ -167,12 +231,16 @@ Flashphoner.prototype = {
                 } else {
                     me.connection.status = ConnectionStatus.Disconnected;
                 }
-                me.invokeListener(WCSEvent.ConnectionStatusEvent, [{connection:me.connection}]);
+                me.invokeListener(WCSEvent.ConnectionStatusEvent, [
+                    {connection: me.connection}
+                ]);
                 me.webRtcMediaManager.close();
             },
             error: function () {
                 me.connection.status = ConnectionStatus.Error;
-                me.invokeListener(WCSEvent.ConnectionStatusEvent, [{connection:me.connection}]);
+                me.invokeListener(WCSEvent.ConnectionStatusEvent, [
+                    {connection: me.connection}
+                ]);
             },
             context: me,
             events: me.callbacks
@@ -296,7 +364,7 @@ Flashphoner.prototype = {
 
     pushLogs: function (logs) {
         if (this.isOpened) {
-            this.webSocket.send("pushLogs", logs)
+            this.webSocket.send("pushLogs", logs);
             return true;
         } else {
             return false;
@@ -346,6 +414,11 @@ Flashphoner.prototype = {
     },
 
     sendMessage: function (message) {
+        var id = createUUID();
+        message.id = id;
+        message.from = this.user.login;
+        message.isImdnRequired = Configuration.getInstance().imdnEnabled;
+        this.messages[id] = message;
         this.webSocket.send("sendInstantMessage", message);
     },
 
@@ -449,4 +522,125 @@ Flashphoner.prototype = {
     }
 
 };
+
+var Messenger = function () {
+
+};
+
+var Connection = function () {
+    this.login = "";
+    this.password = "";
+    this.authenticationName = "";
+    this.domain = "";
+    this.outboundProxy = "";
+    this.port = 5060;
+    this.useProxy = true;
+    this.registerRequired = true;
+    this.useDTLS = true;
+    this.useSelfSigned = !isMobile.any();
+    this.appKey = "defaultVoIPApp";
+    this.status = ConnectionStatus.New;
+};
+
+var ConnectionStatus = function () {
+};
+ConnectionStatus.New = "NEW";
+ConnectionStatus.Pending = "PENDING";
+ConnectionStatus.Established = "ESTABLISHED";
+ConnectionStatus.Disconnected = "DISCONNECTED";
+ConnectionStatus.Error = "ERROR";
+
+var Call = function () {
+    this.callId = "";
+    this.status = "";
+    this.caller = "";
+    this.callee = "";
+    this.incoming = false;
+    this.visibleName = "";
+    this.inviteParameters = "";
+};
+
+var Message = function () {
+    this.from = "";
+    this.to = "";
+    this.visibleName = undefined;
+    this.body = "";
+    this.contentType = "";
+    this.isImdnRequired = false;
+};
+
+var MessageStatus = function () {
+};
+MessageStatus.SENT = "SENT";
+MessageStatus.ACCEPTED = "ACCEPTED";
+MessageStatus.FAILED = "FAILED";
+MessageStatus.IMDN_DELIVERED = "IMDN_DELIVERED";
+MessageStatus.IMDN_FAILED = "IMDN_FAILED";
+MessageStatus.IMDN_FORBIDDEN = "IMDN_FORBIDDEN";
+MessageStatus.IMDN_ERROR = "IMDN_ERROR";
+MessageStatus.RECEIVED = "RECEIVED";
+
+var WCSEvent = function () {
+};
+WCSEvent.OnErrorEvent = "ON_ERROR_EVENT";
+WCSEvent.ConnectionStatusEvent = "CONNECTION_STATUS_EVENT";
+WCSEvent.OnRegistrationEvent = "ON_REGISTRATION_EVENT";
+WCSEvent.OnCallEvent = "ON_CALL_EVENT";
+WCSEvent.CallStatusEvent = "CALL_STATUS_EVENT";
+WCSEvent.OnMessageEvent = "ON_MESSAGE_EVENT";
+WCSEvent.MessageStatusEvent = "MESSAGE_STATUS_EVENT";
+
+var WCSError = function () {
+};
+WCSError.AUTHENTICATION_FAIL = "AUTHENTICATION_FAIL";
+WCSError.USER_NOT_AVAILABLE = "USER_NOT_AVAILABLE";
+WCSError.TOO_MANY_REGISTER_ATTEMPTS = "TOO_MANY_REGISTER_ATTEMPTS";
+WCSError.LICENSE_RESTRICTION = "LICENSE_RESTRICTION";
+WCSError.LICENSE_NOT_FOUND = "LICENSE_NOT_FOUND";
+WCSError.INTERNAL_SIP_ERROR = "INTERNAL_SIP_ERROR";
+WCSError.CONNECTION_ERROR = "CONNECTION_ERROR";
+WCSError.REGISTER_EXPIRE = "REGISTER_EXPIRE";
+WCSError.SIP_PORTS_BUSY = "SIP_PORTS_BUSY";
+WCSError.MEDIA_PORTS_BUSY = "MEDIA_PORTS_BUSY";
+WCSError.WRONG_SIPPROVIDER_ADDRESS = "WRONG_SIPPROVIDER_ADDRESS";
+WCSError.CALLEE_NAME_IS_NULL = "CALLEE_NAME_IS_NULL";
+WCSError.WRONG_FLASHPHONER_XML = "WRONG_FLASHPHONER_XML";
+WCSError.PAYMENT_REQUIRED = "PAYMENT_REQUIRED";
+
+
+var DataMap = function () {
+    this.data = {};
+};
+
+DataMap.prototype = {
+
+    add: function (data) {
+        this.data[data.id] = data;
+    },
+
+    update: function (data) {
+        this.data[data.id] = data;
+    },
+
+    get: function (id) {
+        return this.data[id];
+    },
+
+    remove: function (id) {
+        this.data[id] = undefined;
+    },
+
+    getSize: function () {
+        return Object.size(this.data);
+    },
+
+    array: function () {
+        var callArray = [];
+        for (var o in this.data) {
+            callArray.push(this.data[o]);
+        }
+        return callArray;
+    }
+};
+
 

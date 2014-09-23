@@ -12,11 +12,8 @@
 
     <!-- Other scripts -->
     <script type="text/javascript" src="js/api/Configuration.js"></script>
-    <script type="text/javascript" src="js/api/Model.js"></script>
     <script type="text/javascript" src="js/api/Flashphoner.js"></script>
-    <script type="text/javascript" src="js/api/Messenger.js"></script>
     <script type="text/javascript" src="js/swf/swfobject.js"></script>
-    <script type="text/javascript" src="js/trackbar.js"></script>
     <script type="text/javascript" src="js/rtc/WebRtcMediaManager.js"></script>
     <script type="text/javascript" src="js/SoundControl.js"></script>
     <script type="text/javascript" src="js/rtc/Adapter.js"></script>
@@ -46,6 +43,12 @@
                 phone.call($("#calleeText").val());
             });
 
+            $("#transferButton").click(function () {
+                if (phone.currentCall) {
+                    phone.transfer(phone.currentCall.id, $("#transferInput").val());
+                }
+            });
+
             $("#answerButton").click(function () {
                 if (phone.currentCall) {
                     phone.answer(phone.currentCall.id);
@@ -69,6 +72,10 @@
                 if (phone.currentCall) {
                     phone.hangup(phone.currentCall.id);
                 }
+            });
+
+            $("#messageButton").click(function () {
+                    phone.sendMessage($("#messageToInput").val(), $("#messageBodyInput").val(),  Configuration.getInstance().msgContentType);
             });
 
             $(".bugReportButton").click(function () {
@@ -180,6 +187,14 @@
     <input id="unholdButton" type="button" value="Unhold"/>
     <input id="transferInput" type="text"/>
     <input id="transferOk" type="button" value="Transfer"/>
+</div>
+<!-- ************* -->
+
+<!-- Message view -->
+<div style="border: 1px double black;padding: 10px">
+    <label for="messageToInput">Message to</label><input id="messageToInput" type="text"/>
+    <label for="messageBodyInput">Body</label><input id="messageBodyInput" type="text"/>
+    <input id="messageButton" type="button" value="Send"/>
 </div>
 <!-- ************* -->
 
