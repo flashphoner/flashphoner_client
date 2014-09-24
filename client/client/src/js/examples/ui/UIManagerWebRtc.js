@@ -15,11 +15,6 @@ var UIManagerWebRtc = function () {
 };
 
 UIManagerWebRtc.prototype = {
-    requestUnmuteC2C: function() {
-        trace("UIManagerWebRTC - requestUnmute");
-        Flashphoner.getInstance().getAccessToAudio();
-    },
-
     getAccessToAudioAndVideo: function() {
         trace("UIManagerWebRTC - getAccessToAudio");
         Flashphoner.getInstance().getAccessToAudioAndVideo();

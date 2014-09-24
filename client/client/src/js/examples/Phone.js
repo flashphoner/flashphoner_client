@@ -16,7 +16,6 @@ var Phone = function () {
     this.flashphoner_UI = null;
     this.currentCall = null;
     this.holdedCall = null;
-    this.messenger = null;
     this.logs = "";
     this.intervalId = -1;
 };
@@ -24,7 +23,6 @@ var Phone = function () {
 Phone.prototype.init = function () {
     this.flashphoner_UI = Configuration.getInstance().getFlashphonerUI();
     this.flashphonerListener = Configuration.getInstance().getFlashphonerListener();
-    this.messenger = new Messenger();
 
     Flashphoner.getInstance().addListener(WCSEvent.OnErrorEvent, this.onErrorListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.ConnectionStatusEvent, this.connectionStatusListener, this);
@@ -35,6 +33,10 @@ Phone.prototype.init = function () {
     Flashphoner.getInstance().addListener(WCSEvent.OnMessageEvent, this.onMessageListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.MessageStatusEvent, this.messageStatusListener, this);
 
+    Flashphoner.getInstance().addListener(WCSEvent.OnRecordCompleteEvent, this.onRecordCompleteListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.OnSubscriptionEvent, this.onSubscriptionListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.OnXcapStatusEvent, this.onXcapStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.OnBugReportEvent, this.onBugReportListener, this);
 
     if (Configuration.getInstance().getToken()) {
         this.loginByToken(Configuration.getInstance().getToken());
@@ -266,7 +268,7 @@ Phone.prototype.callStatusListener = function (event) {
     var call = event.call;
     trace("Phone - callStatusListener call id: " + call.id + " state: " + call.state + " incoming: " + call.incoming);
     if (this.currentCall.id == call.id) {
-        if (call.state == STATE_FINISH) {
+        if (call.state == CallStatus.FINISH) {
             trace("Phone - ... Call is finished...");
             if (this.holdedCall != null) {
                 this.currentCall = this.holdedCall;
@@ -277,28 +279,28 @@ Phone.prototype.callStatusListener = function (event) {
                 SoundControl.getInstance().stopSound("RING");
                 SoundControl.getInstance().playSound("FINISH");
             }
-        } else if (call.state == STATE_HOLD) {
+        } else if (call.state == CallStatus.HOLD) {
             trace('Phone - ...Call on hold...');
-        } else if (call.state == STATE_TALK) {
+        } else if (call.state == CallStatus.TALK) {
             trace('Phone - ...Talking...');
             SoundControl.getInstance().stopSound("RING");
-        } else if (call.state == STATE_RING) {
+        } else if (call.state == CallStatus.RING) {
             trace('Phone - ...Ringing...');
             if (this.isRingSoundAllowed()) {
                 SoundControl.getInstance().playSound("RING");
             }
-        } else if (call.state == STATE_RING_MEDIA) {
+        } else if (call.state == CallStatus.RING_MEDIA) {
             trace('Phone - ...Ringing...');
             SoundControl.getInstance().stopSound("RING");
-        } else if (call.state == STATE_BUSY) {
+        } else if (call.state == CallStatus.BUSY) {
             SoundControl.getInstance().playSound("BUSY");
-        } else if (call.state == STATE_SESSION_PROGRESS) {
+        } else if (call.state == CallStatus.SESSION_PROGRESS) {
             trace('Phone - ...Call in Progress...');
             SoundControl.getInstance().stopSound("RING");
         }
     } else {
         if (this.holdedCall.id == call.id) {
-            if (call.state == STATE_FINISH) {
+            if (call.state == CallStatus.FINISH) {
                 trace("It seems we received FINISH state on holdedCall. Just do null the holdedCall.");
                 this.holdedCall = null;
             }
@@ -394,13 +396,15 @@ Phone.prototype.parseMsn = function (fsService, mcn) {
     return ret;
 };
 
-Phone.prototype.notifyRecordComplete = function (recordReport) {
-    trace("Phone - notify record complete: " + recordReport.mixedFilename);
+Phone.prototype.onRecordCompleteListener = function (recordReport) {
+    trace("Phone - onRecordCompleteListener: " + recordReport.mixedFilename);
 };
 
-Phone.prototype.notifySubscription = function (subscriptionObject, sipObject) {
-    trace("Phone - notify subscription event: " + subscriptionObject.event + " expires: " + subscriptionObject.expires + " status: " + subscriptionObject.status + " terminate: " + subscriptionObject.terminate);
-    trace("Phone - notify subscription body: " + subscriptionObject.requestBody);
+Phone.prototype.onSubscriptionListener = function (event) {
+    var subscriptionObject = event.subscription;
+    var sipObject = event.sipObject;
+    trace("Phone - onSubscriptionListener event: " + subscriptionObject.event + " expires: " + subscriptionObject.expires + " status: " + subscriptionObject.status + " terminate: " + subscriptionObject.terminate);
+    trace("Phone - onSubscriptionListener body: " + subscriptionObject.requestBody);
     if (subscriptionObject.event == "reg") {
         if (subscriptionObject.terminate) {
             this.disconnect();
@@ -408,8 +412,8 @@ Phone.prototype.notifySubscription = function (subscriptionObject, sipObject) {
     }
 };
 
-Phone.prototype.notifyXcapResponse = function (xcapResponse) {
-    trace("Phone - notifyXcapResponse " + xcapResponse);
+Phone.prototype.onXcapStatusListener = function (xcapResponse) {
+    trace("Phone - onXcapStatusListener " + xcapResponse);
     var xml = $.parseXML(xcapResponse);
     var history = $(xml).find("history-list").find("history");
     if (history != null && history.length != 0) {
@@ -419,8 +423,8 @@ Phone.prototype.notifyXcapResponse = function (xcapResponse) {
     }
 };
 
-Phone.prototype.notifyBugReport = function (filename) {
-    trace("Created bug report; filename - " + filename);
+Phone.prototype.onBugReportListener = function (event) {
+    trace("Phone - onBugReportListener; filename - " + event.filename);
 };
 
 Phone.prototype.onErrorListener = function (event) {
