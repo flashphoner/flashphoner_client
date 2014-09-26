@@ -4,23 +4,27 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
     <!-- JQuery -->
-    <script type="text/javascript" src="js/examples/jquery/jquery.js"></script>
-    <script type="text/javascript" src="js/examples/jquery/jquery-ui.js"></script>
-    <script type="text/javascript" src="js/examples/jquery/jquery.websocket.js"></script>
-    <script type="text/javascript" src="js/examples/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="api/jquery/jquery.js"></script>
+    <script type="text/javascript" src="api/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="api/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="api/jquery/jquery.json.js"></script>
     <!-- ****** -->
 
     <!-- Other scripts -->
-    <script type="text/javascript" src="js/api/Flashphoner.js"></script>
-    <script type="text/javascript" src="js/api/swf/swfobject.js"></script>
+    <script type="text/javascript" src="api/Flashphoner.js"></script>
+    <script type="text/javascript" src="api/swf/swfobject.js"></script>
 
-    <script type="text/javascript" src="js/examples/ui/UIManagerWebRtc.js"></script>
-    <script type="text/javascript" src="js/examples/ui/UIManagerFlash.js"></script>
-    <script type="text/javascript" src="js/examples/Phone.js"></script>
-    <script type="text/javascript" src="js/examples/StaticData.js"></script>
+    <script type="text/javascript" src="examples/SoundControl.js"></script>
+    <script type="text/javascript" src="examples/listener/DefaultListener.js"></script>
+    <script type="text/javascript" src="examples/listener/LoadToolListener.js"></script>
+    <script type="text/javascript" src="examples/ConfigurationLoader.js"></script>
+    <script type="text/javascript" src="examples/ui/UIManagerWebRtc.js"></script>
+    <script type="text/javascript" src="examples/ui/UIManagerFlash.js"></script>
+    <script type="text/javascript" src="examples/Phone.js"></script>
+    <script type="text/javascript" src="examples/StaticData.js"></script>
     <script type="application/javascript">
         var phone = new Phone();
-        Configuration.getInstance(function(){
+        ConfigurationLoader.getInstance(function(){
             trace("Configuration loaded");
             phone.init();
 
@@ -63,12 +67,16 @@
 
             $("#hangupButton").click(function () {
                 if (phone.currentCall) {
-                    phone.hangup(phone.currentCall.id);
+                    phone.hangup(phone.currentCall);
                 }
             });
 
             $("#messageButton").click(function () {
-                    phone.sendMessage($("#messageToInput").val(), $("#messageBodyInput").val(),  Configuration.getInstance().msgContentType);
+                var message = new Message();
+                message.to = $("#messageToInput").val();
+                message.body = $("#messageBodyInput").val();
+
+                phone.sendMessage(message);
             });
 
             $(".bugReportButton").click(function () {

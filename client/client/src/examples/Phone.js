@@ -21,8 +21,8 @@ var Phone = function () {
 };
 
 Phone.prototype.init = function () {
-    this.flashphoner_UI = Configuration.getInstance().getFlashphonerUI();
-    this.flashphonerListener = Configuration.getInstance().getFlashphonerListener();
+    this.flashphoner_UI = ConfigurationLoader.getInstance().getFlashphonerUI();
+    this.flashphonerListener = ConfigurationLoader.getInstance().getFlashphonerListener();
 
     Flashphoner.getInstance().addListener(WCSEvent.OnErrorEvent, this.onErrorListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.ConnectionStatusEvent, this.connectionStatusListener, this);
@@ -37,10 +37,6 @@ Phone.prototype.init = function () {
     Flashphoner.getInstance().addListener(WCSEvent.OnSubscriptionEvent, this.onSubscriptionListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.OnXcapStatusEvent, this.onXcapStatusListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.OnBugReportEvent, this.onBugReportListener, this);
-
-    if (Configuration.getInstance().getToken()) {
-        this.loginByToken(Configuration.getInstance().getToken());
-    }
 };
 
 
@@ -114,12 +110,8 @@ Phone.prototype.call = function (callee) {
     }
 };
 
-Phone.prototype.sendMessage = function (to, body, contentType) {
-    trace("Phone - sendMessage " + to + " body: " + body + " contentType: " + contentType);
-    var message = new Message();
-    message.to = to;
-    message.body = body;
-    message.contentType = contentType;
+Phone.prototype.sendMessage = function (message) {
+    trace("Phone - sendMessage " + message.to + " body: " + message.body);
     Flashphoner.getInstance().sendMessage(message);
 };
 
@@ -158,9 +150,9 @@ Phone.prototype.answer = function (callId) {
     }
 };
 
-Phone.prototype.hangup = function (callId) {
-    trace("Phone - hangup " + callId);
-    Flashphoner.getInstance().hangup(callId);
+Phone.prototype.hangup = function (call) {
+    trace("Phone - hangup " + call.id);
+    Flashphoner.getInstance().hangup(call);
     this.flashphonerListener.onHangup();
 };
 
@@ -180,14 +172,12 @@ Phone.prototype.transfer = function (callId, target) {
 };
 
 Phone.prototype.sendXcapRequest = function () {
-    if (Configuration.getInstance().xcapUrl != null && Configuration.getInstance().xcapUrl.length != 0) {
-        Flashphoner.getInstance().sendXcapRequest(Configuration.getInstance().xcapUrl);
-    }
+    Flashphoner.getInstance().sendXcapRequest();
 };
 
 Phone.prototype.subscribeReg = function () {
     var subscribeObj = {};
-    subscribeObj.event = Configuration.getInstance().subscribeEvent;
+    subscribeObj.event = ConfigurationLoader.getInstance().subscribeEvent;
     subscribeObj.expires = 3600;
     Flashphoner.getInstance().subscribe(subscribeObj);
 };
@@ -240,7 +230,7 @@ Phone.prototype.onRegistrationListener = function (event) {
     SoundControl.getInstance().playSound("REGISTER");
     this.flashphonerListener.onRegistered();
 
-    if (Configuration.getInstance().subscribeEvent != null && Configuration.getInstance().subscribeEvent.length != 0) {
+    if (ConfigurationLoader.getInstance().subscribeEvent != null && ConfigurationLoader.getInstance().subscribeEvent.length != 0) {
         this.subscribeReg();
     }
 
@@ -318,7 +308,7 @@ Phone.prototype.onMessageListener = function (event) {
 
     if (message.contentType == "application/im-iscomposing+xml" || message.contentType == "message/fsservice+xml") {
         trace("ignore message: " + message.body);
-        if (Configuration.getInstance().disableUnknownMsgFiltering) {
+        if (ConfigurationLoader.getInstance().disableUnknownMsgFiltering) {
             message.body = escapeXmlTags(message.body);
             SoundControl.getInstance().playSound("MESSAGE");
         }
@@ -332,7 +322,7 @@ Phone.prototype.onMessageListener = function (event) {
         SoundControl.getInstance().playSound("MESSAGE");
     } else {
         trace("Not displaying message " + message.body + ", body is null after convert");
-        if (Configuration.getInstance().disableUnknownMsgFiltering) {
+        if (ConfigurationLoader.getInstance().disableUnknownMsgFiltering) {
             message.body = escapeXmlTags(message.body);
             SoundControl.getInstance().playSound("MESSAGE");
         }
@@ -417,8 +407,8 @@ Phone.prototype.onXcapStatusListener = function (xcapResponse) {
     var xml = $.parseXML(xcapResponse);
     var history = $(xml).find("history-list").find("history");
     if (history != null && history.length != 0) {
-        if (Configuration.getInstance().msrpCallee != null && Configuration.getInstance().msrpCallee.length != 0) {
-            this.msrpCall(Configuration.getInstance().msrpCallee);
+        if (ConfigurationLoader.getInstance().msrpCallee != null && ConfigurationLoader.getInstance().msrpCallee.length != 0) {
+            this.msrpCall(ConfigurationLoader.getInstance().msrpCallee);
         }
     }
 };
@@ -477,7 +467,7 @@ Phone.prototype.isVideoCall = function () {
 
 Phone.prototype.isRingSoundAllowed = function () {
     try {
-        if (Configuration.getInstance().suppressRingOnActiveAudioStream && Flashphoner.getInstance().hasActiveAudioStream()) {
+        if (ConfigurationLoader.getInstance().suppressRingOnActiveAudioStream && Flashphoner.getInstance().hasActiveAudioStream()) {
             trace("Phone - isRingSoundAllowed false");
             return false;
         }
