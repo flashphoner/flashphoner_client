@@ -54,7 +54,7 @@ Phone.prototype.connect = function () {
     loginObject.port = $('#port').val();
     loginObject.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
     loginObject.useSelfSigned = !isMobile.any();
-    loginObject.appKey = "defaultVoIPApp";
+    loginObject.appKey = "defaultApp";
 
     var result = Flashphoner.getInstance().connect(loginObject);
     if (result == 0) {
@@ -114,7 +114,6 @@ Phone.prototype.sendMessage = function (message) {
     trace("Phone - sendMessage " + message.to + " body: " + message.body);
     Flashphoner.getInstance().sendMessage(message);
 };
-
 
 Phone.prototype.answer = function (callId) {
     trace("Phone - answer " + callId);
@@ -179,7 +178,7 @@ Phone.prototype.subscribeReg = function () {
     var subscribeObj = {};
     subscribeObj.event = ConfigurationLoader.getInstance().subscribeEvent;
     subscribeObj.expires = 3600;
-    Flashphoner.getInstance().subscribe(subscribeObj);
+    Flashphoner.getInstance().voipSubscribe(subscribeObj);
 };
 
 

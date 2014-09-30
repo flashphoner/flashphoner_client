@@ -4,9 +4,11 @@ function Flashphoner() {
     }
     arguments.callee.instance = this;
 
+    this.webRtcMediaManagers = new DataMap();
     this.connection = null;
     this.configuration = new Configuration();
     this.calls = new DataMap();
+    this.streams = new DataMap();
     this.messages = {};
     this.isOpened = false;
     this.listeners = {};
@@ -34,20 +36,24 @@ Flashphoner.prototype = {
         }
     },
 
-    init: function (localVideoPreview, remoteVideo) {
+    addOrUpdateCall: function (call) {
         var me = this;
-        me.webRtcMediaManager = new WebRtcMediaManager(me.configuration.stunServer, me.configuration.useDTLS, localVideoPreview, remoteVideo);
+        if (me.calls.get(call.id)) {
+            me.calls.update(call.id, call);
+        } else {
+            me.calls.add(call.id, call);
+            me.invokeListener(WCSEvent.OnCallEvent, [
+                {call: call}
+            ]);
+            me.webRtcMediaManagers.add(call.id, new WebRtcMediaManager(me.configuration.stunServer, me.configuration.useDTLS, me.localVideo, me.remoteVideo));
+        }
+    },
 
-        var addOrUpdateCall = function (call) {
-            if (me.calls.get(call.id)) {
-                me.calls.update(call);
-            } else {
-                me.calls.add(call);
-                me.invokeListener(WCSEvent.OnCallEvent, [
-                    {call: call}
-                ]);
-            }
-        };
+    init: function (localVideo, remoteVideo) {
+        var me = this;
+        me.localVideo = localVideo;
+        me.remoteVideo = remoteVideo;
+
 
         this.callbacks = {
             ping: function () {
@@ -77,12 +83,12 @@ Flashphoner.prototype = {
 
             notifyTryingResponse: function (call, sipHeader) {
                 trace("notifyTryingResponse call.id:" + call.id);
-                addOrUpdateCall(call);
+                me.addOrUpdateCall(call);
             },
 
             ring: function (call, sipHeader) {
                 trace("ring call.state: " + call.state + " call.id: " + call.id);
-                addOrUpdateCall(call);
+                me.addOrUpdateCall(call);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     {call: call, sipObject: sipHeader}
                 ]);
@@ -90,29 +96,33 @@ Flashphoner.prototype = {
 
             sessionProgress: function (call, sipHeader) {
                 trace("sessionProgress call.state: " + call.state + " call.id: " + call.id);
-                addOrUpdateCall(call);
+                me.addOrUpdateCall(call);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     {call: call, sipObject: sipHeader}
                 ]);
             },
 
-            setRemoteSDP: function (call, sdp, isInitiator, sipHeader) {
-                addOrUpdateCall(call);
-                me.webRtcMediaManager.setRemoteSDP(sdp, isInitiator);
-                if (!isInitiator && me.webRtcMediaManager.getConnectionState() == "established") {
-                    me.answer(call.id);
+            setRemoteSDP: function (id, sdp, isInitiator) {
+                var webRtcMediaManager = me.webRtcMediaManagers.get(id);
+                webRtcMediaManager.setRemoteSDP(sdp, isInitiator);
+                //todo
+                setPublishStreamName(me.streamName);
+
+                if (!isInitiator && webRtcMediaManager.getConnectionState() == "established") {
+                    me.answer(id);
                 }
+
             },
 
             talk: function (call, sipHeader) {
-                addOrUpdateCall(call);
+                me.addOrUpdateCall(call);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     {call: call, sipObject: sipHeader}
                 ]);
             },
 
             hold: function (call, sipHeader) {
-                addOrUpdateCall(call);
+                me.addOrUpdateCall(call);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     {call: call, sipObject: sipHeader}
                 ]);
@@ -120,16 +130,14 @@ Flashphoner.prototype = {
 
             finish: function (call, sipHeader) {
                 me.calls.remove(call.id);
-                if (me.calls.length == 0) {
-                    me.webRtcMediaManager.close();
-                }
+                me.webRtcMediaManagers.remove(call.id).close();
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     {call: call, sipObject: sipHeader}
                 ]);
             },
 
             busy: function (call, sipHeader) {
-                addOrUpdateCall(call);
+                me.addOrUpdateCall(call);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     {call: call, sipObject: sipHeader}
                 ]);
@@ -207,6 +215,14 @@ Flashphoner.prototype = {
                 me.invokeListener(WCSEvent.OnXcapStatusEvent, [
                     xcapResponse
                 ]);
+            },
+
+            notifySubscribeError: function (message) {
+                notifySubscribeError(message);
+            },
+
+            notifyPublishError: function (message) {
+                notifyPublishError(message);
             }
         };
     },
@@ -242,7 +258,9 @@ Flashphoner.prototype = {
                 me.invokeListener(WCSEvent.ConnectionStatusEvent, [
                     {connection: me.connection}
                 ]);
-                me.webRtcMediaManager.close();
+                for (var id in me.webRtcMediaManagers) {
+                    me.webRtcMediaManagers.remove(id).close();
+                }
             },
             error: function () {
                 me.connection.status = ConnectionStatus.Error;
@@ -261,8 +279,8 @@ Flashphoner.prototype = {
         this.webSocket.close();
     },
 
-    subscribe: function (subscribeObject) {
-        this.webSocket.send("subscribe", subscribeObject);
+    voipSubscribe: function (subscribeObject) {
+        this.webSocket.send("voipSubscribe", subscribeObject);
     },
 
     sendXcapRequest: function (xcapUrl) {
@@ -272,19 +290,24 @@ Flashphoner.prototype = {
         }
     },
 
-    call: function (callRequest) {
+    call: function (call) {
         var me = this;
         trace("Configuring WebRTC connection...");
-        this.webRtcMediaManager.createOffer(function (sdp) {
+
+        call.callId = createUUID();
+        me.addOrUpdateCall(call);
+
+        var webRtcMediaManager = me.webRtcMediaManagers.get(call.callId);
+        webRtcMediaManager.createOffer(function (sdp) {
             //here we will strip codecs from SDP if requested
             if (me.configuration.stripCodecs.length) {
                 sdp = me.stripCodecsSDP(sdp);
                 console.log("New SDP: " + sdp);
             }
             sdp = me.removeCandidatesFromSDP(sdp);
-            callRequest.sdp = sdp;
-            me.webSocket.send("call", callRequest);
-        }, callRequest.hasVideo);
+            call.sdp = sdp;
+            me.webSocket.send("call", call);
+        }, call.hasVideo);
         return 0;
     },
 
@@ -294,22 +317,15 @@ Flashphoner.prototype = {
         return 0;
     },
 
-    setSendVideo: function (hasVideo) {
-//        var me = this;
-//        this.webRtcMediaManager.createOffer(function (sdp) {
-//            me.webSocket.send("changeMediaRequest", {callId: callId, sdp: sdp});
-//        }, hasVideo);
-//        return 0;
-    },
-
     answer: function (callId, hasVideo) {
         var me = this;
         trace("Configuring WebRTC connection...");
         /**
          * If we receive INVITE without SDP, we should send answer with SDP based on webRtcMediaManager.createOffer because we do not have remoteSdp here
          */
-        if (this.webRtcMediaManager.lastReceivedSdp !== null && this.webRtcMediaManager.lastReceivedSdp.length == 0) {
-            this.webRtcMediaManager.createOffer(function (sdp) {
+        var webRtcMediaManager = this.webRtcMediaManagers.get(callId);
+        if (webRtcMediaManager.lastReceivedSdp !== null && webRtcMediaManager.lastReceivedSdp.length == 0) {
+            webRtcMediaManager.createOffer(function (sdp) {
                 //here we will strip codecs from SDP if requested
                 if (me.configuration.stripCodecs.length) {
                     sdp = me.stripCodecsSDP(sdp);
@@ -322,7 +338,7 @@ Flashphoner.prototype = {
             /**
              * If we receive a normal INVITE with SDP we should create answering SDP using normal createAnswer method because we already have remoteSdp here.
              */
-            this.webRtcMediaManager.createAnswer(function (sdp) {
+            webRtcMediaManager.createAnswer(function (sdp) {
                 me.webSocket.send("answer", {callId: callId, hasVideo: hasVideo, sdp: sdp});
             }, hasVideo);
         }
@@ -376,38 +392,38 @@ Flashphoner.prototype = {
     },
 
     getAccessToAudioAndVideo: function () {
-        this.webRtcMediaManager.getAccessToAudioAndVideo();
+        WebRtcMediaManager.getAccessToAudioAndVideo();
     },
 
     getAccessToAudio: function () {
-        this.webRtcMediaManager.getAccessToAudio();
+        WebRtcMediaManager.getAccessToAudio();
     },
 
     getVolume: function () {
-        return this.webRtcMediaManager.remoteVideo.volume * 100;
+        return this.remoteVideo.volume * 100;
     },
 
     setVolume: function (value) {
-        this.webRtcMediaManager.remoteVideo.volume = value / 100;
+        this.remoteVideo.volume = value / 100;
     },
 
     hasAccessToAudio: function () {
-        return this.webRtcMediaManager.isAudioMuted == -1;
+        return WebRtcMediaManager.isAudioMuted == -1;
     },
 
     hasAccessToVideo: function () {
-        return this.webRtcMediaManager.isVideoMuted == -1;
+        return WebRtcMediaManager.isVideoMuted == -1;
     },
 
     hasActiveAudioStream: function () {
-        return this.webRtcMediaManager.hasActiveAudioStream();
+        return WebRtcMediaManager.hasActiveAudioStream();
     },
 
     sendMessage: function (message) {
         var id = createUUID();
         message.id = id;
         message.from = this.user.login;
-        message.contentType = message.contentType || this.configuration.contentType;
+        message.contentType = message.contentType || this.configuration.msgContentType;
         message.isImdnRequired = message.isImdnRequired || this.configuration.imdnEnabled;
         this.messages[id] = message;
         this.webSocket.send("sendInstantMessage", message);
@@ -417,8 +433,61 @@ Flashphoner.prototype = {
         this.webSocket.send("notificationResult", result);
     },
 
-    getStats: function () {
-        this.webRtcMediaManager.requestStats();
+    getStats: function (sessionId) {
+        this.webRtcMediaManagers.get(sessionId).requestStats();
+    },
+
+    publish: function (streamName) {
+        var me = this;
+        var stream = {};
+        stream.mediaSessionId = createUUID();
+        stream.streamName = streamName;
+        stream.hasVideo = true;
+
+        var webRtcMediaManager = new WebRtcMediaManager(me.configuration.stunServer, me.configuration.useDTLS, me.localVideo, me.remoteVideo)
+
+        webRtcMediaManager.createOffer(function (sdp) {
+            trace("Publish streamName " + stream.streamName);
+            stream.sdp = me.removeCandidatesFromSDP(sdp);
+            me.webSocket.send("publish", stream);
+
+            me.webRtcMediaManagers.add(stream.mediaSessionId, webRtcMediaManager);
+            me.streams.add(stream.streamName, stream);
+        }, true, true);
+    },
+
+    unpublish: function (streamName) {
+        console.log("Unpublish stream " + streamName);
+        var me = this;
+        var stream = me.streams.remove(streamName);
+        me.webRtcMediaManagers.remove(stream.mediaSessionId).close();
+        me.webSocket.send("unPublish", stream);
+    },
+
+    subscribe: function (streamName) {
+        var me = this;
+        var webRtcMediaManager = new WebRtcMediaManager(me.configuration.stunServer, me.configuration.useDTLS, me.localVideo, me.remoteVideo)
+        var stream = {};
+        stream.mediaSessionId = createUUID();
+        stream.streamName = streamName;
+        stream.hasVideo = true;
+
+        webRtcMediaManager.createOffer(function (sdp) {
+            console.log("subscribe streamName " + object.streamName);
+            stream.sdp = me.removeCandidatesFromSDP(sdp);
+            me.webSocket.send("subscribe", stream);
+
+            me.webRtcMediaManagers.add(stream.mediaSessionId, webRtcMediaManager);
+            me.streams.add(stream.streamName, stream);
+        }, false, false);
+    },
+
+    unSubscribe: function (streamName) {
+        console.log("unSubscribe stream " + streamName);
+        var me = this;
+        var stream = me.streams.remove(streamName);
+        me.webRtcMediaManagers.remove(stream.mediaSessionId).close();
+        me.webSocket.send("unSubscribe", stream);
     },
 
     removeCandidatesFromSDP: function (sdp) {
@@ -514,13 +583,41 @@ var WebRtcMediaManager = function (stunServer, useDTLS, localVideoPreview, remot
     me.remoteVideo = remoteVideo;
     me.localVideo = localVideoPreview;
     me.localVideo.volume = 0;
-    me.isAudioMuted = 1;
-    me.isVideoMuted = 1;
     me.stunServer = stunServer;
     me.useDTLS = useDTLS;
     //stun server by default
     //commented to speedup WebRTC call establishment
     //me.stunServer = "stun.l.google.com:19302";
+};
+
+WebRtcMediaManager.isAudioMuted = 1;
+WebRtcMediaManager.isVideoMuted = 1;
+WebRtcMediaManager.getAccessToAudioAndVideo = function () {
+    if (!WebRtcMediaManager.localAudioVideoStream) {
+        getUserMedia({audio: true, video: true}, function (stream) {
+                attachMediaStream(me.localVideo, stream);
+                WebRtcMediaManager.localAudioVideoStream = stream;
+                WebRtcMediaManager.isAudioMuted = -1;
+                WebRtcMediaManager.isVideoMuted = -1;
+            }, function (error) {
+                trace("Failed to get access to local media. Error code was " + error.code + ".");
+                WebRtcMediaManager.isAudioMuted = 1;
+                WebRtcMediaManager.isVideoMuted = 1;
+            }
+        );
+    }
+};
+WebRtcMediaManager.getAccessToAudio = function () {
+    if (!WebRtcMediaManager.localAudioStream) {
+        getUserMedia({audio: true}, function (stream) {
+                WebRtcMediaManager.localAudioStream = stream;
+                WebRtcMediaManager.isAudioMuted = -1;
+            }, function (error) {
+                trace("Failed to get access to local media. Error code was " + error.code + ".");
+                WebRtcMediaManager.isAudioMuted = 1;
+            }
+        );
+    }
 };
 
 WebRtcMediaManager.prototype.init = function () {
@@ -632,40 +729,6 @@ WebRtcMediaManager.prototype.waitGatheringIce = function () {
     }
 };
 
-WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
-    var me = this;
-    if (!me.localAudioVideoStream) {
-        getUserMedia({audio: true, video: true}, function (stream) {
-                attachMediaStream(me.localVideo, stream);
-                me.localAudioVideoStream = stream;
-                me.isAudioMuted = -1;
-                me.isVideoMuted = -1;
-            }, function (error) {
-                trace("Failed to get access to local media. Error code was " + error.code + ".");
-                closeInfoView(3000);
-                me.isAudioMuted = 1;
-                me.isVideoMuted = 1;
-            }
-        );
-    }
-};
-
-
-WebRtcMediaManager.prototype.getAccessToAudio = function () {
-    var me = this;
-    if (!me.localAudioStream) {
-        getUserMedia({audio: true}, function (stream) {
-                me.localAudioStream = stream;
-                me.isAudioMuted = -1;
-            }, function (error) {
-                trace("Failed to get access to local media. Error code was " + error.code + ".");
-                closeInfoView(3000);
-                me.isAudioMuted = 1;
-            }
-        );
-    }
-};
-
 WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVideo) {
     trace("WebRtcMediaManager - createOffer()");
     var me = this;
@@ -678,9 +741,9 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
             trace("peerConnection is null");
             me.createPeerConnection();
             if (hasVideo) {
-                me.peerConnection.addStream(me.localAudioVideoStream);
+                me.peerConnection.addStream(WebRtcMediaManager.localAudioVideoStream);
             } else {
-                me.peerConnection.addStream(me.localAudioStream);
+                me.peerConnection.addStream(WebRtcMediaManager.localAudioStream);
             }
         }
         me.createOfferCallback = createOfferCallback;
@@ -707,17 +770,17 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback, hasV
         if (me.peerConnection == null) {
             me.createPeerConnection();
             if (hasVideo) {
-                me.peerConnection.addStream(me.localAudioVideoStream);
+                me.peerConnection.addStream(WebRtcMediaManager.localAudioVideoStream);
             } else {
-                me.peerConnection.addStream(me.localAudioStream);
+                me.peerConnection.addStream(WebRtcMediaManager.localAudioStream);
             }
         } else {
             if (hasVideo) {
-                me.peerConnection.addStream(me.localVideoStream);
+                me.peerConnection.addStream(WebRtcMediaManager.localVideoStream);
                 me.hasVideo = true;
             } else {
-                if (me.localVideoStream) {
-                    me.peerConnection.removeStream(me.localVideoStream);
+                if (WebRtcMediaManager.localVideoStream) {
+                    me.peerConnection.removeStream(WebRtcMediaManager.localVideoStream);
                 }
                 me.hasVideo = false;
             }
@@ -951,7 +1014,7 @@ WebRtcMediaManager.prototype.processGoogRtcStatsReport = function (report) {
         }
     }
     return result;
-}
+};
 
 WebRtcMediaManager.prototype.onCreateAnswerErrorCallback = function (error) {
     console.error("WebRtcMediaManager - onCreateAnswerErrorCallback(): error: " + error);
@@ -1010,7 +1073,7 @@ var Connection = function () {
     this.registerRequired = true;
     this.useDTLS = true;
     this.useSelfSigned = !isMobile.any();
-    this.appKey = "defaultVoIPApp";
+    this.appKey = "defaultApp";
     this.status = ConnectionStatus.New;
 };
 
@@ -1100,12 +1163,12 @@ var DataMap = function () {
 
 DataMap.prototype = {
 
-    add: function (data) {
-        this.data[data.id] = data;
+    add: function (id, data) {
+        this.data[id] = data;
     },
 
-    update: function (data) {
-        this.data[data.id] = data;
+    update: function (id, data) {
+        this.data[id] = data;
     },
 
     get: function (id) {
@@ -1113,7 +1176,9 @@ DataMap.prototype = {
     },
 
     remove: function (id) {
+        var data = this.data[id];
         this.data[id] = undefined;
+        return data;
     },
 
     getSize: function () {

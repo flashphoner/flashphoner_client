@@ -19,11 +19,11 @@ ConfigurationLoader = function (configLoadedListener) {
     this.flashphonerListener = new DefaultListener();
     this.loadBalancerUrl = null;
     this.jsonpSuccess = false;
-    this.ringSound = "examples/sounds/CALL_OUT.ogg";
-    this.busySound = "examples/sounds/BUSY.ogg";
-    this.registerSound = "examples/sounds/REGISTER.ogg";
-    this.finishSound = "examples/sounds/HANGUP.ogg";
-    this.messageSound = "examples/sounds/MESSAGE.ogg";
+    this.ringSound = "sounds/CALL_OUT.ogg";
+    this.busySound = "sounds/BUSY.ogg";
+    this.registerSound = "sounds/REGISTER.ogg";
+    this.finishSound = "sounds/HANGUP.ogg";
+    this.messageSound = "sounds/MESSAGE.ogg";
     this.hangupLT = 0;
     this.answerLT = 0;
     this.callLT = 0;
@@ -33,7 +33,7 @@ ConfigurationLoader = function (configLoadedListener) {
 
     $.ajax({
         type: "GET",
-        url: "flashphoner.xml",
+        url: "../flashphoner.xml",
         dataType: "xml",
         success: this.parseFlashphonerXml,
         context: this
