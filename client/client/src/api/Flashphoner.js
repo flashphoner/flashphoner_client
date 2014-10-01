@@ -38,14 +38,14 @@ Flashphoner.prototype = {
 
     addOrUpdateCall: function (call) {
         var me = this;
-        if (me.calls.get(call.id)) {
-            me.calls.update(call.id, call);
+        if (me.calls.get(call.callId)) {
+            me.calls.update(call.callId, call);
         } else {
-            me.calls.add(call.id, call);
+            me.calls.add(call.callId, call);
             me.invokeListener(WCSEvent.OnCallEvent, [
                 {call: call}
             ]);
-            me.webRtcMediaManagers.add(call.id, new WebRtcMediaManager(me.configuration.stunServer, me.configuration.useDTLS, me.localVideo, me.remoteVideo));
+            me.webRtcMediaManagers.add(call.callId, new WebRtcMediaManager(me.configuration.stunServer, me.configuration.useDTLS, me.localVideo, me.remoteVideo));
         }
     },
 
@@ -82,12 +82,12 @@ Flashphoner.prototype = {
             },
 
             notifyTryingResponse: function (call, sipHeader) {
-                trace("notifyTryingResponse call.id:" + call.id);
+                trace("notifyTryingResponse call.callId:" + call.callId);
                 me.addOrUpdateCall(call);
             },
 
             ring: function (call, sipHeader) {
-                trace("ring call.state: " + call.state + " call.id: " + call.id);
+                trace("ring call.state: " + call.state + " call.callId: " + call.callId);
                 me.addOrUpdateCall(call);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     {call: call, sipObject: sipHeader}
@@ -95,7 +95,7 @@ Flashphoner.prototype = {
             },
 
             sessionProgress: function (call, sipHeader) {
-                trace("sessionProgress call.state: " + call.state + " call.id: " + call.id);
+                trace("sessionProgress call.state: " + call.state + " call.callId: " + call.callId);
                 me.addOrUpdateCall(call);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     {call: call, sipObject: sipHeader}
@@ -129,8 +129,8 @@ Flashphoner.prototype = {
             },
 
             finish: function (call, sipHeader) {
-                me.calls.remove(call.id);
-                me.webRtcMediaManagers.remove(call.id).close();
+//                me.calls.remove(call.callId);
+                me.webRtcMediaManagers.remove(call.callId).close();
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     {call: call, sipObject: sipHeader}
                 ]);
@@ -258,7 +258,7 @@ Flashphoner.prototype = {
                 me.invokeListener(WCSEvent.ConnectionStatusEvent, [
                     {connection: me.connection}
                 ]);
-                for (var id in me.webRtcMediaManagers) {
+                for (var id in me.webRtcMediaManagers.data()) {
                     me.webRtcMediaManagers.remove(id).close();
                 }
             },
@@ -346,7 +346,7 @@ Flashphoner.prototype = {
 
     hangup: function (call) {
         if (call) {
-            this.webSocket.send("hangup", {callId:call.id});
+            this.webSocket.send("hangup", {callId:call.callId});
         }
     },
 
@@ -639,7 +639,6 @@ WebRtcMediaManager.prototype.close = function () {
             trace("WebRtcMediaManager - PeerConnection will be closed");
             this.peerConnection.close();
             this.remoteVideo.pause();
-            this.remoteVideo.src = null;
         }
     } else {
         console.log("peerConnection already closed, do nothing!");
@@ -1183,6 +1182,10 @@ DataMap.prototype = {
 
     getSize: function () {
         return Object.size(this.data);
+    },
+
+    data: function() {
+        return this.data;
     },
 
     array: function () {

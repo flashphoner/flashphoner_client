@@ -150,7 +150,7 @@ Phone.prototype.answer = function (callId) {
 };
 
 Phone.prototype.hangup = function (call) {
-    trace("Phone - hangup " + call.id);
+    trace("Phone - hangup " + call.callId);
     Flashphoner.getInstance().hangup(call);
     this.flashphonerListener.onHangup();
 };
@@ -196,8 +196,8 @@ Phone.prototype.hasAccessToVideo = function () {
 
 
 Phone.prototype.sendVideoChangeState = function (videoEnabled) {
-    trace("Phone - sendVideoChangeState currentCall: " + me.currentCall.id);
-    Flashphoner.getInstance().setSendVideo(me.currentCall.id, videoEnabled);
+    trace("Phone - sendVideoChangeState currentCall: " + me.currentCall.callId);
+    Flashphoner.getInstance().setSendVideo(me.currentCall.callId, videoEnabled);
 };
 
 Phone.prototype.changeRelationMyVideo = function (relation) {
@@ -238,25 +238,25 @@ Phone.prototype.onRegistrationListener = function (event) {
 
 Phone.prototype.onCallListener = function (event) {
     var call = event.call;
-    trace("Phone - onCallListener " + call.id + " call.incoming: " + call.incoming + " call.state: " + call.state);
+    trace("Phone - onCallListener " + call.callId + " call.incoming: " + call.incoming + " call.state: " + call.state);
     if (this.currentCall != null && !call.incoming) {
         this.holdedCall = this.currentCall;
         this.currentCall = call;
-        trace("Phone - It seems like a hold: holdedCall: " + this.holdedCall.id + " currentCall: " + this.currentCall.id);
+        trace("Phone - It seems like a hold: holdedCall: " + this.holdedCall.callId + " currentCall: " + this.currentCall.callId);
     } else {
         this.currentCall = call;
         if (call.incoming == true) {
-            this.flashphonerListener.onIncomingCall(call.id);
+            this.flashphonerListener.onIncomingCall(call.callId);
         }
-        trace("Phone - It seems like a new call currentCall: " + this.currentCall.id + " state: " + this.currentCall.state);
+        trace("Phone - It seems like a new call currentCall: " + this.currentCall.callId + " state: " + this.currentCall.state);
     }
 };
 
 Phone.prototype.callStatusListener = function (event) {
     var sipObject = event.sipObject;
     var call = event.call;
-    trace("Phone - callStatusListener call id: " + call.id + " state: " + call.state + " incoming: " + call.incoming);
-    if (this.currentCall.id == call.id) {
+    trace("Phone - callStatusListener call id: " + call.callId + " state: " + call.state + " incoming: " + call.incoming);
+    if (this.currentCall.callId == call.callId) {
         if (call.state == CallStatus.FINISH) {
             trace("Phone - ... Call is finished...");
             if (this.holdedCall != null) {
@@ -288,7 +288,7 @@ Phone.prototype.callStatusListener = function (event) {
             SoundControl.getInstance().stopSound("RING");
         }
     } else {
-        if (this.holdedCall.id == call.id) {
+        if (this.holdedCall.callId == call.callId) {
             if (call.state == CallStatus.FINISH) {
                 trace("It seems we received FINISH state on holdedCall. Just do null the holdedCall.");
                 this.holdedCall = null;
@@ -457,7 +457,7 @@ Phone.prototype.onErrorListener = function (event) {
 
 /* ------------- Additional interface functions --------- */
 Phone.prototype.isCurrentCall = function (call) {
-    return this.currentCall != null && this.currentCall.id == call.id;
+    return this.currentCall != null && this.currentCall.callId == call.callId;
 };
 
 Phone.prototype.isVideoCall = function () {

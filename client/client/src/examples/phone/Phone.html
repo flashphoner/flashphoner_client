@@ -41,25 +41,25 @@
 
             $("#transferButton").click(function () {
                 if (phone.currentCall) {
-                    phone.transfer(phone.currentCall.id, $("#transferInput").val());
+                    phone.transfer(phone.currentCall.callId, $("#transferInput").val());
                 }
             });
 
             $("#answerButton").click(function () {
                 if (phone.currentCall) {
-                    phone.answer(phone.currentCall.id);
+                    phone.answer(phone.currentCall.callId);
                 }
             });
 
             $("#holdButton").click(function () {
                 if (phone.currentCall) {
-                    phone.hold(phone.currentCall.id, true);
+                    phone.hold(phone.currentCall.callId, true);
                 }
             });
 
             $("#unholdButton").click(function () {
                 if (phone.currentCall) {
-                    phone.hold(phone.currentCall.id, false);
+                    phone.hold(phone.currentCall.callId, false);
                 }
             });
 
