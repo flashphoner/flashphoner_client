@@ -5,20 +5,31 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <!-- Styles -->
     <link rel="stylesheet" type="text/css" href="css/styles.css"/>
-    <!-- Scripts -->
-    <script type="text/javascript" src="js/jquery/jquery-1.11.0.js"></script>
-    <script type="text/javascript" src="js/jquery/jquery.websocket.js"></script>
-    <script type="text/javascript" src="js/jquery/jquery.json.js"></script>
-    <script type="text/javascript" src="js/jquery/jquery-ui.js"></script>
-    <script src="js/ZeroClipboard.js"></script>
-    <script type="text/javascript" src="js/Main.js"></script>
-    <script type="text/javascript" src="js/Adapter.js"></script>
-    <script type="text/javascript" src="js/WebSocketManager.js"></script>
-    <script type="text/javascript" src="js/WebRtcMediaManager.js"></script>
-    <script type="text/javascript" src="js/Config.js"></script>
 
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../api/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../api/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../api/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../api/jquery/jquery.json.js"></script>
+    <!-- ****** -->
 
-    <html>
+    <!-- Other scripts -->
+    <script type="text/javascript" src="../../api/Flashphoner.js"></script>
+    <script type="text/javascript" src="../ConfigurationLoader.js"></script>
+    <script type="text/javascript" src="ZeroClipboard.js"></script>
+
+    <script type="text/javascript" src="Streaming.js"></script>
+
+    <script type="application/javascript">
+
+        var streaming = new Streaming();
+        ConfigurationLoader.getInstance(function() {
+            trace("Configuration loaded");
+            Flashphoner.getInstance().init(getElement('localVideoPreview'), getElement('remoteVideo'));
+
+            streaming.init();
+        });
+    </script>
     <head>
         <title>WebRTC Live Video And Broadcasting Client For Live events and Webinars</title>
     </head>

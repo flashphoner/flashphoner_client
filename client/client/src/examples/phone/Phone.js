@@ -21,7 +21,7 @@ var Phone = function () {
 };
 
 Phone.prototype.init = function () {
-    this.flashphoner_UI = ConfigurationLoader.getInstance().getFlashphonerUI();
+    this.flashphoner_UI = new UIManagerWebRtc();
     this.flashphonerListener = ConfigurationLoader.getInstance().getFlashphonerListener();
 
     Flashphoner.getInstance().addListener(WCSEvent.OnErrorEvent, this.onErrorListener, this);

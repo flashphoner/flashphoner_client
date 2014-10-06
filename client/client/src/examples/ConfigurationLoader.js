@@ -15,8 +15,7 @@ ConfigurationLoader = function (configLoadedListener) {
 
     this.msrpCallee = null;
     this.subscribeEvent = null;
-    this.flashphoner_UI = null;
-    this.flashphonerListener = new DefaultListener();
+    this.flashphonerListener;
     this.loadBalancerUrl = null;
     this.jsonpSuccess = false;
     this.ringSound = "sounds/CALL_OUT.ogg";
@@ -291,12 +290,8 @@ ConfigurationLoader.prototype = {
     loadAPI: function () {
         var me = this;
         var flashphoner = Flashphoner.getInstance();
-        flashphoner.init(getElement('localVideoPreview'), getElement('remoteVideo'));
         flashphoner.configure(me.configuration);
-
-        if (isWebRTCAvailable) {
-            me.flashphoner_UI = new UIManagerWebRtc();
-        } else {
+        if (!isWebRTCAvailable) {
             var params = {};
             params.menu = "true";
             params.swliveconnect = "true";
@@ -319,18 +314,12 @@ ConfigurationLoader.prototype = {
             if (swfobject.hasFlashPlayerVersion("11.2")) {
                 swfobject.embedSWF("flashphoner_js_api.swf", "videoDiv", "100%", "100%", "11.2.202", "expressInstall.swf", flashvars, params, attributes, function (e) {
                     me.flashphoner = e.ref;
-                    me.flashphoner_UI = new UIManagerFlash();
-                    if (me.modeLT) me.flashphonerListener = new LoadToolListener();
                 });
             } else {
                 trace("Problem: Flash not found")
             }
         }
         me.configLoadedListener.apply(this);
-    },
-
-    getFlashphonerUI: function () {
-        return this.flashphoner_UI;
     },
 
     getFlashphonerListener: function () {

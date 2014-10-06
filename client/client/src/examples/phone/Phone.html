@@ -22,9 +22,14 @@
     <script type="text/javascript" src="ui/UIManagerFlash.js"></script>
     <script type="text/javascript" src="Phone.js"></script>
     <script type="application/javascript">
+
         var phone = new Phone();
+
         ConfigurationLoader.getInstance(function(){
             trace("Configuration loaded");
+
+            Flashphoner.getInstance().init(getElement('localVideoPreview'), getElement('remoteVideo'));
+
             phone.init();
 
             $("#logoutButton").click(function () {

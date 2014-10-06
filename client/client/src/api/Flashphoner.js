@@ -105,13 +105,6 @@ Flashphoner.prototype = {
             setRemoteSDP: function (id, sdp, isInitiator) {
                 var webRtcMediaManager = me.webRtcMediaManagers.get(id);
                 webRtcMediaManager.setRemoteSDP(sdp, isInitiator);
-                //todo
-                setPublishStreamName(me.streamName);
-
-                if (!isInitiator && webRtcMediaManager.getConnectionState() == "established") {
-                    me.answer(id);
-                }
-
             },
 
             talk: function (call, sipHeader) {
@@ -172,7 +165,7 @@ Flashphoner.prototype = {
                     notificationResult.status = "OK";
                     me.notificationResult(notificationResult);
                     me.invokeListener(WCSEvent.OnMessageEvent, [
-                        {message: message, sipObject:sipObject}
+                        {message: message, sipObject: sipObject}
                     ]);
                 } else {
                     if (message.status == MessageStatus.ACCEPTED) {
@@ -191,7 +184,7 @@ Flashphoner.prototype = {
                         me.notificationResult(notificationResult);
                     }
                     me.invokeListener(WCSEvent.MessageStatusEvent, [
-                        {message: message, sipObject:sipObject}
+                        {message: message, sipObject: sipObject}
                     ]);
                 }
             },
@@ -207,7 +200,7 @@ Flashphoner.prototype = {
 
             notifySubscription: function (subscription, sipObject) {
                 me.invokeListener(WCSEvent.OnSubscriptionEvent, [
-                    {subscription:subscription, sipObject:sipObject}
+                    {subscription: subscription, sipObject: sipObject}
                 ]);
             },
 
@@ -217,12 +210,11 @@ Flashphoner.prototype = {
                 ]);
             },
 
-            notifySubscribeError: function (message) {
-                notifySubscribeError(message);
-            },
-
-            notifyPublishError: function (message) {
-                notifyPublishError(message);
+            notifyStreamStatusEvent: function (stream) {
+                me.streams.update(stream.id, stream);
+                me.invokeListener(WCSEvent.StreamStatusEvent, [
+                    stream
+                ]);
             }
         };
     },
@@ -258,7 +250,7 @@ Flashphoner.prototype = {
                 me.invokeListener(WCSEvent.ConnectionStatusEvent, [
                     {connection: me.connection}
                 ]);
-                for (var id in me.webRtcMediaManagers.data()) {
+                for (var id in me.webRtcMediaManagers.getData()) {
                     me.webRtcMediaManagers.remove(id).close();
                 }
             },
@@ -307,7 +299,7 @@ Flashphoner.prototype = {
             sdp = me.removeCandidatesFromSDP(sdp);
             call.sdp = sdp;
             me.webSocket.send("call", call);
-        }, call.hasVideo);
+        }, true, call.hasVideo);
         return 0;
     },
 
@@ -333,7 +325,7 @@ Flashphoner.prototype = {
                 }
                 sdp = me.removeCandidatesFromSDP(sdp);
                 me.webSocket.send("answer", {callId: callId, hasVideo: hasVideo, sdp: sdp});
-            }, hasVideo);
+            }, true, hasVideo);
         } else {
             /**
              * If we receive a normal INVITE with SDP we should create answering SDP using normal createAnswer method because we already have remoteSdp here.
@@ -346,7 +338,7 @@ Flashphoner.prototype = {
 
     hangup: function (call) {
         if (call) {
-            this.webSocket.send("hangup", {callId:call.callId});
+            this.webSocket.send("hangup", {callId: call.callId});
         }
     },
 
@@ -437,57 +429,59 @@ Flashphoner.prototype = {
         this.webRtcMediaManagers.get(sessionId).requestStats();
     },
 
-    publish: function (streamName) {
+    publishStream: function (name) {
         var me = this;
-        var stream = {};
+        var stream = new Stream();
         stream.mediaSessionId = createUUID();
-        stream.streamName = streamName;
+        stream.name = name;
+        stream.published = true;
         stream.hasVideo = true;
 
-        var webRtcMediaManager = new WebRtcMediaManager(me.configuration.stunServer, me.configuration.useDTLS, me.localVideo, me.remoteVideo)
+        var webRtcMediaManager = new WebRtcMediaManager(me.configuration.stunServer, me.configuration.useDTLS, me.remoteVideo);
 
         webRtcMediaManager.createOffer(function (sdp) {
-            trace("Publish streamName " + stream.streamName);
+            trace("Publish name " + stream.name);
             stream.sdp = me.removeCandidatesFromSDP(sdp);
-            me.webSocket.send("publish", stream);
+            me.webSocket.send("publishStream", stream);
 
             me.webRtcMediaManagers.add(stream.mediaSessionId, webRtcMediaManager);
-            me.streams.add(stream.streamName, stream);
+            me.streams.add(stream.name, stream);
         }, true, true);
     },
 
-    unpublish: function (streamName) {
-        console.log("Unpublish stream " + streamName);
+    unPublishStream: function (name) {
+        console.log("Unpublish stream " + name);
         var me = this;
-        var stream = me.streams.remove(streamName);
+        var stream = me.streams.remove(name);
         me.webRtcMediaManagers.remove(stream.mediaSessionId).close();
-        me.webSocket.send("unPublish", stream);
+        me.webSocket.send("unPublishStream", stream);
     },
 
-    subscribe: function (streamName) {
+    playStream: function (name) {
         var me = this;
-        var webRtcMediaManager = new WebRtcMediaManager(me.configuration.stunServer, me.configuration.useDTLS, me.localVideo, me.remoteVideo)
-        var stream = {};
+        var webRtcMediaManager = new WebRtcMediaManager(me.configuration.stunServer, me.configuration.useDTLS, me.remoteVideo);
+        var stream = new Stream();
         stream.mediaSessionId = createUUID();
-        stream.streamName = streamName;
+        stream.name = name;
+        stream.published = false;
         stream.hasVideo = true;
 
         webRtcMediaManager.createOffer(function (sdp) {
-            console.log("subscribe streamName " + object.streamName);
+            console.log("playStream name " + stream.name);
             stream.sdp = me.removeCandidatesFromSDP(sdp);
-            me.webSocket.send("subscribe", stream);
+            me.webSocket.send("playStream", stream);
 
             me.webRtcMediaManagers.add(stream.mediaSessionId, webRtcMediaManager);
-            me.streams.add(stream.streamName, stream);
+            me.streams.add(stream.name, stream);
         }, false, false);
     },
 
-    unSubscribe: function (streamName) {
-        console.log("unSubscribe stream " + streamName);
+    stopStream: function (name) {
+        console.log("unSubscribe stream " + name);
         var me = this;
-        var stream = me.streams.remove(streamName);
+        var stream = me.streams.remove(name);
         me.webRtcMediaManagers.remove(stream.mediaSessionId).close();
-        me.webSocket.send("unSubscribe", stream);
+        me.webSocket.send("stopStream", stream);
     },
 
     removeCandidatesFromSDP: function (sdp) {
@@ -574,15 +568,13 @@ Flashphoner.prototype = {
     }
 };
 
-var WebRtcMediaManager = function (stunServer, useDTLS, localVideoPreview, remoteVideo) {
+var WebRtcMediaManager = function (stunServer, useDTLS, remoteVideo) {
     var me = this;
 
     me.peerConnection = null;
     me.peerConnectionState = 'new';
     me.remoteAudioVideoMediaStream = null;
     me.remoteVideo = remoteVideo;
-    me.localVideo = localVideoPreview;
-    me.localVideo.volume = 0;
     me.stunServer = stunServer;
     me.useDTLS = useDTLS;
     //stun server by default
@@ -593,9 +585,10 @@ var WebRtcMediaManager = function (stunServer, useDTLS, localVideoPreview, remot
 WebRtcMediaManager.isAudioMuted = 1;
 WebRtcMediaManager.isVideoMuted = 1;
 WebRtcMediaManager.getAccessToAudioAndVideo = function () {
+
     if (!WebRtcMediaManager.localAudioVideoStream) {
         getUserMedia({audio: true, video: true}, function (stream) {
-                attachMediaStream(me.localVideo, stream);
+                attachMediaStream(Flashphoner.getInstance().localVideo, stream);
                 WebRtcMediaManager.localAudioVideoStream = stream;
                 WebRtcMediaManager.isAudioMuted = -1;
                 WebRtcMediaManager.isVideoMuted = -1;
@@ -728,7 +721,7 @@ WebRtcMediaManager.prototype.waitGatheringIce = function () {
     }
 };
 
-WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVideo) {
+WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasAudio, hasVideo) {
     trace("WebRtcMediaManager - createOffer()");
     var me = this;
     try {
@@ -736,13 +729,16 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
             trace("Connection state is not established. Initializing...");
             me.init();
         }
+        var mandatory = {};
         if (me.peerConnection == null) {
             trace("peerConnection is null");
             me.createPeerConnection();
-            if (hasVideo) {
+            if (hasAudio && hasVideo) {
                 me.peerConnection.addStream(WebRtcMediaManager.localAudioVideoStream);
-            } else {
+            } else if (hasAudio){
                 me.peerConnection.addStream(WebRtcMediaManager.localAudioStream);
+            } else {
+                mandatory = {optional: [], mandatory: { OfferToReceiveAudio: true, OfferToReceiveVideo: true}}
             }
         }
         me.createOfferCallback = createOfferCallback;
@@ -750,7 +746,7 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
             me.onCreateOfferSuccessCallback(offer);
         }, function (error) {
             me.onCreateOfferErrorCallback(error);
-        });
+        }, mandatory);
 
     }
     catch (exception) {
@@ -760,7 +756,7 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
 
 WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback, hasVideo) {
     var me = this;
-    trace("WebRtcMediaManager - createAnswer() me.getConnectionState(): "+me.getConnectionState()+" me.hasVideo: "+me.hasVideo);
+    trace("WebRtcMediaManager - createAnswer() me.getConnectionState(): " + me.getConnectionState() + " me.hasVideo: " + me.hasVideo);
     if (me.getConnectionState() != "established") {
         me.init();
     }
@@ -802,7 +798,7 @@ WebRtcMediaManager.prototype.createAnswer = function (createAnswerCallback, hasV
 };
 
 WebRtcMediaManager.prototype.onCreateOfferSuccessCallback = function (offer) {
-    trace("WebRtcMediaManager - onCreateOfferSuccessCallback this.peerConnection: "+this.peerConnection+" this.peerConnectionState: "+this.peerConnectionState);
+    trace("WebRtcMediaManager - onCreateOfferSuccessCallback this.peerConnection: " + this.peerConnection + " this.peerConnectionState: " + this.peerConnectionState);
     if (this.peerConnection != null) {
         if (this.peerConnectionState == 'new' || this.peerConnectionState == 'established') {
             var application = this;
@@ -846,7 +842,7 @@ WebRtcMediaManager.prototype.getConnectionState = function () {
 };
 
 WebRtcMediaManager.prototype.setRemoteSDP = function (sdp, isInitiator) {
-    trace("WebRtcMediaManager - setRemoteSDP: isInitiator: "+isInitiator+" sdp=" + sdp);
+    trace("WebRtcMediaManager - setRemoteSDP: isInitiator: " + isInitiator + " sdp=" + sdp);
     if (isInitiator) {
         var sdpAnswer = new RTCSessionDescription({
             type: 'answer',
@@ -891,7 +887,7 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionSuccessCallback = function ()
 
 
 WebRtcMediaManager.prototype.onCreateAnswerSuccessCallback = function (answer) {
-    trace("onCreateAnswerSuccessCallback "+this.peerConnection);
+    trace("onCreateAnswerSuccessCallback " + this.peerConnection);
     if (this.peerConnection != null) {
         if (this.peerConnectionState == 'offer-received') {
             trace("Current PeerConnectionState is 'offer-received', preparing answer...");
@@ -935,7 +931,7 @@ WebRtcMediaManager.prototype.requestStats = function () {
                     }
                 }
                 console.log(JSON.stringify(stats, null, '\t'));
-            }, function(error) {
+            }, function (error) {
                 console.log("Error received " + error);
             });
 
@@ -957,7 +953,7 @@ WebRtcMediaManager.prototype.requestStats = function () {
                     }
                 }
                 console.log(JSON.stringify(stats, null, '\t'));
-            }, function(error) {
+            }, function (error) {
                 console.log("Error received " + error);
             });
         }
@@ -1029,15 +1025,15 @@ WebRtcMediaManager.prototype.onSetRemoteDescriptionErrorCallback = function (err
 };
 
 WebRtcMediaManager.prototype.hasActiveAudioStream = function () {
-    if (!this.remoteAudioVideoMediaStream){
+    if (!this.remoteAudioVideoMediaStream) {
         trace("WebRtcMediaManager - no audio tracks");
         return false;
     }
     var l = this.remoteAudioVideoMediaStream.getAudioTracks().length;
-    trace("WebRtcMediaManager - hasAudio length: "+l);
-    if (l){
+    trace("WebRtcMediaManager - hasAudio length: " + l);
+    if (l) {
         return true;
-    }else{
+    } else {
         return false;
     }
 };
@@ -1094,7 +1090,7 @@ var Call = function () {
     this.inviteParameters = "";
 };
 
-var CallStatus = function(){
+var CallStatus = function () {
 };
 CallStatus.RING = "RING";
 CallStatus.RING_MEDIA = "RING_MEDIA";
@@ -1124,6 +1120,26 @@ MessageStatus.IMDN_FORBIDDEN = "IMDN_FORBIDDEN";
 MessageStatus.IMDN_ERROR = "IMDN_ERROR";
 MessageStatus.RECEIVED = "RECEIVED";
 
+var Stream = function () {
+    this.mediaSessionId = null;
+    this.name = "";
+    this.published = false;
+    this.hasVideo = false;
+    this.status = StreamStatus.New;
+    this.sdp = "";
+    this.message = "";
+};
+
+var StreamStatus = function () {
+};
+StreamStatus.New = "NEW";
+StreamStatus.Pending = "PENDING";
+StreamStatus.Publishing = "PUBLISHING";
+StreamStatus.Playing = "PLAYING";
+StreamStatus.Unpublished = "UNPUBLISHED";
+StreamStatus.Stoped = "STOPED";
+StreamStatus.Error = "ERROR";
+
 var WCSEvent = function () {
 };
 WCSEvent.OnErrorEvent = "ON_ERROR_EVENT";
@@ -1134,7 +1150,7 @@ WCSEvent.CallStatusEvent = "CALL_STATUS_EVENT";
 WCSEvent.OnMessageEvent = "ON_MESSAGE_EVENT";
 WCSEvent.MessageStatusEvent = "MESSAGE_STATUS_EVENT";
 WCSEvent.OnRecordCompleteEvent = "ON_RECORD_COMPLETE_EVENT";
-WCSEvent.OnSubscriptionEvent = "ON_SUBSCRIPTION_EVENT";
+WCSEvent.StreamStatusEvent = "ON_SUBSCRIBE_STATUS_EVENT";
 WCSEvent.OnXcapStatusEvent = "ON_XCAP_STATUS_EVENT";
 WCSEvent.OnBugReportEvent = "ON_BUG_REPORT_EVENT";
 
@@ -1184,7 +1200,7 @@ DataMap.prototype = {
         return Object.size(this.data);
     },
 
-    data: function() {
+    getData: function () {
         return this.data;
     },
 
@@ -1268,13 +1284,16 @@ function trace(logMessage) {
     // set time
     var time = "UTC " + hh + ':' + mm + ':' + ss + '.' + ms;
 
-    var console = $("#console");
-
-    // Check if console is scrolled down? Or may be you are reading previous messages.
-    var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37);
-
     var logMessage = time + ' - ' + logMessage;
 
+    var console = $("#console");
+
+    if (console.length > 0) {
+
+        // Check if console is scrolled down? Or may be you are reading previous messages.
+        var isScrolled = (console[0].scrollHeight - console.height() + 1) / (console[0].scrollTop + 1 + 37);
+        console.append(logMessage + '<br>');
+    }
     //check if push_log enabled
     if (Flashphoner.getInstance().configuration.pushLogEnabled) {
         var result = Flashphoner.getInstance().pushLogs(logs + logMessage + '\n');
@@ -1287,7 +1306,6 @@ function trace(logMessage) {
         logs = "";
     }
 
-    console.append(logMessage + '<br>');
     try {
         window.console.debug(logMessage);
     } catch (err) {
@@ -1310,7 +1328,7 @@ var isWebRTCAvailable = false;
 if (navigator.mozGetUserMedia) {
     console.log("This appears to be Firefox");
 
-    if(typeof(mozRTCPeerConnection) === undefined) {
+    if (typeof(mozRTCPeerConnection) === undefined) {
         console.log("Please, update your browser to use WebRTC");
     } else {
         isWebRTCAvailable = true;
@@ -1325,21 +1343,21 @@ if (navigator.mozGetUserMedia) {
 
         getUserMedia = navigator.mozGetUserMedia.bind(navigator);
 
-        attachMediaStream = function(element, stream) {
+        attachMediaStream = function (element, stream) {
             element.mozSrcObject = stream;
             element.play();
         };
 
-        reattachMediaStream = function(to, from) {
+        reattachMediaStream = function (to, from) {
             to.mozSrcObject = from.mozSrcObject;
             to.play();
         };
 
-        MediaStream.prototype.getVideoTracks = function() {
+        MediaStream.prototype.getVideoTracks = function () {
             return [];
         };
 
-        MediaStream.prototype.getAudioTracks = function() {
+        MediaStream.prototype.getAudioTracks = function () {
             return [];
         };
     }
@@ -1357,24 +1375,24 @@ if (navigator.mozGetUserMedia) {
 
         getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
 
-        attachMediaStream = function(element, stream) {
+        attachMediaStream = function (element, stream) {
             element.src = webkitURL.createObjectURL(stream);
             element.play();
         };
 
-        reattachMediaStream = function(to, from) {
+        reattachMediaStream = function (to, from) {
             to.src = from.src;
             element.play();
         };
 
         if (!webkitMediaStream.prototype.getVideoTracks) {
-            webkitMediaStream.prototype.getVideoTracks = function() {
+            webkitMediaStream.prototype.getVideoTracks = function () {
                 return this.videoTracks;
             };
         }
 
         if (!webkitMediaStream.prototype.getAudioTracks) {
-            webkitMediaStream.prototype.getAudioTracks = function() {
+            webkitMediaStream.prototype.getAudioTracks = function () {
                 return this.audioTracks;
             };
         }
