@@ -231,8 +231,8 @@ Flashphoner.prototype = {
         var me = this;
         me.connection = connection;
         me.connection.useDTLS = me.configuration.useDTLS;
-        me.connection.registerRequired = me.connection.registerRequired || me.configuration.registerRequired;
-        me.connection.contactParams = me.connection.contactParams || me.configuration.contactParams;
+        me.connection.sipRegisterRequired = me.connection.sipRegisterRequired || me.configuration.sipRegisterRequired;
+        me.connection.sipContactParams = me.connection.sipContactParams || me.configuration.sipContactParams;
 
         me.connection.status = ConnectionStatus.Pending;
         me.webSocket = $.websocket(urlServer || me.configuration.urlWsServer, {
@@ -418,7 +418,7 @@ Flashphoner.prototype = {
         message.contentType = message.contentType || this.configuration.msgContentType;
         message.isImdnRequired = message.isImdnRequired || this.configuration.imdnEnabled;
         this.messages[id] = message;
-        this.webSocket.send("sendInstantMessage", message);
+        this.webSocket.send("sendMessage", message);
     },
 
     notificationResult: function (result) {
@@ -1041,9 +1041,10 @@ WebRtcMediaManager.prototype.hasActiveAudioStream = function () {
 Configuration = function () {
     this.urlWsServer = null;
     this.urlFlashServer = null;
-    this.registerRequired = true;
+    this.sipRegisterRequired = true;
+    this.sipContactParams = null;
+
     this.useDTLS = true;
-    this.contactParams = null;
 
     this.stunServer = "";
 
@@ -1058,14 +1059,14 @@ Configuration = function () {
 };
 
 var Connection = function () {
-    this.login = "";
-    this.password = "";
-    this.authenticationName = "";
-    this.domain = "";
-    this.outboundProxy = "";
-    this.port = 5060;
+    this.sipLogin = "";
+    this.sipPassword = "";
+    this.sipAuthenticationName = "";
+    this.sipDomain = "";
+    this.sipOutboundProxy = "";
+    this.sipPort = 5060;
+    this.sipRegisterRequired = true;
     this.useProxy = true;
-    this.registerRequired = true;
     this.useDTLS = true;
     this.useSelfSigned = !isMobile.any();
     this.appKey = "defaultApp";
@@ -1150,7 +1151,8 @@ WCSEvent.CallStatusEvent = "CALL_STATUS_EVENT";
 WCSEvent.OnMessageEvent = "ON_MESSAGE_EVENT";
 WCSEvent.MessageStatusEvent = "MESSAGE_STATUS_EVENT";
 WCSEvent.OnRecordCompleteEvent = "ON_RECORD_COMPLETE_EVENT";
-WCSEvent.StreamStatusEvent = "ON_SUBSCRIBE_STATUS_EVENT";
+WCSEvent.OnSubscriptionEvent = "ON_SUBSCRIPTION_EVENT";
+WCSEvent.StreamStatusEvent = "ON_STREAM_STATUS_EVENT";
 WCSEvent.OnXcapStatusEvent = "ON_XCAP_STATUS_EVENT";
 WCSEvent.OnBugReportEvent = "ON_BUG_REPORT_EVENT";
 

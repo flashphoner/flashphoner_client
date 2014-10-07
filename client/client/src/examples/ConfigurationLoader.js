@@ -15,7 +15,6 @@ ConfigurationLoader = function (configLoadedListener) {
 
     this.msrpCallee = null;
     this.subscribeEvent = null;
-    this.flashphonerListener;
     this.loadBalancerUrl = null;
     this.jsonpSuccess = false;
     this.ringSound = "sounds/CALL_OUT.ogg";
@@ -67,9 +66,9 @@ ConfigurationLoader.prototype = {
             this.configuration.urlFlashServer = this.getText(urlFlashServer[0]);
         }
 
-        var registerRequired = $(xml).find("register_required");
-        if (registerRequired.length > 0) {
-            this.configuration.registerRequired = (this.getText(registerRequired[0]) === "true");
+        var sipRegisterRequired = $(xml).find("register_required");
+        if (sipRegisterRequired.length > 0) {
+            this.configuration.sipRegisterRequired = (this.getText(sipRegisterRequired[0]) === "true");
         }
 
         var useDTLS = $(xml).find("use_dtls");
@@ -87,7 +86,7 @@ ConfigurationLoader.prototype = {
         var contactParams = $(xml).find("contact_params");
         if (contactParams.length > 0) {
             if (this.getText(contactParams[0]).length) {
-                this.configuration.contactParams = this.getText(contactParams[0]);
+                this.configuration.sipContactParams = this.getText(contactParams[0]);
             }
         }
 
@@ -211,16 +210,6 @@ ConfigurationLoader.prototype = {
             }
         }
 
-        //Load Tool mode on/off
-        var modeLT = $(xml).find("modeLT");
-        if (modeLT.length > 0) {
-            if (this.getText(modeLT[0]).length) {
-                if (Boolean(this.getText(modeLT[0]))) {
-                    me.flashphonerListener = new LoadToolListener();
-                }
-            }
-        }
-
         //call duration in seconds when Load Tool is enabled, callee will hangup after this timeout.
         // Hangup will not occur in case of 0 timeout.
         var hangupLT = $(xml).find("hangupLT");
@@ -320,9 +309,5 @@ ConfigurationLoader.prototype = {
             }
         }
         me.configLoadedListener.apply(this);
-    },
-
-    getFlashphonerListener: function () {
-        return this.flashphonerListener;
     }
 };

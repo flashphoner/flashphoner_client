@@ -22,7 +22,7 @@ var Phone = function () {
 
 Phone.prototype.init = function () {
     this.flashphoner_UI = new UIManagerWebRtc();
-    this.flashphonerListener = ConfigurationLoader.getInstance().getFlashphonerListener();
+    this.flashphonerListener = new DefaultListener();
 
     Flashphoner.getInstance().addListener(WCSEvent.OnErrorEvent, this.onErrorListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.ConnectionStatusEvent, this.connectionStatusListener, this);
@@ -46,12 +46,12 @@ Phone.prototype.connect = function () {
     }
 
     var loginObject = new Connection();
-    loginObject.login = $('#username').val();
-    loginObject.password = $('#password').val();
-    loginObject.authenticationName = $('#authname').val();
-    loginObject.domain = $('#domain').val();
-    loginObject.outboundProxy = $('#outbound_proxy').val();
-    loginObject.port = $('#port').val();
+    loginObject.sipLogin = $('#username').val();
+    loginObject.sipPassword = $('#password').val();
+    loginObject.sipAuthenticationName = $('#authname').val();
+    loginObject.sipDomain = $('#domain').val();
+    loginObject.sipOutboundProxy = $('#outbound_proxy').val();
+    loginObject.sipPort = $('#port').val();
     loginObject.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
     loginObject.useSelfSigned = !isMobile.any();
     loginObject.appKey = "defaultApp";
