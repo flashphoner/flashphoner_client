@@ -24,19 +24,19 @@ Phone.prototype.init = function () {
     this.flashphoner_UI = new UIManagerWebRtc();
     this.flashphonerListener = new DefaultListener();
 
-    Flashphoner.getInstance().addListener(WCSEvent.OnErrorEvent, this.onErrorListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.ErrorStatusEvent, this.errorStatusEvent, this);
     Flashphoner.getInstance().addListener(WCSEvent.ConnectionStatusEvent, this.connectionStatusListener, this);
-    Flashphoner.getInstance().addListener(WCSEvent.OnRegistrationEvent, this.onRegistrationListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.RegistrationStatusEvent, this.registrationStatusListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.OnCallEvent, this.onCallListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.CallStatusEvent, this.callStatusListener, this);
 
     Flashphoner.getInstance().addListener(WCSEvent.OnMessageEvent, this.onMessageListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.MessageStatusEvent, this.messageStatusListener, this);
 
-    Flashphoner.getInstance().addListener(WCSEvent.OnRecordCompleteEvent, this.onRecordCompleteListener, this);
-    Flashphoner.getInstance().addListener(WCSEvent.OnSubscriptionEvent, this.onSubscriptionListener, this);
-    Flashphoner.getInstance().addListener(WCSEvent.OnXcapStatusEvent, this.onXcapStatusListener, this);
-    Flashphoner.getInstance().addListener(WCSEvent.OnBugReportEvent, this.onBugReportListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.RecordingStatusEvent, this.recordingStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.SubscriptionStatusEvent, this.subscriptionStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.XcapStatusEvent, this.xcapStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.BugReportStatusEvent, this.bugReportStatusListener, this);
 };
 
 
@@ -45,18 +45,18 @@ Phone.prototype.connect = function () {
         $("#outbound_proxy").val($("#domain").val());
     }
 
-    var loginObject = new Connection();
-    loginObject.sipLogin = $('#username').val();
-    loginObject.sipPassword = $('#password').val();
-    loginObject.sipAuthenticationName = $('#authname').val();
-    loginObject.sipDomain = $('#domain').val();
-    loginObject.sipOutboundProxy = $('#outbound_proxy').val();
-    loginObject.sipPort = $('#port').val();
-    loginObject.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
-    loginObject.useSelfSigned = !isMobile.any();
-    loginObject.appKey = "defaultApp";
+    var connection = new Connection();
+    connection.sipLogin = $('#username').val();
+    connection.sipPassword = $('#password').val();
+    connection.sipAuthenticationName = $('#authname').val();
+    connection.sipDomain = $('#domain').val();
+    connection.sipOutboundProxy = $('#outbound_proxy').val();
+    connection.sipPort = $('#port').val();
+    connection.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
+    connection.useSelfSigned = !isMobile.any();
+    connection.appKey = "defaultApp";
 
-    var result = Flashphoner.getInstance().connect(loginObject);
+    var result = Flashphoner.getInstance().connect(connection);
     if (result == 0) {
         trace("Phone - connecting");
     }
@@ -115,8 +115,8 @@ Phone.prototype.sendMessage = function (message) {
     Flashphoner.getInstance().sendMessage(message);
 };
 
-Phone.prototype.answer = function (callId) {
-    trace("Phone - answer " + callId);
+Phone.prototype.answer = function (call) {
+    trace("Phone - answer " + call.callId);
     var hasAccess;
     var me = this;
     if (me.isVideoCall()) {
@@ -131,7 +131,7 @@ Phone.prototype.answer = function (callId) {
                     me.flashphoner_UI.closeRequestUnmute();
                     clearInterval(me.intervalId);
                     me.intervalId = -1;
-                    me.answer(callId);
+                    me.answer(call);
                 }
             };
             me.intervalId = setInterval(checkAccessFunc, 500);
@@ -142,8 +142,9 @@ Phone.prototype.answer = function (callId) {
             me.flashphoner_UI.getAccessToAudio();
         }
     } else if (hasAccess()) {
-        Flashphoner.getInstance().answer(callId, me.isVideoCall());
-        this.flashphonerListener.onAnswer(callId);
+        call.hasVideo = me.isVideoCall();
+        Flashphoner.getInstance().answer(call);
+        this.flashphonerListener.onAnswer(call.callId);
     } else {
         trace("Microphone is not plugged in");
     }
@@ -157,28 +158,33 @@ Phone.prototype.hangup = function (call) {
 
 Phone.prototype.sendDTMF = function (callId, dtmf) {
     trace("Phone - sendDTMF callId: " + callId + " dtmf: " + dtmf);
-    Flashphoner.getInstance().sendDTMF(callId, dtmf);
+    Flashphoner.getInstance().sendDTMF({callId: callId, dtmf: dtmf});
 };
 
-Phone.prototype.hold = function (callId, isHold) {
-    trace("Phone - hold callId: " + callId + " isHold: " + isHold);
-    Flashphoner.getInstance().hold(callId, isHold);
+Phone.prototype.hold = function (call) {
+    trace("Phone - hold callId: " + call.callId);
+    Flashphoner.getInstance().hold(call);
+};
+
+Phone.prototype.unhold = function (call) {
+    trace("Phone - hold callId: " + call.callId);
+    Flashphoner.getInstance().unhold(call);
 };
 
 Phone.prototype.transfer = function (callId, target) {
     trace("Phone - transfer callId: " + callId + " target: " + target);
-    Flashphoner.getInstance().transfer(callId, target);
+    Flashphoner.getInstance().transfer({callId: callId, target: target});
 };
 
 Phone.prototype.sendXcapRequest = function () {
-    Flashphoner.getInstance().sendXcapRequest();
+    Flashphoner.getInstance().sendXcapRequest({url:ConfigurationLoader.getInstance().xcapUrl});
 };
 
-Phone.prototype.subscribeReg = function () {
+Phone.prototype.subscribe = function () {
     var subscribeObj = {};
     subscribeObj.event = ConfigurationLoader.getInstance().subscribeEvent;
     subscribeObj.expires = 3600;
-    Flashphoner.getInstance().voipSubscribe(subscribeObj);
+    Flashphoner.getInstance().subscribe(subscribeObj);
 };
 
 
@@ -192,12 +198,6 @@ Phone.prototype.hasAccessToAudio = function () {
 
 Phone.prototype.hasAccessToVideo = function () {
     return Flashphoner.getInstance().hasAccessToVideo();
-};
-
-
-Phone.prototype.sendVideoChangeState = function (videoEnabled) {
-    trace("Phone - sendVideoChangeState currentCall: " + me.currentCall.callId);
-    Flashphoner.getInstance().setSendVideo(me.currentCall.callId, videoEnabled);
 };
 
 Phone.prototype.changeRelationMyVideo = function (relation) {
@@ -222,15 +222,15 @@ Phone.prototype.connectionStatusListener = function (event) {
     }
 };
 
-Phone.prototype.onRegistrationListener = function (event) {
+Phone.prototype.registrationStatusListener = function (event) {
     var connection = event.connection;
     var sipObject = event.sipObject;
-    trace("Phone - onRegistrationListener " + connection.login);
+    trace("Phone - registrationStatusListener " + connection.login);
     SoundControl.getInstance().playSound("REGISTER");
     this.flashphonerListener.onRegistered();
 
     if (ConfigurationLoader.getInstance().subscribeEvent != null && ConfigurationLoader.getInstance().subscribeEvent.length != 0) {
-        this.subscribeReg();
+        this.subscribe();
     }
 
     this.sendXcapRequest();
@@ -385,15 +385,15 @@ Phone.prototype.parseMsn = function (fsService, mcn) {
     return ret;
 };
 
-Phone.prototype.onRecordCompleteListener = function (recordReport) {
-    trace("Phone - onRecordCompleteListener: " + recordReport.mixedFilename);
+Phone.prototype.recordingStatusListener = function (recordReport) {
+    trace("Phone - recordingStatusListener: " + recordReport.mixedFilename);
 };
 
-Phone.prototype.onSubscriptionListener = function (event) {
+Phone.prototype.subscriptionStatusListener = function (event) {
     var subscriptionObject = event.subscription;
     var sipObject = event.sipObject;
-    trace("Phone - onSubscriptionListener event: " + subscriptionObject.event + " expires: " + subscriptionObject.expires + " status: " + subscriptionObject.status + " terminate: " + subscriptionObject.terminate);
-    trace("Phone - onSubscriptionListener body: " + subscriptionObject.requestBody);
+    trace("Phone - subscriptionStatusListener event: " + subscriptionObject.event + " expires: " + subscriptionObject.expires + " status: " + subscriptionObject.status + " terminate: " + subscriptionObject.terminate);
+    trace("Phone - subscriptionStatusListener body: " + subscriptionObject.requestBody);
     if (subscriptionObject.event == "reg") {
         if (subscriptionObject.terminate) {
             this.disconnect();
@@ -401,8 +401,8 @@ Phone.prototype.onSubscriptionListener = function (event) {
     }
 };
 
-Phone.prototype.onXcapStatusListener = function (xcapResponse) {
-    trace("Phone - onXcapStatusListener " + xcapResponse);
+Phone.prototype.xcapStatusListener = function (xcapResponse) {
+    trace("Phone - xcapStatusListener " + xcapResponse);
     var xml = $.parseXML(xcapResponse);
     var history = $(xml).find("history-list").find("history");
     if (history != null && history.length != 0) {
@@ -412,14 +412,14 @@ Phone.prototype.onXcapStatusListener = function (xcapResponse) {
     }
 };
 
-Phone.prototype.onBugReportListener = function (event) {
-    trace("Phone - onBugReportListener; filename - " + event.filename);
+Phone.prototype.bugReportStatusListener = function (event) {
+    trace("Phone - bugReportStatusListener; filename - " + event.filename);
 };
 
-Phone.prototype.onErrorListener = function (event) {
+Phone.prototype.errorStatusEvent = function (event) {
     var code = event.code;
     var sipObject = event.sipObject;
-    trace("Phone - onErrorListener " + code);
+    trace("Phone - errorStatusEvent " + code);
 
     if (code == WCSError.CONNECTION_ERROR) {
         trace("Phone - ERROR - Can`t connect to server.");

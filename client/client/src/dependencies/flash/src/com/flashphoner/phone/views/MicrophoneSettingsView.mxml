@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2011 Flashphoner
+All rights reserved. This Code and the accompanying materials
+are made available under the terms of the GNU Public License v2.0
+which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+Contributors:
+    Flashphoner - initial API and implementation
+
+This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+-->
+<mx:Panel addedToStage="onAddedToStage()" creationComplete="onCreationComplete()" updateComplete="onCreationComplete()"
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:view="com.tooboos.metronet.client.view.*" 
+	width="220" height="135" layout="absolute" backgroundColor="#FFFFFF" cornerRadius="0" borderColor="#9D9D9D" borderStyle="solid" borderThickness="1" >
+	<mx:Script>
+		<![CDATA[
+			import com.flashphoner.api.Flash_API;
+			import com.flashphoner.api.SoundControl;
+			import com.flashphoner.phone.DataPhone;
+			
+			import flash.sampler.getMemberNames;
+			
+			import mx.managers.PopUpManager;
+			private var micDelay:uint	= 50;
+			private var micRepeat:uint	= 0;
+			private var micTimer:Timer;
+			private var micActivityIndicator:Shape = new Shape();
+            [Bindable] 
+            private var _barColor:uint = 0x00FF00;
+			private static var isViewedAllowDialog:Boolean = false;
+			
+			private var flashAPI:Flash_API; 
+			
+			private function onAddedToStage():void{
+				micTimer = new Timer(micDelay, micRepeat);
+				micTimer.addEventListener(TimerEvent.TIMER, ShowMicActivity);
+				micTimer.start();
+			}
+
+			private function onCreationComplete():void{
+				flashAPI = DataPhone.getInstance().flash_API;
+				var microphone:Microphone = flashAPI.soundControl.getMicrophone();
+				if (microphone != null){
+					 sliderVolumeMic.value = microphone.gain;
+				}
+			}
+			
+			private function onChangeMic():void{
+				flashAPI.soundControl.changeMicrophone(comboMic.selectedIndex,true);
+			}
+			private function onChangeSliderVolumeMic():void{
+				var microphone:Microphone = flashAPI.soundControl.getMicrophone();
+				if (microphone != null){
+					microphone.gain = sliderVolumeMic.value;
+				}
+			}			
+            private function myDataTipFunc(val:String):String {
+                return Math.round(Number(val)).toString();
+            }
+
+			private function ShowMicActivity(e:TimerEvent):void {
+				var microphone:Microphone = flashAPI.soundControl.getMicrophone();
+				if (microphone != null){
+                	progressBar.setProgress( microphone.activityLevel, 100 );
+               		_barColor = rgbToHex(0xFF * ( microphone.activityLevel / 100 ),
+                                        0x00FF * ( ( 100 - microphone.activityLevel ) / 100 ),
+                                        0 );
+					
+				}				
+			}	
+            private function rgbToHex( R:uint, G:uint, B:uint ):uint {
+                return( R << 16 | G << 8 | B );
+            }
+            public function onClickOk():void{
+            	PopUpManager.removePopUp(this);
+				flashAPI.soundControl.getMicrophone().setLoopBack(false);
+            }
+		]]>
+	</mx:Script>
+	<mx:ComboBox id="comboMic" change="onChangeMic()" dataProvider="{Microphone.names}" width="198" y="10" cornerRadius="2" fontSize="10" horizontalCenter="0"></mx:ComboBox>
+	<mx:Button label="Ok" click="onClickOk()" fontWeight="bold" fontSize="16" width="46" horizontalCenter="0" top="95" height="28"/>
+	<mx:HSlider id="sliderVolumeMic" dataTipFormatFunction="myDataTipFunc"
+ 				value="50" minimum="0" maximum="100" height="19.36" snapInterval="5" 
+            tickInterval="25" change="onChangeSliderVolumeMic()" y="40" width="198" horizontalCenter="-2"/>
+    <mx:ProgressBar 
+        id="progressBar"
+        mode="manual"
+        width="198"
+        label=""
+        color="#000000"
+        barColor="{ _barColor }"
+        trackColors="[white, white]"
+        trackHeight="18"  height="10" y="68.35" borderColor="#8C8C8C" alpha="1.0" horizontalCenter="0"/>
+
+</mx:Panel>

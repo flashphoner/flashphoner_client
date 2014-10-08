@@ -4,15 +4,15 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 
     <!-- JQuery -->
-    <script type="text/javascript" src="../../api/jquery/jquery.js"></script>
-    <script type="text/javascript" src="../../api/jquery/jquery-ui.js"></script>
-    <script type="text/javascript" src="../../api/jquery/jquery.websocket.js"></script>
-    <script type="text/javascript" src="../../api/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
     <!-- ****** -->
 
     <!-- Other scripts -->
-    <script type="text/javascript" src="../../api/Flashphoner.js"></script>
-    <script type="text/javascript" src="../../api/swf/swfobject.js"></script>
+    <script type="text/javascript" src="../../Flashphoner.js"></script>
+    <script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
 
     <script type="text/javascript" src="SoundControl.js"></script>
     <script type="text/javascript" src="listener/DefaultListener.js"></script>
@@ -52,19 +52,19 @@
 
             $("#answerButton").click(function () {
                 if (phone.currentCall) {
-                    phone.answer(phone.currentCall.callId);
+                    phone.answer(phone.currentCall);
                 }
             });
 
             $("#holdButton").click(function () {
                 if (phone.currentCall) {
-                    phone.hold(phone.currentCall.callId, true);
+                    phone.hold(phone.currentCall);
                 }
             });
 
             $("#unholdButton").click(function () {
                 if (phone.currentCall) {
-                    phone.hold(phone.currentCall.callId, false);
+                    phone.unhold(phone.currentCall);
                 }
             });
 

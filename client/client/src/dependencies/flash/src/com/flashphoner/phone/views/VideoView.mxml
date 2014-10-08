@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2011 Flashphoner
+All rights reserved. This Code and the accompanying materials
+are made available under the terms of the GNU Public License v2.0
+which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+Contributors:
+    Flashphoner - initial API and implementation
+
+This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+-->
+<views:DragPanel xmlns:mx="http://www.adobe.com/2006/mxml"
+				 xmlns:views="com.flashphoner.phone.views.*"
+				 width="176" height="182" backgroundColor="#000000" borderColor="#9D9D9D"
+				 borderStyle="solid" borderThickness="1" cornerRadius="0"
+				 creationComplete="onCreationComlete()" layout="absolute"
+				 verticalScrollPolicy="off" horizontalScrollPolicy="off">
+	<mx:Script>
+		<![CDATA[
+			import com.flashphoner.api.Call;
+			import com.flashphoner.api.Flash_API;
+			import com.flashphoner.api.PhoneSpeaker;
+			import com.flashphoner.api.management.VideoControl;
+			import com.flashphoner.phone.DataPhone;
+			
+			import mx.managers.PopUpManager;
+			
+			[Bindable]
+			private var flashAPI:Flash_API = DataPhone.getInstance().flash_API;
+			
+			private var phoneSpeaker:PhoneSpeaker;
+			private function onCreationComlete():void{
+	       		phoneSpeaker = DataPhone.getInstance().flash_API.getPhoneSpeaker();
+	       		videoPartner.addChild(phoneSpeaker); 
+			}
+
+			public function init():void{
+				visible = true;
+				videoMy.attachCamera(flashAPI.videoControl.getCam());
+			}
+			public function onCloseClick():void{
+				visible = false;
+			}
+			
+			public function stopVideo():void{
+					
+					var call:Call = flashAPI.getCurrentCall();
+					if (call != null){
+						buttonSendVideo.label = "Send Video";
+						call.setSendVideo(false);						
+					}
+				
+			}			
+			
+			private function sendVideo():void{
+				var call:Call = flashAPI.getCurrentCall();
+				if (call != null){
+					if (buttonSendVideo.label == "Send Video"){
+						buttonSendVideo.label = "Stop Video";
+						call.setSendVideo(true);						
+					}else{
+						buttonSendVideo.label = "Send Video";
+						call.setSendVideo(false);						
+					}
+				}
+			}
+		]]>
+	</mx:Script>
+	<mx:Canvas id="videoPartner" width="176" height="144" x="0" backgroundColor="black" y="0"/>
+	<mx:VideoDisplay id="videoMy" width="74" height="54" x="3" y="90"/>
+	<mx:Button id="buttonClose" x="155" y="3" width="16" height="16" label="X" click="onCloseClick()" styleName="close"/>
+	<mx:Button id="buttonSendVideo" y="149.95" width="104" height="24" label="Send Video"
+			   click="sendVideo();" fontSize="16" fontWeight="bold" horizontalCenter="0"/>
+</views:DragPanel>

@@ -79,7 +79,7 @@ ConfigurationLoader.prototype = {
         var xcapUrl = $(xml).find("xcap_url");
         if (xcapUrl.length > 0) {
             if (this.getText(xcapUrl[0]).length) {
-                this.configuration.xcapUrl = this.getText(xcapUrl[0]);
+                this.xcapUrl = this.getText(xcapUrl[0]);
             }
         }
 

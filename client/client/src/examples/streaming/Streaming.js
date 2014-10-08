@@ -195,25 +195,29 @@ Streaming.prototype.publish = function () {
         me.intervalId = setInterval(checkAccessFunc, 500);
         Flashphoner.getInstance().getAccessToAudioAndVideo();
     } else {
-        me.streamName = me.generateId();
-        Flashphoner.getInstance().publishStream(me.streamName);
+        me.currentStream = new Stream();
+        me.currentStream.name = me.generateId();
+        Flashphoner.getInstance().publishStream(me.currentStream);
     }
 };
 
 Streaming.prototype.playStream = function () {
-    this.info("");
+    var me = this;
+    me.info("");
     var codeText = this.parseUrlId();
     console.log("Streamname " + codeText);
-    Flashphoner.getInstance().playStream(codeText);
+    me.currentStream = new Stream();
+    me.currentStream.name = codeText;
+    Flashphoner.getInstance().playStream(me.currentStream);
 };
 
 Streaming.prototype.unpublish = function () {
-    Flashphoner.getInstance().unPublishStream(this.streamName);
+    Flashphoner.getInstance().unPublishStream(this.currentStream);
     this.setPublishStreamName("");
 };
 
 Streaming.prototype.stopStream = function () {
-    Flashphoner.getInstance().stopStream($("#streamName").text());
+    Flashphoner.getInstance().stopStream(this.currentStream);
     this.setPublishStreamName("");
 };
 

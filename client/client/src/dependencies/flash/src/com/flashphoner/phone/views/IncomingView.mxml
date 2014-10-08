@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2011 Flashphoner
+All rights reserved. This Code and the accompanying materials
+are made available under the terms of the GNU Public License v2.0
+which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+Contributors:
+    Flashphoner - initial API and implementation
+
+This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+-->
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" 
+		   width="220" height="135" backgroundAlpha="1.0"  borderStyle="solid" borderColor="#9D9D9D" backgroundColor="#FFFFFF"
+		   creationComplete="onCreationComplete();">
+	<mx:Style source="styles/style.css"/>
+	<mx:Script>
+		<![CDATA[
+			import com.adobe.cairngorm.control.CairngormEventDispatcher;
+			import com.flashphoner.Logger;
+			import com.flashphoner.api.Call;
+			import com.flashphoner.api.Flash_API;
+			import com.flashphoner.phone.DataPhone;
+			
+			import mx.core.Application;
+			import mx.managers.PopUpManager;			
+		
+			
+			private var timer:Timer = new Timer(1000,1);
+			private var timerChangeStatus:Timer = new Timer(500,0);
+			private var accessView:AccessView = new AccessView();
+			private var infoView:InfoView = new InfoView();
+			[Bindable]
+			public var call:Call;
+			
+			public var flash_API:Flash_API;
+			
+			private function onCreationComplete():void{
+				flash_API = DataPhone.getInstance().flash_API;
+			}
+			
+			private function answer():void{
+				if (flash_API.soundControl.isMuted() == 1) {
+					if (!timerChangeStatus.running){
+						timerChangeStatus.addEventListener(TimerEvent.TIMER, onChangeStatus);
+						timerChangeStatus.start();
+					}
+					viewAccessMessage();
+				} else if (flash_API.soundControl.isMuted() == -1){
+					call.answer();
+					close();
+				} else {
+					infoView.text = "Microphone is not plugged in";
+					PopUpManager.addPopUp(infoView,DisplayObject(Application.application),true);
+					PopUpManager.centerPopUp(infoView);
+					return;					
+				}        
+			}
+			
+			private function viewAccessMessage():void{
+				PopUpManager.addPopUp(accessView,DisplayObject(Application.application),true);
+				PopUpManager.centerPopUp(accessView);
+				flash_API.soundControl.getMicrophone().setLoopBack(true);
+				timer.addEventListener(TimerEvent.TIMER, timerTick);
+				timer.start();
+			}
+			
+			private function timerTick(event:TimerEvent){
+				flash_API.soundControl.getMicrophone().setLoopBack(false);
+			}
+			
+			private function onChangeStatus(event:TimerEvent){
+				if (flash_API.soundControl.isMuted() == -1){
+					PopUpManager.removePopUp(accessView); 
+					timerChangeStatus.stop();
+					answer();
+				}
+			}			
+			private function answerWithVideo():void{
+				call.answer(true);
+				close();		
+			}
+			
+			private function hangup():void{
+				call.hangup();
+				close();
+			}
+			
+			private function close():void{
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</mx:Script>
+	<mx:Label textAlign="center" text="{call.caller+' \''+call.visibleNameCaller+'\''}" horizontalCenter="0" width="200" y="10" fontFamily="Arial" fontSize="16" color="#000000"/>
+	<mx:Label y="45" text="is calling you" color="#000000" fontFamily="Arial" fontSize="16" horizontalCenter="0"/>	
+	<mx:Button label="Answer" width="70" fontWeight="bold" color="#FBF9F9" borderColor="#009800" themeColor="#009800" fillAlphas="[1.0, 1.0]" fillColors="[#39AF39, #109F10, #45D045, #17C917]" height="30" fontSize="16" y="86" click="answer()" horizontalCenter="-39"/>
+	<mx:Button label="Decline" width="70" fontWeight="bold" color="#FBF9F9" borderColor="#E90000" themeColor="#E90000" fillAlphas="[1.0, 1.0]" fillColors="[#FF4848, #FF0000, #FF6565, #FF6565]" height="30" fontSize="16" y="86" click="hangup()" horizontalCenter="39"/>
+</mx:Canvas>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2011 Flashphoner
+All rights reserved. This Code and the accompanying materials
+are made available under the terms of the GNU Public License v2.0
+which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+Contributors:
+    Flashphoner - initial API and implementation
+
+This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+-->
+<mx:Panel 
+	xmlns:mx="http://www.adobe.com/2006/mxml"
+	xmlns:phone="com.flashphoner.phone.views.*" creationComplete="onCreationComplete()"
+	width="149" height="270" layout="absolute" cornerRadius="0" backgroundAlpha="0.0">
+	<mx:Script>
+		<![CDATA[
+			import com.flashphoner.api.Call;
+			import com.flashphoner.api.Flash_API;
+			import com.flashphoner.phone.DataPhone;
+			
+			import flash.utils.setTimeout;
+			
+			import mx.controls.Alert;
+			import mx.controls.PopUpButton;
+			import mx.managers.PopUpManager;			
+			
+			private var cleanButton:Button;		
+			private var delayTimer:Timer;			
+			
+			private function onCreationComplete():void{
+				callee.addEventListener(KeyboardEvent.KEY_DOWN,checkKey);
+			}		
+			
+			private function checkKey(event:KeyboardEvent):void
+			{
+				if(event.charCode == 13)
+					phoneButton.callHandler();
+			}
+			
+			private function print(label:String):void{
+				var call:Call = DataPhone.getInstance().flash_API.getCurrentCall();
+				if (call != null){
+					call.sendDTMF(label);
+					return;	
+				}
+				if (label=='0'){
+					if (callee.text.length==0){
+						callee.text=callee.text+'+';
+						return;
+					}
+				}			
+				
+				callee.text=callee.text+label;
+				
+				onChangeCallee();
+			}
+			
+			
+			
+			private function onChangeCallee():void{
+				phoneButton.calleeNumber = callee.text;
+			}
+		]]>
+	</mx:Script>
+	
+		
+	<!-- <mx:Panel layout="absolute" color="#5A5A5A" width="149" height="98" borderStyle="solid" borderColor="#B7BABC" themeColor="#B7BABC" fontFamily="Arial" fontSize="20" backgroundColor="#DEEEFF" borderThickness="1" x="0" y="0" cornerRadius="3">-->
+		<mx:TextInput id="callee" change="onChangeCallee()" color="#5A5A5A" width="149" height="114.2" cornerRadius="3" borderStyle="solid" borderColor="#B7BABC" themeColor="#B7BABC" fontFamily="Arial" fontSize="20" backgroundColor="#DEEEFF" borderThickness="1" x="0" y="1"/>
+		<mx:Text text="{DataPhone.getInstance().version}" x="90" y="102" fontSize="9" textAlign="right" width="59" height="17"/>
+	<!-- </mx:Panel> -->
+	
+	<mx:Button id="button1" visible="true" label="1" y="156" width="46" click="print('1')" height="24" fontSize="16" fontWeight="bold" cornerRadius="3" x="0" fillAlphas="[1.0, 1.0]" fillColors="[#DCDCDC, #DCDCDC]"/>
+	<mx:Button id="button2" visible="true" y="156" label="2" click="print('2')" width="46" height="24" fontSize="16" fontWeight="bold" cornerRadius="3" x="51"/>
+	<mx:Button id="button3" visible="true" y="156" label="3" click="print('3')" width="46" height="24" fontWeight="bold" fontSize="16" cornerRadius="3" x="102"/>
+	<mx:Button id="button4" visible="true" y="185" label="4" click="print('4')" width="46" height="24" fontWeight="bold" fontSize="16" cornerRadius="3" x="0"/>
+	<mx:Button id="button5" visible="true" y="185" label="5" click="print('5')" width="46" height="24" fontWeight="bold" fontSize="16" cornerRadius="3" x="51"/>
+	<mx:Button id="button6" visible="true" y="185" label="6" click="print('6')" width="46" height="24" fontStyle="normal" fontSize="16" fontWeight="bold" cornerRadius="3" x="102"/>
+	<mx:Button id="button7" visible="true" y="214" label="7" click="print('7')" width="46" height="24" fontSize="16" fontWeight="bold" cornerRadius="3" x="0"/>
+	<mx:Button id="button8" visible="true" y="214" label="8" click="print('8')" width="46" height="24" fontSize="16" fontWeight="bold" cornerRadius="3" x="51"/>
+	<mx:Button id="button9" visible="true" y="214" label="9" click="print('9')" width="46" height="24" fontWeight="bold" fontSize="16" cornerRadius="3" x="102"/>
+	<mx:Button id="button10" visible="true" y="243" label="0 / +" click="print('0')" width="46" height="24" fontWeight="bold" fontSize="16" cornerRadius="3" x="51"/>	
+	<mx:Button id="grill" visible="true" y="243" label="#" click="print('#')" width="46" height="24" fontWeight="bold" fontSize="16" cornerRadius="3" x="102"/>
+	<mx:Button visible="true" label="*" click="print('*')" x="0" y="243" width="46" height="24" fontWeight="bold" fontSize="24" labelPlacement="bottom" cornerRadius="3"/>
+	<phone:PhoneButton id="phoneButton" y="120.2" x="0" width="149" cornerRadius="15" height="30" borderColor="#009800"/>
+</mx:Panel>
