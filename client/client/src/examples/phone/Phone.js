@@ -177,7 +177,10 @@ Phone.prototype.transfer = function (callId, target) {
 };
 
 Phone.prototype.sendXcapRequest = function () {
-    Flashphoner.getInstance().sendXcapRequest({url:ConfigurationLoader.getInstance().xcapUrl});
+    var url = ConfigurationLoader.getInstance().xcapUrl;
+    if (url) {
+        Flashphoner.getInstance().sendXcapRequest({url: url});
+    }
 };
 
 Phone.prototype.subscribe = function () {
