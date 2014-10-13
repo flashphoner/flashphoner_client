@@ -5,3 +5,6 @@
 /server/.idea
 /server/build
 /client/.metadata
+/.metadata
+/client/.idea
+/client/src/dependencies/flash/MediaManager.swf
