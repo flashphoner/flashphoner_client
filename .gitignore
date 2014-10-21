@@ -1,0 +1,10 @@
+
+/client/output
+/client/libs/api.swc
+/release
+/server/.idea
+/server/build
+/client/.metadata
+/.metadata
+/client/.idea
+/client/src/dependencies/flash/MediaManager.swf

@@ -1,0 +1,104 @@
+#!/bin/sh
+CURRENT_DIR=`pwd`
+FLASHPHONER_API_DIR="client/api"
+FLASHPHONER_CLIENT_DIR="client/client"
+BUILD_XML_DIR="server/phone_app"
+
+check_root_access(){
+    USERID=`id | sed -e 's/).*//; s/^.*(//;'`
+    if [ "X$USERID" != "Xroot" ]; then
+        echo ""
+	echo "ERROR: You must be logged in as the root user to install the Flashphoner."
+        echo ""
+	exit
+    fi
+}
+
+detect_java(){
+    echo "DETECTING java command..."
+
+    JAVA_SYMLINK_BIN=`which java 2>/dev/null`
+    if ! test -f "$JAVA_SYMLINK_BIN" ; then
+	echo ""
+	echo "ERROR: The Java command (java) could not be found."
+	echo "Search path: $PATH"
+	echo "In most cases this problem can be fixed by adding a symbolic "
+	echo "link to the Java command in the /usr/bin directory. "
+        echo "To do this first execute the command \"which java\" to identify "
+        echo "the full path to the Java executable. Next, create a symbolic "
+        echo "link to this file with the command"
+        echo "\"ln -sf [path-to-java] /usr/bin/java\" where [path-to-java] is "
+        echo "the path returned by the \"which\" command."
+        echo ""
+	exit 0
+    else
+	echo "- Java command found successfully."
+    fi
+    echo ""
+
+    echo "DETECTING JVM architecture..."
+    java -version 2> tmp.jdk-version 1> /dev/null
+    JDK_VERSION=`cat tmp.jdk-version`
+    rm tmp.jdk-version
+    JVM_ARCH=`echo $JDK_VERSION | sed 's/.*\(...bit\).*/\1/i'`
+    JVM_ARCH_DIGIT=`echo $JVM_ARCH | sed 's/\([0-9]*\).*/\1/'`
+    echo "- $JVM_ARCH architecture detected successfully."
+    echo ""
+
+    echo "DETECTING JDK home..."
+    JAVA_SYMLINK=`ls -l $JAVA_SYMLINK_BIN`
+    JDK_BIN=`echo $JAVA_SYMLINK | sed 's/.*->//'`
+    JDK_HOME=`echo $JDK_BIN | sed 's/\/bin.*//'`
+    if [ ! -f $JDK_HOME/include/jni.h ]; then
+	echo "- Can not find jni.h in JDK_HOME/include dir."    
+        get_jdk_home () {
+	echo "- Please specify JDK_HOME path manually. File JDK_HOME/include/jni.h must exist."
+	read in
+	if [ ! -z "$in" ]; then
+	    if [ ! -f $in/include/jni.h ]; then
+		echo "- Can not find jni.h in JDK_HOME/include dir."
+		get_jdk_home
+	    fi
+	    JDK_HOME=$in
+	    echo "- JDK home detected successfully: $JDK_HOME"
+	else	
+	    echo "- Please do not enter a blank JDK home."
+	    get_jdk_home
+	fi
+	}
+	get_jdk_home    
+    else
+	echo "- JDK home detected successfully: $JDK_HOME."    
+    fi
+    echo ""
+}
+
+detect_ant(){
+    echo "DETECTING ANT..."
+
+    ANT_RESPONSE=$(ant 2>&1 | grep Buildfile)
+    if [ ! -n "$ANT_RESPONSE" ]; then
+	echo "- Error: ANT is not found"
+        exit
+    fi
+    echo "- ANT detected successfully."
+    echo ""
+}
+
+build_client(){
+    cd "$1$FLASHPHONER_API_DIR"
+    BUILD_RESPONSE=$(ant 2>&1 |tee -a $CURRENT_DIR"/log" 2>&1 | grep -i FAILED)
+    if [ -n "$BUILD_RESPONSE" ]; then
+	echo "Error. Build api was not created"
+	exit 0
+    else
+        cd "$1$FLASHPHONER_CLIENT_DIR"
+	BUILD_RESPONSE=$(ant 2>&1|tee -a $CURRENT_DIR"/log" 2>&1 | grep -i FAILED)
+	if [ -n "$BUILD_RESPONSE" ]; then
+    	    echo "Error. Build client was not created"
+    	    exit 0
+        else
+    	    echo "Build client has been created"
+        fi
+    fi
+}

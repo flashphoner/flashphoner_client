@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2011 Flashphoner
+All rights reserved. This Code and the accompanying materials
+are made available under the terms of the GNU Public License v2.0
+which accompanies this distribution, and is available at
+http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+Contributors:
+    Flashphoner - initial API and implementation
+
+This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
+-->
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:ctrl="com.flashphoner.api.communication.*"
+				xmlns:mainPhone="com.flashphoner.mainphone.views.*"
+				backgroundAlpha="0.0" creationComplete="onCreationComlete()" fontFamily="Verdana"
+				layout="absolute">
+    <mx:Script>
+        <![CDATA[
+			import com.flashphoner.Logger;
+			import com.flashphoner.api.FlashAPI;
+			import com.flashphoner.api.PhoneSpeaker;
+			import com.flashphoner.api.APINotify;
+			
+			import flash.utils.setTimeout;
+			
+			import mx.binding.utils.BindingUtils;
+			import mx.controls.Alert;
+			import mx.managers.PopUpManager;
+
+        	private var flashAPI:FlashAPI;
+			private var phoneSpeaker:PhoneSpeaker;
+			
+			[Bindable]
+			private var relationMyVideo:Number = 0.8182;
+			
+			private var timer:Timer = new Timer(1000,0);
+			
+			private function onCreationComlete():void{
+				flashAPI = new FlashAPI(new APINotify());
+				phoneSpeaker = flashAPI.getPhoneSpeaker();
+				phoneSpeaker.percentHeight = 100;
+				phoneSpeaker.percentWidth = 100;
+				videoPartner.addChild(phoneSpeaker);
+				ExternalInterface.addCallback("getAccessToAudio",getAccessToAudio);
+				ExternalInterface.addCallback("getAccessToAudioAndVideo",getAccessToAudio);
+				ExternalInterface.addCallback("changeRelationMyVideo",changeRelationMyVideo);
+				videoPartner.addEventListener(Event.RESIZE,onResize);
+				flashAPI.initMedia();
+
+			}
+			
+			private function onResize(event:Event):void{
+				phoneSpeaker.changeFormat(videoPartner.width,videoPartner.height);
+			}
+			
+			public function getAccessToAudio():void{
+				if (!flashAPI.hasAccessToAudio()){
+					var mic:Microphone = flashAPI.getMicrophone();
+					mic.setLoopBack(true);
+					//mic.addEventListener(StatusEvent.STATUS, onMicrophoneStatus);
+					timer.addEventListener(TimerEvent.TIMER, timerTick);
+					timer.start();
+					videoPartner.visible = false;
+					videoMy.visible = false;
+				}
+			}
+			
+			private function onMicrophoneStatus(event:StatusEvent):void {
+				if (event.code == "Microphone.Unmuted") {
+					videoMy.attachCamera(flashAPI.videoControl.getCam());
+					videoPartner.visible = true;
+					videoMy.visible = true;
+				}
+			}
+			
+			private function timerTick(event:TimerEvent):void {
+				flashAPI.getMicrophone().setLoopBack(false);
+				if (flashAPI.hasAccessToAudio()){
+					timer.stop();
+					videoMy.attachCamera(flashAPI.videoControl.getCam());
+					videoPartner.visible = true;
+					videoMy.visible = true;
+				}
+			}
+			
+			public function changeRelationMyVideo(relation:Number):void{
+				relationMyVideo = relation; 
+			}
+        ]]>       
+    </mx:Script>
+	<!--
+	<mx:TextArea id="messageAccess" editable="false" text="To do that, you should allow the camera and microphone. Open Security Panel and allow access to devices." width="185" height="96" fontSize="12" textAlign="center" x="10" y="13" borderThickness="0"/>
+	-->
+	<mx:Button x="50" y="65" width="200" height="26" label="Allow devices for flash" borderColor="#000000"
+			   click="getAccessToAudio()" color="#CCCCCC" cornerRadius="4" fillAlphas="[1.0, 1.0]"
+			   fillColors="[#444444, #555555]" fontFamily="Georgia" fontSize="12" textAlign="center"/>
+	<mx:Canvas id="videoPartner" visible="false" width="100%" height="100%" x="0" backgroundColor="black" y="0"/>
+	<mx:VideoDisplay id="videoMy" visible="false" left="0" top="0" width="25%"
+					 height="{videoMy.width*relationMyVideo}"/>
+</mx:Application>
