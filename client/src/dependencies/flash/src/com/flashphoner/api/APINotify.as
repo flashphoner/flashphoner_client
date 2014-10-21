@@ -12,26 +12,21 @@ This code and accompanying materials also available under LGPL and MPL license f
 */
 package com.flashphoner.api
 {
-	import com.adobe.cairngorm.control.CairngormEvent;
-	
-	import flash.events.Event;
+	import flash.external.ExternalInterface;
 	
 	/**
-	 * Phone event - describe all phone events
-	 * **/
-	internal class MainEvent extends CairngormEvent
-	{	
-		public static const VIDEO_FORMAT_CHANGED:String = "VIDEO_FORMAT_CHANGED";
-		public static const AUDIO_CODEC_CHANGED_EVENT:String = "AUDIO_CODEC_CHANGED_EVENT";
-		
-		public var flashAPI:Flash_API;
-		public var obj:Object;
-		
-		public function MainEvent(type:String, flashAPI:Flash_API):void
+	 * Implementaion interface for js-phones
+	 **/
+	public class APINotify
+	{
+		public function APINotify()
 		{
-			super(type);
-			this.flashAPI = flashAPI;		
 		}
-		
+		public function notifyCloseConnection():void{
+			ExternalInterface.call("notifyCloseConnection");
+		}
+		public function addLogMessage(message:String):void{
+			ExternalInterface.call("addLogMessage", message);
+		}
 	}
 }

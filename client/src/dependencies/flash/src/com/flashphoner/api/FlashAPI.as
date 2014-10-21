@@ -14,12 +14,6 @@ This code and accompanying materials also available under LGPL and MPL license f
 package com.flashphoner.api
 {
 	import com.flashphoner.Logger;
-	import com.flashphoner.api.data.ErrorCodes;
-	import com.flashphoner.api.data.ModelLocator;
-	import com.flashphoner.api.data.PhoneConfig;
-	import com.flashphoner.api.interfaces.APINotify;
-	import com.flashphoner.api.js.APINotifyJS;
-	import com.flashphoner.api.management.VideoControl;
 	
 	import flash.events.TimerEvent;
 	import flash.external.ExternalInterface;
@@ -36,7 +30,7 @@ package com.flashphoner.api
 	import mx.collections.ArrayCollection;
 
 	[Bindable]
-	public class Flash_API
+	public class FlashAPI
 	{
 		/**
 		 * @private
@@ -48,10 +42,6 @@ package com.flashphoner.api
 		 * Notifier added by addNotify()
 		 **/ 
 		public static var apiNotifys:ArrayCollection;		
-		/**
-		 * Data about logged user
-		 **/
-		public var modelLocator:ModelLocator;
 		
 		/**
 		 * Control of video
@@ -59,42 +49,91 @@ package com.flashphoner.api
 		public var videoControl:VideoControl;
 		
 		private var mic:Microphone;
+		
+		private var userData:Object;
 
-		/**
-		 *
-		 * Initialize parameters from 'flashphoner.xml' and another 
-		 **/
-		public static function initLibrary():void{
-			PhoneModel.getInstance();
-		}
 		/**
 		 * Default contructor.
 		 * Initialize calls,modelLocato and initialize library
 		 */		
-		public function Flash_API(apiNotify:APINotify){
+		public function FlashAPI(apiNotify:APINotify){
 			Security.allowDomain("*");
 			Logger.init();
-			this.mic = defineMicrophone();
+			this.mic = defineMicrophone(true);
 			apiNotifys = new ArrayCollection();
 			addAPINotify(apiNotify);
-			PhoneModel.getInstance();
-			ExternalInterface.addCallback("logoff",logoff);
+			ExternalInterface.addCallback("connect", connect);
+			ExternalInterface.addCallback("talk", talk);
+			ExternalInterface.addCallback("hold", hold);
+			ExternalInterface.addCallback("setAudioCodec", setAudioCodec);
+			ExternalInterface.addCallback("close", close);
+			ExternalInterface.addCallback("publishStream", publishStream);
+			ExternalInterface.addCallback("unPublishStream", unPublishStream);
+			ExternalInterface.addCallback("playStream", playStream);
+			ExternalInterface.addCallback("stopStream", stopStream);
+			ExternalInterface.addCallback("hasAccessToAudio",hasAccessToAudio);
+			ExternalInterface.addCallback("hasAccessToVideo",hasAccessToVideo);
+			ExternalInterface.addCallback("disconnect",disconnect);
 			ExternalInterface.addCallback("getMicVolume",getMicVolume);
 			ExternalInterface.addCallback("setMicVolume",setMicVolume);
 			ExternalInterface.addCallback("getVolume",getVolume);
 			ExternalInterface.addCallback("setVolume",setVolume);
-			ExternalInterface.addCallback("hasAccessToAudio",hasAccessToAudio);
-			ExternalInterface.addCallback("hasAccessToVideo",hasAccessToVideo);
 			ExternalInterface.addCallback("getMicropones",getMicropones);
 			ExternalInterface.addCallback("setMicrophone",setMicrophone);
 			ExternalInterface.addCallback("getCameras",getCameras);
 			ExternalInterface.addCallback("setCamera",setCamera);
-			ExternalInterface.addCallback("setSpeexQuality",setSpeexQuality);
-			ExternalInterface.addCallback("openSettingsPanel",openSettingsPanel);
-			modelLocator = new ModelLocator();
+
 			phoneServerProxy = new PhoneServerProxy(this);
 			
 		}
+		
+		public  function connect(urlFlashServer:String, userData:Object):void{
+			this.userData = userData;
+			var connectObj:Object = new Object();
+			connectObj.token = userData.authToken;
+			phoneServerProxy.connect(urlFlashServer, connectObj);
+		}
+		
+		
+		public  function talk(callId:String, hasVideo:Boolean):void{
+			phoneServerProxy.publish(getPublishStreamNameForCall(callId), true, hasVideo);
+			phoneServerProxy.phoneSpeaker.play(getPlayStreamNameForCall(callId), true);
+		}
+		
+		public  function hold(callId:String):void{
+			phoneServerProxy.unpublish(getPublishStreamNameForCall(callId));
+			phoneServerProxy.phoneSpeaker.stop(getPlayStreamNameForCall(callId));
+		}
+		
+		public  function setAudioCodec(id:String, codecObj:Object):void{
+			changeAudioCodec(codecObj);
+		}		
+		
+		public function close(callId:String):void{
+			phoneServerProxy.unpublish(getPublishStreamNameForCall(callId));
+			phoneServerProxy.phoneSpeaker.stop(getPlayStreamNameForCall(callId));
+		}
+		
+		public  function publishStream(streamName:String, hasAudio:Boolean, hasVideo:Boolean):void{
+			phoneServerProxy.publish(streamName, hasAudio, hasVideo);
+		}
+		
+		public  function unPublishStream(streamName:String):void{
+			phoneServerProxy.unpublish(streamName);
+		}
+		
+		public  function playStream(streamName:String):void{
+			this.phoneServerProxy.phoneSpeaker.play(streamName, true);			
+		}
+		
+		public  function stopStream(streamName:String):void{
+			this.phoneServerProxy.phoneSpeaker.stop(streamName);			
+		}
+		
+		public  function disconnect():void{
+			phoneServerProxy.disconnect();
+		}
+		
 		
 		public function initMedia():void{
 			Logger.info("Init media...");
@@ -113,7 +152,7 @@ package com.flashphoner.api
 		 * @param apiNotify Object will be implemented APINotify
 		 **/
 		public function addAPINotify(apiNotify:APINotify):void{
-			Flash_API.apiNotifys.addItem(apiNotify);
+			FlashAPI.apiNotifys.addItem(apiNotify);
 		}
 
 		/**
@@ -173,7 +212,7 @@ package com.flashphoner.api
 			var i:int = 0;
 			for each (var nameMic:String in Microphone.names){
 				if (nameMic == name){
-					var microphone:Microphone = defineMicrophone(i);
+					var microphone:Microphone = defineMicrophone(true, i);
 					if (microphone != null){
 						this.mic = microphone;
 						if (this.mic != null){	
@@ -225,48 +264,32 @@ package com.flashphoner.api
 			videoControl.changeCamera(Camera.getCamera(name));
 		}
 		
-		/**
-		 * Log off from the server and close connection
-		 **/
-		public  function logoff():void{
-			phoneServerProxy.disconnect();
-		}
-		
-		
-		public function openSettingsPanel():void{
-			Security.showSettings();
-		}
-		
-		private function defineMicrophone(index:int=-1):Microphone {
+		private function defineMicrophone(useEnhanced:Boolean, index:int=-1):Microphone {
 			Logger.info("getMicrophone "+index);
-			if (PhoneConfig.USE_ENHANCED_MIC){				
-				if (PhoneConfig.MAJOR_PLAYER_VERSION >= 11 || Capabilities.language.indexOf("en") >= 0 || PhoneConfig.FORCE_ENHANCED_MIC){
-					Logger.info("return EnhancedMicrophone");
-					Logger.info("majorVersion: "+PhoneConfig.MAJOR_PLAYER_VERSION);
-					Logger.info("Capabilities.language: "+Capabilities.language);
-					Logger.info("FORCE_ENHANCED_MIC: "+PhoneConfig.FORCE_ENHANCED_MIC);
+			if (useEnhanced){				
+				if (getFlashPlayerMajorVersion() >= 11 || Capabilities.language.indexOf("en") >= 0){
 					return Microphone.getEnhancedMicrophone(index);				
 				}else{					
-					for each (var apiNotify:APINotify in Flash_API.apiNotifys){
+					for each (var apiNotify:APINotify in FlashAPI.apiNotifys){
 						apiNotify.addLogMessage("WARNING!!! Echo cancellation is turned off on your side (because your OS has no-english localization). Please use a headset to avoid echo for your interlocutor.");
 					}
-					Logger.info("return Microphone");
 					return Microphone.getMicrophone(index);
 				}
 			}else{
-				Logger.info("return Microphone");
 				return Microphone.getMicrophone(index);
 			}
+		}	
+		
+		public function getFlashPlayerMajorVersion():int {
+			var flashPlayerVersion:String = Capabilities.version;			
+			var osArray:Array = flashPlayerVersion.split(' ');
+			var osType:String = osArray[0];
+			var versionArray:Array = osArray[1].split(',');
+			return parseInt(versionArray[0]);
 		}		
 		
 		private function initMic(mic:Microphone, gain:int=50, loopback:Boolean=false):void{
-			var logMsg:String = "Init mic: codec: "+PhoneConfig.AUDIO_CODEC+" gain: "+50+" loopback: "+loopback;
-			Logger.info(logMsg);
-			for each (var apiNotify:APINotify in Flash_API.apiNotifys){
-				apiNotify.addLogMessage(logMsg);
-			}	
-			
-			changeCodec(PhoneConfig.AUDIO_CODEC);
+			changeCodec("pcma");
 			
 			if (gain != -1){
 				mic.gain = gain;
@@ -302,10 +325,17 @@ package com.flashphoner.api
 			}
 		}
 		
-		public function setSpeexQuality(quality:int){
-			Logger.info("setSpeexQuality: "+quality);
-			mic.encodeQuality=quality;
+		public function pong():void {
+			phoneServerProxy.pong();
 		}		
+		
+		private function getPublishStreamNameForCall(callId:String):String {
+			return "OUT_" + callId;
+		}
+		
+		private function getPlayStreamNameForCall(callId:String):String {
+			return "IN_" + callId;
+		}
 		
 	}
 }

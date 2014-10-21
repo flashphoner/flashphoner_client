@@ -10,10 +10,9 @@ Contributors:
 
 This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 */
-package com.flashphoner.api.management
+package com.flashphoner.api
 {
 	import com.flashphoner.Logger;
-	import com.flashphoner.api.data.PhoneConfig;
 	
 	import flash.media.Camera;
 	
@@ -43,15 +42,12 @@ package com.flashphoner.api.management
 		/**
 		 * Init width,height,fps and another parameters
 		 **/ 
-		public function init():void{			
+		public function init(width:int, height:int):void{			
 			if (cam != null){				
-				supportedResolutions("1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
-				cam.setMode(PhoneConfig.VIDEO_WIDTH,PhoneConfig.VIDEO_HEIGHT,FPS,KEEP_RATIO);
+				cam.setMode(width,height,FPS,KEEP_RATIO);
 				cam.setKeyFrameInterval(KEY_INT);
 				cam.setQuality(0,QUALITY);
 				cam.setMotionLevel(0,2000);
-				PhoneConfig.VIDEO_WIDTH = cam.width;
-				PhoneConfig.VIDEO_HEIGHT = cam.height;	
 			}
 			
 		}		
@@ -59,9 +55,9 @@ package com.flashphoner.api.management
 		/**
 		 * Add new supported resolutions
 		 **/
-		public function supportedResolutions(resolutions:String):void {					
+		public function getSupportedResolutions():String {					
 			var supportedResolutions:String = ""; 
-			var resolutionsSplit:Array = resolutions.split(",");
+			var resolutionsSplit:Array = "1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60".split(",");
 			var flag:Boolean = true;
 			for (var i:int=0;i<resolutionsSplit.length;i++){
 				var res:String = resolutionsSplit[i];
@@ -72,19 +68,14 @@ package com.flashphoner.api.management
 				if ((w==cam.width)&&(h==cam.height)){
 					Logger.info("Resolution is supported: "+w+"x"+h);
 					supportedResolutions += (w+"x"+h+",");
-					if ((w<=PhoneConfig.VIDEO_WIDTH)&&(h<=PhoneConfig.VIDEO_HEIGHT)&&flag){
-						PhoneConfig.VIDEO_WIDTH=w;
-						PhoneConfig.VIDEO_HEIGHT=h;
-						flag=false;
-					}
 				}else{
 					Logger.info("Resolution is NOT supported: "+w+"x"+h+", used: "+cam.width+"x"+cam.height);
 				}
 			}
 			
-			Logger.info("supportedResolutions: "+supportedResolutions+" PhoneConfig.VIDEO_WIDTH: "+PhoneConfig.VIDEO_WIDTH+" PhoneConfig.VIDEO_HEIGHT: "+PhoneConfig.VIDEO_HEIGHT);
+			Logger.info("supportedResolutions: "+supportedResolutions);
 			
-			PhoneConfig.SUPPORTED_RESOLUTIONS = supportedResolutions.substring(0,supportedResolutions.length-1);
+			return supportedResolutions.substring(0,supportedResolutions.length-1);
 			
 		}
 		
@@ -123,13 +114,11 @@ package com.flashphoner.api.management
 		 **/
 		public function changeCamera(camera:Camera):void{
 			Logger.info("changeCamera");
-			if (PhoneConfig.VIDEO_ENABLED){
-				camera.setMode(320,240,FPS,KEEP_RATIO);
-				camera.setKeyFrameInterval(KEY_INT);
-				camera.setQuality(0,QUALITY);
-				camera.setMotionLevel(0,2000);	
-				this.cam = camera;			
-			}
+			camera.setMode(320,240,FPS,KEEP_RATIO);
+			camera.setKeyFrameInterval(KEY_INT);
+			camera.setQuality(0,QUALITY);
+			camera.setMotionLevel(0,2000);	
+			this.cam = camera;			
 		}
 	}
 }
