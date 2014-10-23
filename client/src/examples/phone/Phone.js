@@ -235,7 +235,7 @@ Phone.prototype.registrationStatusListener = function (event) {
 
 Phone.prototype.onCallListener = function (event) {
     var call = event.call;
-    trace("Phone - onCallListener " + call.callId + " call.incoming: " + call.incoming + " call.status: " + call.status);
+    trace("Phone - onCallListener " + call.callId + " call.mediaProvider: " + call.mediaProvider + " call.status: " + call.status);
     if (this.currentCall != null && !call.incoming) {
         this.holdedCall = this.currentCall;
         this.currentCall = call;
@@ -252,7 +252,7 @@ Phone.prototype.onCallListener = function (event) {
 Phone.prototype.callStatusListener = function (event) {
     var sipObject = event.sipObject;
     var call = event.call;
-    trace("Phone - callStatusListener call id: " + call.callId + " status: " + call.status + " incoming: " + call.incoming);
+    trace("Phone - callStatusListener call id: " + call.callId + " status: " + call.status + " mediaProvider: " + call.mediaProvider);
     if (this.currentCall.callId == call.callId) {
         if (call.status == CallStatus.FINISH) {
             trace("Phone - ... Call is finished...");

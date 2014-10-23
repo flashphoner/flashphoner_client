@@ -366,7 +366,7 @@ Flashphoner.prototype = {
         me.connection.useDTLS = me.configuration.useDTLS;
         me.connection.sipRegisterRequired = me.connection.sipRegisterRequired || me.configuration.sipRegisterRequired;
         me.connection.sipContactParams = me.connection.sipContactParams || me.configuration.sipContactParams;
-
+        me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
         me.connection.status = ConnectionStatus.Pending;
         me.webSocket = $.websocket(connection.urlServer || me.configuration.urlWsServer, {
             open: function () {
@@ -415,6 +415,7 @@ Flashphoner.prototype = {
         var me = this;
 
         call.callId = createUUID();
+        call.incoming = false;
         me.addOrUpdateCall(call);
 
         if (MediaProvider.WebRTC == call.mediaProvider) {
@@ -1251,6 +1252,7 @@ var Connection = function () {
     this.useSelfSigned = !isMobile.any();
     this.appKey = "defaultApp";
     this.status = ConnectionStatus.New;
+    this.mediaProviders = [];
 };
 
 var ConnectionStatus = function () {
