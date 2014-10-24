@@ -35,6 +35,8 @@ Phone.prototype.init = function () {
     Flashphoner.getInstance().addListener(WCSEvent.SubscriptionStatusEvent, this.subscriptionStatusListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.XcapStatusEvent, this.xcapStatusListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.BugReportStatusEvent, this.bugReportStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.OnDataEvent, this.onDataEventListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.DataStatusEvent, this.dataStatusEventListener, this);
 };
 
 
@@ -207,6 +209,11 @@ Phone.prototype.submitBugReport = function () {
     trace("submitBugReport " + bugReportText);
     Flashphoner.getInstance().submitBugReport({text: bugReportText, type: "no_media"});
 };
+
+Phone.prototype.sendData = function (data) {
+    trace("sendData " + data);
+    Flashphoner.getInstance().sendData(data);
+}
 
 /* ------------------ LISTENERS ----------------- */
 
@@ -411,6 +418,14 @@ Phone.prototype.xcapStatusListener = function (xcapResponse) {
 
 Phone.prototype.bugReportStatusListener = function (event) {
     trace("Phone - bugReportStatusListener; filename - " + event.filename);
+};
+
+Phone.prototype.onDataEventListener = function (event) {
+    trace("Phone - onDataEventListener; received data " + event.data);
+};
+
+Phone.prototype.dataStatusEventListener = function (event) {
+    trace("Phone - DataStatusEventListener; received status " + event.status);
 };
 
 Phone.prototype.errorStatusEvent = function (event) {

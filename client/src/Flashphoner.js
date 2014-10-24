@@ -348,6 +348,19 @@ Flashphoner.prototype = {
                 me.invokeListener(WCSEvent.StreamStatusEvent, [
                     stream
                 ]);
+            },
+
+            OnDataEvent: function (data) {
+                me.invokeListener(WCSEvent.OnDataEvent, [
+                    data
+                ]);
+                me.webSocket.send("DataStatusEvent", {status: "ACCEPTED"});
+            },
+
+            DataStatusEvent: function (status) {
+                me.invokeListener(WCSEvent.DataStatusEvent, [
+                    status
+                ]);
             }
         };
     },
@@ -558,6 +571,10 @@ Flashphoner.prototype = {
 
     notificationResult: function (result) {
         this.webSocket.send("notificationResult", result);
+    },
+
+    sendData: function (data) {
+        this.webSocket.send("sendData", data);
     },
 
     getStats: function (sessionId) {
@@ -1343,6 +1360,8 @@ WCSEvent.SubscriptionStatusEvent = "SUBSCRIPTION_STATUS_EVENT";
 WCSEvent.StreamStatusEvent = "ON_STREAM_STATUS_EVENT";
 WCSEvent.XcapStatusEvent = "XCAP_STATUS_EVENT";
 WCSEvent.BugReportStatusEvent = "BUG_REPORT_STATUS_EVENT";
+WCSEvent.OnDataEvent = "ON_DATA_EVENT";
+WCSEvent.DataStatusEvent = "DATA_STATUS_EVENT";
 
 var WCSError = function () {
 };
