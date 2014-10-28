@@ -162,7 +162,7 @@ Flashphoner.prototype = {
                 call.mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
             }
             if (MediaProvider.WebRTC == call.mediaProvider) {
-                me.webRtcMediaManager.newConnection(call.callId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, me.localVideo, me.remoteVideo));
+                me.webRtcMediaManager.newConnection(call.callId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, me.remoteVideo));
             }
         }
     },
@@ -172,6 +172,7 @@ Flashphoner.prototype = {
         me.initWebRTC();
         me.initFlash("flashVideoDiv", pathToSWF);
         me.localVideo = localVideo;
+        me.localVideo.volume = 0;
         me.remoteVideo = remoteVideo;
 
 
@@ -447,8 +448,8 @@ Flashphoner.prototype = {
             /**
              * If we receive INVITE without SDP, we should send answer with SDP based on webRtcMediaManager.createOffer because we do not have remoteSdp here
              */
-            if (me.webRtcMediaManager.receivedEmptyRemoteSDP(call.id)) {
-                me.webRtcMediaManager.createOffer(call.id, function (sdp) {
+            if (me.webRtcMediaManager.receivedEmptyRemoteSDP(call.callId)) {
+                me.webRtcMediaManager.createOffer(call.callId, function (sdp) {
                     //here we will strip codecs from SDP if requested
                     if (me.configuration.stripCodecs.length) {
                         sdp = me.stripCodecsSDP(sdp);
@@ -461,7 +462,7 @@ Flashphoner.prototype = {
                 /**
                  * If we receive a normal INVITE with SDP we should create answering SDP using normal createAnswer method because we already have remoteSdp here.
                  */
-                me.webRtcMediaManager.createAnswer(call.id, function (sdp) {
+                me.webRtcMediaManager.createAnswer(call.callId, function (sdp) {
                     call.sdp = sdp;
                     me.webSocket.send("answer", call);
                 }, call.hasVideo);
@@ -728,7 +729,7 @@ WebRtcMediaManager.prototype.newConnection = function (id, webRtcMediaConnection
 
 WebRtcMediaManager.prototype.receivedEmptyRemoteSDP = function (id) {
     var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
-    return webRtcMediaConnection.lastReceivedSdp === "";
+    return webRtcMediaConnection.lastReceivedSdp == "";
 };
 
 WebRtcMediaManager.prototype.createOffer = function (id, callback, hasAudio, hasVideo) {
@@ -812,7 +813,6 @@ var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, r
 
 WebRtcMediaConnection.prototype.init = function () {
     trace("WebRtcMediaConnection - init");
-    this.lastReceivedSdp = null;
     this.hasVideo = false;
     this.peerConnection = null;
     this.peerConnectionState = 'new';

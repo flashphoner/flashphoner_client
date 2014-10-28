@@ -72,7 +72,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("playStream", playStream);
 			ExternalInterface.addCallback("stopStream", stopStream);
 			ExternalInterface.addCallback("hasAccessToAudio",hasAccessToAudio);
-			ExternalInterface.addCallback("hasAccessToVideo",hasAccessToVideo);
+			ExternalInterface.addCallback("hasAccessToAudioAndVideo",hasAccessToAudio);
 			ExternalInterface.addCallback("disconnect",disconnect);
 			ExternalInterface.addCallback("getMicVolume",getMicVolume);
 			ExternalInterface.addCallback("setMicVolume",setMicVolume);
@@ -96,13 +96,13 @@ package com.flashphoner.api
 		
 		
 		public  function talk(callId:String, hasVideo:Boolean):void{
-			phoneServerProxy.publish(getPublishStreamNameForCall(callId), true, hasVideo);
-			phoneServerProxy.phoneSpeaker.play(getPlayStreamNameForCall(callId), true);
+			phoneServerProxy.publish(getPublishStreamNameForCall(userData.login, callId), true, hasVideo);
+			phoneServerProxy.phoneSpeaker.play(getPlayStreamNameForCall(userData.login, callId), true);
 		}
 		
 		public  function hold(callId:String):void{
-			phoneServerProxy.unpublish(getPublishStreamNameForCall(callId));
-			phoneServerProxy.phoneSpeaker.stop(getPlayStreamNameForCall(callId));
+			phoneServerProxy.unpublish(getPublishStreamNameForCall(userData.login, callId));
+			phoneServerProxy.phoneSpeaker.stop(getPlayStreamNameForCall(userData.login, callId));
 		}
 		
 		public  function setAudioCodec(id:String, codecObj:Object):void{
@@ -110,8 +110,8 @@ package com.flashphoner.api
 		}		
 		
 		public function close(callId:String):void{
-			phoneServerProxy.unpublish(getPublishStreamNameForCall(callId));
-			phoneServerProxy.phoneSpeaker.stop(getPlayStreamNameForCall(callId));
+			phoneServerProxy.unpublish(getPublishStreamNameForCall(userData.login, callId));
+			phoneServerProxy.phoneSpeaker.stop(getPlayStreamNameForCall(userData.login, callId));
 		}
 		
 		public  function publishStream(streamName:String, hasAudio:Boolean, hasVideo:Boolean):void{
@@ -329,12 +329,12 @@ package com.flashphoner.api
 			phoneServerProxy.pong();
 		}		
 		
-		private function getPublishStreamNameForCall(callId:String):String {
-			return "OUT_" + callId;
+		private function getPublishStreamNameForCall(login:String, callId:String):String {
+			return "OUT_" + login+ "_" + callId;
 		}
 		
-		private function getPlayStreamNameForCall(callId:String):String {
-			return "IN_" + callId;
+		private function getPlayStreamNameForCall(login:String, callId:String):String {
+			return "IN_" + login + "_" + callId;
 		}
 		
 	}
