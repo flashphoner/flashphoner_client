@@ -334,7 +334,7 @@ function notifyConnected() {
 }
 
 function notifyRegistered(sipObject) {
-    trace("Phone - notifyRegistered "+sipObject.message.raw);
+    trace("Phone - notifyRegistered "+(sipObject.message?sipObject.message.raw:""));
     if (registerRequired) {
         toLogState();
         callerLogin = getInfoAboutMe().login;
