@@ -52,7 +52,6 @@ Phone.prototype.connect = function () {
     connection.sipDomain = $('#domain').val();
     connection.sipOutboundProxy = $('#outbound_proxy').val();
     connection.sipPort = $('#port').val();
-    connection.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
     connection.useSelfSigned = !isMobile.any();
     connection.appKey = "defaultApp";
 
@@ -227,9 +226,9 @@ Phone.prototype.connectionStatusListener = function (event) {
 };
 
 Phone.prototype.registrationStatusListener = function (event) {
-    var connection = event.connection;
-    var sipObject = event.sipObject;
-    trace("Phone - registrationStatusListener " + connection.login);
+    var status = event.status;
+    var sipObject = event.sipMessageRaw;
+    trace("Phone - registrationStatusListener " + status);
     SoundControl.getInstance().playSound("REGISTER");
     this.flashphonerListener.onRegistered();
 
@@ -241,7 +240,7 @@ Phone.prototype.registrationStatusListener = function (event) {
 };
 
 Phone.prototype.onCallListener = function (event) {
-    var call = event.call;
+    var call = event;
     trace("Phone - onCallListener " + call.callId + " call.mediaProvider: " + call.mediaProvider + " call.status: " + call.status);
     if (this.currentCall != null && !call.incoming) {
         this.holdedCall = this.currentCall;
@@ -257,8 +256,8 @@ Phone.prototype.onCallListener = function (event) {
 };
 
 Phone.prototype.callStatusListener = function (event) {
-    var sipObject = event.sipObject;
-    var call = event.call;
+    var sipObject = event.sipMessageRaw;
+    var call = event;
     trace("Phone - callStatusListener call id: " + call.callId + " status: " + call.status + " mediaProvider: " + call.mediaProvider);
     if (this.currentCall.callId == call.callId) {
         if (call.status == CallStatus.FINISH) {
@@ -390,7 +389,7 @@ Phone.prototype.parseMsn = function (fsService, mcn) {
 };
 
 Phone.prototype.recordingStatusListener = function (recordReport) {
-    trace("Phone - recordingStatusListener: " + recordReport.mixedFilename);
+    trace("Phone - recordingStatusListener: " + recordReport.report.mixedFilename);
 };
 
 Phone.prototype.subscriptionStatusListener = function (event) {
@@ -429,8 +428,8 @@ Phone.prototype.dataStatusEventListener = function (event) {
 };
 
 Phone.prototype.errorStatusEvent = function (event) {
-    var code = event.code;
-    var sipObject = event.sipObject;
+    var code = event.status;
+    var sipObject = event.sipMessageRaw;
     trace("Phone - errorStatusEvent " + code);
 
     if (code == WCSError.CONNECTION_ERROR) {
@@ -462,6 +461,11 @@ Phone.prototype.errorStatusEvent = function (event) {
         trace("Phone - ERROR - Flashphoner.xml has errors. Please check it.");
     } else if (code == WCSError.PAYMENT_REQUIRED) {
         trace("Phone - ERROR - Payment required, please check your balance.");
+    } else if (code == WCSError.REST_AUTHORIZATION_FAIL) {
+        trace("Phone - ERROR - Rest authorization fail.");
+        window.setTimeout("disconnect();", 3000);
+    } else if (code == WCSError.REST_FAIL) {
+        trace("Phone - ERROR - Rest fail.");
     }
 
     this.flashphonerListener.onError();

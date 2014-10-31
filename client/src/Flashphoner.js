@@ -156,7 +156,7 @@ Flashphoner.prototype = {
         } else {
             me.calls.add(call.callId, call);
             me.invokeListener(WCSEvent.OnCallEvent, [
-                {call: call}
+                call
             ]);
             if (!call.mediaProvider) {
                 call.mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
@@ -199,30 +199,33 @@ Flashphoner.prototype = {
                 me.version = version;
             },
 
-            registered: function (sipHeader) {
+            registered: function (event) {
                 me.invokeListener(WCSEvent.RegistrationStatusEvent, [
-                    {connection: me.connection, sipObject: sipHeader}
+                    event
                 ]);
             },
 
-            notifyTryingResponse: function (call, sipHeader) {
+            notifyTryingResponse: function (call) {
                 trace("notifyTryingResponse call.callId:" + call.callId);
                 me.addOrUpdateCall(call);
+                me.invokeListener(WCSEvent.CallStatusEvent, [
+                    call
+                ]);
             },
 
-            ring: function (call, sipHeader) {
+            ring: function (call) {
                 trace("ring call.state: " + call.state + " call.callId: " + call.callId);
                 me.addOrUpdateCall(call);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
-                    {call: call, sipObject: sipHeader}
+                    call
                 ]);
             },
 
-            sessionProgress: function (call, sipHeader) {
+            sessionProgress: function (call) {
                 trace("sessionProgress call.state: " + call.state + " call.callId: " + call.callId);
                 me.addOrUpdateCall(call);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
-                    {call: call, sipObject: sipHeader}
+                    call
                 ]);
             },
 
@@ -241,40 +244,40 @@ Flashphoner.prototype = {
             notifyVideoFormat: function (videoFormat) {
             },
 
-            talk: function (call, sipHeader) {
+            talk: function (call) {
                 me.addOrUpdateCall(call);
                 me.mediaProviders.get(call.mediaProvider).talk(call.callId, call.hasVideo);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
-                    {call: call, sipObject: sipHeader}
+                    call
                 ]);
             },
 
-            hold: function (call, sipHeader) {
+            hold: function (call) {
                 me.addOrUpdateCall(call);
                 me.mediaProviders.get(call.mediaProvider).hold(call.callId);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
-                    {call: call, sipObject: sipHeader}
+                    call
                 ]);
             },
 
-            finish: function (call, sipHeader) {
+            finish: function (call) {
                 me.calls.remove(call.callId);
                 me.mediaProviders.get(call.mediaProvider).close(call.callId);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
-                    {call: call, sipObject: sipHeader}
+                    call
                 ]);
             },
 
-            busy: function (call, sipHeader) {
+            busy: function (call) {
                 me.addOrUpdateCall(call);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
-                    {call: call, sipObject: sipHeader}
+                    call
                 ]);
             },
 
-            fail: function (errorCode, sipHeader) {
+            fail: function (event) {
                 me.invokeListener(WCSEvent.ErrorStatusEvent, [
-                    {code: errorCode, sipObject: sipHeader}
+                    event
                 ]);
             },
 
@@ -284,7 +287,7 @@ Flashphoner.prototype = {
                 ]);
             },
 
-            notifyMessage: function (message, notificationResult, sipObject) {
+            notifyMessage: function (message, notificationResult) {
                 var sentMessage = me.messages[message.id];
                 if (sentMessage != null) {
                     sentMessage.status = message.status;
@@ -298,7 +301,7 @@ Flashphoner.prototype = {
                     notificationResult.status = "OK";
                     me.notificationResult(notificationResult);
                     me.invokeListener(WCSEvent.OnMessageEvent, [
-                        {message: message, sipObject: sipObject}
+                        message
                     ]);
                 } else {
                     if (message.status == MessageStatus.ACCEPTED) {
@@ -317,7 +320,7 @@ Flashphoner.prototype = {
                         me.notificationResult(notificationResult);
                     }
                     me.invokeListener(WCSEvent.MessageStatusEvent, [
-                        {message: message, sipObject: sipObject}
+                        message
                     ]);
                 }
             },
@@ -377,12 +380,12 @@ Flashphoner.prototype = {
     connect: function (connection) {
         var me = this;
         me.connection = connection;
-        me.connection.useDTLS = me.configuration.useDTLS;
         me.connection.sipRegisterRequired = me.connection.sipRegisterRequired || me.configuration.sipRegisterRequired;
         me.connection.sipContactParams = me.connection.sipContactParams || me.configuration.sipContactParams;
         me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
         me.connection.status = ConnectionStatus.Pending;
-        me.webSocket = $.websocket(connection.urlServer || me.configuration.urlWsServer, {
+        me.connection.urlServer = me.connection.urlServer || me.configuration.urlWsServer;
+        me.webSocket = $.websocket(me.connection.urlServer, {
             open: function () {
                 me.isOpened = true;
                 me.webSocket.send("connect", me.connection);
@@ -563,7 +566,7 @@ Flashphoner.prototype = {
     sendMessage: function (message) {
         var id = createUUID();
         message.id = id;
-        message.from = this.userData.login;
+        message.from = this.userData.sipLogin;
         message.contentType = message.contentType || this.configuration.msgContentType;
         message.isImdnRequired = message.isImdnRequired || this.configuration.imdnEnabled;
         this.messages[id] = message;
@@ -1243,8 +1246,6 @@ Configuration = function () {
     this.sipRegisterRequired = true;
     this.sipContactParams = null;
 
-    this.useDTLS = true;
-
     this.stunServer = "";
 
     this.stripCodecs = [];
@@ -1264,8 +1265,6 @@ var Connection = function () {
     this.sipOutboundProxy = "";
     this.sipPort = 5060;
     this.sipRegisterRequired = true;
-    this.useProxy = true;
-    this.useDTLS = true;
     this.useSelfSigned = !isMobile.any();
     this.appKey = "defaultApp";
     this.status = ConnectionStatus.New;
@@ -1276,6 +1275,7 @@ var ConnectionStatus = function () {
 };
 ConnectionStatus.New = "NEW";
 ConnectionStatus.Pending = "PENDING";
+ConnectionStatus.Registered = "REGISTERED";
 ConnectionStatus.Established = "ESTABLISHED";
 ConnectionStatus.Disconnected = "DISCONNECTED";
 ConnectionStatus.Error = "ERROR";
@@ -1379,6 +1379,8 @@ WCSError.WRONG_SIPPROVIDER_ADDRESS = "WRONG_SIPPROVIDER_ADDRESS";
 WCSError.CALLEE_NAME_IS_NULL = "CALLEE_NAME_IS_NULL";
 WCSError.WRONG_FLASHPHONER_XML = "WRONG_FLASHPHONER_XML";
 WCSError.PAYMENT_REQUIRED = "PAYMENT_REQUIRED";
+WCSError.REST_AUTHORIZATION_FAIL = "REST_AUTHORIZATION_FAIL";
+WCSError.REST_FAIL = "REST_FAIL";
 
 
 var DataMap = function () {
