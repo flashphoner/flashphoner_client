@@ -44,32 +44,32 @@
 
             $("#transferButton").click(function () {
                 if (phone.currentCall) {
-                    phone.transfer(phone.currentCall.callId, $("#transferInput").val());
+                    phone.transfer(ConsolePhone.currentCall.callId, $("#transferInput").val());
                 }
             });
 
             $("#answerButton").click(function () {
                 if (phone.currentCall) {
-                    phone.answer(phone.currentCall);
+                    phone.answer(ConsolePhone.currentCall);
                 }
             });
 
             $("#holdButton").click(function () {
                 if (phone.currentCall) {
-                    phone.hold(phone.currentCall);
+                    phone.hold(ConsolePhone.currentCall);
                 }
             });
 
             $("#unholdButton").click(function () {
                 if (phone.currentCall) {
-                    phone.unhold(phone.currentCall);
+                    phone.unhold(ConsolePhone.currentCall);
                 }
             });
 
 
             $("#hangupButton").click(function () {
                 if (phone.currentCall) {
-                    phone.hangup(phone.currentCall);
+                    phone.hangup(ConsolePhone.currentCall);
                 }
             });
 

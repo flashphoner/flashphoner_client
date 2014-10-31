@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport"/>
+    <title>Телефон</title>
+    <link type="text/css" rel="stylesheet" href="gui/css/style.css"/>
+</head>
+<body>
+
+<!-- alert -->
+<div class="b-alert"></div>
+<div class="b-alert__ban">
+    <p>The microphine is denied.</p>
+
+    <p>Please allow access to your microphone to make calls..</p>
+
+    <p>
+        <input type="button" class="allow" value="allow"/>
+        <input type="button" class="close" value="close"/>
+    </p>
+</div>
+
+<!-- begin of phone -->
+<div class="b-phone">
+
+<!-- begin of display -->
+<div class="b-display">
+
+    <!-- header -->
+    <div class="b-display__header">
+        <span class="b-display__header__video"></span>
+        <span class="b-display__header__volume"></span>
+        <span class="b-display__header__mike"></span>
+        <span class="b-display__header__login">Log in</span>
+
+        <div class="b-volume">
+            <div id="volume"></div>
+            <div class="volume-percent"></div>
+        </div>
+        <div class="b-mike">
+            <div id="mike"></div>
+            <div class="mike-percent"></div>
+        </div>
+    </div>
+
+    <!-- voice call out -->
+    <div class="call__out__dial">calling to</div>
+    <div class="call__inc__dial">User 5</div>
+    <div class="voice_call__call">
+        <div class="voice_call__call__play">
+            <span class="interlocutor1"></span>
+            <span class="call_type"></span>
+            <span class="interlocutor2"></span>
+
+            <div class="b-time"><span class='b-min'>00</span>:<span class='b-sec'>00</span></div>
+        </div>
+        <div class="voice_call__call__pause">User 5</div>
+        <div class="voice_call__nav">
+            <span class="voice_call__stop open"></span>
+            <span class="voice_call__play"></span>
+            <span class="voice_call__transfer"></span>
+        </div>
+    </div>
+
+    <!-- number block -->
+    <div class="b-display__bottom__number">
+        <input type="text" class="b-numbers"/>
+
+        <div class="b-numbers__clear"></div>
+        <span>Enter your number here</span>
+    </div>
+
+</div>
+<!-- end of display -->
+
+<!-- navigation -->
+<div class="b-nav">
+    <div class="b-nav__chat"><span>Chat</span></div>
+    <div class="b-nav__video"><span>Video call</span></div>
+    <div class="b-nav__voice"><span>Voice call</span></div>
+    <div class="b-nav__chancel_call"><span>Chancel</span></div>
+</div>
+
+<!-- navigation incomming call -->
+<div class="b-nav__inc">
+    <div class="b-nav__hangup"><span>Hangup</span></div>
+    <div class="b-nav__answer_video"><span>Answer with Video</span></div>
+    <div class="b-nav__answer"><span>Answer</span></div>
+</div>
+
+<!-- numbers -->
+<div class="b-num">
+    <table>
+        <tr>
+            <td class="code49">1</td>
+            <td class="code50">2</td>
+            <td class="code51">3</td>
+        </tr>
+        <tr>
+            <td class="code52">4</td>
+            <td class="code53">5</td>
+            <td class="code54">6</td>
+        </tr>
+        <tr>
+            <td class="code55">7</td>
+            <td class="code56">8</td>
+            <td class="code57">9</td>
+        </tr>
+        <tr>
+            <td class="code_star"><span class="b-num__star">*</span></td>
+            <td class="code58">0</td>
+            <td class="code_cell">#</td>
+        </tr>
+    </table>
+</div>
+
+<!-- login window -->
+<form class="b-login">
+    <p>
+        <label for="sipLogin">login:</label>
+        <input type="text" value="" id="sipLogin"/>
+    </p>
+
+    <p>
+        <label for="sipAuthenticationName">auth. name:</label>
+        <input type="text" value="" id="sipAuthenticationName"/>
+    </p>
+
+    <p>
+        <label for="sipPassword">password:</label>
+        <input type="password" value="" id="sipPassword"/>
+    </p>
+
+    <p>
+        <label for="sipDomain">domain:</label>
+        <input type="text" value="" id="sipDomain"/>
+    </p>
+
+    <p>
+        <label for="sipOutboundProxy">outbound proxy:</label>
+        <input type="text" value="" id="sipOutboundProxy"/>
+    </p>
+
+    <p>
+        <label for="sipPort">port:</label>
+        <input type="text" value="" id="sipPort"/>
+    </p>
+
+    <div class="b-login__btn">
+        <input type="button" value="log in"/>
+        <span class="b-login__chancel">cancel</span>
+    </div>
+</form>
+
+<!-- video window -->
+<div class="b-video">
+    <a href="#" title="" class="b-video__close"></a>
+
+    <!-- small video -->
+    <video class="b-video__small" autoplay style="background-color: #000000;"></video>
+
+    <!-- big video -->
+    <video autoplay class="b-video__video ui-widget-content"
+           style="background-color: #000000;"></video>
+
+    <span class="b-ie_video">send video</span>
+</div>
+
+<!-- chat window -->
+<div class="b-chat ui-widget-content">
+    <a href="#" title="" class="b-chat__close"></a>
+
+    <!-- begin of tabs -->
+    <div class="b-chat__nav">
+        <div class="b-chat__nav__tab open" id="tab1">
+            <span class="tab_text">anonim</span>
+            <span class="tab_close"></span>
+        </div>
+        <div class="b-chat__nav__tab" id="tab2">
+            <span class="tab_text">user5 (2)</span>
+            <span class="tab_close"></span>
+        </div>
+        <div class="b-chat__nav__tab" id="new">
+            <span class="tab_text">new chat</span>
+            <span class="tab_close"></span>
+        </div>
+    </div>
+    <!-- end of tabs -->
+
+    <div class="b-chat_tab tab1 open">
+
+        <!-- begin of chat window -->
+        <div class="b-chat__window mCustomScrollbar">
+
+            <!-- message -->
+            <div class="b-chat__message">
+                <div class="b-chat__message__head">
+                    <span class="b-chat__message__time">15:15</span>
+                    <span class="b-chat__message__author">anonim</span>
+                </div>
+                <div class="b-chat__message__text">Привет!</div>
+            </div>
+
+            <!-- message -->
+            <div class="b-chat__message my_message">
+                <div class="b-chat__message__head">
+                    <span class="b-chat__message__time">15:16</span>
+                    <span class="b-chat__message__author"></span>
+                </div>
+                <div class="b-chat__message__text">Привет. Как дела?</div>
+            </div>
+
+            <!-- message -->
+            <div class="b-chat__message">
+                <div class="b-chat__message__head">
+                    <span class="b-chat__message__time">15:16</span>
+                    <span class="b-chat__message__author">anonim</span>
+                </div>
+                <div class="b-chat__message__text">В следующую минуту выяснилось, что председатель биржевого комитета не
+                    имеет возможности принять участие в завтрашней битве. Он очень сожалеет, но не может. Он незнаком с
+                    военным делом. Потому-то его и выбрали председателем биржевого комитета.<br/><br/>Он в полном
+                    отчаянии, но для спасения жизни отца русской демократии (сам он старый октябрист) готов оказать
+                    возможную финансовую помощь".
+                </div>
+            </div>
+
+        </div>
+        <!-- end of chat window -->
+
+        <div class="b-chat__text">
+            <textarea></textarea>
+            <input type="button" value="send"/>
+        </div>
+
+    </div>
+
+    <div class="b-chat_tab tab2">
+
+        <!-- begin of chat window -->
+        <div class="b-chat__window mCustomScrollbar">
+
+            <!-- message -->
+            <div class="b-chat__message">
+                <div class="b-chat__message__head">
+                    <span class="b-chat__message__time">15:15</span>
+                    <span class="b-chat__message__author">user5</span>
+                </div>
+                <div class="b-chat__message__text">В следующую минуту выяснилось, что председатель биржевого комитета не
+                    имеет возможности принять участие в завтрашней битве. Он очень сожалеет, но не может. Он незнаком с
+                    военным делом. Потому-то его и выбрали председателем биржевого комитета.<br/><br/>Он в полном
+                    отчаянии, но для спасения жизни отца русской демократии (сам он старый октябрист) готов оказать
+                    возможную финансовую помощь".
+                </div>
+            </div>
+
+            <!-- message -->
+            <div class="b-chat__message my_message">
+                <div class="b-chat__message__head">
+                    <span class="b-chat__message__time">15:16</span>
+                    <span class="b-chat__message__author"></span>
+                </div>
+                <div class="b-chat__message__text">Привет. Как дела?</div>
+            </div>
+
+            <!-- message -->
+            <div class="b-chat__message unread">
+                <div class="b-chat__message__head">
+                    <span class="b-chat__message__time">15:16</span>
+                    <span class="b-chat__message__author">user5</span>
+                </div>
+                <div class="b-chat__message__text">В следующую минуту выяснилось, что председатель биржевого комитета не
+                    имеет возможности принять участие в завтрашней битве. Он очень сожалеет, но не может. Он незнаком с
+                    военным делом. Потому-то его и выбрали председателем биржевого комитета.<br/><br/>Он в полном
+                    отчаянии, но для спасения жизни отца русской демократии (сам он старый октябрист) готов оказать
+                    возможную финансовую помощь".
+                </div>
+            </div>
+
+        </div>
+        <!-- end of chat window -->
+
+        <div class="b-chat__text">
+            <textarea></textarea>
+            <input type="button" value="send"/>
+        </div>
+    </div>
+
+    <div class="b-chat_tab new">
+        <form>
+            <label for="new__chat">new chat with:</label>
+            <input type="text" value="" id="new__chat"/>
+
+            <div class="b-chat__new__list mCustomScrollbar">
+                <p>Alice</p>
+
+                <p>Alex Sign</p>
+
+                <p>Alexander Nett</p>
+
+                <p>Alice</p>
+
+                <p>Alex Sign</p>
+
+                <p>Alexander Nett</p>
+
+                <p>Alice</p>
+
+                <p>Alex Sign</p>
+
+                <p>Alexander Nett</p>
+
+                <p>Alice</p>
+
+                <p>Alex Sign</p>
+
+                <p>Alexander Nett</p>
+
+                <p>Alice</p>
+
+                <p>Alex Sign</p>
+
+                <p>Alexander Nett</p>
+
+                <p>Alice</p>
+
+                <p>Alex Sign</p>
+
+                <p>Alexander Nett</p>
+            </div>
+            <div class="b-chat__new__nav">
+                <input type="button" value="ok" class="b-chat__new__ok"/>
+                <input type="button" value="chancel" class="b-chat__new__chancel"/>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<!-- transfer window -->
+<form class="b-transfer">
+    <p>
+        <label for="transfer">transfer this call to:</label>
+        <input type="text" value="" id="transfer"/>
+    </p>
+
+    <div class="b-transfer__btn">
+        <input type="button" value="ok" class="b-transfer__ok"/>
+        <input type="button" value="cancel" class="b-transfer__chancel"/>
+    </div>
+</form>
+
+</div>
+<!-- end of phone -->
+
+<!-- buttons -->
+<div class="b-buttons">
+    <p>
+        <input type="button" class="allow" value="Allow mike"/>
+        <input type="button" class="ban" value="Ban mike"/>
+    </p>
+
+    <p>
+        <input type="button" class="hook" value="Off-hook"/>
+    </p>
+
+    <p>
+        <input type="button" class="take open" value="Incoming call"/>
+    </p>
+
+    <p>
+        <input type="button" class="message" value="Incoming message"/>
+    </p>
+</div>
+
+<script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
+<script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+<script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+<script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
+<script src="gui/js/jquery.mCustomScrollbar.concat.min.js"></script>
+
+<script type="text/javascript" src="../../Flashphoner.js"></script>
+<script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
+
+<script type="text/javascript" src="Phone.js"></script>
+<script type="text/javascript" src="GuiPhone.js"></script>
+
+<script type="text/javascript" src="SoundControl.js"></script>
+<script type="text/javascript" src="listener/DefaultListener.js"></script>
+<script type="text/javascript" src="listener/LoadToolListener.js"></script>
+<script type="text/javascript" src="../ConfigurationLoader.js"></script>
+</body>
+</html>

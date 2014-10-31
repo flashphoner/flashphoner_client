@@ -213,7 +213,7 @@ Phone.prototype.submitBugReport = function () {
 Phone.prototype.sendData = function (data) {
     trace("sendData " + data);
     Flashphoner.getInstance().sendData(data);
-}
+};
 
 /* ------------------ LISTENERS ----------------- */
 
