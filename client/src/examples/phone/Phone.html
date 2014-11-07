@@ -44,32 +44,32 @@
 
             $("#transferButton").click(function () {
                 if (phone.currentCall) {
-                    phone.transfer(ConsolePhone.currentCall.callId, $("#transferInput").val());
+                    phone.transfer(phone.currentCall.callId, $("#transferInput").val());
                 }
             });
 
             $("#answerButton").click(function () {
                 if (phone.currentCall) {
-                    phone.answer(ConsolePhone.currentCall);
+                    phone.answer(phone.currentCall);
                 }
             });
 
             $("#holdButton").click(function () {
                 if (phone.currentCall) {
-                    phone.hold(ConsolePhone.currentCall);
+                    phone.hold(phone.currentCall);
                 }
             });
 
             $("#unholdButton").click(function () {
                 if (phone.currentCall) {
-                    phone.unhold(ConsolePhone.currentCall);
+                    phone.unhold(phone.currentCall);
                 }
             });
 
 
             $("#hangupButton").click(function () {
                 if (phone.currentCall) {
-                    phone.hangup(ConsolePhone.currentCall);
+                    phone.hangup(phone.currentCall);
                 }
             });
 
@@ -179,7 +179,7 @@
     <input id="holdButton" type="button" value="Hold"/>
     <input id="unholdButton" type="button" value="Unhold"/>
     <input id="transferInput" type="text"/>
-    <input id="transferOk" type="button" value="Transfer"/>
+    <input id="transferButton" type="button" value="Transfer"/>
 </div>
 <!-- ************* -->
 

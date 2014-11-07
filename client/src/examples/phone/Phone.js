@@ -27,6 +27,8 @@ Phone.prototype.init = function () {
     Flashphoner.getInstance().addListener(WCSEvent.RegistrationStatusEvent, this.registrationStatusListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.OnCallEvent, this.onCallListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.CallStatusEvent, this.callStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.OnTransferEvent, this.onTransferEventListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.TransferStatusEvent, this.onTransferStatusListener, this);
 
     Flashphoner.getInstance().addListener(WCSEvent.OnMessageEvent, this.onMessageListener, this);
     Flashphoner.getInstance().addListener(WCSEvent.MessageStatusEvent, this.messageStatusListener, this);
@@ -100,12 +102,8 @@ Phone.prototype.call = function (callee) {
         call.inviteParameters = {param1: "value1", param2: "value2"};
         call.isMsrp = false;
         call.mediaProvider = mediaProvider;
-        var result = Flashphoner.getInstance().call(call);
-        if (result == 0) {
-            this.flashphonerListener.onCall();
-        } else {
-            trace("Callee number is wrong");
-        }
+        this.currentCall = Flashphoner.getInstance().call(call);
+        this.flashphonerListener.onCall();
     } else {
         trace("Microphone is not plugged in");
     }
@@ -229,14 +227,19 @@ Phone.prototype.registrationStatusListener = function (event) {
     var status = event.status;
     var sipObject = event.sipMessageRaw;
     trace("Phone - registrationStatusListener " + status);
-    SoundControl.getInstance().playSound("REGISTER");
-    this.flashphonerListener.onRegistered();
+    if (status == WCSError.AUTHENTICATION_FAIL) {
+        trace("Phone - ERROR - Register fail, please check your SIP account details.");
+        window.setTimeout(this.disconnect(), 3000);
+    } else {
+        SoundControl.getInstance().playSound("REGISTER");
+        this.flashphonerListener.onRegistered();
 
-    if (ConfigurationLoader.getInstance().subscribeEvent != null && ConfigurationLoader.getInstance().subscribeEvent.length != 0) {
-        this.subscribe();
+        if (ConfigurationLoader.getInstance().subscribeEvent != null && ConfigurationLoader.getInstance().subscribeEvent.length != 0) {
+            this.subscribe();
+        }
+
+        this.sendXcapRequest();
     }
-
-    this.sendXcapRequest();
 };
 
 Phone.prototype.onCallListener = function (event) {
@@ -300,14 +303,22 @@ Phone.prototype.callStatusListener = function (event) {
     }
 };
 
+Phone.prototype.onTransferStatusListener = function (event) {
+    trace("Phone - onTransferStatusListener status:" + event.status + " incoming:" + event.incoming);
+};
+
+Phone.prototype.onTransferEventListener = function (event) {
+    trace("Phone - onTransferEventListener status:" + event.status + " incoming:" + event.incoming);
+};
+
+
 Phone.prototype.messageStatusListener = function (event) {
-    var message = event.message;
+    var message = event;
     trace("Phone - messageStatusListener id = " +message.id + " status = " + message.status);
 };
 
 Phone.prototype.onMessageListener = function (event) {
-    var message = event.message;
-
+    var message = event;
     if (message.contentType == "application/im-iscomposing+xml" || message.contentType == "message/fsservice+xml") {
         trace("ignore message: " + message.body);
         if (ConfigurationLoader.getInstance().disableUnknownMsgFiltering) {

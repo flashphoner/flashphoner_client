@@ -155,9 +155,11 @@ Flashphoner.prototype = {
             me.calls.update(call.callId, call);
         } else {
             me.calls.add(call.callId, call);
-            me.invokeListener(WCSEvent.OnCallEvent, [
-                call
-            ]);
+            if (call.incoming || call.parentCallId !== undefined) {
+                me.invokeListener(WCSEvent.OnCallEvent, [
+                    call
+                ]);
+            }
             if (!call.mediaProvider) {
                 call.mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
             }
@@ -203,6 +205,24 @@ Flashphoner.prototype = {
                 me.invokeListener(WCSEvent.RegistrationStatusEvent, [
                     event
                 ]);
+            },
+
+            notifyIncomingCall: function (call) {
+                trace("notifyIncomingCall call.callId:" + call.callId);
+                me.addOrUpdateCall(call);
+            },
+
+            notifyTransferEvent: function (call) {
+                trace("notifyTransferEvent " + call.status);
+                if (call.status == "PENDING") {
+                    me.invokeListener(WCSEvent.OnTransferEvent, [
+                        call
+                    ]);
+                } else {
+                    me.invokeListener(WCSEvent.TransferStatusEvent, [
+                        call
+                    ]);
+                }
             },
 
             notifyTryingResponse: function (call) {
@@ -276,9 +296,23 @@ Flashphoner.prototype = {
             },
 
             fail: function (event) {
-                me.invokeListener(WCSEvent.ErrorStatusEvent, [
-                    event
-                ]);
+                if (event.hasOwnProperty("apiMethod")) {
+                    var actualEvent = WCSEvent[event.apiMethod];
+                    var obj = {};
+                    delete event.apiMethod;
+                    if (actualEvent == WCSEvent.ConnectionStatusEvent) {
+                        obj.connection = event;
+                    } else {
+                        obj = event;
+                    }
+                    me.invokeListener(actualEvent, [
+                        obj
+                    ]);
+                } else {
+                    me.invokeListener(WCSEvent.ErrorStatusEvent, [
+                        event
+                    ]);
+                }
             },
 
             notifyBugReport: function (filename) {
@@ -449,7 +483,7 @@ Flashphoner.prototype = {
         } else if (MediaProvider.Flash == call.mediaProvider) {
             me.webSocket.send("call", call);
         }
-        return 0;
+        return call;
     },
 
     msrpCall: function (callRequest) {
@@ -661,7 +695,6 @@ Flashphoner.prototype = {
 
     stripCodecsSDP: function (sdp) {
         var sdpArray = sdp.split("\n");
-        console.dir(this.configuration.stripCodecs);
 
         //search and delete codecs line
         var pt = [];
@@ -1381,6 +1414,8 @@ WCSEvent.XcapStatusEvent = "XCAP_STATUS_EVENT";
 WCSEvent.BugReportStatusEvent = "BUG_REPORT_STATUS_EVENT";
 WCSEvent.OnDataEvent = "ON_DATA_EVENT";
 WCSEvent.DataStatusEvent = "DATA_STATUS_EVENT";
+WCSEvent.TransferStatusEvent = "TRANSFER_STATUS_EVENT";
+WCSEvent.OnTransferEvent = "ON_TRANSFER_EVENT";
 
 var WCSError = function () {
 };
