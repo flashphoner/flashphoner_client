@@ -22,7 +22,7 @@ FlashphonerLoader = function (config) {
     this.loadBalancerUrl = null;
     this.jsonpSuccess = false;
     this.token = null;
-    this.registerRequired = false;
+    this.registerRequired = true;
     this.videoWidth = 320;
     this.videoHeight = 240;
     this.pushLogEnabled = false;
@@ -32,10 +32,12 @@ FlashphonerLoader = function (config) {
     this.finishSound = "sounds/HANGUP.ogg";
     this.xcapUrl = null;
     this.msrpCallee = null;
-    this.subscribeEvent = "reg";
+    this.subscribeEvent = null;
     this.contactParams = null;
     this.imdnEnabled = false;
-
+    this.msgContentType = "text/plain";
+    this.stripCodecs = new Array();
+    this.stunServer = "";
 
     $.ajax({
         type: "GET",
@@ -61,6 +63,15 @@ FlashphonerLoader.prototype = {
         if (wsPort.length > 0) {
             this.wsPort = wsPort[0].textContent;
         }
+        var wssPort = $(xml).find("wss_port");
+        if (wssPort.length > 0) {
+            this.wssPort = wssPort[0].textContent;
+        }
+        var useWss= $(xml).find("use_wss");
+        if (useWss.length > 0) {
+            this.useWss = "true" == useWss[0].textContent;
+        }
+
         var flashPort = $(xml).find("flash_port");
         if (flashPort.length > 0) {
             this.flashPort = flashPort[0].textContent;
@@ -79,7 +90,7 @@ FlashphonerLoader.prototype = {
         }
         var registerRequired = $(xml).find("register_required");
         if (registerRequired.length > 0) {
-            this.registerRequired = registerRequired[0].textContent;
+            this.registerRequired = (registerRequired[0].textContent === "true");
         }
         var videoWidth = $(xml).find("video_width");
         if (videoWidth.length > 0) {
@@ -156,6 +167,44 @@ FlashphonerLoader.prototype = {
             }
         }
 
+        //Message content type by default "text/plain", can be "message/cpim"
+        var msgContentType = $(xml).find("msg_content_type");
+        if (msgContentType.length > 0) {
+            this.msgContentType = msgContentType.text();
+            console.log("Message content type: " + this.msgContentType);
+        }
+
+        var stripCodecs = $(xml).find("strip_codecs");
+        if (stripCodecs.length > 0) {
+            var tempCodecs = stripCodecs[0].textContent.split(",");
+            for (i = 0; i < tempCodecs.length; i++) {
+                if (tempCodecs[i].length) this.stripCodecs[i] = tempCodecs[i];
+                console.log("Codec " + tempCodecs[i] + " will be removed from SDP!");
+            }
+        }
+
+        //stun server address
+        var stunServer = $(xml).find("stun_server");
+        if (stunServer.length > 0) {
+            this.stunServer = stunServer.text();
+            console.log("Stun server: " + this.stunServer);
+        }
+
+        //variable participating in api load, can bee null, webrtc, flash
+        var streamingType = $(xml).find("streaming");
+        if (streamingType.length > 0) {
+            if (streamingType.text() == "webrtc") {
+                console.log("Force WebRTC usage!");
+                isWebRTCAvailable = true;
+            } else if (streamingType.text() == "flash") {
+                console.log("Force Flash usage!");
+                isWebRTCAvailable = false;
+            } else {
+                console.log("Bad streaming property " + streamingType.text() +
+                    ", can be webrtc or flash. Using default behaviour!")
+            }
+        }
+
         //get load balancer url if load balancing enabled
         if (me.loadBalancerUrl != null) {
             trace("Retrieve server url from load balancer");
@@ -166,7 +215,7 @@ FlashphonerLoader.prototype = {
              */
             setTimeout(function () {
                 //check status of ajax request
-                if (!this.jsonpSuccess) {
+                if (!me.jsonpSuccess) {
                     trace("Error occurred while retrieving load balancer data, please check your load balancer url " +
                         me.loadBalancerUrl);
                     me.loadAPI();
@@ -179,13 +228,15 @@ FlashphonerLoader.prototype = {
                 dataType: "jsonp",
                 data: loadBalancerData,
                 success: function (loadBalancerData) {
-                    this.wcsIP = loadBalancerData.server;
-                    this.wsPort = loadBalancerData.ws;
-                    this.flashPort = loadBalancerData.flash;
-                    this.jsonpSuccess = true;
+                    me.wcsIP = loadBalancerData.server;
+                    me.wsPort = loadBalancerData.ws;
+					me.wssPort = loadBalancerData.wss;
+                    me.flashPort = loadBalancerData.flash;
+                    me.jsonpSuccess = true;
                     trace("Connection data from load balancer: "
                         + "wcsIP " + loadBalancerData.server
                         + ", wsPort " + loadBalancerData.ws
+                        + ", wssPort " + loadBalancerData.wss
                         + ", flashPort " + loadBalancerData.flash);
                     me.loadAPI();
                 }
@@ -199,10 +250,18 @@ FlashphonerLoader.prototype = {
         var me = this;
         if (isWebRTCAvailable) {
             me.useWebRTC = true;
-            me.urlServer = "ws://" + this.wcsIP + ":" + this.wsPort;
+            var protocol = "ws://";
+            var port = this.wsPort;
+            if (this.useWss){
+                protocol = "wss://";
+                port = this.wssPort;
+            }
+            me.urlServer = protocol + this.wcsIP + ":" + port;
             me.flashphoner = new WebSocketManager(getElement('localVideoPreview'), getElement('remoteVideo'));
+            if (me.stripCodecs.length) me.flashphoner.setStripCodecs(me.stripCodecs);
+            if (me.stunServer != "") me.flashphoner.setStunServer(me.stunServer);
             me.flashphoner_UI = new UIManagerWebRtc();
-            notifyFlashReady();
+            notifyConfigLoaded();
         } else {
             me.useWebRTC = false;
             me.urlServer = "rtmfp://" + this.wcsIP + ":" + this.flashPort + "/" + this.appName;
@@ -211,7 +270,14 @@ FlashphonerLoader.prototype = {
             params.swliveconnect = "true";
             params.allowfullscreen = "true";
             params.allowscriptaccess = "always";
-            params.wmode = "transparent";
+            //in case of Safari wmode should be "window"
+            if((navigator.userAgent.indexOf("Safari") > -1) && !(navigator.userAgent.indexOf("Chrome") > -1)) {
+                params.wmode = "window";
+                //workaround for safari browser, FPNR-403
+                swfobject.switchOffAutoHideShow();
+            } else {
+                params.wmode = "transparent";
+            }
             var attributes = {};
             var flashvars = {};
             flashvars.config = "flashphoner.xml";
@@ -221,6 +287,8 @@ FlashphonerLoader.prototype = {
                     me.flashphoner = e.ref;
                     me.flashphoner_UI = new UIManagerFlash();
                 });
+            } else {
+                notifyFlashNotFound();
             }
 
         }

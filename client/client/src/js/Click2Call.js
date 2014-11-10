@@ -205,8 +205,8 @@ function addLogMessage(message) {
     trace('addLogMessage', message);
 }
 
-function notifyFlashReady() {
-    trace("notifyFlashReady");
+function notifyConfigLoaded() {
+    trace("notifyConfigLoaded");
     flashphoner = flashphonerLoader.getFlashphoner();
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
     if (flashphonerLoader.useWebRTC) {

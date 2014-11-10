@@ -28,7 +28,17 @@ Messenger.prototype = {
         } else if (message.state == "IMDN_FAILED" || message.state == "IMDN_FORBIDDEN" || message.state == "IMDN_ERROR") {
             this.notifyDeliveryFailed(message.notificationResult);
         } else if (message.state == "RECEIVED") {
-            this.notifyReceived(message, notificationResult);
+            //here we will choose what to display on multiple contacts in "from".
+            if (message.from.indexOf(",") != -1) {
+                var fromList = message.from.split(",");
+                message.from = fromList[0];
+            }
+            //Don't show service message to user
+            if (message.contentType.toLowerCase() == "message/fsservice+xml") {
+                console.log("Received service message");
+            } else {
+                this.notifyReceived(message, notificationResult);
+            }
         }
     },
 

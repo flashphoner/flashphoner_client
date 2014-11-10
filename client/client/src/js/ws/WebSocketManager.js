@@ -5,6 +5,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
     me.configLoaded = false;
     me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
     me.soundControl = new SoundControl();
+    me.stripCodecs = new Array();
     var rtcManager = this.webRtcMediaManager;
     var proccessCall = function (call) {
         for (var i in me.calls) {
@@ -48,7 +49,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
         },
 
         registered: function (sipHeader) {
-            notifyRegistered();
+            notifyRegistered(sipHeader);
         },
 
         ring: function (call, sipHeader) {
@@ -62,7 +63,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
 
         setRemoteSDP: function (call, sdp, isInitiator, sipHeader) {
             proccessCall(call);
-            //this.stopSound("RING");
+            this.stopSound("RING");
             rtcManager.setRemoteSDP(sdp, isInitiator);
             if (!isInitiator && rtcManager.getConnectionState() == "established") {
                 me.answer(call.id);
@@ -162,6 +163,11 @@ WebSocketManager.prototype = {
         openInfoView("Configuring WebRTC connection...", 0);
         this.webRtcMediaManager.createOffer(function (sdp) {
             closeInfoView();
+            //here we will strip codecs from SDP if requested
+            if (me.stripCodecs.length) {
+                sdp = me.stripCodecsSDP(sdp);
+                console.log("New SDP: " + sdp);
+            }
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
         }, false);
@@ -187,6 +193,12 @@ WebSocketManager.prototype = {
         openInfoView("Configuring WebRTC connection...", 0, 60);
         this.webRtcMediaManager.createOffer(function (sdp) {
             closeInfoView();
+            //here we will strip codecs from SDP if requested
+            if (me.stripCodecs.length) {
+                sdp = me.stripCodecsSDP(sdp);
+                console.log("New SDP: " + sdp);
+            }
+            sdp = me.removeCandidatesFromSDP(sdp);
             callRequest.sdp = sdp;
             me.webSocket.send("call", callRequest);
         }, false);
@@ -210,11 +222,30 @@ WebSocketManager.prototype = {
     answer: function (callId) {
         var me = this;
         openInfoView("Configuring WebRTC connection...", 0, 60);
-        this.webRtcMediaManager.createAnswer(function (sdp) {
+        /**
+         * If we receive INVITE without SDP, we should send answer with SDP based on webRtcMediaManager.createOffer because we do not have remoteSdp here
+         */
+        if (this.webRtcMediaManager.lastReceivedSdp !== null &&  this.webRtcMediaManager.lastReceivedSdp.length==0){
+            this.webRtcMediaManager.createOffer(function (sdp) {
                 closeInfoView();
+                //here we will strip codecs from SDP if requested
+                if (me.stripCodecs.length) {
+                    sdp = me.stripCodecsSDP(sdp);
+                    console.log("New SDP: " + sdp);
+                }
+                sdp = me.removeCandidatesFromSDP(sdp);
                 me.webSocket.send("answer", {callId: callId, sdp: sdp});
-            }
-        );
+            }, false);
+        } else{
+            /**
+             * If we receive a normal INVITE with SDP we should create answering SDP using normal createAnswer method because we already have remoteSdp here.
+             */
+            this.webRtcMediaManager.createAnswer(function (sdp) {
+                    closeInfoView();
+                    me.webSocket.send("answer", {callId: callId, sdp: sdp});
+                }
+            );
+        }
     },
 
     hangup: function (callId) {
@@ -312,6 +343,91 @@ WebSocketManager.prototype = {
 
     notificationResult: function (result) {
         this.webSocket.send("notificationResult",result);
+    },
+
+    setStripCodecs: function (array) {
+        this.stripCodecs = array;
+    },
+
+    removeCandidatesFromSDP: function (sdp) {
+        var sdpArray = sdp.split("\n");
+
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i].search("a=candidate:") != -1) {
+                sdpArray[i] = "";
+            }
+        }
+
+        //normalize sdp after modifications
+        var result = "";
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i] != "") {
+                result += sdpArray[i] + "\n";
+            }
+        }
+
+        return result;
+    },
+
+    stripCodecsSDP: function (sdp) {
+        var sdpArray = sdp.split("\n");
+        console.dir(this.stripCodecs);
+
+        //search and delete codecs line
+        var pt = [];
+        for (p = 0; p < this.stripCodecs.length; p++) {
+            console.log("Searching for codec " + this.stripCodecs[p]);
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i].search(this.stripCodecs[p]) != -1 && sdpArray[i].indexOf("a=rtpmap") == 0) {
+                    console.log(this.stripCodecs[p] + " detected");
+                    pt.push(sdpArray[i].match(/[0-9]+/)[0]);
+                    sdpArray[i] = "";
+                }
+            }
+        }
+
+        if (pt.length) {
+            //searching for fmtp
+            for (p = 0; p < pt.length; p++) {
+                for (i = 0; i < sdpArray.length; i++){
+                    if (sdpArray[i].search("a=fmtp:"+pt[p]) != -1) {
+                        console.log("PT "+pt[p]+" detected");
+                        sdpArray[i] = "";
+                    }
+                }
+            }
+
+            //delete entries from m= line
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i].search("m=audio") != -1) {
+                    console.log("m line detected " + sdpArray[i]);
+                    var mLineSplitted = sdpArray[i].split(" ");
+                    var newMLine = "";
+                    for (m = 0; m < mLineSplitted.length; m++) {
+                        if (pt.indexOf(mLineSplitted[m]) == -1 || m <= 2){
+                            newMLine += " " + mLineSplitted[m];
+                        }
+                    }
+                    sdpArray[i] = newMLine.substr(1);
+                    console.log("Resulting m= line is: " + sdpArray[i]);
+                    break;
+                }
+            }
+        }
+
+        //normalize sdp after modifications
+        var result = "";
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i] != "") {
+                result += sdpArray[i] + "\n";
+            }
+        }
+
+        return result;
+    },
+
+    setStunServer: function(server) {
+        this.webRtcMediaManager.setStunServer(server);
     }
 
 };

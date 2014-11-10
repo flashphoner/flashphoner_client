@@ -43,8 +43,6 @@ $(document).ready(function () {
     toLogOffState();
     openConnectingView("Loading...", 0);
     flashphonerLoader = new FlashphonerLoader();
-// 	openConnectingView("You have old flash player", 0);
-//  trace("Download flash player from: http://get.adobe.com/flashplayer/");
 });
 
 
@@ -64,6 +62,7 @@ function login() {
     loginObject.outboundProxy = $('#outbound_proxy').val();
     loginObject.port = $('#port').val();
     loginObject.useProxy = $('#checkboxUseProxy').attr("checked") ? true : false;
+    loginObject.registerRequired = flashphonerLoader.registerRequired;
     if (flashphonerLoader.contactParams != null && flashphonerLoader.contactParams.length != 0) {
         loginObject.contactParams = flashphonerLoader.contactParams;
     }
@@ -235,7 +234,13 @@ function addLogMessage(message) {
     trace(message);
 }
 
-function notifyFlashReady() {
+function notifyFlashNotFound() {
+    closeConnectingView();
+    getElement('phoneScreen2').innerHTML = "<a href='http://www.adobe.com/go/getflashplayer' style='margin-left: 17px;'><img src='http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player'/></a>";
+}
+
+function notifyConfigLoaded() {
+    notifyReady();
     flashphoner = flashphonerLoader.getFlashphoner();
     flashphoner_UI = flashphonerLoader.getFlashphonerUI();
     messenger = new Messenger(flashphoner);
@@ -289,7 +294,7 @@ function notifyConnected() {
     //flashphoner.setSpeexQuality(10);
 }
 
-function notifyRegistered() {
+function notifyRegistered(sipObject) {
     trace("notifyRegistered");
     if (registerRequired) {
         toLogState();
@@ -371,6 +376,7 @@ function notifyBalance(balance) {
 function notify(call) {
     trace("notify", call); //: callId " + call.id + " --- " + call.anotherSideUser);
     if (currentCall.id == call.id) { //if we have some call now and notify is about exactly our call
+        trace("currentCall.id == call.id "+call.id);
         currentCall = call;
         if (call.state == STATE_FINISH) {
             // if that hangup during transfer procedure?
@@ -401,6 +407,7 @@ function notify(call) {
             flashphoner.playSound("BUSY");
         }
     } else if (holdedCall.id == call.id) {
+        trace("holdedCall.id == call.id "+call.id);
         if (call.state == STATE_FINISH) {
             /* that mean if
              - user1 call user2
@@ -549,21 +556,41 @@ function notifyMessageReceived(messageObject) {
 function convertMessageBody(messageBody, contentType) {
     trace("convertMessageBody " + contentType);
     if (contentType == "application/fsservice+xml") {
+        var missedCallNotification;
         var xml = $.parseXML(messageBody);
         var fsService = $(xml).find("fs-services").find("fs-service");
         var action = fsService.attr("action");
         if (action == "servicenoti-indicate") {
-            var cawData = fsService.find("caw").find("caw-data");
-            if (cawData) {
-                var sender = $(cawData).attr("sender");
-                trace("cawData: " + sender);
-                return "Missed call " + sender;
+            var caw = parseMsn(fsService,"caw");
+            if (!!caw){
+                missedCallNotification = caw;
+            }else{
+                missedCallNotification = parseMsn(fsService,"mcn");
+            }
+        } else if (action == "serviceinfo-confirm") {
+            //service status confirmation
+            missedCallNotification = "Service status: " + $(fsService.find("mcn").find("mcn-data")).attr("status");
+        }
+        if(missedCallNotification !== undefined) return missedCallNotification;
+    }
+    return messageBody;
+}
+
+function parseMsn(fsService,mcn){
+    trace("parseMcn: "+mcn);
+    var caw = fsService.find(mcn);
+    var ret = null;
+    if (!!caw){
+        var cawData = caw.find(mcn+"-data");
+        if (!!cawData) {
+            var sender = $(cawData).attr("sender");
+            if (!!sender){
+                trace("Missed call: " + sender);
+                ret = "Missed call from " + sender;
             }
         }
     }
-
-    return messageBody;
-
+    return ret;
 }
 
 function addMessageToChat(chatDiv, from, body, className, messageId) {
@@ -612,8 +639,10 @@ function notifyAddCall(call) {
     trace("notifyAddCall", call); // call.id, call.anotherSideUser
 
     if (currentCall != null && call.incoming == true) {
+        trace("currentCall != null && call.incoming == true");
         hangup(call.id);
     } else if (currentCall != null && call.incoming == false) {
+        trace("currentCall != null && call.incoming == false");
         holdedCall = currentCall;
         currentCall = call;
         createCallView(currentCall);
@@ -783,7 +812,10 @@ function closeInfoView(timeout) {
 function openIncomingView(call) {
     trace("openIncomingView", call)// call.caller, call.visibleNameCaller
 
-    var displayedCaller = call.caller + " '" + call.visibleNameCaller + "'";
+    //form Caller-ID information displayed to user
+    var displayedCaller = "";
+    if (call.caller !== undefined) displayedCaller += call.caller;
+    if (call.visibleNameCaller !== undefined) displayedCaller += " '" + call.visibleNameCaller + "'";
 
     $('#incomingDiv').show();
     $('#callerField').html(displayedCaller);
@@ -948,7 +980,7 @@ function createChat(calleeName) {
         $('#chat' + calleeNameId + ' .messageSend').click(function () {
             var fullCalleeName = $(this).parent().attr('fullCalleeName'); //parse id of current chatBox, take away chat word from the beginning
             var messageText = $(this).prev().val(); //parse text from input
-            sendMessage(calleeName, messageText, 'text/plain'); //send message
+            sendMessage(calleeName, messageText, flashphonerLoader.msgContentType); //send message
             $(this).prev().val(''); //clear message input
         });
 
@@ -1008,9 +1040,8 @@ function close(element) {
     element.css('visibility', 'hidden');
 }
 
-
 /* --------------------- On document load we do... ------------------ */
-$(function () {
+function notifyReady() {
 
     // open login view
     $("#loginMainButton").click(function () {
@@ -1147,6 +1178,10 @@ $(function () {
         }
     });
 
+    $(".testButton").click(function () {
+        startUnitTests();
+    });
+
     // this function set changing in button styles when you press any button
     $(".button").mousedown(function () {
         $(this).addClass('pressed');
@@ -1213,4 +1248,4 @@ $(function () {
     });
 
 
-});
+}
