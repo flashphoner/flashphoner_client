@@ -488,8 +488,9 @@ Flashphoner.prototype = {
 
     msrpCall: function (callRequest) {
         var me = this;
-        me.webSocket.send("msrpCall", callRequest);
-        return 0;
+        callRequest.callId = createUUID();
+        me.webSocket.send("call", callRequest);
+        return callRequest;
     },
 
     answer: function (call) {
