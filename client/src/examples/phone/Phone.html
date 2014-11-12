@@ -39,7 +39,7 @@
             });
 
             $("#callButton").click(function () {
-                phone.call($("#calleeText").val());
+                phone.call($("#calleeText").val(), $('#checkboxVideoCall').attr("checked") ? true : false);
             });
 
             $("#transferButton").click(function () {
@@ -50,7 +50,7 @@
 
             $("#answerButton").click(function () {
                 if (phone.currentCall) {
-                    phone.answer(phone.currentCall);
+                    phone.answer(phone.currentCall, $('#checkboxVideoCall').attr("checked") ? true : false);
                 }
             });
 

@@ -73,7 +73,7 @@ Phone.prototype.msrpCall = function (callee) {
     Flashphoner.getInstance().msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: {param1: "value1", param2: "value2"}, isMsrp: true});
 };
 
-Phone.prototype.call = function (callee) {
+Phone.prototype.call = function (callee, hasVideo) {
     trace("Phone - call " + callee);
     var me = this;
     var mediaProvider = MediaProvider.Flash;
@@ -82,10 +82,10 @@ Phone.prototype.call = function (callee) {
             mediaProvider = MediaProvider.WebRTC;
         }
     }
-    if (!me.hasAccess(mediaProvider)) {
+    if (!me.hasAccess(mediaProvider, hasVideo)) {
         if (me.intervalId == -1) {
             var checkAccessFunc = function () {
-                if (me.hasAccess(mediaProvider)) {
+                if (me.hasAccess(mediaProvider, hasVideo)) {
                     clearInterval(me.intervalId);
                     me.intervalId = -1;
                     me.call(callee);
@@ -93,12 +93,12 @@ Phone.prototype.call = function (callee) {
             };
             me.intervalId = setInterval(checkAccessFunc, 500);
         }
-        me.getAccess(mediaProvider);
-    } else if (me.hasAccess(mediaProvider)) {
+        me.getAccess(mediaProvider, hasVideo);
+    } else if (me.hasAccess(mediaProvider, hasVideo)) {
         var call = new Call();
         call.callee = callee;
         call.visibleName = "Caller";
-        call.hasVideo = me.isVideoCall();
+        call.hasVideo = hasVideo;
         call.inviteParameters = {param1: "value1", param2: "value2"};
         call.isMsrp = false;
         call.mediaProvider = mediaProvider;
@@ -114,16 +114,16 @@ Phone.prototype.sendMessage = function (message) {
     Flashphoner.getInstance().sendMessage(message);
 };
 
-Phone.prototype.hasAccess = function(mediaProvider) {
-    if (this.isVideoCall()) {
+Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
+    if (hasVideo) {
         return Flashphoner.getInstance().hasAccessToAudioAndVideo(mediaProvider);
     } else {
         return Flashphoner.getInstance().hasAccessToAudio(mediaProvider);
     }
 };
 
-Phone.prototype.getAccess = function(mediaProvider) {
-    if (this.isVideoCall()) {
+Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
+    if (hasVideo) {
         return Flashphoner.getInstance().getAccessToAudioAndVideo(mediaProvider);
     } else {
         return Flashphoner.getInstance().getAccessToAudio(mediaProvider);
@@ -131,14 +131,13 @@ Phone.prototype.getAccess = function(mediaProvider) {
 };
 
 
-
-Phone.prototype.answer = function (call) {
+Phone.prototype.answer = function (call, hasVideo) {
     trace("Phone - answer " + call.callId);
     var me = this;
-    if (!me.hasAccess(call.mediaProvider)) {
+    if (!me.hasAccess(call.mediaProvider, hasVideo)) {
         if (me.intervalId == -1) {
             var checkAccessFunc = function () {
-                if (me.hasAccess(call.mediaProvider)) {
+                if (me.hasAccess(call.mediaProvider, hasVideo)) {
                     clearInterval(me.intervalId);
                     me.intervalId = -1;
                     me.answer(call);
@@ -146,9 +145,9 @@ Phone.prototype.answer = function (call) {
             };
             me.intervalId = setInterval(checkAccessFunc, 500);
         }
-        me.getAccess(call.mediaProvider);
-    } else if (me.hasAccess(call.mediaProvider)) {
-        call.hasVideo = me.isVideoCall();
+        me.getAccess(call.mediaProvider,hasVideo);
+    } else if (me.hasAccess(call.mediaProvider, hasVideo)) {
+        call.hasVideo = hasVideo;
         Flashphoner.getInstance().answer(call);
         this.flashphonerListener.onAnswer(call.callId);
     } else {
@@ -314,7 +313,7 @@ Phone.prototype.onTransferEventListener = function (event) {
 
 Phone.prototype.messageStatusListener = function (event) {
     var message = event;
-    trace("Phone - messageStatusListener id = " +message.id + " status = " + message.status);
+    trace("Phone - messageStatusListener id = " + message.id + " status = " + message.status);
 };
 
 Phone.prototype.onMessageListener = function (event) {
@@ -341,7 +340,7 @@ Phone.prototype.onMessageListener = function (event) {
         }
     }
 
-    trace("Phone - onMessageListener id = " +message.id + " body = " + message.body);
+    trace("Phone - onMessageListener id = " + message.id + " body = " + message.body);
 };
 
 Phone.prototype.convertMessageBody = function (messageBody, contentType) {
@@ -485,10 +484,6 @@ Phone.prototype.errorStatusEvent = function (event) {
 /* ------------- Additional interface functions --------- */
 Phone.prototype.isCurrentCall = function (call) {
     return this.currentCall != null && this.currentCall.callId == call.callId;
-};
-
-Phone.prototype.isVideoCall = function () {
-    return $('#checkboxVideoCall').attr("checked") ? true : false;
 };
 
 Phone.prototype.isUseWebRTC = function () {

@@ -160,10 +160,6 @@ Phone.prototype.callStatusListener = function (event) {
 };
 
 
-Phone.prototype.isVideoCall = function () {
-    return $("body").hasClass("video");
-};
-
 Phone.prototype.isUseWebRTC = function () {
     return true;
 };
