@@ -416,7 +416,7 @@ Phone.prototype.subscriptionStatusListener = function (event) {
 
 Phone.prototype.xcapStatusListener = function (xcapResponse) {
     trace("Phone - xcapStatusListener " + xcapResponse);
-    var xml = $.parseXML(xcapResponse);
+    var xml = $.parseXML(xcapResponse.responseBody);
     var history = $(xml).find("history-list").find("history");
     if (history != null && history.length != 0) {
         if (ConfigurationLoader.getInstance().msrpCallee != null && ConfigurationLoader.getInstance().msrpCallee.length != 0) {
