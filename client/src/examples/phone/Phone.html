@@ -39,7 +39,13 @@
             });
 
             $("#callButton").click(function () {
-                phone.call($("#calleeText").val(), $('#checkboxVideoCall').attr("checked") ? true : false);
+                var mediaProvider = MediaProvider.Flash;
+                if ($('#checkboxUseWebRTC').attr("checked") ? true : false) {
+                    if (Flashphoner.getInstance().mediaProviders.get(MediaProvider.WebRTC)) {
+                        mediaProvider = MediaProvider.WebRTC;
+                    }
+                }
+                phone.call($("#calleeText").val(), $('#checkboxVideoCall').attr("checked") ? true : false, mediaProvider);
             });
 
             $("#transferButton").click(function () {

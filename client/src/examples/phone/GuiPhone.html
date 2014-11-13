@@ -14,11 +14,6 @@
     <p>The microphine is denied.</p>
 
     <p>Please allow access to your microphone to make calls..</p>
-
-    <p>
-        <input type="button" class="allow" value="allow"/>
-        <input type="button" class="close" value="close"/>
-    </p>
 </div>
 
 <!-- begin of phone -->
@@ -157,13 +152,10 @@
 <div class="b-video">
     <a href="#" title="" class="b-video__close"></a>
 
-    <!-- small video -->
+    <div class="b-video__flash" style="width:100%;height:100%;position:absolute; z-index: 1000"><div id="flashVideoDiv"></div></div>
+
     <video class="b-video__small" autoplay style="background-color: #000000;"></video>
-
-    <!-- big video -->
-    <video autoplay class="b-video__video ui-widget-content"
-           style="background-color: #000000;"></video>
-
+    <video autoplay class="b-video__video ui-widget-content" style="background-color: #000000;"></video>
     <span class="b-ie_video">send video</span>
 </div>
 

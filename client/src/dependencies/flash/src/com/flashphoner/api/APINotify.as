@@ -22,8 +22,8 @@ package com.flashphoner.api
 		public function APINotify()
 		{
 		}
-		public function notifyCloseConnection():void{
-			ExternalInterface.call("notifyCloseConnection");
+		public function notifyFlashphonerAPILoaded():void{
+			ExternalInterface.call("notifyFlashphonerAPILoaded");
 		}
 		public function addLogMessage(message:String):void{
 			ExternalInterface.call("addLogMessage", message);

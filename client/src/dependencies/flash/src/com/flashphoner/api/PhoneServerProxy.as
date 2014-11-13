@@ -79,9 +79,6 @@ package com.flashphoner.api
 			} else if(event.info.code == "NetConnection.Connect.Failed")
 			{
 				Logger.info("NetConnection.Connect.Failed");
-				for each (apiNotify in FlashAPI.apiNotifys){
-					apiNotify.notifyCloseConnection();
-				}
 				hasDisconnectAttempt = false;
 			} else if (event.info.code == 'NetConnection.Connect.Rejected')
 			{
@@ -91,9 +88,6 @@ package com.flashphoner.api
 			} else if (event.info.code == 'NetConnection.Connect.Closed')
 			{				
 				Logger.info("NetConnection.Connect.Closed");
-				for each (apiNotify in FlashAPI.apiNotifys){
-					apiNotify.notifyCloseConnection();
-				}
 				hasDisconnectAttempt = false;
 				isConnected = false;
 			}		

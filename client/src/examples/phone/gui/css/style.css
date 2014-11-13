@@ -459,19 +459,21 @@ body{
 	position: relative;}
 /*-- video --*/
 .b-video{
-	display: none;
+	overflow: hidden;
 	line-height: 0;
 	z-index: 10;
 	position: absolute;
 	left: 307px;
 	top: 85px;
+    width: 1px;
+    height: 1px;
 	background: #000;
 	-webkit-border-radius: 5px;
 	   -moz-border-radius: 5px;
 			border-radius: 5px;
 	box-shadow: 0 0 20px #c9c9c9;}
 .b-video.open{
-	display: block;
+    overflow: inherit;
 	min-width: 320px;
 	min-height: 240px;}
 .b-video__video{
@@ -511,6 +513,7 @@ body{
 	position: absolute;
 	top: 10px;
 	left: 10px;
+    width: 100px;
 	z-index: 10;}
 .b-video__video.open{
 	display: block;}

@@ -53,6 +53,12 @@ Flashphoner.prototype = {
         }
     },
 
+    initFlashMediaManager:function(){
+        if (isFlashphonerAPILoaded && this.userData) {
+            this.flashMediaManager.connect(this.configuration.urlFlashServer, this.userData);
+        }
+    },
+
     initWebRTC: function () {
         var me = this;
         if (navigator.mozGetUserMedia) {
@@ -186,7 +192,7 @@ Flashphoner.prototype = {
             getUserData: function (userData) {
                 me.userData = userData;
                 if (me.flashMediaManager) {
-                    me.flashMediaManager.connect(me.configuration.urlFlashServer, userData);
+                    me.initFlashMediaManager();
                 }
                 for (var prop in userData) {
                     me.connection[prop] = me.userData[prop];
@@ -591,11 +597,13 @@ Flashphoner.prototype = {
     },
 
     hasAccessToAudio: function (mediaProvider) {
-        return this.mediaProviders.get(mediaProvider).hasAccessToAudio();
+        var mp = this.mediaProviders.get(mediaProvider);
+        return mp.hasAccessToAudio && mp.hasAccessToAudio();
     },
 
     hasAccessToAudioAndVideo: function (mediaProvider) {
-        return this.mediaProviders.get(mediaProvider).hasAccessToAudioAndVideo();
+        var mp = this.mediaProviders.get(mediaProvider);
+        return mp.hasAccessToAudioAndVideo && mp.hasAccessToAudioAndVideo();
     },
 
     sendMessage: function (message) {
@@ -775,6 +783,12 @@ Flashphoner.prototype = {
         return value;
     }
 };
+
+var isFlashphonerAPILoaded = false;
+function notifyFlashphonerAPILoaded(){
+    isFlashphonerAPILoaded = true;
+    Flashphoner.getInstance().initFlashMediaManager();
+}
 
 var RTCPeerConnection = null;
 var getUserMedia = null;

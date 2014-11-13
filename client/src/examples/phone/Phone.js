@@ -73,22 +73,16 @@ Phone.prototype.msrpCall = function (callee) {
     Flashphoner.getInstance().msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: {param1: "value1", param2: "value2"}, isMsrp: true});
 };
 
-Phone.prototype.call = function (callee, hasVideo) {
+Phone.prototype.call = function (callee, hasVideo, mediaProvider) {
     trace("Phone - call " + callee);
     var me = this;
-    var mediaProvider = MediaProvider.Flash;
-    if (me.isUseWebRTC()) {
-        if (Flashphoner.getInstance().mediaProviders.get(MediaProvider.WebRTC)) {
-            mediaProvider = MediaProvider.WebRTC;
-        }
-    }
     if (!me.hasAccess(mediaProvider, hasVideo)) {
         if (me.intervalId == -1) {
             var checkAccessFunc = function () {
                 if (me.hasAccess(mediaProvider, hasVideo)) {
                     clearInterval(me.intervalId);
                     me.intervalId = -1;
-                    me.call(callee);
+                    me.call(callee, hasVideo, mediaProvider);
                 }
             };
             me.intervalId = setInterval(checkAccessFunc, 500);
@@ -140,7 +134,7 @@ Phone.prototype.answer = function (call, hasVideo) {
                 if (me.hasAccess(call.mediaProvider, hasVideo)) {
                     clearInterval(me.intervalId);
                     me.intervalId = -1;
-                    me.answer(call);
+                    me.answer(call, hasVideo);
                 }
             };
             me.intervalId = setInterval(checkAccessFunc, 500);
@@ -485,11 +479,6 @@ Phone.prototype.errorStatusEvent = function (event) {
 Phone.prototype.isCurrentCall = function (call) {
     return this.currentCall != null && this.currentCall.callId == call.callId;
 };
-
-Phone.prototype.isUseWebRTC = function () {
-    return $('#checkboxUseWebRTC').attr("checked") ? true : false;
-};
-
 
 Phone.prototype.isRingSoundAllowed = function () {
     try {

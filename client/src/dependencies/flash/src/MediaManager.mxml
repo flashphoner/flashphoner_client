@@ -19,9 +19,9 @@ This code and accompanying materials also available under LGPL and MPL license f
     <mx:Script>
         <![CDATA[
 			import com.flashphoner.Logger;
+			import com.flashphoner.api.APINotify;
 			import com.flashphoner.api.FlashAPI;
 			import com.flashphoner.api.PhoneSpeaker;
-			import com.flashphoner.api.APINotify;
 			
 			import flash.utils.setTimeout;
 			
@@ -38,7 +38,8 @@ This code and accompanying materials also available under LGPL and MPL license f
 			private var timer:Timer = new Timer(1000,0);
 			
 			private function onCreationComlete():void{
-				flashAPI = new FlashAPI(new APINotify());
+				var apiNotify:APINotify = new APINotify();
+				flashAPI = new FlashAPI(apiNotify);
 				phoneSpeaker = flashAPI.getPhoneSpeaker();
 				phoneSpeaker.percentHeight = 100;
 				phoneSpeaker.percentWidth = 100;
@@ -48,7 +49,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 				ExternalInterface.addCallback("changeRelationMyVideo",changeRelationMyVideo);
 				videoPartner.addEventListener(Event.RESIZE,onResize);
 				flashAPI.initMedia();
-
+				apiNotify.notifyFlashphonerAPILoaded();
 			}
 			
 			private function onResize(event:Event):void{
@@ -93,9 +94,9 @@ This code and accompanying materials also available under LGPL and MPL license f
 	<!--
 	<mx:TextArea id="messageAccess" editable="false" text="To do that, you should allow the camera and microphone. Open Security Panel and allow access to devices." width="185" height="96" fontSize="12" textAlign="center" x="10" y="13" borderThickness="0"/>
 	-->
-	<mx:Button x="50" y="65" width="200" height="26" label="Allow devices for flash" borderColor="#000000"
+<!--	<mx:Button x="50" y="65" width="200" height="26" label="Allow devices for flash" borderColor="#000000"
 			   click="getAccessToAudio()" color="#CCCCCC" cornerRadius="4" fillAlphas="[1.0, 1.0]"
-			   fillColors="[#444444, #555555]" fontFamily="Georgia" fontSize="12" textAlign="center"/>
+			   fillColors="[#444444, #555555]" fontFamily="Georgia" fontSize="12" textAlign="center"/>-->
 	<mx:Canvas id="videoPartner" visible="false" width="100%" height="100%" x="0" backgroundColor="black" y="0"/>
 	<mx:VideoDisplay id="videoMy" visible="false" left="0" top="0" width="25%"
 					 height="{videoMy.width*relationMyVideo}"/>
