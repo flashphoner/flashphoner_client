@@ -70,7 +70,6 @@ Phone.prototype.onCallListener = function (event) {
         if (call.incoming) {
             $(".call__inc__dial").text(call.caller);
         }
-        $(".take").removeClass("open");										// скрываем кнопку входящего звонка
     }
 };
 
@@ -95,13 +94,13 @@ Phone.prototype.callStatusListener = function (event) {
                 $("#transfer").val("");										// стираем значение в окне переадресации, если есть
                 $(".call__out__dial").text("calling to");					// возвращаем исходный вид блока исходящего вызова (без номера/ника)
                 $(".b-nav__chancel_call span").text("Cancel");				// возвращаем исходное состояние кнопки
-                $(".b-mike, .b-alert__ban, .call__out__dial, .call__inc__dial, .voice_call__call, .b-buttons input, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // закрываем кучу блоков, которые по умолчанию скрыты .b-buttons input - можно удалить, это правые кнопки
+                $(".b-mike, .b-alert__ban, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // закрываем кучу блоков, которые по умолчанию скрыты
                 $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// открываем блоки, которые могли быть скрыты, но по умолчанию видимые
                 num = 0;
                 $(".b-alert").text("").removeClass("video_alert");	// исходный вид окна с алертом
                 $(".interlocutor2").text("");						// очищаем ник собеседника в окне вызова
                 $(".b-time").html("<span class='b-min'>00</span>:<span class='b-sec'>00</span>");	// возвращаем вёрстку таймера на исходную
-                $(".voice_call__stop, .take").addClass("open");		// делаем видимыми кнопку паузы разговора и кнопку моделирования входящего звонка
+                $(".voice_call__stop").addClass("open");		// делаем видимыми кнопку паузы разговора и кнопку моделирования входящего звонка
 
             }
         } else if (call.status == CallStatus.HOLD) {
@@ -113,7 +112,7 @@ Phone.prototype.callStatusListener = function (event) {
             $(".voice_call__transfer").addClass("tr_call__pause");	// добавляем класс кнопке трансфера, чтобы знать, куда потом, если что, возвращаться
         } else if (call.status == CallStatus.TALK) {
             trace('Phone - ...Talking...');
-            $(".b-alert, .b-nav__inc, .b-alert__ban, .b-buttons .allow, .b-buttons .ban, .call__inc__dial").removeClass("open"); // скрываем кучу ненужных кнопок, окон, а также кнопки "разрешить"/"запретить"
+            $(".b-alert, .b-nav__inc, .b-alert__ban, .call__inc__dial").removeClass("open"); // скрываем кучу ненужных кнопок, окон, а также кнопки "разрешить"/"запретить"
             $(".b-nav").removeClass("close");	// открываем обратно стандартные кнопки навигации (если были скрыты при входящем звонке, к примеру)
             $("body").hasClass("video") ? $(".b-video, .hook").addClass("open") : $(".hook").addClass("open");	// если это видео, открываем его и делаем видимой кнопку, моделирующую ответ собеседника (hook при программировании убрать)
             $(".b-nav__chancel_call span").text("Hangup");	// меняем текст кнопки отмены
@@ -359,16 +358,15 @@ $(document).ready(function () {
     $(".b-nav__voice, .b-nav__video").live("click", function () {
         if ($(".b-numbers").hasClass("write")) {  // проверяем, введёт ли номер телефона
             $("body").addClass("voice_call__out");
-            $(".take").removeClass("open");	// скрываем кнопку входяшего вызова (справа) - удалить при программировании
             $(".call__out__dial").addClass("open").html($(".call__out__dial").html() + " " + $(".b-numbers").val());	// открываем блок дозвона и прописываем туда номер телефона, на который звоним
             if ($(this).hasClass("b-nav__video")) {
                 $("body").addClass("video")
             } // если это видеозвонок, добавляем класс body (нужно для отображение алерта)
 
             var mediaProvider = MediaProvider.Flash;
-            if (Flashphoner.getInstance().mediaProviders.get(MediaProvider.WebRTC)) {
-                mediaProvider = MediaProvider.WebRTC;
-            }
+//            if (Flashphoner.getInstance().mediaProviders.get(MediaProvider.WebRTC)) {
+//                mediaProvider = MediaProvider.WebRTC;
+//            }
 
             if ($("body").hasClass("video")) {
                 phone.call($(".b-numbers").val(), true, mediaProvider);
@@ -387,14 +385,7 @@ $(document).ready(function () {
         if (phone.currentCall) {
             phone.answer(phone.currentCall, $(this).hasClass("b-nav__answer_video"));
         }
-        $(".b-alert").addClass("open"); // открываем окно алерта и кнопки "разрешить"/"запретить" (последние удалить при программировании)
     });
-
-    $(".b-buttons .ban").live("click", function () {	// если запретили микрофон или микрофон и камеру
-        $(".mike").removeClass("mike");				// закрываем значок микрофона в шапке
-        $(".b-alert__ban").addClass("open");		// выводим предупреждение на экран (уверены ли вы)
-    });
-
 
     $(".voice_call__stop").live("click", function () {	// если разговор на паузе
         if (phone.currentCall) {

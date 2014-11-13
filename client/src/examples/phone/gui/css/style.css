@@ -141,26 +141,6 @@ body{
 	cursor: default;
 	margin: 8px 0 0 10px;}
 
-/*-- buttons --*/
-.b-buttons{
-	position: absolute;
-	left: 800px;
-	top: 200px;}
-.b-buttons p{
-	margin: 15px 0;}
-.b-buttons input{
-	width: 200px;
-	height: 45px;
-	border: 0px;
-	color: #fff;
-	cursor: default;
-	display: none;
-	background: #09afe2;}
-.b-buttons input:hover{
-	background: #54d1f7;}
-.b-buttons input.open{
-	display: inline-block;}
-
 /*-- volume --*/
 .b-volume,
 .b-mike{
