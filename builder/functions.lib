@@ -1,8 +1,5 @@
 #!/bin/sh
-CURRENT_DIR=`pwd`
-FLASHPHONER_API_DIR="client/api"
-FLASHPHONER_CLIENT_DIR="client/client"
-BUILD_XML_DIR="server/phone_app"
+FLASH_CLIENT_DIR="/client/src/dependencies/flash"
 
 check_root_access(){
     USERID=`id | sed -e 's/).*//; s/^.*(//;'`
@@ -86,19 +83,13 @@ detect_ant(){
 }
 
 build_client(){
-    cd "$1$FLASHPHONER_API_DIR"
-    BUILD_RESPONSE=$(ant 2>&1 |tee -a $CURRENT_DIR"/log" 2>&1 | grep -i FAILED)
-    if [ -n "$BUILD_RESPONSE" ]; then
-	echo "Error. Build api was not created"
-	exit 0
-    else
-        cd "$1$FLASHPHONER_CLIENT_DIR"
-	BUILD_RESPONSE=$(ant 2>&1|tee -a $CURRENT_DIR"/log" 2>&1 | grep -i FAILED)
+    cd "$1$FLASH_CLIENT_DIR"
+    
+	BUILD_RESPONSE=$(ant 2>&1|tee -a $BASE_DIR"/log" 2>&1 | grep -i FAILED)
 	if [ -n "$BUILD_RESPONSE" ]; then
-    	    echo "Error. Build client was not created"
-    	    exit 0
-        else
-    	    echo "Build client has been created"
-        fi
+   	    echo "Error. Build client was not created"
+  	    exit 0
+    else
+   	    echo "Build client has been created"
     fi
 }
