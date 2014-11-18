@@ -29,6 +29,51 @@
 
             streaming.init();
         });
+
+        document.cancelFullScreen = document.webkitCancelFullScreen ||
+                document.mozCancelFullScreen;
+        var elem = document.getElementById("videoDiv");
+        function enterFullScreen() {
+            if (elem.webkitRequestFullScreen) {
+                elem.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+            } else {
+                elem.mozRequestFullScreen();
+            }
+            /**
+             * On ESC pressed
+             */
+            $(document).keyup(function (e) {
+                if (e.keyCode == 27) {
+                    $('.videoDiv').css({'height': '480px', 'width': '640px'});
+                    $('.panel-visit').css('margin-top', '439px');
+                    $('#full').removeClass('ex-size-min').addClass('ex-size');
+                }
+            });
+            /**
+             * Full screen button
+             *
+             */
+            document.getElementById('full').onclick = exitFullScreen;
+            var marHeight = screen.height - 41;
+            var playHeight = screen.height - 298;
+            var videoH = screen.height;
+            var videoW = screen.width;
+            $('.videoDiv').css({'height': '' + videoH + 'px', 'width': '' + videoW + 'px'});
+            $('.panel-visit').css('margin-top', '' + marHeight + 'px');
+            $('.info-anchor').css('margin-top', '' + playHeight + 'px');
+            $('#full').removeClass('ex-size').addClass('ex-size-min');
+        }
+        /**
+         * Full screen
+         */
+        function exitFullScreen() {
+            document.cancelFullScreen();
+            $('.videoDiv').css({'height': '480px', 'width': '640px'});
+            $('.panel-visit').css('margin-top', '439px');
+            document.getElementById('full').onclick = enterFullScreen;
+            $('#full').removeClass('ex-size-min').addClass('ex-size');
+            $('.info-anchor').css('margin-top', '141px');
+        }
     </script>
     <head>
         <title>WebRTC Live Video And Broadcasting Client For Live events and Webinars</title>
@@ -80,8 +125,10 @@
                     <span></span>
                 </div>
                 <div class="panel-translation">
-                    <div class="copy-code" data-clipboard-target="publishStreamName">
+
+                    <div class="copy-code">
                         <span id="publishStreamName"></span>
+                        <div class="copy-code-button" data-clipboard-target="publishStreamName"></div>
                     </div>
                     <div class="stop-x">
                         <div class="stop-text"></div>
@@ -144,54 +191,5 @@
         </div>
 
     </div>
-
-
-    <script>
-        document.cancelFullScreen = document.webkitCancelFullScreen ||
-                document.mozCancelFullScreen;
-        var elem = document.getElementById("videoDiv");
-        function enterFullScreen() {
-            if (elem.webkitRequestFullScreen) {
-                elem.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-            } else {
-                elem.mozRequestFullScreen();
-            }
-            /**
-             * On ESC pressed
-             */
-            $(document).keyup(function (e) {
-                if (e.keyCode == 27) {
-                    $('.videoDiv').css({'height': '480px', 'width': '640px'});
-                    $('.panel-visit').css('margin-top', '439px');
-                    $('#full').removeClass('ex-size-min').addClass('ex-size');
-                }
-            });
-            /**
-             * Full screen button
-             *
-             */
-            document.getElementById('full').onclick = exitFullScreen;
-            var marHeight = screen.height - 41;
-            var playHeight = screen.height - 298;
-            var videoH = screen.height;
-            var videoW = screen.width;
-            $('.videoDiv').css({'height': '' + videoH + 'px', 'width': '' + videoW + 'px'});
-            $('.panel-visit').css('margin-top', '' + marHeight + 'px');
-            $('.info-anchor').css('margin-top', '' + playHeight + 'px');
-            $('#full').removeClass('ex-size').addClass('ex-size-min');
-        }
-        /**
-         * Full screen
-         */
-        function exitFullScreen() {
-            document.cancelFullScreen();
-            $('.videoDiv').css({'height': '480px', 'width': '640px'});
-            $('.panel-visit').css('margin-top', '439px');
-            document.getElementById('full').onclick = enterFullScreen;
-            $('#full').removeClass('ex-size-min').addClass('ex-size');
-            $('.info-anchor').css('margin-top', '141px');
-        }
-    </script>
-
     </body>
     </html>

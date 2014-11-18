@@ -18,11 +18,11 @@ Streaming.prototype.connectionStatusListener = function (event) {
             $('.text-previu>span').text('You have connected to Flashphoner WebRTC server. Would you like to start your stream?');
         } else {
             setTimeout(function () {
-                me.playStreamButtonListener()
+                me.playStreamButtonListener();
             }, 1000);
-            $('.preload-visit').css('display', 'block');
+            //$('.preload-visit').css('display', 'block');
             me.textId();
-            //$('.visit-translation').css('display','block');
+            $('.visit-translation').css('display','block');
             $('.connect-translation').css('display', 'none');
             $('.stop-y').click(function () {
                 me.playStreamButtonListener();
@@ -170,31 +170,27 @@ Streaming.prototype.publish = function () {
     var me = this;
     $('.connect-translation').css({'display': 'none'});
     $('.connect-img').removeAttr('id');
-    if ($('.flash-img').attr("connect-x") === "ok") {
-        $('.black-window').css({'display': 'none'});
-        $('.access-video').css({'display': 'none'});
-        $('.flash-img').attr("connect-x") === "no"
-    } else {
-        $('.access-video').css({'display': 'block'});
-        $('.text-previu>span').text('You are trying to push a stream to Flashphoner WebRTC Server');
-    }
     $('.access-img').attr('id', 'publishButton');
     $("#subscribeButton").unbind("click");
     $("#publishButton").click(function () {
-        me.publishButtonListener()
+        me.publishButtonListener();
     });
     this.info("");
-    if (!Flashphoner.getInstance().hasAccessToAudioAndVideo()) {
+    if (!Flashphoner.getInstance().hasAccessToAudioAndVideo(MediaProvider.WebRTC)) {
+        $('.access-video').css({'display': 'block'});
+        $('.text-previu>span').text('You are trying to push a stream to Flashphoner WebRTC Server');
         var checkAccessFunc = function () {
-            if (Flashphoner.getInstance().hasAccessToAudioAndVideo()) {
+            if (Flashphoner.getInstance().hasAccessToAudioAndVideo(MediaProvider.WebRTC)) {
                 clearInterval(me.intervalId);
                 me.intervalId = -1;
                 me.publish();
             }
         };
         me.intervalId = setInterval(checkAccessFunc, 500);
-        Flashphoner.getInstance().getAccessToAudioAndVideo();
+        Flashphoner.getInstance().getAccessToAudioAndVideo(MediaProvider.WebRTC);
     } else {
+        $('.black-window').css({'display': 'none'});
+        $('.access-video').css({'display': 'none'});
         me.currentStream = new Stream();
         me.currentStream.name = me.generateId();
         Flashphoner.getInstance().publishStream(me.currentStream);
@@ -255,7 +251,6 @@ Streaming.prototype.streamStatusListener = function (stream) {
         if (!this.kindTrans()) {
             $('.publish-translation').css('display', 'block');
             $('.text-previu>span').text("You can share the stream using the link below. Press 'Copy' to copy the link to clipboard.");
-            $('.flash-img').attr("connect-x", "ok");
         }
     } else if (StreamStatus.Stoped == stream.status || StreamStatus.Unpublished == stream.status) {
         if (stream.published) {
@@ -284,38 +279,8 @@ Streaming.prototype.init = function () {
         $('.text-previu>span').text('You are connected to server. Would you like to start stream?');
     });
 
-    var client2 = new ZeroClipboard($(".copy-code"), {
+    var client2 = new ZeroClipboard($(".copy-code-button"), {
         moviePath: "ZeroClipboard.swf"
-    });
-    client2.on("mouseover", function (client2) {
-        $('.copy-code').css('background', 'url("images/copy2.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0)');
-        $('.copy-code>span').css('background', '#ff5454');
-    });
-    client2.on("mouseout", function (client2) {
-        $('.copy-code').css('background', 'url("images/copy1.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0)');
-        $('.copy-code>span').css('background', '#ffffff');
-    });
-    client2.on("mousedown", function (client2) {
-        $('.copy-code').css('background', 'url("images/copy2.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0)');
-        $('.copy-code>span').css('background', '#ffffff');
-    });
-    client2.on("mouseup", function (client2) {
-        $('.copy-code').css('background', 'url("images/copy1.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0)');
-        $('.copy-code>span').css('background', '#ffffff');
-    });
-    client2.on("load", function (client2) {
-        $('.copy-code').css('background', 'url("images/copy1.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0)');
-        $('.copy-code').css('display', 'inline-block');
-        $('.copy-code').css('height', '100%');
-        $('.copy-code').css('width', '596px');
-        $('.copy-code>span').css('background', '#ffffff');
-        client2.on("complete", function (client2, args) {
-            $('.copy-code').css('background', 'url("images/copy2.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0)');
-            $('.copy-code').css('display', 'inline-block');
-            $('.copy-code').css('height', '100%');
-            $('.copy-code').css('width', '596px');
-            $('.copy-code>span').css('background', '#ffffff');
-        });
     });
 
     $('.stop-x').hover(

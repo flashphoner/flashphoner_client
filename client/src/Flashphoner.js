@@ -25,31 +25,35 @@ Flashphoner.getInstance = function () {
 Flashphoner.prototype = {
 
     initFlash: function (elementId, pathToSWF) {
-        var me = this;
-        var params = {};
-        params.menu = "true";
-        params.swliveconnect = "true";
-        params.allowfullscreen = "true";
-        params.allowscriptaccess = "always";
-        //in case of Safari wmode should be "window"
-        if ((navigator.userAgent.indexOf("Safari") > -1) && !(navigator.userAgent.indexOf("Chrome") > -1)) {
-            params.wmode = "window";
-            //workaround for safari browser, FPNR-403
-            swfobject.switchOffAutoHideShow();
-        } else if ((navigator.userAgent.indexOf("Mozilla") > -1) && (navigator.userAgent.indexOf("Firefox") > -1)) {
-            params.wmode = "window";
+        if (typeof swfobject != 'undefined') {
+            var me = this;
+            var params = {};
+            params.menu = "true";
+            params.swliveconnect = "true";
+            params.allowfullscreen = "true";
+            params.allowscriptaccess = "always";
+            //in case of Safari wmode should be "window"
+            if ((navigator.userAgent.indexOf("Safari") > -1) && !(navigator.userAgent.indexOf("Chrome") > -1)) {
+                params.wmode = "window";
+                //workaround for safari browser, FPNR-403
+                swfobject.switchOffAutoHideShow();
+            } else if ((navigator.userAgent.indexOf("Mozilla") > -1) && (navigator.userAgent.indexOf("Firefox") > -1)) {
+                params.wmode = "window";
+            } else {
+                params.wmode = "transparent";
+            }
+            var attributes = {};
+            var flashvars = {};
+            if (swfobject.hasFlashPlayerVersion("11.2")) {
+                swfobject.embedSWF(pathToSWF, elementId, "100%", "100%", "11.2.202", "expressInstall.swf", flashvars, params, attributes, function (e) {
+                    me.flashMediaManager = e.ref;
+                    me.mediaProviders.add(MediaProvider.Flash, me.flashMediaManager);
+                });
+            } else {
+                trace("Problem: Flash not found")
+            }
         } else {
-            params.wmode = "transparent";
-        }
-        var attributes = {};
-        var flashvars = {};
-        if (swfobject.hasFlashPlayerVersion("11.2")) {
-            swfobject.embedSWF(pathToSWF, elementId, "100%", "100%", "11.2.202", "expressInstall.swf", flashvars, params, attributes, function (e) {
-                me.flashMediaManager = e.ref;
-                me.mediaProviders.add(MediaProvider.Flash, me.flashMediaManager);
-            });
-        } else {
-            trace("Problem: Flash not found")
+            trace("Warning: swfobject.js does not include and flash does not load");
         }
     },
 
@@ -677,7 +681,7 @@ Flashphoner.prototype = {
     stopStream: function (stream) {
         console.log("unSubscribe stream " + stream.name);
         var me = this;
-        var removedStream = me.publishStreams.remove(stream.name);
+        var removedStream = me.playStreams.remove(stream.name);
         me.webRtcMediaManager.close(removedStream.mediaSessionId);
         me.webSocket.send("stopStream", removedStream);
     },
