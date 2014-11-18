@@ -203,7 +203,7 @@ Flashphoner.prototype = {
                 }
                 me.connection.status = ConnectionStatus.Established;
                 me.invokeListener(WCSEvent.ConnectionStatusEvent, [
-                    {connection: me.connection}
+                    me.connection
                 ]);
             },
 
@@ -244,7 +244,7 @@ Flashphoner.prototype = {
             },
 
             ring: function (call) {
-                trace("ring call.state: " + call.state + " call.callId: " + call.callId);
+                trace("ring call.status: " + call.status + " call.callId: " + call.callId);
                 me.addOrUpdateCall(call);
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     call
@@ -276,7 +276,9 @@ Flashphoner.prototype = {
 
             talk: function (call) {
                 me.addOrUpdateCall(call);
-                me.mediaProviders.get(call.mediaProvider).talk(call.callId, call.hasVideo);
+                if (!call.isMsrp) {
+                    me.mediaProviders.get(call.mediaProvider).talk(call.callId, call.hasVideo);
+                }
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     call
                 ]);
@@ -308,15 +310,9 @@ Flashphoner.prototype = {
             fail: function (event) {
                 if (event.hasOwnProperty("apiMethod")) {
                     var actualEvent = WCSEvent[event.apiMethod];
-                    var obj = {};
                     delete event.apiMethod;
-                    if (actualEvent == WCSEvent.ConnectionStatusEvent) {
-                        obj.connection = event;
-                    } else {
-                        obj = event;
-                    }
                     me.invokeListener(actualEvent, [
-                        obj
+                        event
                     ]);
                 } else {
                     me.invokeListener(WCSEvent.ErrorStatusEvent, [
@@ -354,6 +350,8 @@ Flashphoner.prototype = {
                         }
                     } else if (message.status == MessageStatus.FAILED) {
                         me.removeSentMessage(sentMessage);
+                    } else if (message.status == MessageStatus.IMDN_NOTIFICATION_SENT && sentMessage == null) {
+                        me.messages[message.id] = message;
                     } else if (message.status == MessageStatus.IMDN_DELIVERED) {
                         me.removeSentMessage(sentMessage);
                         notificationResult.status = "OK";
@@ -377,7 +375,7 @@ Flashphoner.prototype = {
 
             notifySubscription: function (subscription, sipObject) {
                 me.invokeListener(WCSEvent.SubscriptionStatusEvent, [
-                    {subscription: subscription, sipObject: sipObject}
+                    subscription
                 ]);
             },
 
@@ -427,7 +425,6 @@ Flashphoner.prototype = {
         me.connection.sipRegisterRequired = me.connection.sipRegisterRequired || me.configuration.sipRegisterRequired;
         me.connection.sipContactParams = me.connection.sipContactParams || me.configuration.sipContactParams;
         me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
-        me.connection.status = ConnectionStatus.Pending;
         me.connection.urlServer = me.connection.urlServer || me.configuration.urlWsServer;
         me.webSocket = $.websocket(me.connection.urlServer, {
             open: function () {
@@ -437,20 +434,20 @@ Flashphoner.prototype = {
             close: function (event) {
                 me.isOpened = false;
                 if (!event.originalEvent.wasClean) {
-                    me.connection.status = ConnectionStatus.Error;
+                    me.connection.status = ConnectionStatus.Failed;
                 } else {
                     me.connection.status = ConnectionStatus.Disconnected;
                 }
                 me.invokeListener(WCSEvent.ConnectionStatusEvent, [
-                    {connection: me.connection}
+                    me.connection
                 ]);
                 me.webRtcMediaManager.disconnect();
                 me.flashMediaManager.disconnect();
             },
             error: function () {
-                me.connection.status = ConnectionStatus.Error;
+                me.connection.status = ConnectionStatus.Failed;
                 me.invokeListener(WCSEvent.ConnectionStatusEvent, [
-                    {connection: me.connection}
+                    me.connection
                 ]);
             },
             context: me,
@@ -1338,18 +1335,23 @@ var Connection = function () {
     this.sipRegisterRequired = true;
     this.useSelfSigned = !isMobile.any();
     this.appKey = "defaultApp";
-    this.status = ConnectionStatus.New;
+    this.status = ConnectionStatus.Pending;
     this.mediaProviders = [];
 };
 
 var ConnectionStatus = function () {
 };
-ConnectionStatus.New = "NEW";
 ConnectionStatus.Pending = "PENDING";
 ConnectionStatus.Registered = "REGISTERED";
 ConnectionStatus.Established = "ESTABLISHED";
 ConnectionStatus.Disconnected = "DISCONNECTED";
-ConnectionStatus.Error = "ERROR";
+ConnectionStatus.Failed = "FAILED";
+
+var RegistrationStatus = function () {
+};
+RegistrationStatus.Registered = "REGISTERED";
+RegistrationStatus.Unregistered = "UNREGISTERED";
+RegistrationStatus.Failed = "FAILED";
 
 var Call = function () {
     this.callId = "";
@@ -1372,7 +1374,7 @@ var CallStatus = function () {
 CallStatus.RING = "RING";
 CallStatus.RING_MEDIA = "RING_MEDIA";
 CallStatus.HOLD = "HOLD";
-CallStatus.TALK = "TALK";
+CallStatus.ESTABLISHED = "ESTABLISHED";
 CallStatus.FINISH = "FINISH";
 CallStatus.BUSY = "BUSY";
 CallStatus.SESSION_PROGRESS = "SESSION_PROGRESS";
@@ -1391,6 +1393,7 @@ var MessageStatus = function () {
 MessageStatus.SENT = "SENT";
 MessageStatus.ACCEPTED = "ACCEPTED";
 MessageStatus.FAILED = "FAILED";
+MessageStatus.IMDN_NOTIFICATION_SENT = "IMDN_NOTIFICATION_SENT";
 MessageStatus.IMDN_DELIVERED = "IMDN_DELIVERED";
 MessageStatus.IMDN_FAILED = "IMDN_FAILED";
 MessageStatus.IMDN_FORBIDDEN = "IMDN_FORBIDDEN";
@@ -1402,20 +1405,19 @@ var Stream = function () {
     this.name = "";
     this.published = false;
     this.hasVideo = false;
-    this.status = StreamStatus.New;
+    this.status = StreamStatus.Pending;
     this.sdp = "";
     this.message = "";
 };
 
 var StreamStatus = function () {
 };
-StreamStatus.New = "NEW";
 StreamStatus.Pending = "PENDING";
 StreamStatus.Publishing = "PUBLISHING";
 StreamStatus.Playing = "PLAYING";
 StreamStatus.Unpublished = "UNPUBLISHED";
 StreamStatus.Stoped = "STOPED";
-StreamStatus.Error = "ERROR";
+StreamStatus.Failed = "FAILED";
 
 var WCSEvent = function () {
 };

@@ -70,7 +70,8 @@ Phone.prototype.disconnect = function () {
 
 Phone.prototype.msrpCall = function (callee) {
     trace("Phone - msrpCall " + callee);
-    Flashphoner.getInstance().msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: {param1: "value1", param2: "value2"}, isMsrp: true});
+    var me = this;
+    me.currentCall = Flashphoner.getInstance().msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: {param1: "value1", param2: "value2"}, isMsrp: true});
 };
 
 Phone.prototype.call = function (callee, hasVideo, mediaProvider) {
@@ -208,9 +209,9 @@ Phone.prototype.sendData = function (data) {
 /* ------------------ LISTENERS ----------------- */
 
 Phone.prototype.connectionStatusListener = function (event) {
-    trace("Phone - Connection status " + event.connection.status);
-    if (event.connection.status == ConnectionStatus.Disconnected ||
-        event.connection.status == ConnectionStatus.Error) {
+    trace("Phone - Connection status " + event.status);
+    if (event.status == ConnectionStatus.Disconnected ||
+        event.status == ConnectionStatus.Failed) {
         this.currentCall = null;
         this.holdedCall = null;
     }
@@ -222,6 +223,9 @@ Phone.prototype.registrationStatusListener = function (event) {
     trace("Phone - registrationStatusListener " + status);
     if (status == WCSError.AUTHENTICATION_FAIL) {
         trace("Phone - ERROR - Register fail, please check your SIP account details.");
+        window.setTimeout(this.disconnect(), 3000);
+    } else if (status == RegistrationStatus.Failed) {
+        trace("Phone - ERROR - Register fail.");
         window.setTimeout(this.disconnect(), 3000);
     } else {
         SoundControl.getInstance().playSound("REGISTER");
@@ -256,6 +260,7 @@ Phone.prototype.callStatusListener = function (event) {
     var call = event;
     trace("Phone - callStatusListener call id: " + call.callId + " status: " + call.status + " mediaProvider: " + call.mediaProvider);
     if (this.currentCall.callId == call.callId) {
+        this.currentCall.status = call.status;
         if (call.status == CallStatus.FINISH) {
             trace("Phone - ... Call is finished...");
             if (this.holdedCall != null) {
@@ -269,7 +274,7 @@ Phone.prototype.callStatusListener = function (event) {
             }
         } else if (call.status == CallStatus.HOLD) {
             trace('Phone - ...Call on hold...');
-        } else if (call.status == CallStatus.TALK) {
+        } else if (call.status == CallStatus.ESTABLISHED) {
             trace('Phone - ...Talking...');
             SoundControl.getInstance().stopSound("RING");
         } else if (call.status == CallStatus.RING) {
@@ -397,8 +402,9 @@ Phone.prototype.recordingStatusListener = function (recordReport) {
 };
 
 Phone.prototype.subscriptionStatusListener = function (event) {
-    var subscriptionObject = event.subscription;
-    var sipObject = event.sipObject;
+
+    var subscriptionObject = event;
+    var sipObject = event.sipMessageRaw;
     trace("Phone - subscriptionStatusListener event: " + subscriptionObject.event + " expires: " + subscriptionObject.expires + " status: " + subscriptionObject.status + " terminate: " + subscriptionObject.terminate);
     trace("Phone - subscriptionStatusListener body: " + subscriptionObject.requestBody);
     if (subscriptionObject.event == "reg") {
