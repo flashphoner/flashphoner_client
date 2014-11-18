@@ -226,7 +226,7 @@ $(document).ready(function () {
 
     ConfigurationLoader.getInstance(function () {
         trace("Configuration loaded");
-        Flashphoner.getInstance().init($(".b-video__small").get(0), $(".b-video__video").get(0), "../../dependencies/flash/MediaManager.swf");
+        Flashphoner.getInstance().init($(".b-video__small").get(0), $(".b-video__video").get(0), "flashVideoDiv", "../../dependencies/flash/MediaManager.swf");
         phone.init();
     });
 

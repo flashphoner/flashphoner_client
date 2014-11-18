@@ -25,7 +25,7 @@
         var streaming = new Streaming();
         ConfigurationLoader.getInstance(function() {
             trace("Configuration loaded");
-            Flashphoner.getInstance().init(getElement('localVideoPreview'), getElement('remoteVideo'), "../../dependencies/flash/MediaManager.swf");
+            Flashphoner.getInstance().init(getElement('localVideoPreview'), getElement('remoteVideo'));
 
             streaming.init();
         });

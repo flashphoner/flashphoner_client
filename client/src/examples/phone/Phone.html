@@ -26,7 +26,7 @@
         ConfigurationLoader.getInstance(function () {
             trace("Configuration loaded");
 
-            Flashphoner.getInstance().init(getElement('localVideoPreview'), getElement('remoteVideo'), "../../dependencies/flash/MediaManager.swf");
+            Flashphoner.getInstance().init(getElement('localVideoPreview'), getElement('remoteVideo'), "flashVideoDiv", "../../dependencies/flash/MediaManager.swf");
 
             phone.init();
 

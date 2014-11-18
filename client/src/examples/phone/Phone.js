@@ -94,7 +94,6 @@ Phone.prototype.call = function (callee, hasVideo, mediaProvider) {
         call.visibleName = "Caller";
         call.hasVideo = hasVideo;
         call.inviteParameters = {param1: "value1", param2: "value2"};
-        call.isMsrp = false;
         call.mediaProvider = mediaProvider;
         this.currentCall = Flashphoner.getInstance().call(call);
         this.flashphonerListener.onCall();
