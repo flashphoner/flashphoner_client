@@ -110,7 +110,7 @@ Phone.prototype.callStatusListener = function (event) {
             $(".voice_call__call__play").addClass("close");		// скрываем окно разгоора
             $(".b-video").removeClass("open");					// скрываем видео (если есть)
             $(".voice_call__transfer").addClass("tr_call__pause");	// добавляем класс кнопке трансфера, чтобы знать, куда потом, если что, возвращаться
-        } else if (call.status == CallStatus.TALK) {
+        } else if (call.status == CallStatus.ESTABLISHED) {
             trace('Phone - ...Talking...');
             $(".b-alert, .b-nav__inc, .b-alert__ban, .call__inc__dial").removeClass("open"); // скрываем кучу ненужных кнопок, окон, а также кнопки "разрешить"/"запретить"
             $(".b-nav").removeClass("close");	// открываем обратно стандартные кнопки навигации (если были скрыты при входящем звонке, к примеру)

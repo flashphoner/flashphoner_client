@@ -4,8 +4,8 @@ var Streaming = function () {
 
 Streaming.prototype.connectionStatusListener = function (event) {
     var me = this;
-    trace("Streaming - connectionStatusListener status " + event.connection.status);
-    if (event.connection.status == ConnectionStatus.Established) {
+    trace("Streaming - connectionStatusListener status " + event.status);
+    if (event.status == ConnectionStatus.Established) {
         $("#publishButton").click(function () {
             me.publishButtonListener()
         });
@@ -42,8 +42,8 @@ Streaming.prototype.connectionStatusListener = function (event) {
                 });
             });
         }
-    } else if (event.connection.status == ConnectionStatus.Disconnected ||
-        event.connection.status == ConnectionStatus.Error) {
+    } else if (event.status == ConnectionStatus.Disconnected ||
+        event.status == ConnectionStatus.Failed) {
         $("#subscribeButton").unbind("click");
         $("#publishButton").unbind("click");
         $('.preload-intro').css({'display': 'none'});
@@ -238,8 +238,9 @@ Streaming.prototype.info = function (text) {
 };
 
 Streaming.prototype.streamStatusListener = function (stream) {
-    if (StreamStatus.Error == stream.status) {
-        this.info(stream.message);
+
+    if (StreamStatus.Failed == stream.status) {
+        this.info(stream.info);
         if (stream.published) {
             this.onUnpublish();
         } else {
