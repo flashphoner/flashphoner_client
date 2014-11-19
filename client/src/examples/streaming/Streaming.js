@@ -240,7 +240,7 @@ Streaming.prototype.info = function (text) {
 Streaming.prototype.streamStatusListener = function (stream) {
 
     if (StreamStatus.Failed == stream.status) {
-        this.info(stream.message);
+        this.info(stream.info);
         if (stream.published) {
             this.onUnpublish();
         } else {

@@ -400,7 +400,7 @@ Flashphoner.prototype = {
                 me.invokeListener(WCSEvent.OnDataEvent, [
                     data
                 ]);
-                me.webSocket.send("DataStatusEvent", {status: "ACCEPTED"});
+                me.webSocket.send("DataStatusEvent", {status: "ACCEPTED", operationId: data.operationId});
             },
 
             DataStatusEvent: function (status) {
@@ -1407,7 +1407,7 @@ var Stream = function () {
     this.hasVideo = false;
     this.status = StreamStatus.Pending;
     this.sdp = "";
-    this.message = "";
+    this.info = null;
 };
 
 var StreamStatus = function () {
