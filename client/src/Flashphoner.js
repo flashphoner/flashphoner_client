@@ -444,7 +444,9 @@ Flashphoner.prototype = {
                     me.connection
                 ]);
                 me.webRtcMediaManager.disconnect();
-                me.flashMediaManager.disconnect();
+                if (me.flashMediaManager) {
+                    me.flashMediaManager.disconnect();
+                }
             },
             error: function () {
                 me.connection.status = ConnectionStatus.Failed;
