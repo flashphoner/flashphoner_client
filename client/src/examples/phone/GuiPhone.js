@@ -165,6 +165,41 @@ Phone.prototype.callStatusListener = function (event) {
     }
 };
 
+Phone.prototype.onMessageListener = function (event) {
+    var message = event;
+    if (message.contentType == "application/im-iscomposing+xml" || message.contentType == "message/fsservice+xml") {
+        trace("ignore message: " + message.body);
+        if (ConfigurationLoader.getInstance().disableUnknownMsgFiltering) {
+            message.body = escapeXmlTags(message.body);
+            SoundControl.getInstance().playSound("MESSAGE");
+        }
+        return;
+    }
+
+    //convert body
+    var body = this.convertMessageBody(message.body, message.contentType);
+    if (body) {
+        message.body = body;
+        SoundControl.getInstance().playSound("MESSAGE");
+    } else {
+        trace("Not displaying message " + message.body + ", body is null after convert");
+        if (ConfigurationLoader.getInstance().disableUnknownMsgFiltering) {
+            message.body = escapeXmlTags(message.body);
+            SoundControl.getInstance().playSound("MESSAGE");
+        }
+    }
+
+    trace("Phone - onMessageListener id = " + message.id + " body = " + message.body);
+    var tab = $('#tab_' + message.from);
+    if (tab.length == 0){
+        this.chatCreateTab(message.from);
+    } else {
+        this.chatSelectTab(tab);
+    }
+    $('<div class="b-chat__message"><div class="b-chat__message__head"><span class="b-chat__message__time">' + new Date().toLocaleString() + '</span><span class="b-chat__message__author">' + message.from + '</span></div><div class="b-chat__message__text">' + message.body + '</div></div>').appendTo($(".b-chat_tab.open .mCSB_container"));
+    this.chatScrollDown();
+};
+
 Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
     var hasAccess;
     if (hasVideo) {
@@ -219,6 +254,42 @@ Phone.prototype.time = function () {
         clearInterval(timer); // останавливаем таймер
     });
 };
+
+Phone.prototype.chatSelectTab = function(elem) {
+    if (!elem.hasClass("open")) {												// если таб не активен
+        this.elem_prev = $(".b-chat__nav__tab.open").attr("id");						// сохраняем id предыдущего таба
+        $(".b-chat__nav__tab.open, .b-chat_tab.open, .b-chat__new__nav, .b-chat__new__list, .b-chat__nav__tab#new, .b-chat_tab.new").removeClass("open");
+        elem.addClass("open");													// делаем таб и его содержимое видимым
+        $(".b-chat_tab." + elem.attr("id")).addClass("open");
+        $(".b-chat_tab.open .b-chat__window").mCustomScrollbar({				// инициализируем скроллбар
+            scrollInertia: 50,
+            scrollButtons: {
+                enable: false
+            }
+        });
+        this.chatScrollDown();
+    }
+};
+
+Phone.prototype.chatCreateTab = function(chatUsername){
+    $(".b-chat__nav__tab.open, .b-chat_tab.open, .b-chat__new__nav, .b-chat__new__list, .b-chat__nav__tab#new, .b-chat_tab.new").removeClass("open");
+    $("#new__chat").val("");								// очищаем окно поиска
+    $(".b-chat__nav__tab#new").before('<div class="b-chat__nav__tab open" id="tab_' + chatUsername + '"><span class="tab_text">' + chatUsername + '</span><span class="tab_close"></span></div>'); // id табам задаётся якобы автоматически, но лучше id как-то генерировать независимо от числа табов, иначе может получиться 2 таба с одним id. Проще это пресечь сразу, чем делать 100 проверок при создании таба ИМХО
+    $(".b-chat__new__list p.active").removeClass("active");
+    $(".b-chat_tab.new").before('<div class="b-chat_tab open ' + $(".b-chat__nav__tab.open").attr("id") + '"><div class="b-chat__window mCustomScrollbar"></div><div class="b-chat__text"><textarea></textarea><input type="button" value="send" /></div></div>');
+    $(".b-chat_tab.open .b-chat__window").mCustomScrollbar({ // если вдруг будет загрузка истории, инициализируем скроллбар
+        scrollInertia: 50,
+        scrollButtons: {
+            enable: false
+        }
+    });
+    this.chatScrollDown();
+};
+
+Phone.prototype.chatScrollDown = function() {
+    $(".b-chat_tab.open .b-chat__window .mCSB_container").css("top", $(".b-chat_tab.open .b-chat__window .mCSB_container").height() - $(".b-chat_tab.open .b-chat__window .mCSB_container").parent().height() + 20 + "px");
+};
+
 
 $(document).ready(function () {
 
@@ -432,38 +503,30 @@ $(document).ready(function () {
         if ($(".b-display__header__login").text() != "Log in") {					// снова проверка логина
             if (!$(this).hasClass("chat")) {										// если у кнопки нет класса chat, значит, окно чата закрыто
                 $(this).addClass("chat");										// добавляем класс chat
-                $(".b-chat, .message").addClass("open");						// открываем окно чата и добавляем кнопку входящего сообщения
+                $(".b-chat").addClass("open");						// открываем окно чата и добавляем кнопку входящего сообщения
                 $(".b-chat").attr("id", "active");
                 $(".b-chat_tab.open .b-chat__window").mCustomScrollbar();		// активируем стилизацию скроллбара открытого окна
-                $(".b-chat_tab.open .b-chat__window .mCSB_container").css("top", $(".b-chat_tab.open .b-chat__window .mCSB_container").height() - $(".b-chat_tab.open .b-chat__window .mCSB_container").parent().height() + 20 + "px"); // прокручиваем скроллбар вконец
-                for (i = 0; i < $(".my_message .b-chat__message__author").length; i++) {				// задаём свой логин в истории сообщений
-                    $($(".my_message .b-chat__message__author")[i]).text($("input[id='login']").val());
-                }
+                phone.chatScrollDown();
             } else {															// если чат открыт, закрываем его и удаляем класс чата у кнопки
                 $(this).removeClass("chat");
                 $(".b-chat").removeAttr("id");
-                $(".b-chat, .message").removeClass("open");
+                $(".b-chat").removeClass("open");
             }
         }
     });
     $(".b-chat__close").live("click", function () {	// клик на (Х) окна чата
         $(".b-nav__chat").removeClass("chat");
         $(".b-chat").removeAttr("id");
-        $(".b-chat, .message").removeClass("open");
-    });
-    $(".message").live("click", function () { // входящее сообщение в чате
-        $('<div class="b-chat__message"><div class="b-chat__message__head"><span class="b-chat__message__time">15:16</span><span class="b-chat__message__author">Author message</span></div><div class="b-chat__message__text">В следующую минуту выяснилось, что председатель биржевого комитета не имеет возможности принять участие в завтрашней битве.</div></div>').appendTo($(".b-chat_tab.open .mCSB_container"));
-        $(".b-chat_tab.open .b-chat__window .mCSB_container").css("top", $(".b-chat_tab.open .mCSB_container").height() - $(".b-chat_tab.open .mCustomScrollBox").height() + 20 + "px"); // прокручиваем скроллбар в конец
-
+        $(".b-chat").removeClass("open");
     });
 
     $(".b-chat__nav__tab .tab_close").live("click", function () {	// нажали на крестик таба
-        elem = $(this).parent();
+        var elem = $(this).parent();
         if (elem.attr("id") == "new") {										// если это таб нового окна, его закрывать фу
-            $("#" + elem_prev + ", .b-chat_tab." + elem_prev).addClass("open");	// делаем активным предыдущий
+            $("#" + phone.elem_prev + ", .b-chat_tab." + phone.elem_prev).addClass("open");	// делаем активным предыдущий
             elem.removeClass("open");										// а этот просто скрываем вместе с содержимым
             $(".b-chat_tab." + elem.attr("id")).removeClass("open");
-            $(".b-chat_tab.open .b-chat__window .mCSB_container").css("top", $(".b-chat_tab.open .b-chat__window .mCSB_container").height() - $(".b-chat_tab.open .b-chat__window .mCSB_container").parent().height() + 20 + "px"); // прокручиваем скроллбар в конец
+            phone.chatScrollDown();
         } else {
             if (elem.hasClass("open")) {						// если таб открыт
                 if (elem.index() > 0) {									// и если это не первый элемент
@@ -484,27 +547,22 @@ $(document).ready(function () {
     });
 
     $(".b-chat__text input").live("click", function () {	// при клике на "Отправить" в чате
-        $('<div class="b-chat__message my_message"><div class="b-chat__message__head"><span class="b-chat__message__time">15:16</span><span class="b-chat__message__author">' + $("input[id='login']").val() + '</span></div><div class="b-chat__message__text">' + $(this).prev().val().replace(/\n/g, "<br />") + '</div></div>').appendTo($(".mCSB_container", $(this).parent().prev()));
-        $(".b-chat_tab.open .b-chat__window .mCSB_container").css("top", $(".b-chat_tab.open .b-chat__window .mCSB_container").height() - $(".b-chat_tab.open .b-chat__window .mCSB_container").parent().height() + 20 + "px"); // прокручиваем скроллбар в конец
+        var body = $(this).prev().val().replace(/\n/g, "<br />");
+        var message = new Message();
+        message.to = $(".b-chat__nav__tab.open span.tab_text").html();
+        message.body = body;
+        phone.sendMessage(message);
+
+        $('<div class="b-chat__message my_message"><div class="b-chat__message__head"><span class="b-chat__message__time">' + new Date().toLocaleString() + '</span><span class="b-chat__message__author">' + $("input[id='sipLogin']").val() + '</span></div><div class="b-chat__message__text">' + body + '</div></div>').appendTo($(".mCSB_container", $(this).parent().prev()));
+        phone.chatScrollDown();
         $(this).prev().val(""); // очищаем textarea
     });
 
     $(".b-chat__nav__tab .tab_text").live("click", function () {						// при клике на таб
-        elem = $(this).parent();
-        if (!elem.hasClass("open")) {												// если таб не активен
-            elem_prev = $(".b-chat__nav__tab.open").attr("id");						// сохраняем id предыдущего таба
-            $(".b-chat__nav__tab.open, .b-chat_tab.open").removeClass("open");		// активный таб и его содержимое скрываем
-            elem.addClass("open");													// делаем таб и его содержимое видимым
-            $(".b-chat_tab." + elem.attr("id")).addClass("open");
-            $(".b-chat_tab.open .b-chat__window").mCustomScrollbar({				// инициализируем скроллбар
-                scrollInertia: 50,
-                scrollButtons: {
-                    enable: false
-                }
-            });
-            $(".b-chat_tab.open .b-chat__window .mCSB_container").css("top", $(".b-chat_tab.open .b-chat__window .mCSB_container").height() - $(".b-chat_tab.open .b-chat__window .mCSB_container").parent().height() + 20 + "px"); // прокручиваем скроллбар в конец
-        }
+        var elem = $(this).parent();
+        phone.chatSelectTab(elem);
     });
+
     $("#new__chat").keyup(function () {			// вводим ники
         $(".b-chat__new__list").addClass("open").mCustomScrollbar({	// инициализируем список
             scrollInertia: 50,
@@ -517,29 +575,18 @@ $(document).ready(function () {
     $(".b-chat__new__list p").live("click", function () {			// при клике на ник, выбираем его (я тебя запомнил)
         $(".b-chat__new__list p.active").removeClass("active");
         $(this).addClass("active");
+        $("#new__chat").val($(this).html());
     });
     $(".b-chat__new__chancel").live("click", function () {		// при клике на отмену во время поиска собеседник
         $(".b-chat__new__list p.active").removeClass("active");	// снимаем активый класс с выбранного ранее ника (если таковой был)
         $("#new__chat").val("");								// очищаем поле поиска
         $(".b-chat__new__nav, .b-chat__new__list, .b-chat__nav__tab#new, .b-chat_tab.new").removeClass("open");	// скрываем всё (список, кнопки, вкладку)
-        $("#" + elem_prev + ", .b-chat_tab." + elem_prev).addClass("open");	// делаем активным сохранённый ранее таб
-        $(".b-chat_tab.open .b-chat__window .mCSB_container").css("top", $(".b-chat_tab.open .b-chat__window .mCSB_container").height() - $(".b-chat_tab.open .b-chat__window .mCSB_container").parent().height() + 20 + "px"); // прокручиваем скроллбар в конец
+        $("#" + phone.elem_prev + ", .b-chat_tab." + phone.elem_prev).addClass("open");	// делаем активным сохранённый ранее таб
+        phone.chatScrollDown();
     });
     $(".b-chat__new__ok").live("click", function () {				// выбрали ник для нового диалогового окна
-        $("#new__chat").val("");								// очищаем окно поиска
-        $(".b-chat__new__nav, .b-chat__new__list, .b-chat__nav__tab#new, .b-chat_tab.new").removeClass("open"); // опять всё закрываем
-        $(".b-chat__nav__tab#new").before('<div class="b-chat__nav__tab open" id="tab' + $(".b-chat__nav__tab").length + '"><span class="tab_text">' + $(".b-chat__new__list p.active").text() + '</span><span class="tab_close"></span></div>'); // id табам задаётся якобы автоматически, но лучше id как-то генерировать независимо от числа табов, иначе может получиться 2 таба с одним id. Проще это пресечь сразу, чем делать 100 проверок при создании таба ИМХО
-        $(".b-chat__new__list p.active").removeClass("active");
-        $(".b-chat_tab.new").before('<div class="b-chat_tab open ' + $(".b-chat__nav__tab.open").attr("id") + '"><div class="b-chat__window mCustomScrollbar"></div><div class="b-chat__text"><textarea></textarea><input type="button" value="send" /></div></div>');
-        $(".b-chat_tab.open .b-chat__window").mCustomScrollbar({ // если вдруг будет загрузка истории, инициализируем скроллбар
-            scrollInertia: 50,
-            scrollButtons: {
-                enable: false
-            }
-        });
-        $(".b-chat_tab.open .b-chat__window .mCSB_container").css("top", $(".b-chat_tab.open .b-chat__window .mCSB_container").height() - $(".b-chat_tab.open .b-chat__window .mCSB_container").parent().height() + 20 + "px");  // и прокручиваем скроллбар в конец
-
-        // 328 и 334 строчки удалить, если новое окно всегда будет изначально пустым
+        var chatUsername = $("#new__chat").val();
+        phone.chatCreateTab(chatUsername);
     });
     $(".b-video, .b-login, .b-chat, .b-alert__ban").mousedown(function () { // если нажали на какой-то всплывающий блок, он выходит на первое место
         $("#active").removeAttr("id");
