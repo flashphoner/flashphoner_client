@@ -12,8 +12,8 @@
   This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 -->
 <flashphoner>
-	<url_ws_server>ws://188.226.144.63:8080</url_ws_server>
-    <url_flash_server>rtmfp://188.226.144.63:1935</url_flash_server>
+	<url_ws_server>ws://87.226.225.59:8080</url_ws_server>
+    <url_flash_server>rtmfp://87.226.225.59:1935</url_flash_server>
 	<register_required>true</register_required>
     <use_dtls>true</use_dtls>
 	<video_width>640</video_width>
