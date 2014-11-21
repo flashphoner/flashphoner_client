@@ -54,7 +54,6 @@ Phone.prototype.connect = function () {
     connection.sipDomain = $('#domain').val();
     connection.sipOutboundProxy = $('#outbound_proxy').val();
     connection.sipPort = $('#port').val();
-    connection.useSelfSigned = !isMobile.any();
     connection.appKey = "defaultApp";
 
     var result = Flashphoner.getInstance().connect(connection);
