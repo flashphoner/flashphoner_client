@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phone min</title>
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
+    <!-- ****** -->
+
+    <!-- WCS JavaScript API -->
+    <script type="text/javascript" src="../../Flashphoner.js"></script>
+
+    <!-- Minimum script for calls -->
+    <script type="text/javascript" src="Phone-min.js"></script>
+
+</head>
+<!-- Establish connection on page load -->
+<body>
+    <!-- Call to WCS2 on click by this link -->
+    <a href="#" on onclick="connect();return false">connect</a>
+    <a href="#" on onclick="call('WCS1');return false">call</a>
+    <a href="#" on onclick="hangup();return false">hangup</a>
+</body>
+</html>
