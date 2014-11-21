@@ -11,7 +11,6 @@ Phone.prototype.connect = function () {
     connection.sipOutboundProxy = $('#sipOutboundProxy').val();
     connection.sipPort = $('#sipPort').val();
     connection.useProxy = true;
-    connection.useSelfSigned = !isMobile.any();
     connection.appKey = "defaultApp";
 
     for (var key in connection) {
