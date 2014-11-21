@@ -165,6 +165,21 @@ Phone.prototype.callStatusListener = function (event) {
     }
 };
 
+Phone.prototype.messageStatusListener = function (event) {
+    var message = event;
+    trace("Phone - messageStatusListener id = " + message.id + " status = " + message.status);
+    if (message.status == MessageStatus.ACCEPTED) {
+        $('#message_' + message.id + ' .b-chat__message__text').css("color", "#000000");
+    } else if (message.status == MessageStatus.FAILED ||
+        message.status == MessageStatus.IMDN_ERROR ||
+        message.status == MessageStatus.FAILED ||
+        message.status == MessageStatus.IMDN_FORBIDDEN) {
+        $('#message_' + message.id + ' .b-chat__message__text').css("color", "#d90000");
+    } else if (message.status == MessageStatus.IMDN_DELIVERED) {
+        $('#message_' + message.id + ' .b-chat__message__text').css("color", "#226900");
+    }
+};
+
 Phone.prototype.onMessageListener = function (event) {
     var message = event;
     if (message.contentType == "application/im-iscomposing+xml" || message.contentType == "message/fsservice+xml") {
@@ -191,7 +206,7 @@ Phone.prototype.onMessageListener = function (event) {
 
     trace("Phone - onMessageListener id = " + message.id + " body = " + message.body);
     var tab = $('#tab_' + message.from);
-    if (tab.length == 0){
+    if (tab.length == 0) {
         this.chatCreateTab(message.from);
     } else {
         this.chatSelectTab(tab);
@@ -255,7 +270,7 @@ Phone.prototype.time = function () {
     });
 };
 
-Phone.prototype.chatSelectTab = function(elem) {
+Phone.prototype.chatSelectTab = function (elem) {
     if (!elem.hasClass("open")) {												// если таб не активен
         this.elem_prev = $(".b-chat__nav__tab.open").attr("id");						// сохраняем id предыдущего таба
         $(".b-chat__nav__tab.open, .b-chat_tab.open, .b-chat__new__nav, .b-chat__new__list, .b-chat__nav__tab#new, .b-chat_tab.new").removeClass("open");
@@ -271,7 +286,11 @@ Phone.prototype.chatSelectTab = function(elem) {
     }
 };
 
-Phone.prototype.chatCreateTab = function(chatUsername){
+Phone.prototype.chatCreateTab = function (chatUsername) {
+    this.chatNames += '<p>' + chatUsername + '</p>';
+    Flashphoner.getInstance().setCookie("chatNames", this.chatNames);
+    $('.b-chat__new__list .mCSB_container').html(this.chatNames);
+
     $(".b-chat__nav__tab.open, .b-chat_tab.open, .b-chat__new__nav, .b-chat__new__list, .b-chat__nav__tab#new, .b-chat_tab.new").removeClass("open");
     $("#new__chat").val("");								// очищаем окно поиска
     $(".b-chat__nav__tab#new").before('<div class="b-chat__nav__tab open" id="tab_' + chatUsername + '"><span class="tab_text">' + chatUsername + '</span><span class="tab_close"></span></div>'); // id табам задаётся якобы автоматически, но лучше id как-то генерировать независимо от числа табов, иначе может получиться 2 таба с одним id. Проще это пресечь сразу, чем делать 100 проверок при создании таба ИМХО
@@ -286,7 +305,7 @@ Phone.prototype.chatCreateTab = function(chatUsername){
     this.chatScrollDown();
 };
 
-Phone.prototype.chatScrollDown = function() {
+Phone.prototype.chatScrollDown = function () {
     $(".b-chat_tab.open .b-chat__window .mCSB_container").css("top", $(".b-chat_tab.open .b-chat__window .mCSB_container").height() - $(".b-chat_tab.open .b-chat__window .mCSB_container").parent().height() + 20 + "px");
 };
 
@@ -294,6 +313,8 @@ Phone.prototype.chatScrollDown = function() {
 $(document).ready(function () {
 
     var phone = new Phone();
+
+    phone.chatNames = unescape(Flashphoner.getInstance().getCookie("chatNames"));
 
     ConfigurationLoader.getInstance(function () {
         trace("Configuration loaded");
@@ -435,9 +456,9 @@ $(document).ready(function () {
             } // если это видеозвонок, добавляем класс body (нужно для отображение алерта)
 
             var mediaProvider = MediaProvider.Flash;
-//            if (Flashphoner.getInstance().mediaProviders.get(MediaProvider.WebRTC)) {
-//                mediaProvider = MediaProvider.WebRTC;
-//            }
+            if (Flashphoner.getInstance().mediaProviders.get(MediaProvider.WebRTC)) {
+                mediaProvider = MediaProvider.WebRTC;
+            }
 
             if ($("body").hasClass("video")) {
                 phone.call($(".b-numbers").val(), true, mediaProvider);
@@ -501,6 +522,7 @@ $(document).ready(function () {
 
     $(".b-nav__chat").live("click", function () {									// при клике на кнопку чата
         if ($(".b-display__header__login").text() != "Log in") {					// снова проверка логина
+            $('.b-chat__new__list .mCSB_container').html(phone.chatNames);
             if (!$(this).hasClass("chat")) {										// если у кнопки нет класса chat, значит, окно чата закрыто
                 $(this).addClass("chat");										// добавляем класс chat
                 $(".b-chat").addClass("open");						// открываем окно чата и добавляем кнопку входящего сообщения
@@ -553,7 +575,7 @@ $(document).ready(function () {
         message.body = body;
         phone.sendMessage(message);
 
-        $('<div class="b-chat__message my_message"><div class="b-chat__message__head"><span class="b-chat__message__time">' + new Date().toLocaleString() + '</span><span class="b-chat__message__author">' + $("input[id='sipLogin']").val() + '</span></div><div class="b-chat__message__text">' + body + '</div></div>').appendTo($(".mCSB_container", $(this).parent().prev()));
+        $('<div id="message_' + message.id + '" class="b-chat__message my_message"><div class="b-chat__message__head"><span class="b-chat__message__time">' + new Date().toLocaleString() + '</span><span class="b-chat__message__author">' + $("input[id='sipLogin']").val() + '</span></div><div class="b-chat__message__text">' + body + '</div></div>').appendTo($(".mCSB_container", $(this).parent().prev()));
         phone.chatScrollDown();
         $(this).prev().val(""); // очищаем textarea
     });
@@ -564,12 +586,7 @@ $(document).ready(function () {
     });
 
     $("#new__chat").keyup(function () {			// вводим ники
-        $(".b-chat__new__list").addClass("open").mCustomScrollbar({	// инициализируем список
-            scrollInertia: 50,
-            scrollButtons: {
-                enable: false
-            }
-        });
+        $(".b-chat__new__list").addClass("open");
         $(".b-chat__new__nav").addClass("open");	// делаем активными кнопки под списком
     });
     $(".b-chat__new__list p").live("click", function () {			// при клике на ник, выбираем его (я тебя запомнил)

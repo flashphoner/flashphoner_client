@@ -663,6 +663,7 @@ body{
 .my_message .b-chat__message__author{
 	color: #b3b3b2;}
 .b-chat__message__text{
+    color:#98989a;
 	font-size: 14px;
 	line-height: 18px;}
 .unread{

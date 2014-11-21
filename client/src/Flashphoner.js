@@ -785,6 +785,7 @@ Flashphoner.prototype = {
                 return ARRcookies[i].substr(ARRcookies[i].indexOf("=") + 1);
             }
         }
+        return "";
     },
 
     setCookie: function (c_name, value) {
