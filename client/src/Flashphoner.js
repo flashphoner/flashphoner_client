@@ -1345,7 +1345,6 @@ var Connection = function () {
     this.sipOutboundProxy = "";
     this.sipPort = 5060;
     this.sipRegisterRequired = true;
-    this.useSelfSigned = !isMobile.any();
     this.appKey = "defaultApp";
     this.status = ConnectionStatus.Pending;
     this.mediaProviders = [];
