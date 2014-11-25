@@ -176,18 +176,18 @@ Streaming.prototype.publish = function () {
         me.publishButtonListener();
     });
     this.info("");
-    if (!Flashphoner.getInstance().hasAccessToAudioAndVideo(MediaProvider.WebRTC)) {
+    if (!Flashphoner.getInstance().hasAccess(MediaProvider.WebRTC, true)) {
         $('.access-video').css({'display': 'block'});
         $('.text-previu>span').text('You are trying to push a stream to Flashphoner WebRTC Server');
         var checkAccessFunc = function () {
-            if (Flashphoner.getInstance().hasAccessToAudioAndVideo(MediaProvider.WebRTC)) {
+            if (Flashphoner.getInstance().hasAccess(MediaProvider.WebRTC, true)) {
                 clearInterval(me.intervalId);
                 me.intervalId = -1;
                 me.publish();
             }
         };
         me.intervalId = setInterval(checkAccessFunc, 500);
-        Flashphoner.getInstance().getAccessToAudioAndVideo(MediaProvider.WebRTC);
+        Flashphoner.getInstance().getAccess(MediaProvider.WebRTC, true);
     } else {
         $('.black-window').css({'display': 'none'});
         $('.access-video').css({'display': 'none'});

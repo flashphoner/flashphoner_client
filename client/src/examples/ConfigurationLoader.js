@@ -237,7 +237,7 @@ ConfigurationLoader.prototype = {
                 if (!me.jsonpSuccess) {
                     trace("Configuration - Error occurred while retrieving load balancer data, please check your load balancer url " +
                         me.loadBalancerUrl);
-                    me.loadAPI();
+                    me.configLoadedListener.apply(this, [me.configuration]);
                 }
             }, 10000);
             var loadBalancerData = null;
@@ -253,18 +253,12 @@ ConfigurationLoader.prototype = {
                     trace("Configuration - Connection data from load balancer: "
                         + "urlWsServer " + loadBalancerData.urlWsServer
                         + ", urlFlashServer " + loadBalancerData.urlFlashServer);
-                    me.loadAPI();
+                    me.configLoadedListener.apply(this, [me.configuration]);
                 }
             });
         } else {
-            me.loadAPI();
+            me.configLoadedListener.apply(this, [me.configuration]);
         }
-    },
-
-    loadAPI: function () {
-        var me = this;
-        var flashphoner = Flashphoner.getInstance();
-        flashphoner.configure(me.configuration);
-        me.configLoadedListener.apply(this);
     }
+
 };

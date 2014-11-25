@@ -108,19 +108,11 @@ Phone.prototype.sendMessage = function (message) {
 };
 
 Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
-    if (hasVideo) {
-        return Flashphoner.getInstance().hasAccessToAudioAndVideo(mediaProvider);
-    } else {
-        return Flashphoner.getInstance().hasAccessToAudio(mediaProvider);
-    }
+    Flashphoner.getInstance().hasAccess(mediaProvider, hasVideo);
 };
 
 Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
-    if (hasVideo) {
-        return Flashphoner.getInstance().getAccessToAudioAndVideo(mediaProvider);
-    } else {
-        return Flashphoner.getInstance().getAccessToAudio(mediaProvider);
-    }
+    return Flashphoner.getInstance().getAccess(mediaProvider, hasVideo);
 };
 
 
@@ -138,7 +130,7 @@ Phone.prototype.answer = function (call, hasVideo) {
             };
             me.intervalId = setInterval(checkAccessFunc, 500);
         }
-        me.getAccess(call.mediaProvider,hasVideo);
+        me.getAccess(call.mediaProvider, hasVideo);
     } else if (me.hasAccess(call.mediaProvider, hasVideo)) {
         call.hasVideo = hasVideo;
         Flashphoner.getInstance().answer(call);

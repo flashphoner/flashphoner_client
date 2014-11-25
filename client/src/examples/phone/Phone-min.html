@@ -17,10 +17,10 @@
 
 </head>
 <!-- Establish connection on page load -->
-<body>
+<body onload="initAPI()">
     <!-- Call to WCS2 on click by this link -->
     <a href="#" on onclick="connect();return false">connect</a>
-    <a href="#" on onclick="call('WCS1');return false">call</a>
+    <a href="#" on onclick="call('1002');return false">call</a>
     <a href="#" on onclick="hangup();return false">hangup</a>
 </body>
 </html>

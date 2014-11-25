@@ -215,12 +215,8 @@ Phone.prototype.onMessageListener = function (event) {
 };
 
 Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
-    var hasAccess;
-    if (hasVideo) {
-        hasAccess = Flashphoner.getInstance().hasAccessToAudioAndVideo(mediaProvider);
-    } else {
-        hasAccess = Flashphoner.getInstance().hasAccessToAudio(mediaProvider);
-    }
+    var hasAccess = Flashphoner.getInstance().hasAccess(mediaProvider, hasVideo);
+
     if (hasAccess) {
         if (MediaProvider.Flash == mediaProvider) {
             $(".b-video").removeClass("open").removeAttr("id");
@@ -241,11 +237,7 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
         hasVideo ? $(".b-alert").html("Please <span>allow</span> access to your web camera and microphone.") : $(".b-alert").html("please <span>allow</span> access to audio device");
         $("body").addClass("mike");
     }
-    if (hasVideo) {
-        return Flashphoner.getInstance().getAccessToAudioAndVideo(mediaProvider);
-    } else {
-        return Flashphoner.getInstance().getAccessToAudio(mediaProvider);
-    }
+    return Flashphoner.getInstance().getAccess(mediaProvider, hasVideo);
 };
 
 
@@ -315,9 +307,14 @@ $(document).ready(function () {
 
     phone.chatNames = unescape(Flashphoner.getInstance().getCookie("chatNames"));
 
-    ConfigurationLoader.getInstance(function () {
+    ConfigurationLoader.getInstance(function (configuration) {
         trace("Configuration loaded");
-        Flashphoner.getInstance().init($(".b-video__small").get(0), $(".b-video__video").get(0), "flashVideoDiv", "../../dependencies/flash/MediaManager.swf");
+        configuration.localMediaElement = $(".b-video__small").get(0);
+        configuration.remoteMediaElement = $(".b-video__video").get(0);
+        configuration.elementIdForSWF = "flashVideoDiv";
+        configuration.pathToSWF = "../../dependencies/flash/MediaManager.swf";
+
+        Flashphoner.getInstance().init(configuration);
         phone.init();
     });
 
