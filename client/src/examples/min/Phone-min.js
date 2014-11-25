@@ -2,35 +2,37 @@
 var f = Flashphoner.getInstance();
 
 function initAPI() {
+
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.RegistrationStatusEvent, registrationStatusListener);
     f.addListener(WCSEvent.CallStatusEvent, callStatusListener);
     f.init();
+
 }
 
 var currentCall;
 
 //New connection
-function connect(){
-    f.connect({urlServer:'ws://87.226.225.59:8080', appKey:'defaultApp', sipLogin:'1000', sipPassword:'1234', sipDomain:'87.226.225.52', sipPort:5080});
+function connect() {
+    f.connect({urlServer: field("urlServer"), appKey: 'defaultApp', sipLogin: field("sipLogin"), sipPassword: field("sipPassword"), sipDomain: field("sipDomain")});
 }
 
-function hangup(){
+function hangup() {
     f.hangup(currentCall);
 }
 
 //New call
-function call(to){
+function call() {
     var call = new Call();
-    call.callee = to;
+    call.callee = field("callee");
     currentCall = f.call(call);
 }
 
 //Connection Status
 function connectionStatusListener(event) {
     trace(event.status);
-    if (event.status == ConnectionStatus.Established){
+    if (event.status == ConnectionStatus.Established) {
         trace('Connection has been established. You can start a new call.');
     }
 }
@@ -43,8 +45,8 @@ function registrationStatusListener(event) {
 //Call Status
 function callStatusListener(event) {
     trace(event.status);
-    if (event.status == CallStatus.ESTABLISHED){
-        trace('Call '+event.callId+' is established');
+    if (event.status == CallStatus.ESTABLISHED) {
+        trace('Call ' + event.callId + ' is established');
     }
 }
 
@@ -54,6 +56,12 @@ function errorEvent(event) {
 }
 
 //Trace
-function trace(str){
+function trace(str) {
     console.log(str);
+}
+
+//Get field
+function field(name){
+    var field = document.getElementById(name).value;
+    return field;
 }

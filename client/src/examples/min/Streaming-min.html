@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Phone min</title>
+    <title>Streaming min</title>
     <!-- JQuery -->
     <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
@@ -13,14 +13,18 @@
     <script type="text/javascript" src="../../Flashphoner.js"></script>
 
     <!-- Minimum script for calls -->
-    <script type="text/javascript" src="Phone-min.js"></script>
+    <script type="text/javascript" src="Streaming-min.js"></script>
 
 </head>
 <!-- Establish connection on page load -->
 <body onload="initAPI()">
     <!-- Call to WCS2 on click by this link -->
+    WCS Server URL: <input id="urlServer" type="text" value="ws://192.168.1.5:8080"/><br/>
+    Stream name: <input id="streamName" type="text" value="streamName"/><br/>
     <a href="#" on onclick="connect();return false">connect</a>
-    <a href="#" on onclick="call('1002');return false">call</a>
-    <a href="#" on onclick="hangup();return false">hangup</a>
+    <a href="#" on onclick="publishStream();return false">publish_stream</a>
+    <a href="#" on onclick="unPublishStream();return false">unpublish_stream</a>
+    <a href="#" on onclick="playStream();return false">play_stream</a>
+    <a href="#" on onclick="stopStream();return false">play_stream</a>
 </body>
 </html>
