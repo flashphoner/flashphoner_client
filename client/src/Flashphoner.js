@@ -181,11 +181,30 @@ Flashphoner.prototype = {
         if (!configuration) {
             configuration = new Configuration();
         }
-        if (!configuration.remoteMediaElement){
+        if (!configuration.remoteMediaElement) {
             var _body = document.getElementsByTagName('body') [0];
             configuration.remoteMediaElement = document.createElement('audio');
             _body.appendChild(configuration.remoteMediaElement);
         }
+
+        if (!configuration.pathToSWF) {
+            configuration.pathToSWF = '../../dependencies/flash/MediaManager.swf';
+        }
+
+        if (!configuration.elementIdForSWF) {
+            configuration.elementIdForSWF = 'flashVideoDiv';
+            var _body = document.getElementsByTagName('body') [0];
+            var flashVideoDiv = document.createElement('div');
+            flashVideoDiv.style.border = '1px double black';
+            flashVideoDiv.style.padding = '10px';
+            flashVideoDiv.style.width = '322px';
+            flashVideoDiv.style.height = '176px';
+            flashVideoDiv.innerHTML = '<div id="'+configuration.elementIdForSWF+'"></div>';
+            _body.appendChild(flashVideoDiv);
+
+        }
+
+
         me.configuration = configuration;
         me.initWebRTC();
         if (me.configuration.elementIdForSWF && me.configuration.pathToSWF) {
@@ -653,18 +672,20 @@ Flashphoner.prototype = {
         var me = this;
         var mediaSessionId = createUUID();
 
-        me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, me.configuration.remoteMediaElement));
-
         stream.mediaSessionId = mediaSessionId;
         stream.published = true;
         stream.hasVideo = true;
 
-        me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
-            trace("Publish name " + stream.name);
-            stream.sdp = me.removeCandidatesFromSDP(sdp);
-            me.webSocket.send("publishStream", stream);
-            me.publishStreams.add(stream.name, stream);
-        }, true, true);
+        me.checkAndGetAccess(MediaProvider.WebRTC, stream.hasVideo, function () {
+            me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, me.configuration.remoteMediaElement));
+
+            me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
+                trace("Publish name " + stream.name);
+                stream.sdp = me.removeCandidatesFromSDP(sdp);
+                me.webSocket.send("publishStream", stream);
+                me.publishStreams.add(stream.name, stream);
+            }, true, stream.hasVideo);
+        }, []);
     },
 
     unPublishStream: function (stream) {
@@ -786,7 +807,7 @@ Flashphoner.prototype = {
 
     checkAndGetAccess: function (mediaProvider, hasVideo, func, args) {
         var me = this;
-        if (args === undefined){
+        if (args === undefined) {
             args = [];
         }
         if (!this.hasAccess(mediaProvider, hasVideo)) {
@@ -974,15 +995,19 @@ WebRtcMediaConnection.prototype.createPeerConnection = function () {
     trace("WebRtcMediaConnection - createPeerConnection()");
     var application = this;
     if (application.stunServer !== undefined && application.stunServer.length > 0) {
-        pc_config = {"iceServers": [
-            {"url": "stun:" + application.stunServer}
-        ]};
+        pc_config = {
+            "iceServers": [
+                {"url": "stun:" + application.stunServer}
+            ]
+        };
     } else {
         pc_config = {"iceServers": []};
     }
-    this.peerConnection = new RTCPeerConnection(pc_config, {"optional": [
-        {"DtlsSrtpKeyAgreement": application.useDTLS}
-    ]});
+    this.peerConnection = new RTCPeerConnection(pc_config, {
+        "optional": [
+            {"DtlsSrtpKeyAgreement": application.useDTLS}
+        ]
+    });
 
     this.peerConnection.onaddstream = function (event) {
         application.onOnAddStreamCallback(event);
@@ -1069,7 +1094,7 @@ WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, has
             } else if (hasAudio) {
                 me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
             } else {
-                mandatory = {optional: [], mandatory: { OfferToReceiveAudio: true, OfferToReceiveVideo: true}}
+                mandatory = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: true}}
             }
         }
         me.createOfferCallback = createOfferCallback;
