@@ -714,6 +714,7 @@ Flashphoner.prototype = {
 
         me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, stream.remoteMediaElement || me.configuration.remoteMediaElement));
 
+        stream.remoteMediaElement = null;
         stream.mediaSessionId = mediaSessionId;
         stream.published = false;
         stream.hasVideo = true;
