@@ -452,6 +452,18 @@ Flashphoner.prototype = {
         me.connection.sipContactParams = me.connection.sipContactParams || me.configuration.sipContactParams;
         me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
         me.connection.urlServer = me.connection.urlServer || me.configuration.urlWsServer;
+
+        var getLocation = function(href) {
+            var l = document.createElement("a");
+            l.href = href;
+            return l;
+        };
+        var l = getLocation(me.connection.urlServer);
+
+        if (!me.configuration.urlFlashServer) {
+            me.configuration.urlFlashServer = "rtmfp://"+ l.hostname+":1935";
+        }
+
         me.webSocket = $.websocket(me.connection.urlServer, {
             open: function () {
                 me.isOpened = true;
