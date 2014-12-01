@@ -16,7 +16,7 @@ function connect(){
 //Publish stream
 function publishStream(){
     var streamName = field("streamName");
-    f.publishStream({name:streamName});
+    f.publishStream({name:streamName, hasVideo:false});
 }
 
 //Stop stream publishing

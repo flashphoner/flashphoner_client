@@ -686,7 +686,9 @@ Flashphoner.prototype = {
 
         stream.mediaSessionId = mediaSessionId;
         stream.published = true;
-        stream.hasVideo = true;
+        if (stream.hasVideo == undefined) {
+            stream.hasVideo = true;
+        }
 
         me.checkAndGetAccess(MediaProvider.WebRTC, stream.hasVideo, function () {
             me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, me.configuration.remoteMediaElement));
@@ -717,7 +719,9 @@ Flashphoner.prototype = {
         stream.remoteMediaElement = null;
         stream.mediaSessionId = mediaSessionId;
         stream.published = false;
-        stream.hasVideo = true;
+        if (stream.hasVideo == undefined) {
+            stream.hasVideo = true;
+        }
 
         me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
             console.log("playStream name " + stream.name);
@@ -725,7 +729,7 @@ Flashphoner.prototype = {
             me.webSocket.send("playStream", stream);
 
             me.playStreams.add(stream.name, stream);
-        }, false, false);
+        }, false, false, stream.hasVideo);
     },
 
     stopStream: function (stream) {
@@ -898,9 +902,9 @@ WebRtcMediaManager.prototype.receivedEmptyRemoteSDP = function (id) {
     return webRtcMediaConnection.lastReceivedSdp == "";
 };
 
-WebRtcMediaManager.prototype.createOffer = function (id, callback, hasAudio, hasVideo) {
+WebRtcMediaManager.prototype.createOffer = function (id, callback, hasAudio, hasVideo, receiveVideo) {
     var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
-    webRtcMediaConnection.createOffer(callback, hasAudio, hasVideo);
+    webRtcMediaConnection.createOffer(callback, hasAudio, hasVideo, receiveVideo);
 };
 
 WebRtcMediaManager.prototype.createAnswer = function (id, callback, hasVideo) {
@@ -1090,7 +1094,7 @@ WebRtcMediaConnection.prototype.waitGatheringIce = function () {
     }
 };
 
-WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, hasAudio, hasVideo) {
+WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, hasAudio, hasVideo, receiveVideo) {
     trace("WebRtcMediaConnection - createOffer()");
     var me = this;
     try {
@@ -1107,7 +1111,10 @@ WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, has
             } else if (hasAudio) {
                 me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
             } else {
-                mandatory = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: true}}
+                if (receiveVideo == undefined) {
+                    receiveVideo = true;
+                }
+                mandatory = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}}
             }
         }
         me.createOfferCallback = createOfferCallback;
