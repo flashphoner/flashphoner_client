@@ -18,15 +18,15 @@
     <script type="text/javascript" src="listener/DefaultListener.js"></script>
     <script type="text/javascript" src="listener/LoadToolListener.js"></script>
     <script type="text/javascript" src="../ConfigurationLoader.js"></script>
-    <script type="text/javascript" src="Phone.js"></script>
+    <script type="text/javascript" src="ConsolePhone.js"></script>
     <script type="application/javascript">
 
         var phone = new Phone();
 
         ConfigurationLoader.getInstance(function (configuration) {
             trace("Configuration loaded");
-            configuration.localMediaElement = getElement('localVideoPreview');
-            configuration.remoteMediaElement = getElement('remoteVideo');
+            configuration.localMediaElementId = 'localVideoPreview';
+            configuration.remoteMediaElementId = 'remoteVideo';
             configuration.elementIdForSWF = "flashVideoDiv";
             configuration.pathToSWF = "../../dependencies/flash/MediaManager.swf";
 

@@ -85,7 +85,7 @@ Streaming.prototype.onUnpublish = function () {
 Streaming.prototype.publishButtonListener = function () {
     console.log("Pressed publishButton");
     if ($('.connect-translation').css("display") === 'block') {
-        this.publish();
+        this.publish(true);
     } else {
         this.onUnpublish();
         this.unpublish();
@@ -166,7 +166,7 @@ Streaming.prototype.disconnect = function () {
     Flashphoner.getInstance().disconnect();
 };
 
-Streaming.prototype.publish = function () {
+Streaming.prototype.publish = function (hasVideo) {
     var me = this;
     $('.connect-translation').css({'display': 'none'});
     $('.connect-img').removeAttr('id');
@@ -176,23 +176,25 @@ Streaming.prototype.publish = function () {
         me.publishButtonListener();
     });
     this.info("");
-    if (!Flashphoner.getInstance().hasAccess(MediaProvider.WebRTC, true)) {
+
+    if (!Flashphoner.getInstance().hasAccess(MediaProvider.WebRTC, hasVideo)) {
         $('.access-video').css({'display': 'block'});
         $('.text-previu>span').text('You are trying to push a stream to Flashphoner WebRTC Server');
         var checkAccessFunc = function () {
-            if (Flashphoner.getInstance().hasAccess(MediaProvider.WebRTC, true)) {
+            if (Flashphoner.getInstance().hasAccess(MediaProvider.WebRTC, hasVideo)) {
                 clearInterval(me.intervalId);
                 me.intervalId = -1;
-                me.publish();
+                me.publish(hasVideo);
             }
         };
         me.intervalId = setInterval(checkAccessFunc, 500);
-        Flashphoner.getInstance().getAccess(MediaProvider.WebRTC, true);
+        Flashphoner.getInstance().getAccess(MediaProvider.WebRTC, hasVideo);
     } else {
         $('.black-window').css({'display': 'none'});
         $('.access-video').css({'display': 'none'});
         me.currentStream = new Stream();
         me.currentStream.name = me.generateId();
+        me.currentStream.hasVideo = hasVideo;
         Flashphoner.getInstance().publishStream(me.currentStream);
     }
 };
@@ -204,6 +206,7 @@ Streaming.prototype.playStream = function () {
     console.log("Streamname " + codeText);
     me.currentStream = new Stream();
     me.currentStream.name = codeText;
+    me.currentStream.hasVideo = true;
     Flashphoner.getInstance().playStream(me.currentStream);
 };
 

@@ -77,6 +77,7 @@ Phone.prototype.callStatusListener = function (event) {
     var call = event;
     trace("Phone - callStatusListener call id: " + call.callId + " status: " + call.status + " mediaProvider: " + call.mediaProvider);
     if (this.currentCall.callId == call.callId) {
+        this.currentCall.status = call.status;
         if (call.status == CallStatus.FINISH) {
             trace("Phone - ... Call is finished...");
             if (this.holdedCall != null) {
@@ -309,8 +310,8 @@ $(document).ready(function () {
 
     ConfigurationLoader.getInstance(function (configuration) {
         trace("Configuration loaded");
-        configuration.localMediaElement = $(".b-video__small").get(0);
-        configuration.remoteMediaElement = $(".b-video__video").get(0);
+        configuration.localMediaElementId = 'localMediaElement';
+        configuration.remoteMediaElementId = 'remoteMediaElement';
         configuration.elementIdForSWF = "flashVideoDiv";
         configuration.pathToSWF = "../../dependencies/flash/MediaManager.swf";
 
@@ -424,10 +425,15 @@ $(document).ready(function () {
                 $(".b-display__bottom__number>span").addClass("close");
                 $(".b-numbers").addClass("write").next().addClass("open");
             }
-            if ($(".b-transfer").hasClass("open")) {		// ввод номера телефона при переадресации звонка
-                $("#transfer").val($("#transfer").val() + $(this).text());
+            if (phone.currentCall &&
+                (CallStatus.ESTABLISHED == phone.currentCall.status || CallStatus.HOLD == phone.currentCall.status)) {
+                phone.sendDTMF(phone.currentCall.callId, $(this).text());
             } else {
-                $(".b-numbers").val($(".b-numbers").val() + $(this).text());
+                if ($(".b-transfer").hasClass("open")) {
+                    $("#transfer").val($("#transfer").val() + $(this).text());
+                } else if (!phone.currentCall){
+                    $(".b-numbers").val($(".b-numbers").val() + $(this).text());
+                }
             }
         }
     });

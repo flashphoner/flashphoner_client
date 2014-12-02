@@ -171,7 +171,7 @@ Flashphoner.prototype = {
                 call.mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
             }
             if (MediaProvider.WebRTC == call.mediaProvider) {
-                me.webRtcMediaManager.newConnection(call.callId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, me.configuration.remoteMediaElement));
+                me.webRtcMediaManager.newConnection(call.callId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, me.configuration.remoteMediaElementId));
             }
         }
     },
@@ -181,22 +181,22 @@ Flashphoner.prototype = {
         if (!configuration) {
             configuration = new Configuration();
         }
-        if (!configuration.remoteMediaElement) {
+        if (!configuration.remoteMediaElementId) {
+            configuration.remoteMediaElementId = 'remoteMediaElement';
             var _body = document.getElementsByTagName('body') [0];
-            configuration.remoteMediaElement = document.createElement('audio');
-            _body.appendChild(configuration.remoteMediaElement);
+            var remoteMediaElement = document.createElement('audio');
+            remoteMediaElement.id = configuration.remoteMediaElementId;
+            _body.appendChild(remoteMediaElement);
         }
 
         if (!configuration.pathToSWF) {
             configuration.pathToSWF = '../../dependencies/flash/MediaManager.swf';
         }
 
-        if (!configuration.elementIdForSWF) {
+        if (!configuration.elementIdForSWF && typeof swfobject != 'undefined') {
             configuration.elementIdForSWF = 'flashVideoDiv';
             var _body = document.getElementsByTagName('body') [0];
             var flashVideoDiv = document.createElement('div');
-            flashVideoDiv.style.border = '1px double black';
-            flashVideoDiv.style.padding = '10px';
             flashVideoDiv.style.width = '322px';
             flashVideoDiv.style.height = '176px';
             flashVideoDiv.innerHTML = '<div id="'+configuration.elementIdForSWF+'"></div>';
@@ -210,8 +210,8 @@ Flashphoner.prototype = {
         if (me.configuration.elementIdForSWF && me.configuration.pathToSWF) {
             me.initFlash(me.configuration.elementIdForSWF, me.configuration.pathToSWF);
         }
-        if (me.configuration.localMediaElement) {
-            me.configuration.localMediaElement.volume = 0;
+        if (me.configuration.localMediaElementId ) {
+            getElement(me.configuration.localMediaElementId).volume = 0;
         }
 
         this.callbacks = {
@@ -527,7 +527,7 @@ Flashphoner.prototype = {
             if (MediaProvider.WebRTC == call.mediaProvider) {
                 me.webRtcMediaManager.createOffer(call.callId, function (sdp) {
                     //here we will strip codecs from SDP if requested
-                    if (me.configuration.stripCodecs.length) {
+                    if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
                         sdp = me.stripCodecsSDP(sdp);
                         console.log("New SDP: " + sdp);
                     }
@@ -559,7 +559,7 @@ Flashphoner.prototype = {
                 if (me.webRtcMediaManager.receivedEmptyRemoteSDP(call.callId)) {
                     me.webRtcMediaManager.createOffer(call.callId, function (sdp) {
                         //here we will strip codecs from SDP if requested
-                        if (me.configuration.stripCodecs.length) {
+                        if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
                             sdp = me.stripCodecsSDP(sdp);
                             console.log("New SDP: " + sdp);
                         }
@@ -650,11 +650,11 @@ Flashphoner.prototype = {
     },
 
     getVolume: function () {
-        return this.configuration.remoteMediaElement.volume * 100;
+        return getElement(this.configuration.remoteMediaElementId).volume * 100;
     },
 
     setVolume: function (value) {
-        this.configuration.remoteMediaElement.volume = value / 100;
+        getElement(this.configuration.remoteMediaElementId).volume = value / 100;
     },
 
     sendMessage: function (message) {
@@ -691,7 +691,7 @@ Flashphoner.prototype = {
         }
 
         me.checkAndGetAccess(MediaProvider.WebRTC, stream.hasVideo, function () {
-            me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, me.configuration.remoteMediaElement));
+            me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, me.configuration.remoteMediaElementId));
 
             me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
                 trace("Publish name " + stream.name);
@@ -714,9 +714,8 @@ Flashphoner.prototype = {
         var me = this;
         var mediaSessionId = createUUID();
 
-        me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, stream.remoteMediaElement || me.configuration.remoteMediaElement));
+        me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, stream.remoteMediaElementId || me.configuration.remoteMediaElementId));
 
-        stream.remoteMediaElement = null;
         stream.mediaSessionId = mediaSessionId;
         stream.published = false;
         if (stream.hasVideo == undefined) {
@@ -940,7 +939,7 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
     var me = this;
     if (!me.localAudioVideoStream) {
         getUserMedia({audio: true, video: true}, function (stream) {
-                var localMediaElement = Flashphoner.getInstance().configuration.localMediaElement;
+                var localMediaElement = getElement(Flashphoner.getInstance().configuration.localMediaElementId);
                 if (localMediaElement) {
                     attachMediaStream(localMediaElement, stream);
                 }
@@ -969,13 +968,13 @@ WebRtcMediaManager.prototype.getAccessToAudio = function () {
     }
 };
 
-var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, remoteMediaElement) {
+var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, remoteMediaElementId) {
     var me = this;
     me.webRtcMediaManager = webRtcMediaManager;
     me.peerConnection = null;
     me.peerConnectionState = 'new';
     me.remoteAudioVideoMediaStream = null;
-    me.remoteMediaElement = remoteMediaElement;
+    me.remoteMediaElement = getElement(remoteMediaElementId);
     me.stunServer = stunServer;
     me.useDTLS = useDTLS;
     me.lastReceivedSdp = null;
@@ -1391,8 +1390,8 @@ WebRtcMediaConnection.prototype.onSetRemoteDescriptionErrorCallback = function (
 };
 
 Configuration = function () {
-    this.remoteMediaElement = null;
-    this.localMediaElement = null;
+    this.remoteMediaElementId = null;
+    this.localMediaElementId = null;
     this.elementIdForSWF = null;
     this.pathToSWF = null;
     this.urlWsServer = null;
@@ -1493,7 +1492,7 @@ var Stream = function () {
     this.status = StreamStatus.Pending;
     this.sdp = "";
     this.info = null;
-    this.remoteMediaElement = null;
+    this.remoteMediaElementId = null;
 };
 
 var StreamStatus = function () {
