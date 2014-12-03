@@ -106,7 +106,8 @@ package com.flashphoner.api
 				
 				if (hasAudio){
 					outStream.attachAudio(flash_API.getMicrophone());
-				} else {
+				}
+				if (hasVideo){
 					setVideoCompressionSettings(outStream);
 				}
 				outStream.publish(streamName);

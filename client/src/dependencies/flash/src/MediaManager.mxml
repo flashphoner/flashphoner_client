@@ -37,6 +37,8 @@ This code and accompanying materials also available under LGPL and MPL license f
 			
 			private var timer:Timer = new Timer(1000,0);
 			
+			private var count = 0;
+			
 			private function onCreationComlete():void{
 				var apiNotify:APINotify = new APINotify();
 				flashAPI = new FlashAPI(apiNotify);
@@ -77,7 +79,10 @@ This code and accompanying materials also available under LGPL and MPL license f
 			}
 			
 			private function timerTick(event:TimerEvent):void {
-				flashAPI.getMicrophone().setLoopBack(false);
+				count++;
+				if (count >= 3 || flashAPI.hasAccessToAudio()){
+					flashAPI.getMicrophone().setLoopBack(false);
+				}
 				if (flashAPI.hasAccessToAudio()){
 					timer.stop();
 					videoMy.attachCamera(flashAPI.videoControl.getCam());
