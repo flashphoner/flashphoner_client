@@ -467,7 +467,7 @@ Flashphoner.prototype = {
         me.webSocket = $.websocket(me.connection.urlServer, {
             open: function () {
                 me.isOpened = true;
-                me.webSocket.send("connect", me.connection);
+                me.webSocket.send("connection", me.connection);
             },
             close: function (event) {
                 me.isOpened = false;

@@ -69,7 +69,12 @@ SoundControl.prototype = {
             case "RING":
                 if (me.ringSound && !me.ringSound.paused) {
                     me.ringSound.pause();
-                    me.ringSound.currentTime = 0;
+                    try{
+                        me.ringSound.currentTime = 0;
+                    } catch(err){
+                        //Possible error with IE HTML5 does not have audio.currentTime attribute
+                        trace(err);
+                    }
                 }
                 break;
             default:
