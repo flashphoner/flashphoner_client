@@ -33,6 +33,9 @@ Phone.prototype.registrationStatusListener = function (event) {
     if (status == WCSError.AUTHENTICATION_FAIL) {
         trace("Phone - ERROR - Register fail, please check your SIP account details.");
         window.setTimeout(this.disconnect(), 3000);
+    } else if (status == RegistrationStatus.Failed) {
+        trace("Phone - ERROR - Register fail.");
+        window.setTimeout(this.disconnect(), 3000);
     } else {
         $(".b-login").removeClass("open").removeAttr("id");
         $(".b-display__header__login").html($("input[id='sipLogin']").val() == "" ? "Log in" : $("input[id='sipLogin']").val()); // передаём введённый логин в интерфейс
