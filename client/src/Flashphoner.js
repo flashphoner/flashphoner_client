@@ -452,6 +452,10 @@ Flashphoner.prototype = {
         me.connection.sipContactParams = me.connection.sipContactParams || me.configuration.sipContactParams;
         me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
         me.connection.urlServer = me.connection.urlServer || me.configuration.urlWsServer;
+        //workaround for old Safari (5.X)
+        if ((navigator.userAgent.indexOf("Safari") > -1) && !(navigator.userAgent.indexOf("Chrome") > -1)) {
+            me.connection.urlServer = me.connection.urlServer.slice(-1) == "/" ? me.connection.urlServer + "websocket" : me.connection.urlServer + "/websocket";
+        }
 
         var getLocation = function(href) {
             var l = document.createElement("a");
