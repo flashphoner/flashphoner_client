@@ -37,7 +37,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			
 			private var timer:Timer = new Timer(1000,0);
 			
-			private var count = 0;
+			private var count:int = 0;
 			
 			private function onCreationComlete():void{
 				var apiNotify:APINotify = new APINotify();

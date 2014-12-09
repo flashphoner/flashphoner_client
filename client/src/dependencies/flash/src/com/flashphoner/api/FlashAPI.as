@@ -72,7 +72,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("playStream", playStream);
 			ExternalInterface.addCallback("stopStream", stopStream);
 			ExternalInterface.addCallback("hasAccessToAudio",hasAccessToAudio);
-			ExternalInterface.addCallback("hasAccessToAudioAndVideo",hasAccessToAudio);
+			ExternalInterface.addCallback("hasAccessToAudioAndVideo",hasAccessToAudioAndVideo);
 			ExternalInterface.addCallback("disconnect",disconnect);
 			ExternalInterface.addCallback("getMicVolume",getMicVolume);
 			ExternalInterface.addCallback("setMicVolume",setMicVolume);
@@ -239,6 +239,13 @@ package com.flashphoner.api
 				}
 				
 			}
+		}
+		
+		/**
+		 * Check access to the devices (mic,camera)
+		 **/
+		public function hasAccessToAudioAndVideo():Boolean{
+			return hasAccessToAudio() && hasAccessToVideo();
 		}
 		
 		/**
