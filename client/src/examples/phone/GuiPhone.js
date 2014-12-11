@@ -237,6 +237,11 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
     if (MediaProvider.Flash == mediaProvider) {
         $(".b-video").addClass("open").attr("id", "active");
         $(".b-video").draggable("disable");
+        $("#flashVideoDiv").css("position", "absolute");
+        //check flash div dimensions
+        if ($("#flashVideoDiv").width() < 320 || $("#flashVideoDiv").height() < 240) {
+            console.log("Size of flashVideoDiv is to small, most likely there will be no Privacy dialog");
+        }
     } else {
         hasVideo ? $(".b-alert").html("Please <span>allow</span> access to your web camera and microphone.") : $(".b-alert").html("please <span>allow</span> access to audio device");
         $("body").addClass("mike");

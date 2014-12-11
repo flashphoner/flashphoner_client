@@ -47,7 +47,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 				phoneSpeaker.percentWidth = 100;
 				videoPartner.addChild(phoneSpeaker);
 				ExternalInterface.addCallback("getAccessToAudio",getAccessToAudio);
-				ExternalInterface.addCallback("getAccessToAudioAndVideo",getAccessToAudio);
+				ExternalInterface.addCallback("getAccessToAudioAndVideo",getAccessToAudioAndVideo);
 				ExternalInterface.addCallback("changeRelationMyVideo",changeRelationMyVideo);
 				videoPartner.addEventListener(Event.RESIZE,onResize);
 				flashAPI.initMedia();
@@ -62,29 +62,22 @@ This code and accompanying materials also available under LGPL and MPL license f
 				if (!flashAPI.hasAccessToAudio()){
 					var mic:Microphone = flashAPI.getMicrophone();
 					mic.setLoopBack(true);
-					//mic.addEventListener(StatusEvent.STATUS, onMicrophoneStatus);
-					timer.addEventListener(TimerEvent.TIMER, timerTick);
-					timer.start();
+					Logger.info("getAccessToAudio");
+					mic.addEventListener(StatusEvent.STATUS, onMicrophoneStatus);
 					videoPartner.visible = false;
 					videoMy.visible = false;
 				}
 			}
 			
-			private function onMicrophoneStatus(event:StatusEvent):void {
-				if (event.code == "Microphone.Unmuted") {
-					videoMy.attachCamera(flashAPI.videoControl.getCam());
-					videoPartner.visible = true;
-					videoMy.visible = true;
-				}
+			public function getAccessToAudioAndVideo():void{
+				getAccessToAudio();
 			}
 			
-			private function timerTick(event:TimerEvent):void {
-				count++;
-				if (count >= 3 || flashAPI.hasAccessToAudio()){
-					flashAPI.getMicrophone().setLoopBack(false);
-				}
-				if (flashAPI.hasAccessToAudio()){
-					timer.stop();
+			private function onMicrophoneStatus(event:StatusEvent):void {
+				Logger.info("onMicrophoneStatus " + event.code);
+				if (event.code == "Microphone.Unmuted") {
+					var mic:Microphone = flashAPI.getMicrophone();
+					mic.setLoopBack(false);
 					videoMy.attachCamera(flashAPI.videoControl.getCam());
 					videoPartner.visible = true;
 					videoMy.visible = true;
