@@ -318,6 +318,10 @@ Flashphoner.prototype = {
                 ]);
             },
 
+            callbackHold: function (callId, isHold) {
+                trace("callbackHold "+ isHold);
+            },
+
             finish: function (call) {
                 me.calls.remove(call.callId);
                 me.mediaProviders.get(call.mediaProvider).close(call.callId);
