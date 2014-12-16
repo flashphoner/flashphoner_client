@@ -29,16 +29,12 @@ package com.flashphoner.api
 	{	
 		private var videoContainer:UIComponent;		
 		private var video:Video;
-		private var incomingStream:NetStream;
-		private var incomingVideoStream:NetStream;
+		private var currentStream:NetStream;
+		private var streams:Object = {};
 		private var netConnection:NetConnection;
-		/**
-		 * Playing flag
-		 **/
-		public  var playing:Boolean;
 
 		private  var currentVolume:int = 100;
-		private var streamName:String;
+		private var currentStreamName:String;
 		private var rePlay:Boolean = false;
 		
 		private var flashAPI:FlashAPI;
@@ -62,12 +58,11 @@ package com.flashphoner.api
 		{
 			Logger.info("PhoneSpeaker.nsOnStatus() "+infoObject.info.code);
 			
-			if (incomingStream==null){
+			if (currentStream == null){
 				return;
 			}			
 					
 			if (infoObject.info.code == "NetStream.Play.Start"){
-				playing = true;
 			}
 			
 			if (infoObject.info.code == "NetStream.Play.PublishNotify"){
@@ -75,7 +70,6 @@ package com.flashphoner.api
 					
 			else if (infoObject.info.code == "NetStream.Play.StreamNotFound" || infoObject.info.code == "NetStream.Play.Failed"||infoObject.info.code == "NetStream.Play.Stop"){
 				Logger.info("incomingStream.onStatus() "+infoObject.info.description);
-				playing = false;
 			}
 				
 		}	
@@ -87,7 +81,8 @@ package com.flashphoner.api
 		 **/
 		public function stop(streamName:String):void{
 			Logger.info("PhoneSpeaker.stopAudio() - "+streamName +"; current stream name - "+streamName);
-			if (incomingStream!=null){
+			var incomingStream:NetStream = streams[streamName];
+			if (incomingStream != null) {
 				incomingStream.removeEventListener(NetStatusEvent.NET_STATUS,nsOnStatus);
 				try{
 					incomingStream.play(false);
@@ -96,10 +91,13 @@ package com.flashphoner.api
 					Logger.error(e.message);
 				}
 				incomingStream.close();
-				incomingStream = null;
-				playing = false;
-				video.clear();
-				video.attachNetStream(null);			
+				streams[streamName] = null;
+				if (currentStreamName == streamName){
+					currentStream = null;
+					currentStreamName = null;
+					video.clear();
+					video.attachNetStream(null);
+				}
 			}
 		}
 		
@@ -108,19 +106,20 @@ package com.flashphoner.api
 		 * @param streamName name of audio stream
 		 **/
 		public function play(streamName:String, rePlay:Boolean):void{
-			Logger.info("PhoneSpeaker play streamName="+streamName +"; currentStremName="+this.streamName);
+			Logger.info("PhoneSpeaker play streamName="+streamName +"; currentStremName="+currentStreamName);
 			//If we have a new stream, we stop old and start new
 			//This is mandatory for reInvite and update to video session
 			var needReplay:Boolean = this.rePlay;  
 			this.rePlay = rePlay;
-			if (incomingStream != null){
-				if (this.streamName == streamName && !needReplay){
+			if (currentStream != null){
+				if (currentStreamName == streamName && !needReplay){
 					return;
 				}
-				stop(this.streamName);
+				stop(currentStreamName);
 			}
-			incomingStream = startNewIncomingStream(streamName,nsOnStatus);
-			this.streamName = streamName;  
+			currentStream = startNewIncomingStream(streamName,nsOnStatus);
+			currentStreamName = streamName;
+			streams[streamName] = currentStream;
 		}
 
 		private function startNewIncomingStream(streamName:String, listener:Function):NetStream{
@@ -160,10 +159,10 @@ package com.flashphoner.api
 		 **/
 		public function setVolume(volume:int):void{
 			currentVolume = volume;
-			if (incomingStream != null){
+			if (currentStream != null){
 				var soundTransform:SoundTransform = new  SoundTransform;	
 				soundTransform.volume = currentVolume/100;
-				incomingStream.soundTransform = soundTransform;
+				currentStream.soundTransform = soundTransform;
 			}
 						
 		}

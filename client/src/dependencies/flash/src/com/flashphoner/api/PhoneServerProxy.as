@@ -30,14 +30,9 @@ package com.flashphoner.api
 	 * **/
 	internal class PhoneServerProxy
 	{			
-		//output voice stream
-		private static var outStream:NetStream;
-		
 		internal var nc:NetConnection;		
 		
 		public var hasDisconnectAttempt:Boolean;
-		
-		public static var sendVideo:Boolean = false;
 		
 		public var phoneSpeaker:PhoneSpeaker;
 		
@@ -45,7 +40,7 @@ package com.flashphoner.api
 		
 		private var isConnected:Boolean;
 		
-		private var outStream:NetStream;
+		private var outStreams:Object = {};
 		
 		public function PhoneServerProxy(flash_API:FlashAPI)
 		{		
@@ -88,6 +83,7 @@ package com.flashphoner.api
 			} else if (event.info.code == 'NetConnection.Connect.Closed')
 			{				
 				Logger.info("NetConnection.Connect.Closed");
+				outStreams = {};
 				hasDisconnectAttempt = false;
 				isConnected = false;
 			}		
@@ -95,7 +91,8 @@ package com.flashphoner.api
 		
 		
 		public function publish(streamName:String, hasAudio:Boolean, hasVideo:Boolean):void{
-			Logger.info("publish() streamName: "+streamName);			
+			Logger.info("publish() streamName: "+streamName);
+			var outStream:NetStream = outStreams[streamName];
 			if (outStream == null){
 				outStream = new NetStream(nc);
 				outStream.addEventListener(AsyncErrorEvent.ASYNC_ERROR,asyncErrorHandler);
@@ -111,16 +108,18 @@ package com.flashphoner.api
 					setVideoCompressionSettings(outStream);
 				}
 				outStream.publish(streamName);
+				outStreams[streamName] = outStream;
 			}					
 		}
 		
 		public function unpublish(streamName:String):void{	
 			Logger.info("unpublish() name: "+streamName);
+			var outStream:NetStream = outStreams[streamName];
 			if (outStream != null){				
 				outStream.removeEventListener(AsyncErrorEvent.ASYNC_ERROR,asyncErrorHandler);
 				outStream.removeEventListener(NetStatusEvent.NET_STATUS,onNetStatus);		
 				outStream.close();
-				outStream=null;
+				outStreams[streamName] = null;
 			}		
 		}
 		
