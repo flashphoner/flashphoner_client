@@ -5,6 +5,7 @@ function Flashphoner() {
     arguments.callee.instance = this;
 
     this.webRtcMediaManager = undefined;
+    this.webRtcCallSessionId = undefined;
     this.flashMediaManager = undefined;
     this.connection = null;
     this.configuration = new Configuration();
@@ -170,7 +171,8 @@ Flashphoner.prototype = {
             if (!call.mediaProvider) {
                 call.mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
             }
-            if (MediaProvider.WebRTC == call.mediaProvider) {
+            if ((!this.webRtcCallSessionId) && MediaProvider.WebRTC == call.mediaProvider) {
+                this.webRtcCallSessionId = call.callId;
                 me.webRtcMediaManager.newConnection(call.callId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, me.configuration.remoteMediaElementId));
             }
         }
@@ -324,7 +326,13 @@ Flashphoner.prototype = {
 
             finish: function (call) {
                 me.calls.remove(call.callId);
-                me.mediaProviders.get(call.mediaProvider).close(call.callId);
+                if (me.calls.getSize() == 0 && MediaProvider.WebRTC == call.mediaProvider){
+                    me.mediaProviders.get(call.mediaProvider).close(me.webRtcCallSessionId);
+                    me.webRtcCallSessionId = undefined;
+                }
+                if (MediaProvider.Flash == call.mediaProvider) {
+                    me.mediaProviders.get(call.mediaProvider).close(call.callId);
+                }
                 me.invokeListener(WCSEvent.CallStatusEvent, [
                     call
                 ]);
@@ -1571,7 +1579,7 @@ DataMap.prototype = {
 
     remove: function (id) {
         var data = this.data[id];
-        this.data[id] = undefined;
+        delete this.data[id];
         return data;
     },
 
