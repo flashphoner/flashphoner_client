@@ -96,15 +96,16 @@ Phone.prototype.callStatusListener = function (event) {
                 $(".voice_call__transfer").removeClass("tr_call__pause");	// обнуляем доп.стиль кнопки переадресации
                 $("#transfer").val("");										// стираем значение в окне переадресации, если есть
                 $(".call__out__dial").text("calling to");					// возвращаем исходный вид блока исходящего вызова (без номера/ника)
-                $(".b-nav__chancel_call span").text("Cancel");				// возвращаем исходное состояние кнопки
+                $(".b-nav__cancel_call span").text("Cancel");				// возвращаем исходное состояние кнопки
                 $(".b-mike, .b-alert__ban, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // закрываем кучу блоков, которые по умолчанию скрыты
                 $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// открываем блоки, которые могли быть скрыты, но по умолчанию видимые
-                num = 0;
                 $(".b-alert").text("").removeClass("video_alert");	// исходный вид окна с алертом
                 $(".interlocutor2").text("");						// очищаем ник собеседника в окне вызова
-                $(".b-time").html("<span class='b-min'>00</span>:<span class='b-sec'>00</span>");	// возвращаем вёрстку таймера на исходную
                 $(".voice_call__stop").addClass("open");		// делаем видимыми кнопку паузы разговора и кнопку моделирования входящего звонка
 
+                clearInterval(this.timerInterval);
+                this.timerInterval = null;
+                $(".b-time").html("<span class='b-min'>00</span>:<span class='b-sec'>00</span>");	// возвращаем вёрстку таймера на исходную
             }
         } else if (call.status == CallStatus.HOLD) {
             trace('Phone - ...Call on hold...');
@@ -123,27 +124,22 @@ Phone.prototype.callStatusListener = function (event) {
                 $(".hook").addClass("open");
             }
 
-            $(".b-nav__chancel_call span").text("Hangup");	// меняем текст кнопки отмены
+            $(".b-nav__cancel_call span").text("Hangup");	// меняем текст кнопки отмены
             if ($("body").hasClass("voice_call__inc")) {	// если это входящий звонок
                 $(".voice_call__call").addClass("open");	//открываем окно с разговором
-                start = min = 0;							// обнуляем и запускаем счётчик времени
-                this.time();
                 if (call.incoming) {
                     $(".interlocutor2").text(call.caller);
                 } else {
                     $(".interlocutor2").text(call.callee);
                 }
-
             } else {
                 $(".call__out__dial").removeClass("open");	// скрываем окно вызова
                 $(".voice_call__call").addClass("open");	// открываем окно разговора
-                $(".b-nav__chancel_call span").text("Hangup");	// меняем текст красной кнопки
+                $(".b-nav__cancel_call span").text("Hangup");	// меняем текст красной кнопки
                 $(".interlocutor2").text($(".b-numbers").val());	//указываем номер собеседника в окне разговора (или что угодно, что нужно вставить)
-                $(".b-time").html("<span class='b-min'>00</span>:<span class='b-sec'>00</span>");	// обнуляем старый счётчик
-                start = min = 0;																	//
-                this.time();																				// и запускаем заново
                 $(this).removeClass("open");														// скрываем кнопку приёма вызова (удалить при программировании)
             }
+            this.startTimer();
 
             $(".voice_call__call__pause").removeClass("open");	// скрываем окно паузы и окно переадресации (если было открыто)
             $(".voice_call__call__play").removeClass("close");				// открываем окно разговора
@@ -260,23 +256,25 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
 
 
 // функция отсчёта времени
-Phone.prototype.time = function () {
-    var timer = setInterval(function () {
-        start++;
-        if (start > 59) {
-            start = 0;
-            min++;
-            if (min < 10) {
-                $(".b-min").html("0" + min);
-            } else $(".b-min").html(min);
-        }
-        if (start < 10) {
-            $(".b-sec").html("0" + start);
-        } else $(".b-sec").html(start);
-    }, 1000);
-    $(".b-nav__chancel_call, .close, .voice_call__stop, .voice_call__transfer, .chat").live("click", function () {
-        clearInterval(timer); // останавливаем таймер
-    });
+Phone.prototype.startTimer = function () {
+    var me = this;
+    if (!me.timerInterval) {
+        me.start = 0;
+        me.min = 0;
+        me.timerInterval = setInterval(function () {
+            me.start++;
+            if (me.start > 59) {
+                me.start = 0;
+                me.min++;
+                if (me.min < 10) {
+                    $(".b-min").html("0" + me.min);
+                } else $(".b-min").html(me.min);
+            }
+            if (me.start < 10) {
+                $(".b-sec").html("0" + me.start);
+            } else $(".b-sec").html(me.start);
+        }, 1000);
+    }
 };
 
 Phone.prototype.chatSelectTab = function (elem) {
@@ -341,7 +339,7 @@ $(document).ready(function () {
     });
 
     // открываем/закрываем окно авторизации
-    $(".b-display__header__login, .b-login__chancel").live("click", function () {
+    $(".b-display__header__login, .b-login__cancel").live("click", function () {
         $('#sipLogin').val(Flashphoner.getInstance().getCookie('sipLogin'));
         $('#sipPassword').val(Flashphoner.getInstance().getCookie('sipPassword'));
         $('#sipAuthenticationName').val(Flashphoner.getInstance().getCookie('sipAuthenticationName'));
@@ -524,7 +522,7 @@ $(document).ready(function () {
         }
     });
 
-    $(".b-transfer__chancel").live("click", function () {
+    $(".b-transfer__cancel").live("click", function () {
         if (phone.currentCall) {
             phone.unhold(phone.currentCall);
         }
@@ -615,7 +613,7 @@ $(document).ready(function () {
         $(this).addClass("active");
         $("#new__chat").val($(this).html());
     });
-    $(".b-chat__new__chancel").live("click", function () {		// при клике на отмену во время поиска собеседник
+    $(".b-chat__new__cancel").live("click", function () {		// при клике на отмену во время поиска собеседник
         $(".b-chat__new__list p.active").removeClass("active");	// снимаем активый класс с выбранного ранее ника (если таковой был)
         $("#new__chat").val("");								// очищаем поле поиска
         $(".b-chat__new__nav, .b-chat__new__list, .b-chat__nav__tab#new, .b-chat_tab.new").removeClass("open");	// скрываем всё (список, кнопки, вкладку)
@@ -631,7 +629,7 @@ $(document).ready(function () {
         $(this).attr("id", "active");
     });
 
-    $(".b-nav__chancel_call, .close, .b-nav__hangup").live("click", function () {	// возвращаемся на исходный экран из разных позиций
+    $(".b-nav__cancel_call, .close, .b-nav__hangup").live("click", function () {	// возвращаемся на исходный экран из разных позиций
         if (phone.currentCall) {
             phone.hangup(phone.currentCall);
         }

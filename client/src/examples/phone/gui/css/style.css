@@ -420,7 +420,7 @@ body{
 	border: 0px;}
 .b-login input[type="button"]:hover{
 	background: #92e234;}
-.b-login__chancel{
+.b-login__cancel{
 	cursor: default;
 	margin: 0 3px;
 	width: 92px;
@@ -431,10 +431,10 @@ body{
 	background: #f7f7f7;
 	display: inline-block;
 	font-size: 14px;}
-.b-login__chancel:hover{
+.b-login__cancel:hover{
 	background: #ececec;}
 .b-login input[type="button"]:active,
-.b-login__chancel:active{
+.b-login__cancel:active{
 	top: 1px;
 	position: relative;}
 /*-- video --*/
@@ -831,9 +831,9 @@ body{
 	background: #2accfe;}
 .b-chat__new__ok:hover{
 	background: #92e234;}
-.b-chat__new__chancel{
+.b-chat__new__cancel{
 	background: #f7f7f7;}
-.b-chat__new__chancel:hover{
+.b-chat__new__cancel:hover{
 	background: #ececec;}
 
 /*-- call --*/
@@ -873,7 +873,7 @@ body{
 .voice_call__inc .b-display__bottom__number,
 .chat_call .b-display__bottom__number{
 	display: none;}
-.b-nav__chancel_call{
+.b-nav__cancel_call{
 	display: none;
 	width: 89px;
 	height: 48px;
@@ -882,7 +882,7 @@ body{
 	top: 0;
 	background: #ff5454;
 	padding-left: 81px;}
-.b-nav__chancel_call:before{
+.b-nav__cancel_call:before{
 	content:"";
 	display: inline-block;
 	width: 22px;
@@ -893,11 +893,11 @@ body{
 	background:url(../img/sprite.png) -93px 0 no-repeat;}
 .voice_call__out.mike .b-display__header__mike{
 	display: inline-block;}
-.voice_call__out .b-nav__chancel_call,
-.chat_call .b-nav__chancel_call,
-.voice_call__inc .b-nav__chancel_call{
+.voice_call__out .b-nav__cancel_call,
+.chat_call .b-nav__cancel_call,
+.voice_call__inc .b-nav__cancel_call{
 	display: block;}
-.b-nav__chancel_call:hover{
+.b-nav__cancel_call:hover{
 	background: #ed3030 !important;
 	color: #fff !important;}
 .call__inc__dial{
@@ -1154,9 +1154,9 @@ body{
 	background: #2accfe;}
 .b-transfer__ok:hover{
 	background: #92e234;}
-.b-transfer__chancel{
+.b-transfer__cancel{
 	background: #f7f7f7;}
-.b-transfer__chancel:hover{
+.b-transfer__cancel:hover{
 	background: #ececec;}
 	
 /*-- incomming --*/
