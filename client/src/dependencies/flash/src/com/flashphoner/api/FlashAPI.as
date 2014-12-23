@@ -182,7 +182,7 @@ package com.flashphoner.api
 		 * Get volume of speakers
 		 * @return volume interval 1-100
 		 **/
-		public function getVolume():int{
+		public function getVolume(callId:String):int{
 			return phoneServerProxy.phoneSpeaker.getVolume();
 		}
 		
@@ -190,7 +190,7 @@ package com.flashphoner.api
 		 * Set volume for speakers
 		 * @param volume interval 1-100
 		 **/
-		public function setVolume(volume:int):void{
+		public function setVolume(callId:String, volume:int):void{
 			phoneServerProxy.phoneSpeaker.setVolume(volume);
 		}
 		

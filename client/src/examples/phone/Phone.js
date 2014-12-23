@@ -34,6 +34,7 @@ Phone.prototype.connectionStatusListener = function (event) {
         this.holdedCall = null;
         $(".b-display__header__sip_login").html("");
         $(".b-display__header__login").html("Log in");
+        $(".b-volume").removeClass("open");
     } else if (event.status == ConnectionStatus.Established) {
         $(".b-display__header__sip_login").html(event.sipLogin);
         $(".b-display__header__login").html("Log out");
@@ -118,6 +119,8 @@ Phone.prototype.callStatusListener = function (event) {
                 clearInterval(this.timerInterval);
                 this.timerInterval = null;
                 $(".b-time").html("<span class='b-min'>00</span>:<span class='b-sec'>00</span>");	// возвращаем вёрстку таймера на исходную
+
+                $(".b-volume").removeClass("open");
             }
         } else if (call.status == CallStatus.HOLD) {
             trace('Phone - ...Call on hold...');
@@ -377,7 +380,7 @@ $(document).ready(function () {
 
     // открываем/закрываем громкость
     $(".b-display__header__volume").live("click", function () {
-        if (phone.connectionStatus == ConnectionStatus.Established || phone.connectionStatus == ConnectionStatus.Registered) {
+        if (phone.currentCall) {
             $(".b-volume").hasClass("open") ? $(".b-volume").removeClass("open") : $(".b-volume").addClass("open");
         }
     });
@@ -388,7 +391,8 @@ $(document).ready(function () {
         range: "min",
         animate: true,
         slide: function (event, ui) {
-            Flashphoner.getInstance().setVolume(ui.value);
+            $(".volume-percent").html(ui.value + "%");
+            Flashphoner.getInstance().setVolume(phone.currentCall, ui.value);
         }
     });
     // вывод уровня громкости около регулятора

@@ -201,7 +201,7 @@ Flashphoner.prototype = {
             var flashVideoDiv = document.createElement('div');
             flashVideoDiv.style.width = '322px';
             flashVideoDiv.style.height = '176px';
-            flashVideoDiv.innerHTML = '<div id="'+configuration.elementIdForSWF+'"></div>';
+            flashVideoDiv.innerHTML = '<div id="' + configuration.elementIdForSWF + '"></div>';
             _body.appendChild(flashVideoDiv);
 
         }
@@ -212,7 +212,7 @@ Flashphoner.prototype = {
         if (me.configuration.elementIdForSWF && me.configuration.pathToSWF) {
             me.initFlash(me.configuration.elementIdForSWF, me.configuration.pathToSWF);
         }
-        if (me.configuration.localMediaElementId ) {
+        if (me.configuration.localMediaElementId) {
             getElement(me.configuration.localMediaElementId).volume = 0;
         }
 
@@ -321,12 +321,12 @@ Flashphoner.prototype = {
             },
 
             callbackHold: function (callId, isHold) {
-                trace("callbackHold "+ isHold);
+                trace("callbackHold " + isHold);
             },
 
             finish: function (call) {
                 me.calls.remove(call.callId);
-                if (me.calls.getSize() == 0 && MediaProvider.WebRTC == call.mediaProvider){
+                if (me.calls.getSize() == 0 && MediaProvider.WebRTC == call.mediaProvider) {
                     me.mediaProviders.get(call.mediaProvider).close(me.webRtcCallSessionId);
                     me.webRtcCallSessionId = undefined;
                 }
@@ -469,7 +469,7 @@ Flashphoner.prototype = {
             me.connection.urlServer = me.connection.urlServer.slice(-1) == "/" ? me.connection.urlServer + "websocket" : me.connection.urlServer + "/websocket";
         }
 
-        var getLocation = function(href) {
+        var getLocation = function (href) {
             var l = document.createElement("a");
             l.href = href;
             return l;
@@ -477,7 +477,7 @@ Flashphoner.prototype = {
         var l = getLocation(me.connection.urlServer);
 
         if (!me.configuration.urlFlashServer) {
-            me.configuration.urlFlashServer = "rtmfp://"+ l.hostname+":1935";
+            me.configuration.urlFlashServer = "rtmfp://" + l.hostname + ":1935";
         }
 
         me.webSocket = $.websocket(me.connection.urlServer, {
@@ -665,12 +665,12 @@ Flashphoner.prototype = {
         }
     },
 
-    getVolume: function () {
-        return getElement(this.configuration.remoteMediaElementId).volume * 100;
+    getVolume: function (call) {
+        return this.mediaProviders.get(call.mediaProvider).getVolume(call.callId);
     },
 
-    setVolume: function (value) {
-        getElement(this.configuration.remoteMediaElementId).volume = value / 100;
+    setVolume: function (call, value) {
+        this.mediaProviders.get(call.mediaProvider).setVolume(call.callId, value);
     },
 
     sendMessage: function (message) {
@@ -899,6 +899,17 @@ var WebRtcMediaManager = function () {
     this.isAudioMuted = 1;
     this.isVideoMuted = 1;
 };
+
+WebRtcMediaManager.prototype.getVolume = function (id) {
+    var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
+    return webRtcMediaConnection.remoteMediaElement.volume;
+};
+
+WebRtcMediaManager.prototype.setVolume = function (id, volume) {
+    var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
+    webRtcMediaConnection.remoteMediaElement.volume = volume / 100;
+};
+
 
 WebRtcMediaManager.prototype.hasAccessToAudio = function () {
     return this.isAudioMuted == -1;

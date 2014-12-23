@@ -123,7 +123,9 @@
                 max: 100,
                 value: 60,
                 slide: function (event, ui) {
-                    Flashphoner.getInstance().setVolume(ui.value);
+                    if (phone.currentCall) {
+                        Flashphoner.getInstance().setVolume(phone.currentCall, ui.value);
+                    }
                 }
             });
 
