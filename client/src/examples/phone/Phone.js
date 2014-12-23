@@ -25,6 +25,20 @@ Phone.prototype.connect = function () {
 
 /* ------------------ LISTENERS ----------------- */
 
+Phone.prototype.connectionStatusListener = function (event) {
+    trace("Phone - Connection status " + event.status);
+    this.connectionStatus = event.status;
+    if (event.status == ConnectionStatus.Disconnected ||
+        event.status == ConnectionStatus.Failed) {
+        this.currentCall = null;
+        this.holdedCall = null;
+        $(".b-display__header__sip_login").html("");
+        $(".b-display__header__login").html("Log in");
+    } else if (event.status == ConnectionStatus.Established) {
+        $(".b-display__header__sip_login").html(event.sipLogin);
+        $(".b-display__header__login").html("Log out");
+    }
+};
 
 Phone.prototype.registrationStatusListener = function (event) {
     var status = event.status;
@@ -37,8 +51,6 @@ Phone.prototype.registrationStatusListener = function (event) {
         trace("Phone - ERROR - Register fail.");
         window.setTimeout(this.disconnect(), 3000);
     } else {
-        $(".b-login").removeClass("open").removeAttr("id");
-        $(".b-display__header__login").html($("input[id='sipLogin']").val() == "" ? "Log in" : $("input[id='sipLogin']").val()); // передаём введённый логин в интерфейс
 
         SoundControl.getInstance().playSound("REGISTER");
         this.flashphonerListener.onRegistered();
@@ -340,26 +352,34 @@ $(document).ready(function () {
 
     // открываем/закрываем окно авторизации
     $(".b-display__header__login, .b-login__cancel").live("click", function () {
-        $('#sipLogin').val(Flashphoner.getInstance().getCookie('sipLogin'));
-        $('#sipPassword').val(Flashphoner.getInstance().getCookie('sipPassword'));
-        $('#sipAuthenticationName').val(Flashphoner.getInstance().getCookie('sipAuthenticationName'));
-        $('#sipDomain').val(Flashphoner.getInstance().getCookie('sipDomain'));
-        $('#sipOutboundProxy').val(Flashphoner.getInstance().getCookie('sipOutboundProxy'));
-        $('#sipPort').val(Flashphoner.getInstance().getCookie('sipPort'));
+        if (phone.connectionStatus == ConnectionStatus.Established || phone.connectionStatus == ConnectionStatus.Registered) {
+            phone.disconnect();
+        } else {
+            $('#sipLogin').val(Flashphoner.getInstance().getCookie('sipLogin'));
+            $('#sipPassword').val(Flashphoner.getInstance().getCookie('sipPassword'));
+            $('#sipAuthenticationName').val(Flashphoner.getInstance().getCookie('sipAuthenticationName'));
+            $('#sipDomain').val(Flashphoner.getInstance().getCookie('sipDomain'));
+            $('#sipOutboundProxy').val(Flashphoner.getInstance().getCookie('sipOutboundProxy'));
+            $('#sipPort').val(Flashphoner.getInstance().getCookie('sipPort'));
 
-        $(".b-login").toggleClass("open");
-        $("#active").removeAttr("id");
-        $(".b-login").hasClass("open") ? $(".b-login").attr("id", "active") : $(".b-login").removeAttr("id");
+            $(".b-login").toggleClass("open");
+            $("#active").removeAttr("id");
+            $(".b-login").hasClass("open") ? $(".b-login").attr("id", "active") : $(".b-login").removeAttr("id");
+        }
     });
 
     // авторизация
     $(".b-login input[type='button']").live("click", function () {
+        $(".b-display__header__login").html("Connecting");
+        $(".b-login").removeClass("open").removeAttr("id");
         phone.connect();
     });
 
     // открываем/закрываем громкость
     $(".b-display__header__volume").live("click", function () {
-        if ($(".b-display__header__login").text() != "Log in")    $(".b-volume").hasClass("open") ? $(".b-volume").removeClass("open") : $(".b-volume").addClass("open");
+        if (phone.connectionStatus == ConnectionStatus.Established || phone.connectionStatus == ConnectionStatus.Registered) {
+            $(".b-volume").hasClass("open") ? $(".b-volume").removeClass("open") : $(".b-volume").addClass("open");
+        }
     });
     // регулятор громкости
     $("#volume").slider({
@@ -418,7 +438,7 @@ $(document).ready(function () {
 
     // ввод номера телефона
     $(".b-display__bottom__number>span").live("click", function () { // кликнули на надпись "Enter your number here"
-        if ($(".b-display__header__login").text() != "Log in") {
+        if (phone.connectionStatus == ConnectionStatus.Established || phone.connectionStatus == ConnectionStatus.Registered) {
             $(this).addClass("close");
             $(".b-numbers__clear").addClass("open");
             $(".b-numbers").addClass("write").focus();
@@ -435,7 +455,7 @@ $(document).ready(function () {
         }
     });
     $(".b-num td").live("click", function () {
-        if ($(".b-display__header__login").text() != "Log in") {
+        if (phone.connectionStatus == ConnectionStatus.Established || phone.connectionStatus == ConnectionStatus.Registered) {
             if (!$(".b-numbers").hasClass("write")) {	// если введены символы, убирием блок с надписью
                 $(".b-display__bottom__number>span").addClass("close");
                 $(".b-numbers").addClass("write").next().addClass("open");
@@ -540,7 +560,7 @@ $(document).ready(function () {
     });
 
     $(".b-nav__chat").live("click", function () {									// при клике на кнопку чата
-        if ($(".b-display__header__login").text() != "Log in") {					// снова проверка логина
+        if (phone.connectionStatus == ConnectionStatus.Established || phone.connectionStatus == ConnectionStatus.Registered) {
             $('.b-chat__new__list .mCSB_container').html(phone.chatNames);
             if (!$(this).hasClass("chat")) {										// если у кнопки нет класса chat, значит, окно чата закрыто
                 $(this).addClass("chat");										// добавляем класс chat

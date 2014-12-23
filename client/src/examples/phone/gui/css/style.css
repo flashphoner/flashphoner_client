@@ -126,6 +126,13 @@ body{
 	background:url(../img/sprite.png) -25px 0 no-repeat;
 	margin: 8px 0 0 10px;
 	float: left;}
+.b-display__header__sip_login{
+	cursor: default;
+	float: right;
+	display: inline-block;
+	line-height: 30px;
+	padding: 0 5px;
+}
 .b-display__header__login{
 	cursor: default;
 	float: right;
