@@ -994,11 +994,22 @@ body{
 	height: 26px;}
 .voice_call__nav span:active{
 	margin-top: 1px;}
-.b-alert__ban{
+.b-alert__close{
+	display: inline-block;
+	width: 10px;
+	height: 11px;
+	cursor: default;
+	background:url(../img/sprite.png) -118px -15px;
+	position: absolute;
+	top: -11px;
+	right: -15px;}
+.b-alert__close:hover{
+	background-position: -118px -27px;}
+.b-alert__error{
 	z-index: 201;}
-.b-alert__ban input{
+.b-alert__error input{
 	cursor: default;}
-.b-alert__ban input:active,
+.b-alert__error input:active,
 .b-transfer__btn input:active{
 	position: relative;
 	top: 1px;}
@@ -1081,12 +1092,12 @@ body{
 	background: url(../img/sprite.png) 0 -69px no-repeat;}
 	
 /*-- alert ban --*/
-.b-alert__ban{
+.b-alert__error{
 	display: none;
 	position: absolute;
-	left: 390px;
-	top: 137px;
-	width: 195px;
+	left: 39px;
+	top: 295px;
+	width: 240px;
 	padding: 15px 30px;
 	font-size: 14px;
 	line-height: 18px;
@@ -1095,9 +1106,9 @@ body{
 	-webkit-border-radius: 5px;
 	   -moz-border-radius: 5px;
 			border-radius: 5px;}
-.b-alert__ban p{
+.b-alert__error p{
 	margin: 15px 0;}
-.b-alert__ban.open{
+.b-alert__error.open{
 	display: block;}
 .allow{
 	width: 92px;

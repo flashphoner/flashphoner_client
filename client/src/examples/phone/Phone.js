@@ -45,21 +45,19 @@ Phone.prototype.registrationStatusListener = function (event) {
     var status = event.status;
     var sipObject = event.sipMessageRaw;
     trace("Phone - registrationStatusListener " + status);
-    if (status == WCSError.AUTHENTICATION_FAIL) {
-        trace("Phone - ERROR - Register fail, please check your SIP account details.");
-        window.setTimeout(this.disconnect(), 3000);
-    } else if (status == RegistrationStatus.Failed) {
-        trace("Phone - ERROR - Register fail.");
-        window.setTimeout(this.disconnect(), 3000);
+    if (status == RegistrationStatus.Failed) {
+        this.viewMessage("Register fail, please check your SIP account details.");
+        this.disconnect();
+    } else if (status == RegistrationStatus.Unregistered) {
+        this.viewMessage("Unregistered from sip server");
+        this.disconnect();
     } else {
-
         SoundControl.getInstance().playSound("REGISTER");
         this.flashphonerListener.onRegistered();
 
         if (ConfigurationLoader.getInstance().subscribeEvent != null && ConfigurationLoader.getInstance().subscribeEvent.length != 0) {
             this.subscribe();
         }
-
         this.sendXcapRequest();
     }
 };
@@ -110,7 +108,7 @@ Phone.prototype.callStatusListener = function (event) {
                 $("#transfer").val("");										// стираем значение в окне переадресации, если есть
                 $(".call__out__dial").text("calling to");					// возвращаем исходный вид блока исходящего вызова (без номера/ника)
                 $(".b-nav__cancel_call span").text("Cancel");				// возвращаем исходное состояние кнопки
-                $(".b-mike, .b-alert__ban, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // закрываем кучу блоков, которые по умолчанию скрыты
+                $(".b-mike, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // закрываем кучу блоков, которые по умолчанию скрыты
                 $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// открываем блоки, которые могли быть скрыты, но по умолчанию видимые
                 $(".b-alert").text("").removeClass("video_alert");	// исходный вид окна с алертом
                 $(".interlocutor2").text("");						// очищаем ник собеседника в окне вызова
@@ -130,7 +128,7 @@ Phone.prototype.callStatusListener = function (event) {
             $(".voice_call__transfer").addClass("tr_call__pause");	// добавляем класс кнопке трансфера, чтобы знать, куда потом, если что, возвращаться
         } else if (call.status == CallStatus.ESTABLISHED) {
             trace('Phone - ...Talking...');
-            $(".b-alert, .b-nav__inc, .b-alert__ban, .call__inc__dial").removeClass("open"); // скрываем кучу ненужных кнопок, окон, а также кнопки "разрешить"/"запретить"
+            $(".b-alert, .b-nav__inc, .call__inc__dial").removeClass("open"); // скрываем кучу ненужных кнопок, окон, а также кнопки "разрешить"/"запретить"
             $(".b-nav").removeClass("close");	// открываем обратно стандартные кнопки навигации (если были скрыты при входящем звонке, к примеру)
             if ($("body").hasClass("video")) {
                 $(".b-video__video").addClass("open");
@@ -308,6 +306,11 @@ Phone.prototype.chatSelectTab = function (elem) {
     }
 };
 
+Phone.prototype.viewMessage = function(message){
+    $(".b-alert__error__message").html("<p>"+message + "</p>");
+    $(".b-alert__error").addClass("open");
+};
+
 Phone.prototype.chatCreateTab = function (chatUsername) {
     this.chatNames += '<p>' + chatUsername + '</p>';
     Flashphoner.getInstance().setCookie("chatNames", this.chatNames);
@@ -433,7 +436,7 @@ $(document).ready(function () {
         return false;
     });
     // изменение размеров окна видео
-    $(".b-video, .b-login, .b-alert__ban, .b-chat, .b-transfer").draggable();	// а ещё его можно таскать!
+    $(".b-video, .b-login, .b-alert__error, .b-chat, .b-transfer").draggable();	// а ещё его можно таскать!
     $(".b-video").resizable({
         minHeight: 240,
         minWidth: 320,
@@ -579,6 +582,11 @@ $(document).ready(function () {
             }
         }
     });
+
+    $(".b-alert__close").live("click", function () {
+        $(".b-alert__error").removeAttr("id");
+        $(".b-alert__error").removeClass("open");
+    });
     $(".b-chat__close").live("click", function () {	// клик на (Х) окна чата
         $(".b-nav__chat").removeClass("chat");
         $(".b-chat").removeAttr("id");
@@ -648,7 +656,7 @@ $(document).ready(function () {
         var chatUsername = $("#new__chat").val();
         phone.chatCreateTab(chatUsername);
     });
-    $(".b-video, .b-login, .b-chat, .b-alert__ban").mousedown(function () { // если нажали на какой-то всплывающий блок, он выходит на первое место
+    $(".b-video, .b-login, .b-chat, .b-alert__error").mousedown(function () { // если нажали на какой-то всплывающий блок, он выходит на первое место
         $("#active").removeAttr("id");
         $(this).attr("id", "active");
     });
