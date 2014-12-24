@@ -240,8 +240,11 @@ Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
 
     if (hasAccess) {
         if (MediaProvider.Flash == mediaProvider) {
-            $(".b-video").removeClass("open").removeAttr("id");
-            $(".b-video").draggable();
+            if ($(".b-video").hasClass("flash_access")) {
+                $(".b-video").removeClass("flash_access").draggable("enable").resizable("enable");
+                $(".b-video__flash").removeClass("access");
+                $(".b-video__flash_footer").removeClass("open").addClass("close");
+            }
         } else {
             $("body").removeClass("mike");
         }
@@ -252,12 +255,14 @@ Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
 
 Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
     if (MediaProvider.Flash == mediaProvider) {
-        $(".b-video").addClass("open").attr("id", "active");
+        $(".b-video").addClass("flash_access");
         $(".b-video").draggable("disable");
-        $(".b-video__flash").zIndex(1000);
-        $("#flashVideoDiv").css("position", "absolute");
+        $(".b-video").resizable("disable");
+        $(".b-video__flash").addClass("access");
+        $(".b-video__flash_footer").addClass("open");
+        $(".b-video__flash_footer").append("Please <span>allow</span> access to your web camera and microphone.");
         //check flash div dimensions
-        if ($("#flashVideoDiv").width() < 320 || $("#flashVideoDiv").height() < 240) {
+        if ($("#flashVideoDiv").width() < 215 || $("#flashVideoDiv").height() < 138) {
             console.log("Size of flashVideoDiv is to small, most likely there will be no Privacy dialog");
         }
     } else {
