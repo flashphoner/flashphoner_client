@@ -425,6 +425,7 @@ $(document).ready(function () {
     $(".b-display__header__video").live("click", function () {
         if ($(".b-video").hasClass("open")) {			// открываем/закрываем главное окно видео и меняем класс video у body
             $(".b-video").removeClass("open").removeAttr("id");
+            $(".b-video").removeAttr('style');
             $("body").removeClass("video");
         } else {
             $("#active").removeAttr("id");
@@ -438,7 +439,7 @@ $(document).ready(function () {
     // закрытие видео по клику на (Х)
     $(".b-video__close").live("click", function (e) {
         $(".b-video").removeClass("open").removeAttr("id");
-        return false;
+        $(".b-video").removeAttr('style');
     });
     // изменение размеров окна видео
     $(".b-video, .b-login, .b-alert__error, .b-chat, .b-transfer").draggable();	// а ещё его можно таскать!
