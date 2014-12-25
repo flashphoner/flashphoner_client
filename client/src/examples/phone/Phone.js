@@ -76,8 +76,8 @@ Phone.prototype.onCallListener = function (event) {
         }
         trace("Phone - It seems like a new call currentCall: " + this.currentCall.callId + " status: " + this.currentCall.status);
 
-        $("body").addClass("voice_call__inc");								// добавляем класс входящего вызова body
-        $(".b-nav").addClass("close");										// скрываем обычные чёрные кнопки и делаем видимы кнопки ответа на звонок
+        $("body").addClass("voice_call__inc");								// add incoming call class
+        $(".b-nav").addClass("close");										// hide black buttons and do 'answer call' buttons visible
         $(".b-nav__inc, .call__inc__dial").addClass("open");
         $(".call__inc__dial").addClass("open");
         if (call.incoming) {
@@ -103,33 +103,33 @@ Phone.prototype.callStatusListener = function (event) {
                 SoundControl.getInstance().stopSound("RING");
                 SoundControl.getInstance().playSound("FINISH");
 
-                $("body").removeAttr("class");								// стираем все классы у body
-                $(".voice_call__transfer").removeClass("tr_call__pause");	// обнуляем доп.стиль кнопки переадресации
-                $("#transfer").val("");										// стираем значение в окне переадресации, если есть
-                $(".call__out__dial").text("calling to");					// возвращаем исходный вид блока исходящего вызова (без номера/ника)
-                $(".b-nav__cancel_call span").text("Cancel");				// возвращаем исходное состояние кнопки
-                $(".b-mike, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // закрываем кучу блоков, которые по умолчанию скрыты
-                $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// открываем блоки, которые могли быть скрыты, но по умолчанию видимые
-                $(".b-alert").text("").removeClass("video_alert");	// исходный вид окна с алертом
-                $(".interlocutor2").text("");						// очищаем ник собеседника в окне вызова
-                $(".voice_call__stop").addClass("open");		// делаем видимыми кнопку паузы разговора и кнопку моделирования входящего звонка
+                $("body").removeAttr("class");								// remove all classes from the body
+                $(".voice_call__transfer").removeClass("tr_call__pause");	// remove additional style of the transfer button
+                $("#transfer").val("");										// remove value in the transfer field if the value is present
+                $(".call__out__dial").text("calling to");					// return to initial view of outgoing call (view without number or login name)
+                $(".b-nav__cancel_call span").text("Cancel");				// return to initial state of button
+                $(".b-mike, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // close set of blocks which are hidden by default
+                $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// open a set of blocks which might be hidden, but the blocks are visible by default
+                $(".b-alert").text("").removeClass("video_alert");	// initial view of video alert
+                $(".interlocutor2").text("");						// clear login name of callee in the call window
+                $(".voice_call__stop").addClass("open");		// do visible hold button
 
                 clearInterval(this.timerInterval);
                 this.timerInterval = null;
-                $(".b-time").html("<span class='b-min'>00</span>:<span class='b-sec'>00</span>");	// возвращаем вёрстку таймера на исходную
+                $(".b-time").html("<span class='b-min'>00</span>:<span class='b-sec'>00</span>");	// return timer to initial state
 
                 $(".b-volume").removeClass("open");
             }
         } else if (call.status == CallStatus.HOLD) {
             trace('Phone - ...Call on hold...');
-            $(".voice_call__call__pause").addClass("open");	// делаем видимой кнопку возврата к разговору и окно паузы
-            $(".voice_call__call__play").addClass("close");		// скрываем окно разгоора
-            $(".b-video").removeClass("open");					// скрываем видео (если есть)
-            $(".voice_call__transfer").addClass("tr_call__pause");	// добавляем класс кнопке трансфера, чтобы знать, куда потом, если что, возвращаться
+            $(".voice_call__call__pause").addClass("open");	// do visible button of unhold and call window with hold button
+            $(".voice_call__call__play").addClass("close");		// hide call view
+            $(".b-video").removeClass("open");					// hide video view (if exists)
+            $(".voice_call__transfer").addClass("tr_call__pause");	// add class for transfer button to know point of return
         } else if (call.status == CallStatus.ESTABLISHED) {
             trace('Phone - ...Talking...');
-            $(".b-alert, .b-nav__inc, .call__inc__dial").removeClass("open"); // скрываем кучу ненужных кнопок, окон, а также кнопки "разрешить"/"запретить"
-            $(".b-nav").removeClass("close");	// открываем обратно стандартные кнопки навигации (если были скрыты при входящем звонке, к примеру)
+            $(".b-alert, .b-nav__inc, .call__inc__dial").removeClass("open"); // hide a set of buttons and buttons allow/deny
+            $(".b-nav").removeClass("close");	// re-open default navigation buttons (i.e. if the buttons was hidden while an incoming call)
             if ($("body").hasClass("video")) {
                 $(".b-video__video").addClass("open");
                 $(".b-video, .hook").addClass("open");
@@ -137,26 +137,26 @@ Phone.prototype.callStatusListener = function (event) {
                 $(".hook").addClass("open");
             }
 
-            $(".b-nav__cancel_call span").text("Hangup");	// меняем текст кнопки отмены
-            if ($("body").hasClass("voice_call__inc")) {	// если это входящий звонок
-                $(".voice_call__call").addClass("open");	//открываем окно с разговором
+            $(".b-nav__cancel_call span").text("Hangup");	// change text of "Cancel" button
+            if ($("body").hasClass("voice_call__inc")) {	// if the call is incoming
+                $(".voice_call__call").addClass("open");	// open talk view
                 if (call.incoming) {
                     $(".interlocutor2").text(call.caller);
                 } else {
                     $(".interlocutor2").text(call.callee);
                 }
             } else {
-                $(".call__out__dial").removeClass("open");	// скрываем окно вызова
-                $(".voice_call__call").addClass("open");	// открываем окно разговора
-                $(".b-nav__cancel_call span").text("Hangup");	// меняем текст красной кнопки
-                $(".interlocutor2").text($(".b-numbers").val());	//указываем номер собеседника в окне разговора (или что угодно, что нужно вставить)
-                $(this).removeClass("open");														// скрываем кнопку приёма вызова (удалить при программировании)
+                $(".call__out__dial").removeClass("open");	// hide call view
+                $(".voice_call__call").addClass("open");	// open talk view
+                $(".b-nav__cancel_call span").text("Hangup");	// change text for Hangup button
+                $(".interlocutor2").text($(".b-numbers").val());	// set number of callee in the talk view
+                $(this).removeClass("open");														// hide 'Answer' button
             }
             this.startTimer();
 
-            $(".voice_call__call__pause").removeClass("open");	// скрываем окно паузы и окно переадресации (если было открыто)
-            $(".voice_call__call__play").removeClass("close");				// открываем окно разговора
-            $(".voice_call__transfer").removeClass("tr_call__pause");		// удаляем класс у кнопки трансфера (если этот класс есть, то после отмены переадресции
+            $(".voice_call__call__pause").removeClass("open");	// hide hold view and transfer view (if the views was opened)
+            $(".voice_call__call__play").removeClass("close");				// open talk view
+            $(".voice_call__transfer").removeClass("tr_call__pause");		// remove class from the transfer button (if the class exists, then after transfer cancellation)
 
             SoundControl.getInstance().stopSound("RING");
         } else if (call.status == CallStatus.RING) {
@@ -273,7 +273,7 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
 };
 
 
-// функция отсчёта времени
+// talk timer
 Phone.prototype.startTimer = function () {
     var me = this;
     if (!me.timerInterval) {
@@ -296,12 +296,12 @@ Phone.prototype.startTimer = function () {
 };
 
 Phone.prototype.chatSelectTab = function (elem) {
-    if (!elem.hasClass("open")) {												// если таб не активен
-        this.elem_prev = $(".b-chat__nav__tab.open").attr("id");						// сохраняем id предыдущего таба
+    if (!elem.hasClass("open")) {												// if the tab is inactive
+        this.elem_prev = $(".b-chat__nav__tab.open").attr("id");						// save id of previous tab
         $(".b-chat__nav__tab.open, .b-chat_tab.open, .b-chat__new__nav, .b-chat__new__list, .b-chat__nav__tab#new, .b-chat_tab.new").removeClass("open");
-        elem.addClass("open");													// делаем таб и его содержимое видимым
+        elem.addClass("open");													// do tab and its content visible
         $(".b-chat_tab." + elem.attr("id")).addClass("open");
-        $(".b-chat_tab.open .b-chat__window").mCustomScrollbar({				// инициализируем скроллбар
+        $(".b-chat_tab.open .b-chat__window").mCustomScrollbar({				// init scroll-bar
             scrollInertia: 50,
             scrollButtons: {
                 enable: false
@@ -322,11 +322,11 @@ Phone.prototype.chatCreateTab = function (chatUsername) {
     $('.b-chat__new__list .mCSB_container').html(this.chatNames);
 
     $(".b-chat__nav__tab.open, .b-chat_tab.open, .b-chat__new__nav, .b-chat__new__list, .b-chat__nav__tab#new, .b-chat_tab.new").removeClass("open");
-    $("#new__chat").val("");								// очищаем окно поиска
-    $(".b-chat__nav__tab#new").before('<div class="b-chat__nav__tab open" id="tab_' + chatUsername + '"><span class="tab_text">' + chatUsername + '</span><span class="tab_close"></span></div>'); // id табам задаётся якобы автоматически, но лучше id как-то генерировать независимо от числа табов, иначе может получиться 2 таба с одним id. Проще это пресечь сразу, чем делать 100 проверок при создании таба ИМХО
+    $("#new__chat").val("");								// clear search view
+    $(".b-chat__nav__tab#new").before('<div class="b-chat__nav__tab open" id="tab_' + chatUsername + '"><span class="tab_text">' + chatUsername + '</span><span class="tab_close"></span></div>'); //tab id is username
     $(".b-chat__new__list p.active").removeClass("active");
     $(".b-chat_tab.new").before('<div class="b-chat_tab open ' + $(".b-chat__nav__tab.open").attr("id") + '"><div class="b-chat__window mCustomScrollbar"></div><div class="b-chat__text"><textarea></textarea><input type="button" value="send" /></div></div>');
-    $(".b-chat_tab.open .b-chat__window").mCustomScrollbar({ // если вдруг будет загрузка истории, инициализируем скроллбар
+    $(".b-chat_tab.open .b-chat__window").mCustomScrollbar({ // init scroll-bar if we load a history
         scrollInertia: 50,
         scrollButtons: {
             enable: false
@@ -361,7 +361,7 @@ $(document).ready(function () {
         $(this).text() == "send video" ? $(this).text("stop video") : $(this).text("send video");
     });
 
-    // открываем/закрываем окно авторизации
+    // open/close authentication view
     $(".b-display__header__login, .b-login__cancel").live("click", function () {
         if (phone.connectionStatus == ConnectionStatus.Established || phone.connectionStatus == ConnectionStatus.Registered) {
             phone.disconnect();
@@ -379,20 +379,20 @@ $(document).ready(function () {
         }
     });
 
-    // авторизация
+    // authentication
     $(".b-login input[type='button']").live("click", function () {
         $(".b-display__header__login").html("Connecting");
         $(".b-login").removeClass("open").removeAttr("id");
         phone.connect();
     });
 
-    // открываем/закрываем громкость
+    // open/close microphone gain control
     $(".b-display__header__volume").live("click", function () {
         if (phone.currentCall) {
             $(".b-volume").hasClass("open") ? $(".b-volume").removeClass("open") : $(".b-volume").addClass("open");
         }
     });
-    // регулятор громкости
+    // open/close loudspeaker control
     $("#volume").slider({
         value: 60,
         orientation: "horizontal",
@@ -403,10 +403,10 @@ $(document).ready(function () {
             Flashphoner.getInstance().setVolume(phone.currentCall, ui.value);
         }
     });
-    // вывод уровня громкости около регулятора
+    // digital value of loudspeaker volume
     $(".volume-percent").html($("#volume").slider("value") + "%");
 
-    // всё то же самое с микрофоном
+    // digital value of microphone gain
     $(".b-display__header__mike").live("click", function () {
         $(".b-mike").hasClass("open") ? $(".b-mike").removeClass("open") : $(".b-mike").addClass("open");
     });
@@ -421,9 +421,9 @@ $(document).ready(function () {
     });
     $(".mike-percent").html($("#volume").slider("value") + "%");
 
-    // клик на значок видео в "шапке"
+    // on click "Video" icon in the top menu
     $(".b-display__header__video").live("click", function () {
-        if ($(".b-video").hasClass("open")) {			// открываем/закрываем главное окно видео и меняем класс video у body
+        if ($(".b-video").hasClass("open")) {			// open/close main video view and change class video for body
             $(".b-video").removeClass("open").removeAttr("id");
             $(".b-video").removeAttr('style');
             $("body").removeClass("video");
@@ -434,33 +434,33 @@ $(document).ready(function () {
         }
         if ($(".voice_call__call").hasClass("open")) {
             $(".b-video__video").addClass("open");
-        }// если идёт разговор, выводим картинку собеседника
+        }// if the call in talking state - do callee video visible
     });
-    // закрытие видео по клику на (Х)
+    // close video upon (Х) click
     $(".b-video__close").live("click", function (e) {
         $(".b-video").removeClass("open").removeAttr("id");
         $(".b-video").removeAttr('style');
     });
-    // изменение размеров окна видео
-    $(".b-video, .b-login, .b-alert__error, .b-chat, .b-transfer").draggable();	// а ещё его можно таскать!
+    // change video view dimensions
+    $(".b-video, .b-login, .b-alert__error, .b-chat, .b-transfer").draggable();	// set video view draggable
     $(".b-video").resizable({
         minHeight: 240,
         minWidth: 320,
         aspectRatio: 4 / 3
     });
 
-    // ввод номера телефона
-    $(".b-display__bottom__number>span").live("click", function () { // кликнули на надпись "Enter your number here"
+    // enter phone number
+    $(".b-display__bottom__number>span").live("click", function () { // on click by 'Enter your number here'
         if (phone.connectionStatus == ConnectionStatus.Established || phone.connectionStatus == ConnectionStatus.Registered) {
             $(this).addClass("close");
             $(".b-numbers__clear").addClass("open");
             $(".b-numbers").addClass("write").focus();
         }
     });
-    $(document).keyup(function (event) {								//отслеживаем ввод с клавиатуры
-        if (($(".b-numbers").is(":focus")) && (event.keyCode == 8)) {	// если фокус на вводе номера и нажат Backspace
-            num = $(".b-numbers").val().length;						// смотрим количество символов в поле, оставшееся после удаления символа
-            if (num == 0) {											// если удалили последнюю цифру, возвращаемся в исходную позицию
+    $(document).keyup(function (event) {								// listening keyboard input
+        if (($(".b-numbers").is(":focus")) && (event.keyCode == 8)) {	// if the focus on the number field and Backspace is pressed
+            num = $(".b-numbers").val().length;						// check number of symbols in the field which remain after the symbol removing
+            if (num == 0) {											// if the latest digit was removed then return to initial position
                 $(".b-numbers__clear").removeClass("open");
                 $(".b-numbers").removeClass("write");
                 $(".b-display__bottom__number>span").removeClass("close");
@@ -469,7 +469,7 @@ $(document).ready(function () {
     });
     $(".b-num td").live("click", function () {
         if (phone.connectionStatus == ConnectionStatus.Established || phone.connectionStatus == ConnectionStatus.Registered) {
-            if (!$(".b-numbers").hasClass("write")) {	// если введены символы, убирием блок с надписью
+            if (!$(".b-numbers").hasClass("write")) {	// if the symbols are entered then remove the text block
                 $(".b-display__bottom__number>span").addClass("close");
                 $(".b-numbers").addClass("write").next().addClass("open");
             }
@@ -485,25 +485,25 @@ $(document).ready(function () {
             }
         }
     });
-    // удаление символов
+    // removing of symbols
     $(".b-numbers__clear").live("click", function () {
         $(".b-numbers").val($(".b-numbers").val().substring(0, $(".b-numbers").val().length - 1));
         num = $(".b-numbers").val().length;
-        if (num == 0) {	// если удалили последнюю цифру, возвращаемся в исходную позицию
+        if (num == 0) {	// if the latest digit was removed then return to initial position
             $(this).removeClass("open");
             $(".b-numbers").removeClass("write");
             $(".b-display__bottom__number>span").removeClass("close");
         }
     });
 
-    // делаем видео или аудиовызов
+    // do video and audio call
     $(".b-nav__voice, .b-nav__video").live("click", function () {
-        if ($(".b-numbers").hasClass("write")) {  // проверяем, введёт ли номер телефона
+        if ($(".b-numbers").hasClass("write")) {  // check if phone number was entered
             $("body").addClass("voice_call__out");
-            $(".call__out__dial").addClass("open").html($(".call__out__dial").html() + " " + $(".b-numbers").val());	// открываем блок дозвона и прописываем туда номер телефона, на который звоним
+            $(".call__out__dial").addClass("open").html($(".call__out__dial").html() + " " + $(".b-numbers").val());	// open outgoing call block and writ here callee number
             if ($(this).hasClass("b-nav__video")) {
                 $("body").addClass("video")
-            } // если это видеозвонок, добавляем класс body (нужно для отображение алерта)
+            } // if it is a video call then add the body class (for alert view)
 
             var mediaProvider = MediaProvider.Flash;
             if (Flashphoner.getInstance().mediaProviders.get(MediaProvider.WebRTC)) {
@@ -519,9 +519,9 @@ $(document).ready(function () {
         }
     });
 
-    // отвечаем на входящий звонок
+    // answer the incoming call
     $(".b-nav__answer, .b-nav__answer_video").live("click", function () {
-        if ($(this).hasClass("b-nav__answer_video")) {	// если видеозвонок, открываем окно с видео
+        if ($(this).hasClass("b-nav__answer_video")) {	// if it is a video call then open view with video
             $("body").addClass("video");
         }
         if (phone.currentCall) {
@@ -529,29 +529,29 @@ $(document).ready(function () {
         }
     });
 
-    $(".voice_call__stop").live("click", function () {	// если разговор на паузе
+    $(".voice_call__stop").live("click", function () {	// if the call is on hold
         if (phone.currentCall) {
             phone.hold(phone.currentCall);
-            $(this).removeClass("open");					// скрываем кнопку паузы
-            $(".voice_call__play").addClass("open");	// делаем видимой кнопку возврата к разговору и окно паузы
+            $(this).removeClass("open");					// hide the hold button
+            $(".voice_call__play").addClass("open");	// do visible button of returning to the call and hold view
         }
     });
 
-    $(".voice_call__play").live("click", function () {	// вернулись к разговору
+    $(".voice_call__play").live("click", function () {	// return to talk
         if (phone.currentCall) {
             phone.unhold(phone.currentCall);
-            $(this).removeClass("open");					// скрыли кнопку Play
-            $(".voice_call__stop").addClass("open");						// делаем видимой кнопку паузы звонка
+            $(this).removeClass("open");					// hide unhold button
+            $(".voice_call__stop").addClass("open");						// do visible hold button
         }
     });
 
-    $(".voice_call__transfer").live("click", function () {							// если нажали кнопку переадресации
+    $(".voice_call__transfer").live("click", function () {							// if the transfer button is pressed
         if (phone.currentCall) {
             phone.hold(phone.currentCall);
-            $(".voice_call__transfer").addClass("close");		// скрываем кнопку переадресции
-            $(".b-transfer").addClass("open");				// открываем окно переадресации и окно паузы
+            $(".voice_call__transfer").addClass("close");		// hide transfer button
+            $(".b-transfer").addClass("open");				// open transfer view and hold view
             $(".b-transfer").attr("id", "active");
-            $("#transfer").focus();														// ставим фокус на поле с вводом номера
+            $("#transfer").focus();														// set focus on the phone number field
         }
     });
 
@@ -572,16 +572,16 @@ $(document).ready(function () {
 
     });
 
-    $(".b-nav__chat").live("click", function () {									// при клике на кнопку чата
+    $(".b-nav__chat").live("click", function () {									// on "Chat" button click
         if (phone.connectionStatus == ConnectionStatus.Established || phone.connectionStatus == ConnectionStatus.Registered) {
             $('.b-chat__new__list .mCSB_container').html(phone.chatNames);
-            if (!$(this).hasClass("chat")) {										// если у кнопки нет класса chat, значит, окно чата закрыто
-                $(this).addClass("chat");										// добавляем класс chat
-                $(".b-chat").addClass("open");						// открываем окно чата и добавляем кнопку входящего сообщения
+            if (!$(this).hasClass("chat")) {										// if the button does not have the chat class then the chat view is closed
+                $(this).addClass("chat");										// add chat class
+                $(".b-chat").addClass("open");						// open the chat window and add button of incoming call
                 $(".b-chat").attr("id", "active");
-                $(".b-chat_tab.open .b-chat__window").mCustomScrollbar();		// активируем стилизацию скроллбара открытого окна
+                $(".b-chat_tab.open .b-chat__window").mCustomScrollbar();		// activate styles of scroll-bar of the open chat window
                 phone.chatScrollDown();
-            } else {															// если чат открыт, закрываем его и удаляем класс чата у кнопки
+            } else {															// if the chat is open then close it and remove the chat class from button
                 $(this).removeClass("chat");
                 $(".b-chat").removeAttr("id");
                 $(".b-chat").removeClass("open");
@@ -593,39 +593,39 @@ $(document).ready(function () {
         $(".b-alert__error").removeAttr("id");
         $(".b-alert__error").removeClass("open");
     });
-    $(".b-chat__close").live("click", function () {	// клик на (Х) окна чата
+    $(".b-chat__close").live("click", function () {	// on close click (Х) on the chat view
         $(".b-nav__chat").removeClass("chat");
         $(".b-chat").removeAttr("id");
         $(".b-chat").removeClass("open");
     });
 
-    $(".b-chat__nav__tab .tab_close").live("click", function () {	// нажали на крестик таба
+    $(".b-chat__nav__tab .tab_close").live("click", function () {	// on close click (X) on the chat tab
         var elem = $(this).parent();
-        if (elem.attr("id") == "new") {										// если это таб нового окна, его закрывать фу
-            $("#" + phone.elem_prev + ", .b-chat_tab." + phone.elem_prev).addClass("open");	// делаем активным предыдущий
-            elem.removeClass("open");										// а этот просто скрываем вместе с содержимым
+        if (elem.attr("id") == "new") {										// do not close the tab if the tab belongs to a new chat window
+            $("#" + phone.elem_prev + ", .b-chat_tab." + phone.elem_prev).addClass("open");	// do previous tab active
+            elem.removeClass("open");										// hide this tab with its content
             $(".b-chat_tab." + elem.attr("id")).removeClass("open");
             phone.chatScrollDown();
         } else {
-            if (elem.hasClass("open")) {						// если таб открыт
-                if (elem.index() > 0) {									// и если это не первый элемент
-                    elem.prev().addClass("open");					// делаем активным предыдущий таб и его содержимое
+            if (elem.hasClass("open")) {						// if the tab is open
+                if (elem.index() > 0) {									// and if the element is not first element
+                    elem.prev().addClass("open");					// do active previous tab and its content
                     $("." + elem.prev().attr("id")).addClass("open");
-                } else {											// если таб первый, то активным становится следующий
+                } else {											// if the tab is first then do active next tab
                     elem.next().addClass("open");
                     $("." + elem.next().attr("id")).addClass("open");
                 }
             }
-            elem.remove();											// закрываем таб и его содержимое
+            elem.remove();											// close the tab and its content
             $(".b-chat_tab." + elem.attr("id")).remove();
         }
     });
-    $(".b-chat").resizable({	// изменение размера окна чата
+    $(".b-chat").resizable({	// change chat window dimensions
         minHeight: 395,
         minWidth: 500
     });
 
-    $(".b-chat__text input").live("click", function () {	// при клике на "Отправить" в чате
+    $(".b-chat__text input").live("click", function () {	// on click "Send" in the chat
         var body = $(this).prev().val().replace(/\n/g, "<br />");
         var message = new Message();
         message.to = $(".b-chat__nav__tab.open span.tab_text").html();
@@ -634,40 +634,40 @@ $(document).ready(function () {
 
         $('<div id="message_' + message.id + '" class="b-chat__message my_message"><div class="b-chat__message__head"><span class="b-chat__message__time">' + new Date().toLocaleString() + '</span><span class="b-chat__message__author">' + $("input[id='sipLogin']").val() + '</span></div><div class="b-chat__message__text">' + body + '</div></div>').appendTo($(".mCSB_container", $(this).parent().prev()));
         phone.chatScrollDown();
-        $(this).prev().val(""); // очищаем textarea
+        $(this).prev().val(""); // clear the textarea
     });
 
-    $(".b-chat__nav__tab .tab_text").live("click", function () {						// при клике на таб
+    $(".b-chat__nav__tab .tab_text").live("click", function () {						// on tab click
         var elem = $(this).parent();
         phone.chatSelectTab(elem);
     });
 
-    $("#new__chat").keyup(function () {			// вводим ники
+    $("#new__chat").keyup(function () {			// enter username from keyboard
         $(".b-chat__new__list").addClass("open");
-        $(".b-chat__new__nav").addClass("open");	// делаем активными кнопки под списком
+        $(".b-chat__new__nav").addClass("open");	// do active buttons under the list
     });
-    $(".b-chat__new__list p").live("click", function () {			// при клике на ник, выбираем его (я тебя запомнил)
+    $(".b-chat__new__list p").live("click", function () {			// on click by username select its name
         $(".b-chat__new__list p.active").removeClass("active");
         $(this).addClass("active");
         $("#new__chat").val($(this).html());
     });
-    $(".b-chat__new__cancel").live("click", function () {		// при клике на отмену во время поиска собеседник
-        $(".b-chat__new__list p.active").removeClass("active");	// снимаем активый класс с выбранного ранее ника (если таковой был)
-        $("#new__chat").val("");								// очищаем поле поиска
-        $(".b-chat__new__nav, .b-chat__new__list, .b-chat__nav__tab#new, .b-chat_tab.new").removeClass("open");	// скрываем всё (список, кнопки, вкладку)
-        $("#" + phone.elem_prev + ", .b-chat_tab." + phone.elem_prev).addClass("open");	// делаем активным сохранённый ранее таб
+    $(".b-chat__new__cancel").live("click", function () {		// on click "Cancel" while search of callee name
+        $(".b-chat__new__list p.active").removeClass("active");	// remove active class from the selected username (if the username exists)
+        $("#new__chat").val("");								// clear the search field
+        $(".b-chat__new__nav, .b-chat__new__list, .b-chat__nav__tab#new, .b-chat_tab.new").removeClass("open");	// hide all(list, buttons, the tab)
+        $("#" + phone.elem_prev + ", .b-chat_tab." + phone.elem_prev).addClass("open");	// do active the tab previously saved
         phone.chatScrollDown();
     });
-    $(".b-chat__new__ok").live("click", function () {				// выбрали ник для нового диалогового окна
+    $(".b-chat__new__ok").live("click", function () {				// selected username for the new chat tab
         var chatUsername = $("#new__chat").val();
         phone.chatCreateTab(chatUsername);
     });
-    $(".b-video, .b-login, .b-chat, .b-alert__error").mousedown(function () { // если нажали на какой-то всплывающий блок, он выходит на первое место
+    $(".b-video, .b-login, .b-chat, .b-alert__error").mousedown(function () { // if we pressed on a popup block then the block is bringing to forward
         $("#active").removeAttr("id");
         $(this).attr("id", "active");
     });
 
-    $(".b-nav__cancel_call, .close, .b-nav__hangup").live("click", function () {	// возвращаемся на исходный экран из разных позиций
+    $(".b-nav__cancel_call, .close, .b-nav__hangup").live("click", function () {	// return to initial view
         if (phone.currentCall) {
             phone.hangup(phone.currentCall);
         }
