@@ -460,8 +460,10 @@ Flashphoner.prototype = {
     connect: function (connection) {
         var me = this;
         me.connection = connection;
-        me.connection.sipRegisterRequired = me.connection.sipRegisterRequired || me.configuration.sipRegisterRequired;
-        me.connection.sipContactParams = me.connection.sipContactParams || me.configuration.sipContactParams;
+        if (me.connection.sipRegisterRequired == undefined) {
+            me.connection.sipRegisterRequired = me.configuration.sipRegisterRequired;
+        }
+        me.connection.sipContactParams = me.connection.sipContactParams | me.configuration.sipContactParams;
         me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
         me.connection.urlServer = me.connection.urlServer || me.configuration.urlWsServer;
         //workaround for old Safari (5.X)
