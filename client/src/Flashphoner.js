@@ -96,13 +96,13 @@ Flashphoner.prototype = {
                     to.play();
                 };
 
-                MediaStream.prototype.getVideoTracks = function () {
-                    return [];
-                };
-
-                MediaStream.prototype.getAudioTracks = function () {
-                    return [];
-                };
+                //MediaStream.prototype.getVideoTracks = function () {
+                //    return [];
+                //};
+                //
+                //MediaStream.prototype.getAudioTracks = function () {
+                //    return [];
+                //};
             }
         } else if (navigator.webkitGetUserMedia) {
             trace("This appears to be Chrome");
@@ -129,17 +129,17 @@ Flashphoner.prototype = {
                     element.play();
                 };
 
-                if (!webkitMediaStream.prototype.getVideoTracks) {
-                    webkitMediaStream.prototype.getVideoTracks = function () {
-                        return this.videoTracks;
-                    };
-                }
-
-                if (!webkitMediaStream.prototype.getAudioTracks) {
-                    webkitMediaStream.prototype.getAudioTracks = function () {
-                        return this.audioTracks;
-                    };
-                }
+                //if (!webkitMediaStream.prototype.getVideoTracks) {
+                //    webkitMediaStream.prototype.getVideoTracks = function () {
+                //        return this.videoTracks;
+                //    };
+                //}
+                //
+                //if (!webkitMediaStream.prototype.getAudioTracks) {
+                //    webkitMediaStream.prototype.getAudioTracks = function () {
+                //        return this.audioTracks;
+                //    };
+                //}
             }
         } else {
             trace("Browser does not appear to be WebRTC-capable");
@@ -1135,9 +1135,22 @@ WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, has
             trace("peerConnection is null");
             me.createPeerConnection();
             if (hasAudio && hasVideo) {
+                if (me.webRtcMediaManager.videoTrack){
+                    me.webRtcMediaManager.localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
+                    me.webRtcMediaManager.videoTrack = null;
+                }
                 me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
             } else if (hasAudio) {
-                me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
+                if (me.webRtcMediaManager.localAudioStream){
+                    me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
+                } else {
+                    var localAudioVideoStream = me.webRtcMediaManager.localAudioVideoStream;
+                    if (localAudioVideoStream.getVideoTracks().length > 0){
+                        me.webRtcMediaManager.videoTrack = localAudioVideoStream.getVideoTracks()[0];
+                        localAudioVideoStream.removeTrack(me.webRtcMediaManager.videoTrack);
+                    }
+                    me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
+                }
             } else {
                 if (receiveVideo == undefined) {
                     receiveVideo = true;
@@ -1169,9 +1182,22 @@ WebRtcMediaConnection.prototype.createAnswer = function (createAnswerCallback, h
         if (me.peerConnection == null) {
             me.createPeerConnection();
             if (hasVideo) {
+                if (me.webRtcMediaManager.videoTrack){
+                    me.webRtcMediaManager.localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
+                    me.webRtcMediaManager.videoTrack = null;
+                }
                 me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
             } else {
-                me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
+                if (me.webRtcMediaManager.localAudioStream){
+                    me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
+                } else {
+                    var localAudioVideoStream = me.webRtcMediaManager.localAudioVideoStream;
+                    if (localAudioVideoStream.getVideoTracks().length > 0){
+                        me.webRtcMediaManager.videoTrack = localAudioVideoStream.getVideoTracks()[0];
+                        localAudioVideoStream.removeTrack(me.webRtcMediaManager.videoTrack);
+                    }
+                    me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
+                }
             }
         }
         me.createAnswerCallback = createAnswerCallback;
