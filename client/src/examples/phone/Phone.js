@@ -103,17 +103,13 @@ Phone.prototype.callStatusListener = function (event) {
                 SoundControl.getInstance().stopSound("RING");
                 SoundControl.getInstance().playSound("FINISH");
 
-                $("body").removeAttr("class");								// remove all classes from the body
                 $(".voice_call__transfer").removeClass("tr_call__pause");	// remove additional style of the transfer button
                 $("#transfer").val("");										// remove value in the transfer field if the value is present
-                $(".call__out__dial").text("calling to");					// return to initial view of outgoing call (view without number or login name)
                 $(".b-nav__cancel_call span").text("Cancel");				// return to initial state of button
-                $(".b-mike, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // close set of blocks which are hidden by default
-                $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// open a set of blocks which might be hidden, but the blocks are visible by default
-                $(".b-alert").text("").removeClass("video_alert");	// initial view of video alert
                 $(".interlocutor2").text("");						// clear login name of callee in the call window
                 $(".voice_call__stop").addClass("open");		// do visible hold button
 
+                this.cancel();
                 clearInterval(this.timerInterval);
                 this.timerInterval = null;
                 $(".b-time").html("<span class='b-min'>00</span>:<span class='b-sec'>00</span>");	// return timer to initial state
@@ -183,6 +179,20 @@ Phone.prototype.callStatusListener = function (event) {
     }
 };
 
+Phone.prototype.cancel = function(){
+    $(".call__out__dial").text("calling to");					// return to initial view of outgoing call (view without number or login name)
+    $("body").removeAttr("class");								// remove all classes from the body
+    $(".b-mike, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // close set of blocks which are hidden by default
+    $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// open a set of blocks which might be hidden, but the blocks are visible by default
+    $(".b-alert").text("").removeClass("video_alert");	// initial view of video alert
+
+    if ($(".b-video").hasClass("flash_access")) {
+        $(".b-video").removeClass("flash_access").draggable("enable").resizable("enable");
+        $(".b-video__flash").removeClass("access");
+        $(".b-video__flash_footer").removeClass("open");
+    }
+};
+
 Phone.prototype.messageStatusListener = function (event) {
     var message = event;
     trace("Phone - messageStatusListener id = " + message.id + " status = " + message.status);
@@ -241,7 +251,7 @@ Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
             if ($(".b-video").hasClass("flash_access")) {
                 $(".b-video").removeClass("flash_access").draggable("enable").resizable("enable");
                 $(".b-video__flash").removeClass("access");
-                $(".b-video__flash_footer").removeClass("open").addClass("close");
+                $(".b-video__flash_footer").removeClass("open");
             }
         } else {
             $("body").removeClass("mike");
@@ -258,7 +268,7 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
         $(".b-video").resizable("disable");
         $(".b-video__flash").addClass("access");
         $(".b-video__flash_footer").addClass("open");
-        $(".b-video__flash_footer").append("Please <span>allow</span> access to your web camera and microphone.");
+        $(".b-video__flash_footer").html("Please <span>allow</span> access to your web camera and microphone.");
         //check flash div dimensions
         if ($("#flashVideoDiv").width() < 215 || $("#flashVideoDiv").height() < 138) {
             console.log("Size of flashVideoDiv is to small, most likely there will be no Privacy dialog");
@@ -670,6 +680,8 @@ $(document).ready(function () {
     $(".b-nav__cancel_call, .close, .b-nav__hangup").live("click", function () {	// return to initial view
         if (phone.currentCall) {
             phone.hangup(phone.currentCall);
+        } else {
+            phone.cancel();
         }
     });
 });
