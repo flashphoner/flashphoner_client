@@ -59,13 +59,15 @@ This code and accompanying materials also available under LGPL and MPL license f
 			}
 			
 			public function getAccessToAudio():void{
+				Logger.info("getAccessToAudio");
 				if (!flashAPI.hasAccessToAudio()){
 					var mic:Microphone = flashAPI.getMicrophone();
-					mic.setLoopBack(true);
-					Logger.info("getAccessToAudio");
 					mic.addEventListener(StatusEvent.STATUS, onMicrophoneStatus);
+					mic.setLoopBack(true);
 					videoPartner.visible = false;
 					videoMy.visible = false;
+					timer.addEventListener(TimerEvent.TIMER, timerTick);
+					timer.start();					
 				}
 			}
 			
@@ -73,15 +75,20 @@ This code and accompanying materials also available under LGPL and MPL license f
 				getAccessToAudio();
 			}
 			
-			private function onMicrophoneStatus(event:StatusEvent):void {
-				Logger.info("onMicrophoneStatus " + event.code);
-				if (event.code == "Microphone.Unmuted") {
+			private function timerTick(event:TimerEvent):void{
+				if (flashAPI.hasAccessToAudio()){
+					timer.stop();
 					var mic:Microphone = flashAPI.getMicrophone();
 					mic.setLoopBack(false);
 					videoMy.attachCamera(flashAPI.videoControl.getCam());
 					videoPartner.visible = true;
 					videoMy.visible = true;
+					
 				}
+			}			
+			
+			private function onMicrophoneStatus(event:StatusEvent):void {
+				Logger.info("onMicrophoneStatus " + event.code);
 			}
 			
 			public function changeRelationMyVideo(relation:Number):void{
@@ -92,10 +99,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 	<!--
 	<mx:TextArea id="messageAccess" editable="false" text="To do that, you should allow the camera and microphone. Open Security Panel and allow access to devices." width="185" height="96" fontSize="12" textAlign="center" x="10" y="13" borderThickness="0"/>
 	-->
-<!--	<mx:Button x="50" y="65" width="200" height="26" label="Allow devices for flash" borderColor="#000000"
-			   click="getAccessToAudio()" color="#CCCCCC" cornerRadius="4" fillAlphas="[1.0, 1.0]"
-			   fillColors="[#444444, #555555]" fontFamily="Georgia" fontSize="12" textAlign="center"/>-->
 	<mx:Canvas id="videoPartner" visible="false" width="100%" height="100%" x="0" backgroundColor="black" y="0"/>
-	<mx:VideoDisplay id="videoMy" visible="false" left="0" top="0" width="25%"
+	<mx:VideoDisplay id="videoMy" visible="false" left="0" top="0" width="25%" backgroundColor="white"
 					 height="{videoMy.width*relationMyVideo}"/>
 </mx:Application>

@@ -186,11 +186,7 @@ Phone.prototype.cancel = function(){
     $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// open a set of blocks which might be hidden, but the blocks are visible by default
     $(".b-alert").text("").removeClass("video_alert");	// initial view of video alert
 
-    if ($(".b-video").hasClass("flash_access")) {
-        $(".b-video").removeClass("flash_access").draggable("enable").resizable("enable");
-        $(".b-video__flash").removeClass("access");
-        $(".b-video__flash_footer").removeClass("open");
-    }
+    this.hideFlashAccess();
 };
 
 Phone.prototype.messageStatusListener = function (event) {
@@ -243,17 +239,22 @@ Phone.prototype.onMessageListener = function (event) {
     this.chatScrollDown();
 };
 
+Phone.prototype.hideFlashAccess = function(){
+    if ($(".b-video").hasClass("flash_access")) {
+        $(".b-video").removeClass("flash_access").resizable("enable");
+        $(".b-video__flash").removeClass("access");
+        $(".b-video__flash_footer").removeClass("open");
+    }
+};
+
 Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
     var hasAccess = Flashphoner.getInstance().hasAccess(mediaProvider, hasVideo);
 
     if (hasAccess) {
         if (MediaProvider.Flash == mediaProvider) {
-            if ($(".b-video").hasClass("flash_access")) {
-                $(".b-video").removeClass("flash_access").draggable("enable").resizable("enable");
-                $(".b-video__flash").removeClass("access");
-                $(".b-video__flash_footer").removeClass("open");
-            }
+            this.hideFlashAccess();
         } else {
+            $(".b-video").draggable("enable");
             $("body").removeClass("mike");
         }
     }
@@ -275,11 +276,46 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
         }
     } else {
         //hide flash div
+        $(".b-video").draggable("enable");
         $(".b-video__flash").zIndex(0);
         hasVideo ? $(".b-alert").html("Please <span>allow</span> access to your web camera and microphone.") : $(".b-alert").html("please <span>allow</span> access to audio device");
         $("body").addClass("mike");
     }
     return Flashphoner.getInstance().getAccess(mediaProvider, hasVideo);
+};
+
+Phone.prototype.openVideoView = function (){
+    var me = this;
+    var mediaProvider = MediaProvider.Flash;
+    if (Flashphoner.getInstance().mediaProviders.get(MediaProvider.WebRTC)) {
+        mediaProvider = MediaProvider.WebRTC;
+    }
+    if (!me.hasAccess(mediaProvider, true)) {
+        if (me.intervalId == -1) {
+            var checkAccessFunc = function () {
+                if (me.hasAccess(mediaProvider, true)) {
+                    clearInterval(me.intervalId);
+                    me.intervalId = -1;
+                    me.openVideoView();
+                }
+            };
+            me.intervalId = setInterval(checkAccessFunc, 500);
+        }
+        me.getAccess(mediaProvider, true);
+    } else {
+        if ($(".b-video").hasClass("open")) {			// open/close main video view and change class video for body
+            $(".b-video").removeClass("open").removeAttr("id");
+            $(".b-video").removeAttr('style');
+            $("body").removeClass("video");
+        } else {
+            $("#active").removeAttr("id");
+            $(".b-video").addClass("open").attr("id", "active");
+            $("body").addClass("video");
+        }
+        if ($(".voice_call__call").hasClass("open")) {
+            $(".b-video__video").addClass("open");
+        }
+    }
 };
 
 
@@ -433,18 +469,7 @@ $(document).ready(function () {
 
     // on click "Video" icon in the top menu
     $(".b-display__header__video").live("click", function () {
-        if ($(".b-video").hasClass("open")) {			// open/close main video view and change class video for body
-            $(".b-video").removeClass("open").removeAttr("id");
-            $(".b-video").removeAttr('style');
-            $("body").removeClass("video");
-        } else {
-            $("#active").removeAttr("id");
-            $(".b-video").addClass("open").attr("id", "active");
-            $("body").addClass("video");
-        }
-        if ($(".voice_call__call").hasClass("open")) {
-            $(".b-video__video").addClass("open");
-        }// if the call in talking state - do callee video visible
+        phone.openVideoView();
     });
     // close video upon (Х) click
     $(".b-video__close").live("click", function (e) {
