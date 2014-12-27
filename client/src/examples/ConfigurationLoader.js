@@ -247,8 +247,10 @@ ConfigurationLoader.prototype = {
                 dataType: "jsonp",
                 data: loadBalancerData,
                 success: function (loadBalancerData) {
-                    me.configuration.urlWsServer = loadBalancerData.urlWsServer;
-                    me.configuration.urlFlashServer = loadBalancerData.urlFlashServer;
+                    me.configuration.urlWsServer = "ws://"+loadBalancerData.server + ":" + loadBalancerData.ws;
+                    //use for wss
+                    //me.configuration.urlWsServer = "wss://"+loadBalancerData.server + ":" + loadBalancerData.wss;
+                    me.configuration.urlFlashServer = "rtmfp://"+ loadBalancerData.server + ":" + loadBalancerData.flash;
                     me.jsonpSuccess = true;
                     trace("Configuration - Connection data from load balancer: "
                         + "urlWsServer " + loadBalancerData.urlWsServer
