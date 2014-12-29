@@ -475,6 +475,9 @@ $(document).ready(function () {
     $(".b-video__close").live("click", function (e) {
         $(".b-video").removeClass("open").removeAttr("id");
         $(".b-video").removeAttr('style');
+        if ($(".b-video").hasClass("flash_access")) {
+            phone.cancel();
+        }
     });
     // change video view dimensions
     $(".b-video, .b-login, .b-alert__error, .b-chat, .b-transfer").draggable();	// set video view draggable
