@@ -268,6 +268,7 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
         $(".b-video").draggable("disable");
         $(".b-video").resizable("disable");
         $(".b-video__flash").addClass("access");
+        $(".b-video__flash").zIndex(1000);
         $(".b-video__flash_footer").addClass("open");
         $(".b-video__flash_footer").html("Please <span>allow</span> access to your web camera and microphone.");
         //check flash div dimensions
