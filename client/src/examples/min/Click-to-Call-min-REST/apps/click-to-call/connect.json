@@ -1,0 +1,25 @@
+{
+   "sipRegisterRequired":false,
+   "sipLogin":"your SIP login",
+   "sipAuthenticationName":"your SIP auth name",
+   "sipDomain":"your SIP domain",
+   "sipOutboundProxy":"your SIP outbound proxy",
+   "sipPassword":"your SIP password",
+   "sipPort":5060,
+   "restClientConfig":{
+      "call":{
+         "restExclude":"",
+         "clientExclude":"",
+         "restOnError":"FAIL",
+         "restPolicy":"OVERWRITE",
+         "restOverwrite":"callee"
+      },
+      "ConnectionStatusEvent":{
+         "restExclude":"",
+         "clientExclude":"sipLogin,sipPassword,sipAuthenticationName,sipDomain,sipOutboundProxy",
+	 "restOnError":"LOG",
+         "restPolicy":"NOTIFY",
+         "restOverwrite":""
+      }
+   }
+}
