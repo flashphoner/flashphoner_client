@@ -156,11 +156,18 @@ ConfigurationLoader.prototype = {
 
         var videoWidth = $(xml).find("video_width");
         if (videoWidth.length > 0) {
-            this.videoWidth = this.getText(videoWidth[0]);
+            this.configuration.videoWidth = this.getText(videoWidth[0]);
         }
         var videoHeight = $(xml).find("video_height");
         if (videoHeight.length > 0) {
-            this.videoHeight = this.getText(videoHeight[0]);
+            this.configuration.videoHeight = this.getText(videoHeight[0]);
+        }
+
+        var forceResolution = $(xml).find("force_resolution");
+        if (forceResolution.length > 0) {
+            if (this.getText(forceResolution[0]).length) {
+                this.configuration.forceResolution = Boolean(this.getText(forceResolution[0]));
+            }
         }
 
         //Sounds for WebRTC implementation

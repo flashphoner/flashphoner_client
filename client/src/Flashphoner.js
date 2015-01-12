@@ -967,7 +967,20 @@ WebRtcMediaManager.prototype.disconnect = function () {
 WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
     var me = this;
     if (!me.localAudioVideoStream) {
-        getUserMedia({audio: true, video: true}, function (stream) {
+        //video constraints
+        var videoConstraints = {
+            mandatory: {
+                maxWidth: Flashphoner.getInstance().configuration.videoWidth,
+                maxHeight: Flashphoner.getInstance().configuration.videoHeight
+            },
+            optional: []
+        };
+
+        if (Flashphoner.getInstance().configuration.forceResolution) {
+            videoConstraints.mandatory.minWidth = Flashphoner.getInstance().configuration.videoWidth;
+            videoConstraints.mandatory.minHeight = Flashphoner.getInstance().configuration.videoHeight;
+        }
+        getUserMedia({audio: true, video: videoConstraints}, function (stream) {
                 var localMediaElement = getElement(Flashphoner.getInstance().configuration.localMediaElementId);
                 if (localMediaElement) {
                     attachMediaStream(localMediaElement, stream);
@@ -1453,6 +1466,10 @@ Configuration = function () {
     this.urlFlashServer = null;
     this.sipRegisterRequired = true;
     this.sipContactParams = null;
+
+    this.videoWidth = 640;
+    this.videoHeight = 480;
+    this.forceResolution = false;
 
     this.stunServer = "";
 
