@@ -61,7 +61,7 @@ Flashphoner.prototype = {
 
     initFlashMediaManager: function () {
         if (isFlashphonerAPILoaded && this.userData) {
-            this.flashMediaManager.connect(this.configuration.urlFlashServer, this.userData);
+            this.flashMediaManager.connect(this.configuration.urlFlashServer, this.userData, this.configuration);
         }
     },
 

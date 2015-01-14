@@ -87,10 +87,11 @@ package com.flashphoner.api
 			
 		}
 		
-		public  function connect(urlFlashServer:String, userData:Object):void{
+		public  function connect(urlFlashServer:String, userData:Object, configuration:Object):void{
 			this.userData = userData;
 			var connectObj:Object = new Object();
 			connectObj.token = userData.authToken;
+			videoControl.init(configuration.videoWidth,configuration.videoHeight);
 			phoneServerProxy.connect(urlFlashServer, connectObj);
 		}
 		

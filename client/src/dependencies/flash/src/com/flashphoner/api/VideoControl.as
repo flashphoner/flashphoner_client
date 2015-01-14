@@ -32,6 +32,8 @@ package com.flashphoner.api
 		private const KEEP_RATIO:Boolean = true;
 		private const KEY_INT:int = 48;
 		private const QUALITY:int = 80;
+		private var width:int;
+		private var height:int;
 		
 		public function VideoControl()
 		{
@@ -42,9 +44,12 @@ package com.flashphoner.api
 		/**
 		 * Init width,height,fps and another parameters
 		 **/ 
-		public function init(width:int, height:int):void{			
-			if (cam != null){				
-				cam.setMode(width,height,FPS,KEEP_RATIO);
+		public function init(width:int, height:int):void{
+			this.width = width;
+			this.height = height;
+			if (cam != null){
+				supportedResolutions("1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
+				cam.setMode(this.width,this.height,FPS,KEEP_RATIO);
 				cam.setKeyFrameInterval(KEY_INT);
 				cam.setQuality(0,QUALITY);
 				cam.setMotionLevel(0,2000);
@@ -52,12 +57,8 @@ package com.flashphoner.api
 			
 		}		
 		
-		/**
-		 * Add new supported resolutions
-		 **/
-		public function getSupportedResolutions():String {					
-			var supportedResolutions:String = ""; 
-			var resolutionsSplit:Array = "1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60".split(",");
+		public function supportedResolutions(resolutions:String):void {					
+			var resolutionsSplit:Array = resolutions.split(",");
 			var flag:Boolean = true;
 			for (var i:int=0;i<resolutionsSplit.length;i++){
 				var res:String = resolutionsSplit[i];
@@ -67,16 +68,15 @@ package com.flashphoner.api
 				cam.setMode(w,h,30,true);
 				if ((w==cam.width)&&(h==cam.height)){
 					Logger.info("Resolution is supported: "+w+"x"+h);
-					supportedResolutions += (w+"x"+h+",");
+					if ((w<=this.width)&&(h<=this.height)&&flag){
+						this.width=w;
+						this.height=h;
+						flag=false;
+					}
 				}else{
 					Logger.info("Resolution is NOT supported: "+w+"x"+h+", used: "+cam.width+"x"+cam.height);
 				}
 			}
-			
-			Logger.info("supportedResolutions: "+supportedResolutions);
-			
-			return supportedResolutions.substring(0,supportedResolutions.length-1);
-			
 		}
 		
 		/**
