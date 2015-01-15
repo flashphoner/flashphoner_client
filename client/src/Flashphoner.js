@@ -900,6 +900,7 @@ var WebRtcMediaManager = function () {
     this.webRtcMediaConnections = new DataMap();
     this.isAudioMuted = 1;
     this.isVideoMuted = 1;
+    this.remoteSDP = {};
 };
 
 WebRtcMediaManager.prototype.getVolume = function (id) {
@@ -922,6 +923,10 @@ WebRtcMediaManager.prototype.hasAccessToAudioAndVideo = function () {
 };
 
 WebRtcMediaManager.prototype.newConnection = function (id, webRtcMediaConnection) {
+    if (this.remoteSDP[id]) {
+        webRtcMediaConnection.setRemoteSDP(this.remoteSDP[id], false);
+        delete this.remoteSDP[id];
+    }
     this.webRtcMediaConnections.add(id, webRtcMediaConnection);
 };
 
@@ -942,7 +947,11 @@ WebRtcMediaManager.prototype.createAnswer = function (id, callback, hasVideo) {
 
 WebRtcMediaManager.prototype.setRemoteSDP = function (id, sdp, isInitiator) {
     var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
-    webRtcMediaConnection.setRemoteSDP(sdp, isInitiator);
+    if (webRtcMediaConnection) {
+        webRtcMediaConnection.setRemoteSDP(sdp, isInitiator);
+    } else {
+        this.remoteSDP[id] = sdp;
+    }
 };
 
 WebRtcMediaManager.prototype.setAudioCodec = function (id, codec) {
