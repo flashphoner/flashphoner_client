@@ -60,6 +60,7 @@ package com.flashphoner.api
 			Security.allowDomain("*");
 			Logger.init();
 			this.mic = defineMicrophone(true);
+			initMic(this.mic);
 			apiNotifys = new ArrayCollection();
 			addAPINotify(apiNotify);
 			ExternalInterface.addCallback("connect", connect);
