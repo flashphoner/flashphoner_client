@@ -73,7 +73,6 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("playStream", playStream);
 			ExternalInterface.addCallback("stopStream", stopStream);
 			ExternalInterface.addCallback("hasAccessToAudio",hasAccessToAudio);
-			ExternalInterface.addCallback("hasAccessToAudioAndVideo",hasAccessToAudioAndVideo);
 			ExternalInterface.addCallback("disconnect",disconnect);
 			ExternalInterface.addCallback("getMicVolume",getMicVolume);
 			ExternalInterface.addCallback("setMicVolume",setMicVolume);
@@ -84,8 +83,9 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("getCameras",getCameras);
 			ExternalInterface.addCallback("setCamera",setCamera);
 
-			phoneServerProxy = new PhoneServerProxy(this);
+			videoControl = new VideoControl();
 			
+			phoneServerProxy = new PhoneServerProxy(this);
 		}
 		
 		public  function connect(urlFlashServer:String, userData:Object, configuration:Object):void{
@@ -136,11 +136,6 @@ package com.flashphoner.api
 			phoneServerProxy.disconnect();
 		}
 		
-		
-		public function initMedia():void{
-			Logger.info("Init media...");
-			videoControl = new VideoControl();
-		}
 		
 		/**
 		 * Get controller of speaker
@@ -242,21 +237,6 @@ package com.flashphoner.api
 				
 			}
 		}
-		
-		/**
-		 * Check access to the devices (mic,camera)
-		 **/
-		public function hasAccessToAudioAndVideo():Boolean{
-			return hasAccessToAudio() && hasAccessToVideo();
-		}
-		
-		/**
-		 * Check access to the devices (mic,camera)
-		 **/
-		public function hasAccessToVideo():Boolean{
-			return videoControl.hasAccess();
-		}
-		
 		
 		/**
 		 * Get list of cameras

@@ -15,10 +15,12 @@ package com.flashphoner.api
 	import com.flashphoner.Logger;
 	
 	import flash.media.Camera;
+	import flash.net.NetStream;
 	
 	import flashx.textLayout.debug.assert;
 	
 	import mx.controls.Alert;
+	import mx.controls.VideoDisplay;
 	import mx.core.Application;
 
 	/**
@@ -35,10 +37,7 @@ package com.flashphoner.api
 		private var width:int;
 		private var height:int;
 		
-		public function VideoControl()
-		{
-			cam = Camera.getCamera();
-			
+		public function VideoControl(){
 		}
 		
 		/**
@@ -47,17 +46,18 @@ package com.flashphoner.api
 		public function init(width:int, height:int):void{
 			this.width = width;
 			this.height = height;
-			if (cam != null){
-				supportedResolutions("1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
-				cam.setMode(this.width,this.height,FPS,KEEP_RATIO);
-				cam.setKeyFrameInterval(KEY_INT);
-				cam.setQuality(0,QUALITY);
-				cam.setMotionLevel(0,2000);
+			var camera:Camera = getCam(); 
+			if (camera != null){
+				supportedResolutions(camera, "1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
+				camera.setMode(this.width,this.height,FPS,KEEP_RATIO);
+				camera.setKeyFrameInterval(KEY_INT);
+				camera.setQuality(0,QUALITY);
+				camera.setMotionLevel(0,2000);
 			}
 			
 		}		
 		
-		public function supportedResolutions(resolutions:String):void {					
+		private function supportedResolutions(camera:Camera, resolutions:String):void {					
 			var resolutionsSplit:Array = resolutions.split(",");
 			var flag:Boolean = true;
 			for (var i:int=0;i<resolutionsSplit.length;i++){
@@ -65,8 +65,8 @@ package com.flashphoner.api
 				var resSplit:Array = res.split("x");
 				var w:int = int(resSplit[0]);
 				var h:int = int(resSplit[1]);
-				cam.setMode(w,h,30,true);
-				if ((w==cam.width)&&(h==cam.height)){
+				camera.setMode(w,h,30,true);
+				if ((w==camera.width)&&(h==camera.height)){
 					Logger.info("Resolution is supported: "+w+"x"+h);
 					if ((w<=this.width)&&(h<=this.height)&&flag){
 						this.width=w;
@@ -74,17 +74,29 @@ package com.flashphoner.api
 						flag=false;
 					}
 				}else{
-					Logger.info("Resolution is NOT supported: "+w+"x"+h+", used: "+cam.width+"x"+cam.height);
+					Logger.info("Resolution is NOT supported: "+w+"x"+h+", used: "+camera.width+"x"+camera.height);
 				}
 			}
+		}
+		
+		private function getCam():Camera {
+			if (cam == null){
+				cam = Camera.getCamera();
+			}
+			return cam; 			
 		}
 		
 		/**
 		 * Get current camera to used Flashphoner
 		 **/
-		public function getCam():Camera{
-			return cam;
+		public function attachStream(netStream:NetStream):void{
+			netStream.attachCamera(getCam());
 		}
+		
+		public function attachLocal(videoDisplay:VideoDisplay):void{
+			videoDisplay.attachCamera(getCam());
+		}
+		
 		
 		/**
 		 * Change output format CIF/QCIF
@@ -92,15 +104,16 @@ package com.flashphoner.api
 		public function changeFormat(width:int, height:int):void{
 			Logger.info("change format "+width+"x"+height);			
 			if ((width>0)&&(height>0)){
-				cam.setMode(width,height,FPS,KEEP_RATIO);
+				getCam().setMode(width,height,FPS,KEEP_RATIO);
 			}			
 		}
 		
 		public function hasAccess():Boolean{
-			if (cam == null){
+			var camera:Camera = getCam();
+			if (camera == null){
 				return true;
 			}else{
-				if (cam.muted){
+				if (camera.muted){
 					return false;
 				}else{
 					return true;

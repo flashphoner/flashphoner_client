@@ -130,9 +130,7 @@ package com.flashphoner.api
 				settings.setProfileLevel(H264Profile.BASELINE, flash.media.H264Level.LEVEL_3);					
 				outStream.videoStreamSettings = settings;				
 			}
-			var cam:Camera = flash_API.videoControl.getCam();
-			outStream.attachCamera(cam);
-			Logger.info("attach video stream: "+cam.width+"x"+cam.height);
+			flash_API.videoControl.attachStream(outStream);
 		}
 				
 		

@@ -46,11 +46,11 @@ This code and accompanying materials also available under LGPL and MPL license f
 				phoneSpeaker.percentHeight = 100;
 				phoneSpeaker.percentWidth = 100;
 				videoPartner.addChild(phoneSpeaker);
+				ExternalInterface.addCallback("hasAccessToAudioAndVideo",hasAccessToAudioAndVideo);
 				ExternalInterface.addCallback("getAccessToAudio",getAccessToAudio);
 				ExternalInterface.addCallback("getAccessToAudioAndVideo",getAccessToAudioAndVideo);
 				ExternalInterface.addCallback("changeRelationMyVideo",changeRelationMyVideo);
 				videoPartner.addEventListener(Event.RESIZE,onResize);
-				flashAPI.initMedia();
 				apiNotify.notifyFlashphonerAPILoaded();
 			}
 			
@@ -58,8 +58,22 @@ This code and accompanying materials also available under LGPL and MPL license f
 				phoneSpeaker.changeFormat(videoPartner.width,videoPartner.height);
 			}
 			
+			public function hasAccessToAudioAndVideo():Boolean{
+				var hasAccess:Boolean = flashAPI.hasAccessToAudio() && hasAccessToVideo();
+		 		if (hasAccess) {
+					flashAPI.videoControl.attachLocal(videoMy);
+					videoPartner.visible = true;
+					videoMy.visible = true;
+					
+				}
+				return hasAccess;
+			}
+			
+			public function hasAccessToVideo():Boolean{
+				return flashAPI.videoControl.hasAccess();
+			}
+			
 			public function getAccessToAudio():void{
-				Logger.info("getAccessToAudio");
 				if (!flashAPI.hasAccessToAudio()){
 					var mic:Microphone = flashAPI.getMicrophone();
 					mic.addEventListener(StatusEvent.STATUS, onMicrophoneStatus);
@@ -80,10 +94,6 @@ This code and accompanying materials also available under LGPL and MPL license f
 					timer.stop();
 					var mic:Microphone = flashAPI.getMicrophone();
 					mic.setLoopBack(false);
-					videoMy.attachCamera(flashAPI.videoControl.getCam());
-					videoPartner.visible = true;
-					videoMy.visible = true;
-					
 				}
 			}			
 			
