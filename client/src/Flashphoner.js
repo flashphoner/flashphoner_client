@@ -713,6 +713,10 @@ Flashphoner.prototype = {
 
             me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
                 trace("Publish name " + stream.name);
+                if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
+                    sdp = me.stripCodecsSDP(sdp);
+                    console.log("New SDP: " + sdp);
+                }
                 stream.sdp = me.removeCandidatesFromSDP(sdp);
                 me.webSocket.send("publishStream", stream);
                 me.publishStreams.add(stream.name, stream);
@@ -742,6 +746,10 @@ Flashphoner.prototype = {
 
         me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
             console.log("playStream name " + stream.name);
+            if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
+                sdp = me.stripCodecsSDP(sdp);
+                console.log("New SDP: " + sdp);
+            }
             stream.sdp = me.removeCandidatesFromSDP(sdp);
             me.webSocket.send("playStream", stream);
 
