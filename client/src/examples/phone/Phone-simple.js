@@ -68,14 +68,17 @@ Phone.prototype.disconnect = function () {
 };
 
 Phone.prototype.msrpCall = function (callee) {
-    trace("Phone - msrpCall " + callee);
     var me = this;
+    callee = me.applyCalleeLetterCase(callee);
+    trace("Phone - msrpCall " + callee);
+
     me.currentCall = Flashphoner.getInstance().msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: {param1: "value1", param2: "value2"}, isMsrp: true});
 };
 
 Phone.prototype.call = function (callee, hasVideo, mediaProvider) {
-    trace("Phone - call " + callee);
     var me = this;
+    callee = me.applyCalleeLetterCase(callee);
+    trace("Phone - call " + callee);
     if (!me.hasAccess(mediaProvider, hasVideo)) {
         if (me.intervalId == -1) {
             var checkAccessFunc = function () {
@@ -486,4 +489,16 @@ Phone.prototype.isRingSoundAllowed = function () {
     }
     trace("Phone - isRingSoundAllowed true");
     return true;
+};
+
+Phone.prototype.applyCalleeLetterCase = function(callee){
+    if (callee) {
+        if ("uppercase" == ConfigurationLoader.getInstance().calleeLetterCase) {
+            return callee.toUpperCase();
+        }
+        if ("lowercase" == ConfigurationLoader.getInstance().calleeLetterCase) {
+            return callee.toLowerCase();
+        }
+    }
+    return callee;
 };

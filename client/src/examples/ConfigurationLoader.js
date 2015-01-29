@@ -12,7 +12,7 @@ ConfigurationLoader = function (configLoadedListener) {
     }
 
     this.configuration = new Configuration();
-
+    this.calleeLetterCase = null;
     this.msrpCallee = null;
     this.subscribeEvent = null;
     this.loadBalancerUrl = null;
@@ -169,6 +169,14 @@ ConfigurationLoader.prototype = {
                 this.configuration.forceResolution = Boolean(this.getText(forceResolution[0]));
             }
         }
+
+        var calleeLetterCase = $(xml).find("callee_letter_case");
+        if (calleeLetterCase.length > 0) {
+            if (this.getText(calleeLetterCase[0]).length) {
+                this.calleeLetterCase = this.getText(calleeLetterCase[0]);
+            }
+        }
+
 
         //Sounds for WebRTC implementation
         var ringSound = $(xml).find("ring_sound");

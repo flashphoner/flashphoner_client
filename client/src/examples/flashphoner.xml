@@ -21,6 +21,7 @@
 	<video_height>480</video_height>
 	<check_validation_callee>true</check_validation_callee>
 	<use_enhanced_mic>true</use_enhanced_mic>
+    <!--<callee_letter_case>uppercase</callee_letter_case> &lt;!&ndash;uppercase,lowercase&ndash;&gt;-->
 	<ring_sound></ring_sound>
 	<busy_sound></busy_sound>
 	<register_sound></register_sound>
