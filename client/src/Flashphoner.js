@@ -618,6 +618,9 @@ Flashphoner.prototype = {
     },
 
     sendDTMF: function (dtmfObj) {
+        if (!dtmfObj.type) {
+            dtmfObj.type = DtmfType.rfc2833;
+        }
         this.webSocket.send("sendDtmf", dtmfObj);
     },
 
@@ -1551,6 +1554,13 @@ CallStatus.ESTABLISHED = "ESTABLISHED";
 CallStatus.FINISH = "FINISH";
 CallStatus.BUSY = "BUSY";
 CallStatus.SESSION_PROGRESS = "SESSION_PROGRESS";
+
+var DtmfType = function(){
+};
+
+DtmfType.info = "INFO";
+DtmfType.info_relay = "INFO_RELAY";
+DtmfType.rfc2833 = "RFC2833";
 
 var Message = function () {
     this.from = "";
