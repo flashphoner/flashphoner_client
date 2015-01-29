@@ -235,7 +235,7 @@ Phone.prototype.onMessageListener = function (event) {
     } else {
         this.chatSelectTab(tab);
     }
-    $('<div class="b-chat__message"><div class="b-chat__message__head"><span class="b-chat__message__time">' + new Date().toLocaleString() + '</span><span class="b-chat__message__author">' + message.from + '</span></div><div class="b-chat__message__text">' + message.body + '</div></div>').appendTo($(".b-chat_tab.open .mCSB_container"));
+    $('<div class="b-chat__message"><div class="b-chat__message__head"><span class="b-chat__message__time">' + new Date().toLocaleString() + '</span><span class="b-chat__message__author">' + message.from + '</span></div><div class="b-chat__message__text">' + message.body.replace(/\n/g, "<br />") + '</div></div>').appendTo($(".b-chat_tab.open .mCSB_container"));
     this.chatScrollDown();
 };
 
@@ -665,13 +665,13 @@ $(document).ready(function () {
     });
 
     $(".b-chat__text input").live("click", function () {	// on click "Send" in the chat
-        var body = $(this).prev().val().replace(/\n/g, "<br />");
+        var body = $(this).prev().val();
         var message = new Message();
         message.to = $(".b-chat__nav__tab.open span.tab_text").html();
         message.body = body;
         phone.sendMessage(message);
 
-        $('<div id="message_' + message.id + '" class="b-chat__message my_message"><div class="b-chat__message__head"><span class="b-chat__message__time">' + new Date().toLocaleString() + '</span><span class="b-chat__message__author">' + $("input[id='sipLogin']").val() + '</span></div><div class="b-chat__message__text">' + body + '</div></div>').appendTo($(".mCSB_container", $(this).parent().prev()));
+        $('<div id="message_' + message.id + '" class="b-chat__message my_message"><div class="b-chat__message__head"><span class="b-chat__message__time">' + new Date().toLocaleString() + '</span><span class="b-chat__message__author">' + $("input[id='sipLogin']").val() + '</span></div><div class="b-chat__message__text">' + body.replace(/\n/g, "<br />") + '</div></div>').appendTo($(".mCSB_container", $(this).parent().prev()));
         phone.chatScrollDown();
         $(this).prev().val(""); // clear the textarea
     });
