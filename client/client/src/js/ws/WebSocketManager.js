@@ -278,8 +278,12 @@ WebSocketManager.prototype = {
         this.webSocket.send("transfer", {callId: callId, callee: callee});
     },
 
-    sendDTMF: function (callId, dtmf) {
-        this.webSocket.send("sendDtmf", {callId: callId, dtmf: dtmf});
+    sendDTMF: function (callId, dtmf, type) {
+        var dtmfObj = {callId: callId, dtmf: dtmf, type: type};
+        if (!dtmfObj.type) {
+            dtmfObj.type = DtmfType.rfc2833;
+        }
+        this.webSocket.send("sendDtmf", dtmfObj);
     },
 
     setUseProxy: function (useProxy) {
