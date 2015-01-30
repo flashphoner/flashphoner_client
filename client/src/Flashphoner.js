@@ -288,6 +288,9 @@ Flashphoner.prototype = {
             },
 
             setRemoteSDP: function (id, sdp, isInitiator) {
+                if (sdp.search("a=recvonly") != -1) {
+                    sdp = me.handleVideoSSRC(sdp);
+                }
                 if (me.webRtcMediaManager) {
                     me.webRtcMediaManager.setRemoteSDP(id, sdp, isInitiator);
                 }
@@ -837,6 +840,41 @@ Flashphoner.prototype = {
                     break;
                 }
             }
+        }
+
+        //normalize sdp after modifications
+        var result = "";
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i] != "") {
+                result += sdpArray[i] + "\n";
+            }
+        }
+
+        return result;
+    },
+
+    handleVideoSSRC: function (sdp) {
+        var sdpArray = sdp.split("\n");
+        var videoPart = false;
+        var recvonly = false;
+        var ssrcPos = -1;
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i].search("m=video") != -1) {
+                videoPart = true;
+            }
+            if (sdpArray[i].search("a=ssrc") != -1 && videoPart) {
+                ssrcPos = i;
+            }
+            if (sdpArray[i].search("a=recvonly") != -1 && videoPart) {
+                recvonly = true;
+            }
+            if (sdpArray[i].search("m=audio") != -1 && videoPart) {
+                break;
+            }
+        }
+
+        if (recvonly && ssrcPos != -1) {
+            sdpArray[ssrcPos] = "";
         }
 
         //normalize sdp after modifications
