@@ -288,9 +288,9 @@ Flashphoner.prototype = {
             },
 
             setRemoteSDP: function (id, sdp, isInitiator) {
-                if (sdp.search("a=recvonly") != -1) {
-                    sdp = me.handleVideoSSRC(sdp);
-                }
+                //if (sdp.search("a=recvonly") != -1) {
+                //    sdp = me.handleVideoSSRC(sdp);
+                //}
                 if (me.webRtcMediaManager) {
                     me.webRtcMediaManager.setRemoteSDP(id, sdp, isInitiator);
                 }
