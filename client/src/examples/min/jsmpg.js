@@ -67,7 +67,7 @@ jsmpeg.prototype.waitForIntraFrame = true;
 jsmpeg.prototype.socketBufferSize = 512 * 1024; // 512kb each
 jsmpeg.prototype.onlostconnection = null;
 
-jsmpeg.prototype.initSocketClient = function( client ) {
+jsmpeg.prototype.initSocketClient = function( client, width, height) {
 	console.log("initSocketClient");
 	this.buffer = new BitReader(new ArrayBuffer(this.socketBufferSize));
 
@@ -75,6 +75,9 @@ jsmpeg.prototype.initSocketClient = function( client ) {
 	this.nextPictureBuffer.writePos = 0;
 	this.nextPictureBuffer.chunkBegin = 0;
 	this.nextPictureBuffer.lastWriteBeforeWrap = 0;
+
+	this.width = parseInt(width);
+	this.height = parseInt(height);
 
 	//this.client.binaryType = 'arraybuffer';
 	//this.client.onmessage = this.receiveSocketMessage.bind(this);
@@ -94,16 +97,13 @@ jsmpeg.prototype.decodeSocketHeader = function( data ) {
 		this.height = (data[6] * 256 + data[7]);
 		this.initBuffers();
 	}*/
-	this.width = 640;
-	this.height = 480;
-	this.initBuffers();
 };
 
 jsmpeg.prototype.receiveSocketMessage = function( event ) {
 	var messageData = new Uint8Array(event.data);
 
 	if( !this.sequenceStarted ) {
-		this.decodeSocketHeader(messageData);
+		this.initBuffers();
 	}
 
 	var current = this.buffer;
@@ -128,7 +128,6 @@ jsmpeg.prototype.receiveSocketMessage = function( event ) {
 			// We reached the end with no picture found yet; move back a few bytes
 			// in case we are at the beginning of a start code and exit.
 			next.index = Math.max((next.writePos-3), 0) << 3;
-			console.log("while true return");
 			return;
 		}
 		else if( startCode == START_PICTURE ) {

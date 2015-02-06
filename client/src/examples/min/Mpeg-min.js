@@ -10,9 +10,11 @@ function initAPI() {
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
     f.addListener(WCSEvent.OnBinaryEvent, binaryListener);
-    f.init();
-    connect();
-    initMpeg();
+    ConfigurationLoader.getInstance(function (configuration) {
+        f.init(configuration);
+        initMpeg();
+        connect();
+    });
 }
 
 function initMpeg() {
@@ -23,11 +25,11 @@ function initMpeg() {
     ctx.fillText('Loading...', canvas.width/2-30, canvas.height/3);
 
     this.player = new jsmpeg(null, {canvas:canvas});
-    player.initSocketClient();
+    player.initSocketClient(null, f.configuration.videoWidth, f.configuration.videoHeight);
 }
 
 function connect() {
-    f.connect({urlServer: "ws://192.168.56.2:8080", appKey: "defaultApp", useRTCSessions: false});
+    f.connect({appKey: "defaultApp", useRTCSessions: false, useWsTunnel: true});
 }
 
 //Connection Status
@@ -76,12 +78,6 @@ function playStream() {
         "a=recvonly\r\n";
     this.stream = stream;
     f.playStream(stream);
-
-    //trigger decodeSocketHeader
-    var event = {};
-    event.data = 0;
-    binaryListener(event);
-
 }
 
 function parseUrlId() {
