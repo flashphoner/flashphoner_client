@@ -101,7 +101,8 @@ jsmpeg.prototype.decodeSocketHeader = function( data ) {
 
 jsmpeg.prototype.receiveSocketMessage = function( event ) {
 	var messageData = new Uint8Array(event.data);
-
+	//strip rtp header, 4 bytes
+	messageData = messageData.subarray(4);
 	if( !this.sequenceStarted ) {
 		this.initBuffers();
 	}
