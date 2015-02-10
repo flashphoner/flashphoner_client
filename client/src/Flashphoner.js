@@ -308,6 +308,22 @@ Flashphoner.prototype = {
                 ]);
             },
 
+            base64BinaryData: function (data) {
+                var result = {};
+                var raw = window.atob(data);
+                var rawLength = raw.length;
+                var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+                for(i = 0; i < rawLength; i++) {
+                    array[i] = raw.charCodeAt(i);
+                }
+                result.data = array;
+                console.log("received data length " + result.data.length);
+                me.invokeListener(WCSEvent.OnBinaryEvent, [
+                    result
+                ]);
+            },
+
             notifyVideoFormat: function (videoFormat) {
             },
 

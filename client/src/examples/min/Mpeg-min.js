@@ -29,7 +29,7 @@ function initMpeg() {
 }
 
 function connect() {
-    f.connect({appKey: "defaultApp", useRTCSessions: false, useWsTunnel: true});
+    f.connect({appKey: "defaultApp", useRTCSessions: false, useWsTunnel: true, useBase64BinaryEncoding: false});
 }
 
 //Connection Status
@@ -40,6 +40,8 @@ function connectionStatusListener(event) {
         playStream();
     } else if (event.status == ConnectionStatus.Disconnected) {
         console.log("Disconnected");
+    } else if (event.status == ConnectionStatus.Failed) {
+        f.disconnect();
     }
 }
 
