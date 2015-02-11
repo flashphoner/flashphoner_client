@@ -491,6 +491,8 @@ Flashphoner.prototype = {
         me.connection.sipContactParams = me.connection.sipContactParams | me.configuration.sipContactParams;
         me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
         me.connection.urlServer = me.connection.urlServer || me.configuration.urlWsServer;
+        me.connection.width = me.connection.width || me.configuration.videoWidth;
+        me.connection.height = me.connection.height || me.configuration.videoHeight;
         //workaround for old Safari (5.X)
         if ((navigator.userAgent.indexOf("Safari") > -1) && !(navigator.userAgent.indexOf("Chrome") > -1)) {
             me.connection.urlServer = me.connection.urlServer.slice(-1) == "/" ? me.connection.urlServer + "websocket" : me.connection.urlServer + "/websocket";
@@ -1581,6 +1583,8 @@ var Connection = function () {
     this.appKey = "defaultApp";
     this.status = ConnectionStatus.Pending;
     this.mediaProviders = [];
+    this.width = "";
+    this.height = "";
 };
 
 var ConnectionStatus = function () {
