@@ -405,7 +405,13 @@ $(document).ready(function () {
     });
 
     $(".b-ie_video").live("click", function () {
-        $(this).text() == "send video" ? $(this).text("stop video") : $(this).text("send video");
+        if ($(this).text() == "Send video"){
+            $(this).text("Stop video");
+            phone.changeVideoState(phone.currentCall.callId, true);
+        } else {
+            $(this).text("Send video");
+            phone.changeVideoState(phone.currentCall.callId, false);
+        }
     });
 
     // open/close authentication view

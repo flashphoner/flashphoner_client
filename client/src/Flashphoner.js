@@ -288,11 +288,14 @@ Flashphoner.prototype = {
             },
 
             setRemoteSDP: function (id, sdp, isInitiator) {
-                if (sdp.search("a=recvonly") != -1) {
-                    sdp = me.handleVideoSSRC(sdp);
-                }
                 if (me.webRtcMediaManager) {
-                    me.webRtcMediaManager.setRemoteSDP(id, sdp, isInitiator);
+                    if (me.webRtcMediaManager.setRemoteSDP(id, sdp, isInitiator)) {
+                        var call = me.calls.get(id);
+                        me.webRtcMediaManager.createAnswer(call.callId, function (sdp) {
+                            call.sdp = sdp;
+                            me.webSocket.send("answer", call);
+                        }, call.hasVideo);
+                    }
                 }
             },
 
@@ -600,6 +603,14 @@ Flashphoner.prototype = {
                 me.webSocket.send("answer", call);
             }
         }, []);
+    },
+
+    changeVideoState: function (callId, hasVideo) {
+        var me = this;
+        this.webRtcMediaManager.createOffer(callId, function (sdp) {
+            me.webSocket.send("changeVideoState", {callId: callId, sdp: sdp});
+        }, true, hasVideo);
+        return 0;
     },
 
     hangup: function (call) {
@@ -997,9 +1008,10 @@ WebRtcMediaManager.prototype.createAnswer = function (id, callback, hasVideo) {
 WebRtcMediaManager.prototype.setRemoteSDP = function (id, sdp, isInitiator) {
     var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
     if (webRtcMediaConnection) {
-        webRtcMediaConnection.setRemoteSDP(sdp, isInitiator);
+        return webRtcMediaConnection.setRemoteSDP(sdp, isInitiator);
     } else {
         this.remoteSDP[id] = sdp;
+        return false;
     }
 };
 
@@ -1086,6 +1098,7 @@ var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, r
 WebRtcMediaConnection.prototype.init = function () {
     trace("WebRtcMediaConnection - init");
     this.hasVideo = false;
+    this.addedStream = null;
     this.peerConnection = null;
     this.peerConnectionState = 'new';
     this.remoteAudioVideoMediaStream = null;
@@ -1205,30 +1218,38 @@ WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, has
         if (me.peerConnection == null) {
             trace("peerConnection is null");
             me.createPeerConnection();
-            if (hasAudio && hasVideo) {
-                if (me.webRtcMediaManager.videoTrack){
-                    me.webRtcMediaManager.localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
-                    me.webRtcMediaManager.videoTrack = null;
+        }
+        if (me.addedStream) {
+            me.peerConnection.removeStream(me.addedStream);
+            me.addedStream = null;
+        }
+        if (hasAudio && hasVideo) {
+            if (me.webRtcMediaManager.videoTrack) {
+                me.webRtcMediaManager.localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
+                me.webRtcMediaManager.videoTrack = null;
+            }
+            me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
+            me.addedStream = me.webRtcMediaManager.localAudioVideoStream;
+        } else if (hasAudio) {
+            if (me.webRtcMediaManager.localAudioStream) {
+                me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
+                me.addedStream = me.webRtcMediaManager.localAudioStream;
+            } else {
+                var localAudioVideoStream = me.webRtcMediaManager.localAudioVideoStream;
+                if (localAudioVideoStream.getVideoTracks().length > 0) {
+                    me.webRtcMediaManager.videoTrack = localAudioVideoStream.getVideoTracks()[0];
+                    localAudioVideoStream.removeTrack(me.webRtcMediaManager.videoTrack);
                 }
                 me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
-            } else if (hasAudio) {
-                if (me.webRtcMediaManager.localAudioStream){
-                    me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
-                } else {
-                    var localAudioVideoStream = me.webRtcMediaManager.localAudioVideoStream;
-                    if (localAudioVideoStream.getVideoTracks().length > 0){
-                        me.webRtcMediaManager.videoTrack = localAudioVideoStream.getVideoTracks()[0];
-                        localAudioVideoStream.removeTrack(me.webRtcMediaManager.videoTrack);
-                    }
-                    me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
-                }
-            } else {
-                if (receiveVideo == undefined) {
-                    receiveVideo = true;
-                }
-                mandatory = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}}
+                me.addedStream = me.webRtcMediaManager.localAudioVideoStream;
             }
+        } else {
+            if (receiveVideo == undefined) {
+                receiveVideo = true;
+            }
+            mandatory = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}};
         }
+
         me.createOfferCallback = createOfferCallback;
         me.peerConnection.createOffer(function (offer) {
             me.onCreateOfferSuccessCallback(offer);
@@ -1253,17 +1274,17 @@ WebRtcMediaConnection.prototype.createAnswer = function (createAnswerCallback, h
         if (me.peerConnection == null) {
             me.createPeerConnection();
             if (hasVideo) {
-                if (me.webRtcMediaManager.videoTrack){
+                if (me.webRtcMediaManager.videoTrack) {
                     me.webRtcMediaManager.localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
                     me.webRtcMediaManager.videoTrack = null;
                 }
                 me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
             } else {
-                if (me.webRtcMediaManager.localAudioStream){
+                if (me.webRtcMediaManager.localAudioStream) {
                     me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
                 } else {
                     var localAudioVideoStream = me.webRtcMediaManager.localAudioVideoStream;
-                    if (localAudioVideoStream.getVideoTracks().length > 0){
+                    if (localAudioVideoStream.getVideoTracks().length > 0) {
                         me.webRtcMediaManager.videoTrack = localAudioVideoStream.getVideoTracks()[0];
                         localAudioVideoStream.removeTrack(me.webRtcMediaManager.videoTrack);
                     }
@@ -1348,12 +1369,17 @@ WebRtcMediaConnection.prototype.setRemoteSDP = function (sdp, isInitiator) {
         });
     } else {
         this.lastReceivedSdp = sdp;
+        if (this.peerConnectionState == "established") {
+            return true;
+        }
     }
+    return false;
 };
 
 WebRtcMediaConnection.prototype.onSetRemoteDescriptionSuccessCallback = function () {
     trace("onSetRemoteDescriptionSuccessCallback");
     if (this.peerConnection != null) {
+        attachMediaStream(this.remoteMediaElement, this.peerConnection.getRemoteStreams()[0]);
         if (this.peerConnectionState == 'answer-received') {
             trace("Current PeerConnectionState is 'answer-received' changing the PeerConnectionState to 'established'");
             this.peerConnectionState = 'established';
@@ -1593,7 +1619,7 @@ CallStatus.FINISH = "FINISH";
 CallStatus.BUSY = "BUSY";
 CallStatus.SESSION_PROGRESS = "SESSION_PROGRESS";
 
-var DtmfType = function(){
+var DtmfType = function () {
 };
 
 DtmfType.info = "INFO";

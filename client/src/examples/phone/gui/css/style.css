@@ -1228,8 +1228,6 @@ body{
 	
 /*-- ie video --*/
 .b-ie_video{
-	display: none;}
-.ie .b-ie_video{
 	display: block;
 	position: absolute;
 	bottom: 10px;
@@ -1237,10 +1235,11 @@ body{
 	background: #2accfe;
 	text-align: center;
 	width: 92px;
-	height: 44px;
+	height: 20px;
 	font-size: 14px;
-	line-height: 44px;
-	z-index: 10;}
+	line-height: 20px;
+	z-index: 10;
+	cursor: pointer}
 .ie .b-alert.open{
 	display: block;}
 .ie  .b-alert{
