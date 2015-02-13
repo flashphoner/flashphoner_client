@@ -28,6 +28,7 @@ ConfigurationLoader = function (configLoadedListener) {
     this.disableUnknownMsgFiltering = false;
     this.disableLocalRing = false;
     this.suppressRingOnActiveAudioStream = false;
+    this.reoffersEnabled = false;
 
     $.ajax({
         type: "GET",
@@ -238,6 +239,12 @@ ConfigurationLoader.prototype = {
         if (suppressRingOnActiveAudioStream.length > 0) {
             this.suppressRingOnActiveAudioStream = (this.getText(suppressRingOnActiveAudioStream[0]) === "true");
         }
+
+        var reoffersEnabled = $(xml).find("reoffers_enabled");
+        if (reoffersEnabled.length > 0) {
+            this.reoffersEnabled = (this.getText(reoffersEnabled[0]) === "true");
+        }
+
 
         //get load balancer url if load balancing enabled
         if (me.loadBalancerUrl != null) {

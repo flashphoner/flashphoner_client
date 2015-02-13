@@ -105,9 +105,9 @@ Phone.prototype.call = function (callee, hasVideo, mediaProvider) {
     }
 };
 
-Phone.prototype.changeVideoState = function (callId, hasVideo) {
+Phone.prototype.changeVideoState = function (call, enable) {
     trace("Phone - changeVideoState");
-    Flashphoner.getInstance().changeVideoState(callId, hasVideo);
+    Flashphoner.getInstance().changeVideoState(call, enable);
 };
 
 Phone.prototype.sendMessage = function (message) {

@@ -605,11 +605,20 @@ Flashphoner.prototype = {
         }, []);
     },
 
-    changeVideoState: function (callId, hasVideo) {
+    changeVideoState: function (call, enable) {
         var me = this;
-        this.webRtcMediaManager.createOffer(callId, function (sdp) {
-            me.webSocket.send("changeVideoState", {callId: callId, sdp: sdp});
-        }, true, hasVideo);
+        if (MediaProvider.Flash == call.mediaProvider) {
+            if (!call.hasVideo) {
+                me.webSocket.send("updateCallToVideo", call.callId);
+                call.hasVideo = true;
+            }
+            me.flashMediaManager.changeVideoState(call.callId, enable);
+        } else {
+            //todo uncomment after firefox implement reoffer
+            //this.webRtcMediaManager.createOffer(call.callId, function (sdp) {
+            //    me.webSocket.send("changeVideoState", {callId: call.callId, sdp: sdp});
+            //}, true, call.hasVideo);
+        }
         return 0;
     },
 

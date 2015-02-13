@@ -123,6 +123,20 @@ package com.flashphoner.api
 			}		
 		}
 		
+		public function enableVideo(streamName:String):void{
+			var outStream:NetStream = outStreams[streamName];
+			if (outStream != null){
+				setVideoCompressionSettings(outStream);
+			}
+		}
+		
+		public function disableVideo(streamName:String):void{
+			var outStream:NetStream = outStreams[streamName];
+			if (outStream != null){
+				outStream.attachCamera(null);
+			}			
+		}
+		
 		private function setVideoCompressionSettings(outStream:NetStream):void{			
 			if (flash_API.getFlashPlayerMajorVersion() >= 11){
 				Logger.info("Player 11. Using h.264 compresstion settings...")

@@ -115,6 +115,7 @@ Phone.prototype.callStatusListener = function (event) {
                 $(".b-time").html("<span class='b-min'>00</span>:<span class='b-sec'>00</span>");	// return timer to initial state
 
                 $(".b-volume").removeClass("open");
+                $(".b-send_video").removeClass("open");
             }
         } else if (call.status == CallStatus.HOLD) {
             trace('Phone - ...Call on hold...');
@@ -148,6 +149,17 @@ Phone.prototype.callStatusListener = function (event) {
                 $(".interlocutor2").text($(".b-numbers").val());	// set number of callee in the talk view
                 $(this).removeClass("open");														// hide 'Answer' button
             }
+
+            if (MediaProvider.Flash == call.mediaProvider && ConfigurationLoader.getInstance().reoffersEnabled) {
+                $(".b-send_video").addClass("open");
+            }
+
+            if (call.hasVideo) {
+                $(".b-send_video").text("Stop video");
+            } else {
+                $(".b-send_video").text("Send video");
+            }
+
             this.startTimer();
 
             $(".voice_call__call__pause").removeClass("open");	// hide hold view and transfer view (if the views was opened)
@@ -404,13 +416,13 @@ $(document).ready(function () {
         phone.init();
     });
 
-    $(".b-ie_video").live("click", function () {
+    $(".b-send_video").live("click", function () {
         if ($(this).text() == "Send video"){
+            phone.changeVideoState(phone.currentCall, true);
             $(this).text("Stop video");
-            phone.changeVideoState(phone.currentCall.callId, true);
         } else {
+            phone.changeVideoState(phone.currentCall, false);
             $(this).text("Send video");
-            phone.changeVideoState(phone.currentCall.callId, false);
         }
     });
 
