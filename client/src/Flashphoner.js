@@ -602,6 +602,23 @@ Flashphoner.prototype = {
         }, []);
     },
 
+    changeVideoState: function (call, enable) {
+        var me = this;
+        if (MediaProvider.Flash == call.mediaProvider) {
+            if (!call.hasVideo) {
+                me.webSocket.send("updateCallToVideo", call.callId);
+                call.hasVideo = true;
+            }
+            me.flashMediaManager.changeVideoState(call.callId, enable);
+        } else {
+            //todo uncomment after firefox implement reoffer
+            //this.webRtcMediaManager.createOffer(call.callId, function (sdp) {
+            //    me.webSocket.send("changeVideoState", {callId: call.callId, sdp: sdp});
+            //}, true, call.hasVideo);
+        }
+        return 0;
+    },
+
     hangup: function (call) {
         if (call) {
             this.webSocket.send("hangup", {callId: call.callId});

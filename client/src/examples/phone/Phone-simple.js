@@ -105,6 +105,11 @@ Phone.prototype.call = function (callee, hasVideo, mediaProvider) {
     }
 };
 
+Phone.prototype.changeVideoState = function (call, enable) {
+    trace("Phone - changeVideoState");
+    Flashphoner.getInstance().changeVideoState(call, enable);
+};
+
 Phone.prototype.sendMessage = function (message) {
     trace("Phone - sendMessage " + message.to + " body: " + message.body);
     Flashphoner.getInstance().sendMessage(message);

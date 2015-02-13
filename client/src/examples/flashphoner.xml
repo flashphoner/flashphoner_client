@@ -17,6 +17,7 @@
 	<register_required>true</register_required>
     <!--<load_balancer_url>http://192.168.1.1:8081?action=server_list</load_balancer_url>-->
     <use_dtls>true</use_dtls>
+    <reoffers_enabled>false</reoffers_enabled>
 	<video_width>640</video_width>
 	<video_height>480</video_height>
 	<check_validation_callee>true</check_validation_callee>

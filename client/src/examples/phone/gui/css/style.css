@@ -408,7 +408,6 @@ body{
 	padding: 3px 8px;
 	width: 196px;
 	border: 0;
-	height: 14px;
 	font-size: 14px;
 	line-height: 14px;
 	margin-top: 8px;
@@ -1227,20 +1226,22 @@ body{
 	display: inline-block;}	
 	
 /*-- ie video --*/
-.b-ie_video{
-	display: none;}
-.ie .b-ie_video{
-	display: block;
+.b-send_video{
+	display: none;
 	position: absolute;
 	bottom: 10px;
 	left: 10px;
 	background: #2accfe;
 	text-align: center;
 	width: 92px;
-	height: 44px;
+	height: 20px;
 	font-size: 14px;
-	line-height: 44px;
-	z-index: 10;}
+	line-height: 20px;
+	z-index: 10000;
+	cursor: pointer}
+.b-send_video.open{
+	display: block;
+}
 .ie .b-alert.open{
 	display: block;}
 .ie  .b-alert{

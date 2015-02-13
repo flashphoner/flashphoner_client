@@ -66,6 +66,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("connect", connect);
 			ExternalInterface.addCallback("talk", talk);
 			ExternalInterface.addCallback("hold", hold);
+			ExternalInterface.addCallback("changeVideoState",changeVideoState);
 			ExternalInterface.addCallback("setAudioCodec", setAudioCodec);
 			ExternalInterface.addCallback("close", close);
 			ExternalInterface.addCallback("publishStream", publishStream);
@@ -96,6 +97,13 @@ package com.flashphoner.api
 			phoneServerProxy.connect(urlFlashServer, connectObj);
 		}
 		
+		public function changeVideoState(callId:String, hasVideo:Boolean):void{
+			if (hasVideo){
+				phoneServerProxy.enableVideo(getPublishStreamNameForCall(userData.sipLogin, callId));
+			} else {
+				phoneServerProxy.disableVideo(getPublishStreamNameForCall(userData.sipLogin, callId));
+			}
+		}
 		
 		public  function talk(callId:String, hasVideo:Boolean):void{
 			phoneServerProxy.publish(getPublishStreamNameForCall(userData.sipLogin, callId), true, hasVideo);
