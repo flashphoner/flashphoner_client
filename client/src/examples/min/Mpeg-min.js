@@ -5,7 +5,11 @@
 var f = Flashphoner.getInstance();
 var stream;
 var player;
+var audioPlayer;
+
+
 function initAPI() {
+    initAudio();
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
@@ -28,6 +32,17 @@ function initMpeg() {
     player.initSocketClient(null, f.configuration.videoWidth, f.configuration.videoHeight);
 }
 
+function initAudio() {
+    try {
+        // Fix up for prefixing
+        window.AudioContext = window.AudioContext||window.webkitAudioContext;
+        audioPlayer = new AudioPlayer(new AudioContext());
+    }
+    catch(e) {
+        alert('Web Audio API is not supported in this browser' + e);
+    }
+}
+
 function connect() {
     f.connect({appKey: "defaultApp", useRTCSessions: false, useWsTunnel: true, useBase64BinaryEncoding: false});
 }
@@ -39,6 +54,7 @@ function connectionStatusListener(event) {
         console.log('Connection has been established. Retrieve stream');
         playStream();
     } else if (event.status == ConnectionStatus.Disconnected) {
+        audioPlayer.stop();
         console.log("Disconnected");
     } else if (event.status == ConnectionStatus.Failed) {
         f.disconnect();
@@ -46,7 +62,24 @@ function connectionStatusListener(event) {
 }
 
 function binaryListener(event) {
-    player.receiveSocketMessage(event);
+    var view = new DataView(event.data);
+    var header = parseInt("0x01010101", 16);
+    //de-multiplexing
+    if (header == view.getInt32(0)) {
+        //video
+        player.receiveSocketMessage(stripHeader(new Uint8Array(event.data)));
+    } else {
+        audioPlayer.play(stripHeader(new Uint8Array(event.data)));
+    }
+}
+
+function stripHeader(data) {
+    var ret = new Uint8Array(data.byteLength - 4);
+    var offset = 4;
+    for (var i = 0; i < ret.byteLength; i++, offset++) {
+        ret[i] = data[offset];
+    }
+    return ret;
 }
 
 //Connection Status
@@ -54,6 +87,10 @@ function streamStatusListener(event) {
     console.log(event.status);
     if (event.status == StreamStatus.Failed) {
         player.stop();
+        audioPlayer.stop();
+    } else if (event.status == StreamStatus.Stoped) {
+        player.stop();
+        audioPlayer.stop();
     }
 }
 
@@ -61,6 +98,7 @@ function streamStatusListener(event) {
 function errorEvent(event) {
     console.log(event.info);
     player.stop();
+    audioPlayer.stop();
 }
 
 function playStream() {
@@ -77,7 +115,10 @@ function playStream() {
 
     "m=video 6000 RTP/AVP 32\r\n" +
         "a=rtpmap:32 MPV/90000\r\n" +
-        "a=recvonly\r\n";
+        "a=recvonly\r\n" +
+    "m=audio 6002 RTP/AVP 0\r\n" +
+    "a=rtpmap:0 PCMU/8000\r\n" +
+    "a=recvonly\r\n";
     this.stream = stream;
     f.playStream(stream);
 }
