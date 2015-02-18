@@ -106,13 +106,13 @@ package com.flashphoner.api
 		}
 		
 		public  function talk(callId:String, hasVideo:Boolean):void{
-			phoneServerProxy.publish(getPublishStreamNameForCall(userData.sipLogin, callId), true, hasVideo);
 			phoneServerProxy.phoneSpeaker.play(getPlayStreamNameForCall(userData.sipLogin, callId), true);
+			phoneServerProxy.publish(getPublishStreamNameForCall(userData.sipLogin, callId), true, hasVideo);
 		}
 		
 		public  function hold(callId:String):void{
-			phoneServerProxy.unpublish(getPublishStreamNameForCall(userData.sipLogin, callId));
 			phoneServerProxy.phoneSpeaker.stop(getPlayStreamNameForCall(userData.sipLogin, callId));
+			phoneServerProxy.unpublish(getPublishStreamNameForCall(userData.sipLogin, callId));
 		}
 		
 		public  function setAudioCodec(id:String, codecObj:Object):void{
@@ -120,8 +120,8 @@ package com.flashphoner.api
 		}		
 		
 		public function close(callId:String):void{
-			phoneServerProxy.unpublish(getPublishStreamNameForCall(userData.sipLogin, callId));
 			phoneServerProxy.phoneSpeaker.stop(getPlayStreamNameForCall(userData.sipLogin, callId));
+			phoneServerProxy.unpublish(getPublishStreamNameForCall(userData.sipLogin, callId));
 		}
 		
 		public  function publishStream(streamName:String, hasAudio:Boolean, hasVideo:Boolean):void{

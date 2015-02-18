@@ -297,7 +297,8 @@ Flashphoner.prototype = {
             },
 
             notifyAudioCodec: function (id, codec) {
-                if (me.flashMediaManager) {
+                var call = me.calls.get(id);
+                if (me.flashMediaManager && call && MediaProvider.Flash == call.mediaProvider) {
                     me.flashMediaManager.setAudioCodec(id, codec);
                 }
             },
