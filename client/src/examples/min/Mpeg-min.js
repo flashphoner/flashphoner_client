@@ -9,7 +9,6 @@ var audioPlayer;
 
 
 function initAPI() {
-    initAudio();
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
@@ -17,6 +16,7 @@ function initAPI() {
     ConfigurationLoader.getInstance(function (configuration) {
         f.init(configuration);
         initMpeg();
+        initAudio();
         connect();
     });
 }
@@ -35,10 +35,10 @@ function initMpeg() {
 function initAudio() {
     try {
         // Fix up for prefixing
-        window.AudioContext = window.AudioContext||window.webkitAudioContext;
-        audioPlayer = new AudioPlayer(new AudioContext());
-    }
-    catch(e) {
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        var audioContext = new AudioContext();
+        audioPlayer = new AudioPlayer(audioContext, f.configuration.incomingAudioBufferLength);
+    } catch(e) {
         alert('Web Audio API is not supported in this browser' + e);
     }
 }
@@ -69,7 +69,7 @@ function binaryListener(event) {
         //video
         player.receiveSocketMessage(stripHeader(new Uint8Array(event.data)));
     } else {
-        audioPlayer.play(stripHeader(new Uint8Array(event.data)));
+        audioPlayer.ulaw8000(stripHeader(new Uint8Array(event.data)));
     }
 }
 

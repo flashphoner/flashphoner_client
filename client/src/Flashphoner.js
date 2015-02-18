@@ -1569,6 +1569,7 @@ Configuration = function () {
     this.msgContentType = "text/plain";
 
     this.pushLogEnabled = false;
+    this.incomingAudioBufferLength = 1024;
 };
 
 var Connection = function () {

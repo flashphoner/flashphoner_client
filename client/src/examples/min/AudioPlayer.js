@@ -1,17 +1,19 @@
-function AudioPlayer(audioContext) {
+function AudioPlayer(audioContext, internalBufferSize) {
     var me = this;
     this.initBuffers();
     this.nodeConnected = false;
     this.context = audioContext;
-    //this.resampler = new Resampler(8000, 44100, 1, 4096, true);
+    this.resampler = new Resampler(8000, 44100, 1, 4096, true);
+    //size of data js node will request, 1024 samples
+    this.internalBufferSize = parseInt(internalBufferSize) || 1024;
     try {
         this.context.createScriptProcessor = this.context.createScriptProcessor || this.context.createJavaScriptNode;
-        this.audioJSNode = this.context.createScriptProcessor(4096, 1, 1);
+        this.audioJSNode = this.context.createScriptProcessor(this.internalBufferSize, 1, 1);
     } catch (e) {
         alert('JS Audio Node is not supported in this browser' + e);
     }
     this.audioJSNode.onaudioprocess = function(event) {
-        var bufferSize = 4096;
+        var bufferSize = me.internalBufferSize;
         if (me.decodedBufferPos >= bufferSize) {
             var decoded = me.shiftDecodedData(bufferSize);
             var output = event.outputBuffer.getChannelData(0);
@@ -24,10 +26,12 @@ function AudioPlayer(audioContext) {
         }
     };
     this.codec = new G711U();
+    console.log("AudioPlayer ready, incoming buffer length " + this.internalBufferSize);
 }
 
 AudioPlayer.prototype.initBuffers = function() {
-    this.decodedBufferSize = 4096*100;
+    //1 second buffer of ieee float32 samples
+    this.decodedBufferSize = 176400;
     this.decodedBufferArray = new ArrayBuffer(this.decodedBufferSize);
     this.decodedBufferView = new Float32Array(this.decodedBufferArray);
     //fill array with 0
@@ -35,69 +39,83 @@ AudioPlayer.prototype.initBuffers = function() {
         this.decodedBufferView[i] = 0;
     }
     this.decodedBufferPos = 0;
-    console.log("decodedBuffer initialized, position " + this.decodedBufferPos);
 
-    this.incomingBufferArray = new ArrayBuffer(1600);
+    //not using at the moment
+    this.incomingBufferArray = new ArrayBuffer(1);
     this.incomingBufferView = new Uint8Array(this.incomingBufferArray);
     this.incomingBufferPos = 0;
-    console.log("incomingBuffer initialized, position " + this.incomingBufferPos);
+    console.log("Buffers ready");
 };
 
 /**
- * Decodes audio payload into 16-bit linear PCM and wraps it in WAV header
+ * Play G711U payload
  * @param payload G711U payload with 20ms ptime
  */
-AudioPlayer.prototype.play = function(payload) {
-    var me = this;
+AudioPlayer.prototype.ulaw8000 = function(payload) {
     var pcm16Data = this.codec.decode(payload);
-    var i;
-    for (i = 0; i < pcm16Data.byteLength; i++) {
-        this.incomingBufferView[this.incomingBufferPos++] = pcm16Data[i];
+    var retBuff = new Float32Array(pcm16Data.byteLength/2);
+    var incomingDataView = new DataView(pcm16Data.buffer);
+    for (var i = 0; i < retBuff.length; i++) {
+        retBuff[i] = incomingDataView.getInt16(i*2, true) / 32768.0;
     }
-    if (this.incomingBufferPos == 1600) {
-        //bufferred, wrap into wav
-        var header = this.codec.getWavHeader();
-        var retBuff = new Uint8Array(header.byteLength + this.incomingBufferView.byteLength);
-        var pos = 0;
-        for (i = 0; i < header.byteLength; i++, pos++) {
-            retBuff[pos] = header[i];
-        }
-        for (i = 0; i < this.incomingBufferView.byteLength; i++, pos++) {
-            retBuff[pos] = this.incomingBufferView[i];
-        }
-        this.incomingBufferPos = 0;
+    var resampledLength = this.resampler.resampler(retBuff);
+    var resampledResult = this.resampler.outputBuffer.subarray(0, resampledLength);
+    this.pushDecodedData(resampledResult);
 
-        //pass data to decoder
-        this.context.decodeAudioData(retBuff.buffer, function (buffer) {
-            me.pushDecodedData(buffer.getChannelData(0));
-            if (!me.nodeConnected) {
-                me.audioJSNode.connect(me.context.destination);
-                me.nodeConnected = true;
-            }
-        }, function (error) {
-            console.log("Got error from decoder! " + error)
-        });
-
-        /*
-        ////////////////////////////////////////////////
-        ///////////////convert to float and put into decoded buffer
-        var floatView = new Float32Array(this.incomingBufferPos / 2);
-        var bufferView = new DataView(this.incomingBufferArray);
-        var bytePos = 0;
-        for (var i = 0; i < this.incomingBufferPos / 2 ; i++, bytePos += 2) {
-            floatView[i] = bufferView.getInt16(bytePos) / 32768.0;
-        }
-        //resample
-        var resultLength = me.resampler.resampler(floatView);
-        this.pushDecodedData(me.resampler.outputBuffer.subarray(0, resultLength));
-        //this.test = true;
-        this.incomingBufferPos = 0;
-        if (!me.nodeConnected && me.decodedBufferPos > 4096*3) {
-            me.audioJSNode.connect(me.audioFilter);
-            me.audioFilter.connect(me.context.destination);
-            me.nodeConnected = true;
-        }*/
+    //buffer at least 1 sample
+    if (!this.nodeConnected && this.decodedBufferPos > this.internalBufferSize) {
+        this.audioJSNode.connect(this.context.destination);
+        this.nodeConnected = true;
     }
+
+};
+
+AudioPlayer.prototype.play16PCM8000 = function(payload) {
+    var retBuff = new Float32Array(payload.byteLength/2);
+    var incomingDataView = new DataView(payload.buffer);
+    for (var i = 0; i < retBuff.length; i++) {
+        retBuff[i] = incomingDataView.getInt16(i*2, true) / 32768.0;
+    }
+    var resampledLength = this.resampler.resampler(retBuff);
+    var resampledResult = this.resampler.outputBuffer.subarray(0, resampledLength);
+    this.pushDecodedData(resampledResult);
+    this.incomingBufferPos = 0;
+    if (!this.nodeConnected && this.decodedBufferPos > this.internalBufferSize) {
+        this.audioJSNode.connect(this.context.destination);
+        this.nodeConnected = true;
+    }
+
+};
+
+AudioPlayer.prototype.play32PCM8000 = function(payload) {
+    //playing bypass
+    var retBuff = new Float32Array(payload.byteLength/4);
+    var incomingDataView = new DataView(payload.buffer);
+    for (var i = 0; i < retBuff.length; i++) {
+        retBuff[i] = incomingDataView.getFloat32(i*4, true);
+    }
+    var resampledLength = me.resampler.resampler(retBuff);
+    var resampledResult = me.resampler.outputBuffer.subarray(0, resampledLength);
+    this.pushDecodedData(resampledResult);
+    if (!me.nodeConnected && this.decodedBufferPos > this.internalBufferSize) {
+        me.audioJSNode.connect(me.context.destination);
+        me.nodeConnected = true;
+    }
+
+};
+
+AudioPlayer.prototype.play32PCM44100 = function(payload) {
+    var retBuff = new Float32Array(payload.byteLength/4);
+    var incomingDataView = new DataView(payload.buffer);
+    for (var i = 0; i < retBuff.length; i++) {
+        retBuff[i] = incomingDataView.getFloat32(i*4, true);
+    }
+    this.pushDecodedData(retBuff);
+    if (!me.nodeConnected && this.decodedBufferPos > this.internalBufferSize) {
+        me.audioJSNode.connect(me.context.destination);
+        me.nodeConnected = true;
+    }
+
 };
 
 AudioPlayer.prototype.stop = function () {
@@ -114,6 +132,7 @@ AudioPlayer.prototype.pushDecodedData = function(data) {
     } else {
         console.log("Decoded audio buffer full!");
         //clear buffer
+        //todo shift instead
         this.decodedBufferPos = 0;
     }
 };
