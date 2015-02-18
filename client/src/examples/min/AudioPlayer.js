@@ -4,11 +4,12 @@ function AudioPlayer(audioContext) {
     this.nodeConnected = false;
     this.context = audioContext;
     //this.resampler = new Resampler(8000, 44100, 1, 4096, true);
-    this.audioFilter = this.context.createBiquadFilter();
-    this.audioFilter.type = "lowpas";
-    this.audioFilter.frequency.value = 4000;
-    console.dir(this.audioFilter);
-    this.audioJSNode = this.context.createScriptProcessor(4096, 1, 1);
+    try {
+        this.context.createScriptProcessor = this.context.createScriptProcessor || this.context.createJavaScriptNode;
+        this.audioJSNode = this.context.createScriptProcessor(4096, 1, 1);
+    } catch (e) {
+        alert('JS Audio Node is not supported in this browser' + e);
+    }
     this.audioJSNode.onaudioprocess = function(event) {
         var bufferSize = 4096;
         if (me.decodedBufferPos >= bufferSize) {
