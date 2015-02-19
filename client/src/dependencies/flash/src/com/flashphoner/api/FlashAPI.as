@@ -106,12 +106,11 @@ package com.flashphoner.api
 		}
 		
 		public  function talk(callId:String, hasVideo:Boolean):void{
-			phoneServerProxy.phoneSpeaker.play(getPlayStreamNameForCall(userData.sipLogin, callId), true);
+			phoneServerProxy.phoneSpeaker.play(getPlayStreamNameForCall(userData.sipLogin, callId), false);
 			phoneServerProxy.publish(getPublishStreamNameForCall(userData.sipLogin, callId), true, hasVideo);
 		}
 		
 		public  function hold(callId:String):void{
-			phoneServerProxy.phoneSpeaker.stop(getPlayStreamNameForCall(userData.sipLogin, callId));
 			phoneServerProxy.unpublish(getPublishStreamNameForCall(userData.sipLogin, callId));
 		}
 		
