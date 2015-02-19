@@ -32,6 +32,18 @@ function initMpeg() {
     player.initSocketClient(null, f.configuration.videoWidth, f.configuration.videoHeight);
 }
 
+function playFirstSound() {
+    var audioBuffer = audioPlayer.context.createBuffer(1, 441, 44100);
+    var output = audioBuffer.getChannelData(0);
+    for (var i = 0; i < output.length; i++) {
+        output[i] = Math.random() * 2 - 1;;
+    }
+    var src = audioPlayer.context.createBufferSource();
+    src.buffer = audioBuffer;
+    src.connect(audioPlayer.context.destination);
+    src.start(0);
+}
+
 function initAudio() {
     try {
         // Fix up for prefixing
@@ -130,3 +142,9 @@ function parseUrlId() {
     idTrans = address.match(pattern);
     return idTrans[1];
 }
+
+$(document).ready(function () {
+    $("#enableAudio").click(function () {
+        playFirstSound();
+    });
+});
