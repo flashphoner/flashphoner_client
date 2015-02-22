@@ -79,7 +79,7 @@ package com.flashphoner.api
 			}
 		}
 		
-		private function getCam():Camera {
+		public function getCam():Camera {
 			if (cam == null){
 				cam = Camera.getCamera();
 			}

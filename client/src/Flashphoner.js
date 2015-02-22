@@ -518,6 +518,12 @@ Flashphoner.prototype = {
         return 0;
     },
 
+    invokeProblem: function(status){
+        this.invokeListener(WCSEvent.ErrorStatusEvent, [
+            status
+        ]);
+    },
+
     disconnect: function () {
         trace("WebSocketManager - disconnect");
         this.webSocket.close();
@@ -676,9 +682,13 @@ Flashphoner.prototype = {
 
     getAccess: function (mediaProvider, hasVideo) {
         if (hasVideo) {
-            this.mediaProviders.get(mediaProvider).getAccessToAudioAndVideo();
+            if (!this.mediaProviders.get(mediaProvider).getAccessToAudioAndVideo()) {
+                this.invokeProblem({status:WCSError.MIC_CAM_ACCESS_PROBLEM, info:"Failed to get access to microphone or not found"});
+            }
         } else {
-            this.mediaProviders.get(mediaProvider).getAccessToAudio();
+            if (!this.mediaProviders.get(mediaProvider).getAccessToAudio()){
+                this.invokeProblem({status:WCSError.MIC_ACCESS_PROBLEM, info:"Failed to get access to microphone and camera or not found"});
+            }
         }
     },
 
@@ -1068,9 +1078,12 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
                 trace("Failed to get access to local media. Error code was " + error.code + ".");
                 me.isAudioMuted = 1;
                 me.isVideoMuted = 1;
+                var status = {status:WCSError.MIC_CAM_ACCESS_PROBLEM, info:"Failed to get access to microphone and camera. Error code was " + error.code + "."};
+                Flashphoner.getInstance().invokeProblem(status);
             }
         );
     }
+    return true;
 };
 WebRtcMediaManager.prototype.getAccessToAudio = function () {
     var me = this;
@@ -1079,11 +1092,13 @@ WebRtcMediaManager.prototype.getAccessToAudio = function () {
                 me.localAudioStream = stream;
                 me.isAudioMuted = -1;
             }, function (error) {
-                trace("Failed to get access to local media. Error code was " + error.code + ".");
+                var status = {status:WCSError.MIC_ACCESS_PROBLEM, info:"Failed to get access to microphone. Error code was " + error.code + "."};
+                Flashphoner.getInstance().invokeProblem(status);
                 me.isAudioMuted = 1;
             }
         );
     }
+    return true;
 };
 
 var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, remoteMediaElementId) {
@@ -1680,6 +1695,8 @@ WCSEvent.OnTransferEvent = "ON_TRANSFER_EVENT";
 
 var WCSError = function () {
 };
+WCSError.MIC_ACCESS_PROBLEM = "MIC_ACCESS_PROBLEM";
+WCSError.MIC_CAM_ACCESS_PROBLEM = "MIC_CAM_ACCESS_PROBLEM";
 WCSError.AUTHENTICATION_FAIL = "AUTHENTICATION_FAIL";
 WCSError.USER_NOT_AVAILABLE = "USER_NOT_AVAILABLE";
 WCSError.TOO_MANY_REGISTER_ATTEMPTS = "TOO_MANY_REGISTER_ATTEMPTS";

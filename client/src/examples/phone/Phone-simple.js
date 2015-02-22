@@ -67,12 +67,24 @@ Phone.prototype.disconnect = function () {
     Flashphoner.getInstance().disconnect();
 };
 
+Phone.prototype.cancel = function() {
+    if (this.currentCall) {
+        this.hangup(this.currentCall);
+    }
+};
+
 Phone.prototype.msrpCall = function (callee) {
     var me = this;
     callee = me.applyCalleeLetterCase(callee);
     trace("Phone - msrpCall " + callee);
 
-    me.currentCall = Flashphoner.getInstance().msrpCall({callee: callee, visibleName: 'Caller', hasVideo: false, inviteParameters: {param1: "value1", param2: "value2"}, isMsrp: true});
+    me.currentCall = Flashphoner.getInstance().msrpCall({
+        callee: callee,
+        visibleName: 'Caller',
+        hasVideo: false,
+        inviteParameters: {param1: "value1", param2: "value2"},
+        isMsrp: true
+    });
 };
 
 Phone.prototype.call = function (callee, hasVideo, mediaProvider) {
@@ -437,46 +449,53 @@ Phone.prototype.dataStatusEventListener = function (event) {
 
 Phone.prototype.errorStatusEvent = function (event) {
     var code = event.status;
-    var sipObject = event.sipMessageRaw;
     trace("Phone - errorStatusEvent " + code);
-
-    if (code == WCSError.CONNECTION_ERROR) {
-        trace("Phone - ERROR - Can`t connect to server.");
+    this.cancel();
+    if (code == WCSError.MIC_ACCESS_PROBLEM) {
+        this.viewMessage("ERROR - " + event.info);
+    } else if (code == WCSError.MIC_CAM_ACCESS_PROBLEM) {
+        this.viewMessage("ERROR - " + event.info);
+    } else if (code == WCSError.CONNECTION_ERROR) {
+        this.viewMessage("ERROR - Can`t connect to server.");
     } else if (code == WCSError.AUTHENTICATION_FAIL) {
-        trace("Phone - ERROR - Register fail, please check your SIP account details.");
+        this.viewMessage("ERROR - Register fail, please check your SIP account details.");
         window.setTimeout("disconnect();", 3000);
     } else if (code == WCSError.USER_NOT_AVAILABLE) {
-        trace("Phone - ERROR - User not available.");
+        this.viewMessage("ERROR - User not available.");
     } else if (code == WCSError.LICENSE_RESTRICTION) {
-        trace("Phone - ERROR - You trying to connect too many users, or license is expired");
+        this.viewMessage("ERROR - You trying to connect too many users, or license is expired");
     } else if (code == WCSError.LICENSE_NOT_FOUND) {
-        trace("Phone - ERROR - Please get a valid license or contact Flashphoner support");
+        this.viewMessage("ERROR - Please get a valid license or contact Flashphoner support");
     } else if (code == WCSError.INTERNAL_SIP_ERROR) {
-        trace("Phone - ERROR - Unknown error. Please contact support.");
+        this.viewMessage("ERROR - Unknown error. Please contact support.");
     } else if (code == WCSError.REGISTER_EXPIRE) {
-        trace("Phone - ERROR - No response from VOIP server during 15 seconds.");
+        this.viewMessage("ERROR - No response from VOIP server during 15 seconds.");
     } else if (code == WCSError.SIP_PORTS_BUSY) {
-        trace("Phone - ERROR - SIP ports are busy. Please open SIP ports range (30000-31000 by default).");
+        this.viewMessage("ERROR - SIP ports are busy. Please open SIP ports range (30000-31000 by default).");
         window.setTimeout("disconnect();", 3000);
     } else if (code == WCSError.MEDIA_PORTS_BUSY) {
-        trace("Phone - ERROR - Media ports are busy. Please open media ports range (31001-32000 by default).");
+        this.viewMessage("ERROR - Media ports are busy. Please open media ports range (31001-32000 by default).");
     } else if (code == WCSError.WRONG_SIPPROVIDER_ADDRESS) {
-        trace("Phone - ERROR - Wrong domain.");
+        this.viewMessage("ERROR - Wrong domain.");
         window.setTimeout("disconnect();", 3000);
     } else if (code == WCSError.CALLEE_NAME_IS_NULL) {
-        trace("Phone - ERROR - Callee name is empty.");
+        this.viewMessage("ERROR - Callee name is empty.");
     } else if (code == WCSError.WRONG_FLASHPHONER_XML) {
-        trace("Phone - ERROR - Flashphoner.xml has errors. Please check it.");
+        this.viewMessage("ERROR - Flashphoner.xml has errors. Please check it.");
     } else if (code == WCSError.PAYMENT_REQUIRED) {
-        trace("Phone - ERROR - Payment required, please check your balance.");
+        this.viewMessage("ERROR - Payment required, please check your balance.");
     } else if (code == WCSError.REST_AUTHORIZATION_FAIL) {
-        trace("Phone - ERROR - Rest authorization fail.");
+        this.viewMessage("ERROR - Rest authorization fail.");
         window.setTimeout("disconnect();", 3000);
     } else if (code == WCSError.REST_FAIL) {
-        trace("Phone - ERROR - Rest fail.");
+        this.viewMessage("ERROR - Rest fail.");
     }
 
     this.flashphonerListener.onError();
+};
+
+Phone.prototype.viewMessage = function(message) {
+    trace(message);
 };
 
 /* ------------- Additional interface functions --------- */
@@ -496,7 +515,7 @@ Phone.prototype.isRingSoundAllowed = function () {
     return true;
 };
 
-Phone.prototype.applyCalleeLetterCase = function(callee){
+Phone.prototype.applyCalleeLetterCase = function (callee) {
     if (callee) {
         if ("uppercase" == ConfigurationLoader.getInstance().calleeLetterCase) {
             return callee.toUpperCase();

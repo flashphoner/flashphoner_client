@@ -73,9 +73,12 @@ This code and accompanying materials also available under LGPL and MPL license f
 				return flashAPI.videoControl.hasAccess();
 			}
 			
-			public function getAccessToAudio():void{
+			public function getAccessToAudio():Boolean {
+				var mic:Microphone = flashAPI.getMicrophone();
+				if (mic == null){
+					return false;
+				}
 				if (!flashAPI.hasAccessToAudio()){
-					var mic:Microphone = flashAPI.getMicrophone();
 					mic.addEventListener(StatusEvent.STATUS, onMicrophoneStatus);
 					mic.setLoopBack(true);
 					videoPartner.visible = false;
@@ -83,10 +86,15 @@ This code and accompanying materials also available under LGPL and MPL license f
 					timer.addEventListener(TimerEvent.TIMER, timerTick);
 					timer.start();					
 				}
+				return true;
 			}
 			
-			public function getAccessToAudioAndVideo():void{
-				getAccessToAudio();
+			public function getAccessToAudioAndVideo():Boolean {
+				if (flashAPI.videoControl.getCam() == null){
+					return false;
+				}
+				
+				return getAccessToAudio();
 			}
 			
 			private function timerTick(event:TimerEvent):void{

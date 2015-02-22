@@ -191,14 +191,18 @@ Phone.prototype.callStatusListener = function (event) {
     }
 };
 
-Phone.prototype.cancel = function(){
-    $(".call__out__dial").text("calling to");					// return to initial view of outgoing call (view without number or login name)
-    $("body").removeAttr("class");								// remove all classes from the body
-    $(".b-mike, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // close set of blocks which are hidden by default
-    $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// open a set of blocks which might be hidden, but the blocks are visible by default
-    $(".b-alert").text("").removeClass("video_alert");	// initial view of video alert
+Phone.prototype.cancel = function () {
+    if (this.currentCall) {
+        this.hangup(this.currentCall);
+    } else {
+        $(".call__out__dial").text("calling to");					// return to initial view of outgoing call (view without number or login name)
+        $("body").removeAttr("class");								// remove all classes from the body
+        $(".b-mike, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // close set of blocks which are hidden by default
+        $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// open a set of blocks which might be hidden, but the blocks are visible by default
+        $(".b-alert").text("").removeClass("video_alert");	// initial view of video alert
 
-    this.hideFlashAccess();
+        this.hideFlashAccess();
+    }
 };
 
 Phone.prototype.messageStatusListener = function (event) {
@@ -251,7 +255,7 @@ Phone.prototype.onMessageListener = function (event) {
     this.chatScrollDown();
 };
 
-Phone.prototype.hideFlashAccess = function(){
+Phone.prototype.hideFlashAccess = function () {
     if ($(".b-video").hasClass("flash_access")) {
         $(".b-video").removeClass("flash_access").resizable("enable");
         $(".b-video__flash").removeClass("access");
@@ -297,7 +301,7 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
     return Flashphoner.getInstance().getAccess(mediaProvider, hasVideo);
 };
 
-Phone.prototype.openVideoView = function (){
+Phone.prototype.openVideoView = function () {
     var me = this;
     var mediaProvider = MediaProvider.Flash;
     if (Flashphoner.getInstance().mediaProviders.get(MediaProvider.WebRTC)) {
@@ -370,8 +374,8 @@ Phone.prototype.chatSelectTab = function (elem) {
     }
 };
 
-Phone.prototype.viewMessage = function(message){
-    $(".b-alert__error__message").html("<p>"+message + "</p>");
+Phone.prototype.viewMessage = function (message) {
+    $(".b-alert__error__message").html("<p>" + message + "</p>");
     $(".b-alert__error").addClass("open");
 };
 
@@ -417,7 +421,7 @@ $(document).ready(function () {
     });
 
     $(".b-send_video").live("click", function () {
-        if ($(this).text() == "Send video"){
+        if ($(this).text() == "Send video") {
             phone.changeVideoState(phone.currentCall, true);
             $(this).text("Stop video");
         } else {
@@ -725,10 +729,6 @@ $(document).ready(function () {
     });
 
     $(".b-nav__cancel_call, .close, .b-nav__hangup").live("click", function () {	// return to initial view
-        if (phone.currentCall) {
-            phone.hangup(phone.currentCall);
-        } else {
-            phone.cancel();
-        }
+        phone.cancel();
     });
 });
