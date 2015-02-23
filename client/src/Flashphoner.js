@@ -681,21 +681,25 @@ Flashphoner.prototype = {
     },
 
     getAccess: function (mediaProvider, hasVideo) {
-        if (hasVideo) {
-            if (!this.mediaProviders.get(mediaProvider).getAccessToAudioAndVideo()) {
-                this.invokeProblem({
-                    status: WCSError.MIC_CAM_ACCESS_PROBLEM,
-                    info: "Failed to get access to microphone or not found"
-                });
+        var me = this;
+        setTimeout(function(){
+            if (hasVideo) {
+                if (!me.mediaProviders.get(mediaProvider).getAccessToAudioAndVideo()) {
+                    me.invokeProblem({
+                        status: WCSError.MIC_CAM_ACCESS_PROBLEM,
+                        info: "Failed to get access to microphone or not found"
+                    });
+                }
+            } else {
+                if (!me.mediaProviders.get(mediaProvider).getAccessToAudio()) {
+                    me.invokeProblem({
+                        status: WCSError.MIC_ACCESS_PROBLEM,
+                        info: "Failed to get access to microphone and camera or not found"
+                    });
+                }
             }
-        } else {
-            if (!this.mediaProviders.get(mediaProvider).getAccessToAudio()) {
-                this.invokeProblem({
-                    status: WCSError.MIC_ACCESS_PROBLEM,
-                    info: "Failed to get access to microphone and camera or not found"
-                });
-            }
-        }
+        }, 50);
+
     },
 
     hasAccess: function (mediaProvider, hasVideo) {

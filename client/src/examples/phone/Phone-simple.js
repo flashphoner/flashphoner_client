@@ -139,7 +139,7 @@ Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
 };
 
 Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
-    return Flashphoner.getInstance().getAccess(mediaProvider, hasVideo);
+    Flashphoner.getInstance().getAccess(mediaProvider, hasVideo);
 };
 
 

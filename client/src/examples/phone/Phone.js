@@ -298,7 +298,7 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
         hasVideo ? $(".b-alert").html("Please <span>allow</span> access to your web camera and microphone.") : $(".b-alert").html("please <span>allow</span> access to audio device");
         $("body").addClass("mike");
     }
-    return Flashphoner.getInstance().getAccess(mediaProvider, hasVideo);
+    Flashphoner.getInstance().getAccess(mediaProvider, hasVideo);
 };
 
 Phone.prototype.openVideoView = function () {
