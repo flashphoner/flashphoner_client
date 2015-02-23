@@ -12,6 +12,7 @@ ConfigurationLoader = function (configLoadedListener) {
     }
 
     this.configuration = new Configuration();
+    this.forceMediaProvider = null;
     this.calleeLetterCase = null;
     this.msrpCallee = null;
     this.subscribeEvent = null;
@@ -127,6 +128,10 @@ ConfigurationLoader.prototype = {
         }
 
         //EXAMPLE CONFIGURATION
+        var forceMediaProvider = $(xml).find("force_media_provider");
+        if (forceMediaProvider.length) {
+            this.forceMediaProvider = forceMediaProvider.text();
+        }
 
         var msrpCallee = $(xml).find("msrp_callee");
         if (msrpCallee.length > 0) {

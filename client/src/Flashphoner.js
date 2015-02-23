@@ -518,7 +518,7 @@ Flashphoner.prototype = {
         return 0;
     },
 
-    invokeProblem: function(status){
+    invokeProblem: function (status) {
         this.invokeListener(WCSEvent.ErrorStatusEvent, [
             status
         ]);
@@ -683,11 +683,17 @@ Flashphoner.prototype = {
     getAccess: function (mediaProvider, hasVideo) {
         if (hasVideo) {
             if (!this.mediaProviders.get(mediaProvider).getAccessToAudioAndVideo()) {
-                this.invokeProblem({status:WCSError.MIC_CAM_ACCESS_PROBLEM, info:"Failed to get access to microphone or not found"});
+                this.invokeProblem({
+                    status: WCSError.MIC_CAM_ACCESS_PROBLEM,
+                    info: "Failed to get access to microphone or not found"
+                });
             }
         } else {
-            if (!this.mediaProviders.get(mediaProvider).getAccessToAudio()){
-                this.invokeProblem({status:WCSError.MIC_ACCESS_PROBLEM, info:"Failed to get access to microphone and camera or not found"});
+            if (!this.mediaProviders.get(mediaProvider).getAccessToAudio()) {
+                this.invokeProblem({
+                    status: WCSError.MIC_ACCESS_PROBLEM,
+                    info: "Failed to get access to microphone and camera or not found"
+                });
             }
         }
     },
@@ -1078,7 +1084,10 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
                 trace("Failed to get access to local media. Error code was " + error.code + ".");
                 me.isAudioMuted = 1;
                 me.isVideoMuted = 1;
-                var status = {status:WCSError.MIC_CAM_ACCESS_PROBLEM, info:"Failed to get access to microphone and camera. Error code was " + error.code + "."};
+                var status = {
+                    status: WCSError.MIC_CAM_ACCESS_PROBLEM,
+                    info: "Failed to get access to microphone and camera. Error code was " + error.code + "."
+                };
                 Flashphoner.getInstance().invokeProblem(status);
             }
         );
@@ -1092,7 +1101,10 @@ WebRtcMediaManager.prototype.getAccessToAudio = function () {
                 me.localAudioStream = stream;
                 me.isAudioMuted = -1;
             }, function (error) {
-                var status = {status:WCSError.MIC_ACCESS_PROBLEM, info:"Failed to get access to microphone. Error code was " + error.code + "."};
+                var status = {
+                    status: WCSError.MIC_ACCESS_PROBLEM,
+                    info: "Failed to get access to microphone. Error code was " + error.code + "."
+                };
                 Flashphoner.getInstance().invokeProblem(status);
                 me.isAudioMuted = 1;
             }
@@ -1239,17 +1251,17 @@ WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, has
             trace("peerConnection is null");
             me.createPeerConnection();
             if (hasAudio && hasVideo) {
-                if (me.webRtcMediaManager.videoTrack){
+                if (me.webRtcMediaManager.videoTrack) {
                     me.webRtcMediaManager.localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
                     me.webRtcMediaManager.videoTrack = null;
                 }
                 me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
             } else if (hasAudio) {
-                if (me.webRtcMediaManager.localAudioStream){
+                if (me.webRtcMediaManager.localAudioStream) {
                     me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
                 } else {
                     var localAudioVideoStream = me.webRtcMediaManager.localAudioVideoStream;
-                    if (localAudioVideoStream.getVideoTracks().length > 0){
+                    if (localAudioVideoStream.getVideoTracks().length > 0) {
                         me.webRtcMediaManager.videoTrack = localAudioVideoStream.getVideoTracks()[0];
                         localAudioVideoStream.removeTrack(me.webRtcMediaManager.videoTrack);
                     }
@@ -1286,17 +1298,17 @@ WebRtcMediaConnection.prototype.createAnswer = function (createAnswerCallback, h
         if (me.peerConnection == null) {
             me.createPeerConnection();
             if (hasVideo) {
-                if (me.webRtcMediaManager.videoTrack){
+                if (me.webRtcMediaManager.videoTrack) {
                     me.webRtcMediaManager.localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
                     me.webRtcMediaManager.videoTrack = null;
                 }
                 me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
             } else {
-                if (me.webRtcMediaManager.localAudioStream){
+                if (me.webRtcMediaManager.localAudioStream) {
                     me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
                 } else {
                     var localAudioVideoStream = me.webRtcMediaManager.localAudioVideoStream;
-                    if (localAudioVideoStream.getVideoTracks().length > 0){
+                    if (localAudioVideoStream.getVideoTracks().length > 0) {
                         me.webRtcMediaManager.videoTrack = localAudioVideoStream.getVideoTracks()[0];
                         localAudioVideoStream.removeTrack(me.webRtcMediaManager.videoTrack);
                     }
@@ -1626,7 +1638,7 @@ CallStatus.FINISH = "FINISH";
 CallStatus.BUSY = "BUSY";
 CallStatus.SESSION_PROGRESS = "SESSION_PROGRESS";
 
-var DtmfType = function(){
+var DtmfType = function () {
 };
 
 DtmfType.info = "INFO";

@@ -90,6 +90,13 @@ Phone.prototype.msrpCall = function (callee) {
 Phone.prototype.call = function (callee, hasVideo, mediaProvider) {
     var me = this;
     callee = me.applyCalleeLetterCase(callee);
+
+    var forceMediaProvider = ConfigurationLoader.getInstance().forceMediaProvider;
+    if (forceMediaProvider) {
+        if (Flashphoner.getInstance().mediaProviders.get(forceMediaProvider)){
+            mediaProvider = forceMediaProvider;
+        }
+    }
     trace("Phone - call " + callee);
     if (!me.hasAccess(mediaProvider, hasVideo)) {
         if (me.intervalId == -1) {
