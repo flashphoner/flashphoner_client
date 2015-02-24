@@ -303,10 +303,7 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
 
 Phone.prototype.openVideoView = function () {
     var me = this;
-    var mediaProvider = MediaProvider.Flash;
-    if (Flashphoner.getInstance().mediaProviders.get(MediaProvider.WebRTC)) {
-        mediaProvider = MediaProvider.WebRTC;
-    }
+    var mediaProvider = me.getMediaProvider();
     if (!me.hasAccess(mediaProvider, true)) {
         if (me.intervalId == -1) {
             var checkAccessFunc = function () {
@@ -566,10 +563,7 @@ $(document).ready(function () {
                 $("body").addClass("video")
             } // if it is a video call then add the body class (for alert view)
 
-            var mediaProvider = MediaProvider.Flash;
-            if (Flashphoner.getInstance().mediaProviders.get(MediaProvider.WebRTC)) {
-                mediaProvider = MediaProvider.WebRTC;
-            }
+            var mediaProvider = phone.getMediaProvider();
 
             if ($("body").hasClass("video")) {
                 phone.call($(".b-numbers").val(), true, mediaProvider);

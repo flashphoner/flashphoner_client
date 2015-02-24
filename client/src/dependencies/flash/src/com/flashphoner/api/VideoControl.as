@@ -111,7 +111,7 @@ package com.flashphoner.api
 		public function hasAccess():Boolean{
 			var camera:Camera = getCam();
 			if (camera == null){
-				return true;
+				return false;
 			}else{
 				if (camera.muted){
 					return false;

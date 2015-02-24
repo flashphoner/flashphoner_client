@@ -41,6 +41,25 @@ Phone.prototype.init = function () {
     Flashphoner.getInstance().addListener(WCSEvent.DataStatusEvent, this.dataStatusEventListener, this);
 };
 
+Phone.prototype.getMediaProvider = function () {
+    var mediaProviders = Flashphoner.getInstance().mediaProviders;
+    var mediaProvider;
+
+    var forceMediaProvider = ConfigurationLoader.getInstance().forceMediaProvider;
+    if (forceMediaProvider) {
+        if (mediaProviders.get(forceMediaProvider)) {
+            mediaProvider = forceMediaProvider;
+        }
+    }
+    if (!mediaProvider) {
+        mediaProvider = MediaProvider.Flash;
+        if (mediaProviders.get(MediaProvider.WebRTC)) {
+            mediaProvider = MediaProvider.WebRTC;
+        }
+    }
+    return mediaProvider;
+};
+
 
 Phone.prototype.connect = function () {
     if ($("#outbound_proxy").val() == "") {
@@ -67,7 +86,7 @@ Phone.prototype.disconnect = function () {
     Flashphoner.getInstance().disconnect();
 };
 
-Phone.prototype.cancel = function() {
+Phone.prototype.cancel = function () {
     if (this.currentCall) {
         this.hangup(this.currentCall);
     }
@@ -90,13 +109,6 @@ Phone.prototype.msrpCall = function (callee) {
 Phone.prototype.call = function (callee, hasVideo, mediaProvider) {
     var me = this;
     callee = me.applyCalleeLetterCase(callee);
-
-    var forceMediaProvider = ConfigurationLoader.getInstance().forceMediaProvider;
-    if (forceMediaProvider) {
-        if (Flashphoner.getInstance().mediaProviders.get(forceMediaProvider)){
-            mediaProvider = forceMediaProvider;
-        }
-    }
     trace("Phone - call " + callee);
     if (!me.hasAccess(mediaProvider, hasVideo)) {
         if (me.intervalId == -1) {
@@ -501,7 +513,7 @@ Phone.prototype.errorStatusEvent = function (event) {
     this.flashphonerListener.onError();
 };
 
-Phone.prototype.viewMessage = function(message) {
+Phone.prototype.viewMessage = function (message) {
     trace(message);
 };
 

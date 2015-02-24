@@ -234,7 +234,7 @@ package com.flashphoner.api
 		 **/
 		public function hasAccessToAudio():Boolean{
 			if (mic == null){
-				return true;
+				return false;
 			}else{
 				if (mic.muted){
 					return false;
@@ -285,16 +285,18 @@ package com.flashphoner.api
 		}		
 		
 		private function initMic(mic:Microphone, gain:int=50, loopback:Boolean=false):void{
-			changeCodec("pcma");
+			if (mic != null){
+				changeCodec("pcma");
+				
+				if (gain != -1){
+					mic.gain = gain;
+				}
 			
-			if (gain != -1){
-				mic.gain = gain;
+				mic.soundTransform = new SoundTransform(1,0);			
+				mic.setLoopBack(loopback);			
+				mic.setSilenceLevel(0,3600000);
+				mic.setUseEchoSuppression(true);
 			}
-			
-			mic.soundTransform = new SoundTransform(1,0);			
-			mic.setLoopBack(loopback);			
-			mic.setSilenceLevel(0,3600000);
-			mic.setUseEchoSuppression(true);
 		}
 		
 		public function changeAudioCodec(codec:Object):void{			
