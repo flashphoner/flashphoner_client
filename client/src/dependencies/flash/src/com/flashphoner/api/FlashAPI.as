@@ -51,6 +51,8 @@ package com.flashphoner.api
 		private var mic:Microphone;
 		
 		private var userData:Object;
+		
+		private var currentGain:int = -1;
 
 		/**
 		 * Default contructor.
@@ -77,6 +79,8 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("disconnect",disconnect);
 			ExternalInterface.addCallback("getMicVolume",getMicVolume);
 			ExternalInterface.addCallback("setMicVolume",setMicVolume);
+			ExternalInterface.addCallback("mute",mute);
+			ExternalInterface.addCallback("unmute",unmute);
 			ExternalInterface.addCallback("getVolume",getVolume);
 			ExternalInterface.addCallback("setVolume",setVolume);
 			ExternalInterface.addCallback("getMicropones",getMicropones);
@@ -181,6 +185,20 @@ package com.flashphoner.api
 				mic.gain = volume;
 			}
 		}
+		
+		public function mute():void{
+			if (mic != null){
+				currentGain = mic.gain;
+				mic.gain = 0;
+			}
+		}
+		
+		public function unmute():void{
+			if (mic != null && currentGain != -1){
+				mic.gain = currentGain;
+				currentGain = -1;
+			}
+		}		
 		
 		/**
 		 * Get volume of speakers

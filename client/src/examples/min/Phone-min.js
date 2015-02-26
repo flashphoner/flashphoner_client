@@ -22,6 +22,14 @@ function hangup() {
     f.hangup(currentCall);
 }
 
+function mute() {
+    f.mute();
+}
+
+function unmute() {
+    f.unmute();
+}
+
 //New call
 function call() {
     var call = new Call();

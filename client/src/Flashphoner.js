@@ -719,6 +719,20 @@ Flashphoner.prototype = {
         this.mediaProviders.get(call.mediaProvider).setVolume(call.callId, value);
     },
 
+    mute: function(mediaProvider) {
+        if (!mediaProvider){
+            mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
+        }
+        this.mediaProviders.get(mediaProvider).mute();
+    },
+
+    unmute : function(mediaProvider) {
+        if (!mediaProvider){
+            mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
+        }
+        this.mediaProviders.get(mediaProvider).unmute();
+    },
+
     sendMessage: function (message) {
         var id = createUUID();
         message.id = id;
@@ -1000,6 +1014,23 @@ WebRtcMediaManager.prototype.setVolume = function (id, volume) {
     webRtcMediaConnection.remoteMediaElement.volume = volume / 100;
 };
 
+WebRtcMediaManager.prototype.mute = function () {
+    if (this.localAudioStream) {
+        this.localAudioStream.getAudioTracks()[0].enabled = false;
+    }
+    if (this.localAudioVideoStream) {
+        this.localAudioVideoStream.getAudioTracks()[0].enabled = false;
+    }
+};
+
+WebRtcMediaManager.prototype.unmute = function () {
+    if (this.localAudioStream) {
+        this.localAudioStream.getAudioTracks()[0].enabled = true;
+    }
+    if (this.localAudioVideoStream) {
+        this.localAudioVideoStream.getAudioTracks()[0].enabled = true;
+    }
+};
 
 WebRtcMediaManager.prototype.hasAccessToAudio = function () {
     return this.isAudioMuted == -1;
