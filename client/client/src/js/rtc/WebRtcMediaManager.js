@@ -123,6 +123,24 @@ WebRtcMediaManager.prototype.waitGatheringIce = function () {
     }
 };
 
+WebRtcMediaManager.prototype.mute = function () {
+    if (this.localAudioStream) {
+        this.localAudioStream.getAudioTracks()[0].enabled = false;
+    }
+    if (this.localAudioVideoStream) {
+        this.localAudioVideoStream.getAudioTracks()[0].enabled = false;
+    }
+};
+
+WebRtcMediaManager.prototype.unmute = function () {
+    if (this.localAudioStream) {
+        this.localAudioStream.getAudioTracks()[0].enabled = true;
+    }
+    if (this.localAudioVideoStream) {
+        this.localAudioVideoStream.getAudioTracks()[0].enabled = true;
+    }
+};
+
 WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
     var me = this;
     if (!me.localAudioVideoStream) {

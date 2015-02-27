@@ -477,6 +477,14 @@ WebSocketManager.prototype = {
 
     setStunServer: function (server) {
         this.webRtcMediaManager.setStunServer(server);
+    },
+
+    mute: function() {
+        this.webRtcMediaManager.mute();
+    },
+
+    unmute: function() {
+        this.webRtcMediaManager.unmute();
     }
 
 };

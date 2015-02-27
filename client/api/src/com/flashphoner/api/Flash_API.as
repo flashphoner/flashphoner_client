@@ -72,6 +72,9 @@ package com.flashphoner.api
 		public static function initLibrary():void{
 			PhoneModel.getInstance();
 		}
+		
+		private var currentGain:int = -1;
+		
 		/**
 		 * Default contructor.
 		 * Initialize calls,modelLocato and initialize library
@@ -122,6 +125,8 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("openSettingsPanel",openSettingsPanel);
 			ExternalInterface.addCallback("submitBugReport",submitBugReport);
 			ExternalInterface.addCallback("setLTState",setLTState);
+			ExternalInterface.addCallback("mute",mute);
+			ExternalInterface.addCallback("unmute",unmute);
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -705,5 +710,19 @@ package com.flashphoner.api
 			obj.state = state;
 			this.phoneServerProxy.setLTState(obj);
 		}
+		
+		public function mute():void{
+			if (mic != null){
+				currentGain = mic.gain;
+				mic.gain = 0;
+			}
+		}
+		
+		public function unmute():void{
+			if (mic != null && currentGain != -1){
+				mic.gain = currentGain;
+				currentGain = -1;
+			}
+		}	
 	}
 }
