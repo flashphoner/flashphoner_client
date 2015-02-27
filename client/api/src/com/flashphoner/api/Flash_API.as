@@ -712,6 +712,7 @@ package com.flashphoner.api
 		}
 		
 		public function mute():void{
+			var mic:Microphone = soundControl.getMicrophone();
 			if (mic != null){
 				currentGain = mic.gain;
 				mic.gain = 0;
@@ -719,6 +720,7 @@ package com.flashphoner.api
 		}
 		
 		public function unmute():void{
+			var mic:Microphone = soundControl.getMicrophone();
 			if (mic != null && currentGain != -1){
 				mic.gain = currentGain;
 				currentGain = -1;
