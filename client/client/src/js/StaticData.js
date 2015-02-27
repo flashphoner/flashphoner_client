@@ -33,6 +33,13 @@ var CALLEE_NAME_IS_NULL = "CALLEE_NAME_IS_NULL";
 var WRONG_FLASHPHONER_XML = "WRONG_FLASHPHONER_XML";
 var PAYMENT_REQUIRED = "PAYMENT_REQUIRED";
 
+var DtmfType = function(){
+};
+
+DtmfType.info = "INFO";
+DtmfType.info_relay = "INFO_RELAY";
+DtmfType.rfc2833 = "RFC2833";
+
 var isMobile = {
     Android: function() {
         return navigator.userAgent.match(/Android/i);
