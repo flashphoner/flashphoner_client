@@ -30,29 +30,56 @@ package com.flashphoner.api
 	{
 		private static var videoControl:VideoControl;
 		private var cam:Camera;
-		private const FPS:int = 15;
-		private const KEEP_RATIO:Boolean = true;
-		private const KEY_INT:int = 48;
-		private const QUALITY:int = 80;
+		private var FPS:int = 15;
+		private var KEEP_RATIO:Boolean = true;
+		private var KEY_INT:int = 48;
+		private var QUALITY:int = 80;
+		private var MOTION_LEVEL:int = 2000;
+		private var BANDWIDTH:int = 0;
 		private var width:int;
 		private var height:int;
+		private var configuration:Object;
 		
 		public function VideoControl(){
+		}
+		
+		private function getIntConfigurationProperty(value:String, def: int):int{
+			if (value!=null && value.length!=0){
+				return int (value);
+			}else{
+				return def;
+			}			 
+		}
+		
+		private function getBooleanConfigurationProperty(value:String, def: Boolean):Boolean{
+			if (value!=null && value.length!=0){
+				return Boolean (value);
+			}else{
+				return def;
+			}			 
 		}
 		
 		/**
 		 * Init width,height,fps and another parameters
 		 **/ 
-		public function init(width:int, height:int):void{
-			this.width = width;
-			this.height = height;
+		public function init(configuration:Object):void{			
+			this.width = configuration.videoWidth;
+			this.height = configuration.videoHeight;			
+			this.FPS = getIntConfigurationProperty(configuration.flashCameraFPS, this.FPS);
+			this.KEEP_RATIO = getBooleanConfigurationProperty(configuration.flashCameraKeepRatio, this.KEEP_RATIO);
+			this.KEY_INT = getIntConfigurationProperty(configuration.flashCameraKeyFrameInterval, this.KEY_INT);
+			this.QUALITY = getIntConfigurationProperty(configuration.flashCameraQuality, this.QUALITY);
+			this.MOTION_LEVEL = getIntConfigurationProperty(configuration.flashCameraMotionLevel, this.MOTION_LEVEL);
+			this.BANDWIDTH = getIntConfigurationProperty(configuration.flashCameraBandwidth, this.BANDWIDTH)
+			
+			if (configuration.video_) 
 			var camera:Camera = getCam(); 
 			if (camera != null){
 				supportedResolutions(camera, "1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
 				camera.setMode(this.width,this.height,FPS,KEEP_RATIO);
 				camera.setKeyFrameInterval(KEY_INT);
-				camera.setQuality(0,QUALITY);
-				camera.setMotionLevel(0,2000);
+				camera.setQuality(BANDWIDTH,QUALITY);
+				camera.setMotionLevel(0,this.MOTION_LEVEL);
 			}
 			
 		}		
@@ -127,10 +154,10 @@ package com.flashphoner.api
 		 **/
 		public function changeCamera(camera:Camera):void{
 			Logger.info("changeCamera");
-			camera.setMode(320,240,FPS,KEEP_RATIO);
+			camera.setMode(this.width,this.height,FPS,KEEP_RATIO);
 			camera.setKeyFrameInterval(KEY_INT);
-			camera.setQuality(0,QUALITY);
-			camera.setMotionLevel(0,2000);	
+			camera.setQuality(BANDWIDTH,QUALITY);
+			camera.setMotionLevel(0,this.MOTION_LEVEL);	
 			this.cam = camera;			
 		}
 	}

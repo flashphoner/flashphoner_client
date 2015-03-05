@@ -30,6 +30,12 @@ ConfigurationLoader = function (configLoadedListener) {
     this.disableLocalRing = false;
     this.suppressRingOnActiveAudioStream = false;
     this.reoffersEnabled = false;
+    this.flashCameraFPS = 15;
+    this.flashCameraBandwidth = 0;
+    this.flashCameraKeepRatio = true;
+    this.flashCameraKeyFrameInterval = 48;
+    this.flashCameraMotionLevel = 2000;
+    this.flashCameraQuality = 80;
 
     $.ajax({
         type: "GET",
@@ -250,6 +256,38 @@ ConfigurationLoader.prototype = {
             this.reoffersEnabled = (this.getText(reoffersEnabled[0]) === "true");
         }
 
+        /**
+         * Flash Camera Settings
+         */
+        var flashCameraFPS = $(xml).find("flash_camera_fps");
+        if (flashCameraFPS.length > 0) {
+            this.flashCameraFPS = this.getText(flashCameraFPS[0]);
+        }
+
+        var flashCameraKeepRatio = $(xml).find("flash_camera_keep_ratio");
+        if (flashCameraKeepRatio.length > 0) {
+            this.flashCameraKeepRatio = (this.getText(flashCameraKeepRatio[0]) === "true");
+        }
+
+        var flashCameraKeyFrameInterval = $(xml).find("flash_camera_keyframe_interval");
+        if (flashCameraKeyFrameInterval.length > 0) {
+            this.flashCameraKeyFrameInterval = this.getText(flashCameraKeyFrameInterval[0]);
+        }
+
+        var flashCameraQuality = $(xml).find("flash_camera_quality");
+        if (flashCameraQuality.length > 0) {
+            this.flashCameraQuality = this.getText(flashCameraQuality[0]);
+        }
+
+        var flashCameraMotionLevel = $(xml).find("flash_camera_motion_level");
+        if (flashCameraMotionLevel.length > 0) {
+            this.flashCameraMotionLevel = this.getText(flashCameraMotionLevel[0]);
+        }
+
+        var flashCameraBandwidth = $(xml).find("flash_camera_bandwidth");
+        if (flashCameraBandwidth.length > 0) {
+            this.flashCameraBandwidth = this.getText(flashCameraBandwidth[0]);
+        }
 
         //get load balancer url if load balancing enabled
         if (me.loadBalancerUrl != null) {
