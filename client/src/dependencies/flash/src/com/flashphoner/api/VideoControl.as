@@ -43,16 +43,16 @@ package com.flashphoner.api
 		public function VideoControl(){
 		}
 		
-		private function getIntConfigurationProperty(value:String, def: int):int{
-			if (value!=null && value.length!=0){
+		private function getIntConfigurationProperty(value, def: int):int{
+			if (value != null){
 				return int (value);
 			}else{
 				return def;
 			}			 
 		}
 		
-		private function getBooleanConfigurationProperty(value:String, def: Boolean):Boolean{
-			if (value!=null && value.length!=0){
+		private function getBooleanConfigurationProperty(value, def: Boolean):Boolean{
+			if (value != null){
 				return Boolean (value);
 			}else{
 				return def;
@@ -63,6 +63,7 @@ package com.flashphoner.api
 		 * Init width,height,fps and another parameters
 		 **/ 
 		public function init(configuration:Object):void{			
+			Logger.info("Configuration object: "+configuration.videoWidth+" Height: "+configuration.videoHeight+" FPS: "+configuration.flashCameraFPS+" KEEP_RATIO: "+configuration.flashCameraKeepRatio+" KEY_INT: "+configuration.flashCameraKeyFrameInterval +" QUALITY: "+configuration.flashCameraQuality+" MOTION_LEVEL: "+configuration.flashCameraMotionLevel+" BANDWIDTH: "+configuration.flashCameraBandwidth);
 			this.width = configuration.videoWidth;
 			this.height = configuration.videoHeight;			
 			this.FPS = getIntConfigurationProperty(configuration.flashCameraFPS, this.FPS);
@@ -71,8 +72,8 @@ package com.flashphoner.api
 			this.QUALITY = getIntConfigurationProperty(configuration.flashCameraQuality, this.QUALITY);
 			this.MOTION_LEVEL = getIntConfigurationProperty(configuration.flashCameraMotionLevel, this.MOTION_LEVEL);
 			this.BANDWIDTH = getIntConfigurationProperty(configuration.flashCameraBandwidth, this.BANDWIDTH)
+			Logger.info("Final configuration: WIDTH: "+width+" Height: "+height+" FPS: "+FPS+" KEEP_RATIO: "+KEEP_RATIO+" KEY_INT: "+KEY_INT +" QUALITY: "+QUALITY+" MOTION_LEVEL: "+MOTION_LEVEL+" BANDWIDTH: "+BANDWIDTH);
 			
-			if (configuration.video_) 
 			var camera:Camera = getCam(); 
 			if (camera != null){
 				supportedResolutions(camera, "1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
