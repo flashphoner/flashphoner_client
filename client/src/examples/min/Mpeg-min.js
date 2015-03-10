@@ -6,6 +6,7 @@ var f = Flashphoner.getInstance();
 var stream;
 var player;
 var audioPlayer;
+var avReceiver;
 
 
 function initAPI() {
@@ -17,7 +18,9 @@ function initAPI() {
         f.init(configuration);
         initMpeg();
         initAudio();
+        avReceiver = new AVReceiver(player, audioPlayer);
         connect();
+
     });
 }
 
@@ -74,24 +77,7 @@ function connectionStatusListener(event) {
 }
 
 function binaryListener(event) {
-    var view = new DataView(event.data);
-    var header = parseInt("0x01010101", 16);
-    //de-multiplexing
-    if (header == view.getInt32(0)) {
-        //video
-        player.receiveSocketMessage(stripHeader(new Uint8Array(event.data)));
-    } else {
-        audioPlayer.ulaw8000(stripHeader(new Uint8Array(event.data)));
-    }
-}
-
-function stripHeader(data) {
-    var ret = new Uint8Array(data.byteLength - 4);
-    var offset = 4;
-    for (var i = 0; i < ret.byteLength; i++, offset++) {
-        ret[i] = data[offset];
-    }
-    return ret;
+    avReceiver.onDataReceived(event);
 }
 
 //Connection Status

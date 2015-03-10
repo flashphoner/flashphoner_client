@@ -4,6 +4,7 @@ function AudioPlayer(audioContext, internalBufferSize) {
     this.nodeConnected = false;
     this.context = audioContext;
     this.resampler = new Resampler(8000, 44100, 1, 4096, true);
+    this.timePlaying = 0;
     //size of data js node will request, 1024 samples
     this.internalBufferSize = parseInt(internalBufferSize) || 1024;
     try {
@@ -22,7 +23,9 @@ function AudioPlayer(audioContext, internalBufferSize) {
                 //white noise for testing purposes
                 //output[i] = (Math.random() * 2 - 1);
             }
-
+            me.timePlaying += me.internalBufferSize / 44100 * 1000;
+        } else {
+            console.log("Not enough data in audio buffer! Available " + this.decodedBufferPos);
         }
     };
     this.codec = new G711U();
@@ -30,8 +33,8 @@ function AudioPlayer(audioContext, internalBufferSize) {
 }
 
 AudioPlayer.prototype.initBuffers = function() {
-    //1 second buffer of ieee float32 samples
-    this.decodedBufferSize = 176400;
+    //2 seconds buffer of ieee float32 samples in bytes
+    this.decodedBufferSize = 352800;
     this.decodedBufferArray = new ArrayBuffer(this.decodedBufferSize);
     this.decodedBufferView = new Float32Array(this.decodedBufferArray);
     //fill array with 0
@@ -122,10 +125,11 @@ AudioPlayer.prototype.stop = function () {
     this.audioJSNode.disconnect();
 };
 
+//data must be a Float32View
 AudioPlayer.prototype.pushDecodedData = function(data) {
     //check if we have space
     //console.log("pushDecodedData decodedBufferPos:" + this.decodedBufferPos + " data length:"+data.length);
-    if (this.decodedBufferSize - this.decodedBufferPos > data.length) {
+    if (this.decodedBufferSize / 4 - this.decodedBufferPos > data.length) {
         for (var i = 0; i < data.length; i++) {
             this.decodedBufferView[this.decodedBufferPos++] = data[i];
         }
@@ -133,6 +137,8 @@ AudioPlayer.prototype.pushDecodedData = function(data) {
         console.log("Decoded audio buffer full!");
         //clear buffer
         //todo shift instead
+        //shift playtime
+        this.timePlaying += this.decodedBufferPos / 44100 * 1000;
         this.decodedBufferPos = 0;
     }
 };
