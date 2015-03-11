@@ -12,6 +12,9 @@ function AVReceiver(videoPlayer, audioPlayer) {
     this.videoTimeDifference = 0;
     this.audioTimeDifference = 0;
     this.sync = false;
+    this.bufferFilled = false;
+    //in milliseconds
+    this.audioBufferWaitFor = 1000;
 }
 
 AVReceiver.prototype.onDataReceived = function(event) {
@@ -35,16 +38,18 @@ AVReceiver.prototype.onDataReceived = function(event) {
         buffEntry.data = this.stripBytes(new Uint8Array(event.data), stripBytes);
         this.incomingVideoBuffer.push(buffEntry);
         //if we are in sync see if we have video picture to show
-        if (this.sync) {
+        if (this.sync && this.bufferFilled) {
+            var audioPlayerTime = this.getAudioPlayerTime() + 50;
+            var count = 0;
             while (true) {
-                var audioPlayerTime = this.getAudioPlayerTime();
                 var buffEntry = this.incomingVideoBuffer[0];
                 if (buffEntry != undefined && this.toCommonTimeBase(false, buffEntry.timestamp) <= audioPlayerTime) {
                     //console.log("Play video entry ts " + this.toCommonTimeBase(false, buffEntry.timestamp) + " audio player ts " + audioPlayerTime);
                     this.handleVideo(buffEntry.data);
                     this.incomingVideoBuffer.shift();
+                    count++;
                 } else {
-                    console.log("break, video buffer length " + this.incomingVideoBuffer.length);
+                    console.log("break, video buffer length " + this.incomingVideoBuffer.length + " flushed packets " + count);
                     break;
                 }
             }
@@ -65,8 +70,19 @@ AVReceiver.prototype.onDataReceived = function(event) {
         if (this.firstAudioTimestamp == 0) {
             this.firstAudioTimestamp = this.lastAudioTimestamp;
         }
-        if (this.sync && this.incomingAudioBuffer.length > 0) {
+        if (!this.bufferFilled) {
+            var buffEntry = {};
+            buffEntry.timestamp = this.lastAudioTimestamp;
+            buffEntry.data = this.stripBytes(new Uint8Array(event.data), stripBytes);
+            this.incomingAudioBuffer.push(buffEntry);
+            //one buff entry for audio is 20ms
+            if (this.audioBufferWaitFor < this.incomingAudioBuffer.length * 20) {
+                this.bufferFilled = true;
+            }
+
+        } else if (this.sync && this.incomingAudioBuffer.length > 0) {
             //just got sync, flush buffer
+            console.log("Flush buffer, buffer size " + this.incomingAudioBuffer.length);
             while (this.incomingAudioBuffer.length != 0) {
                 this.handleAudio(this.incomingAudioBuffer.shift().data);
             }
@@ -79,7 +95,6 @@ AVReceiver.prototype.onDataReceived = function(event) {
             buffEntry.data = this.stripBytes(new Uint8Array(event.data), stripBytes);
             this.incomingAudioBuffer.push(buffEntry);
         }
-        //this.handleAudio(this.incomingAudioBuffer.shift().data);
     } else if (view.getUint8(0) == 0x02) {
         //rtcp
         this.handleRtcp(this.stripBytes(new Uint8Array(event.data), 4))
@@ -88,27 +103,6 @@ AVReceiver.prototype.onDataReceived = function(event) {
         return;
     }
 
-
-
-    /*if (this.sync) {
-        var audioPlayerTime = this.getAudioPlayerTime();
-        //flush audio buffer
-        /*while (this.incomingAudioBuffer.length != 0) {
-            this.handleAudio(this.incomingAudioBuffer.shift().data);
-        }
-        //play video frames
-        while (true) {
-            var buffEntry = this.incomingVideoBuffer[0];
-            if (buffEntry != undefined && this.toCommonTimeBase(false, buffEntry.timestamp) <= audioPlayerTime + 50) {
-                console.log("Play video entry ts " + this.toCommonTimeBase(false, buffEntry.timestamp) + " audio player ts " + audioPlayerTime);
-                this.handleVideo(buffEntry.data);
-                this.incomingVideoBuffer.shift();
-            } else {
-                console.log("break, video buffer length " + this.incomingVideoBuffer.length);
-                break;
-            }
-        }
-    }*/
 };
 
 AVReceiver.prototype.handleVideo = function(data) {

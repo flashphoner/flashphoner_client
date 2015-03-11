@@ -6,7 +6,7 @@ function AudioPlayer(audioContext, internalBufferSize) {
     this.resampler = new Resampler(8000, 44100, 1, 4096, true);
     this.timePlaying = 0;
     //size of data js node will request, 1024 samples
-    this.internalBufferSize = parseInt(internalBufferSize) || 1024;
+    this.internalBufferSize = parseInt(internalBufferSize) || 2048;
     try {
         this.context.createScriptProcessor = this.context.createScriptProcessor || this.context.createJavaScriptNode;
         this.audioJSNode = this.context.createScriptProcessor(this.internalBufferSize, 1, 1);
@@ -25,7 +25,7 @@ function AudioPlayer(audioContext, internalBufferSize) {
             }
             me.timePlaying += me.internalBufferSize / 44100 * 1000;
         } else {
-            console.log("Not enough data in audio buffer! Available " + this.decodedBufferPos);
+            console.log("Not enough data in audio buffer! Available " + me.decodedBufferPos);
         }
     };
     this.codec = new G711U();
@@ -33,8 +33,8 @@ function AudioPlayer(audioContext, internalBufferSize) {
 }
 
 AudioPlayer.prototype.initBuffers = function() {
-    //2 seconds buffer of ieee float32 samples in bytes
-    this.decodedBufferSize = 352800;
+    //4 seconds buffer of ieee float32 samples in bytes
+    this.decodedBufferSize = 705600;
     this.decodedBufferArray = new ArrayBuffer(this.decodedBufferSize);
     this.decodedBufferView = new Float32Array(this.decodedBufferArray);
     //fill array with 0
