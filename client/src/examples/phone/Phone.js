@@ -559,18 +559,13 @@ $(document).ready(function () {
         if ($(".b-numbers").hasClass("write")) {  // check if phone number was entered
             $("body").addClass("voice_call__out");
             $(".call__out__dial").addClass("open").html($(".call__out__dial").html() + " " + $(".b-numbers").val());	// open outgoing call block and writ here callee number
-            if ($(this).hasClass("b-nav__video")) {
-                $("body").addClass("video")
-            } // if it is a video call then add the body class (for alert view)
-
             var mediaProvider = phone.getMediaProvider();
-
-            if ($("body").hasClass("video")) {
+            if ($(this).hasClass("b-nav__video")) {
+                $("body").addClass("video");
                 phone.call($(".b-numbers").val(), true, mediaProvider);
             } else {
                 phone.call($(".b-numbers").val(), false, mediaProvider);
             }
-
         }
     });
 
