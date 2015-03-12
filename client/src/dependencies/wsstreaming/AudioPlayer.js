@@ -4,8 +4,10 @@ function AudioPlayer(audioContext, internalBufferSize) {
     this.nodeConnected = false;
     this.context = audioContext;
     this.resampler = new Resampler(8000, 44100, 1, 4096, true);
+    //time handling
+    this.lastBufferTime = 0;
     this.timePlaying = 0;
-    //size of data js node will request, 1024 samples
+    //size of data js node will request in samples
     this.internalBufferSize = parseInt(internalBufferSize) || 2048;
     try {
         this.context.createScriptProcessor = this.context.createScriptProcessor || this.context.createJavaScriptNode;
@@ -23,8 +25,15 @@ function AudioPlayer(audioContext, internalBufferSize) {
                 //white noise for testing purposes
                 //output[i] = (Math.random() * 2 - 1);
             }
-            me.timePlaying += me.internalBufferSize / 44100 * 1000;
+            if (me.lastBufferTime == 0) {
+                console.log("Audio Player, playing first buffer!");
+                me.lastBufferTime = me.now();
+            } else {
+                me.lastBufferTime = me.now();
+                me.timePlaying += bufferSize / 44100 * 1000
+            }
         } else {
+            //todo handle this with comfort noise?
             console.log("Not enough data in audio buffer! Available " + me.decodedBufferPos);
         }
     };
@@ -41,12 +50,8 @@ AudioPlayer.prototype.initBuffers = function() {
     for (var i = 0; i < this.decodedBufferView.length; i++) {
         this.decodedBufferView[i] = 0;
     }
+    //position in floats
     this.decodedBufferPos = 0;
-
-    //not using at the moment
-    this.incomingBufferArray = new ArrayBuffer(1);
-    this.incomingBufferView = new Uint8Array(this.incomingBufferArray);
-    this.incomingBufferPos = 0;
     console.log("Buffers ready");
 };
 
@@ -125,6 +130,15 @@ AudioPlayer.prototype.stop = function () {
     this.audioJSNode.disconnect();
 };
 
+AudioPlayer.prototype.getCurrentPlayingTime = function () {
+    if (this.lastBufferTime != 0) {
+        return this.timePlaying + (this.now() - this.lastBufferTime);
+    } else {
+        //not playing yet
+        return 0;
+    }
+};
+
 //data must be a Float32View
 AudioPlayer.prototype.pushDecodedData = function(data) {
     //check if we have space
@@ -134,7 +148,7 @@ AudioPlayer.prototype.pushDecodedData = function(data) {
             this.decodedBufferView[this.decodedBufferPos++] = data[i];
         }
     } else {
-        console.log("Decoded audio buffer full!");
+        console.log("ERROR Decoded audio buffer full!");
         //clear buffer
         //todo shift instead
         //shift playtime
@@ -157,4 +171,10 @@ AudioPlayer.prototype.shiftDecodedData = function (length) {
     }
     this.decodedBufferPos = pos - length;
     return ret;
+};
+
+AudioPlayer.prototype.now = function() {
+    return window.performance
+        ? window.performance.now()
+        : Date.now();
 };

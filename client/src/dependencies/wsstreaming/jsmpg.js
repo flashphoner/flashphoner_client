@@ -152,7 +152,7 @@ jsmpeg.prototype.receiveSocketMessage = function( data ) {
 	// Last picture hasn't been decoded yet? Decode now but skip output
 	// before scheduling the next one
 	if( !this.currentPictureDecoded ) {
-		this.decodePicture(DECODE_SKIP_OUTPUT);
+		this.decodePicture();
 	}
 
 	
@@ -178,7 +178,8 @@ jsmpeg.prototype.receiveSocketMessage = function( data ) {
 
 	// Decode!
 	this.currentPictureDecoded = false;
-	requestAnimFrame( this.scheduleDecoding.bind(this), this.canvas );
+	this.decodePicture();
+	//requestAnimFrame( this.scheduleDecoding.bind(this), this.canvas );
 };
 
 jsmpeg.prototype.scheduleDecoding = function() {
@@ -647,7 +648,7 @@ jsmpeg.prototype.decodePicture = function(skipOutput) {
 		this.renderFrame();
 
 		if(this.externalDecodeCallback) {
-			this.externalDecodeCallback(this, this.canvas);
+			this.externalDecodeCallback(this, this.currentRGBA);
 		}
 	}
 	
@@ -748,7 +749,7 @@ jsmpeg.prototype.YCbCrToRGBA = function() {
 
 jsmpeg.prototype.renderFrame2D = function() {
 	this.YCbCrToRGBA();
-	this.canvasContext.putImageData(this.currentRGBA, 0, 0);
+	//this.canvasContext.putImageData(this.currentRGBA, 0, 0);
 };
 
 
