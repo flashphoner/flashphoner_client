@@ -112,16 +112,34 @@ public class PhoneApp extends ModuleBase implements IModuleOnConnect, IModuleOnA
 
         // If we are logged by token - we will not send user data to client app, because this is security violation
         boolean loggedByToken = false;
-        log.info("onConnect " + params+" clientId: "+client.getClientId());
+        log.info("onConnect " + params + " clientId: " + client.getClientId());
 
+        /**
+         * Looking for THIRD_PARTY_CONNECTION param
+         * Example:
+         * rtmp://host/phone_app?THIRD_PARTY_CONNECTION=1
+         * If the parameter is found in query string, or if it is a netConnection.connect() parameter,
+         * then we will authorize this connection.
+         * Applicable if we want to broadcast a SIP stream as RTMP stream.
+         */
         if (ALLOW_THIRD_PARTY_CONNECTIONS) {
+
             AMFData amfData = params.get(PARAM1);
-            if (amfData != null && amfData instanceof AMFDataItem) {
-                String value = amfData.getValue().toString();
-                log.info("THIRD_PARTY_CONNECTION value: " + value);
-                if ("THIRD_PARTY_CONNECTION".equals(value)) {
-                    client.acceptConnection();
-                    return;
+
+            String qString = client.getQueryStr();
+            log.info("qString: " + qString);
+
+            if (qString != null && qString.length() != 0 && qString.indexOf("THIRD_PARTY_CONNECTION") != -1) {
+                client.acceptConnection();
+                return;
+            } else {
+                if (amfData != null && amfData instanceof AMFDataItem) {
+                    String value = amfData.getValue().toString();
+                    log.info("THIRD_PARTY_CONNECTION value: " + value);
+                    if ("THIRD_PARTY_CONNECTION".equals(value)) {
+                        client.acceptConnection();
+                        return;
+                    }
                 }
             }
         }
