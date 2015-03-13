@@ -235,6 +235,12 @@ ConfigurationLoader.prototype = {
             this.callLT = this.getText(callLT[0]);
         }
 
+        //AudioPlayer incoming buffer
+        var incomingAudioBufferLength = $(xml).find("incoming_audio_buffer_length");
+        if (incomingAudioBufferLength.length > 0) {
+            this.configuration.incomingAudioBufferLength = this.getText(incomingAudioBufferLength[0]);
+        }
+
         var disableUnknownMsgFiltering = $(xml).find("disable_unknown_msg_filtering");
         if (disableUnknownMsgFiltering.length > 0) {
             this.disableUnknownMsgFiltering = (this.getText(disableUnknownMsgFiltering[0]) === "true");

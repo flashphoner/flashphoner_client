@@ -21,15 +21,22 @@
                 close: function () {
                 }
             };
+            ws.binaryType = 'arraybuffer';
             $.extend($.websocketSettings, s);
             $(ws).bind('open', $.websocketSettings.open)
                 .bind('close', $.websocketSettings.close)
                 .bind('error', $.websocketSettings.error)
                 .bind('message', $.websocketSettings.message)
                 .bind('message', function (e) {
-                    var m = $.evalJSON(e.originalEvent.data);
-                    var h = $.websocketSettings.events[m.message];
-                    if (h) h.apply($.websocketSettings.context, m.data);
+                    var h;
+                    if (e.originalEvent.data instanceof ArrayBuffer) {
+                        h = $.websocketSettings.events["binaryData"];
+                        if (h) h.apply($.websocketSettings.context, [e.originalEvent]);
+                    } else {
+                        var m = $.evalJSON(e.originalEvent.data);
+                        h = $.websocketSettings.events[m.message];
+                        if (h) h.apply($.websocketSettings.context, m.data);
+                    }
                 });
 
             ws._send = ws.send;
