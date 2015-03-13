@@ -22,7 +22,7 @@ function WebsocketPlayer(canvas, canvasCtx) {
     this.sync = false;
     this.bufferFilled = false;
     //in milliseconds
-    this.audioBufferWaitFor = 1000;
+    this.audioBufferWaitFor;
 }
 
 var requestAnimFrame = (function(){
@@ -39,7 +39,7 @@ WebsocketPlayer.prototype.init = function(configuration) {
     try {
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         var audioContext = new AudioContext();
-        this.audioPlayer = new AudioPlayer(audioContext, configuration.incomingAudioBufferLength);
+        this.audioPlayer = new AudioPlayer(audioContext, configuration.incomingAudioBufferLength, configuration.decodedBufferSize);
     } catch(e) {
         alert('Failed to init audio player' + e);
     }
@@ -51,6 +51,8 @@ WebsocketPlayer.prototype.init = function(configuration) {
     } catch (e) {
         alert('Failed to init video player' + e);
     }
+    //500ms by default
+    this.audioBufferWaitFor = parseInt(configuration.audioBufferWaitFor) || 500;
 };
 
 WebsocketPlayer.prototype.videoDecodedCallback = function(that, picture) {
@@ -243,9 +245,9 @@ WebsocketPlayer.prototype.getAudioPlayerTime = function() {
 };
 
 
-function AudioPlayer(audioContext, internalBufferSize) {
+function AudioPlayer(audioContext, internalBufferSize, decodedBufferSize) {
     var me = this;
-    this.initBuffers();
+    this.initBuffers(decodedBufferSize);
     this.nodeConnected = false;
     this.context = audioContext;
     this.resampler = new Resampler(8000, 44100, 1, 4096, true);
@@ -302,9 +304,9 @@ function AudioPlayer(audioContext, internalBufferSize) {
     console.log("AudioPlayer ready, incoming buffer length " + this.internalBufferSize);
 }
 
-AudioPlayer.prototype.initBuffers = function() {
+AudioPlayer.prototype.initBuffers = function(decodedBufferSize) {
     //4 seconds buffer of ieee float32 samples in bytes
-    this.decodedBufferSize = 705600;
+    this.decodedBufferSize = parseInt(decodedBufferSize) || 705600;
     this.decodedBufferArray = new ArrayBuffer(this.decodedBufferSize);
     this.decodedBufferView = new Float32Array(this.decodedBufferArray);
     //fill array with 0
