@@ -12,6 +12,8 @@ Phone.prototype.connect = function () {
     connection.sipPort = $('#sipPort').val();
     connection.useProxy = true;
     connection.appKey = "defaultApp";
+    //This parameter will be defined from flashphoner.xml config
+    connection.sipRegisterRequired = null;
 
     for (var key in connection) {
         Flashphoner.getInstance().setCookie(key, connection[key]);
@@ -559,13 +561,18 @@ $(document).ready(function () {
         if ($(".b-numbers").hasClass("write")) {  // check if phone number was entered
             $("body").addClass("voice_call__out");
             $(".call__out__dial").addClass("open").html($(".call__out__dial").html() + " " + $(".b-numbers").val());	// open outgoing call block and writ here callee number
-            var mediaProvider = phone.getMediaProvider();
             if ($(this).hasClass("b-nav__video")) {
-                $("body").addClass("video");
+                $("body").addClass("video")
+            } // if it is a video call then add the body class (for alert view)
+
+            var mediaProvider = phone.getMediaProvider();
+
+            if ($("body").hasClass("video")) {
                 phone.call($(".b-numbers").val(), true, mediaProvider);
             } else {
                 phone.call($(".b-numbers").val(), false, mediaProvider);
             }
+
         }
     });
 
