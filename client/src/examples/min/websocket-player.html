@@ -9,12 +9,8 @@
 	<script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
 	<script type="text/javascript" src="../../Flashphoner.js"></script>
 	<script type="text/javascript" src="../ConfigurationLoader.js"></script>
-	<script type="text/javascript" src="../../dependencies/wsstreaming/jsmpg.js"></script>
-	<script type="text/javascript" src="../../dependencies/wsstreaming/resampler.js"></script>
-	<script type="text/javascript" src="../../dependencies/wsstreaming/AudioPlayer.js"></script>
-	<script type="text/javascript" src="../../dependencies/wsstreaming/G711U.js"></script>
-	<script type="text/javascript" src="../../dependencies/wsstreaming/AVReceiver.js"></script>
-	<script type="text/javascript" src="Mpeg-min.js"></script>
+	<script type="text/javascript" src="../../dependencies/websocket-player/websocket-player.js"></script>
+	<script type="text/javascript" src="websocket-player-min.js"></script>
 	<style type="text/css">
 		body {
 
@@ -36,6 +32,7 @@ change this internal resolution to whatever the source provides. The size the
 canvas is displayed on the website is dictated by the CSS style.
 -->
 	<button type="button" id="enableAudio">Enable audio</button>
+	<button type="button" id="disconnect">Disconnect</button>
 	<canvas id="videoCanvas" width="640" height="480">
 		<p>
 			Please use a browser that supports the Canvas Element, like

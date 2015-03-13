@@ -4,9 +4,7 @@
 //Init WCS JavaScript API
 var f = Flashphoner.getInstance();
 var stream;
-var player;
-var audioPlayer;
-var avReceiver;
+var wsPlayer;
 
 function initAPI() {
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
@@ -15,21 +13,25 @@ function initAPI() {
     f.addListener(WCSEvent.OnBinaryEvent, binaryListener);
     ConfigurationLoader.getInstance(function (configuration) {
         f.init(configuration);
-        avReceiver = new AVReceiver(player, audioPlayer);
-        avReceiver.initPlayers();
+        var canvas = document.getElementById('videoCanvas');
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#444';
+        ctx.fillText('Loading...', canvas.width / 2 - 30, canvas.height / 3);
+        wsPlayer = new WebsocketPlayer(canvas, ctx);
+        wsPlayer.init(configuration);
         connect();
     });
 }
 
 function playFirstSound() {
-    var audioBuffer = avReceiver.audioPlayer.context.createBuffer(1, 441, 44100);
+    var audioBuffer = wsPlayer.audioPlayer.context.createBuffer(1, 441, 44100);
     var output = audioBuffer.getChannelData(0);
     for (var i = 0; i < output.length; i++) {
         output[i] = Math.random() * 2 - 1;
     }
-    var src = avReceiver.audioPlayer.context.createBufferSource();
+    var src = wsPlayer.audioPlayer.context.createBufferSource();
     src.buffer = audioBuffer;
-    src.connect(avReceiver.audioPlayer.context.destination);
+    src.connect(wsPlayer.audioPlayer.context.destination);
     src.start(0);
 }
 
@@ -44,33 +46,32 @@ function connectionStatusListener(event) {
         console.log('Connection has been established. Retrieve stream');
         playStream();
     } else if (event.status == ConnectionStatus.Disconnected) {
-        avReceiver.stop();
+        wsPlayer.stop();
         console.log("Disconnected");
     } else if (event.status == ConnectionStatus.Failed) {
-        avReceiver.stop();
+        wsPlayer.stop();
         f.disconnect();
     }
 }
 
 function binaryListener(event) {
-    avReceiver.onDataReceived(event);
+    wsPlayer.onDataReceived(event);
 }
 
 //Connection Status
 function streamStatusListener(event) {
     console.log(event.status);
     if (event.status == StreamStatus.Failed) {
-        avReceiver.stop();
+        wsPlayer.stop();
     } else if (event.status == StreamStatus.Stoped) {
-        avReceiver.stop();
+        wsPlayer.stop();
     }
 }
 
 //Error
 function errorEvent(event) {
     console.log(event.info);
-    player.stop();
-    audioPlayer.stop();
+    wsPlayer.stop();
 }
 
 function playStream() {
@@ -106,5 +107,8 @@ function parseUrlId() {
 $(document).ready(function () {
     $("#enableAudio").click(function () {
         playFirstSound();
+    });
+    $("#disconnect").click(function () {
+        f.disconnect();
     });
 });
