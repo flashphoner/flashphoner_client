@@ -147,7 +147,7 @@ Phone.prototype.sendMessage = function (message) {
 };
 
 Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
-    Flashphoner.getInstance().hasAccess(mediaProvider, hasVideo);
+    return Flashphoner.getInstance().hasAccess(mediaProvider, hasVideo);
 };
 
 Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
@@ -203,6 +203,12 @@ Phone.prototype.unhold = function (call) {
 Phone.prototype.transfer = function (callId, target) {
     trace("Phone - transfer callId: " + callId + " target: " + target);
     Flashphoner.getInstance().transfer({callId: callId, target: target});
+};
+
+Phone.prototype.getStatistics = function() {
+    Flashphoner.getInstance().getStatistics(this.currentCall, function(statistics){
+        trace("Statistics: " +  JSON.stringify(statistics), null, ' ');
+    });
 };
 
 Phone.prototype.sendXcapRequest = function () {

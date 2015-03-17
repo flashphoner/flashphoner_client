@@ -651,6 +651,35 @@ Flashphoner.prototype = {
         this.webSocket.send("sendDtmf", dtmfObj);
     },
 
+    getStatistics: function (call, callbackFn) {
+        if (MediaProvider.Flash == call.mediaProvider) {
+            var statistics = this.flashMediaManager.getStatistics(call.callId);
+            var param;
+            for (param in statistics.incomingStreams.info){
+                if (param.indexOf("audio") > -1) {
+                    statistics.incomingStreams.audio[param] = statistics.incomingStreams.info[param];
+                }
+                if (param.indexOf("video") > -1) {
+                    statistics.incomingStreams.video[param] = statistics.incomingStreams.info[param];
+                }
+            }
+            delete statistics.incomingStreams.info;
+            for (param in statistics.outgoingStreams.info){
+                if (param.indexOf("audio") > -1) {
+                    statistics.outgoingStreams.audio[param] = statistics.outgoingStreams.info[param];
+                }
+                if (param.indexOf("video") > -1) {
+                    statistics.outgoingStreams.video[param] = statistics.outgoingStreams.info[param];
+                }
+            }
+            delete statistics.outgoingStreams.info;
+
+            callbackFn(statistics);
+        } else {
+            this.webRtcMediaManager.getStatistics(call.callId, callbackFn);
+        }
+    },
+
     setUseProxy: function (useProxy) {
         if (this.isOpened) {
             this.webSocket.send("setUseProxy", useProxy);
@@ -682,7 +711,7 @@ Flashphoner.prototype = {
 
     getAccess: function (mediaProvider, hasVideo) {
         var me = this;
-        setTimeout(function(){
+        setTimeout(function () {
             if (hasVideo) {
                 if (!me.mediaProviders.get(mediaProvider).getAccessToAudioAndVideo()) {
                     me.invokeProblem({
@@ -719,15 +748,15 @@ Flashphoner.prototype = {
         this.mediaProviders.get(call.mediaProvider).setVolume(call.callId, value);
     },
 
-    mute: function(mediaProvider) {
-        if (!mediaProvider){
+    mute: function (mediaProvider) {
+        if (!mediaProvider) {
             mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
         }
         this.mediaProviders.get(mediaProvider).mute();
     },
 
-    unmute : function(mediaProvider) {
-        if (!mediaProvider){
+    unmute: function (mediaProvider) {
+        if (!mediaProvider) {
             mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
         }
         this.mediaProviders.get(mediaProvider).unmute();
@@ -1071,6 +1100,12 @@ WebRtcMediaManager.prototype.setRemoteSDP = function (id, sdp, isInitiator) {
         this.remoteSDP[id] = sdp;
     }
 };
+
+WebRtcMediaManager.prototype.getStatistics = function (callId, callbackFn) {
+    var webRtcMediaConnection = this.webRtcMediaConnections.get(callId);
+    webRtcMediaConnection.getStatistics(callbackFn);
+};
+
 
 WebRtcMediaManager.prototype.setAudioCodec = function (id, codec) {
 };
@@ -1480,28 +1515,38 @@ WebRtcMediaConnection.prototype.onCreateAnswerSuccessCallback = function (answer
     }
 };
 
-WebRtcMediaConnection.prototype.requestStats = function () {
+WebRtcMediaConnection.prototype.getStatistics = function (callbackFn) {
     var me = this;
     if (this.peerConnection && this.peerConnection.getRemoteStreams()[0] && webrtcDetectedBrowser == "chrome") {
         if (this.peerConnection.getStats) {
             this.peerConnection.getStats(function (rawStats) {
                 var results = rawStats.result();
-                var result = {};
+                var result = {type:"chrome", outgoingStreams: {}, incomingStreams: {}};
                 for (var i = 0; i < results.length; ++i) {
                     var resultPart = me.processGoogRtcStatsReport(results[i]);
                     if (resultPart != null) {
                         if (resultPart.type == "googCandidatePair") {
                             result.activeCandidate = resultPart;
                         } else if (resultPart.type == "ssrc") {
-                            if (resultPart.packetsLost == -1) {
-                                result.outgoingStream = resultPart;
+                            if (resultPart.transportId.indexOf("audio") > -1) {
+                                if (resultPart.packetsLost == -1) {
+                                    result.outgoingStreams.audio = resultPart;
+                                } else {
+                                    result.incomingStreams.audio = resultPart;
+                                }
+
                             } else {
-                                result.incomingStream = resultPart;
+                                if (resultPart.packetsLost == -1) {
+                                    result.outgoingStreams.video = resultPart;
+                                } else {
+                                    result.incomingStreams.video = resultPart;
+                                }
+
                             }
                         }
                     }
                 }
-                console.log(JSON.stringify(stats, null, '\t'));
+                callbackFn(result);
             }, function (error) {
                 console.log("Error received " + error);
             });
@@ -1510,20 +1555,28 @@ WebRtcMediaConnection.prototype.requestStats = function () {
     } else if (this.peerConnection && this.peerConnection.getRemoteStreams()[0] && webrtcDetectedBrowser == "firefox") {
         if (this.peerConnection.getStats) {
             this.peerConnection.getStats(null, function (rawStats) {
-                var result = {};
+                var result = {type:"firefox", outgoingStreams: {}, incomingStreams: {}};
                 for (var k in rawStats) {
                     if (rawStats.hasOwnProperty(k)) {
                         var resultPart = me.processRtcStatsReport(rawStats[k]);
                         if (resultPart != null) {
                             if (resultPart.type == "outboundrtp") {
-                                result.outgoingStream = resultPart;
+                                if (resultPart.id.indexOf("audio") > -1) {
+                                    result.outgoingStreams.audio = resultPart;
+                                } else {
+                                    result.outgoingStreams.video = resultPart;
+                                }
                             } else if (resultPart.type == "inboundrtp") {
-                                result.incomingStream = resultPart;
+                                if (resultPart.id.indexOf("audio") > -1) {
+                                    result.incomingStreams.audio = resultPart;
+                                } else {
+                                    result.incomingStreams.video = resultPart;
+                                }
                             }
                         }
                     }
                 }
-                console.log(JSON.stringify(stats, null, '\t'));
+                callbackFn(result);
             }, function (error) {
                 console.log("Error received " + error);
             });

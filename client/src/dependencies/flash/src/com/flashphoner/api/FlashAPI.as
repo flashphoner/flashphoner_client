@@ -68,6 +68,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("connect", connect);
 			ExternalInterface.addCallback("talk", talk);
 			ExternalInterface.addCallback("hold", hold);
+			ExternalInterface.addCallback("getStatistics", getStatistics);
 			ExternalInterface.addCallback("changeVideoState",changeVideoState);
 			ExternalInterface.addCallback("setAudioCodec", setAudioCodec);
 			ExternalInterface.addCallback("close", close);
@@ -116,6 +117,13 @@ package com.flashphoner.api
 		
 		public  function hold(callId:String):void{
 			phoneServerProxy.unpublish(getPublishStreamNameForCall(userData.sipLogin, callId));
+		}
+		
+		public  function getStatistics(callId:String):Object{
+			var statistics:Object = new Object();
+			statistics.outgoingStreams = phoneServerProxy.getStatistics(getPublishStreamNameForCall(userData.sipLogin, callId));
+			statistics.incomingStreams = phoneServerProxy.phoneSpeaker.getStatistics(getPlayStreamNameForCall(userData.sipLogin, callId));
+			return statistics;
 		}
 		
 		public  function setAudioCodec(id:String, codecObj:Object):void{

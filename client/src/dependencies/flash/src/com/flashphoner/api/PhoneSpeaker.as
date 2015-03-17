@@ -176,6 +176,17 @@ package com.flashphoner.api
 			this.video.height=height;
 			this.video.clear();			
 		}
+		
+		public function getStatistics(streamName:String):Object {
+			var incomingStreams:Object = new Object();
+			var inStream:NetStream = streams[streamName];
+			if (inStream != null) {
+				incomingStreams.info = inStream.info;
+				incomingStreams.audio = new Object();
+				incomingStreams.video = new Object();
+			}
+			return incomingStreams;			
+		}
 						
 	}
 }

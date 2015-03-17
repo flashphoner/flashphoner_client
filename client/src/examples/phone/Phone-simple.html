@@ -57,6 +57,11 @@
                 }
             });
 
+            $("#statisticsButton").click(function () {
+                if (phone.currentCall) {
+                    phone.getStatistics();
+                }
+            });
             $("#answerButton").click(function () {
                 if (phone.currentCall) {
                     phone.answer(phone.currentCall, $('#checkboxVideoCall').attr("checked") ? true : false);
@@ -191,6 +196,7 @@
     <input id="unholdButton" type="button" value="Unhold"/>
     <input id="transferInput" type="text"/>
     <input id="transferButton" type="button" value="Transfer"/>
+    <input id="statisticsButton" type="button" value="Statistics"/>
 </div>
 <!-- ************* -->
 

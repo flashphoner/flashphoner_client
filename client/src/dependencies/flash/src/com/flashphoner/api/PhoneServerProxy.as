@@ -146,7 +146,19 @@ package com.flashphoner.api
 			}
 			flash_API.videoControl.attachStream(outStream);
 		}
+
+		
+		public function getStatistics(streamName:String):Object {
+			var outgoingStreams:Object = new Object();
+			var outStream:NetStream = outStreams[streamName];
+			if (outStream != null) {
+				outgoingStreams.info = outStream.info;
+				outgoingStreams.audio = new Object();
+				outgoingStreams.video = new Object();
 				
+			}
+			return outgoingStreams;
+		}
 		
 		private function asyncErrorHandler(event: AsyncErrorEvent):void {
 		}
