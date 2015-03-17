@@ -303,6 +303,28 @@ Flashphoner.prototype = {
                 }
             },
 
+            binaryData: function (data) {
+                me.invokeListener(WCSEvent.OnBinaryEvent, [
+                    data
+                ]);
+            },
+
+            base64BinaryData: function (data) {
+                var result = {};
+                var raw = window.atob(data);
+                var rawLength = raw.length;
+                var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+                for(i = 0; i < rawLength; i++) {
+                    array[i] = raw.charCodeAt(i);
+                }
+                result.data = array;
+                console.log("received data length " + result.data.length);
+                me.invokeListener(WCSEvent.OnBinaryEvent, [
+                    result
+                ]);
+            },
+
             notifyVideoFormat: function (videoFormat) {
             },
 
@@ -470,6 +492,8 @@ Flashphoner.prototype = {
         me.connection.sipContactParams = me.connection.sipContactParams | me.configuration.sipContactParams;
         me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
         me.connection.urlServer = me.connection.urlServer || me.configuration.urlWsServer;
+        me.connection.width = me.connection.width || me.configuration.videoWidth;
+        me.connection.height = me.connection.height || me.configuration.videoHeight;
         //workaround for old Safari (5.X)
         if ((navigator.userAgent.indexOf("Safari") > -1) && !(navigator.userAgent.indexOf("Chrome") > -1)) {
             me.connection.urlServer = me.connection.urlServer.slice(-1) == "/" ? me.connection.urlServer + "websocket" : me.connection.urlServer + "/websocket";
@@ -822,26 +846,34 @@ Flashphoner.prototype = {
     playStream: function (stream) {
         var me = this;
         var mediaSessionId = createUUID();
+        if (stream.sdp == "") {
 
-        me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, stream.remoteMediaElementId || me.configuration.remoteMediaElementId));
+            me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, stream.remoteMediaElementId || me.configuration.remoteMediaElementId));
 
-        stream.mediaSessionId = mediaSessionId;
-        stream.published = false;
-        if (stream.hasVideo == undefined) {
-            stream.hasVideo = true;
-        }
-
-        me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
-            console.log("playStream name " + stream.name);
-            if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
-                sdp = me.stripCodecsSDP(sdp);
-                console.log("New SDP: " + sdp);
+            stream.mediaSessionId = mediaSessionId;
+            stream.published = false;
+            if (stream.hasVideo == undefined) {
+                stream.hasVideo = true;
             }
-            stream.sdp = me.removeCandidatesFromSDP(sdp);
-            me.webSocket.send("playStream", stream);
 
+            me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
+                console.log("playStream name " + stream.name);
+                if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
+                    sdp = me.stripCodecsSDP(sdp);
+                    console.log("New SDP: " + sdp);
+                }
+                stream.sdp = me.removeCandidatesFromSDP(sdp);
+                me.webSocket.send("playStream", stream);
+
+                me.playStreams.add(stream.name, stream);
+            }, false, false, stream.hasVideo);
+        } else {
+            console.log("playStream name " + stream.name);
+            stream.mediaSessionId = mediaSessionId;
+            stream.published = false;
+            me.webSocket.send("playStream", stream);
             me.playStreams.add(stream.name, stream);
-        }, false, false, stream.hasVideo);
+        }
     },
 
     stopStream: function (stream) {
@@ -1684,6 +1716,8 @@ var Connection = function () {
     this.appKey = "defaultApp";
     this.status = ConnectionStatus.Pending;
     this.mediaProviders = [];
+    this.width = "";
+    this.height = "";
 };
 
 var ConnectionStatus = function () {
@@ -1792,6 +1826,7 @@ WCSEvent.OnDataEvent = "ON_DATA_EVENT";
 WCSEvent.DataStatusEvent = "DATA_STATUS_EVENT";
 WCSEvent.TransferStatusEvent = "TRANSFER_STATUS_EVENT";
 WCSEvent.OnTransferEvent = "ON_TRANSFER_EVENT";
+WCSEvent.OnBinaryEvent = "ON_BINARY_EVENT";
 
 var WCSError = function () {
 };

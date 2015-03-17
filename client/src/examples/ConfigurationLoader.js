@@ -235,6 +235,40 @@ ConfigurationLoader.prototype = {
             this.callLT = this.getText(callLT[0]);
         }
 
+        /**
+         * AudioPlayer incoming buffer, in samples. This is size of data js audio node will request.
+         * Valid values are:
+         * 256, 512, 1024, 2048, 4096, 8192, or 16384.
+         */
+        var incomingAudioBufferLength = $(xml).find("incoming_audio_buffer_length");
+        if (incomingAudioBufferLength.length > 0) {
+            this.configuration.incomingAudioBufferLength = this.getText(incomingAudioBufferLength[0]);
+        }
+
+
+        /**
+         * AudioPlayer decoded buffer size in bytes. All decoded data will be stored in this buffer before playing
+         * It is a good idea to keep this above 4 seconds
+         * 1 second buffer = 44100 * 4 = 176400
+         */
+        var decodedBufferSize = $(xml).find("decoded_audio_buffer_size");
+        if (decodedBufferSize.length > 0) {
+            this.configuration.decodedBufferSize = this.getText(decodedBufferSize[0]);
+        }
+
+        /**
+         * Indicates amount of audio data in milliseconds that we should buffer before playing.
+         * This must be larger than decoded_audio_buffer_size, otherwise flushing buffered data into decodedBuffer
+         * will result in decodedBuffer overflow.
+         * Example:
+         * decoded_audio_buffer_size = 176400 (1000ms)
+         * audio_buffer_wait_for = 500ms
+         */
+        var audioBufferWaitFor = $(xml).find("audio_buffer_wait_for");
+        if (audioBufferWaitFor.length > 0) {
+            this.configuration.audioBufferWaitFor = this.getText(audioBufferWaitFor[0]);
+        }
+
         var disableUnknownMsgFiltering = $(xml).find("disable_unknown_msg_filtering");
         if (disableUnknownMsgFiltering.length > 0) {
             this.disableUnknownMsgFiltering = (this.getText(disableUnknownMsgFiltering[0]) === "true");

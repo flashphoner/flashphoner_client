@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=320, initial-scale=1"/>
+	<title>jsmpeg streaming</title>
+	<script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
+	<script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+	<script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+	<script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
+	<script type="text/javascript" src="../../Flashphoner.js"></script>
+	<script type="text/javascript" src="../ConfigurationLoader.js"></script>
+	<script type="text/javascript" src="../../dependencies/websocket-player/websocket-player.js"></script>
+	<script type="text/javascript" src="websocket-player-min.js"></script>
+	<style type="text/css">
+		body {
+
+		background: #333;
+		text-align: center;
+		margin-top: 10%;
+		}
+		#videoCanvas {
+			/* Always stretch the canvas to 640x480, regardless of its
+			internal size. */
+		width: 640px;
+		height: 480px;
+		}
+	</style>
+</head>
+<body onload="initAPI()">
+<!-- The Canvas size specified here is the "initial" internal resolution. jsmpeg will
+change this internal resolution to whatever the source provides. The size the
+canvas is displayed on the website is dictated by the CSS style.
+-->
+	<button type="button" id="enableAudio">Enable audio</button>
+	<button type="button" id="disconnect">Disconnect</button>
+	<canvas id="videoCanvas" width="640" height="480">
+		<p>
+			Please use a browser that supports the Canvas Element, like
+			<a href="http://www.google.com/chrome">Chrome</a>,
+			<a href="http://www.mozilla.com/firefox/">Firefox</a>,
+			<a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
+		</p>
+	</canvas>
+
+
+</body>
+</html>
