@@ -14,10 +14,7 @@ function initAPI() {
     ConfigurationLoader.getInstance(function (configuration) {
         f.init(configuration);
         var canvas = document.getElementById('videoCanvas');
-        var ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#444';
-        ctx.fillText('Loading...', canvas.width / 2 - 30, canvas.height / 3);
-        wsPlayer = new WebsocketPlayer(canvas, ctx);
+        wsPlayer = new WebsocketPlayer(canvas);
         wsPlayer.init(configuration);
         connect();
     });
@@ -79,19 +76,16 @@ function playStream() {
     stream.name = parseUrlId();
     stream.hasVideo = true;
     stream.sdp = "v=0\r\n" +
-        "o=- 1988962254 1988962254 IN IP4 192.168.56.1\r\n" +
-        "c=IN IP4 192.168.56.1\r\n" +
+        "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
+        "c=IN IP4 0.0.0.0\r\n" +
         "t=0 0\r\n" +
-    "a=sdplang:en\r\n"+
-    "a=range:npt=now-\r\n" +
-    "a=control:*\r\n" +
-
-    "m=video 6000 RTP/AVP 32\r\n" +
+        "a=sdplang:en\r\n"+
+        "m=video 0 RTP/AVP 32\r\n" +
         "a=rtpmap:32 MPV/90000\r\n" +
         "a=recvonly\r\n" +
-    "m=audio 6002 RTP/AVP 0\r\n" +
-    "a=rtpmap:0 PCMU/8000\r\n" +
-    "a=recvonly\r\n";
+        "m=audio 0 RTP/AVP 0\r\n" +
+        "a=rtpmap:0 PCMU/8000\r\n" +
+        "a=recvonly\r\n";
     this.stream = stream;
     f.playStream(stream);
 }
