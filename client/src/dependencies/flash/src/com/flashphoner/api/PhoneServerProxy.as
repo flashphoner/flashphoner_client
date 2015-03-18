@@ -98,8 +98,12 @@ package com.flashphoner.api
 				outStream.addEventListener(AsyncErrorEvent.ASYNC_ERROR,asyncErrorHandler);
 				outStream.addEventListener(NetStatusEvent.NET_STATUS,onNetStatus);									
 
-				outStream.audioReliable = false;
-				outStream.videoReliable = false;
+				if (flash_API.configuration.audioReliable != null){
+					outStream.audioReliable = flash_API.configuration.audioReliable;
+				}
+				if (flash_API.configuration.videoReliable != null){
+					outStream.videoReliable = flash_API.configuration.videoReliable;
+				}
 				
 				if (hasAudio){
 					outStream.attachAudio(flash_API.getMicrophone());

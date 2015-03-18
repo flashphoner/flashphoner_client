@@ -1693,6 +1693,8 @@ Configuration = function () {
     this.videoWidth = 640;
     this.videoHeight = 480;
     this.forceResolution = false;
+    this.audioReliable = false;
+    this.videoReliable = false;
 
     this.stunServer = "";
 

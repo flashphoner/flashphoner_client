@@ -176,6 +176,16 @@ ConfigurationLoader.prototype = {
             }
         }
 
+        var audioReliable = $(xml).find("audio_reliable");
+        if (audioReliable.length > 0) {
+            this.configuration.audioReliable = this.getText(audioReliable[0]);
+        }
+        var videoReliable = $(xml).find("video_reliable");
+        if (videoReliable.length > 0) {
+            this.configuration.videoReliable = this.getText(videoReliable[0]);
+        }
+
+
         var calleeLetterCase = $(xml).find("callee_letter_case");
         if (calleeLetterCase.length > 0) {
             if (this.getText(calleeLetterCase[0]).length) {

@@ -53,6 +53,8 @@ package com.flashphoner.api
 		private var userData:Object;
 		
 		private var currentGain:int = -1;
+		
+		public var configuration:Object;
 
 		/**
 		 * Default contructor.
@@ -96,6 +98,7 @@ package com.flashphoner.api
 		
 		public  function connect(urlFlashServer:String, userData:Object, configuration:Object):void{
 			this.userData = userData;
+			this.configuration = configuration;
 			var connectObj:Object = new Object();
 			connectObj.token = userData.authToken;
 			videoControl.init(configuration);
