@@ -1111,7 +1111,7 @@ WebRtcMediaManager.prototype.newConnection = function (id, webRtcMediaConnection
 
 WebRtcMediaManager.prototype.receivedEmptyRemoteSDP = function (id) {
     var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
-    return webRtcMediaConnection.lastReceivedSdp == "";
+    return !webRtcMediaConnection || webRtcMediaConnection.lastReceivedSdp == "";
 };
 
 WebRtcMediaManager.prototype.createOffer = function (id, callback, hasAudio, hasVideo, receiveVideo) {
