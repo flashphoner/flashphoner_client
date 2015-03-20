@@ -53,6 +53,9 @@ Phone.prototype.registrationStatusListener = function (event) {
     } else if (status == RegistrationStatus.Unregistered) {
         this.viewMessage("Unregistered from sip server");
         this.disconnect();
+    } else if (status == WCSError.AUTHENTICATION_FAIL) {
+        this.viewMessage("Authentication failed, please check your SIP account details.");
+        this.disconnect();
     } else {
         SoundControl.getInstance().playSound("REGISTER");
         this.flashphonerListener.onRegistered();
