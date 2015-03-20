@@ -185,6 +185,10 @@ ConfigurationLoader.prototype = {
             this.configuration.videoReliable = this.getText(videoReliable[0]);
         }
 
+        var flashBufferTime = $(xml).find("flash_buffer_time");
+        if (flashBufferTime.length > 0) {
+            this.configuration.flashBufferTime = this.getText(flashBufferTime[0]);
+        }
 
         var calleeLetterCase = $(xml).find("callee_letter_case");
         if (calleeLetterCase.length > 0) {

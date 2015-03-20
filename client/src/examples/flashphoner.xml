@@ -21,6 +21,9 @@
     <!--<force_media_provider>Flash</force_media_provider> &lt;!&ndash;WebRTC or Flash &ndash;&gt;-->
 	<video_width>640</video_width>
 	<video_height>480</video_height>
+    <audio_reliable>true</audio_reliable>
+    <video_reliable>true</video_reliable>
+    <flash_buffer_time>0.2</flash_buffer_time>
 	<check_validation_callee>true</check_validation_callee>
 	<use_enhanced_mic>true</use_enhanced_mic>
     <!--<callee_letter_case>uppercase</callee_letter_case> &lt;!&ndash;uppercase,lowercase&ndash;&gt;-->

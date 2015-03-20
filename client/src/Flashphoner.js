@@ -1695,6 +1695,7 @@ Configuration = function () {
     this.forceResolution = false;
     this.audioReliable = false;
     this.videoReliable = false;
+    this.flashBufferTime = null;
 
     this.stunServer = "";
 

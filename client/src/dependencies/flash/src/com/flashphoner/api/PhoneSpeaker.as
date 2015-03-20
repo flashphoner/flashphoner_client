@@ -131,7 +131,11 @@ package com.flashphoner.api
 			
 			var streamClientObj:Object = new Object();
 			stream.client = streamClientObj;
-			stream.bufferTime = 0;
+			if (flashAPI.configuration.flashBufferTime != null) {
+				stream.bufferTime = flashAPI.configuration.flashBufferTime;
+			} else {
+				stream.bufferTime = 0.2;
+			}
 			
 			Logger.info("bufferTime "+stream.bufferTime);
 				
