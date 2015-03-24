@@ -21,8 +21,8 @@
 		#videoCanvas {
 			/* Always stretch the canvas to 640x480, regardless of its
 			internal size. */
-		width: 640px;
-		height: 480px;
+		width: 320px;
+		height: 240px;
 		}
 	</style>
 </head>
@@ -31,9 +31,8 @@
 change this internal resolution to whatever the source provides. The size the
 canvas is displayed on the website is dictated by the CSS style.
 -->
-	<button type="button" id="enableAudio">Enable audio</button>
-	<button type="button" id="disconnect">Disconnect</button>
-	<canvas id="videoCanvas" width="640" height="480">
+	<button type="button" id="playButton">Play</button>
+	<canvas id="videoCanvas" width="320" height="240">
 		<p>
 			Please use a browser that supports the Canvas Element, like
 			<a href="http://www.google.com/chrome">Chrome</a>,

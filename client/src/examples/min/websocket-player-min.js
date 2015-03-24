@@ -11,12 +11,13 @@ function initAPI() {
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
     f.addListener(WCSEvent.OnBinaryEvent, binaryListener);
+
     ConfigurationLoader.getInstance(function (configuration) {
         f.init(configuration);
         var canvas = document.getElementById('videoCanvas');
         wsPlayer = new WebsocketPlayer(canvas);
         wsPlayer.init(configuration);
-        connect();
+        f.connect({appKey: "defaultApp", useRTCSessions: false, useWsTunnel: true, useBase64BinaryEncoding: false});
     });
 }
 
@@ -32,16 +33,11 @@ function playFirstSound() {
     src.start(0);
 }
 
-function connect() {
-    f.connect({appKey: "defaultApp", useRTCSessions: false, useWsTunnel: true, useBase64BinaryEncoding: false});
-}
-
 //Connection Status
 function connectionStatusListener(event) {
     console.log(event.status);
     if (event.status == ConnectionStatus.Established) {
-        console.log('Connection has been established. Retrieve stream');
-        playStream();
+        console.log('Connection has been established. Press Play to get stream.');
     } else if (event.status == ConnectionStatus.Disconnected) {
         wsPlayer.stop();
         console.log("Disconnected");
@@ -72,6 +68,10 @@ function errorEvent(event) {
 }
 
 function playStream() {
+
+    //play a sound to enable mobile loudspeakers
+    playFirstSound();
+
     var stream = new Stream();
     stream.name = parseUrlId();
     stream.hasVideo = true;
@@ -99,10 +99,7 @@ function parseUrlId() {
 }
 
 $(document).ready(function () {
-    $("#enableAudio").click(function () {
-        playFirstSound();
-    });
-    $("#disconnect").click(function () {
-        f.disconnect();
+    $("#playButton").click(function () {
+        playStream();
     });
 });
