@@ -262,6 +262,9 @@ Phone.prototype.registrationStatusListener = function (event) {
     } else if (status == RegistrationStatus.Failed) {
         trace("Phone - ERROR - Register fail.");
         window.setTimeout(this.disconnect(), 3000);
+    } else if (status == WCSError.AUTHENTICATION_FAIL) {
+        trace("Authentication failed, please check your SIP account details.");
+        window.setTimeout(this.disconnect(), 3000);
     } else {
         SoundControl.getInstance().playSound("REGISTER");
         this.flashphonerListener.onRegistered();
