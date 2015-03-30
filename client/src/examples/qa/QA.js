@@ -1,5 +1,6 @@
-//Init WCS JavaScript API
 var api = Flashphoner.getInstance();
+var currentCall;
+var intervalId = -1;
 
 function initAPI() {
     api.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
@@ -8,15 +9,32 @@ function initAPI() {
     api.addListener(WCSEvent.CallStatusEvent, callStatusListener);
     api.addListener(WCSEvent.OnDataEvent, dataEventListener);
     api.addListener(WCSEvent.OnCallEvent, onCallListener);
-    api.addListener(WCSEvent.OnCallEvent, onCallListener);
     ConfigurationLoader.getInstance(function (configuration) {
         api.init(configuration);
-        api.connect({appKey: 'qaApp'});
-    });
+        getAccess(MediaProvider.WebRTC, false, function () {
+            getAccess(MediaProvider.WebRTC, true, function () {
+                trace("Connecting to qaApp");
+                api.connect({appKey: 'qaApp', client: getClientFromUrl()});
+            });
+        });
 
+    });
 }
 
-var currentCall;
+function getAccess(mediaProvider, hasVideo, callbackFn) {
+    if (intervalId == -1) {
+        var checkAccessFunc = function () {
+            if (api.hasAccess(mediaProvider, hasVideo)) {
+                clearInterval(intervalId);
+                intervalId = -1;
+                callbackFn();
+
+            }
+        };
+        intervalId = setInterval(checkAccessFunc, 500);
+    }
+    api.getAccess(mediaProvider, hasVideo);
+}
 
 function dataEventListener(event) {
     var operationId = event.operationId;
@@ -27,8 +45,8 @@ function dataEventListener(event) {
 
     var result = eval(code);
 
-    trace("operationId: " + operationId + " payload: " + JSON.stringify(payload) +"; result: " + result);
-    api.sendData({operationId:createUUID(), payload: {testId:testId, iterationIndex:iterationIndex, result:result}})
+    trace("operationId: " + operationId + " payload: " + JSON.stringify(payload) + "; result: " + result);
+    api.sendData({operationId: createUUID(), payload: {testId: testId, iterationIndex: iterationIndex, result: result}})
 }
 
 
@@ -66,3 +84,12 @@ function errorEvent(event) {
 function trace(str) {
     console.log(str);
 }
+
+
+getClientFromUrl = function () {
+    var clientMatch = [];
+    var address = window.location.toString();
+    var pattern = /https?:\/\/.*\?client\=(.*)/;
+    clientMatch = address.match(pattern);
+    return clientMatch != null ? clientMatch[1] : "undefined";
+};
