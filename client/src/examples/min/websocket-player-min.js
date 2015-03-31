@@ -22,15 +22,7 @@ function initAPI() {
 }
 
 function playFirstSound() {
-    var audioBuffer = wsPlayer.audioPlayer.context.createBuffer(1, 441, 44100);
-    var output = audioBuffer.getChannelData(0);
-    for (var i = 0; i < output.length; i++) {
-        output[i] = Math.random() * 2 - 1;
-    }
-    var src = wsPlayer.audioPlayer.context.createBufferSource();
-    src.buffer = audioBuffer;
-    src.connect(wsPlayer.audioPlayer.context.destination);
-    src.start(0);
+    wsPlayer.playFirstSound();
 }
 
 //Connection Status
