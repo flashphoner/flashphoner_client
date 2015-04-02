@@ -1,6 +1,34 @@
 var api = Flashphoner.getInstance();
 var currentCall;
 var intervalId = -1;
+var currentCommand;
+var result;
+var resultReady = false;
+var resultInterval = {};
+var mediaProvider;
+var receivedMessages = [];
+
+function enableWebRTC() {
+    mediaProvider = MediaProvider.WebRTC;
+    initAccess();
+}
+
+function enableFlash() {
+    mediaProvider = MediaProvider.Flash;
+    initAccess();
+
+}
+
+function initAccess() {
+    document.getElementById("flashButton").disabled = true;
+    document.getElementById("webrtcButton").disabled = true;
+    getAccess(mediaProvider, false, function () {
+        getAccess(mediaProvider, true, function () {
+            trace("Connecting to qaApp");
+            api.connect({appKey: 'qaApp', mediaProviders: [mediaProvider], client: getClientFromUrl()});
+        });
+    });
+}
 
 function initAPI() {
     api.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
@@ -9,15 +37,9 @@ function initAPI() {
     api.addListener(WCSEvent.CallStatusEvent, callStatusListener);
     api.addListener(WCSEvent.OnDataEvent, dataEventListener);
     api.addListener(WCSEvent.OnCallEvent, onCallListener);
+    api.addListener(WCSEvent.OnMessageEvent, onMessageListener);
     ConfigurationLoader.getInstance(function (configuration) {
         api.init(configuration);
-        getAccess(MediaProvider.WebRTC, false, function () {
-            getAccess(MediaProvider.WebRTC, true, function () {
-                trace("Connecting to qaApp");
-                api.connect({appKey: 'qaApp', client: getClientFromUrl()});
-            });
-        });
-
     });
 }
 
@@ -36,46 +58,102 @@ function getAccess(mediaProvider, hasVideo, callbackFn) {
     api.getAccess(mediaProvider, hasVideo);
 }
 
-function dataEventListener(event) {
-    var operationId = event.operationId;
-    var payload = event.payload;
-    var testId = payload.testId;
-    var iterationIndex = payload.iterationIndex;
-    var code = payload.code;
-
-    var result = eval(code);
-
-    trace("operationId: " + operationId + " payload: " + JSON.stringify(payload) + "; result: " + result);
-    api.sendData({operationId: createUUID(), payload: {testId: testId, iterationIndex: iterationIndex, result: result}})
+function call(call) {
+    api.call(call);
+    currentCall = call;
 }
 
+function isAudioReceived() {
+    isMediaReceived("audio");
+}
 
-//Connection Status
+function isVideoReceived() {
+    isMediaReceived("video");
+}
+
+function isMediaReceived(type) {
+    resultReady = false;
+    api.getStatistics(currentCall, function (statistic) {
+        var beforeBytes = getBytes(statistic, type);
+        setTimeout(function () {
+            api.getStatistics(currentCall, function (statistic) {
+                var afterBytes = getBytes(statistic, type);
+                result = (afterBytes - beforeBytes) > 100;
+                resultReady = true;
+            });
+        }, 500);
+    })
+}
+
+function getBytes(statistic, type) {
+    var afterBytes = 0;
+    if (statistic.type == "chrome") {
+        afterBytes = statistic.incomingStreams[type].bytesReceived;
+    } else if (statistic.type == "flash") {
+        if ("audio" == type) {
+            afterBytes = statistic.incomingStreams[type].audioByteCount;
+        } else if ("video" == type) {
+            afterBytes = statistic.incomingStreams[type].videoByteCount;
+        }
+    }
+    return afterBytes;
+}
+
+function isMessageReceived(message) {
+    for (var m in receivedMessages) {
+        if (receivedMessages[m].body == message.body) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function onMessageListener(event) {
+    trace("New message: " + event.body);
+    receivedMessages.push(event);
+}
+
+function dataEventListener(event) {
+    currentCommand = event.payload;
+    var operationId = event.operationId;
+
+    var testId = currentCommand.testId;
+    var iterationIndex = currentCommand.iterationIndex;
+    var code = currentCommand.code;
+
+    trace("received operationId: " + operationId + " command: " + JSON.stringify(currentCommand));
+
+    resultReady = true;
+    result = eval(code);
+    resultInterval[operationId] = setInterval(function () {
+        if (resultReady) {
+            clearInterval(resultInterval[operationId]);
+            trace("send result on command: " + JSON.stringify(currentCommand) + "; result: " + result);
+            api.sendData({
+                operationId: createUUID(),
+                payload: {testId: testId, iterationIndex: iterationIndex, result: result}
+            });
+        }
+    }, 200);
+}
+
+function onCallListener(event) {
+    trace("New call " + event.callId);
+    currentCall = event;
+}
+
 function connectionStatusListener(event) {
     trace(event.status);
-    if (event.status == ConnectionStatus.Established) {
-        trace('Connection has been established. You can start a new call.');
-    }
 }
 
-//Registration Status
 function registrationStatusListener(event) {
     trace(event.status);
 }
 
-function onCallListener(event) {
-    currentCall = event;
-}
-
-//Call Status
 function callStatusListener(event) {
     trace(event.status);
-    if (event.status == CallStatus.ESTABLISHED) {
-        trace('Call ' + event.callId + ' is established');
-    }
 }
 
-//Error
 function errorEvent(event) {
     trace(event.info);
 }

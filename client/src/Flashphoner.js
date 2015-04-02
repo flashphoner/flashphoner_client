@@ -490,7 +490,9 @@ Flashphoner.prototype = {
             me.connection.sipRegisterRequired = me.configuration.sipRegisterRequired;
         }
         me.connection.sipContactParams = me.connection.sipContactParams | me.configuration.sipContactParams;
-        me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
+        if (!me.connection.mediaProviders) {
+            me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
+        }
         me.connection.urlServer = me.connection.urlServer || me.configuration.urlWsServer;
         me.connection.width = me.connection.width || me.configuration.videoWidth;
         me.connection.height = me.connection.height || me.configuration.videoHeight;
@@ -676,6 +678,7 @@ Flashphoner.prototype = {
     },
 
     getStatistics: function (call, callbackFn) {
+        var me = this;
         if (MediaProvider.Flash == call.mediaProvider) {
             var statistics = this.flashMediaManager.getStatistics(call.callId);
             var param;
@@ -698,9 +701,10 @@ Flashphoner.prototype = {
             }
             delete statistics.outgoingStreams.info;
 
+            statistics.type = "flash";
             callbackFn(statistics);
         } else {
-            this.webRtcMediaManager.getStatistics(call.callId, callbackFn);
+            this.webRtcMediaManager.getStatistics(me.webRtcCallSessionId, callbackFn);
         }
     },
 
