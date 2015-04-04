@@ -39,6 +39,7 @@ function initAPI() {
     api.addListener(WCSEvent.OnCallEvent, onCallListener);
     api.addListener(WCSEvent.OnMessageEvent, onMessageListener);
     ConfigurationLoader.getInstance(function (configuration) {
+        configuration.remoteMediaElementId = 'remoteVideo';
         api.init(configuration);
     });
 }
@@ -117,7 +118,7 @@ function dataEventListener(event) {
     currentCommand = event.payload;
     var operationId = event.operationId;
 
-    var testId = currentCommand.testId;
+    var executionId = currentCommand.executionId;
     var iterationIndex = currentCommand.iterationIndex;
     var code = currentCommand.code;
 
@@ -131,7 +132,7 @@ function dataEventListener(event) {
             trace("send result on command: " + JSON.stringify(currentCommand) + "; result: " + result);
             api.sendData({
                 operationId: createUUID(),
-                payload: {testId: testId, iterationIndex: iterationIndex, result: result}
+                payload: {executionId: executionId, iterationIndex: iterationIndex, result: result}
             });
         }
     }, 200);
