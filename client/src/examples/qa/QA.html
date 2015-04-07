@@ -19,8 +19,14 @@
 
 </head>
 <body onload="initAPI()">
-<input id="flashButton" type="button" value="Flash" onclick="enableFlash()"/>
-<input id="webrtcButton" type="button" value="WebRTC" onclick="enableWebRTC()"/>
+<input id="flashButton" type="button" value="Flash" onclick="setMediaProvider(MediaProvider.Flash)"/>
+<input id="webrtcButton" type="button" value="WebRTC" onclick="setMediaProvider(MediaProvider.WebRTC)"/>
+<br>
+<br>
+<input id="callButton" type="button" value="Call" onclick="setAccountType('CALL')"/>
+<input id="streamButton" type="button" value="Stream" onclick="setAccountType('STREAM')"/>
+<br>
+<br>
 <video id="remoteVideo" autoplay style="background-color: #000000; width:320px; height:240px;"></video>
 </body>
 </html>

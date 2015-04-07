@@ -677,7 +677,15 @@ Flashphoner.prototype = {
         this.webSocket.send("sendDtmf", dtmfObj);
     },
 
-    getStatistics: function (call, callbackFn) {
+    getCallStatistics: function (call, callbackFn) {
+        if (MediaProvider.Flash == call.mediaProvider) {
+            this.getStreamStatistics(call.callId, call.mediaProvider, callbackFn)
+        } else {
+            this.getStreamStatistics(this.webRtcCallSessionId, call.mediaProvider, callbackFn);
+        }
+    },
+
+    getStreamStatistics: function (mediaSessionId, mediaProvider, callbackFn) {
         var me = this;
         if (MediaProvider.Flash == call.mediaProvider) {
             var statistics = this.flashMediaManager.getStatistics(call.callId);
@@ -704,7 +712,7 @@ Flashphoner.prototype = {
             statistics.type = "flash";
             callbackFn(statistics);
         } else {
-            this.webRtcMediaManager.getStatistics(me.webRtcCallSessionId, callbackFn);
+            this.webRtcMediaManager.getStatistics(mediaSessionId, callbackFn);
         }
     },
 
@@ -808,11 +816,6 @@ Flashphoner.prototype = {
         this.webSocket.send("sendData", data);
     },
 
-    getStats: function (sessionId) {
-        //todo implement getStats
-        //this.webRtcMediaManagers.get(sessionId).requestStats();
-    },
-
     publishStream: function (stream) {
         var me = this;
         var mediaSessionId = createUUID();
@@ -850,7 +853,7 @@ Flashphoner.prototype = {
     playStream: function (stream) {
         var me = this;
         var mediaSessionId = createUUID();
-        if (stream.sdp == "") {
+        if (!stream.sdp) {
 
             me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, stream.remoteMediaElementId || me.configuration.remoteMediaElementId));
 

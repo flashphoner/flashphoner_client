@@ -206,7 +206,7 @@ Phone.prototype.transfer = function (callId, target) {
 };
 
 Phone.prototype.getStatistics = function() {
-    Flashphoner.getInstance().getStatistics(this.currentCall, function(statistics){
+    Flashphoner.getInstance().getCallStatistics(this.currentCall, function(statistics){
         trace("Statistics: " +  JSON.stringify(statistics), null, ' ');
     });
 };

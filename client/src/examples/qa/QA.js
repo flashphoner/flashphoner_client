@@ -1,4 +1,5 @@
 var api = Flashphoner.getInstance();
+var authToken;
 var currentCall;
 var intervalId = -1;
 var currentCommand;
@@ -8,24 +9,29 @@ var resultInterval = {};
 var mediaProvider;
 var receivedMessages = [];
 
-function enableWebRTC() {
-    mediaProvider = MediaProvider.WebRTC;
-    initAccess();
+function setAccountType(type) {
+    authToken = type;
+    document.getElementById("callButton").disabled = true;
+    document.getElementById("streamButton").disabled = true;
+    if (mediaProvider) {
+        initAccess();
+    }
 }
 
-function enableFlash() {
-    mediaProvider = MediaProvider.Flash;
-    initAccess();
-
+function setMediaProvider(mp) {
+    mediaProvider = mp;
+    document.getElementById("flashButton").disabled = true;
+    document.getElementById("webrtcButton").disabled = true;
+    if (authToken) {
+        initAccess();
+    }
 }
 
 function initAccess() {
-    document.getElementById("flashButton").disabled = true;
-    document.getElementById("webrtcButton").disabled = true;
     getAccess(mediaProvider, false, function () {
         getAccess(mediaProvider, true, function () {
             trace("Connecting to qaApp");
-            api.connect({appKey: 'qaApp', mediaProviders: [mediaProvider], client: getClientFromUrl()});
+            api.connect({authToken:authToken, appKey: 'qaApp', mediaProviders: [mediaProvider], client: getClientFromUrl()});
         });
     });
 }
@@ -64,20 +70,22 @@ function call(call) {
     currentCall = call;
 }
 
+//used for calls
 function isAudioReceived() {
-    isMediaReceived("audio");
+    isCallMediaReceived("audio");
 }
 
+//used for calls
 function isVideoReceived() {
-    isMediaReceived("video");
+    isCallMediaReceived("video");
 }
 
-function isMediaReceived(type) {
+function isCallMediaReceived(type) {
     resultReady = false;
-    api.getStatistics(currentCall, function (statistic) {
+    api.getCallStatistics(currentCall, function (statistic) {
         var beforeBytes = getBytes(statistic, type);
         setTimeout(function () {
-            api.getStatistics(currentCall, function (statistic) {
+            api.getCallStatistics(currentCall, function (statistic) {
                 var afterBytes = getBytes(statistic, type);
                 result = (afterBytes - beforeBytes) > 100;
                 resultReady = true;
@@ -85,6 +93,25 @@ function isMediaReceived(type) {
         }, 500);
     })
 }
+
+function isStreamMediaReceived(streamName, type) {
+    resultReady = false;
+    var stream = api.publishStreams.get(streamName);
+    if (!stream){
+        stream = api.playStreams.get(streamName);
+    }
+    api.getStreamStatistics(stream.mediaSessionId, MediaProvider.WebRTC, function (statistic) {
+        var beforeBytes = getBytes(statistic, type);
+        setTimeout(function () {
+            api.getStreamStatistics(stream.mediaSessionId, MediaProvider.WebRTC, function (statistic) {
+                var afterBytes = getBytes(statistic, type);
+                result = (afterBytes - beforeBytes) > 100;
+                resultReady = true;
+            });
+        }, 500);
+    })
+}
+
 
 function getBytes(statistic, type) {
     var afterBytes = 0;
