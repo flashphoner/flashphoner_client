@@ -6,6 +6,7 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
     me.webRtcMediaManager = new WebRtcMediaManager(localVideoPreview, remoteVideo);
     me.soundControl = new SoundControl();
     me.stripCodecs = new Array();
+    me.firefoxCodecReplaicer = {"pcma":"PCMA", "pcmu":"PCMU", "g722":"G722", "OPUS":"opus", "SHA-256":"sha-256"};
 
     var rtcManager = this.webRtcMediaManager;
     var proccessCall = function (call) {
@@ -78,7 +79,12 @@ var WebSocketManager = function (localVideoPreview, remoteVideo) {
             proccessCall(call);
             //don't stop ring sound if call is incoming, sound will be stopped by onCurrentCallNotify method in Phone.js
             if (!call.incoming) {
-                this.stopSound("RING");
+                me.stopSound("RING");
+            }
+            if (navigator.mozGetUserMedia && sdp) {
+                for (var c in me.firefoxCodecReplaicer){
+                    sdp = sdp.split(c).join(me.firefoxCodecReplaicer[c]);
+                }
             }
             rtcManager.setRemoteSDP(sdp, isInitiator);
             if (!isInitiator && rtcManager.getConnectionState() == "established") {
