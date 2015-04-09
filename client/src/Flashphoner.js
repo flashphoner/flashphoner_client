@@ -18,6 +18,7 @@ function Flashphoner() {
     this.version = undefined;
     this.mediaProviders = new DataMap();
     this.intervalId = -1;
+    this.firefoxCodecReplaicer = {"pcma":"PCMA", "pcmu":"PCMU", "g722":"G722", "OPUS":"opus", "SHA-256":"sha-256"};
 }
 
 Flashphoner.getInstance = function () {
@@ -292,6 +293,11 @@ Flashphoner.prototype = {
                 //    sdp = me.handleVideoSSRC(sdp);
                 //}
                 if (me.webRtcMediaManager) {
+                    if (navigator.mozGetUserMedia) {
+                        for (var c in me.firefoxCodecReplaicer){
+                            sdp = sdp.split(c).join(me.firefoxCodecReplaicer[c]);
+                        }
+                    }
                     me.webRtcMediaManager.setRemoteSDP(id, sdp, isInitiator);
                 }
             },
@@ -490,7 +496,7 @@ Flashphoner.prototype = {
             me.connection.sipRegisterRequired = me.configuration.sipRegisterRequired;
         }
         me.connection.sipContactParams = me.connection.sipContactParams | me.configuration.sipContactParams;
-        if (!me.connection.mediaProviders) {
+        if (!me.connection.mediaProviders || me.connection.mediaProviders.length == 0) {
             me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
         }
         me.connection.urlServer = me.connection.urlServer || me.configuration.urlWsServer;
