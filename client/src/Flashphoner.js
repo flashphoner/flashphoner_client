@@ -693,8 +693,8 @@ Flashphoner.prototype = {
 
     getStreamStatistics: function (mediaSessionId, mediaProvider, callbackFn) {
         var me = this;
-        if (MediaProvider.Flash == call.mediaProvider) {
-            var statistics = this.flashMediaManager.getStatistics(call.callId);
+        if (MediaProvider.Flash == mediaProvider) {
+            var statistics = this.flashMediaManager.getStatistics(mediaSessionId);
             var param;
             for (param in statistics.incomingStreams.info){
                 if (param.indexOf("audio") > -1) {
