@@ -858,6 +858,11 @@ Flashphoner.prototype = {
 
     playStream: function (stream) {
         var me = this;
+        if (me.playStreams.get(stream.name) != null) {
+            console.log("Request resume for stream " + stream.name);
+            me.webSocket.send("playStream", stream);
+            return;
+        }
         var mediaSessionId = createUUID();
         if (!stream.sdp) {
 
@@ -887,6 +892,7 @@ Flashphoner.prototype = {
             me.webSocket.send("playStream", stream);
             me.playStreams.add(stream.name, stream);
         }
+        return stream;
     },
 
     stopStream: function (stream) {
@@ -895,6 +901,13 @@ Flashphoner.prototype = {
         var removedStream = me.playStreams.remove(stream.name);
         me.webRtcMediaManager.close(removedStream.mediaSessionId);
         me.webSocket.send("stopStream", removedStream);
+    },
+
+    //Works only with websocket streams
+    pauseStream: function (stream) {
+        console.log("Pause stream " + stream.name);
+        var me = this;
+        me.webSocket.send("pauseStream", stream);
     },
 
     removeCandidatesFromSDP: function (sdp) {

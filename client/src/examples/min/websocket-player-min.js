@@ -15,7 +15,17 @@ function initAPI() {
     ConfigurationLoader.getInstance(function (configuration) {
         f.init(configuration);
         var canvas = document.getElementById('videoCanvas');
-        wsPlayer = new WebsocketPlayer(canvas);
+        wsPlayer = new WebsocketPlayer(canvas, function(e){
+            if (e.unmute != undefined) {
+                console.log("Request stream back");
+                f.playStream(stream);
+            } else if (e.mute != undefined) {
+                f.pauseStream(stream);
+                console.log("pauseStream")
+            }
+            }.bind(this)
+        );
+
         wsPlayer.init(configuration);
         f.connect({appKey: "defaultApp", useRTCSessions: false, useWsTunnel: true, useBase64BinaryEncoding: false});
     });
@@ -78,8 +88,7 @@ function playStream() {
         "m=audio 0 RTP/AVP 0\r\n" +
         "a=rtpmap:0 PCMU/8000\r\n" +
         "a=recvonly\r\n";
-    this.stream = stream;
-    f.playStream(stream);
+    this.stream = f.playStream(stream);
 }
 
 function parseUrlId() {
