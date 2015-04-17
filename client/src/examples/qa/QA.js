@@ -127,7 +127,10 @@ function isStreamMediaReceived(streamName, type) {
 
 function getBytes(statistic, type) {
     var afterBytes = 0;
-    if (statistic.type == "chrome") {
+    if (!statistic.incomingStreams[type]) {
+        return 0;
+    }
+    if (statistic.type == "chrome" || statistic.type == "firefox") {
         afterBytes = statistic.incomingStreams[type].bytesReceived;
     } else if (statistic.type == "flash") {
         if ("audio" == type) {
@@ -185,7 +188,7 @@ function onCallListener(event) {
 function connectionStatusListener(connection, event) {
     trace(connection.status);
     if (ConnectionStatus.Disconnected == connection.status || ConnectionStatus.Failed == connection.status) {
-        if (event && event.code == 100) {
+        if (event && (event.code == 3001 || event.code == 1005)) {
             connectToServer(event.reason);
         } else {
             document.getElementById("callButton").disabled = false;

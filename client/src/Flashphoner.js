@@ -533,7 +533,9 @@ Flashphoner.prototype = {
                 me.invokeListener(WCSEvent.ConnectionStatusEvent, [
                     me.connection, event.originalEvent
                 ]);
-                me.webRtcMediaManager.disconnect();
+                if (me.webRtcMediaManager) {
+                    me.webRtcMediaManager.disconnect();
+                }
                 if (me.flashMediaManager) {
                     me.flashMediaManager.disconnect();
                 }
