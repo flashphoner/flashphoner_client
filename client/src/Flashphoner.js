@@ -531,12 +531,13 @@ Flashphoner.prototype = {
                     me.connection.status = ConnectionStatus.Disconnected;
                 }
                 me.invokeListener(WCSEvent.ConnectionStatusEvent, [
-                    me.connection
+                    me.connection, event.originalEvent
                 ]);
                 me.webRtcMediaManager.disconnect();
                 if (me.flashMediaManager) {
                     me.flashMediaManager.disconnect();
                 }
+                me.webRtcCallSessionId = null;
             },
             error: function () {
                 me.connection.status = ConnectionStatus.Failed;

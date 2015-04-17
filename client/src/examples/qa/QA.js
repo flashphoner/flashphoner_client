@@ -29,11 +29,23 @@ function setMediaProvider(mp) {
 
 function initAccess() {
     getAccess(mediaProvider, false, function () {
-        getAccess(mediaProvider, true, function () {
-            trace("Connecting to qaApp");
-            api.connect({authToken:authToken, appKey: 'qaApp', mediaProviders: [mediaProvider], client: getClientFromUrl()});
-        });
+        getAccess(mediaProvider, true, connectToServer);
     });
+}
+
+function connectToServer(accountId) {
+    trace("Connecting to qaApp");
+    var connection = {
+        authToken: authToken,
+        appKey: 'qaApp',
+        mediaProviders: [mediaProvider],
+        client: getClientFromUrl() + "; " + mediaProvider
+    };
+    if (accountId) {
+        connection.accountId = accountId;
+    }
+
+    api.connect(connection);
 }
 
 function initAPI() {
@@ -97,7 +109,7 @@ function isCallMediaReceived(type) {
 function isStreamMediaReceived(streamName, type) {
     resultReady = false;
     var stream = api.publishStreams.get(streamName);
-    if (!stream){
+    if (!stream) {
         stream = api.playStreams.get(streamName);
     }
     api.getStreamStatistics(stream.mediaSessionId, MediaProvider.WebRTC, function (statistic) {
@@ -170,8 +182,19 @@ function onCallListener(event) {
     currentCall = event;
 }
 
-function connectionStatusListener(event) {
-    trace(event.status);
+function connectionStatusListener(connection, event) {
+    trace(connection.status);
+    if (ConnectionStatus.Disconnected == connection.status || ConnectionStatus.Failed == connection.status) {
+        if (event && event.code == 100) {
+            connectToServer(event.reason);
+        } else {
+            document.getElementById("callButton").disabled = false;
+            document.getElementById("streamButton").disabled = false;
+            document.getElementById("flashButton").disabled = false;
+            document.getElementById("webrtcButton").disabled = false;
+        }
+    }
+
 }
 
 function registrationStatusListener(event) {
