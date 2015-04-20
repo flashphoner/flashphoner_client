@@ -1,4 +1,5 @@
 var api = Flashphoner.getInstance();
+var client;
 var authToken;
 var currentCall;
 var intervalId = -1;
@@ -9,25 +10,21 @@ var resultInterval = {};
 var mediaProvider;
 var receivedMessages = [];
 
-function setAccountType(type) {
-    authToken = type;
-    document.getElementById("callButton").disabled = true;
-    document.getElementById("streamButton").disabled = true;
-    if (mediaProvider) {
-        initAccess();
-    }
-}
-
-function setMediaProvider(mp) {
-    mediaProvider = mp;
-    document.getElementById("flashButton").disabled = true;
-    document.getElementById("webrtcButton").disabled = true;
-    if (authToken) {
-        initAccess();
-    }
-}
-
 function initAccess() {
+    var mediaProviderEl = document.getElementById("mediaProvider");
+    mediaProvider = mediaProviderEl.options[mediaProviderEl.selectedIndex].value;
+    mediaProviderEl.disabled = true;
+
+    var accountTypeEl = document.getElementById("accountType");
+    authToken = accountTypeEl.options[accountTypeEl.selectedIndex].value;
+    accountTypeEl.disabled = true;
+
+    var clientEl = document.getElementById("client");
+    client = clientEl.value + "; " + mediaProvider;
+    clientEl.disabled = true;
+
+    document.getElementById("connectButton").disabled = true;
+
     getAccess(mediaProvider, false, function () {
         getAccess(mediaProvider, true, connectToServer);
     });
@@ -39,7 +36,7 @@ function connectToServer(accountId) {
         authToken: authToken,
         appKey: 'qaApp',
         mediaProviders: [mediaProvider],
-        client: getClientFromUrl() + "; " + mediaProvider
+        client: client
     };
     if (accountId) {
         connection.accountId = accountId;
@@ -60,6 +57,31 @@ function initAPI() {
         configuration.remoteMediaElementId = 'remoteVideo';
         api.init(configuration);
     });
+
+    var clientEl = document.getElementById("client");
+
+    var mediaProviderEl = document.getElementById("mediaProvider");
+    var accountTypeEl = document.getElementById("accountType");
+
+    var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+    if (isOpera) {
+        clientEl.value = "Opera";
+        mediaProviderEl.remove(0);
+        accountTypeEl.remove(1);
+    } else if (typeof InstallTrigger !== 'undefined') {
+        clientEl.value = "Firefox";
+    } else if (Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0) {
+        clientEl.value = "Safari";
+        mediaProviderEl.remove(0);
+        accountTypeEl.remove(1);
+    } else if (!!window.chrome && !isOpera) {
+        clientEl.value = "Chrome";
+    } else if (/*@cc_on!@*/false || !!document.documentMode) {
+        clientEl.value = "Internet Explorer";
+        mediaProviderEl.remove(0);
+        accountTypeEl.remove(1);
+    }
+
 }
 
 function getAccess(mediaProvider, hasVideo, callbackFn) {
@@ -99,10 +121,10 @@ function isCallMediaReceived(type) {
         setTimeout(function () {
             api.getCallStatistics(currentCall, function (statistic) {
                 var afterBytes = getBytes(statistic, type);
-                result = (afterBytes - beforeBytes) > 100;
+                result = (afterBytes - beforeBytes) > 1000;
                 resultReady = true;
             });
-        }, 500);
+        }, 2000);
     })
 }
 
@@ -117,10 +139,10 @@ function isStreamMediaReceived(streamName, type) {
         setTimeout(function () {
             api.getStreamStatistics(stream.mediaSessionId, MediaProvider.WebRTC, function (statistic) {
                 var afterBytes = getBytes(statistic, type);
-                result = (afterBytes - beforeBytes) > 100;
+                result = (afterBytes - beforeBytes) > 1000;
                 resultReady = true;
             });
-        }, 500);
+        }, 2000);
     })
 }
 
@@ -191,10 +213,10 @@ function connectionStatusListener(connection, event) {
         if (event && (event.code == 3001 || event.code == 1005)) {
             connectToServer(event.reason);
         } else {
-            document.getElementById("callButton").disabled = false;
-            document.getElementById("streamButton").disabled = false;
-            document.getElementById("flashButton").disabled = false;
-            document.getElementById("webrtcButton").disabled = false;
+            document.getElementById("mediaProvider").disabled = false;
+            document.getElementById("accountType").disabled = false;
+            document.getElementById("client").disabled = false;
+            document.getElementById("connectButton").disabled = false;
         }
     }
 
@@ -216,12 +238,3 @@ function errorEvent(event) {
 function trace(str) {
     console.log(str);
 }
-
-
-getClientFromUrl = function () {
-    var clientMatch = [];
-    var address = window.location.toString();
-    var pattern = /https?:\/\/.*\?client\=(.*)/;
-    clientMatch = address.match(pattern);
-    return clientMatch != null ? clientMatch[1] : "undefined";
-};

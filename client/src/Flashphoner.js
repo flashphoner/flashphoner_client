@@ -359,8 +359,9 @@ Flashphoner.prototype = {
             finish: function (call) {
                 me.calls.remove(call.callId);
                 if (me.calls.getSize() == 0 && MediaProvider.WebRTC == call.mediaProvider) {
-                    me.mediaProviders.get(call.mediaProvider).close(me.webRtcCallSessionId);
+                    var sessionId = me.webRtcCallSessionId;
                     me.webRtcCallSessionId = undefined;
+                    me.mediaProviders.get(call.mediaProvider).close(sessionId);
                 }
                 if (MediaProvider.Flash == call.mediaProvider) {
                     me.mediaProviders.get(call.mediaProvider).close(call.callId);
@@ -539,7 +540,8 @@ Flashphoner.prototype = {
                 if (me.flashMediaManager) {
                     me.flashMediaManager.disconnect();
                 }
-                me.webRtcCallSessionId = null;
+                me.webRtcCallSessionId = undefined;
+                me.calls = new DataMap();
             },
             error: function () {
                 me.connection.status = ConnectionStatus.Failed;
