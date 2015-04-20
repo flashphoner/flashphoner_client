@@ -1,21 +1,41 @@
-/**
- * Created by nazar on 04.02.2015.
- */
-//Init WCS JavaScript API
+//Prepare config
+var config = new Configuration();
+
+//Video width resolution
+config.videoWidth = 320;
+
+//Video height resolution
+config.videoHeight = 240;
+
+//Web Call Server Websocket URL
+var url = "ws://192.168.1.5:8080";
+
+//The stream name can be an RTSP URL for playback
+var streamName = "rtsp://192.168.1.5:1935/live/stream1";
+
+//The streamName can be also WebRTC stream ID. Example:
+//var streamName = "XP34dq6aqJK0V09o5RbU";
+
+//Get API instance
 var f = Flashphoner.getInstance();
-var stream;
+
+//get player instance
 var wsPlayer;
 
-function initAPI() {
+//Current stream
+var stream;
+
+function initOnLoad() {
+    //add listeners
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
     f.addListener(WCSEvent.OnBinaryEvent, binaryListener);
+    f.init();
 
-    ConfigurationLoader.getInstance(function (configuration) {
-        f.init(configuration);
-        var canvas = document.getElementById('videoCanvas');
-        wsPlayer = new WebsocketPlayer(canvas, function(e){
+    //create player
+    var canvas = document.getElementById('videoCanvas');
+    wsPlayer = new WebsocketPlayer(canvas, function(e){
             if (e.unmute != undefined) {
                 console.log("Request stream back");
                 f.playStream(stream);
@@ -23,19 +43,22 @@ function initAPI() {
                 f.pauseStream(stream);
                 console.log("pauseStream")
             }
-            }.bind(this)
-        );
+        }.bind(this)
+    );
+    wsPlayer.init(config);
 
-        wsPlayer.init(configuration);
-        f.connect({appKey: "defaultApp", useRTCSessions: false, useWsTunnel: true, useBase64BinaryEncoding: false});
+    //connect to server
+    f.connect({
+        urlServer: url,
+        appKey: "defaultApp",
+        useRTCSessions: false,
+        useWsTunnel: true,
+        useBase64BinaryEncoding: false
     });
 }
 
-function playFirstSound() {
-    wsPlayer.playFirstSound();
-}
-
-//Connection Status
+///////////////////////////////////////////
+//////////////Listeners////////////////////
 function connectionStatusListener(event) {
     console.log(event.status);
     if (event.status == ConnectionStatus.Established) {
@@ -68,36 +91,32 @@ function errorEvent(event) {
     console.log(event.info);
     wsPlayer.stop();
 }
+//////////////////////////////////////////
+
+function playFirstSound() {
+    wsPlayer.playFirstSound();
+}
 
 function playStream() {
-
     //play a sound to enable mobile loudspeakers
     playFirstSound();
-
     var stream = new Stream();
-    stream.name = parseUrlId();
+    stream.name = streamName;
     stream.hasVideo = true;
     stream.sdp = "v=0\r\n" +
-        "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
-        "c=IN IP4 0.0.0.0\r\n" +
-        "t=0 0\r\n" +
-        "a=sdplang:en\r\n"+
-        "m=video 0 RTP/AVP 32\r\n" +
-        "a=rtpmap:32 MPV/90000\r\n" +
-        "a=recvonly\r\n" +
-        "m=audio 0 RTP/AVP 0\r\n" +
-        "a=rtpmap:0 PCMU/8000\r\n" +
-        "a=recvonly\r\n";
+    "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
+    "c=IN IP4 0.0.0.0\r\n" +
+    "t=0 0\r\n" +
+    "a=sdplang:en\r\n"+
+    "m=video 0 RTP/AVP 32\r\n" +
+    "a=rtpmap:32 MPV/90000\r\n" +
+    "a=recvonly\r\n" +
+    "m=audio 0 RTP/AVP 0\r\n" +
+    "a=rtpmap:0 PCMU/8000\r\n" +
+    "a=recvonly\r\n";
     this.stream = f.playStream(stream);
 }
 
-function parseUrlId() {
-    var idTrans = [];
-    var address = window.location.toString();
-    var pattern = /https?:\/\/.*\?id\=(.*)/;
-    idTrans = address.match(pattern);
-    return idTrans[1];
-}
 
 $(document).ready(function () {
     $("#playButton").click(function () {
