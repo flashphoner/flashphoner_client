@@ -84,6 +84,7 @@ function streamStatusListener(event) {
     } else if (event.status == StreamStatus.Stoped) {
         wsPlayer.stop();
     }
+    stream.status = event.status;
 }
 
 //Error
@@ -122,4 +123,20 @@ $(document).ready(function () {
     $("#playButton").click(function () {
         playStream();
     });
+
+    $("#pauseButton").click(function () {
+        var str = $("#pauseButton").text();
+        console.log("stream status " + stream.status);
+        if (str == "Pause") {
+            if (stream.status != StreamStatus.Stoped) {
+                wsPlayer.pause();
+                f.pauseStream(stream);
+                $("#pauseButton").text("Resume");
+            }
+        } else if (str == "Resume") {
+            wsPlayer.resume();
+            f.playStream(stream);
+            $("#pauseButton").text("Pause");
+        }
+    })
 });
