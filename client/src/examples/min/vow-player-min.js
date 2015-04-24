@@ -130,12 +130,10 @@ $(document).ready(function () {
         if (str == "Pause") {
             if (stream.status != StreamStatus.Stoped) {
                 wsPlayer.pause();
-                f.pauseStream(stream);
                 $("#pauseButton").text("Resume");
             }
         } else if (str == "Resume") {
             wsPlayer.resume();
-            f.playStream(stream);
             $("#pauseButton").text("Pause");
         }
     })
