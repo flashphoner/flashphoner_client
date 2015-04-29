@@ -800,7 +800,7 @@ body{
 	padding: 3px 8px;
 	width: 193px;
 	border: 0;
-	height: 14px;
+	/*height: 14px;*/
 	font-size: 14px;
 	line-height: 14px;
 	margin-top: 8px;
@@ -1154,7 +1154,7 @@ body{
 	padding: 3px 8px;
 	width: 185px;
 	border: 0;
-	height: 14px;
+	/*height: 14px;*/
 	font-size: 14px;
 	line-height: 14px;
 	margin-top: 8px;

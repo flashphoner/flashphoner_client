@@ -127,6 +127,7 @@ Phone.prototype.call = function (callee, hasVideo, mediaProvider) {
         call.callee = callee;
         call.visibleName = "Caller";
         call.hasVideo = hasVideo;
+        call.receiveVideo = true;
         call.inviteParameters = {param1: "value1", param2: "value2"};
         call.mediaProvider = mediaProvider;
         this.currentCall = Flashphoner.getInstance().call(call);

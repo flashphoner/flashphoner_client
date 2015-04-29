@@ -586,6 +586,10 @@ Flashphoner.prototype = {
             call.hasVideo = false;
         }
 
+        if (!call.receiveVideo) {
+            call.receiveVideo = false;
+        }
+
         me.addOrUpdateCall(call);
 
         me.checkAndGetAccess(call.mediaProvider, call.hasVideo, function () {
@@ -599,7 +603,7 @@ Flashphoner.prototype = {
                     sdp = me.removeCandidatesFromSDP(sdp);
                     call.sdp = sdp;
                     me.webSocket.send("call", call);
-                }, true, call.hasVideo);
+                }, true, call.hasVideo, call.receiveVideo);
             } else if (MediaProvider.Flash == call.mediaProvider) {
                 me.webSocket.send("call", call);
             }
@@ -1400,6 +1404,7 @@ WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, has
                     }
                     me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
                 }
+                mandatory = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}};
             } else {
                 if (receiveVideo == undefined) {
                     receiveVideo = true;
@@ -1774,6 +1779,7 @@ var Call = function () {
     this.caller = "";
     this.callee = "";
     this.incoming = false;
+    this.receiveVideo = false;
     this.visibleName = "";
     this.inviteParameters = {};
     this.mediaProvider = undefined;
