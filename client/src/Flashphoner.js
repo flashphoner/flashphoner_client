@@ -1844,6 +1844,7 @@ var StreamStatus = function () {
 StreamStatus.Pending = "PENDING";
 StreamStatus.Publishing = "PUBLISHING";
 StreamStatus.Playing = "PLAYING";
+StreamStatus.Paused = "PAUSED";
 StreamStatus.Unpublished = "UNPUBLISHED";
 StreamStatus.Stoped = "STOPED";
 StreamStatus.Failed = "FAILED";

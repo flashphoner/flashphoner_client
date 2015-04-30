@@ -37,12 +37,19 @@ function initOnLoad() {
     var canvas = document.getElementById('videoCanvas');
     wsPlayer = new WebsocketPlayer(canvas, function(e){
             if (e.unmute != undefined) {
-                console.log("Request stream back");
-                f.playStream(stream);
+                if (this.stream.status == StreamStatus.Paused) {
+                    f.playStream(stream);
+                    console.log("Request stream back");
+                }
             } else if (e.mute != undefined) {
-                f.pauseStream(stream);
-                console.log("pauseStream")
+                if (this.stream.status == StreamStatus.Playing) {
+                    f.pauseStream(stream);
+                    console.log("pauseStream")
+                }
             }
+        }.bind(this),
+        function (str) {
+            this.writeInfo(str);
         }.bind(this)
     );
     wsPlayer.init(config);
@@ -84,6 +91,7 @@ function streamStatusListener(event) {
     } else if (event.status == StreamStatus.Stoped) {
         wsPlayer.stop();
     }
+    writeInfo("Stream " + event.status);
     stream.status = event.status;
 }
 
@@ -118,6 +126,10 @@ function playStream() {
     this.stream = f.playStream(stream);
 }
 
+function writeInfo(str) {
+    var div = document.getElementById('infoDiv');
+    div.innerHTML = div.innerHTML + str + "<BR>";
+}
 
 $(document).ready(function () {
     $("#playButton").click(function () {
