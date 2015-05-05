@@ -479,45 +479,48 @@ Phone.prototype.dataStatusEventListener = function (event) {
 Phone.prototype.errorStatusEvent = function (event) {
     var code = event.status;
     trace("Phone - errorStatusEvent " + code);
-    this.cancel();
-    if (code == WCSError.MIC_ACCESS_PROBLEM) {
-        this.viewMessage("ERROR - " + event.info);
-    } else if (code == WCSError.MIC_CAM_ACCESS_PROBLEM) {
-        this.viewMessage("ERROR - " + event.info);
-    } else if (code == WCSError.CONNECTION_ERROR) {
-        this.viewMessage("ERROR - Can`t connect to server.");
-    } else if (code == WCSError.AUTHENTICATION_FAIL) {
-        this.viewMessage("ERROR - Register fail, please check your SIP account details.");
-        window.setTimeout("disconnect();", 3000);
-    } else if (code == WCSError.USER_NOT_AVAILABLE) {
-        this.viewMessage("ERROR - User not available.");
-    } else if (code == WCSError.LICENSE_RESTRICTION) {
-        this.viewMessage("ERROR - You trying to connect too many users, or license is expired");
-    } else if (code == WCSError.LICENSE_NOT_FOUND) {
-        this.viewMessage("ERROR - Please get a valid license or contact Flashphoner support");
-    } else if (code == WCSError.INTERNAL_SIP_ERROR) {
-        this.viewMessage("ERROR - Unknown error. Please contact support.");
-    } else if (code == WCSError.REGISTER_EXPIRE) {
-        this.viewMessage("ERROR - No response from VOIP server during 15 seconds.");
-    } else if (code == WCSError.SIP_PORTS_BUSY) {
-        this.viewMessage("ERROR - SIP ports are busy. Please open SIP ports range (30000-31000 by default).");
-        window.setTimeout("disconnect();", 3000);
-    } else if (code == WCSError.MEDIA_PORTS_BUSY) {
-        this.viewMessage("ERROR - Media ports are busy. Please open media ports range (31001-32000 by default).");
-    } else if (code == WCSError.WRONG_SIPPROVIDER_ADDRESS) {
-        this.viewMessage("ERROR - Wrong domain.");
-        window.setTimeout("disconnect();", 3000);
-    } else if (code == WCSError.CALLEE_NAME_IS_NULL) {
-        this.viewMessage("ERROR - Callee name is empty.");
-    } else if (code == WCSError.WRONG_FLASHPHONER_XML) {
-        this.viewMessage("ERROR - Flashphoner.xml has errors. Please check it.");
-    } else if (code == WCSError.PAYMENT_REQUIRED) {
-        this.viewMessage("ERROR - Payment required, please check your balance.");
-    } else if (code == WCSError.REST_AUTHORIZATION_FAIL) {
-        this.viewMessage("ERROR - Rest authorization fail.");
-        window.setTimeout("disconnect();", 3000);
-    } else if (code == WCSError.REST_FAIL) {
-        this.viewMessage("ERROR - Rest fail.");
+    if (code == WCSError.MIC_ACCESS_PROBLEM || code == WCSError.MIC_CAM_ACCESS_PROBLEM) {
+        if (this.currentCall != null && this.currentCall.status != CallStatus.ESTABLISHED) {
+            this.cancel();
+            this.viewMessage("ERROR - " + event.info);
+        }
+    } else {
+        this.cancel();
+        if (code == WCSError.CONNECTION_ERROR) {
+            this.viewMessage("ERROR - Can`t connect to server.");
+        } else if (code == WCSError.AUTHENTICATION_FAIL) {
+            this.viewMessage("ERROR - Register fail, please check your SIP account details.");
+            window.setTimeout("disconnect();", 3000);
+        } else if (code == WCSError.USER_NOT_AVAILABLE) {
+            this.viewMessage("ERROR - User not available.");
+        } else if (code == WCSError.LICENSE_RESTRICTION) {
+            this.viewMessage("ERROR - You trying to connect too many users, or license is expired");
+        } else if (code == WCSError.LICENSE_NOT_FOUND) {
+            this.viewMessage("ERROR - Please get a valid license or contact Flashphoner support");
+        } else if (code == WCSError.INTERNAL_SIP_ERROR) {
+            this.viewMessage("ERROR - Unknown error. Please contact support.");
+        } else if (code == WCSError.REGISTER_EXPIRE) {
+            this.viewMessage("ERROR - No response from VOIP server during 15 seconds.");
+        } else if (code == WCSError.SIP_PORTS_BUSY) {
+            this.viewMessage("ERROR - SIP ports are busy. Please open SIP ports range (30000-31000 by default).");
+            window.setTimeout("disconnect();", 3000);
+        } else if (code == WCSError.MEDIA_PORTS_BUSY) {
+            this.viewMessage("ERROR - Media ports are busy. Please open media ports range (31001-32000 by default).");
+        } else if (code == WCSError.WRONG_SIPPROVIDER_ADDRESS) {
+            this.viewMessage("ERROR - Wrong domain.");
+            window.setTimeout("disconnect();", 3000);
+        } else if (code == WCSError.CALLEE_NAME_IS_NULL) {
+            this.viewMessage("ERROR - Callee name is empty.");
+        } else if (code == WCSError.WRONG_FLASHPHONER_XML) {
+            this.viewMessage("ERROR - Flashphoner.xml has errors. Please check it.");
+        } else if (code == WCSError.PAYMENT_REQUIRED) {
+            this.viewMessage("ERROR - Payment required, please check your balance.");
+        } else if (code == WCSError.REST_AUTHORIZATION_FAIL) {
+            this.viewMessage("ERROR - Rest authorization fail.");
+            window.setTimeout("disconnect();", 3000);
+        } else if (code == WCSError.REST_FAIL) {
+            this.viewMessage("ERROR - Rest fail.");
+        }
     }
 
     this.flashphonerListener.onError();

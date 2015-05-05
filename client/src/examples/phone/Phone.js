@@ -309,31 +309,32 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
 Phone.prototype.openVideoView = function () {
     var me = this;
     var mediaProvider = me.getMediaProvider();
+
+    if ($(".b-video").hasClass("open")) {			// open/close main video view and change class video for body
+        $(".b-video").removeClass("open").removeAttr("id");
+        $(".b-video").removeAttr('style');
+        $("body").removeClass("video");
+    } else {
+        $("#active").removeAttr("id");
+        $(".b-video").addClass("open").attr("id", "active");
+        $("body").addClass("video");
+    }
+    if ($(".voice_call__call").hasClass("open")) {
+        $(".b-video__video").addClass("open");
+    }
+
     if (!me.hasAccess(mediaProvider, true)) {
         if (me.intervalId == -1) {
             var checkAccessFunc = function () {
                 if (me.hasAccess(mediaProvider, true)) {
                     clearInterval(me.intervalId);
                     me.intervalId = -1;
-                    me.openVideoView();
+                    $(".b-alert").removeClass("open");
                 }
             };
             me.intervalId = setInterval(checkAccessFunc, 500);
         }
         me.getAccess(mediaProvider, true);
-    } else {
-        if ($(".b-video").hasClass("open")) {			// open/close main video view and change class video for body
-            $(".b-video").removeClass("open").removeAttr("id");
-            $(".b-video").removeAttr('style');
-            $("body").removeClass("video");
-        } else {
-            $("#active").removeAttr("id");
-            $(".b-video").addClass("open").attr("id", "active");
-            $("body").addClass("video");
-        }
-        if ($(".voice_call__call").hasClass("open")) {
-            $(".b-video__video").addClass("open");
-        }
     }
 };
 
