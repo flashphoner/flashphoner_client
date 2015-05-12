@@ -23,7 +23,7 @@ var f = Flashphoner.getInstance();
 var wsPlayer;
 
 //Current stream
-var stream;
+var stream = {};
 
 function initOnLoad() {
     //add listeners
@@ -38,12 +38,12 @@ function initOnLoad() {
     wsPlayer = new WebsocketPlayer(canvas, function(e){
             if (e.unmute != undefined) {
                 if (this.stream.status == StreamStatus.Paused) {
-                    f.playStream(stream);
+                    f.playStream(this.stream);
                     console.log("Request stream back");
                 }
             } else if (e.mute != undefined) {
                 if (this.stream.status == StreamStatus.Playing) {
-                    f.pauseStream(stream);
+                    f.pauseStream(this.stream);
                     console.log("pauseStream")
                 }
             }
@@ -70,11 +70,14 @@ function connectionStatusListener(event) {
     console.log(event.status);
     if (event.status == ConnectionStatus.Established) {
         console.log('Connection has been established. Press Play to get stream.');
+        writeInfo("CONNECTED, press play");
     } else if (event.status == ConnectionStatus.Disconnected) {
         wsPlayer.stop();
         console.log("Disconnected");
+        writeInfo("DISCONNECTED");
     } else if (event.status == ConnectionStatus.Failed) {
         wsPlayer.stop();
+        writeInfo("CONNECTION FAILED");
         f.disconnect();
     }
 }
@@ -92,7 +95,7 @@ function streamStatusListener(event) {
         wsPlayer.stop();
     }
     writeInfo("Stream " + event.status);
-    stream.status = event.status;
+    this.stream.status = event.status;
 }
 
 //Error
@@ -133,6 +136,9 @@ function writeInfo(str) {
 
 $(document).ready(function () {
     $("#playButton").click(function () {
+        if (stream.status != undefined && stream.status != StreamStatus.Stoped) {
+            return;
+        }
         playStream();
     });
 
@@ -148,5 +154,5 @@ $(document).ready(function () {
             wsPlayer.resume();
             $("#pauseButton").text("Pause");
         }
-    })
+    });
 });
