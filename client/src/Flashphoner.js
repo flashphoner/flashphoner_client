@@ -357,18 +357,7 @@ Flashphoner.prototype = {
             },
 
             finish: function (call) {
-                me.calls.remove(call.callId);
-                if (me.calls.getSize() == 0 && MediaProvider.WebRTC == call.mediaProvider) {
-                    var sessionId = me.webRtcCallSessionId;
-                    me.webRtcCallSessionId = undefined;
-                    me.mediaProviders.get(call.mediaProvider).close(sessionId);
-                }
-                if (MediaProvider.Flash == call.mediaProvider) {
-                    me.mediaProviders.get(call.mediaProvider).close(call.callId);
-                }
-                me.invokeListener(WCSEvent.CallStatusEvent, [
-                    call
-                ]);
+                me.finish(call);
             },
 
             busy: function (call) {
@@ -381,6 +370,14 @@ Flashphoner.prototype = {
             fail: function (event) {
                 if (event.hasOwnProperty("apiMethod")) {
                     var actualEvent = WCSEvent[event.apiMethod];
+                    //Finish Call before raising of FAILED event to close resources properly such as peer connection
+                    if (event.apiMethod == "CallStatusEvent"){
+                        var call = me.calls.get(event.id);
+                        if (call) {
+                            call.status = CallStatus.FINISH;
+                            me.finish(call);
+                        }
+                    }
                     delete event.apiMethod;
                     me.invokeListener(actualEvent, [
                         event
@@ -673,6 +670,21 @@ Flashphoner.prototype = {
         if (call) {
             this.webSocket.send("hangup", {callId: call.callId});
         }
+    },
+
+    finish: function (call) {
+        this.calls.remove(call.callId);
+        if (this.calls.getSize() == 0 && MediaProvider.WebRTC == call.mediaProvider) {
+            var sessionId = this.webRtcCallSessionId;
+            this.webRtcCallSessionId = undefined;
+            this.mediaProviders.get(call.mediaProvider).close(sessionId);
+        }
+        if (MediaProvider.Flash == call.mediaProvider) {
+            this.mediaProviders.get(call.mediaProvider).close(call.callId);
+        }
+        this.invokeListener(WCSEvent.CallStatusEvent, [
+            call
+        ]);
     },
 
     hold: function (call) {
@@ -1804,6 +1816,7 @@ CallStatus.ESTABLISHED = "ESTABLISHED";
 CallStatus.FINISH = "FINISH";
 CallStatus.BUSY = "BUSY";
 CallStatus.SESSION_PROGRESS = "SESSION_PROGRESS";
+CallStatus.FAILED = "FAILED";
 
 var DtmfType = function () {
 };

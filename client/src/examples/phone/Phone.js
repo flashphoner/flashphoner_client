@@ -93,6 +93,10 @@ Phone.prototype.onCallListener = function (event) {
 
 Phone.prototype.callStatusListener = function (event) {
     var sipObject = event.sipMessageRaw;
+    if (event.status==CallStatus.FAILED){
+        trace("Call failed: callId: "+event.id+" info: "+event.info);
+        return;
+    }
     var call = event;
     trace("Phone - callStatusListener call id: " + call.callId + " status: " + call.status + " mediaProvider: " + call.mediaProvider);
     if (this.currentCall.callId == call.callId) {
