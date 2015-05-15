@@ -542,6 +542,8 @@ Flashphoner.prototype = {
                 }
                 me.webRtcCallSessionId = undefined;
                 me.calls = new DataMap();
+                me.publishStreams = new DataMap();
+                me.playStreams = new DataMap();
             },
             error: function () {
                 me.connection.status = ConnectionStatus.Failed;
@@ -1184,7 +1186,10 @@ WebRtcMediaManager.prototype.hold = function (callId) {
 };
 
 WebRtcMediaManager.prototype.close = function (id) {
-    this.webRtcMediaConnections.remove(id).close();
+    var connection = this.webRtcMediaConnections.remove(id);
+    if (connection) {
+        connection.close();
+    }
 };
 
 WebRtcMediaManager.prototype.disconnect = function () {
@@ -1846,7 +1851,7 @@ StreamStatus.Publishing = "PUBLISHING";
 StreamStatus.Playing = "PLAYING";
 StreamStatus.Paused = "PAUSED";
 StreamStatus.Unpublished = "UNPUBLISHED";
-StreamStatus.Stoped = "STOPED";
+StreamStatus.Stoped = "STOPPED";
 StreamStatus.Failed = "FAILED";
 
 var WCSEvent = function () {
