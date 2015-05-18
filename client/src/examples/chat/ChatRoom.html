@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Room App</title>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../Flashphoner.js"></script>
+    <script type="text/javascript" src="ChatRoom.js"></script>
+</head>
+<body onload="initOnLoad()">
+<label for="login">Server:</label><br><input id="server" type="text" value="ws://192.168.1.5:8080"/>
+<br>
+<label for="login">Your name:</label><br><input id="login" type="text" value="Alice"/>
+<br>
+<label for="room">Room:</label><br><input id="room" type="text" value="main"/>
+<button type="button" id="loginButton">Login</button>
+<button type="button" id="logoutButton" disabled>Logout</button>
+<br><br>
+
+<label for="chat">Your chat:</label><br><textarea id="chat" cols="50" rows="10"></textarea>
+<br><br>
+<label for="message">Your message:</label><br><textarea id="message" cols="50" rows="10">Hi All!</textarea>
+<button type="button" id="sendButton" disabled>Send</button>
+<br>
+<video id="localVideo" width="320" height="240" autoplay style="position: absolute; left: 450px; top: 10px; border: 1px double black;"></video>
+<div style="position: absolute; left: 540px; top: 260px;">
+    <button type="button" id="publishButton" disabled>Publish</button>
+    <button type="button" id="unpublishButton" disabled>Unpublish</button>
+</div>
+
+<video id="remoteVideo" width="320" height="240" autoplay style="position: absolute; left: 450px; top: 300px; border: 1px double black;"></video>
+
+<div style="position: absolute; left: 460px; top: 550px;">
+    <label for="to">User:</label><input id="to" type="text" value="Bob"/>
+    <button type="button" id="playButton" disabled>Play</button>
+    <button type="button" id="stopButton" disabled>Stop</button>
+</div>
+
+</body>
+</html>
