@@ -25,6 +25,11 @@ var wsPlayer;
 //Current stream
 var stream = {};
 
+//todo it is a workaround
+var enableSyncDelay = true;
+
+var waitForSync = true;
+
 function initOnLoad() {
     //add listeners
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
@@ -96,6 +101,36 @@ function streamStatusListener(event) {
     }
     writeInfo("Stream " + event.status);
     this.stream.status = event.status;
+    syncDelay();
+}
+
+//Pause and play stream at the beginning to wait audio video sync
+//todo replace this workaround
+function syncDelay(){
+    if (enableSyncDelay){
+        if (this.stream.status == "PLAYING"){
+            if (waitForSync == true){
+                document.getElementById("videoCanvas").style.visibility = "hidden";
+                setTimeout(beginWaitForSync,5000);
+            }
+        } else if (this.stream.status == "PAUSED"){
+            if (waitForSync == true){
+                waitForSync = false;
+                setTimeout(endWaitForSync,5000);
+            }
+        }
+    }
+}
+
+function beginWaitForSync(){
+    writeInfo("beginWaitForSync");
+    wsPlayer.pause();
+}
+
+function endWaitForSync(){
+    writeInfo("endWaitForSync");
+    document.getElementById("videoCanvas").style.visibility = "visible";
+    wsPlayer.resume();
 }
 
 //Error
