@@ -60,7 +60,9 @@ function initOnLoad() {
         appKey: "defaultApp",
         useRTCSessions: false,
         useWsTunnel: true,
-        useBase64BinaryEncoding: false
+        useBase64BinaryEncoding: false,
+        width: config.videoWidth,
+        height: config.videoHeight
     });
 }
 
