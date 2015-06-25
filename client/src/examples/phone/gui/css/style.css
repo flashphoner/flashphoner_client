@@ -462,6 +462,10 @@ body{
     overflow: inherit;
 	min-width: 320px;
 	min-height: 240px;}
+.b-video.suppressed{
+    position:absolute;
+    left:-20000px;
+}
 .b-video__video{
 	display: none;
 	width: 100%;
