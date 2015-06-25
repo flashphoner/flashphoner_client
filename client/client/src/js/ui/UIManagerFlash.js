@@ -24,8 +24,13 @@ var UIManagerFlash = function () {
         getElement('video').style.top = "35px";
 
         flashphoner.getAccessToAudioAndVideo();
+
+        //Suppress Flash Settings Window for Microsoft Edge aka Spartan browser
+        if (navigator.userAgent.indexOf("Edge") > 0) {
+            $("#video_requestUnmuteDiv").addClass("suppressed");
+        }
     };
-}
+};
 
 UIManagerFlash.prototype = {
     requestUnmuteC2C: function() {

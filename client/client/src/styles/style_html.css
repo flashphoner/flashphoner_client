@@ -485,6 +485,10 @@ input::-webkit-input-placeholder {
     height: 1px !important;
     visibility: hidden;
 }
+#video_requestUnmuteDiv.suppressed{
+    position:absolute;
+    left:-20000px;
+}
 /*
 we use '.init' class to make div size 1x1 basically
 Because Firefox can`t operate with swf object located in
