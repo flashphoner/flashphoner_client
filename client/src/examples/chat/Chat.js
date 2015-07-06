@@ -43,11 +43,13 @@ function login() {
     if (MediaProvider.WebRTC == mediaProvider) {
         useRTCSessions = true;
         useWsTunnel = false;
-        document.getElementById('remoteVideoCanvas').style.display = false;
+        document.getElementById('remoteVideo').style.visibility = "visible";
+        document.getElementById('remoteVideoCanvas').style.visibility = "hidden";
     } else {
         useRTCSessions = false;
         useWsTunnel = true;
-        document.getElementById('remoteVideo').style.display = false;
+        document.getElementById('remoteVideo').style.visibility = "hidden";
+        document.getElementById('remoteVideoCanvas').style.visibility = "visible";
     }
 
     //connect to server

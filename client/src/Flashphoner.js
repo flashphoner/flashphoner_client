@@ -164,17 +164,20 @@ Flashphoner.prototype = {
             me.calls.update(call.callId, call);
         } else {
             me.calls.add(call.callId, call);
+
+            if (!call.mediaProvider) {
+                call.mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
+            }
+
+            if ((!this.webRtcCallSessionId) && MediaProvider.WebRTC == call.mediaProvider) {
+                this.webRtcCallSessionId = call.callId;
+                me.webRtcMediaManager.newConnection(call.callId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, me.configuration.remoteMediaElementId));
+            }
+
             if (call.incoming || call.parentCallId !== undefined) {
                 me.invokeListener(WCSEvent.OnCallEvent, [
                     call
                 ]);
-            }
-            if (!call.mediaProvider) {
-                call.mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
-            }
-            if ((!this.webRtcCallSessionId) && MediaProvider.WebRTC == call.mediaProvider) {
-                this.webRtcCallSessionId = call.callId;
-                me.webRtcMediaManager.newConnection(call.callId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, me.configuration.remoteMediaElementId));
             }
         }
     },
