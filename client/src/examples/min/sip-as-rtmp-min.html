@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phone min</title>
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
+    <!-- ****** -->
+
+    <!-- WCS JavaScript API -->
+    <script type="text/javascript" src="../../Flashphoner.js"></script>
+
+    <script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
+
+    <!-- Minimum script for calls -->
+    <script type="text/javascript" src="../ConfigurationLoader.js"></script>
+    <script type="text/javascript" src="sip-as-rtmp-min.js"></script>
+
+</head>
+<!-- Establish connection on page load -->
+<body onload="initAPI()">
+<!-- Call to WCS2 on click by this link -->
+WCS Server URL: <input id="urlServer" type="text" value="ws://192.168.1.5:8080"/><br/>
+SIP login, password, domain: <input id="sipLogin" type="text" value="1234"/>, <input id="sipPassword" type="password" value="1234"/>, <input id="sipDomain" type="text" value="160.79.219.122"/><br/>
+<a href="#" on onclick="connect();return false">connect</a>
+<br/><br/>
+SIP callee: <input id="callee" type="text" style="width:250px;" value="sip:18013@160.79.219.122:5060"/><br/>
+RTMP Url: <input id="rtmpUrl" type="text" style="width:250px;" value="rtmp://192.168.1.5:1935/live/myStream"/><br/>
+<a href="#" on onclick="call();return false">call</a>
+<a href="#" on onclick="hangup();return false">hangup</a>
+</body>
+</html>
