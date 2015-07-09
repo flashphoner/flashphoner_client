@@ -37,6 +37,7 @@ function call() {
     var call = new Call();
     call.callee = field("callee");
     call.rtmpUrl = field("rtmpUrl");
+    call.rtmpStream = field("rtmpStream");
     call.hasVideo = true;
     currentCall = f.call(call);
 }
