@@ -286,6 +286,7 @@ function notifyConfigLoaded() {
         $('#micButton').css('visibility', 'visible');
         $('#sendVideo').css('visibility', 'visible');
     }
+    flashphoner.setSoundNotifications("busy finish ring register message");
     //todo refactoring
     //$('#versionOfProduct').html(getVersion());
     if (flashphonerLoader.getToken()) {

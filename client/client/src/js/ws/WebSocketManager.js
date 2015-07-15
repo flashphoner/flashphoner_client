@@ -491,6 +491,10 @@ WebSocketManager.prototype = {
 
     unmute: function() {
         this.webRtcMediaManager.unmute();
+    },
+
+    setSoundNotifications: function(notifications){
+        this.soundControl.setSoundNotifications(notifications);
     }
 
 };

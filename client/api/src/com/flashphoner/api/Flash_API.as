@@ -127,6 +127,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("setLTState",setLTState);
 			ExternalInterface.addCallback("mute",mute);
 			ExternalInterface.addCallback("unmute",unmute);
+			ExternalInterface.addCallback("setSoundNotifications",setSoundNotifications);
 			calls = new ArrayCollection();
 			modelLocator = new ModelLocator();
 			phoneServerProxy = new PhoneServerProxy(new Responder(result),this);			
@@ -726,5 +727,9 @@ package com.flashphoner.api
 				currentGain = -1;
 			}
 		}	
+		
+		public function setSoundNotifications(notifications:String):void {
+			SoundControl.setNotifications(notifications);
+		}
 	}
 }

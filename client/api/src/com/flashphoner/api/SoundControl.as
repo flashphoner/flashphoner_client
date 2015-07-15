@@ -49,6 +49,7 @@ package com.flashphoner.api
 		private static var finishSound:Sound;
 		private static var messageSound:Sound;
 		private static var ringSoundChannel:SoundChannel;
+		private static var notifications:String = "busy finish ring register message";
 
 		/**
 		 * Path to sound for ring
@@ -195,19 +196,28 @@ package com.flashphoner.api
 			
 			Logger.info("onUpdateSoundComplete :"+localSound.url);			
 		} 
+		
+		public static function setNotifications(param:String):void {
+			Logger.info("setNotifications "+param);
+			notifications = param;
+		}
 
 		/**
 		 * Play busy sound
 		 **/
 		public static function playBusySound():void{
-			busySound.play(0,1);			
+			if (notifications.indexOf("busy")!=-1){
+				busySound.play(0,1);			
+			}
 		}
 
 		/**
 		 * Play finish sound
 		 **/
 		public static function playFinishSound():void{
-			finishSound.play(0,1);		
+			if (notifications.indexOf("finish")!=-1){
+				finishSound.play(0,1);	
+			}
 		}
 		
 		/**
@@ -215,12 +225,16 @@ package com.flashphoner.api
 		 **/
 		public static function playRegisterSound():void{
 			Logger.info("playRegisterSound "+registerSound.url);
-			registerSound.play(0,1);		
+			if (notifications.indexOf("register")!=-1){
+				registerSound.play(0,1);
+			}
 		}	
 		
 		public static function playMessageSound():void{
 			Logger.info("playMessageSound "+messageSound.url);
-			messageSound.play(0,1);		
+			if (notifications.indexOf("message")!=-1){
+				messageSound.play(0,1);
+			}
 		}
 		
 		/**
@@ -238,7 +252,9 @@ package com.flashphoner.api
 		 **/		
 		public static function playRingSound():void{
 			if (ringSoundChannel == null){
-				ringSoundChannel = ringSound.play(0,999);
+				if (notifications.indexOf("ring")!=-1){
+					ringSoundChannel = ringSound.play(0,999);
+				}
 			}			
 		}
 		
