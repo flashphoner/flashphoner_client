@@ -121,7 +121,8 @@ Flashphoner.prototype = {
                 getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
 
                 attachMediaStream = function (element, stream) {
-                    element.src = webkitURL.createObjectURL(stream);
+                    var URL = window.URL || window.webkitURL;
+                    element.src = URL.createObjectURL(stream);
                     element.play();
                 };
 
