@@ -650,6 +650,8 @@ $(document).ready(function () {
     $(".b-transfer__cancel").live("click", function () {
         if (phone.currentCall) {
             phone.unhold(phone.currentCall);
+            $(".voice_call__play").removeClass("open");					// hide unhold button
+            $(".voice_call__stop").addClass("open");						// do visible hold button
         }
         $(".voice_call__transfer").removeClass("close");
         $(".b-transfer").removeClass("open").removeAttr("id");
