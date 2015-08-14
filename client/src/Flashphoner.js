@@ -810,11 +810,19 @@ Flashphoner.prototype = {
     },
 
     getVolume: function (call) {
-        return this.mediaProviders.get(call.mediaProvider).getVolume(call.callId);
+        if (MediaProvider.Flash == call.mediaProvider) {
+            this.mediaProviders.get(call.mediaProvider).setVolume(call.callId, value);
+        } else {
+            this.mediaProviders.get(call.mediaProvider).setVolume(this.webRtcCallSessionId, value);
+        }
     },
 
     setVolume: function (call, value) {
-        this.mediaProviders.get(call.mediaProvider).setVolume(call.callId, value);
+        if (MediaProvider.Flash == call.mediaProvider) {
+            this.mediaProviders.get(call.mediaProvider).setVolume(call.callId, value);
+        } else {
+            this.mediaProviders.get(call.mediaProvider).setVolume(this.webRtcCallSessionId, value);
+        }
     },
 
     mute: function (mediaProvider) {

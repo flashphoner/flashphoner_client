@@ -103,13 +103,13 @@ Phone.prototype.callStatusListener = function (event) {
         this.currentCall.status = call.status;
         if (call.status == CallStatus.FINISH) {
             trace("Phone - ... Call is finished...");
+            SoundControl.getInstance().stopSound("RING");
             if (this.holdedCall != null) {
                 this.currentCall = this.holdedCall;
                 this.holdedCall = null;
             } else if (this.isCurrentCall(call)) {
                 this.currentCall = null;
                 this.flashphonerListener.onRemoveCall();
-                SoundControl.getInstance().stopSound("RING");
                 SoundControl.getInstance().playSound("FINISH");
 
                 $(".voice_call__transfer").removeClass("tr_call__pause");	// remove additional style of the transfer button
@@ -171,6 +171,8 @@ Phone.prototype.callStatusListener = function (event) {
 
             this.startTimer();
 
+            $(".voice_call__stop").addClass("open");		// do visible hold button
+            $(".voice_call__play").removeClass("open");					// hide unhold button
             $(".voice_call__call__pause").removeClass("open");	// hide hold view and transfer view (if the views was opened)
             $(".voice_call__call__play").removeClass("close");				// open talk view
             $(".voice_call__transfer").removeClass("tr_call__pause");		// remove class from the transfer button (if the class exists, then after transfer cancellation)
