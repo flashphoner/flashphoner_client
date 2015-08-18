@@ -626,6 +626,7 @@ $(document).ready(function () {
     $(".voice_call__stop").live("click", function () {	// if the call is on hold
         if (phone.currentCall) {
             phone.hold(phone.currentCall);
+            $(".voice_call__transfer").addClass("close");
             $(this).removeClass("open");					// hide the hold button
             $(".voice_call__play").addClass("open");	// do visible button of returning to the call and hold view
         }
@@ -634,6 +635,7 @@ $(document).ready(function () {
     $(".voice_call__play").live("click", function () {	// return to talk
         if (phone.currentCall) {
             phone.unhold(phone.currentCall);
+            $(".voice_call__transfer").removeClass("close");
             $(this).removeClass("open");					// hide unhold button
             $(".voice_call__stop").addClass("open");						// do visible hold button
         }
@@ -641,7 +643,7 @@ $(document).ready(function () {
 
     $(".voice_call__transfer").live("click", function () {							// if the transfer button is pressed
         if (phone.currentCall) {
-            phone.hold(phone.currentCall);
+            phone.holdForTransfer(phone.currentCall);
             $(".voice_call__transfer").addClass("close");		// hide transfer button
             $(".b-transfer").addClass("open");				// open transfer view and hold view
             $(".b-transfer").attr("id", "active");

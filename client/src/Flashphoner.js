@@ -695,6 +695,10 @@ Flashphoner.prototype = {
         this.webSocket.send("hold", {callId: call.callId});
     },
 
+    holdForTransfer: function (call) {
+        this.webSocket.send("hold", {callId: call.callId, holdForTransfer:true});
+    },
+
     unhold: function (call) {
         this.webSocket.send("unhold", {callId: call.callId});
     },

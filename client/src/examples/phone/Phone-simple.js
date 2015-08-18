@@ -197,6 +197,11 @@ Phone.prototype.hold = function (call) {
     Flashphoner.getInstance().hold(call);
 };
 
+Phone.prototype.holdForTransfer = function (call) {
+    trace("Phone - hold callId: " + call.callId);
+    Flashphoner.getInstance().holdForTransfer(call);
+};
+
 Phone.prototype.unhold = function (call) {
     trace("Phone - hold callId: " + call.callId);
     Flashphoner.getInstance().unhold(call);
