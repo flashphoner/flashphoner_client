@@ -171,6 +171,7 @@ Phone.prototype.callStatusListener = function (event) {
 
             this.startTimer();
 
+            $(".voice_call__transfer").removeClass("close");
             $(".voice_call__stop").addClass("open");		// do visible hold button
             $(".voice_call__play").removeClass("open");					// hide unhold button
             $(".voice_call__call__pause").removeClass("open");	// hide hold view and transfer view (if the views was opened)
