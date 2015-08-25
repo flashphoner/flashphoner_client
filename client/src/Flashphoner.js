@@ -1630,14 +1630,14 @@ WebRtcMediaConnection.prototype.getStatistics = function (callbackFn) {
                             result.activeCandidate = resultPart;
                         } else if (resultPart.type == "ssrc") {
                             if (resultPart.transportId.indexOf("audio") > -1) {
-                                if (resultPart.packetsLost == -1) {
+                                if (resultPart.id.indexOf("send") > -1) {
                                     result.outgoingStreams.audio = resultPart;
                                 } else {
                                     result.incomingStreams.audio = resultPart;
                                 }
 
                             } else {
-                                if (resultPart.packetsLost == -1) {
+                                if (resultPart.id.indexOf("send") > -1) {
                                     result.outgoingStreams.video = resultPart;
                                 } else {
                                     result.incomingStreams.video = resultPart;
