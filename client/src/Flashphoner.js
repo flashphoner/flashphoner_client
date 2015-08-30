@@ -1248,7 +1248,9 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
                     attachMediaStream(localMediaElement, stream);
                 }
                 me.localAudioVideoStream = stream;
-                me.isAudioMuted = -1;
+                if (webrtcDetectedBrowser != "firefox") {
+                    me.isAudioMuted = -1;
+                }
                 me.isVideoMuted = -1;
             }, function (error) {
                 trace("Failed to get access to local media. Error code was " + error.code + ".");
