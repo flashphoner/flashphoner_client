@@ -11,7 +11,8 @@ config.videoHeight = 240;
 var url = "ws://192.168.1.5:8080";
 
 //The stream name can be an RTSP URL for playback
-var streamName = "rtsp://192.168.1.5:1935/live/stream1";
+//Example: rtsp://192.168.1.5:1935/live/stream1
+var streamName;
 
 //The streamName can be also WebRTC stream ID. Example:
 //var streamName = "XP34dq6aqJK0V09o5RbU";
@@ -115,7 +116,7 @@ function playStream() {
     //play a sound to enable mobile loudspeakers
     playFirstSound();
     var stream = new Stream();
-    stream.name = streamName;
+    stream.name = document.getElementById("streamId").value;
     stream.hasVideo = true;
     stream.sdp = "v=0\r\n" +
     "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
