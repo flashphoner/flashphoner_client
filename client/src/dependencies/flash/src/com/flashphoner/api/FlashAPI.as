@@ -119,7 +119,7 @@ package com.flashphoner.api
 		}
 		
 		public  function hold(callId:String):void{
-			phoneServerProxy.unpublish(getPublishStreamNameForCall(userData.sipLogin, callId));
+			phoneServerProxy.hold(getPublishStreamNameForCall(userData.sipLogin, callId));
 		}
 		
 		public  function getStatistics(callId:String):Object{
