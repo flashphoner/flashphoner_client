@@ -6,6 +6,7 @@ var wsPlayer;
 
 //Current stream
 var currentStream = {};
+var currentPublishStream = {};
 
 var mediaProvider;
 
@@ -71,6 +72,9 @@ function connectionStatusListener(event) {
         console.log('Connection has been established.');
         document.getElementById("logoutButton").disabled = false;
         document.getElementById("playButton").disabled = false;
+        if (MediaProvider.WebRTC == mediaProvider) {
+            document.getElementById("publishButton").disabled = false;
+        }
         document.getElementById("sendButton").disabled = false;
     } else if (event.status == ConnectionStatus.Disconnected) {
         if (wsPlayer) {
@@ -83,6 +87,8 @@ function connectionStatusListener(event) {
         document.getElementById("playButton").disabled = true;
         document.getElementById("sendButton").disabled = true;
         document.getElementById("stopButton").disabled = true;
+        document.getElementById("publishButton").disabled = true;
+        document.getElementById("unpublishButton").disabled = true;
     } else if (event.status == ConnectionStatus.Failed) {
         if (wsPlayer != null) {
             wsPlayer.stop();
@@ -94,6 +100,7 @@ function connectionStatusListener(event) {
         document.getElementById("logoutButton").disabled = true;
         document.getElementById("loginButton").disabled = false;
         document.getElementById("playButton").disabled = true;
+        document.getElementById("publishButton").disabled = true;
         document.getElementById("sendButton").disabled = true;
         document.getElementById("stopButton").disabled = true;
     }
@@ -108,17 +115,22 @@ function binaryListener(event) {
 //Connection Status
 function streamStatusListener(event) {
     console.log(event.status);
+    var isPublishStream = currentPublishStream.name != undefined && currentPublishStream.name == event.name;
     if (event.status == StreamStatus.Failed) {
-        if (wsPlayer) {
+        if (wsPlayer && !isPublishStream) {
             wsPlayer.stop();
         }
     } else if (event.status == StreamStatus.Stoped) {
-        if (wsPlayer) {
+        if (wsPlayer && !isPublishStream) {
             wsPlayer.stop();
         }
     }
     writeInfo("Stream " + event.status);
-    currentStream.status = event.status;
+    if (isPublishStream) {
+        currentPublishStream.status = event.status;
+    } else {
+        currentStream.status = event.status;
+    }
 }
 
 //Error
@@ -232,6 +244,24 @@ $(document).ready(function () {
 
     $("#logoutButton").click(function () {
         f.disconnect();
+    });
+
+    $("#publishButton").click(function () {
+        if (currentPublishStream.status != undefined && currentPublishStream.status != StreamStatus.Stoped && currentPublishStream.status != StreamStatus.Failed) {
+            return;
+        }
+        var streamName = "stream-" + document.getElementById("login").value;
+        currentPublishStream.name = streamName;
+        f.publishStream({name:streamName, hasVideo:true});
+        document.getElementById("publishButton").disabled = true;
+        document.getElementById("unpublishButton").disabled = false;
+    });
+
+    $("#unpublishButton").click(function () {
+        var streamName = "stream-" + document.getElementById("login").value;
+        f.unPublishStream({name:streamName});
+        document.getElementById("publishButton").disabled = false;
+        document.getElementById("unpublishButton").disabled = true;
     });
 
 });
