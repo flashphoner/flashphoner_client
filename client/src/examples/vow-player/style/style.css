@@ -1,0 +1,141 @@
+.fullPlayer canvas{
+}
+.fullPlayer {
+	position:relative;
+	width:320px;
+	font-family: "arial", sans-serif;
+	font-size: 12px;
+	line-height: 18px;
+}
+
+.player{
+	height:60px;
+	background-color:#111111;
+}
+
+
+.pauseButton, .playButton{
+	background: url(../images/pause.png) no-repeat 0 0;
+	height:14px;
+	width:12px;
+	margin:13px 5px;
+	border:none;
+	cursor:pointer;
+	display: inline-block;
+}
+.playButton {
+	background: url("../images/play.png") no-repeat 0 0;
+}
+
+.pause{
+	float:left;
+	width:43px;
+	height:40px;
+	margin:10px;
+	padding-right:10px;
+	border-right:1px solid #6B6B6B;
+}
+
+.sound{
+	float:right;
+	height:23px;
+	width:130px;
+}
+
+.shkala1{
+	width:78px;
+	height:4px;
+	background: #4D4D4D;
+	color: #fff;
+	margin:7px 15px;
+	cursor:pointer;
+
+}
+
+.shkala2 {
+	width:61px;
+	height:4px;
+	background: #DD1E25;
+
+}
+
+.fullButton{
+	background:#111111 url('../images/fullscr.png') no-repeat;
+	height:14px;
+	width:14px;
+	margin:13px auto;
+	border:none;
+	cursor:pointer;
+	display: block;
+}
+
+.control{
+	float:right;
+	width:58px;
+	height:40px;
+	margin: 10px 0 0 0;
+	border-left:1px solid #6B6B6B;
+	text-align: center;
+}
+
+.stream-name {
+	float: left;
+	width: 240px;
+	padding: 20px 10px;
+}
+.stream-name input {
+	border: none;
+	text-align: center;
+	margin: 0 auto;
+	display: block;
+	width: 90%;
+	padding: 3px;
+	color: #000;
+}
+
+.powered-by {
+	height: 22px;
+	text-align: center;
+	line-height: 22px;
+	background: #111111;
+	color: #fff;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+}
+
+#preloader5{
+	position:absolute;
+	left: calc(50% - 7px);
+	top: calc(45% - 7px);
+	width:15px;
+	height:15px;
+	background:#000000;
+	border-radius:50px;
+	animation: preloader_5 1.5s infinite linear;
+}
+#preloader5:after{
+	position:absolute;
+	width:25px;
+	height:25px;
+	border-top:5px solid #DD1E25;
+	border-bottom:5px solid #DD1E25;
+	border-left:5px solid transparent;
+	border-right:5px solid transparent;
+	border-radius:25px;
+	content:'';
+	top:-10px;
+	left:-10px;
+	animation: preloader_5_after 1.5s infinite linear;
+}
+@keyframes preloader_5 {
+	0% {transform: rotate(0deg);}
+	50% {transform: rotate(180deg);background:#DD1E25;}
+	100% {transform: rotate(360deg);}
+}
+@keyframes preloader_5_after {
+	0% {border-top:5px solid #DD1E25;border-bottom:5px solid #DD1E25;}
+	50% {border-top:5px solid #000000;border-bottom:5px solid #000000;}
+	100% {border-top:5px solid #DD1E25;border-bottom:5px solid #DD1E25;}
+}

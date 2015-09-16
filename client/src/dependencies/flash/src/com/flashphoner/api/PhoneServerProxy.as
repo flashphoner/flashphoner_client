@@ -114,7 +114,14 @@ package com.flashphoner.api
 				}
 				outStream.publish(streamName);
 				outStreams[streamName] = outStream;
-			}					
+			} else {
+				if (hasAudio){
+					outStream.attachAudio(flash_API.getMicrophone());
+				}
+				if (hasVideo){
+					setVideoCompressionSettings(outStream);
+				}
+			}
 		}
 		
 		public function unpublish(streamName:String):void{	
@@ -126,6 +133,15 @@ package com.flashphoner.api
 				outStream.close();
 				outStreams[streamName] = null;
 			}		
+		}
+		
+		public function hold(streamName:String):void{
+			Logger.info("hold() name: "+streamName);
+			var outStream:NetStream = outStreams[streamName];
+			if (outStream != null){				
+				outStream.attachCamera(null);
+				outStream.attachAudio(null);
+			}
 		}
 		
 		public function enableVideo(streamName:String):void{

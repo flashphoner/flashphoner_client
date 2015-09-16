@@ -28,11 +28,14 @@
 <br><br>
 <button type="button" id="playButton" disabled>Play</button>
 <button type="button" id="stopButton" disabled>Stop</button>
+<button type="button" id="publishButton" disabled>Publish</button>
+<button type="button" id="unpublishButton" disabled>Unpublish</button>
 <br><br>
 <label for="message">Your message:</label><br><textarea id="message" cols="50" rows="10">Hi Bob!</textarea>
 <button type="button" id="sendButton" disabled>Send</button>
 <br>
 <canvas id="remoteVideoCanvas" width="320" height="240" style="position: absolute; left: 450px; top: 300px; border: 1px double black;" ></canvas>
 <video id="remoteVideo" width="320" height="240" autoplay style="position: absolute; left: 450px; top: 300px; border: 1px double black;"></video>
+<video id="localVideo" width="80" height="60" autoplay style="position: absolute; left: 450px; top: 300px;"></video>
 </body>
 </html>

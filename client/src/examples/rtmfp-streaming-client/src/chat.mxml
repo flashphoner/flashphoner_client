@@ -12,16 +12,24 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import mx.core.UIComponent;
 			
 			private var nc:NetConnection;
 			private var cam:Camera;
 			private var mic:Microphone;
+			private var videoFarEnd:Video;
 			private var publishStream:NetStream;
+			private var subscribeStream:NetStream;
+			private var subscribeStreamObject:Object;
 			
 			private function init():void{
 				cam = Camera.getCamera();
 				videoMy.attachCamera(cam);
 				mic = Microphone.getMicrophone();
+				videoFarEnd = new Video();
+				var container:UIComponent = new UIComponent();
+				container.addChild(videoFarEnd);
+				canvas.addChild(container);
 			}
 			
 			private function initCam():void{				
@@ -73,15 +81,19 @@
 					disconnectBtn.enabled = true;
 					sendBtn.enabled = true;
 					publishBtn.enabled = true;
+					playBtn.enabled = true;
 				} else if (event.info.code=="NetConnection.Connect.Closed"){					
 					nc.removeEventListener(NetStatusEvent.NET_STATUS,handleConnectionStatus);
 					unpublish();
+					stop();
 					Logger.info("Connection closed");
 					connectBtn.enabled = true;
 					disconnectBtn.enabled = false;
 					sendBtn.enabled = false;
 					unpublishBtn.enabled = false;
 					publishBtn.enabled = false;
+					playBtn.enabled = false;
+					stopBtn.enabled = false;
 				}
 			}
 			
@@ -120,7 +132,7 @@
 				}
 				publishBtn.enabled = true;
 				unpublishBtn.enabled = false;
-				
+				videoFarEnd.clear();
 			}
 			
 			private function addListenerAndPublish():void{
@@ -136,6 +148,69 @@
 				var videoStreamSettings:H264VideoStreamSettings = new H264VideoStreamSettings();
 				videoStreamSettings.setProfileLevel(H264Profile.MAIN,H264Level.LEVEL_3_1);						
 				publishStream.videoStreamSettings = videoStreamSettings;
+			}
+			
+			/**
+			 * *************************
+			 * 		PLAY / STOP
+			 * *************************
+			 **/
+			private function play():void{
+				Logger.info("play");
+				subscribeStream = new NetStream(nc);
+				addListenerAndPlay();
+			}
+			
+			private function stop():void{
+				if (subscribeStream != null) {
+					subscribeStream.close();
+					subscribeStream = null;
+				}
+				if (nc != null && nc.connected) {
+					nc.call("stopStream", null, subscribeStreamObject);
+				}
+				subscribeStreamObject = null;
+				videoFarEnd.visible = false;
+				stopBtn.enabled = false;
+				playBtn.enabled = true;
+			}
+			
+			private function addListenerAndPlay():void{
+				subscribeStream.videoReliable=true;
+				subscribeStream.audioReliable=false;
+				subscribeStream.useHardwareDecoder=true;				
+				subscribeStream.addEventListener(NetStatusEvent.NET_STATUS, handleSubscribeStreamStatus);
+				subscribeStream.bufferTime=0;
+				var soundTransform:SoundTransform = new SoundTransform();	
+				soundTransform.volume=0.7;
+				subscribeStream.soundTransform = soundTransform;	
+				subscribeStreamObject = createStreamObject();
+				nc.call("playStream", null, subscribeStreamObject);
+				subscribeStream.play(subscribeStreamObject.mediaSessionId);
+				videoFarEnd.attachNetStream(subscribeStream);
+				playBtn.enabled = false;
+				stopBtn.enabled = true;
+				videoFarEnd.width = 320;
+				videoFarEnd.height = 240;
+				videoFarEnd.visible = true;
+			}
+			
+			private function createStreamObject():Object{
+				var ret:Object = new Object();
+				ret.mediaSessionId = generateRandomString(8);
+				ret.name = "stream-"+To.text;
+				return ret; 
+			}
+			
+			private function generateRandomString(strlen:Number):String{
+				var chars:String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+				var num_chars:Number = chars.length - 1;
+				var randomChar:String = "";
+				
+				for (var i:Number = 0; i < strlen; i++){
+					randomChar += chars.charAt(Math.floor(Math.random() * num_chars));
+				}
+				return randomChar;
 			}
 			
 			/**
@@ -177,6 +252,10 @@
 				}
 			}
 			
+			private function handleSubscribeStreamStatus(event:NetStatusEvent):void{
+				Logger.info("handleSubscribeStreamStatus: "+event.info.code);
+			}
+			
 			private function asyncErrorHandler(event: AsyncErrorEvent):void{
 				Logger.info("asyncErrorHandler: "+event);					
 			}
@@ -214,7 +293,11 @@
 	
 	<s:Label x="630" y="344" text="keyframe"/>
 	<s:TextInput id="camKeyFrame" x="631" y="314" width="31" text="15"/>	
-
+	
+	<!-- play / stop -->
+	<s:Button id="playBtn" x="422" y="405" label="Play video" width="118" height="21" click="play()" enabled="false"/>
+	<s:Button id="stopBtn" x="590" y="405" label="Stop video" width="118" height="21" click="stop()" enabled="false"/>
+	
 	<!-- chat -->
 	<s:TextArea id="messageText" x="35" y="382" width="251" height="67" text="Hey!"/>
 	<s:Button id="sendBtn" x="307" y="382" height="67" label="Send" click="sendMessage()" enabled="false"/>
@@ -225,7 +308,8 @@
 	<!-- console -->
 	
 	<!-- video view -->
-	<mx:VideoDisplay id="videoMy" visible="true" x="407" y="56" width="320" height="224"  chromeColor="#EEA1A1"/>
+	<mx:Canvas id = "canvas" visible="true" x="412" y="15" width="320" height="240"/>
+	<mx:VideoDisplay id="videoMy" visible="true" x="412" y="15" width="80" height="60"  chromeColor="#EEA1A1"/>
 	<s:Label x="35" y="362" width="89" text="Your message:"/>
 	<s:Label x="34" y="128" width="89" text="Your chat:"/>
 	<s:Label x="38" y="69" width="89" text="Your name:"/>

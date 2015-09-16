@@ -872,7 +872,7 @@ Flashphoner.prototype = {
         }
 
         me.checkAndGetAccess(MediaProvider.WebRTC, stream.hasVideo, function () {
-            me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, me.configuration.remoteMediaElementId));
+            me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined));
 
             me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
                 trace("Publish name " + stream.name);
@@ -1291,7 +1291,9 @@ var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, r
     me.peerConnection = null;
     me.peerConnectionState = 'new';
     me.remoteAudioVideoMediaStream = null;
-    me.remoteMediaElement = getElement(remoteMediaElementId);
+    if (remoteMediaElementId) {
+        me.remoteMediaElement = getElement(remoteMediaElementId);
+    }
     me.stunServer = stunServer;
     me.useDTLS = useDTLS;
     me.lastReceivedSdp = null;
@@ -1316,7 +1318,9 @@ WebRtcMediaConnection.prototype.close = function () {
         if (this.peerConnection) {
             trace("WebRtcMediaConnection - PeerConnection will be closed");
             this.peerConnection.close();
-            this.remoteMediaElement.pause();
+            if (this.remoteMediaElement) {
+                this.remoteMediaElement.pause();
+            }
         }
     } else {
         console.log("peerConnection already closed, do nothing!");
@@ -1358,7 +1362,9 @@ WebRtcMediaConnection.prototype.onOnAddStreamCallback = function (event) {
     trace("WebRtcMediaConnection - onOnAddStreamCallback(): event=" + this.remoteMediaElement);
     if (this.peerConnection != null) {
         this.remoteAudioVideoMediaStream = event.stream;
-        attachMediaStream(this.remoteMediaElement, this.remoteAudioVideoMediaStream);
+        if (this.remoteMediaElement) {
+            attachMediaStream(this.remoteMediaElement, this.remoteAudioVideoMediaStream);
+        }
     }
     else {
         console.warn("SimpleWebRtcSipPhone:onOnAddStreamCallback(): this.peerConnection is null, bug in state machine!, bug in state machine!");
@@ -1369,7 +1375,9 @@ WebRtcMediaConnection.prototype.onOnRemoveStreamCallback = function (event) {
     trace("WebRtcMediaConnection - onOnRemoveStreamCallback(): event=" + event);
     if (this.peerConnection != null) {
         this.remoteAudioVideoMediaStream = null;
-        this.remoteMediaElement.pause();
+        if (this.remoteMediaElement) {
+            this.remoteMediaElement.pause();
+        }
     } else {
         console.warn("SimpleWebRtcSipPhone:onOnRemoveStreamCallback(): this.peerConnection is null, bug in state machine!");
     }

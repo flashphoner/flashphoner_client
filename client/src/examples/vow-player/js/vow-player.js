@@ -41,11 +41,13 @@ function initOnLoad() {
                 if (this.stream.status == StreamStatus.Paused) {
                     f.playStream(this.stream);
                     console.log("Request stream back");
+                    onPlaying();
                 }
             } else if (e.mute != undefined) {
                 if (this.stream.status == StreamStatus.Playing) {
                     f.pauseStream(this.stream);
-                    console.log("pauseStream")
+                    console.log("pauseStream");
+                    onPaused();
                 }
             }
         }.bind(this),
@@ -96,6 +98,10 @@ function streamStatusListener(event) {
         wsPlayer.stop();
     } else if (event.status == StreamStatus.Stoped) {
         wsPlayer.stop();
+    } else if (event.status == StreamStatus.Playing){
+        onPlaying();
+    } else if (event.status == StreamStatus.Paused){
+        onPaused();
     }
     writeInfo("Stream " + event.status);
     this.stream.status = event.status;
@@ -137,25 +143,28 @@ function writeInfo(str) {
     div.innerHTML = div.innerHTML + str + "<BR>";
 }
 
+function onPlaying(){
+    $("#controlButton").removeClass("playButton");
+    $("#controlButton").addClass("pauseButton");
+    $(".control").click(function () {
+        wsPlayer.pause();
+    });
+}
+
+function onPaused(){
+    $("#controlButton").removeClass("pauseButton");
+    $("#controlButton").addClass("playButton");
+    $(".control").click(function () {
+        wsPlayer.resume();
+    });
+}
+
 $(document).ready(function () {
-    $("#playButton").click(function () {
+    $("#controlButton").addClass("playButton");
+    $(".control").click(function () {
         if (stream.status != undefined && stream.status != StreamStatus.Stoped) {
             return;
         }
         playStream();
-    });
-
-    $("#pauseButton").click(function () {
-        var str = $("#pauseButton").text();
-        console.log("stream status " + stream.status);
-        if (str == "Pause") {
-            if (stream.status != StreamStatus.Stoped) {
-                wsPlayer.pause();
-                $("#pauseButton").text("Resume");
-            }
-        } else if (str == "Resume") {
-            wsPlayer.resume();
-            $("#pauseButton").text("Pause");
-        }
     });
 });
