@@ -14,6 +14,8 @@ package com.flashphoner.api
 {
 	import flash.external.ExternalInterface;
 	
+	import mx.controls.Alert;
+	
 	/**
 	 * Implementaion interface for js-phones
 	 **/

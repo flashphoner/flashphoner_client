@@ -65,24 +65,25 @@ package com.flashphoner.api
 		
 		public function netStatusHandler(event : NetStatusEvent) : void
 		{		
-			var apiNotify:APINotify;
+			var eventInfoStr:String = "";
+			for(var id:String in event.info) {
+				var value:Object = event.info[id];
+				eventInfoStr += id + "=" + value + "; ";
+			}
+			Logger.info("NetConnection " + event + " - " + eventInfoStr);
+
 			if(event.info.code == "NetConnection.Connect.Success")
 			{
-				Logger.info("NetConnection.Connect.Success");
 				isConnected = true;
-								
 			} else if(event.info.code == "NetConnection.Connect.Failed")
 			{
-				Logger.info("NetConnection.Connect.Failed");
 				hasDisconnectAttempt = false;
 			} else if (event.info.code == 'NetConnection.Connect.Rejected')
 			{
-				Logger.info("NetConnection.Connect.Rejected");
 				Alert.show("Connect rejected,\n permission to server denied.");
 				hasDisconnectAttempt = false;
 			} else if (event.info.code == 'NetConnection.Connect.Closed')
 			{				
-				Logger.info("NetConnection.Connect.Closed");
 				outStreams = {};
 				hasDisconnectAttempt = false;
 				isConnected = false;
@@ -165,14 +166,21 @@ package com.flashphoner.api
 		}
 		
 		private function asyncErrorHandler(event: AsyncErrorEvent):void {
+			Logger.info("NetStream async error: " + event);
 		}
 		
 		private function onNetStatus(event : NetStatusEvent) : void{
+			var eventInfoStr:String = "";
+			for(var id:String in event.info) {
+				var value:Object = event.info[id];
+				eventInfoStr += id + "=" + value + "; ";
+			}			
+			Logger.info("NetStream " + event + " - " + eventInfoStr);
 		}
 		
 		
 		public function pong():void{
-			nc.call("pong",null);		
+			nc.call("pong", null);		
 		}
 		
 	}

@@ -54,24 +54,14 @@ package com.flashphoner.api
 			video.clear();			
 		}
 		
-		private function nsOnStatus(infoObject:NetStatusEvent):void
+		private function nsOnStatus(event:NetStatusEvent):void
 		{
-			Logger.info("PhoneSpeaker.nsOnStatus() "+infoObject.info.code);
-			
-			if (currentStream == null){
-				return;
-			}			
-					
-			if (infoObject.info.code == "NetStream.Play.Start"){
-			}
-			
-			if (infoObject.info.code == "NetStream.Play.PublishNotify"){
-			}		
-					
-			else if (infoObject.info.code == "NetStream.Play.StreamNotFound" || infoObject.info.code == "NetStream.Play.Failed"||infoObject.info.code == "NetStream.Play.Stop"){
-				Logger.info("incomingStream.onStatus() "+infoObject.info.description);
-			}
-				
+			var eventInfoStr:String = "";
+			for(var id:String in event.info) {
+				var value:Object = event.info[id];
+				eventInfoStr += id + "=" + value + "; ";
+			}				
+			Logger.info("PhoneSpeaker.nsOnStatus() " + event + " - " + eventInfoStr);
 		}	
 		
 		

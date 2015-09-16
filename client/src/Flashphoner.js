@@ -2072,3 +2072,7 @@ function trace(logMessage) {
         console[0].scrollTop = console[0].scrollHeight;
     }
 }
+
+function addLogMessage(message){
+    trace("Flash - " + message);
+}

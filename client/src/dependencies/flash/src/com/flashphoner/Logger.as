@@ -13,6 +13,9 @@ This code and accompanying materials also available under LGPL and MPL license f
 package com.flashphoner
 {
 	
+	import com.flashphoner.api.APINotify;
+	import com.flashphoner.api.FlashAPI;
+	
 	import flash.system.Capabilities;
 	
 	public class Logger
@@ -86,6 +89,9 @@ package com.flashphoner
 			if (SEVERITY[severity] <= SEVERITY_VALUE ){
 				str = severity+':   ' + getTime() + str + "\n";
 				trace(str);
+				for each (var apiNotify:APINotify in FlashAPI.apiNotifys){
+					apiNotify.addLogMessage(str);
+				}
 				log += str + '';
 			}
 		}

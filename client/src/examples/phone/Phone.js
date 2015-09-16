@@ -540,7 +540,7 @@ $(document).ready(function () {
         }
     });
     // change video view dimensions
-    $(".b-video, .b-login, .b-alert__error, .b-chat, .b-transfer").draggable();	// set video view draggable
+    //$(".b-video, .b-login, .b-alert__error, .b-chat, .b-transfer").draggable();	// set video view draggable
     $(".b-video").resizable({
         minHeight: 240,
         minWidth: 320,
