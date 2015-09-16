@@ -12,6 +12,7 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import mx.core.UIComponent;
 			
 			private var nc:NetConnection;
 			private var cam:Camera;
@@ -26,7 +27,9 @@
 				videoMy.attachCamera(cam);
 				mic = Microphone.getMicrophone();
 				videoFarEnd = new Video();
-				uic.addChild(videoFarEnd);
+				var container:UIComponent = new UIComponent();
+				container.addChild(videoFarEnd);
+				canvas.addChild(container);
 			}
 			
 			private function initCam():void{				
@@ -129,7 +132,7 @@
 				}
 				publishBtn.enabled = true;
 				unpublishBtn.enabled = false;
-				
+				videoFarEnd.clear();
 			}
 			
 			private function addListenerAndPublish():void{
@@ -305,8 +308,8 @@
 	<!-- console -->
 	
 	<!-- video view -->
+	<mx:Canvas id = "canvas" visible="true" x="412" y="15" width="320" height="240"/>
 	<mx:VideoDisplay id="videoMy" visible="true" x="412" y="15" width="80" height="60"  chromeColor="#EEA1A1"/>
-	<mx:UIComponent id = "uic" visible="true" x="412" y="15" width="320" height="240"/>
 	<s:Label x="35" y="362" width="89" text="Your message:"/>
 	<s:Label x="34" y="128" width="89" text="Your chat:"/>
 	<s:Label x="38" y="69" width="89" text="Your name:"/>
