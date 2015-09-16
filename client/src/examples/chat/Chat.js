@@ -19,6 +19,7 @@ function initOnLoad() {
     f.addListener(WCSEvent.OnDataEvent, dataEventListener);
     var configuration = new Configuration();
     configuration.remoteMediaElementId = 'remoteVideo';
+    configuration.localMediaElementId = 'localVideo';
     f.init(configuration);
 
     var mediaProviderEl = document.getElementById("mediaProvider");
@@ -247,7 +248,7 @@ $(document).ready(function () {
     });
 
     $("#publishButton").click(function () {
-        if (currentPublishStream.status != undefined && currentPublishStream.status != StreamStatus.Stoped && currentPublishStream.status != StreamStatus.Failed) {
+        if (currentPublishStream.status != undefined && currentPublishStream.status != StreamStatus.Stoped && currentPublishStream.status != StreamStatus.Failed && currentPublishStream.status != StreamStatus.Unpublished) {
             return;
         }
         var streamName = "stream-" + document.getElementById("login").value;
