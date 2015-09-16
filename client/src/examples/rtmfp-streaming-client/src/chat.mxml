@@ -179,7 +179,7 @@
 				subscribeStream.addEventListener(NetStatusEvent.NET_STATUS, handleSubscribeStreamStatus);
 				subscribeStream.bufferTime=0;
 				var soundTransform:SoundTransform = new SoundTransform();	
-				soundTransform.volume=70;
+				soundTransform.volume=0.7;
 				subscribeStream.soundTransform = soundTransform;	
 				subscribeStreamObject = createStreamObject();
 				nc.call("playStream", null, subscribeStreamObject);
