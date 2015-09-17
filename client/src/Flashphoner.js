@@ -18,7 +18,7 @@ function Flashphoner() {
     this.version = undefined;
     this.mediaProviders = new DataMap();
     this.intervalId = -1;
-    this.firefoxCodecReplaicer = {"pcma":"PCMA", "pcmu":"PCMU", "g722":"G722", "OPUS":"opus", "SHA-256":"sha-256"};
+    this.firefoxCodecReplaicer = {"pcma": "PCMA", "pcmu": "PCMU", "g722": "G722", "OPUS": "opus", "SHA-256": "sha-256"};
 }
 
 Flashphoner.getInstance = function () {
@@ -296,11 +296,17 @@ Flashphoner.prototype = {
                 //if (sdp.search("a=recvonly") != -1) {
                 //    sdp = me.handleVideoSSRC(sdp);
                 //}
+                console.log("setRemoteSDP: " + sdp);
                 if (me.webRtcMediaManager) {
                     if (navigator.mozGetUserMedia) {
-                        for (var c in me.firefoxCodecReplaicer){
+                        for (var c in me.firefoxCodecReplaicer) {
                             sdp = sdp.split(c).join(me.firefoxCodecReplaicer[c]);
                         }
+                    }
+
+                    if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
+                        sdp = me.stripCodecsSDP(sdp, false);
+                        console.log("Apply strip codecs");
                     }
                     me.webRtcMediaManager.setRemoteSDP(id, sdp, isInitiator);
                 }
@@ -325,7 +331,7 @@ Flashphoner.prototype = {
                 var rawLength = raw.length;
                 var array = new Uint8Array(new ArrayBuffer(rawLength));
 
-                for(i = 0; i < rawLength; i++) {
+                for (i = 0; i < rawLength; i++) {
                     array[i] = raw.charCodeAt(i);
                 }
                 result.data = array;
@@ -375,7 +381,7 @@ Flashphoner.prototype = {
                 if (event.hasOwnProperty("apiMethod")) {
                     var actualEvent = WCSEvent[event.apiMethod];
                     //Finish Call before raising of FAILED event to close resources properly such as peer connection
-                    if (event.apiMethod == "CallStatusEvent"){
+                    if (event.apiMethod == "CallStatusEvent") {
                         var call = me.calls.get(event.id);
                         if (call) {
                             call.status = CallStatus.FINISH;
@@ -600,7 +606,7 @@ Flashphoner.prototype = {
                 me.webRtcMediaManager.createOffer(call.callId, function (sdp) {
                     //here we will strip codecs from SDP if requested
                     if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
-                        sdp = me.stripCodecsSDP(sdp);
+                        sdp = me.stripCodecsSDP(sdp, true);
                         console.log("New SDP: " + sdp);
                     }
                     sdp = me.removeCandidatesFromSDP(sdp);
@@ -632,7 +638,7 @@ Flashphoner.prototype = {
                     me.webRtcMediaManager.createOffer(call.callId, function (sdp) {
                         //here we will strip codecs from SDP if requested
                         if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
-                            sdp = me.stripCodecsSDP(sdp);
+                            sdp = me.stripCodecsSDP(sdp, true);
                             console.log("New SDP: " + sdp);
                         }
                         call.sdp = me.removeCandidatesFromSDP(sdp);
@@ -696,7 +702,7 @@ Flashphoner.prototype = {
     },
 
     holdForTransfer: function (call) {
-        this.webSocket.send("hold", {callId: call.callId, holdForTransfer:true});
+        this.webSocket.send("hold", {callId: call.callId, holdForTransfer: true});
     },
 
     unhold: function (call) {
@@ -727,7 +733,7 @@ Flashphoner.prototype = {
         if (MediaProvider.Flash == mediaProvider) {
             var statistics = this.flashMediaManager.getStatistics(mediaSessionId);
             var param;
-            for (param in statistics.incomingStreams.info){
+            for (param in statistics.incomingStreams.info) {
                 if (param.indexOf("audio") > -1) {
                     statistics.incomingStreams.audio[param] = statistics.incomingStreams.info[param];
                 }
@@ -736,7 +742,7 @@ Flashphoner.prototype = {
                 }
             }
             delete statistics.incomingStreams.info;
-            for (param in statistics.outgoingStreams.info){
+            for (param in statistics.outgoingStreams.info) {
                 if (param.indexOf("audio") > -1) {
                     statistics.outgoingStreams.audio[param] = statistics.outgoingStreams.info[param];
                 }
@@ -877,7 +883,7 @@ Flashphoner.prototype = {
             me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
                 trace("Publish name " + stream.name);
                 if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
-                    sdp = me.stripCodecsSDP(sdp);
+                    sdp = me.stripCodecsSDP(sdp, true);
                     console.log("New SDP: " + sdp);
                 }
                 stream.sdp = me.removeCandidatesFromSDP(sdp);
@@ -916,7 +922,7 @@ Flashphoner.prototype = {
             me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
                 console.log("playStream name " + stream.name);
                 if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
-                    sdp = me.stripCodecsSDP(sdp);
+                    sdp = me.stripCodecsSDP(sdp, true);
                     console.log("New SDP: " + sdp);
                 }
                 stream.sdp = me.removeCandidatesFromSDP(sdp);
@@ -969,11 +975,12 @@ Flashphoner.prototype = {
         return result;
     },
 
-    stripCodecsSDP: function (sdp) {
+    stripCodecsSDP: function (sdp, removeCandidates) {
         var sdpArray = sdp.split("\n");
 
         //search and delete codecs line
         var pt = [];
+        var i;
         for (p = 0; p < this.configuration.stripCodecs.length; p++) {
             console.log("Searching for codec " + this.configuration.stripCodecs[p]);
             for (i = 0; i < sdpArray.length; i++) {
@@ -985,15 +992,20 @@ Flashphoner.prototype = {
             }
         }
 
+        if (removeCandidates) {
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i].search("a=candidate:") != -1) {
+                    sdpArray[i] = "";
+                }
+            }
+        }
+
         if (pt.length) {
             //searching for fmtp
             for (p = 0; p < pt.length; p++) {
                 for (i = 0; i < sdpArray.length; i++) {
                     if (sdpArray[i].search("a=fmtp:" + pt[p]) != -1) {
                         console.log("PT " + pt[p] + " detected");
-                        sdpArray[i] = "";
-                    }
-                    if (sdpArray[i].search("a=candidate:") != -1) {
                         sdpArray[i] = "";
                     }
                 }
@@ -1167,7 +1179,7 @@ WebRtcMediaManager.prototype.hasAccessToAudioAndVideo = function () {
 };
 
 WebRtcMediaManager.prototype.newConnection = function (id, webRtcMediaConnection) {
-    if (this.remoteSDP[id]) {
+    if (this.remoteSDP[id] || this.remoteSDP[id] == "") {
         webRtcMediaConnection.setRemoteSDP(this.remoteSDP[id], false);
         delete this.remoteSDP[id];
     }
@@ -1498,6 +1510,7 @@ WebRtcMediaConnection.prototype.createAnswer = function (createAnswerCallback, h
             }
         }
         me.createAnswerCallback = createAnswerCallback;
+
         var sdpOffer = new RTCSessionDescription({
             type: 'offer',
             sdp: me.lastReceivedSdp
@@ -1632,7 +1645,7 @@ WebRtcMediaConnection.prototype.getStatistics = function (callbackFn) {
         if (this.peerConnection.getStats) {
             this.peerConnection.getStats(function (rawStats) {
                 var results = rawStats.result();
-                var result = {type:"chrome", outgoingStreams: {}, incomingStreams: {}};
+                var result = {type: "chrome", outgoingStreams: {}, incomingStreams: {}};
                 for (var i = 0; i < results.length; ++i) {
                     var resultPart = me.processGoogRtcStatsReport(results[i]);
                     if (resultPart != null) {
@@ -1666,7 +1679,7 @@ WebRtcMediaConnection.prototype.getStatistics = function (callbackFn) {
     } else if (this.peerConnection && this.peerConnection.getRemoteStreams()[0] && webrtcDetectedBrowser == "firefox") {
         if (this.peerConnection.getStats) {
             this.peerConnection.getStats(null, function (rawStats) {
-                var result = {type:"firefox", outgoingStreams: {}, incomingStreams: {}};
+                var result = {type: "firefox", outgoingStreams: {}, incomingStreams: {}};
                 for (var k in rawStats) {
                     if (rawStats.hasOwnProperty(k)) {
                         var resultPart = me.processRtcStatsReport(rawStats[k]);
@@ -2081,6 +2094,6 @@ function trace(logMessage) {
     }
 }
 
-function addLogMessage(message){
+function addLogMessage(message) {
     trace("Flash - " + message);
 }

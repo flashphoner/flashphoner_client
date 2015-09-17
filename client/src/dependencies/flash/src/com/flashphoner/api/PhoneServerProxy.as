@@ -59,6 +59,7 @@ package com.flashphoner.api
 		}
 		
 		public function disconnect():void {
+			Logger.info("disconnect");
 			hasDisconnectAttempt = true;
 			nc.close();
 		}
