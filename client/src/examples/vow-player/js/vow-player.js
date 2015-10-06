@@ -61,7 +61,6 @@ function initOnLoad() {
     f.connect({
         urlServer: url,
         appKey: "defaultApp",
-        useRTCSessions: false,
         useWsTunnel: true,
         useBase64BinaryEncoding: false,
         width: config.videoWidth,

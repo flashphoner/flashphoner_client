@@ -8,6 +8,7 @@
     <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
     <script type="text/javascript" src="../../Flashphoner.js"></script>
     <script type="text/javascript" src="../../dependencies/websocket-player/websocket-player.js"></script>
+    <script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
     <script type="text/javascript" src="Chat.js"></script>
 </head>
 <body onload="initOnLoad()">
@@ -16,6 +17,7 @@
 <label for="login">Your name:</label><br><input id="login" type="text" value="Alice"/>
 <select id="mediaProvider">
     <option value="WebRTC">WebRTC</option>
+    <option value="Flash">Flash</option>
     <option value="WebSocket">WebSocket</option>
 </select>
 <button type="button" id="loginButton">Login</button>
@@ -34,6 +36,7 @@
 <label for="message">Your message:</label><br><textarea id="message" cols="50" rows="10">Hi Bob!</textarea>
 <button type="button" id="sendButton" disabled>Send</button>
 <br>
+<div id="flashVideoWrapper" style=" width:320px; height:240px; position: absolute; left: 450px; top: 300px; border: 1px double black;"><div id="flashVideoDiv"></div></div>
 <canvas id="remoteVideoCanvas" width="320" height="240" style="position: absolute; left: 450px; top: 300px; border: 1px double black;" ></canvas>
 <video id="remoteVideo" width="320" height="240" autoplay style="position: absolute; left: 450px; top: 300px; border: 1px double black;"></video>
 <video id="localVideo" width="80" height="60" autoplay style="position: absolute; left: 450px; top: 300px;"></video>

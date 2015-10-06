@@ -22,8 +22,7 @@ function login() {
     document.getElementById("login").disabled = true;
     document.getElementById("room").disabled = true;
 
-    var useRTCSessions, useWsTunnel;
-    useRTCSessions = true;
+    var useWsTunnel;
     useWsTunnel = false;
 
     //connect to server
@@ -32,7 +31,6 @@ function login() {
         room: document.getElementById("room").value,
         urlServer: document.getElementById("server").value,
         appKey: "chatRoomApp",
-        useRTCSessions: useRTCSessions,
         useWsTunnel: useWsTunnel,
         useBase64BinaryEncoding: false
     });

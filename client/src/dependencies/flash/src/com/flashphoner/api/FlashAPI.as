@@ -107,25 +107,25 @@ package com.flashphoner.api
 		
 		public function changeVideoState(callId:String, hasVideo:Boolean):void{
 			if (hasVideo){
-				phoneServerProxy.enableVideo(getPublishStreamNameForCall(userData.sipLogin, callId));
+				phoneServerProxy.enableVideo(getPublishStreamName(userData.sipLogin, callId));
 			} else {
-				phoneServerProxy.disableVideo(getPublishStreamNameForCall(userData.sipLogin, callId));
+				phoneServerProxy.disableVideo(getPublishStreamName(userData.sipLogin, callId));
 			}
 		}
 		
 		public  function talk(callId:String, hasVideo:Boolean):void{
-			phoneServerProxy.phoneSpeaker.play(getPlayStreamNameForCall(userData.sipLogin, callId), false);
-			phoneServerProxy.publish(getPublishStreamNameForCall(userData.sipLogin, callId), true, hasVideo);
+			phoneServerProxy.phoneSpeaker.play(getPlayStreamName(userData.sipLogin, callId), false);
+			phoneServerProxy.publish(getPublishStreamName(userData.sipLogin, callId), true, hasVideo);
 		}
 		
 		public  function hold(callId:String):void{
-			phoneServerProxy.hold(getPublishStreamNameForCall(userData.sipLogin, callId));
+			phoneServerProxy.hold(getPublishStreamName(userData.sipLogin, callId));
 		}
 		
 		public  function getStatistics(callId:String):Object{
 			var statistics:Object = new Object();
-			statistics.outgoingStreams = phoneServerProxy.getStatistics(getPublishStreamNameForCall(userData.sipLogin, callId));
-			statistics.incomingStreams = phoneServerProxy.phoneSpeaker.getStatistics(getPlayStreamNameForCall(userData.sipLogin, callId));
+			statistics.outgoingStreams = phoneServerProxy.getStatistics(getPublishStreamName(userData.sipLogin, callId));
+			statistics.incomingStreams = phoneServerProxy.phoneSpeaker.getStatistics(getPlayStreamName(userData.sipLogin, callId));
 			return statistics;
 		}
 		
@@ -134,24 +134,24 @@ package com.flashphoner.api
 		}		
 		
 		public function close(callId:String):void{
-			phoneServerProxy.phoneSpeaker.stop(getPlayStreamNameForCall(userData.sipLogin, callId));
-			phoneServerProxy.unpublish(getPublishStreamNameForCall(userData.sipLogin, callId));
+			phoneServerProxy.phoneSpeaker.stop(getPlayStreamName(userData.sipLogin, callId));
+			phoneServerProxy.unpublish(getPublishStreamName(userData.sipLogin, callId));
 		}
 		
-		public  function publishStream(streamName:String, hasAudio:Boolean, hasVideo:Boolean):void{
-			phoneServerProxy.publish(streamName, hasAudio, hasVideo);
+		public  function publishStream(mediaSessionId:String, hasAudio:Boolean, hasVideo:Boolean):void{
+			phoneServerProxy.publish(getPublishStreamName(null, mediaSessionId), hasAudio, hasVideo);
 		}
 		
-		public  function unPublishStream(streamName:String):void{
-			phoneServerProxy.unpublish(streamName);
+		public  function unPublishStream(mediaSessionId:String):void{
+			phoneServerProxy.unpublish(getPublishStreamName(null, mediaSessionId));
 		}
 		
-		public  function playStream(streamName:String):void{
-			this.phoneServerProxy.phoneSpeaker.play(streamName, true);			
+		public  function playStream(mediaSessionId:String):void{
+			this.phoneServerProxy.phoneSpeaker.play(getPlayStreamName(null, mediaSessionId), true);			
 		}
 		
-		public  function stopStream(streamName:String):void{
-			this.phoneServerProxy.phoneSpeaker.stop(streamName);			
+		public  function stopStream(mediaSessionId:String):void{
+			this.phoneServerProxy.phoneSpeaker.stop(getPlayStreamName(null, mediaSessionId));			
 		}
 		
 		public  function disconnect():void{
@@ -356,13 +356,24 @@ package com.flashphoner.api
 			phoneServerProxy.pong();
 		}		
 		
-		private function getPublishStreamNameForCall(login:String, callId:String):String {
-			return "OUT_" + login+ "_" + callId;
+		private function getPublishStreamName(login:String, sessionId:String):String {
+			if (login){
+				return "OUT_" + login+ "_" + sessionId;
+			} else {
+				return "OUT_" + sessionId;
+			}
 		}
 		
-		private function getPlayStreamNameForCall(login:String, callId:String):String {
-			return "IN_" + login + "_" + callId;
+		private function getPlayStreamName(login:String, sessionId:String):String {
+			if (login){
+				return "IN_" + login + "_" + sessionId;
+			} else {
+				return "IN_" + sessionId;
+			}
+			
+			
 		}
+		
 		
 	}
 }

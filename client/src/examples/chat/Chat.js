@@ -20,6 +20,8 @@ function initOnLoad() {
     var configuration = new Configuration();
     configuration.remoteMediaElementId = 'remoteVideo';
     configuration.localMediaElementId = 'localVideo';
+    configuration.elementIdForSWF = "flashVideoDiv";
+    configuration.pathToSWF = "../../dependencies/flash/MediaManager.swf";
     f.init(configuration);
 
     var mediaProviderEl = document.getElementById("mediaProvider");
@@ -40,17 +42,22 @@ function login() {
     mediaProviderEl.disabled = true;
     document.getElementById("loginButton").disabled = true;
 
-    var useRTCSessions, useWsTunnel;
+    var useWsTunnel;
 
     if (MediaProvider.WebRTC == mediaProvider) {
-        useRTCSessions = true;
         useWsTunnel = false;
         document.getElementById('remoteVideo').style.visibility = "visible";
+        document.getElementById('flashVideoWrapper').style.visibility = "hidden";
+        document.getElementById('remoteVideoCanvas').style.visibility = "hidden";
+    } else if (MediaProvider.Flash == mediaProvider) {
+        useWsTunnel = false;
+        document.getElementById('remoteVideo').style.visibility = "hidden";
+        document.getElementById('flashVideoWrapper').style.visibility = "visible";
         document.getElementById('remoteVideoCanvas').style.visibility = "hidden";
     } else {
-        useRTCSessions = false;
         useWsTunnel = true;
         document.getElementById('remoteVideo').style.visibility = "hidden";
+        document.getElementById('flashVideoWrapper').style.visibility = "hidden";
         document.getElementById('remoteVideoCanvas').style.visibility = "visible";
     }
 
@@ -59,7 +66,6 @@ function login() {
         login: document.getElementById("login").value,
         urlServer: document.getElementById("server").value,
         appKey: "websocketChatApp",
-        useRTCSessions: useRTCSessions,
         useWsTunnel: useWsTunnel,
         useBase64BinaryEncoding: false
     });
@@ -73,9 +79,7 @@ function connectionStatusListener(event) {
         console.log('Connection has been established.');
         document.getElementById("logoutButton").disabled = false;
         document.getElementById("playButton").disabled = false;
-        if (MediaProvider.WebRTC == mediaProvider) {
-            document.getElementById("publishButton").disabled = false;
-        }
+        document.getElementById("publishButton").disabled = false;
         document.getElementById("sendButton").disabled = false;
     } else if (event.status == ConnectionStatus.Disconnected) {
         if (wsPlayer) {
@@ -174,20 +178,20 @@ function playWSStream() {
     stream.name = "stream-" + document.getElementById("to").value;
     stream.hasVideo = true;
     stream.sdp = "v=0\r\n" +
-    "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
-    "c=IN IP4 0.0.0.0\r\n" +
-    "t=0 0\r\n" +
-    "a=sdplang:en\r\n" +
-    "m=video 0 RTP/AVP 32\r\n" +
-    "a=rtpmap:32 MPV/90000\r\n" +
-    "a=recvonly\r\n" +
-    "m=audio 0 RTP/AVP 0\r\n" +
-    "a=rtpmap:0 PCMU/8000\r\n" +
-    "a=recvonly\r\n";
+        "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
+        "c=IN IP4 0.0.0.0\r\n" +
+        "t=0 0\r\n" +
+        "a=sdplang:en\r\n" +
+        "m=video 0 RTP/AVP 32\r\n" +
+        "a=rtpmap:32 MPV/90000\r\n" +
+        "a=recvonly\r\n" +
+        "m=audio 0 RTP/AVP 0\r\n" +
+        "a=rtpmap:0 PCMU/8000\r\n" +
+        "a=recvonly\r\n";
     currentStream = f.playStream(stream);
 }
 
-function playWebRTCStream() {
+function playStream() {
     var stream = new Stream();
     stream.name = "stream-" + document.getElementById("to").value;
     stream.hasVideo = true;
@@ -228,8 +232,8 @@ $(document).ready(function () {
         if (currentStream.status != undefined && currentStream.status != StreamStatus.Stoped && currentStream.status != StreamStatus.Failed && currentStream.status != StreamStatus.Paused) {
             return;
         }
-        if (MediaProvider.WebRTC == mediaProvider) {
-            playWebRTCStream();
+        if (MediaProvider.WebRTC == mediaProvider || MediaProvider.Flash == mediaProvider) {
+            playStream();
         } else {
             playWSStream();
         }
@@ -253,14 +257,14 @@ $(document).ready(function () {
         }
         var streamName = "stream-" + document.getElementById("login").value;
         currentPublishStream.name = streamName;
-        f.publishStream({name:streamName, hasVideo:true});
+        f.publishStream({name: streamName, hasVideo: true});
         document.getElementById("publishButton").disabled = true;
         document.getElementById("unpublishButton").disabled = false;
     });
 
     $("#unpublishButton").click(function () {
         var streamName = "stream-" + document.getElementById("login").value;
-        f.unPublishStream({name:streamName});
+        f.unPublishStream({name: streamName});
         document.getElementById("publishButton").disabled = false;
         document.getElementById("unpublishButton").disabled = true;
     });

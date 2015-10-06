@@ -876,20 +876,44 @@ Flashphoner.prototype = {
         if (stream.hasVideo == undefined) {
             stream.hasVideo = true;
         }
+        if (!stream.mediaProvider) {
+            stream.mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
+        }
 
-        me.checkAndGetAccess(MediaProvider.WebRTC, stream.hasVideo, function () {
-            me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined));
+        me.checkAndGetAccess(stream.mediaProvider, stream.hasVideo, function () {
+                if (MediaProvider.WebRTC == stream.mediaProvider) {
+                    me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined));
 
-            me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
-                trace("Publish name " + stream.name);
-                if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
-                    sdp = me.stripCodecsSDP(sdp, true);
-                    console.log("New SDP: " + sdp);
+                    me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
+                        trace("Publish name " + stream.name);
+                        if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
+                            sdp = me.stripCodecsSDP(sdp, true);
+                            console.log("New SDP: " + sdp);
+                        }
+                        stream.sdp = me.removeCandidatesFromSDP(sdp);
+                        me.webSocket.send("publishStream", stream);
+                        me.publishStreams.add(stream.name, stream);
+                    }, true, stream.hasVideo);
+                } else if (MediaProvider.Flash == stream.mediaProvider) {
+                    //todo add pcma/pcmu
+                    stream.sdp = "v=0\r\n" +
+                        "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
+                        "c=IN IP4 0.0.0.0\r\n" +
+                        "t=0 0\r\n" +
+                        "a=sdplang:en\r\n"+
+                        "m=video 0 RTP/AVP 112\r\n" +
+                        "a=rtpmap:112 H264/90000\r\n" +
+                        "a=fmtp:112 packetization-mode=1; profile-level-id=420020\r\n" +
+                        "a=sendonly\r\n" +
+                        "m=audio 0 RTP/AVP 0 8 100\r\n" +
+                        "a=rtpmap:0 PCMU/8000\r\n" +
+                        "a=rtpmap:8 PCMA/8000\r\n" +
+                        "a=rtpmap:100 SPEEX/16000\r\n" +
+                        "a=sendonly\r\n";
+                    me.webSocket.send("publishStream", stream);
+                    me.playStreams.add(stream.name, stream);
+                    me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo);
                 }
-                stream.sdp = me.removeCandidatesFromSDP(sdp);
-                me.webSocket.send("publishStream", stream);
-                me.publishStreams.add(stream.name, stream);
-            }, true, stream.hasVideo);
         }, []);
     },
 
@@ -897,7 +921,11 @@ Flashphoner.prototype = {
         console.log("Unpublish stream " + stream.name);
         var me = this;
         var removedStream = me.publishStreams.remove(stream.name);
-        me.webRtcMediaManager.close(removedStream.mediaSessionId);
+        if (MediaProvider.WebRTC == stream.mediaProvider) {
+            me.webRtcMediaManager.close(removedStream.mediaSessionId);
+        } else if (MediaProvider.Flash == stream.mediaProvider) {
+            me.flashMediaManager.unPublishStream(removedStream.mediaSessionId);
+        }
         me.webSocket.send("unPublishStream", removedStream);
     },
 
@@ -909,12 +937,18 @@ Flashphoner.prototype = {
             return;
         }
         var mediaSessionId = createUUID();
-        if (!stream.sdp) {
+        stream.mediaSessionId = mediaSessionId;
+        stream.published = false;
+        if (!stream.mediaProvider) {
+            stream.mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
+        }
+
+
+        if (MediaProvider.WebRTC == stream.mediaProvider && !stream.sdp) {
 
             me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, stream.remoteMediaElementId || me.configuration.remoteMediaElementId));
 
-            stream.mediaSessionId = mediaSessionId;
-            stream.published = false;
+
             if (stream.hasVideo == undefined) {
                 stream.hasVideo = true;
             }
@@ -930,10 +964,27 @@ Flashphoner.prototype = {
 
                 me.playStreams.add(stream.name, stream);
             }, false, false, stream.hasVideo);
+        } else if (MediaProvider.Flash == stream.mediaProvider && !stream.sdp){
+            //todo add pcma/pcmu
+            stream.sdp = "v=0\r\n" +
+                "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
+                "c=IN IP4 0.0.0.0\r\n" +
+                "t=0 0\r\n" +
+                "a=sdplang:en\r\n"+
+                "m=video 0 RTP/AVP 112\r\n" +
+                "a=rtpmap:112 H264/90000\r\n" +
+                "a=fmtp:112 packetization-mode=1; profile-level-id=420020\r\n" +
+                "a=recvonly\r\n" +
+                "m=audio 0 RTP/AVP 0 8 100\r\n" +
+                "a=rtpmap:0 PCMU/8000\r\n" +
+                "a=rtpmap:8 PCMA/8000\r\n" +
+                "a=rtpmap:100 SPEEX/16000\r\n" +
+                "a=recvonly\r\n";
+            me.webSocket.send("playStream", stream);
+            me.playStreams.add(stream.name, stream);
+            me.flashMediaManager.playStream(stream.mediaSessionId);
         } else {
             console.log("playStream name " + stream.name);
-            stream.mediaSessionId = mediaSessionId;
-            stream.published = false;
             me.webSocket.send("playStream", stream);
             me.playStreams.add(stream.name, stream);
         }
@@ -944,7 +995,11 @@ Flashphoner.prototype = {
         console.log("unSubscribe stream " + stream.name);
         var me = this;
         var removedStream = me.playStreams.remove(stream.name);
-        me.webRtcMediaManager.close(removedStream.mediaSessionId);
+        if (MediaProvider.WebRTC == stream.mediaProvider) {
+            me.webRtcMediaManager.close(removedStream.mediaSessionId);
+        } else if (MediaProvider.Flash == stream.mediaProvider) {
+            me.flashMediaManager.stopStream(removedStream.mediaSessionId);
+        }
         me.webSocket.send("stopStream", removedStream);
     },
 

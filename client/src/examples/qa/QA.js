@@ -79,7 +79,6 @@ function initAPI() {
     } else if (/*@cc_on!@*/false || !!document.documentMode) {
         clientEl.value = "Internet Explorer";
         mediaProviderEl.remove(0);
-        accountTypeEl.remove(1);
     }
 
 }
@@ -134,10 +133,10 @@ function isStreamMediaReceived(streamName, type) {
     if (!stream) {
         stream = api.playStreams.get(streamName);
     }
-    api.getStreamStatistics(stream.mediaSessionId, MediaProvider.WebRTC, function (statistic) {
+    api.getStreamStatistics(stream.mediaSessionId, stream.mediaProvider, function (statistic) {
         var beforeBytes = getBytes(statistic, type);
         setTimeout(function () {
-            api.getStreamStatistics(stream.mediaSessionId, MediaProvider.WebRTC, function (statistic) {
+            api.getStreamStatistics(stream.mediaSessionId, stream.mediaProvider, function (statistic) {
                 var afterBytes = getBytes(statistic, type);
                 result = (afterBytes - beforeBytes) > 1000;
                 resultReady = true;
