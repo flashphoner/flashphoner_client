@@ -5,7 +5,20 @@ function initAPI() {
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
-    f.init();
+    var configuration = new Configuration();
+    configuration.remoteMediaElementId = 'remoteVideo';
+    configuration.localMediaElementId = 'localVideo';
+    configuration.elementIdForSWF = "flashVideoDiv";
+    configuration.pathToSWF = "../../dependencies/flash/MediaManager.swf";
+    f.init(configuration);
+
+    if (webrtcDetectedBrowser) {
+        document.getElementById('remoteVideo').style.visibility = "visible";
+        document.getElementById('flashVideoWrapper').style.visibility = "hidden";
+    } else {
+        document.getElementById('remoteVideo').style.visibility = "hidden";
+        document.getElementById('flashVideoWrapper').style.visibility = "visible";
+    }
 }
 
 //New connection
@@ -16,7 +29,7 @@ function connect(){
 //Publish stream
 function publishStream(){
     var streamName = field("streamName");
-    f.publishStream({name:streamName, hasVideo:false});
+    f.publishStream({name:streamName});
 }
 
 //Stop stream publishing
