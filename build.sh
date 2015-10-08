@@ -18,8 +18,8 @@ cp client/src/Flashphoner.js output
 mkdir output/dependencies
 cp client/src/dependencies/jquery output/dependencies -R
 cp client/src/dependencies/swf output/dependencies -R
+cp client/src/dependencies/ie9 output/dependencies -R
 mkdir output/dependencies/flash
 cp client/src/dependencies/flash/asdoc output/dependencies/flash -R
-cp client/src/dependencies/flash/asdoc output/dependencies/ie9 -R
 cp client/src/dependencies/flash/MediaManager.swf output/dependencies/flash
 echo "FINISH"
