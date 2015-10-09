@@ -48,6 +48,7 @@ function login() {
         useWsTunnel = false;
         document.getElementById('remoteVideo').style.visibility = "visible";
         document.getElementById('flashVideoWrapper').style.visibility = "hidden";
+        document.getElementById('flashVideoDiv').style.visibility = "hidden";
         document.getElementById('remoteVideoCanvas').style.visibility = "hidden";
     } else if (MediaProvider.Flash == mediaProvider) {
         useWsTunnel = false;
@@ -58,6 +59,7 @@ function login() {
         useWsTunnel = true;
         document.getElementById('remoteVideo').style.visibility = "hidden";
         document.getElementById('flashVideoWrapper').style.visibility = "hidden";
+        document.getElementById('flashVideoDiv').style.visibility = "hidden";
         document.getElementById('remoteVideoCanvas').style.visibility = "visible";
     }
 

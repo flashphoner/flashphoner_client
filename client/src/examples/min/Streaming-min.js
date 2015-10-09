@@ -15,6 +15,7 @@ function initAPI() {
     if (webrtcDetectedBrowser) {
         document.getElementById('remoteVideo').style.visibility = "visible";
         document.getElementById('flashVideoWrapper').style.visibility = "hidden";
+        document.getElementById('flashVideoDiv').style.visibility = "hidden";
     } else {
         document.getElementById('remoteVideo').style.visibility = "hidden";
         document.getElementById('flashVideoWrapper').style.visibility = "visible";
