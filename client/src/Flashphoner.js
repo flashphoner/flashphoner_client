@@ -922,9 +922,9 @@ Flashphoner.prototype = {
         var me = this;
         var removedStream = me.publishStreams.remove(stream.name);
         if (removedStream) {
-            if (MediaProvider.WebRTC == stream.mediaProvider) {
+            if (MediaProvider.WebRTC == removedStream.mediaProvider) {
                 me.webRtcMediaManager.close(removedStream.mediaSessionId);
-            } else if (MediaProvider.Flash == stream.mediaProvider) {
+            } else if (MediaProvider.Flash == removedStream.mediaProvider) {
                 me.flashMediaManager.unPublishStream(removedStream.mediaSessionId);
             }
             me.webSocket.send("unPublishStream", removedStream);
@@ -998,9 +998,9 @@ Flashphoner.prototype = {
         var me = this;
         var removedStream = me.playStreams.remove(stream.name);
         if (removedStream) {
-            if (MediaProvider.WebRTC == stream.mediaProvider) {
+            if (MediaProvider.WebRTC == removedStream.mediaProvider) {
                 me.webRtcMediaManager.close(removedStream.mediaSessionId);
-            } else if (MediaProvider.Flash == stream.mediaProvider) {
+            } else if (MediaProvider.Flash == removedStream.mediaProvider) {
                 me.flashMediaManager.stopStream(removedStream.mediaSessionId);
             }
             me.webSocket.send("stopStream", removedStream);
