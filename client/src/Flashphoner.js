@@ -911,7 +911,7 @@ Flashphoner.prototype = {
                         "a=rtpmap:100 SPEEX/16000\r\n" +
                         "a=sendonly\r\n";
                     me.webSocket.send("publishStream", stream);
-                    me.playStreams.add(stream.name, stream);
+                    me.publishStreams.add(stream.name, stream);
                     me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo);
                 }
         }, []);
@@ -921,12 +921,14 @@ Flashphoner.prototype = {
         console.log("Unpublish stream " + stream.name);
         var me = this;
         var removedStream = me.publishStreams.remove(stream.name);
-        if (MediaProvider.WebRTC == stream.mediaProvider) {
-            me.webRtcMediaManager.close(removedStream.mediaSessionId);
-        } else if (MediaProvider.Flash == stream.mediaProvider) {
-            me.flashMediaManager.unPublishStream(removedStream.mediaSessionId);
+        if (removedStream) {
+            if (MediaProvider.WebRTC == removedStream.mediaProvider) {
+                me.webRtcMediaManager.close(removedStream.mediaSessionId);
+            } else if (MediaProvider.Flash == removedStream.mediaProvider) {
+                me.flashMediaManager.unPublishStream(removedStream.mediaSessionId);
+            }
+            me.webSocket.send("unPublishStream", removedStream);
         }
-        me.webSocket.send("unPublishStream", removedStream);
     },
 
     playStream: function (stream) {
@@ -995,12 +997,14 @@ Flashphoner.prototype = {
         console.log("unSubscribe stream " + stream.name);
         var me = this;
         var removedStream = me.playStreams.remove(stream.name);
-        if (MediaProvider.WebRTC == stream.mediaProvider) {
-            me.webRtcMediaManager.close(removedStream.mediaSessionId);
-        } else if (MediaProvider.Flash == stream.mediaProvider) {
-            me.flashMediaManager.stopStream(removedStream.mediaSessionId);
+        if (removedStream) {
+            if (MediaProvider.WebRTC == removedStream.mediaProvider) {
+                me.webRtcMediaManager.close(removedStream.mediaSessionId);
+            } else if (MediaProvider.Flash == removedStream.mediaProvider) {
+                me.flashMediaManager.stopStream(removedStream.mediaSessionId);
+            }
+            me.webSocket.send("stopStream", removedStream);
         }
-        me.webSocket.send("stopStream", removedStream);
     },
 
     //Works only with websocket streams
