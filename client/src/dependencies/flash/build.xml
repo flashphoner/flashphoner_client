@@ -42,7 +42,7 @@
         <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
         <mxmlc output="${DEPLOY_DIR}/MediaManager.swf" file="${basedir}/src/MediaManager.mxml"
                swf-version="${SWF_VERSION}"
-               target-player="${PLAYER_VERSION}" compatibility-version="3"
+               target-player="${PLAYER_VERSION}" compatibility-version="4"
                static-link-runtime-shared-libraries="true">
             <source-path path-element="${basedir}/src"/>
             <compiler.external-library-path dir="${FLEX_HOME}/frameworks/libs/player/${PLAYER_VERSION}" append="true">
