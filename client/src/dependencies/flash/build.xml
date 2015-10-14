@@ -14,7 +14,7 @@
             <arg line='-doc-sources "src"'/>
             <arg line='-main-title "flashphoner_client API documentation"'/>
             <arg line='-window-title "flashphoner_client API documentation"'/>
-            <arg line='-compiler.mxml.compatibility-version 3.0.0'/>
+            <!--<arg line='-compiler.mxml.compatibility-version 3.0.0'/>-->
             <arg line='-theme "${FLEX_HOME}/frameworks/themes/Halo/halo.swc"'/>
             <arg line='-output "${DEPLOY_DIR}/asdoc"'/>
         </exec>
@@ -31,7 +31,7 @@
             <arg line='-doc-sources "src"'/>
             <arg line='-main-title "flashphoner_client API documentation"'/>
             <arg line='-window-title "flashphoner_client API documentation"'/>
-            <arg line='-compiler.mxml.compatibility-version "3.0.0"'/>
+            <!-- <arg line='-compiler.mxml.compatibility-version "3.0.0"'/> -->
             <arg line='-theme "${FLEX_HOME}/frameworks/themes/Halo/halo.swc"'/>
             <arg line='-output "${DEPLOY_DIR}/asdoc_client"'/>
         </exec>
