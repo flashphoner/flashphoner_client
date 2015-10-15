@@ -14,7 +14,7 @@
             <arg line='-doc-sources "src"'/>
             <arg line='-main-title "flashphoner_client API documentation"'/>
             <arg line='-window-title "flashphoner_client API documentation"'/>
-            <arg line='-compiler.mxml.compatibility-version 3.0.0'/>
+            <!--<arg line='-compiler.mxml.compatibility-version 3.0.0'/>-->
             <arg line='-theme "${FLEX_HOME}/frameworks/themes/Halo/halo.swc"'/>
             <arg line='-output "${DEPLOY_DIR}/asdoc"'/>
         </exec>
@@ -31,7 +31,7 @@
             <arg line='-doc-sources "src"'/>
             <arg line='-main-title "flashphoner_client API documentation"'/>
             <arg line='-window-title "flashphoner_client API documentation"'/>
-            <arg line='-compiler.mxml.compatibility-version "3.0.0"'/>
+            <!-- <arg line='-compiler.mxml.compatibility-version "3.0.0"'/> -->
             <arg line='-theme "${FLEX_HOME}/frameworks/themes/Halo/halo.swc"'/>
             <arg line='-output "${DEPLOY_DIR}/asdoc_client"'/>
         </exec>
@@ -42,7 +42,7 @@
         <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
         <mxmlc output="${DEPLOY_DIR}/MediaManager.swf" file="${basedir}/src/MediaManager.mxml"
                swf-version="${SWF_VERSION}"
-               target-player="${PLAYER_VERSION}" compatibility-version="3"
+               target-player="${PLAYER_VERSION}" compatibility-version="4"
                static-link-runtime-shared-libraries="true">
             <source-path path-element="${basedir}/src"/>
             <compiler.external-library-path dir="${FLEX_HOME}/frameworks/libs/player/${PLAYER_VERSION}" append="true">

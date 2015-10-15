@@ -11,12 +11,15 @@ Contributors:
 
 This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 -->
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx"
 				xmlns:ctrl="com.flashphoner.api.communication.*"
 				xmlns:mainPhone="com.flashphoner.mainphone.views.*"
-				backgroundAlpha="0.0" creationComplete="onCreationComlete()" fontFamily="Verdana"
-				layout="absolute">
-    <mx:Script>
+				skinClass="TransparentSkin"
+				creationComplete="onCreationComlete()"
+				>
+    <fx:Script>
         <![CDATA[
 			import com.flashphoner.Logger;
 			import com.flashphoner.api.APINotify;
@@ -112,11 +115,11 @@ This code and accompanying materials also available under LGPL and MPL license f
 				relationMyVideo = relation; 
 			}
         ]]>       
-    </mx:Script>
+    </fx:Script>
 	<!--
 	<mx:TextArea id="messageAccess" editable="false" text="To do that, you should allow the camera and microphone. Open Security Panel and allow access to devices." width="185" height="96" fontSize="12" textAlign="center" x="10" y="13" borderThickness="0"/>
 	-->
-	<mx:Canvas id="videoPartner" width="100%" height="100%" x="0" backgroundColor="black" y="0"/>
-	<mx:VideoDisplay id="videoMy" visible="false" left="0" top="0" width="25%" backgroundColor="white"
+	<mx:Canvas id="videoPartner" width="100%" height="100%" x="0" y="0" backgroundAlpha="0.0"/>
+	<mx:VideoDisplay id="videoMy" visible="false" left="0" top="0" width="25%"
 					 height="{videoMy.width*relationMyVideo}"/>
-</mx:Application>
+</s:Application>
