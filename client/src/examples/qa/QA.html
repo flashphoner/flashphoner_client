@@ -13,6 +13,7 @@
     <script type="text/javascript" src="../../Flashphoner.js"></script>
     <script type="text/javascript" src="../ConfigurationLoader.js"></script>
     <script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
+    <script type="text/javascript" src="../../dependencies/websocket-player/websocket-player.js"></script>
 
     <!-- Minimum script for calls -->
     <script type="text/javascript" src="QA.js"></script>
@@ -23,6 +24,7 @@
 <select id="mediaProvider">
     <option value="WebRTC">WebRTC</option>
     <option value="Flash">Flash</option>
+    <option value="VOW">VOW</option>
 </select>
 <br>
 <br>
@@ -40,5 +42,6 @@
 <br>
 <br>
 <video id="remoteVideo" autoplay style="background-color: #000000; width:320px; height:240px;"></video>
+<canvas id="videoCanvas" width="320" height="240"></canvas>
 </body>
 </html>

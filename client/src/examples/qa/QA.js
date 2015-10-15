@@ -25,9 +25,13 @@ function initAccess() {
 
     document.getElementById("connectButton").disabled = true;
 
-    getAccess(mediaProvider, false, function () {
-        getAccess(mediaProvider, true, connectToServer);
-    });
+    if (mediaProvider == "VOW") {
+        connectToServer();
+    } else {
+        getAccess(mediaProvider, false, function () {
+            getAccess(mediaProvider, true, connectToServer);
+        });
+    }
 }
 
 function connectToServer(accountId) {
@@ -38,6 +42,19 @@ function connectToServer(accountId) {
         mediaProviders: [mediaProvider],
         client: client
     };
+
+    if (mediaProvider == "VOW") {
+        connection.mediaProviders[0] = "Flash";
+        connection.useWsTunnel = true;
+        connection.useBase64BinaryEncoding = false;
+        var canvas = document.getElementById('videoCanvas');
+        wsPlayer = new WebsocketPlayer(canvas, function(){}, function(){});
+        var config = new Configuration();
+        config.videoWidth = 320;
+        config.videoHeight = 240;
+        wsPlayer.init(config);
+    }
+
     if (accountId) {
         connection.accountId = accountId;
     }
@@ -53,6 +70,7 @@ function initAPI() {
     api.addListener(WCSEvent.OnDataEvent, dataEventListener);
     api.addListener(WCSEvent.OnCallEvent, onCallListener);
     api.addListener(WCSEvent.OnMessageEvent, onMessageListener);
+    api.addListener(WCSEvent.OnBinaryEvent, binaryListener);
     ConfigurationLoader.getInstance(function (configuration) {
         configuration.remoteMediaElementId = 'remoteVideo';
         api.init(configuration);
@@ -79,6 +97,8 @@ function initAPI() {
     } else if (/*@cc_on!@*/false || !!document.documentMode) {
         clientEl.value = "Internet Explorer";
         mediaProviderEl.remove(0);
+        mediaProviderEl.remove(2);
+        accountTypeEl.remove(1);
     }
 
 }
@@ -96,6 +116,10 @@ function getAccess(mediaProvider, hasVideo, callbackFn) {
         intervalId = setInterval(checkAccessFunc, 500);
     }
     api.getAccess(mediaProvider, hasVideo);
+}
+
+function binaryListener(event) {
+    wsPlayer.onDataReceived(event);
 }
 
 function call(call) {
@@ -129,20 +153,34 @@ function isCallMediaReceived(type) {
 
 function isStreamMediaReceived(streamName, type) {
     resultReady = false;
-    var stream = api.publishStreams.get(streamName);
-    if (!stream) {
-        stream = api.playStreams.get(streamName);
-    }
-    api.getStreamStatistics(stream.mediaSessionId, stream.mediaProvider, function (statistic) {
-        var beforeBytes = getBytes(statistic, type);
+    if (mediaProvider == "VOW" && wsPlayer != null) {
+        var before = jQuery.extend(true, {}, wsPlayer.getStreamStatistics());
         setTimeout(function () {
-            api.getStreamStatistics(stream.mediaSessionId, stream.mediaProvider, function (statistic) {
-                var afterBytes = getBytes(statistic, type);
-                result = (afterBytes - beforeBytes) > 1000;
-                resultReady = true;
-            });
+            var after = jQuery.extend(true, {}, wsPlayer.getStreamStatistics());
+            //check for type
+            if (type == "audio") {
+                result = (after.audioBytesReceived - before.audioBytesReceived > 1000);
+            } else if (type == "video") {
+                result = (after.framesDisplayed - before.framesDisplayed > 1);
+            }
+            resultReady = true;
         }, 2000);
-    })
+    } else {
+        var stream = api.publishStreams.get(streamName);
+        if (!stream) {
+            stream = api.playStreams.get(streamName);
+        }
+        api.getStreamStatistics(stream.mediaSessionId, stream.mediaProvider, function (statistic) {
+            var beforeBytes = getBytes(statistic, type);
+            setTimeout(function () {
+                api.getStreamStatistics(stream.mediaSessionId, stream.mediaProvider, function (statistic) {
+                    var afterBytes = getBytes(statistic, type);
+                    result = (afterBytes - beforeBytes) > 1000;
+                    resultReady = true;
+                });
+            }, 2000);
+        })
+    }
 }
 
 
