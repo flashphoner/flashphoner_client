@@ -464,10 +464,27 @@ Flashphoner.prototype = {
             },
 
             notifyStreamStatusEvent: function (stream) {
-                if (stream.published) {
-                    me.publishStreams.update(stream.id, stream);
+                //clean resources if status is failed
+                if (stream.status == StreamStatus.Failed) {
+                    var removedStream;
+                    if (stream.published) {
+                        removedStream = me.publishStreams.remove(stream.name);
+                    } else {
+                        removedStream = me.playStreams.remove(stream.name);
+                    }
+                    if (removedStream) {
+                        if (MediaProvider.WebRTC == removedStream.mediaProvider) {
+                            me.webRtcMediaManager.close(removedStream.mediaSessionId);
+                        } else if (MediaProvider.Flash == removedStream.mediaProvider) {
+                            me.flashMediaManager.stopStream(removedStream.mediaSessionId);
+                        }
+                    }
                 } else {
-                    me.playStreams.update(stream.id, stream);
+                    if (stream.published) {
+                        me.publishStreams.update(stream.id, stream);
+                    } else {
+                        me.playStreams.update(stream.id, stream);
+                    }
                 }
                 me.invokeListener(WCSEvent.StreamStatusEvent, [
                     stream
