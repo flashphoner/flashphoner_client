@@ -98,7 +98,6 @@ function initAPI() {
         clientEl.value = "Internet Explorer";
         mediaProviderEl.remove(0);
         mediaProviderEl.remove(2);
-        accountTypeEl.remove(1);
     }
 
 }
