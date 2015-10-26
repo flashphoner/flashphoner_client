@@ -8,28 +8,83 @@
     <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
     <!-- ****** -->
+    <script type="text/javascript">
+        function sendREST(method) {
+            var _url = document.getElementById("resturl").value + "/"+method;
+            var _data = {};
+            var connectionDetailsFormObject = $('#ConnectionDetailsForm').serializeObject();
+            var RESTCallFormObject = $('#RESTCallForm').serializeObject();
+            RESTCallFormObject.connection = connectionDetailsFormObject;
 
-    <!-- WCS JavaScript API -->
-    <script type="text/javascript" src="../../Flashphoner.js"></script>
+            _data = JSON.stringify(RESTCallFormObject);
+            console.info("url: "+_url);
+            console.info("data: "+_data);
+            $.ajax({
+                url: _url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: _data,
+                success: function () {
+                    alert('REST request has been sent. Please check Developer Tools > Console output.');
+                    console.info("REST successfully done");
+                }
+            });
+        }
 
-    <script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
+        $.fn.serializeObject = function()
+        {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function() {
+                if (o[this.name] !== undefined) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
 
-    <!-- Minimum script for calls -->
-    <script type="text/javascript" src="../ConfigurationLoader.js"></script>
-    <script type="text/javascript" src="sip-as-rtmp-min.js"></script>
-
+    </script>
 </head>
-<!-- Establish connection on page load -->
-<body onload="initAPI()">
-<!-- Call to WCS2 on click by this link -->
-WCS Server URL: <input id="urlServer" type="text" value="ws://wcs-host.com:8080"/><br/>
-SIP login, password, domain: <input id="sipLogin" type="text" value="1234"/>, <input id="sipPassword" type="password" value="1234"/>, <input id="sipDomain" type="text" value="sip-proxy-host.com"/><br/>
-<a href="#" on onclick="connect();return false">connect</a>
-<br/><br/>
-SIP callee: <input id="callee" type="text" style="width:250px;" value="sip:test@sip-proxy-host.com:5060"/><br/>
-RTMP Url: <input id="rtmpUrl" type="text" style="width:250px;" value="rtmp://rtmp-media-server-host.com:1935/live/myStream"/><br/>
-RTMP Stream: <input id="rtmpStream" type="text" style="width:250px;" value="streamName"/><br/>
-<a href="#" on onclick="call();return false">call</a>
-<a href="#" on onclick="hangup();return false">hangup</a>
+<body>
+
+<h2>REST URL</h2>
+<p>REST url: <input size="50" id="resturl" name="url" type="text" value="http://test.flashphoner.com:9091/RESTCall"/></p>
+
+<h2>Connection Details</h2>
+<form id="ConnectionDetailsForm">
+    <p>sipLogin: <input name="sipLogin" type="text" value="1000"/></p>
+    <p>sipPassword: <input name="sipPassword" type="text" value="1234"/></p>
+    <p>sipAuthenticationName: <input name="sipAuthenticationName" type="text" value="1000"/></p>
+    <p>sipDomain: <input name="sipDomain" type="text" value="flashphoner.sip.twilio.com"/></p>
+    <p>sipPort: <input name="sipPort" type="text" value="5060"/><p>
+    <p>sipRegisterRequired: <input name="sipRegisterRequired" type="text" value="false"/></p>
+    <p>appKey: <input name="appKey" type="text" value="callApp"/></p>
+</form>
+
+<h2>Call Management</h2>
+<form id="RESTCallForm">
+    <b>Call Details</b>
+    <p>callId: <input name="callId" type="text" value="Xq2tlLcX89tTjaji"/></p>
+    <p>callee: <input name="callee" type="text" value="test"/></p>
+    <p>rtmpUrl: <input name="rtmpUrl" type="text" value="rtmp://rtmp.flashphoner.com:1935/live"/></p>
+    <p>rtmpStream: <input name="rtmpStream" type="text" value="stream1"/></p>
+    <p>hasAudio: <input name="hasAudio" type="text" value="false"/></p>
+    <p>hasVideo: <input name="hasVideo" type="text" value="false"/></p>
+    <b>Connection Details</b>
+    <p><input type="button" onclick="sendREST('call')" value="Start Call"/></p>
+    <p><input type="button" onclick="sendREST('getStatus')" value="Get Status"/></p>
+    <p><input type="button" onclick="sendREST('hangup')" value="Hangup"/></p>
+    <p><input type="button" onclick="sendREST('getCalls')" value="Get Calls"/></p>
+</form>
+
+
+<h2>Notes</h2>
+<p>Methods 'call', 'getStatus', 'hangup' require callId. <a href="http://flashphoner.com/docs/wcs4/wcs_docs/html/en/wcs-user-guide/sip_rtmp_streaming_usage_call_management.htm">Learn more</a></p>
+<p>See results in Developer Tools (Ctrl+Shift+I) in Chrome.</p>
 </body>
 </html>
