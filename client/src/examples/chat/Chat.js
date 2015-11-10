@@ -124,8 +124,15 @@ function streamStatusListener(event) {
     console.log(event.status);
     var isPublishStream = currentPublishStream.name != undefined && currentPublishStream.name == event.name;
     if (event.status == StreamStatus.Failed) {
-        if (wsPlayer && !isPublishStream) {
-            wsPlayer.stop();
+        if (isPublishStream) {
+            document.getElementById("publishButton").disabled = false;
+            document.getElementById("unpublishButton").disabled = true;
+        } else {
+            if (wsPlayer) {
+                wsPlayer.stop();
+            }
+            document.getElementById("playButton").disabled = false;
+            document.getElementById("stopButton").disabled = true;
         }
     } else if (event.status == StreamStatus.Stoped) {
         if (wsPlayer && !isPublishStream) {

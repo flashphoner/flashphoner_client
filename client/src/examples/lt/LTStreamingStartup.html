@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script>
+
+    var i;
+    var windows = getURLParameter("qty");
+    for (i = 0; i < windows; i++) {
+        window.open("LTStreaming.html", i, "height=260,width=340");
+    }
+    function getURLParameter(name) {
+        return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+    }
+</script>
+
+</body>
+</html>

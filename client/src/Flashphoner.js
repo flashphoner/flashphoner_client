@@ -464,10 +464,27 @@ Flashphoner.prototype = {
             },
 
             notifyStreamStatusEvent: function (stream) {
-                if (stream.published) {
-                    me.publishStreams.update(stream.id, stream);
+                //clean resources if status is failed
+                if (stream.status == StreamStatus.Failed) {
+                    var removedStream;
+                    if (stream.published) {
+                        removedStream = me.publishStreams.remove(stream.name);
+                    } else {
+                        removedStream = me.playStreams.remove(stream.name);
+                    }
+                    if (removedStream) {
+                        if (MediaProvider.WebRTC == removedStream.mediaProvider) {
+                            me.webRtcMediaManager.close(removedStream.mediaSessionId);
+                        } else if (MediaProvider.Flash == removedStream.mediaProvider) {
+                            me.flashMediaManager.stopStream(removedStream.mediaSessionId);
+                        }
+                    }
                 } else {
-                    me.playStreams.update(stream.id, stream);
+                    if (stream.published) {
+                        me.publishStreams.update(stream.id, stream);
+                    } else {
+                        me.playStreams.update(stream.id, stream);
+                    }
                 }
                 me.invokeListener(WCSEvent.StreamStatusEvent, [
                     stream
@@ -1306,20 +1323,28 @@ WebRtcMediaManager.prototype.disconnect = function () {
 WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
     var me = this;
     if (!me.localAudioVideoStream) {
-        //video constraints
-        var videoConstraints = {
-            mandatory: {
-                maxWidth: Flashphoner.getInstance().configuration.videoWidth,
-                maxHeight: Flashphoner.getInstance().configuration.videoHeight
-            },
-            optional: []
-        };
+        var requestedMedia = {};
+        requestedMedia.audio = true;
+        requestedMedia.video = {};
+        //FF differs from Chrome
+        if (webrtcDetectedBrowser == "firefox") {
+            requestedMedia.video.width = Flashphoner.getInstance().configuration.videoWidth;
+            requestedMedia.video.height = Flashphoner.getInstance().configuration.videoHeight;
+        } else {
+            requestedMedia.video = {
+                mandatory: {
+                    maxWidth: Flashphoner.getInstance().configuration.videoWidth,
+                    maxHeight: Flashphoner.getInstance().configuration.videoHeight
+                },
+                optional: []
+            };
 
-        if (Flashphoner.getInstance().configuration.forceResolution) {
-            videoConstraints.mandatory.minWidth = Flashphoner.getInstance().configuration.videoWidth;
-            videoConstraints.mandatory.minHeight = Flashphoner.getInstance().configuration.videoHeight;
+            if (Flashphoner.getInstance().configuration.forceResolution) {
+                requestedMedia.video.mandatory.minWidth = Flashphoner.getInstance().configuration.videoWidth;
+                requestedMedia.video.mandatory.minHeight = Flashphoner.getInstance().configuration.videoHeight;
+            }
         }
-        getUserMedia({audio: true, video: videoConstraints}, function (stream) {
+        getUserMedia(requestedMedia, function (stream) {
                 var localMediaElement = getElement(Flashphoner.getInstance().configuration.localMediaElementId);
                 if (localMediaElement) {
                     attachMediaStream(localMediaElement, stream);
