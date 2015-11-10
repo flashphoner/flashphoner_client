@@ -873,6 +873,9 @@ Flashphoner.prototype = {
 
         stream.mediaSessionId = mediaSessionId;
         stream.published = true;
+        if (stream.record == undefined) {
+            stream.record = false;
+        }
         if (stream.hasVideo == undefined) {
             stream.hasVideo = true;
         }
@@ -941,6 +944,9 @@ Flashphoner.prototype = {
         var mediaSessionId = createUUID();
         stream.mediaSessionId = mediaSessionId;
         stream.published = false;
+        if (stream.record == undefined) {
+            stream.record = false;
+        }
         if (!stream.mediaProvider) {
             stream.mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
         }
@@ -1953,6 +1959,7 @@ var Stream = function () {
     this.sdp = "";
     this.info = null;
     this.remoteMediaElementId = null;
+    this.record = false;
 };
 
 var StreamStatus = function () {
