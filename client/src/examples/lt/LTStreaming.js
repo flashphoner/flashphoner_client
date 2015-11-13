@@ -2,12 +2,16 @@
 var f = Flashphoner.getInstance();
 var pStream;
 var sStream;
+var wsPlayer;
+var wsPlayerEnabled = false;
 
 function initAPI() {
+    wsPlayerEnabled = getURLParameter("wsPlayerEnabled");
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
     f.addListener(WCSEvent.OnDataEvent, dataEventListener);
+    f.addListener(WCSEvent.OnBinaryEvent, binaryListener);
     ConfigurationLoader.getInstance(function (configuration) {
         configuration.remoteMediaElementId = 'remoteVideo';
         configuration.localMediaElementId = 'localVideo';
@@ -28,6 +32,23 @@ function initAPI() {
 
 }
 
+function initWsPlayer() {
+    if (wsPlayer) {
+        wsPlayer.reset();
+    } else {
+        var canvas = document.getElementById('videoCanvas');
+        wsPlayer = new WebsocketPlayer(canvas, function (e) {},
+            function (str) {
+                this.trace(str);
+            }.bind(this)
+        );
+        var config = new Configuration();
+        config.videoWidth = f.configuration.videoWidth;
+        config.videoHeight = f.configuration.videoHeight;
+        wsPlayer.init(config);
+    }
+}
+
 function dataEventListener(event) {
     console.dir(event);
     var method = event.payload.method;
@@ -46,9 +67,24 @@ function dataEventListener(event) {
 
 }
 
+function binaryListener(event) {
+    if (wsPlayerEnabled) {
+        wsPlayer.onDataReceived(event);
+    }
+}
+
 //New connection
 function connect(){
-    f.connect({appKey:'loadToolStreamingApp'});
+    var config = {};
+    config.appKey = "loadToolStreamingApp";
+    if (wsPlayerEnabled) {
+        config.useWsTunnel = true;
+        document.getElementById('remoteVideo').style.visibility = "hidden";
+        document.getElementById('flashVideoWrapper').style.visibility = "hidden";
+        document.getElementById('flashVideoDiv').style.visibility = "hidden";
+        document.getElementById('videoCanvas').style.visibility = "visible";
+    }
+    f.connect(config);
 }
 
 //Publish stream
@@ -65,8 +101,23 @@ function unPublishStream(name){
 
 //Play stream
 function playStream(){
-    var streamName = createUUID();
-    f.playStream({name:streamName});
+    var stream = {};
+    stream.name = createUUID();
+    if (wsPlayerEnabled) {
+        initWsPlayer();
+        stream.sdp = "v=0\r\n" +
+        "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
+        "c=IN IP4 0.0.0.0\r\n" +
+        "t=0 0\r\n" +
+        "a=sdplang:en\r\n"+
+        "m=video 0 RTP/AVP 32\r\n" +
+        "a=rtpmap:32 MPV/90000\r\n" +
+        "a=recvonly\r\n" +
+        "m=audio 0 RTP/AVP 0\r\n" +
+        "a=rtpmap:0 PCMU/8000\r\n" +
+        "a=recvonly\r\n";
+    }
+    f.playStream(stream);
 }
 
 //Stop stream playback
@@ -81,6 +132,7 @@ function connectionStatusListener(event) {
     if (event.status == ConnectionStatus.Established){
         trace('Connection has been established. You can start a new call.');
     }
+    updateStatus();
 }
 
 function streamStatusListener(event) {
@@ -90,6 +142,11 @@ function streamStatusListener(event) {
     } else if (event.status == StreamStatus.Publishing) {
         pStream = event;
     }
+    updateStatus();
+}
+
+function getURLParameter(name) {
+    return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 }
 
 //Error
@@ -100,5 +157,14 @@ function errorEvent(event) {
 //Trace
 function trace(str){
     console.log(str);
+}
+
+function updateStatus() {
+    var publish = document.getElementById("pInfo");
+    var subscribe = document.getElementById("sInfo");
+    publish.innerHTML = "PUBLISH:";
+    publish.innerHTML += pStream != undefined ? pStream.name + ":" + pStream.status : "NO STREAM";
+    subscribe.innerHTML = "SUBSCRIBE:";
+    subscribe.innerHTML += sStream != undefined ? sStream.name + ":" + sStream.status : "NO STREAM";
 }
 
