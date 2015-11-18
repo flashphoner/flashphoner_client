@@ -314,36 +314,12 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
 
     Flashphoner.getInstance().getAccess(mediaProvider, hasVideo);
 
-    //Suppress Flash Settings Window for Microsoft Edge aka Spartan browser
-    if (MediaProvider.Flash == mediaProvider && this.isMicrosoftEdge()) {
-        if (!this.hasAccess(mediaProvider,hasVideo)){
-            setTimeout(this.suppressFlashWindow, 10);
-        }
-    }
-
-};
-
-Phone.prototype.isMicrosoftEdge = function() {
-    var isMicrosoftEdge = navigator.userAgent.indexOf("Edge") > 0;
-    trace("isMicrosoftEdge: "+isMicrosoftEdge);
-    return isMicrosoftEdge;
-};
-
-
-Phone.prototype.suppressFlashWindow = function() {
-    $(".b-video").addClass("suppressed");
-};
-
-Phone.prototype.repairFlashWindow = function() {
-    if ($(".b-video").hasClass("suppressed")){
-        $(".b-video").removeClass("suppressed");
-    }
 };
 
 Phone.prototype.openVideoView = function () {
     var me = this;
     var mediaProvider = me.getMediaProvider();
-    this.repairFlashWindow();
+
     if ($(".b-video").hasClass("open")) {			// open/close main video view and change class video for body
         $(".b-video").removeClass("open").removeAttr("id");
         $(".b-video").removeAttr('style');
