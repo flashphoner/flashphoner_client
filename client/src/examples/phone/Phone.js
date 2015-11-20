@@ -1,3 +1,52 @@
+var Phone = function () {
+    this.flashphonerListener = null;
+    this.currentCall = null;
+    this.holdedCall = null;
+    this.logs = "";
+    this.intervalId = -1;
+};
+
+Phone.prototype.init = function () {
+    this.flashphonerListener = new DefaultListener();
+
+    Flashphoner.getInstance().addListener(WCSEvent.ErrorStatusEvent, this.errorStatusEvent, this);
+    Flashphoner.getInstance().addListener(WCSEvent.ConnectionStatusEvent, this.connectionStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.RegistrationStatusEvent, this.registrationStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.OnCallEvent, this.onCallListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.CallStatusEvent, this.callStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.OnTransferEvent, this.onTransferEventListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.TransferStatusEvent, this.onTransferStatusListener, this);
+
+    Flashphoner.getInstance().addListener(WCSEvent.OnMessageEvent, this.onMessageListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.MessageStatusEvent, this.messageStatusListener, this);
+
+    Flashphoner.getInstance().addListener(WCSEvent.RecordingStatusEvent, this.recordingStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.SubscriptionStatusEvent, this.subscriptionStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.XcapStatusEvent, this.xcapStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.BugReportStatusEvent, this.bugReportStatusListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.OnDataEvent, this.onDataEventListener, this);
+    Flashphoner.getInstance().addListener(WCSEvent.DataStatusEvent, this.dataStatusEventListener, this);
+};
+
+Phone.prototype.getMediaProvider = function () {
+    var mediaProviders = Flashphoner.getInstance().mediaProviders;
+    var mediaProvider;
+
+    var forceMediaProvider = ConfigurationLoader.getInstance().forceMediaProvider;
+    if (forceMediaProvider) {
+        if (mediaProviders.get(forceMediaProvider)) {
+            mediaProvider = forceMediaProvider;
+        }
+    }
+    if (!mediaProvider) {
+        mediaProvider = MediaProvider.Flash;
+        if (mediaProviders.get(MediaProvider.WebRTC)) {
+            mediaProvider = MediaProvider.WebRTC;
+        }
+    }
+    return mediaProvider;
+};
+
 Phone.prototype.connect = function () {
     if ($("#outbound_proxy").val() == "") {
         $("#outbound_proxy").val($("#domain").val());
@@ -23,6 +72,164 @@ Phone.prototype.connect = function () {
     if (result == 0) {
         trace("Phone - connecting");
     }
+};
+
+Phone.prototype.disconnect = function () {
+    trace("Phone - disconnect");
+    Flashphoner.getInstance().disconnect();
+};
+
+Phone.prototype.cancel = function () {
+    if (this.currentCall) {
+        this.hangup(this.currentCall);
+    }
+};
+
+Phone.prototype.msrpCall = function (callee) {
+    var me = this;
+    callee = me.applyCalleeLetterCase(callee);
+    trace("Phone - msrpCall " + callee);
+
+    me.currentCall = Flashphoner.getInstance().msrpCall({
+        callee: callee,
+        visibleName: 'Caller',
+        hasVideo: false,
+        inviteParameters: {param1: "value1", param2: "value2"},
+        isMsrp: true
+    });
+};
+
+Phone.prototype.call = function (callee, hasVideo, mediaProvider) {
+    var me = this;
+    callee = me.applyCalleeLetterCase(callee);
+    trace("Phone - call " + callee);
+    if (!me.hasAccess(mediaProvider, hasVideo)) {
+        if (me.intervalId == -1) {
+            var checkAccessFunc = function () {
+                if (me.hasAccess(mediaProvider, hasVideo)) {
+                    clearInterval(me.intervalId);
+                    me.intervalId = -1;
+                    me.call(callee, hasVideo, mediaProvider);
+                }
+            };
+            me.intervalId = setInterval(checkAccessFunc, 500);
+        }
+        me.getAccess(mediaProvider, hasVideo);
+    } else if (me.hasAccess(mediaProvider, hasVideo)) {
+        var call = new Call();
+        call.callee = callee;
+        call.visibleName = "Caller";
+        call.hasVideo = hasVideo;
+        //uncomment for receive video in audio call
+        //call.receiveVideo = true;
+        call.inviteParameters = {param1: "value1", param2: "value2"};
+        call.mediaProvider = mediaProvider;
+        this.currentCall = Flashphoner.getInstance().call(call);
+        this.flashphonerListener.onCall();
+    } else {
+        trace("Microphone is not plugged in");
+    }
+};
+
+Phone.prototype.changeVideoState = function (call, enable) {
+    trace("Phone - changeVideoState");
+    Flashphoner.getInstance().changeVideoState(call, enable);
+};
+
+Phone.prototype.sendMessage = function (message) {
+    trace("Phone - sendMessage " + message.to + " body: " + message.body);
+    Flashphoner.getInstance().sendMessage(message);
+};
+
+Phone.prototype.answer = function (call, hasVideo) {
+    trace("Phone - answer " + call.callId);
+    var me = this;
+    if (!me.hasAccess(call.mediaProvider, hasVideo)) {
+        if (me.intervalId == -1) {
+            var checkAccessFunc = function () {
+                if (me.hasAccess(call.mediaProvider, hasVideo)) {
+                    clearInterval(me.intervalId);
+                    me.intervalId = -1;
+                    me.answer(call, hasVideo);
+                }
+            };
+            me.intervalId = setInterval(checkAccessFunc, 500);
+        }
+        me.getAccess(call.mediaProvider, hasVideo);
+    } else if (me.hasAccess(call.mediaProvider, hasVideo)) {
+        call.hasVideo = hasVideo;
+        Flashphoner.getInstance().answer(call);
+        this.flashphonerListener.onAnswer(call.callId);
+    } else {
+        trace("Microphone is not plugged in");
+    }
+};
+
+Phone.prototype.hangup = function (call) {
+    trace("Phone - hangup " + call.callId);
+    Flashphoner.getInstance().hangup(call);
+    this.flashphonerListener.onHangup();
+};
+
+Phone.prototype.sendDTMF = function (callId, dtmf) {
+    trace("Phone - sendDTMF callId: " + callId + " dtmf: " + dtmf);
+    Flashphoner.getInstance().sendDTMF({callId: callId, dtmf: dtmf});
+};
+
+Phone.prototype.hold = function (call) {
+    trace("Phone - hold callId: " + call.callId);
+    Flashphoner.getInstance().hold(call);
+};
+
+Phone.prototype.holdForTransfer = function (call) {
+    trace("Phone - hold callId: " + call.callId);
+    Flashphoner.getInstance().holdForTransfer(call);
+};
+
+Phone.prototype.unhold = function (call) {
+    trace("Phone - hold callId: " + call.callId);
+    Flashphoner.getInstance().unhold(call);
+};
+
+Phone.prototype.transfer = function (callId, target) {
+    trace("Phone - transfer callId: " + callId + " target: " + target);
+    Flashphoner.getInstance().transfer({callId: callId, target: target});
+};
+
+Phone.prototype.getStatistics = function() {
+    Flashphoner.getInstance().getCallStatistics(this.currentCall, function(statistics){
+        trace("Statistics: " +  JSON.stringify(statistics), null, ' ');
+    });
+};
+
+Phone.prototype.sendXcapRequest = function () {
+    var url = ConfigurationLoader.getInstance().xcapUrl;
+    if (url) {
+        Flashphoner.getInstance().sendXcapRequest({url: url});
+    }
+};
+
+Phone.prototype.subscribe = function () {
+    var subscribeObj = {};
+    subscribeObj.event = ConfigurationLoader.getInstance().subscribeEvent;
+    subscribeObj.expires = 3600;
+    Flashphoner.getInstance().subscribe(subscribeObj);
+};
+
+Phone.prototype.changeRelationMyVideo = function (relation) {
+    trace("Phone - changeRelationMyVideo " + relation);
+    Flashphoner.getInstance().changeRelationMyVideo(relation);
+};
+
+Phone.prototype.submitBugReport = function () {
+    var bugReportText = getElement('bugReportText').value;
+    trace("submitBugReport " + bugReportText);
+    Flashphoner.getInstance().submitBugReport({text: bugReportText, type: "no_media"});
+};
+
+Phone.prototype.sendData = function (data) {
+    trace("sendData " + data);
+    Flashphoner.getInstance().sendData(data);
 };
 
 /* ------------------ LISTENERS ----------------- */
@@ -203,6 +410,14 @@ Phone.prototype.callStatusListener = function (event) {
     }
 };
 
+Phone.prototype.onTransferStatusListener = function (event) {
+    trace("Phone - onTransferStatusListener status:" + event.status + " incoming:" + event.incoming);
+};
+
+Phone.prototype.onTransferEventListener = function (event) {
+    trace("Phone - onTransferEventListener status:" + event.status + " incoming:" + event.incoming);
+};
+
 Phone.prototype.cancel = function () {
     if (this.currentCall) {
         this.hangup(this.currentCall);
@@ -266,6 +481,154 @@ Phone.prototype.onMessageListener = function (event) {
     $('<div class="b-chat__message"><div class="b-chat__message__head"><span class="b-chat__message__time">' + new Date().toLocaleString() + '</span><span class="b-chat__message__author">' + message.from + '</span></div><div class="b-chat__message__text">' + message.body.replace(/\n/g, "<br />") + '</div></div>').appendTo($(".b-chat_tab.open .mCSB_container"));
     this.chatScrollDown();
 };
+
+Phone.prototype.convertMessageBody = function (messageBody, contentType) {
+    trace("Phone - convertMessageBody " + contentType);
+    if (contentType == "application/fsservice+xml") {
+        var xml = $.parseXML(messageBody);
+        var missedCallNotification;
+        var fsService = $(xml).find("fs-services").find("fs-service");
+        var action = fsService.attr("action");
+        if (action == "servicenoti-indicate") {
+            var caw = this.parseMsn(fsService, "caw");
+            if (!!caw) {
+                missedCallNotification = caw;
+            } else {
+                missedCallNotification = parseMsn(fsService, "mcn");
+            }
+        } else if (action == "serviceinfo-confirm") {
+            //service status confirmation
+            missedCallNotification = "Service status: " + $(fsService.find("mcn").find("mcn-data")).attr("status");
+        }
+        if (missedCallNotification !== undefined) return missedCallNotification;
+
+    } else if (contentType == "application/vnd.oma.push") {
+        var xml = $.parseXML(messageBody);
+        /**
+         * application/vnd.oma.push will contain xml with app information
+         * Try to handle this information or discard xml
+         */
+        var content;
+        if ($(xml).find("ums-service")) {
+            //voice mail service message
+            content = $(xml).find("ni-data").attr("content");
+        }
+        return content;
+    }
+
+    return messageBody;
+
+};
+
+Phone.prototype.parseMsn = function (fsService, mcn) {
+    trace("Phone - parseMcn: " + mcn);
+    var caw = fsService.find(mcn);
+    var ret = null;
+    if (!!caw) {
+        var cawData = caw.find(mcn + "-data");
+        if (!!cawData) {
+            var sender = $(cawData).attr("sender");
+            if (!!sender) {
+                trace("Phone - Missed call: " + sender);
+                ret = "Missed call from " + sender;
+            }
+        }
+    }
+    return ret;
+};
+
+Phone.prototype.recordingStatusListener = function (recordReport) {
+    trace("Phone - recordingStatusListener: " + recordReport.report.mixedFilename);
+};
+
+Phone.prototype.subscriptionStatusListener = function (event) {
+    var subscriptionObject = event;
+    var sipObject = event.sipMessageRaw;
+    trace("Phone - subscriptionStatusListener event: " + subscriptionObject.event + " expires: " + subscriptionObject.expires + " status: " + subscriptionObject.status + " terminate: " + subscriptionObject.terminate);
+    trace("Phone - subscriptionStatusListener body: " + subscriptionObject.requestBody);
+    if (subscriptionObject.event == "reg") {
+        if (subscriptionObject.terminate) {
+            this.disconnect();
+        }
+    }
+};
+
+Phone.prototype.xcapStatusListener = function (xcapResponse) {
+    trace("Phone - xcapStatusListener " + xcapResponse);
+    var xml = $.parseXML(xcapResponse.responseBody);
+    var history = $(xml).find("history-list").find("history");
+    if (history != null && history.length != 0) {
+        if (ConfigurationLoader.getInstance().msrpCallee != null && ConfigurationLoader.getInstance().msrpCallee.length != 0) {
+            this.msrpCall(ConfigurationLoader.getInstance().msrpCallee);
+        }
+    }
+};
+
+Phone.prototype.bugReportStatusListener = function (event) {
+    trace("Phone - bugReportStatusListener; filename - " + event.filename);
+};
+
+Phone.prototype.onDataEventListener = function (event) {
+    trace("Phone - onDataEventListener; received data " + event.data);
+};
+
+Phone.prototype.dataStatusEventListener = function (event) {
+    trace("Phone - DataStatusEventListener; received status " + event.status);
+};
+
+Phone.prototype.errorStatusEvent = function (event) {
+    var code = event.status;
+    trace("Phone - errorStatusEvent " + code);
+    if (code == WCSError.MIC_ACCESS_PROBLEM || code == WCSError.MIC_CAM_ACCESS_PROBLEM) {
+        this.cancel();
+        this.viewMessage("ERROR - " + event.info);
+    } else {
+        this.cancel();
+        if (code == WCSError.CONNECTION_ERROR) {
+            this.viewMessage("ERROR - Can`t connect to server.");
+        } else if (code == WCSError.AUTHENTICATION_FAIL) {
+            this.viewMessage("ERROR - Register fail, please check your SIP account details.");
+            window.setTimeout("disconnect();", 3000);
+        } else if (code == WCSError.USER_NOT_AVAILABLE) {
+            this.viewMessage("ERROR - User not available.");
+        } else if (code == WCSError.LICENSE_RESTRICTION) {
+            this.viewMessage("ERROR - You trying to connect too many users, or license is expired");
+        } else if (code == WCSError.LICENSE_NOT_FOUND) {
+            this.viewMessage("ERROR - Please get a valid license or contact Flashphoner support");
+        } else if (code == WCSError.INTERNAL_SIP_ERROR) {
+            this.viewMessage("ERROR - Unknown error. Please contact support.");
+        } else if (code == WCSError.REGISTER_EXPIRE) {
+            this.viewMessage("ERROR - No response from VOIP server during 15 seconds.");
+        } else if (code == WCSError.SIP_PORTS_BUSY) {
+            this.viewMessage("ERROR - SIP ports are busy. Please open SIP ports range (30000-31000 by default).");
+            window.setTimeout("disconnect();", 3000);
+        } else if (code == WCSError.MEDIA_PORTS_BUSY) {
+            this.viewMessage("ERROR - Media ports are busy. Please open media ports range (31001-32000 by default).");
+        } else if (code == WCSError.WRONG_SIPPROVIDER_ADDRESS) {
+            this.viewMessage("ERROR - Wrong domain.");
+            window.setTimeout("disconnect();", 3000);
+        } else if (code == WCSError.CALLEE_NAME_IS_NULL) {
+            this.viewMessage("ERROR - Callee name is empty.");
+        } else if (code == WCSError.WRONG_FLASHPHONER_XML) {
+            this.viewMessage("ERROR - Flashphoner.xml has errors. Please check it.");
+        } else if (code == WCSError.PAYMENT_REQUIRED) {
+            this.viewMessage("ERROR - Payment required, please check your balance.");
+        } else if (code == WCSError.REST_AUTHORIZATION_FAIL) {
+            this.viewMessage("ERROR - Rest authorization fail.");
+            window.setTimeout("disconnect();", 3000);
+        } else if (code == WCSError.REST_FAIL) {
+            this.viewMessage("ERROR - Rest fail.");
+        }
+    }
+
+    this.flashphonerListener.onError();
+};
+
+Phone.prototype.viewMessage = function (message) {
+    trace(message);
+};
+
+
 
 Phone.prototype.hideFlashAccess = function () {
     if ($(".b-video").hasClass("flash_access")) {
@@ -437,6 +800,35 @@ Phone.prototype.chatCreateTab = function (chatUsername) {
 
 Phone.prototype.chatScrollDown = function () {
     $(".b-chat_tab.open .b-chat__window .mCSB_container").css("top", $(".b-chat_tab.open .b-chat__window .mCSB_container").height() - $(".b-chat_tab.open .b-chat__window .mCSB_container").parent().height() + 20 + "px");
+};
+
+/* ------------- Additional interface functions --------- */
+Phone.prototype.isCurrentCall = function (call) {
+    return this.currentCall != null && this.currentCall.callId == call.callId;
+};
+
+Phone.prototype.isRingSoundAllowed = function () {
+    try {
+        if (ConfigurationLoader.getInstance().suppressRingOnActiveAudioStream) {
+            trace("Phone - isRingSoundAllowed false");
+            return false;
+        }
+    } catch (error) {
+    }
+    trace("Phone - isRingSoundAllowed true");
+    return true;
+};
+
+Phone.prototype.applyCalleeLetterCase = function (callee) {
+    if (callee) {
+        if ("uppercase" == ConfigurationLoader.getInstance().calleeLetterCase) {
+            return callee.toUpperCase();
+        }
+        if ("lowercase" == ConfigurationLoader.getInstance().calleeLetterCase) {
+            return callee.toLowerCase();
+        }
+    }
+    return callee;
 };
 
 
