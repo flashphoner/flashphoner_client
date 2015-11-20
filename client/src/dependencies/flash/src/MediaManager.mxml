@@ -49,11 +49,14 @@ This code and accompanying materials also available under LGPL and MPL license f
 				phoneSpeaker.percentHeight = 100;
 				phoneSpeaker.percentWidth = 100;
 				videoPartner.addChild(phoneSpeaker);
+				videoPartner.addEventListener(Event.RESIZE,onResize);
+				phoneSpeaker.changeFormat(videoPartner.width,videoPartner.height);
+				
 				ExternalInterface.addCallback("hasAccessToAudioAndVideo",hasAccessToAudioAndVideo);
 				ExternalInterface.addCallback("getAccessToAudio",getAccessToAudio);
 				ExternalInterface.addCallback("getAccessToAudioAndVideo",getAccessToAudioAndVideo);
 				ExternalInterface.addCallback("changeRelationMyVideo",changeRelationMyVideo);
-				videoPartner.addEventListener(Event.RESIZE,onResize);
+				
 				apiNotify.notifyFlashphonerAPILoaded();
 			}
 			
