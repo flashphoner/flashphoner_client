@@ -1,5 +1,5 @@
 var SoundControl = function () {
-    if ( arguments.callee.instance ) {
+    if (arguments.callee.instance) {
         return arguments.callee.instance;
     }
     arguments.callee.instance = this;
@@ -14,7 +14,7 @@ var SoundControl = function () {
     me.finishSound = me.initSound(configuration.finishSound, false, "none");
 };
 
-SoundControl.getInstance = function() {
+SoundControl.getInstance = function () {
     return new SoundControl();
 };
 
@@ -39,47 +39,51 @@ SoundControl.prototype = {
 
     //plays audio
     playSound: function (soundName) {
-        switch (soundName) {
-            case "RING":
-                if (!ConfigurationLoader.getInstance().disableLocalRing){
-                    me.ringSound.play();
-                }
-                break;
-            case "BUSY":
-                me.busySound.play();
-                break;
-            case "REGISTER":
-                me.registerSound.play();
-                break;
-            case "FINISH":
-                me.finishSound.play();
-                break;
-            case "MESSAGE":
-                me.messageSound.play();
-                break;
-            default:
-                console.error("Do not know what to play on " + soundName);
+        try {
+            switch (soundName) {
+                case "RING":
+                    if (!ConfigurationLoader.getInstance().disableLocalRing) {
+                        me.ringSound.play();
+                    }
+                    break;
+                case "BUSY":
+                    me.busySound.play();
+                    break;
+                case "REGISTER":
+                    me.registerSound.play();
+                    break;
+                case "FINISH":
+                    me.finishSound.play();
+                    break;
+                case "MESSAGE":
+                    me.messageSound.play();
+                    break;
+                default:
+                    console.error("Do not know what to play on " + soundName);
 
+            }
+        }
+        catch (err) {
+            console.info("This browser may not support sound.play() method: " + err)
         }
     },
 
     //stops audio
     stopSound: function (soundName) {
-        switch (soundName) {
-            case "RING":
-                if (me.ringSound && !me.ringSound.paused) {
-                    me.ringSound.pause();
-                    try{
+        try {
+            switch (soundName) {
+                case "RING":
+                    if (me.ringSound && !me.ringSound.paused) {
+                        me.ringSound.pause();
                         me.ringSound.currentTime = 0;
-                    } catch(err){
-                        //Possible error with IE HTML5 does not have audio.currentTime attribute
-                        trace(err);
                     }
-                }
-                break;
-            default:
-                console.error("Do not know what to stop on " + soundName);
+                    break;
+                default:
+                    console.error("Do not know what to stop on " + soundName);
 
+            }
+        } catch (err) {
+            console.info("This browser may not support sound.pause() method or sound.currentTime property: " + err)
         }
     }
 };

@@ -217,8 +217,13 @@ Flashphoner.prototype = {
         if (me.configuration.elementIdForSWF && me.configuration.pathToSWF) {
             me.initFlash(me.configuration.elementIdForSWF, me.configuration.pathToSWF);
         }
+
         if (me.configuration.localMediaElementId) {
-            getElement(me.configuration.localMediaElementId).volume = 0;
+            try {
+                getElement(me.configuration.localMediaElementId).volume = 0;
+            }catch(err) {
+                console.info("This browser may not support video.volume: "+err);
+            }
         }
 
         this.callbacks = {
