@@ -613,6 +613,9 @@ Flashphoner.prototype = {
         if (!call.isMsrp) {
             call.isMsrp = false;
         }
+        if (call.hasAudio == undefined) {
+            call.hasAudio = true;
+        }
         if (!call.hasVideo) {
             call.hasVideo = false;
         }
@@ -623,7 +626,7 @@ Flashphoner.prototype = {
 
         me.addOrUpdateCall(call);
 
-        me.checkAndGetAccess(call.mediaProvider, call.hasVideo, function () {
+        var internalCall = function () {
             if (MediaProvider.WebRTC == call.mediaProvider) {
                 me.webRtcMediaManager.createOffer(call.callId, function (sdp) {
                     //here we will strip codecs from SDP if requested
@@ -634,11 +637,16 @@ Flashphoner.prototype = {
                     sdp = me.removeCandidatesFromSDP(sdp);
                     call.sdp = sdp;
                     me.webSocket.send("call", call);
-                }, true, call.hasVideo, call.receiveVideo);
+                }, call.hasAudio, call.hasVideo, call.receiveVideo);
             } else if (MediaProvider.Flash == call.mediaProvider) {
                 me.webSocket.send("call", call);
             }
-        }, []);
+        };
+        if (call.hasAudio) {
+            me.checkAndGetAccess(call.mediaProvider, call.hasVideo, internalCall, []);
+        } else {
+            internalCall();
+        }
         return call;
     },
 
