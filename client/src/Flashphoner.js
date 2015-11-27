@@ -4,6 +4,8 @@ function Flashphoner() {
     }
     arguments.callee.instance = this;
 
+    this.clientVersion = "UNKNOWN_VERSION";
+
     this.webRtcMediaManager = undefined;
     this.webRtcCallSessionId = undefined;
     this.flashMediaManager = undefined;
@@ -532,6 +534,7 @@ Flashphoner.prototype = {
         me.connection.urlServer = me.connection.urlServer || me.configuration.urlWsServer;
         me.connection.width = me.connection.width || me.configuration.videoWidth;
         me.connection.height = me.connection.height || me.configuration.videoHeight;
+        me.connection.clientVersion = me.clientVersion;
         //workaround for old Safari (5.X)
         if ((navigator.userAgent.indexOf("Safari") > -1) && !(navigator.userAgent.indexOf("Chrome") > -1)) {
             me.connection.urlServer = me.connection.urlServer.slice(-1) == "/" ? me.connection.urlServer + "websocket" : me.connection.urlServer + "/websocket";
