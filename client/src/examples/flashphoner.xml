@@ -12,21 +12,22 @@
   This code and accompanying materials also available under LGPL and MPL license for Flashphoner buyers. Other license versions by negatiation. Write us support@flashphoner.com with any questions.
 -->
 <flashphoner>
-	<url_ws_server>ws://192.168.1.5:8080</url_ws_server>
-    <url_flash_server>rtmfp://192.168.1.5:1935</url_flash_server>
+	<url_ws_server>ws://87.226.225.59:8080</url_ws_server>
+    <url_flash_server>rtmfp://87.226.225.59:1935</url_flash_server>
 	<register_required>true</register_required>
     <!--<load_balancer_url>http://192.168.1.1:8081?action=server_list</load_balancer_url>-->
     <use_dtls>true</use_dtls>
     <reoffers_enabled>false</reoffers_enabled>
     <!--<force_media_provider>Flash</force_media_provider> &lt;!&ndash;WebRTC or Flash &ndash;&gt;-->
-	<video_width>640</video_width>
-	<video_height>480</video_height>
+	<video_width>320</video_width>
+	<video_height>240</video_height>
     <audio_reliable>true</audio_reliable>
     <video_reliable>true</video_reliable>
     <flash_buffer_time>0</flash_buffer_time>
 	<check_validation_callee>true</check_validation_callee>
 	<use_enhanced_mic>true</use_enhanced_mic>
     <!--<callee_letter_case>uppercase</callee_letter_case> &lt;!&ndash;uppercase,lowercase&ndash;&gt;-->
+    <!--<strip_codecs>VP8,vp8</strip_codecs>-->
 	<ring_sound></ring_sound>
 	<busy_sound></busy_sound>
 	<register_sound></register_sound>
