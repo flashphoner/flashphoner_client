@@ -7,6 +7,7 @@ function initAPI() {
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.RegistrationStatusEvent, registrationStatusListener);
     f.addListener(WCSEvent.CallStatusEvent, callStatusListener);
+    f.addListener(WCSEvent.OnCallEvent, callListener, this);
     f.init();
 
 }
@@ -37,6 +38,11 @@ function call() {
     currentCall = f.call(call);
 }
 
+function answer() {
+    f.answer(currentCall);
+}
+
+
 //Connection Status
 function connectionStatusListener(event) {
     trace(event.status);
@@ -48,6 +54,12 @@ function connectionStatusListener(event) {
 //Registration Status
 function registrationStatusListener(event) {
     trace(event.status);
+}
+
+function callListener(event) {
+    var call = event;
+    trace("Phone - callListener " + call.callId + " call.mediaProvider: " + call.mediaProvider + " call.status: " + call.status);
+    currentCall = call;
 }
 
 //Call Status
