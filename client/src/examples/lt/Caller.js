@@ -47,6 +47,10 @@ function connectionStatusListener(event) {
     trace(event.status);
     if (event.status == ConnectionStatus.Established) {
         status("Connected");
+        if (event.sipRegisterRequired == false){
+            status("Calling");
+            call();
+        }
     } else if (event.status == ConnectionStatus.Disconnected) {
         status("Disconnected");
     }

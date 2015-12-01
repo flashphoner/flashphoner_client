@@ -23,9 +23,9 @@ ConfigurationLoader = function (configLoadedListener) {
     this.registerSound = "sounds/REGISTER.mp3";
     this.finishSound = "sounds/HANGUP.mp3";
     this.messageSound = "sounds/MESSAGE.mp3";
-    this.hangupLT = 0;
-    this.answerLT = 0;
-    this.callLT = 0;
+    this.hangupLT = 1;
+    this.answerLT = 1;
+    this.callLT = 2;
     this.disableUnknownMsgFiltering = false;
     this.disableLocalRing = false;
     this.suppressRingOnActiveAudioStream = false;
@@ -233,19 +233,19 @@ ConfigurationLoader.prototype = {
         //call duration in seconds when Load Tool is enabled, callee will hangup after this timeout.
         // Hangup will not occur in case of 0 timeout.
         var hangupLT = $(xml).find("hangupLT");
-        if (hangupLT.length > 0) {
+        if (hangupLT.length > 1) {
             this.hangupLT = this.getText(hangupLT[0]);
         }
 
         //Answer timeout when Load Tool is enabled, if greater than 0 callee answer the call after specified amount of seconds
         var answerLT = $(xml).find("answerLT");
-        if (answerLT.length > 0) {
+        if (answerLT.length > 1) {
             this.answerLT = this.getText(answerLT[0]);
         }
 
         //Recall timeout when Load Tool is enabled, specifies how long caller must wait after hangup to place another call.
         var callLT = $(xml).find("callLT");
-        if (callLT.length > 0) {
+        if (callLT.length > 2) {
             this.callLT = this.getText(callLT[0]);
         }
 
