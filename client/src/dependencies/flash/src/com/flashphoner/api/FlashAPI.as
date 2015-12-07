@@ -84,6 +84,7 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("setMicVolume",setMicVolume);
 			ExternalInterface.addCallback("muteVideo",muteVideo);
 			ExternalInterface.addCallback("unmuteVideo",unmuteVideo);
+			ExternalInterface.addCallback("isVideoMuted",isVideoMuted);
 			ExternalInterface.addCallback("mute",mute);
 			ExternalInterface.addCallback("unmute",unmute);
 			ExternalInterface.addCallback("getVolume",getVolume);
@@ -205,7 +206,12 @@ package com.flashphoner.api
 		
 		public function unmuteVideo():void{
 			phoneServerProxy.unmuteVideo();
+		}
+		
+		public function isVideoMuted():Boolean{
+			return phoneServerProxy.isVideoMuted();
 		}		
+		
 		
 		
 		public function mute():void{

@@ -40,6 +40,8 @@ package com.flashphoner.api
 		
 		private var isConnected:Boolean;
 		
+		private var videoMuted:Boolean = false;
+		
 		private var outStreams:Object = {};
 		private var outStreamsVideoMarker:Object = {};
 		
@@ -174,6 +176,7 @@ package com.flashphoner.api
 					outStream.attachCamera(null);
 				}
 			}
+			videoMuted = true;
 		}
 		
 		public function unmuteVideo():void{
@@ -184,7 +187,12 @@ package com.flashphoner.api
 					setVideoCompressionSettings(outStream);
 				}
 			}
+			videoMuted = false;
 		}		
+		
+		public function isVideoMuted():Boolean {
+			return videoMuted; 
+		}
 		
 		private function setVideoCompressionSettings(outStream:NetStream):void{			
 			if (flash_API.getFlashPlayerMajorVersion() >= 11){

@@ -53,6 +53,11 @@ function unmuteVideo() {
     f.unmuteVideo(currentCall.mediaProvider);
 }
 
+function isVideoMuted() {
+    trace("isVideoMuted - " + f.isVideoMuted(currentCall.mediaProvider));
+}
+
+
 //New call
 function call() {
     var call = new Call();
