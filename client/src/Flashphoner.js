@@ -29,9 +29,23 @@ Flashphoner.getInstance = function () {
 
 Flashphoner.prototype = {
 
+    isChrome: function(){
+        return (navigator.userAgent.indexOf("Chrome") > -1) && (navigator.userAgent.indexOf("Edge") == -1);
+    },
+
     initFlash: function (elementId, pathToSWF) {
+
+        var me = this;
+
+        if (me.isChrome()) {
+            //Don't init Flash player for Chrome browser because it has some bugs in version 46 (Flash no longer detects webcam in Chrome)
+            //Once Flash is not loaded, WebRTC will be used everywhere in Chrome until the Flash Player bug is not resolved
+            //https://productforums.google.com/forum/#!topic/chrome/QjT1GR2IYzM;context-place=forum/chrome
+            trace("Flash won't be initialized for Chrome");
+            return;
+        }
+
         if (typeof swfobject != 'undefined') {
-            var me = this;
             var params = {};
             params.menu = "true";
             params.swliveconnect = "true";
