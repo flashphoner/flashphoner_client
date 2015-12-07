@@ -67,7 +67,8 @@ This code and accompanying materials also available under LGPL and MPL license f
 			public function hasAccessToAudioAndVideo():Boolean{
 				var hasAccess:Boolean = flashAPI.hasAccessToAudio() && hasAccessToVideo();
 		 		if (hasAccess) {
-					flashAPI.videoControl.attachLocal(videoMy);
+					flashAPI.videoControl.setLocal(videoMy);
+					flashAPI.videoControl.attachLocal();
 
 					videoMy.visible = true;
 					

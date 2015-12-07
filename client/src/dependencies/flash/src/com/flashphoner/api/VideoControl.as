@@ -121,8 +121,18 @@ package com.flashphoner.api
 			netStream.attachCamera(getCam());
 		}
 		
-		public function attachLocal(videoDisplay:VideoDisplay):void{
-			videoDisplay.attachCamera(getCam());
+		private var localVideo:VideoDisplay;
+		
+		public function setLocal(videoDisplay:VideoDisplay):void{
+			localVideo = videoDisplay;			
+		}
+		
+		public function attachLocal():void{
+			localVideo.attachCamera(getCam());
+		}
+		
+		public function deattachLocal():void{
+			localVideo.attachCamera(null);
 		}
 		
 		

@@ -176,6 +176,7 @@ package com.flashphoner.api
 					outStream.attachCamera(null);
 				}
 			}
+			flash_API.videoControl.deattachLocal();
 			videoMuted = true;
 		}
 		
@@ -187,6 +188,7 @@ package com.flashphoner.api
 					setVideoCompressionSettings(outStream);
 				}
 			}
+			flash_API.videoControl.attachLocal();
 			videoMuted = false;
 		}		
 		
