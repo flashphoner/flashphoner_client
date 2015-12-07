@@ -868,6 +868,22 @@ Flashphoner.prototype = {
         }
     },
 
+    muteVideo: function (mediaProvider) {
+        if (!mediaProvider) {
+            mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
+        }
+        this.mediaProviders.get(mediaProvider).muteVideo();
+
+    },
+
+    unmuteVideo: function (mediaProvider) {
+        if (!mediaProvider) {
+            mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
+        }
+        this.mediaProviders.get(mediaProvider).unmuteVideo();
+
+    },
+
     mute: function (mediaProvider) {
         if (!mediaProvider) {
             mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
@@ -1250,6 +1266,18 @@ WebRtcMediaManager.prototype.setVolume = function (id, volume) {
     webRtcMediaConnection.remoteMediaElement.volume = volume / 100;
 };
 
+WebRtcMediaManager.prototype.muteVideo = function () {
+    if (this.localAudioVideoStream) {
+        this.localAudioVideoStream.getVideoTracks()[0].enabled = false;
+    }
+};
+
+WebRtcMediaManager.prototype.unmuteVideo = function () {
+    if (this.localAudioVideoStream) {
+        this.localAudioVideoStream.getVideoTracks()[0].enabled = true;
+    }
+};
+
 WebRtcMediaManager.prototype.mute = function () {
     if (this.localAudioStream) {
         this.localAudioStream.getAudioTracks()[0].enabled = false;
@@ -1318,6 +1346,7 @@ WebRtcMediaManager.prototype.setAudioCodec = function (id, codec) {
 };
 
 WebRtcMediaManager.prototype.talk = function (callId, hasVideo) {
+
 };
 
 WebRtcMediaManager.prototype.hold = function (callId) {
@@ -1327,6 +1356,8 @@ WebRtcMediaManager.prototype.close = function (id) {
     var connection = this.webRtcMediaConnections.remove(id);
     if (connection) {
         connection.close();
+        this.unmute();
+        this.unmuteVideo();
     }
 };
 

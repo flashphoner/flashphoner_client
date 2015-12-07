@@ -41,6 +41,7 @@ package com.flashphoner.api
 		private var isConnected:Boolean;
 		
 		private var outStreams:Object = {};
+		private var outStreamsVideoMarker:Object = {};
 		
 		public function PhoneServerProxy(flash_API:FlashAPI)
 		{		
@@ -123,6 +124,7 @@ package com.flashphoner.api
 					setVideoCompressionSettings(outStream);
 				}
 			}
+			outStreamsVideoMarker[streamName] = hasVideo;
 		}
 		
 		public function unpublish(streamName:String):void{	
@@ -133,6 +135,7 @@ package com.flashphoner.api
 				outStream.removeEventListener(NetStatusEvent.NET_STATUS,onNetStatus);		
 				outStream.close();
 				outStreams[streamName] = null;
+				outStreamsVideoMarker[streamName] = null;
 			}		
 		}
 		
@@ -146,18 +149,42 @@ package com.flashphoner.api
 		}
 		
 		public function enableVideo(streamName:String):void{
+			Logger.info("enableVideo() name: "+streamName);
 			var outStream:NetStream = outStreams[streamName];
 			if (outStream != null){
 				setVideoCompressionSettings(outStream);
+				outStreamsVideoMarker[streamName] = true;
 			}
 		}
 		
 		public function disableVideo(streamName:String):void{
+			Logger.info("disableVideo() name: "+streamName);
 			var outStream:NetStream = outStreams[streamName];
 			if (outStream != null){
 				outStream.attachCamera(null);
+				outStreamsVideoMarker[streamName] = false;
 			}			
 		}
+		
+		public function muteVideo():void{
+			Logger.info("muteVideo()");
+			for (var streamName in outStreams){
+				var outStream:NetStream = outStreams[streamName];
+				if (outStream != null && outStreamsVideoMarker[streamName]){
+					outStream.attachCamera(null);
+				}
+			}
+		}
+		
+		public function unmuteVideo():void{
+			Logger.info("unmuteVideo()");
+			for (var streamName in outStreams){
+				var outStream:NetStream = outStreams[streamName];
+				if (outStream != null && outStreamsVideoMarker[streamName]){
+					setVideoCompressionSettings(outStream);
+				}
+			}
+		}		
 		
 		private function setVideoCompressionSettings(outStream:NetStream):void{			
 			if (flash_API.getFlashPlayerMajorVersion() >= 11){
@@ -167,6 +194,7 @@ package com.flashphoner.api
 				outStream.videoStreamSettings = settings;				
 			}
 			flash_API.videoControl.attachStream(outStream);
+			
 		}
 
 		

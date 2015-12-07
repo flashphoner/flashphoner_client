@@ -45,6 +45,14 @@ function unmute() {
     f.unmute();
 }
 
+function muteVideo() {
+    f.muteVideo(currentCall.mediaProvider);
+}
+
+function unmuteVideo() {
+    f.unmuteVideo(currentCall.mediaProvider);
+}
+
 //New call
 function call() {
     var call = new Call();
