@@ -1327,6 +1327,7 @@ body{
 	background:url(../img/sprite.png) -57px -66px;
 }
 .b-video.flash_access{
+	min-width:215px;
 	width:215px;
 	height:240px;
 	overflow: inherit;
