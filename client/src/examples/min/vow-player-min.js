@@ -138,7 +138,7 @@ function writeInfo(str) {
 
 $(document).ready(function () {
     $("#playButton").click(function () {
-        if (stream.status != undefined && stream.status != StreamStatus.Stoped) {
+        if (stream.status != undefined && (stream.status == StreamStatus.Playing || stream.status == StreamStatus.Paused)) {
             return;
         }
         playStream();
