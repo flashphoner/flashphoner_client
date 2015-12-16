@@ -501,7 +501,11 @@ Flashphoner.prototype = {
                         if (MediaProvider.WebRTC == removedStream.mediaProvider) {
                             me.webRtcMediaManager.close(removedStream.mediaSessionId);
                         } else if (MediaProvider.Flash == removedStream.mediaProvider) {
-                            me.flashMediaManager.stopStream(removedStream.mediaSessionId);
+							if (stream.published) {
+								me.flashMediaManager.unPublishStream(removedStream.mediaSessionId);
+							} else {
+								me.flashMediaManager.stopStream(removedStream.mediaSessionId);
+							}
                         }
                     }
                 } else {
