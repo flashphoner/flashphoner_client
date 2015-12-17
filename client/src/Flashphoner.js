@@ -1604,6 +1604,16 @@ WebRtcMediaConnection.prototype.waitGatheringIce = function () {
     }
 };
 
+WebRtcMediaConnection.prototype.getConstraints = function (receiveVideo) {
+    var constraints = {};
+    if (webrtcDetectedBrowser == "firefox") {
+        constraints = {offerToReceiveAudio: true, offerToReceiveVideo: receiveVideo};
+    } else {
+        constraints = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}};
+    }
+    return constraints;
+};
+
 WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, hasAudio, hasVideo, receiveVideo) {
     trace("WebRtcMediaConnection - createOffer()");
     var me = this;
@@ -1633,12 +1643,12 @@ WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, has
                     }
                     me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
                 }
-                mandatory = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}};
+                mandatory = me.getConstraints(receiveVideo);
             } else {
                 if (receiveVideo == undefined) {
                     receiveVideo = true;
                 }
-                mandatory = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}}
+                mandatory = me.getConstraints(receiveVideo);
             }
         }
         me.createOfferCallback = createOfferCallback;
