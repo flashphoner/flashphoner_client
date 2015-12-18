@@ -91,10 +91,25 @@ function binaryListener(event) {
 //Connection Status
 function streamStatusListener(event) {
     console.log(event.status);
-    if (event.status == StreamStatus.Failed) {
-        wsPlayer.stop();
-    } else if (event.status == StreamStatus.Stoped) {
-        wsPlayer.stop();
+    switch (event.status) {
+        case StreamStatus.Failed:
+        case StreamStatus.Stoped:
+            wsPlayer.stop();
+            $("#playButton").text("Play");
+            $("#pauseButton").text("Pause");
+            $("#pauseButton").prop("disabled", true);
+            $("#playButton").prop("disabled", false);
+            break;
+        case StreamStatus.Playing:
+            $("#playButton").text("Stop");
+            $("#pauseButton").text("Pause");
+            $("#pauseButton").prop("disabled", false);
+            $("#playButton").prop("disabled", false);
+            break;
+        case StreamStatus.Paused:
+            $("#pauseButton").text("Resume");
+            $("#pauseButton").prop("disabled", false);
+            break;
     }
     writeInfo("Stream " + event.status);
     this.stream.status = event.status;
@@ -109,6 +124,10 @@ function errorEvent(event) {
 
 function playFirstSound() {
     wsPlayer.playFirstSound();
+}
+
+function stopStream() {
+    f.stopStream(stream);
 }
 
 function playStream() {
@@ -137,24 +156,29 @@ function writeInfo(str) {
 }
 
 $(document).ready(function () {
+    $("#pauseButton").prop("disabled", true);
+    $("#playButton").prop("disabled", false);
     $("#playButton").click(function () {
-        if (stream.status != undefined && (stream.status == StreamStatus.Playing || stream.status == StreamStatus.Paused)) {
-            return;
+        var str = $("#playButton").text();
+        if (str == "Play") {
+            if (document.getElementById("streamId").value) {
+                $("#playButton").prop("disabled", true);
+                playStream();
+            }
+        } else if (str == "Stop") {
+            stopStream();
         }
-        playStream();
     });
 
     $("#pauseButton").click(function () {
         var str = $("#pauseButton").text();
         console.log("stream status " + stream.status);
         if (str == "Pause") {
-            if (stream.status != StreamStatus.Stoped) {
-                wsPlayer.pause();
-                $("#pauseButton").text("Resume");
-            }
+            $("#pauseButton").prop("disabled", true);
+            wsPlayer.pause();
         } else if (str == "Resume") {
+            $("#pauseButton").prop("disabled", true);
             wsPlayer.resume();
-            $("#pauseButton").text("Pause");
         }
     });
 });
