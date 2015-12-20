@@ -1016,7 +1016,7 @@ Flashphoner.prototype = {
         var me = this;
         if (me.playStreams.get(stream.name) != null) {
             console.log("Request resume for stream " + stream.name);
-            me.webSocket.send("playStream", stream);
+            me.webSocket.send("playStream", me.playStreams.get(stream.name));
             return;
         }
         var mediaSessionId = createUUID();
