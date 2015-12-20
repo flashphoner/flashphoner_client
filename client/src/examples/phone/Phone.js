@@ -335,6 +335,11 @@ Phone.prototype.callStatusListener = function (event) {
             }
         } else if (call.status == CallStatus.HOLD) {
             trace('Phone - ...Call on hold...');
+            if (call.incoming) {
+                $(".voice_call__call__pause").text(call.caller);
+            } else {
+                $(".voice_call__call__pause").text(call.callee);
+            }
             $(".voice_call__call__pause").addClass("open");	// do visible button of unhold and call window with hold button
             $(".voice_call__call__play").addClass("close");		// hide call view
             $(".b-video").removeClass("open");					// hide video view (if exists)
