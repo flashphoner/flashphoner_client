@@ -15,7 +15,7 @@ var connected;
 //New connection
 function connect() {
     if (!connected){
-	f.connect({urlServer: "ws://192.168.1.5:8080", appKey: "click2call"});
+	f.connect({urlServer: setURL(), appKey: "click2call"});
 	status("Connecting");
     }else{
 	    call();
@@ -77,3 +77,19 @@ function status(str){
     document.getElementById("info").innerHTML = str;
 }
 
+//set WCS URL
+function setURL() {
+    var proto;
+    var url;
+    var port;
+    if (window.location.protocol == "http:") {
+        proto = "ws://"
+        port = "8080"
+    } else {
+        proto = "wss://"
+        port = "8443"
+    }
+
+    url = proto + window.location.hostname + ":" + port;
+    return url;
+}

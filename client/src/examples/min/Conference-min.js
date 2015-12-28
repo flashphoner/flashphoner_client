@@ -92,3 +92,20 @@ function field(name){
     var field = document.getElementById(name).value;
     return field;
 }
+
+//Set WCS URL
+function setURL() {
+    var proto;
+    var url;
+    var port;
+    if (window.location.protocol == "http:") {
+        proto = "ws://"
+        port = "8080"
+    } else {
+        proto = "wss://"
+        port = "8443"
+    }
+
+    url = proto + window.location.hostname + ":" + port;
+    document.getElementById("urlServer").value = url;
+}

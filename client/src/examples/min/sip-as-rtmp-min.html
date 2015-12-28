@@ -83,6 +83,10 @@
             return o;
         };
 
+        function setURL() {
+            document.getElementById("resturl").value = "http://" + window.location.hostname +":9091/RESTCall";
+        }
+
     </script>
 </head>
 <body>
@@ -94,7 +98,7 @@ Once the SIP call is established, audio or video will be forwarded by Web Call S
 You can get more information from <a href="http://flashphoner.com/docs/wcs4/wcs_docs/html/en/wcs-user-guide/">User Guide</a> section 11 'SIP as RTMP'.</p>
 
 <h2>REST URL</h2>
-<p>REST url: <input size="50" id="resturl" name="url" type="text" value="http://test.flashphoner.com:9091/RESTCall"/></p>
+<p>REST url: <input size="50" id="resturl" name="url" type="text" value=""/></p>
 
 <h2>Start new call</h2>
 

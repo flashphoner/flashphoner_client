@@ -8,7 +8,7 @@ config.videoWidth = 320;
 config.videoHeight = 240;
 
 //Web Call Server Websocket URL
-var url = "ws://192.168.1.5:8080";
+var url = setURL();
 
 //The stream name can be an RTSP URL for playback
 //Example: rtsp://192.168.1.5:1935/live/stream1
@@ -182,3 +182,20 @@ $(document).ready(function () {
         }
     });
 });
+
+//set WCS URL
+function setURL() {
+    var proto;
+    var url;
+    var port;
+    if (window.location.protocol == "http:") {
+        proto = "ws://"
+        port = "8080"
+    } else {
+        proto = "wss://"
+        port = "8443"
+    }
+
+    url = proto + window.location.hostname + ":" + port;
+    return url;
+}
