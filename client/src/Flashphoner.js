@@ -498,15 +498,7 @@ Flashphoner.prototype = {
                         removedStream = me.playStreams.remove(stream.name);
                     }
                     if (removedStream) {
-                        if (MediaProvider.WebRTC == removedStream.mediaProvider) {
-                            me.webRtcMediaManager.close(removedStream.mediaSessionId);
-                        } else if (MediaProvider.Flash == removedStream.mediaProvider) {
-							if (stream.published) {
-								me.flashMediaManager.unPublishStream(removedStream.mediaSessionId);
-							} else {
-								me.flashMediaManager.stopStream(removedStream.mediaSessionId);
-							}
-                        }
+                        me.releaseMediaManagerStream(removedStream);
                     }
                 } else {
                     if (stream.published) {
@@ -1082,11 +1074,7 @@ Flashphoner.prototype = {
         var me = this;
         var removedStream = me.playStreams.remove(stream.name);
         if (removedStream) {
-            if (MediaProvider.WebRTC == removedStream.mediaProvider) {
-                me.webRtcMediaManager.close(removedStream.mediaSessionId);
-            } else if (MediaProvider.Flash == removedStream.mediaProvider) {
-                me.flashMediaManager.stopStream(removedStream.mediaSessionId);
-            }
+            me.releaseMediaManagerStream(removedStream);
             me.webSocket.send("stopStream", removedStream);
         }
     },
@@ -1096,6 +1084,19 @@ Flashphoner.prototype = {
         console.log("Pause stream " + stream.name);
         var me = this;
         me.webSocket.send("pauseStream", stream);
+    },
+
+    releaseMediaManagerStream: function (stream) {
+        var me = this;
+        if (MediaProvider.WebRTC == stream.mediaProvider && me.webRtcMediaManager) {
+            me.webRtcMediaManager.close(stream.mediaSessionId);
+        } else if (MediaProvider.Flash == stream.mediaProvider && me.flashMediaManager) {
+            if (stream.published) {
+                me.flashMediaManager.unPublishStream(stream.mediaSessionId);
+            } else {
+                me.flashMediaManager.stopStream(stream.mediaSessionId);
+            }
+        }
     },
 
     removeCandidatesFromSDP: function (sdp) {
