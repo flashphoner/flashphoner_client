@@ -70,6 +70,7 @@ function connectionStatusListener(event) {
         //init wsPlayer
         config.token = f.connection.authToken;
         config.urlWsServer = url;
+        config.receiverPath = "../../dependencies/websocket-player/WSReceiver.js";
         wsPlayer.init(config);
     } else if (event.status == ConnectionStatus.Disconnected) {
         wsPlayer.stop();
