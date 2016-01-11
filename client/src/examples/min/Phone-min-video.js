@@ -96,6 +96,8 @@ function callStatusListener(event) {
     trace(event.status);
     if (event.status == CallStatus.ESTABLISHED) {
         trace('Call ' + event.callId + ' is established');
+    } else if (event.status == CallStatus.FINISH) {
+        f.freeAccess(event.mediaProvider);
     }
 }
 

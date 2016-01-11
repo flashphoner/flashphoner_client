@@ -162,6 +162,25 @@ Flashphoner.prototype = {
         } else {
             trace("Browser does not appear to be WebRTC-capable");
         }
+
+        var MediaStream = window.MediaStream;
+
+        if (typeof MediaStream === 'undefined' && typeof webkitMediaStream !== 'undefined') {
+            MediaStream = webkitMediaStream;
+        }
+
+        /*global MediaStream:true */
+        if (typeof MediaStream !== 'undefined' && !('stop' in MediaStream.prototype)) {
+            MediaStream.prototype.stop = function() {
+                this.getAudioTracks().forEach(function(track) {
+                    track.stop();
+                });
+
+                this.getVideoTracks().forEach(function(track) {
+                    track.stop();
+                });
+            };
+        }
     },
 
     addListener: function (event, listener, thisArg) {
@@ -866,6 +885,10 @@ Flashphoner.prototype = {
         }
     },
 
+    freeAccess: function (mediaProvider) {
+        this.mediaProviders.get(mediaProvider).freeAccess();
+    },
+
     getVolume: function (call) {
         if (MediaProvider.Flash == call.mediaProvider) {
             this.mediaProviders.get(call.mediaProvider).setVolume(call.callId, value);
@@ -1461,6 +1484,19 @@ WebRtcMediaManager.prototype.getAccessToAudio = function () {
         );
     }
     return true;
+};
+
+WebRtcMediaManager.prototype.freeAccess = function () {
+    if (this.localAudioStream) {
+        this.localAudioStream.stop();
+        this.localAudioStream = null;
+    }
+    if (this.localAudioVideoStream) {
+        this.localAudioVideoStream.stop();
+        this.localAudioVideoStream = null;
+    }
+    this.audioMuted = 1;
+    this.videoMuted = 1;
 };
 
 var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, remoteMediaElementId) {
