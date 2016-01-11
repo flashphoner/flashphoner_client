@@ -58,6 +58,11 @@ function isVideoMuted() {
     trace("isVideoMuted - " + f.isVideoMuted(currentCall.mediaProvider));
 }
 
+function releaseCameraAndMicrophone(){
+    trace("releaseCameraAndMicrophone");
+    f.releaseCameraAndMicrophone(event.mediaProvider);
+}
+
 
 //New call
 function call() {
@@ -97,8 +102,6 @@ function callStatusListener(event) {
     trace(event.status);
     if (event.status == CallStatus.ESTABLISHED) {
         trace('Call ' + event.callId + ' is established');
-    } else if (event.status == CallStatus.FINISH) {
-        f.freeAccess(event.mediaProvider);
     }
 }
 

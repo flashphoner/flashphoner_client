@@ -885,8 +885,8 @@ Flashphoner.prototype = {
         }
     },
 
-    freeAccess: function (mediaProvider) {
-        this.mediaProviders.get(mediaProvider).freeAccess();
+    releaseCameraAndMicrophone: function (mediaProvider) {
+        this.mediaProviders.get(mediaProvider).releaseCameraAndMicrophone();
     },
 
     getVolume: function (call) {
@@ -1495,7 +1495,7 @@ WebRtcMediaManager.prototype.getAccessToAudio = function () {
     return true;
 };
 
-WebRtcMediaManager.prototype.freeAccess = function () {
+WebRtcMediaManager.prototype.releaseCameraAndMicrophone = function () {
     if (this.localAudioStream) {
         this.localAudioStream.stop();
         this.localAudioStream = null;
