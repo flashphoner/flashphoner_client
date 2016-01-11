@@ -33,11 +33,15 @@ Flashphoner.prototype = {
         return (navigator.userAgent.indexOf("Chrome") > -1) && (navigator.userAgent.indexOf("Edge") == -1);
     },
 
+    isFF: function(){
+        return (navigator.userAgent.indexOf("Mozilla") > -1) && (navigator.userAgent.indexOf("Firefox") > -1) && (navigator.userAgent.indexOf("Edge") == -1);
+    },
+
     initFlash: function (elementId, pathToSWF) {
 
         var me = this;
 
-        if (me.isChrome()) {
+        if (me.isChrome() || me.isFF()) {
             //Don't init Flash player for Chrome browser because it has some bugs in version 46 (Flash no longer detects webcam in Chrome)
             //Once Flash is not loaded, WebRTC will be used everywhere in Chrome until the Flash Player bug is not resolved
             //https://productforums.google.com/forum/#!topic/chrome/QjT1GR2IYzM;context-place=forum/chrome
@@ -513,11 +517,7 @@ Flashphoner.prototype = {
                         removedStream = me.playStreams.remove(stream.name);
                     }
                     if (removedStream) {
-                        if (MediaProvider.WebRTC == removedStream.mediaProvider) {
-                            me.webRtcMediaManager.close(removedStream.mediaSessionId);
-                        } else if (MediaProvider.Flash == removedStream.mediaProvider) {
-                            me.flashMediaManager.stopStream(removedStream.mediaSessionId);
-                        }
+                        me.releaseMediaManagerStream(removedStream);
                     }
                 } else {
                     if (stream.published) {
@@ -1031,7 +1031,7 @@ Flashphoner.prototype = {
         var me = this;
         if (me.playStreams.get(stream.name) != null) {
             console.log("Request resume for stream " + stream.name);
-            me.webSocket.send("playStream", stream);
+            me.webSocket.send("playStream", me.playStreams.get(stream.name));
             return;
         }
         var mediaSessionId = createUUID();
@@ -1097,11 +1097,7 @@ Flashphoner.prototype = {
         var me = this;
         var removedStream = me.playStreams.remove(stream.name);
         if (removedStream) {
-            if (MediaProvider.WebRTC == removedStream.mediaProvider) {
-                me.webRtcMediaManager.close(removedStream.mediaSessionId);
-            } else if (MediaProvider.Flash == removedStream.mediaProvider) {
-                me.flashMediaManager.stopStream(removedStream.mediaSessionId);
-            }
+            me.releaseMediaManagerStream(removedStream);
             me.webSocket.send("stopStream", removedStream);
         }
     },
@@ -1111,6 +1107,19 @@ Flashphoner.prototype = {
         console.log("Pause stream " + stream.name);
         var me = this;
         me.webSocket.send("pauseStream", stream);
+    },
+
+    releaseMediaManagerStream: function (stream) {
+        var me = this;
+        if (MediaProvider.WebRTC == stream.mediaProvider && me.webRtcMediaManager) {
+            me.webRtcMediaManager.close(stream.mediaSessionId);
+        } else if (MediaProvider.Flash == stream.mediaProvider && me.flashMediaManager) {
+            if (stream.published) {
+                me.flashMediaManager.unPublishStream(stream.mediaSessionId);
+            } else {
+                me.flashMediaManager.stopStream(stream.mediaSessionId);
+            }
+        }
     },
 
     removeCandidatesFromSDP: function (sdp) {
@@ -1632,6 +1641,16 @@ WebRtcMediaConnection.prototype.waitGatheringIce = function () {
     }
 };
 
+WebRtcMediaConnection.prototype.getConstraints = function (receiveVideo) {
+    var constraints = {};
+    if (webrtcDetectedBrowser == "firefox") {
+        constraints = {offerToReceiveAudio: true, offerToReceiveVideo: receiveVideo};
+    } else {
+        constraints = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}};
+    }
+    return constraints;
+};
+
 WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, hasAudio, hasVideo, receiveVideo) {
     trace("WebRtcMediaConnection - createOffer()");
     var me = this;
@@ -1661,12 +1680,12 @@ WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, has
                     }
                     me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
                 }
-                mandatory = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}};
+                mandatory = me.getConstraints(receiveVideo);
             } else {
                 if (receiveVideo == undefined) {
                     receiveVideo = true;
                 }
-                mandatory = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}}
+                mandatory = me.getConstraints(receiveVideo);
             }
         }
         me.createOfferCallback = createOfferCallback;

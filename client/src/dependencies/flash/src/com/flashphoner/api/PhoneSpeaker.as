@@ -124,7 +124,7 @@ package com.flashphoner.api
 			if (flashAPI.configuration.flashBufferTime != null) {
 				stream.bufferTime = flashAPI.configuration.flashBufferTime;
 			} else {
-				stream.bufferTime = 0.2;
+				stream.bufferTime = 0;
 			}
 			
 			Logger.info("bufferTime "+stream.bufferTime);

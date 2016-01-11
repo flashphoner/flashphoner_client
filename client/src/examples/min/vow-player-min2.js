@@ -26,34 +26,27 @@ var wsPlayer;
 //Current stream
 var stream = {};
 
+var loadInterval;
+function loadMainThread() {
+    for (var i=0; i<=15000; i++) {
+        factorial(10000);
+    }
+    function factorial(n) {
+        return n ? n * factorial(n - 1) : 1;
+    }
+}
+
 function initOnLoad() {
     //add listeners
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
-    f.addListener(WCSEvent.OnBinaryEvent, binaryListener);
     f.init();
 
     //create player
     var canvas = document.getElementById('videoCanvas');
-    wsPlayer = new WebsocketPlayer(canvas, function(e){
-            if (e.unmute != undefined) {
-                if (this.stream.status == StreamStatus.Paused) {
-                    f.playStream(this.stream);
-                    console.log("Request stream back");
-                }
-            } else if (e.mute != undefined) {
-                if (this.stream.status == StreamStatus.Playing) {
-                    f.pauseStream(this.stream);
-                    console.log("pauseStream")
-                }
-            }
-        }.bind(this),
-        function (str) {
-            this.writeInfo(str);
-        }.bind(this)
-    );
-    wsPlayer.init(config);
+    wsPlayer = new WSPlayer(canvas);
+    wsPlayer.initLogger(3);
 
     //connect to server
     f.connect({
@@ -64,6 +57,7 @@ function initOnLoad() {
         width: config.videoWidth,
         height: config.videoHeight
     });
+    initVisibility();
 }
 
 ///////////////////////////////////////////
@@ -73,6 +67,11 @@ function connectionStatusListener(event) {
     if (event.status == ConnectionStatus.Established) {
         console.log('Connection has been established. Press Play to get stream.');
         writeInfo("CONNECTED, press play");
+        //init wsPlayer
+        config.token = f.connection.authToken;
+        config.urlWsServer = url;
+        config.receiverPath = "../../dependencies/websocket-player/WSReceiver.js";
+        wsPlayer.init(config);
     } else if (event.status == ConnectionStatus.Disconnected) {
         wsPlayer.stop();
         console.log("Disconnected");
@@ -82,10 +81,6 @@ function connectionStatusListener(event) {
         writeInfo("CONNECTION FAILED");
         f.disconnect();
     }
-}
-
-function binaryListener(event) {
-    wsPlayer.onDataReceived(event);
 }
 
 //Connection Status
@@ -99,12 +94,14 @@ function streamStatusListener(event) {
             $("#pauseButton").text("Pause");
             $("#pauseButton").prop("disabled", true);
             $("#playButton").prop("disabled", false);
+            $("#loadButton").prop("disabled", true);
             break;
         case StreamStatus.Playing:
             $("#playButton").text("Stop");
             $("#pauseButton").text("Pause");
             $("#pauseButton").prop("disabled", false);
             $("#playButton").prop("disabled", false);
+            $("#loadButton").prop("disabled", false);
             break;
         case StreamStatus.Paused:
             $("#pauseButton").text("Resume");
@@ -147,7 +144,9 @@ function playStream() {
     "m=audio 0 RTP/AVP 0\r\n" +
     "a=rtpmap:0 PCMU/8000\r\n" +
     "a=recvonly\r\n";
+    stream.mediaProvider = "WebRTC";
     this.stream = f.playStream(stream);
+    wsPlayer.play();
 }
 
 function writeInfo(str) {
@@ -155,9 +154,52 @@ function writeInfo(str) {
     div.innerHTML = div.innerHTML + str + "<BR>";
 }
 
+/////////////////////////////////////////////////////
+///////////////Page visibility///////////////////////
+/////////////////////////////////////////////////////
+
+var hidden = undefined;
+function initVisibility() {
+    var visibilityChange;
+    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+        this.hidden = "hidden";
+        visibilityChange = "visibilitychange";
+    } else if (typeof document.mozHidden !== "undefined") {
+        this.hidden = "mozHidden";
+        visibilityChange = "mozvisibilitychange";
+    } else if (typeof document.msHidden !== "undefined") {
+        this.hidden = "msHidden";
+        visibilityChange = "msvisibilitychange";
+    } else if (typeof document.webkitHidden !== "undefined") {
+        this.hidden = "webkitHidden";
+        visibilityChange = "webkitvisibilitychange";
+    }
+    if (typeof this.hidden === "undefined") {
+        console.error("Visibility API not supported, player will continue to play when in background");
+    } else {
+        document.addEventListener(visibilityChange, visibilityHandler.bind(this), false);
+    }
+}
+
+function visibilityHandler() {
+    if (document[this.hidden]) {
+        console.log("Document hidden, mute player");
+        if (wsPlayer && stream && stream.status == StreamStatus.Playing) {
+            wsPlayer.mute(true);
+        }
+    } else {
+        console.log("Document active, unmute player");
+        if (wsPlayer && stream && stream.status == StreamStatus.Playing) {
+            wsPlayer.mute(false);
+        }
+    }
+}
+
+
 $(document).ready(function () {
     $("#pauseButton").prop("disabled", true);
     $("#playButton").prop("disabled", false);
+    $("#loadButton").prop("disabled", true);
     $("#playButton").click(function () {
         var str = $("#playButton").text();
         if (str == "Play") {
@@ -176,9 +218,22 @@ $(document).ready(function () {
         if (str == "Pause") {
             $("#pauseButton").prop("disabled", true);
             wsPlayer.pause();
+            f.pauseStream(stream);
         } else if (str == "Resume") {
             $("#pauseButton").prop("disabled", true);
             wsPlayer.resume();
+            f.playStream(stream);
+        }
+    });
+
+    $("#loadButton").click(function () {
+        var str = $("#loadButton").text();
+        if (str == "Load") {
+            loadInterval = setInterval(function(){loadMainThread()}, 30000);
+            $("#loadButton").text("Unload");
+        } else if (str == "Unload") {
+            clearInterval(loadInterval);
+            $("#loadButton").text("Load");
         }
     });
 });
@@ -189,11 +244,11 @@ function setURL() {
     var url;
     var port;
     if (window.location.protocol == "http:") {
-        proto = "ws://"
-        port = "8080"
+        proto = "ws://";
+        port = "8080";
     } else {
-        proto = "wss://"
-        port = "8443"
+        proto = "wss://";
+        port = "8443";
     }
 
     url = proto + window.location.hostname + ":" + port;

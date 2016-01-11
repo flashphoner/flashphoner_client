@@ -47,11 +47,16 @@
             return document.getElementById(elementId).value;
         }
 
+        function setURL() {
+            document.getElementById("urlServer").value = "http://" + window.location.hostname +":9091/RESTCallback/sendData";
+        }
+
+
     </script>
 </head>
-<body>
+<body onload="setURL()">
        <h1>Conference Server Callback Emulator</h1>
-       <p>Server REST URL&nbsp;&nbsp;&nbsp;<input id="restUrl" size="50" type="text" value="http://192.168.1.5:9091/RESTCallback/sendData"/></p>
+       <p>Server REST URL&nbsp;&nbsp;&nbsp;<input id="restUrl" size="50" type="text" value=""/></p>
        <br/>
        <p>NodeId&nbsp;&nbsp;&nbsp;<input id="nodeId" size="50" type="text" value="nodeId"/></p>
        <p>SessionId&nbsp;&nbsp;&nbsp;<input id="sessionId" size="50" type="text" value="sessionId"/></p>
