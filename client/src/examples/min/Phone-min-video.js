@@ -60,7 +60,7 @@ function isVideoMuted() {
 
 function releaseCameraAndMicrophone(){
     trace("releaseCameraAndMicrophone");
-    f.releaseCameraAndMicrophone(event.mediaProvider);
+    f.releaseCameraAndMicrophone(MediaProvider.WebRTC);
 }
 
 
