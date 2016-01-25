@@ -2,6 +2,19 @@
 <html>
 <head>
     <title>Click-to-Call minimal using WCS JavaScript API</title>
+
+    <!--[if IE 8]>
+    <script type="text/javascript" src="../../dependencies/ie8/objectkeys.js"></script>
+    <![endif]-->
+
+    <!--[if lte IE 9]>
+    <script type="text/javascript" src="../../dependencies/ie9/web_socket.js"></script>
+    <script type="text/javascript">
+        WEB_SOCKET_SWF_LOCATION = "../../dependencies/ie9/WebSocketMain.swf";
+    </script>
+    <script type="text/javascript" src="../../dependencies/ie9/typedarray.js"></script>
+    <![endif]-->
+
     <!-- JQuery -->
     <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
@@ -20,7 +33,9 @@
 </head>
 <!-- Establish connection on page load -->
 <body onload="initAPI()">
-Call status: <div id="info"></div></br>
+Call status:
+<div id="info"></div>
+</br>
 <!-- Call to WCS2 on click by this link -->
 <a href="#" onclick="connect();return false">call</a>
 <a href="#" onclick="cancel();return false">cancel</a>

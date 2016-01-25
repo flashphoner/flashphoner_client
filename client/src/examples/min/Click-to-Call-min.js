@@ -6,7 +6,7 @@ function initAPI() {
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.RegistrationStatusEvent, registrationStatusListener);
     f.addListener(WCSEvent.CallStatusEvent, callStatusListener);
-    f.init();    
+    f.init({flashBufferTime:0.0});
 }
 
 var currentCall;
