@@ -1,6 +1,9 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
     <title>RTSP and WebRTC playback in iOS Safari browser via Websocket</title>
     <link href="style/style.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
@@ -10,26 +13,33 @@
     <script type="text/javascript" src="../../Flashphoner.js"></script>
     <script type="text/javascript" src="../../dependencies/websocket-player/websocket-player.js"></script>
     <script type="text/javascript" src="js/vow-player.js"></script>
+	<!-- Bootstrap -->
+	<script src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body onload="initOnLoad()">
-<div class="fullPlayer">
+<div class="container">
+	<div class="row">
+	<div class="fullPlayer">
 
-    <canvas id="videoCanvas" width="320" height="240"></canvas>
+		<canvas id="videoCanvas" width="320" height="240"></canvas>
 
-	<div class="powered-by">
-		Powered by Flashphoner
+		<div class="powered-by">
+			Powered by Flashphoner
+		</div>
+
+		<div class="player">
+
+			<div class="stream-name">
+				<input id="streamId" type="text" placeholder="Enter stream name"/>
+			</div>
+
+			<div class="control">
+				<button id="controlButton"></button>
+			</div>
+		</div>
 	</div>
-
-	<div class="player">
-
-		<div class="stream-name">
-			<input id="streamId" type="text" placeholder="Enter stream name"/>
-		</div>
-
-		<div class="control">
-			<button id="controlButton"></button>
-		</div>
+	<div id="infoDiv" style="visibility: hidden"></div>
 	</div>
 </div>
-<div id="infoDiv" style="visibility: hidden"></div></body>
+</body>
 </html>

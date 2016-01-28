@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <title>One to one text chat</title>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../Flashphoner.js"></script>
+    <script type="text/javascript" src="Room-text-chat.js"></script>
+    <!-- Bootstrap -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body onload="initOnLoad()">
+<div class="container">
+    <div class="row row-space">
+
+        <div class="col-md-5">
+            <h3 class="text-center">Room Text Chat</h3><br>
+            <div class="input-group">
+                <span class="input-group-addon">WCS Server URL:</span>
+                <input class="form-control" id="urlServer" type="text"/>
+            </div>
+            <br>
+            <div class="input-group">
+                <span class="input-group-addon">Nickname:</span>
+                <input class="form-control" id="login" type="text" value="Alice"/>
+            </div>
+            <br>
+            <div class="input-group">
+                <span class="input-group-addon">Room:</span>
+                <input class="form-control" id="room" type="text" value="room1"/>
+                <span class="input-group-btn">
+                        <button id="connectBtn" type="button" class="btn btn-success pull-right" onclick="connect(); return false">Connect</button>
+                        <button id="disconnectBtn" type="button" style="display: none;" class="btn btn-danger pull-right" onclick="disconnect(); return false">Disconnect</button>
+                    </span>
+            </div>
+            <br>
+            <div class="well well-sm text-center" id="connectionStatus">Not connected</div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="pull-right">
+                <div class="input-group">
+                    <span class="input-group-addon small">Chat with:</span>
+                    <input class="form-control" id="to" type="text" value="Bob"/>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="form-group">
+                <textarea id="chat" class="form-control" rows="4" disabled></textarea>
+                <!--<div class="well form-control" id="chat"></div>-->
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="form-group">
+                <textarea id="message" class="form-control" rows="1"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="pull-right">
+                <button type="button" class="btn btn-success" onclick="sendMessage(); return false;">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+</body>
+</html>

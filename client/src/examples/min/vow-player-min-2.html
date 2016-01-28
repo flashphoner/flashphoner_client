@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+
+    <title>RTSP and WebRTC playback in iOS Safari browser via Websocket - Flashphoner VoW Player minimal configuration</title>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../Flashphoner.js"></script>
+    <script type="text/javascript" src="../../dependencies/websocket-player/websocket-player.js"></script>
+    <script type="text/javascript" src="vow-player-min-2.js"></script>
+    <!-- Bootstrap -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body onload="initOnLoad()">
+    <div class="container">
+        <div class="row row-space">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-addon">WCS Server URL:</span>
+                    <input class="form-control" id="urlServer" type="text"/>
+                    <span class="input-group-btn">
+                        <button id="connectBtn" type="button" class="btn btn-success pull-right">Connect</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="col-md-6">
+                <div class="well well-sm text-center" id="connectionStatus">Not connected</div>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-addon">Stream:</span>
+                    <input class="form-control" id="streamId" type="text"/>
+                    <span class="input-group-btn">
+                        <button id="playButton" type="button" class="btn btn-success pull-right">Play</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="col-md-5">
+                <div class="text-center" id="playStatus">Not playing</div>
+            </div>
+            <div class="col-md-1">
+                <button id="pauseButton" type="button" class="btn pull-right">Pause</button>
+                <button id="resumeButton" type="button" style="display: none;" class="btn pull-right">Resume</button>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="col-md-6">
+                <canvas style="background-color: #161616;" id="videoCanvas" width="320" height="240" class="center-block"></canvas>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

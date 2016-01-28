@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <title>SIP as RTMP Broadcasting Minimal</title>
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
+    <!-- ****** -->
+    <script type="text/javascript" src="sip-as-rtmp-min-2.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
+    <script type="text/javascript">
+        var attributes = {};
+        attributes.id = "player";
+        attributes.name = "player";
+        attributes.styleclass="center-block";
+        var flashvars = {};
+        var pathToSWF = "../../dependencies/swf/player.swf";
+        var elementId = "player";
+        var params = {};
+        params.menu = "true";
+        params.swliveconnect = "true";
+        params.allowfullscreen = "true";
+        params.allowscriptaccess = "always";
+        params.bgcolor = "#777777";
+        swfobject.embedSWF(pathToSWF, elementId, "350", "400", "11.2.202", "expressInstall.swf", flashvars, params, attributes);
+    </script>
+
+</head>
+<body onload="init();">
+<div class="container">
+    <div class="row">
+        <div class="col-md-5">
+            <h3 class="text-center">SIP as RTMP Broadcasting Minimal</h3>
+            <h4 class="text-left">SIP Details</h4>
+            <input id="restUrl" class="form-control" type="text" value=""/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5">
+            <form id="ConnectionDetailsForm">
+                <div class="input-group row-space">
+                    <span class="input-group-addon middle">Login</span>
+                    <input name="sipLogin" type="text" class="form-control" placeholder="SIP Login">
+                </div>
+                <div class="input-group row-space">
+                    <span class="input-group-addon middle">Password</span>
+                    <input name="sipPassword" type="text" class="form-control" placeholder="SIP Password">
+                </div>
+                <div class="input-group row-space">
+                    <span class="input-group-addon middle">Domain</span>
+                    <input name="sipDomain" type="text" class="form-control" placeholder="SIP Domain">
+                </div>
+                <div class="input-group row-space">
+                    <span class="input-group-addon middle">Port</span>
+                    <input name="sipPort" type="text" class="form-control form-control-small" placeholder="5060">
+                </div>
+                <div class="input-group row-space">
+                    <span class="input-group-addon middle">App Key</span>
+                    <input name="appKey" type="text" class="form-control form-control-small" value="callApp">
+                </div>
+            </form>
+            <div class="input-group row-space">
+                <label class="checkbox-inline"><input onclick="setValue(this);" id="sipRegisterRequired" type="checkbox" value="false">Register Required</label>
+                <label class="checkbox-inline"><input onclick="setValue(this);" id="hasAudio" type="checkbox" value="false">hasAudio</label>
+                <label class="checkbox-inline"><input onclick="setValue(this);" id="hasVideo" type="checkbox" value="false">hasVideo</label>
+            </div>
+        </div>
+    </div>
+    <div class="row row-space">
+        <div class="col-md-5">
+            <h4 class="text-left">RTMP Target Details</h4>
+            <form id="RESTCallForm">
+                <input name="callId" type="hidden" value="">
+                <input name="rtmpUrl" class="form-control" type="text" placeholder="rtmp://localhost:1935/live"/>
+                <div class="input-group row-space">
+                    <span class="input-group-addon">Stream</span>
+                    <input name="rtmpStream" type="text" class="form-control" placeholder="stream1">
+                </div>
+                <div class="input-group row-space">
+                    <span class="input-group-addon">Start call</span>
+                    <input name="callee" type="text" class="form-control">
+                    <span class="input-group-btn">
+                        <button id="callBtn" class="btn btn-success">Call</button>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row row-space">
+        <div class="col-md-5">
+            <div class="well well-sm text-center">
+                <div id="callTrace"></div>
+                <div id="callStatus"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row row-space">
+        <div class="col-md-5">
+            <div id="player"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

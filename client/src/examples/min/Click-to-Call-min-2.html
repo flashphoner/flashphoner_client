@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+
+    <title>Click-to-Call minimal using WCS JavaScript API</title>
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
+    <!-- ****** -->
+
+    <!-- WCS JavaScript API -->
+    <script type="text/javascript" src="../../Flashphoner.js"></script>
+    <!--script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script-->
+
+    <!-- Minimum script for calls -->
+    <script type="text/javascript" src="Click-to-Call-min-2.js"></script>
+    <script type="text/javascript" src="../ConfigurationLoader.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+
+</head>
+<!-- Establish connection on page load -->
+<body onload="initAPI()">
+  <div class="container">
+      <div class="row row-space">
+          <div class="col-md-6">
+              <!-- Call to WCS2 on click by this link -->
+              <button id="callBtn" type="button" onclick="connect();return false" class="btn btn-success btn-block center-block" style="width: 50%;">Call</button>
+              <button id="hangupBtn" type="button" onclick="cancel();return false" class="btn btn-danger btn-block center-block" style="width: 50%; display: none">Hangup</button>
+              <br>
+              <div id="info" class="center-block text-center" style="width: 50%;"></div>
+              <div id="error" class="hidden" style="width: 50%;"></div>
+          </div>
+      </div>
+      <div class="row row-space">
+          <div class="col-md-6">
+              <p><h3 class="text-center">JavaScript Source Code</h3></p>
+              <p><h5 class="text-center">Edit this fields using your own values</h5></p>
+              <div class="form-group">
+                <label for="connection">Connection</label>
+                <textarea class="form-control" rows="2" id="connection"></textarea>
+              </div>
+              <div class="form-group">
+                  <label for="callee">Callee</label>
+                  <textarea class="form-control" rows="1" id="callee"></textarea>
+              </div>
+              <p>See also <a href="Click-to-Call-min-2.js">Click-to-Call-min-2.js</a></p>
+          </div>
+      </div>
+  </div>
+</body>
+</html>
