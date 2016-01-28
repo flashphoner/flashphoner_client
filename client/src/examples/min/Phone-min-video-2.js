@@ -53,7 +53,7 @@ var currentCall;
 
 //New connection
 function connect() {
-    f.connect({urlServer: field("urlServer"), appKey: 'defaultApp', sipLogin: field("sipLogin"), sipPassword: field("sipPassword"), sipDomain: field("sipDomain")});
+    f.connect({urlServer: field("urlServer"), appKey: 'defaultApp', sipLogin: field("sipLogin"), sipPassword: field("sipPassword"), sipDomain: field("sipDomain"), sipPort: field("sipPort")});
 }
 
 function disconnect() {
@@ -112,12 +112,10 @@ function connectionStatusListener(event) {
 
 //Registration Status
 function registrationStatusListener(event) {
-
     if (event.status == ConnectionStatus.Registered) {
         $("#connectBtn").removeClass("btn-success").addClass("btn-danger");
         $("#connectBtn").text("Disconnect");
     }
-
     document.getElementById("regStatus").value = event.status;
     trace(event.status);
 }
@@ -129,6 +127,7 @@ function callListener(event) {
     if (call.incoming) {
         $("#incomingCall").show();
         document.getElementById("caller").value = call.caller;
+        $("#outgoingCall").hide();
     }
 }
 
@@ -143,22 +142,24 @@ function callStatusListener(event) {
 
     if (event.status == CallStatus.ESTABLISHED) {
         trace('Call ' + event.callId + ' is established');
+        if (currentCall.incoming) {
+            $("#answerBtn").hide();
+        }
     }
 
     if (event.status == CallStatus.FINISH || event.status == CallStatus.FAILED || event.status == CallStatus.BUSY) {
         $("#incomingCall").hide();
+        $("#outgoingCall").show();
 
-        if (!event.incoming) {
-            $("#callBtn").text("Call");
-            $("#callBtn").removeClass("btn-danger").addClass("btn-success");
-        }
+        $("#callBtn").text("Call");
+        $("#callBtn").removeClass("btn-danger").addClass("btn-success");
 
         setTimeout(function() {
             var callStatus = document.getElementById("callStatus");
             callStatus.className = "hidden";
         },3000);
 
-    } else if (!event.incoming) {
+    } else {
         $("#callBtn").text("Hangup");
         $("#callBtn").removeClass("btn-success").addClass("btn-danger");
     }

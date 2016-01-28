@@ -22,7 +22,7 @@
     <![endif]-->
 
     <!-- JQuery -->
-    <script type="text/javascript" src="../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
@@ -77,6 +77,14 @@
         <div class="row row-space">
             <div class="col-md-5">
                 <div class="input-group">
+                    <span class="input-group-addon">Port:</span>
+                    <input id="sipPort" type="text" value="5060" class="form-control form-control-small"/>
+                </div>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="col-md-5">
+                <div class="input-group">
                     <span class="input-group-addon">Status</span>
                     <input id="regStatus" class="form-control" disabled value="NOT REGISTERED">
                         <span class="input-group-btn">
@@ -85,7 +93,7 @@
                 </div>
             </div>
         </div>
-        <div class="row row-space">
+        <div id="outgoingCall" class="row row-space">
             <div class="col-md-5">
                 <div class="input-group">
                     <span class="input-group-addon">Call to</span>
@@ -104,13 +112,17 @@
                     <input id="caller" type="text" class="form-control" disabled/>
                 </div>
                 <div class="row-space">
-                    <button class="btn" type="button" on onclick="mute();return false">Mute</button>
-                    <button class="btn" type="button" on onclick="unmute();return false">Unmute</button>
-                    <button type="button" class="btn btn-space btn-success pull-right" onclick="answer();return false">Answer</button>
-                    <button type="button" class="btn btn-space btn-danger pull-right" onclick="hangup();return false">Hangup</button>
+                    <button id="answerBtn" type="button" class="btn btn-success pull-right" onclick="answer();return false">Answer</button>
+                    <button id="hangupBtn" type="button" class="btn btn-space btn-danger pull-right" onclick="hangup();return false">Hangup</button>
                 </div>
                 <br><br>
                 <h4 class="text-center">You have a new call</h4>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="col-md-5">
+                <button class="btn" type="button" on onclick="mute();return false">Mute</button>
+                <button class="btn" type="button" on onclick="unmute();return false">Unmute</button>
             </div>
         </div>
     </div>
