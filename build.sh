@@ -6,6 +6,8 @@ echo "" > $BASE_DIR"/log"
 
 echo "Start clients build..."
 build_client $BASE_DIR
+build_chat $BASE_DIR
+build_player $BASE_DIR
 echo "Build clients complete"
 echo ""
     
@@ -21,6 +23,7 @@ cp client/src/dependencies/swf output/dependencies -R
 cp client/src/dependencies/ie8 output/dependencies -R
 cp client/src/dependencies/ie9 output/dependencies -R
 cp client/src/dependencies/bootstrap output/dependencies -R
+cp client/src/dependencies/player/player.swf output/dependencies/swf
 mkdir output/dependencies/flash
 cp client/src/dependencies/flash/asdoc output/dependencies/flash -R
 cp client/src/dependencies/flash/MediaManager.swf output/dependencies/flash

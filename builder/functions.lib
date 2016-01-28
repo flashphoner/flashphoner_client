@@ -1,5 +1,7 @@
 #!/bin/sh
 FLASH_CLIENT_DIR="/client/src/dependencies/flash"
+CHAT_DIR="/client/src/examples/rtmfp-streaming-client"
+PLAYER_DIR="/client/src/dependencies/player"
 
 check_root_access(){
     USERID=`id | sed -e 's/).*//; s/^.*(//;'`
@@ -91,5 +93,29 @@ build_client(){
   	    exit 0
     else
    	    echo "Build client has been created"
+    fi
+}
+
+build_chat(){
+    cd "$1$CHAT_DIR"
+    
+	BUILD_RESPONSE=$(ant 2>&1|tee -a $BASE_DIR"/log" 2>&1 | grep -i FAILED)
+	if [ -n "$BUILD_RESPONSE" ]; then
+   	    echo "Error. Build chat was not created"
+  	    exit 0
+    else
+   	    echo "Build chat has been created"
+    fi
+}
+
+build_player(){
+    cd "$1$PLAYER_DIR"
+    
+	BUILD_RESPONSE=$(ant 2>&1|tee -a $BASE_DIR"/log" 2>&1 | grep -i FAILED)
+	if [ -n "$BUILD_RESPONSE" ]; then
+   	    echo "Error. Build player was not created"
+  	    exit 0
+    else
+   	    echo "Build player has been created"
     fi
 }

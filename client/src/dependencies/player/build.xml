@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="flashphoner_player" default="linux" basedir=".">
+    <property name="PRODUCT_NAME" value="WCS"/>
+    <property name="DEPLOY_DIR" value="."/>
+    <property file="./build.properties"/>
+
+    <target name="linux" depends="clean">
+        <property name="FLEX_HOME" value="${FLEX_HOME_LINUX}"/>
+        <ant target="main"/>
+    </target>
+
+    <target name="windows" depends="clean">
+        <property name="FLEX_HOME" value="${FLEX_HOME_WINDOWS}"/>
+        <ant target="main"/>
+    </target>
+
+    <target name="main">
+        <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
+        <mxmlc output="${DEPLOY_DIR}/player.swf" file="${basedir}/src/player.mxml"
+               swf-version="${SWF_VERSION}"
+               target-player="${PLAYER_VERSION}" compatibility-version="4"
+               static-link-runtime-shared-libraries="true">
+            <source-path path-element="${basedir}/src"/>
+            <compiler.external-library-path dir="${FLEX_HOME}/frameworks/libs/player/${PLAYER_VERSION}" append="true">
+                <include name="playerglobal.swc"/>
+            </compiler.external-library-path>
+        </mxmlc>
+
+    </target>
+
+    <target name="clean">
+        <delete file="player.swf" includeEmptyDirs="true"/>
+    	<delete dir="${DEPLOY_DIR}/asdoc" includeEmptyDirs="true"/>
+    </target>
+</project>
