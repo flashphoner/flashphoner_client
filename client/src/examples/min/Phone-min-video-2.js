@@ -159,6 +159,10 @@ function callStatusListener(event) {
             callStatus.className = "hidden";
         },3000);
 
+        if (currentCall.incoming) {
+            $("#answerBtn").show();
+        }
+
     } else {
         $("#callBtn").text("Hangup");
         $("#callBtn").removeClass("btn-success").addClass("btn-danger");

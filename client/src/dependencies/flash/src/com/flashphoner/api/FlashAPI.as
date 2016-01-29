@@ -216,14 +216,20 @@ package com.flashphoner.api
 		
 		public function mute():void{
 			if (mic != null){
-				currentGain = mic.gain;
-				mic.gain = 0;
+				if (mic.gain != 0) {
+					currentGain = mic.gain;
+					mic.gain = 0;
+					Logger.info("Mute stream");
+				} else {
+					Logger.info("Stream already muted");
+				}
 			}
 		}
 		
 		public function unmute():void{
 			if (mic != null && currentGain != -1){
 				mic.gain = currentGain;
+				Logger.info("Unmute stream");
 				currentGain = -1;
 			}
 		}		
