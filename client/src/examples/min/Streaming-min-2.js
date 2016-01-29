@@ -106,6 +106,10 @@ function connectionStatusListener(event) {
         setTimeout(function() {
             $("#connectionStatusBar").hide();
         },3000);
+        $("#publishBtn").text("Start").removeClass("btn-danger").addClass("btn-success");
+        $("#playBtn").text("Start").removeClass("btn-danger").addClass("btn-success");
+        $("#publishStatusBar").hide();
+        $("#playStatusBar").hide();
     }
     $("#connectionStatus").text(event.status);
 }
