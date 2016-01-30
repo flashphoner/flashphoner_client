@@ -1,0 +1,32 @@
+<div id="outgoingCall" class="row row-space">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-6">
+        <div class="input-group">
+            <input id="callee" type="text" class="form-control" placeholder="Alice"/>
+                        <span class="input-group-btn">
+                            <button id="callBtn" type="button" class="btn btn-default pull-right">Call</button>
+                        </span>
+        </div>
+    </div>
+    <div class="col-sm-3">
+    </div>
+</div>
+
+<div id="incomingCallAlert" class="alert alert-info">
+</div>
+
+<div id="incomingCall" class="row row-space">
+    <div class="col-sm-4"></div>
+    <div class="col-sm-4">
+        <button id="answerBtn" onclick="answer();return false;" type="button" class="btn btn-default">Answer</button>
+        <button id="hangupBtn" onclick="hangup();return false;" type="button" class="btn btn-default">Hangup</button>
+    </div>
+    <div class="col-sm-4">
+    </div>
+</div>
+
+<div class="row row-space">
+    <div class="col-sm-12">
+        <span id="callStatus" class="text-muted"></span>
+    </div>
+</div>

@@ -8,3 +8,5 @@
 /.metadata
 /client/.idea
 /client/src/dependencies/flash/MediaManager.swf
+/client/src/examples/rtmfp-test-client/bin-debug
+/client/src/examples/rtmfp-streaming-client/bin-debug
