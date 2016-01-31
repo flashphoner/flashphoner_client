@@ -1,5 +1,6 @@
 $(document).ready(function() {
     $("#pauseButton").prop("disabled", true);
+
     $("#playButton").prop("disabled", false);
     $("#playButton").click(function () {
         var str = $("#playButton").text();
@@ -17,11 +18,15 @@ $(document).ready(function() {
         var str = $("#pauseButton").text();
         console.log("stream status " + stream.status);
         if (str == "Pause") {
-            $("#pauseButton").prop("disabled", true);
+            //$("#pauseButton").prop("disabled", true);
+            console.log("Pause stream");
             wsPlayer.pause();
+            $("#pauseButton").text("Resume");
         } else if (str == "Resume") {
-            $("#pauseButton").prop("disabled", true);
+            //$("#pauseButton").prop("disabled", true);
+            console.log("Resume stream");
             wsPlayer.resume();
+            $("#pauseButton").text("Pause");
         }
     });
     $("#connectBtn").click(function () {
@@ -118,18 +123,17 @@ function connectionStatusListener(event) {
     console.log(event.status);
     if (event.status == ConnectionStatus.Established) {
         console.log('Connection has been established. Press Play to get stream.');
-        $("#connectBtn").removeClass("btn-success").addClass("btn-danger");
-        $("#connectBtn").text("Disconnect");
+        $("#connectBtn").text("Disconnect").removeClass("btn-success").addClass("btn-danger");
         $("#connectionStatus").text(event.status);
     } else if (event.status == ConnectionStatus.Disconnected) {
         wsPlayer.stop();
         console.log("Disconnected");
         $("#connectionStatus").text(event.status);
-        $("#connectBtn").removeClass("btn-danger").addClass("btn-success");
-        $("#connectBtn").text("Connect");
+        $("#connectBtn").text("Connect").removeClass("btn-danger").addClass("btn-success");
+        $("#playButton").text("Play").removeClass("btn-danger").addClass("btn-success");
+        $("#playStatus").text("Not playing");
     } else if (event.status == ConnectionStatus.Failed) {
-        $("#connectBtn").removeClass("btn-danger").addClass("btn-success");
-        $("#connectBtn").text("Connect");
+        $("#connectBtn").text("Connect").removeClass("btn-danger").addClass("btn-success");
         wsPlayer.stop();
         $("#connectionStatus").text("CONNECTION FAILED");
         f.disconnect();
@@ -148,13 +152,13 @@ function streamStatusListener(event) {
         case StreamStatus.Failed:
         case StreamStatus.Stoped:
             wsPlayer.stop();
-            $("#playButton").text("Play");
+            $("#playButton").text("Play").removeClass("btn-danger").addClass("btn-success");
             $("#pauseButton").text("Pause");
             $("#pauseButton").prop("disabled", true);
             $("#playButton").prop("disabled", false);
             break;
         case StreamStatus.Playing:
-            $("#playButton").text("Stop");
+            $("#playButton").text("Stop").removeClass("btn-success").addClass("btn-danger");
             $("#pauseButton").text("Pause");
             $("#pauseButton").prop("disabled", false);
             $("#playButton").prop("disabled", false);

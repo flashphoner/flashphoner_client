@@ -58,6 +58,10 @@ This code and accompanying materials also available under LGPL and MPL license f
 				ExternalInterface.addCallback("changeRelationMyVideo",changeRelationMyVideo);
 				
 				apiNotify.notifyFlashphonerAPILoaded();
+				var checkMic:Microphone = Microphone.getMicrophone();
+				if (!checkMic.muted) {
+					openSettingsButton.visible = false;
+				}
 			}
 			
 			private function onResize(event:Event):void{
@@ -124,6 +128,14 @@ This code and accompanying materials also available under LGPL and MPL license f
 			protected function onOpenSettings(event:MouseEvent):void
 			{
 				Security.showSettings(SecurityPanel.PRIVACY);
+				var mic:Microphone = Microphone.getMicrophone();
+				mic.addEventListener(StatusEvent.STATUS, this.showSettingsButton);
+			}
+			private function showSettingsButton(event:StatusEvent):void {
+				if (event.code == "Microphone.Unmuted") {
+					openSettingsButton.visible = false;
+				}
+				
 			}
 			
 		]]>       

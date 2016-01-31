@@ -65,12 +65,12 @@ function call() {
 function connectionStatusListener(event) {
     trace("connection status: "+event.status);
     if (event.status == ConnectionStatus.Established) {
-	connected = true;
+	    connected = true;
         trace('Connection has been established. Calling');
         status("Calling");
         call();
-    } else if (event.status == ConnectionStatus.Disconnected) {
-        status("Disconnected");
+    } else {
+        status(event.status);
     }
 }
 
