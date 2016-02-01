@@ -29,11 +29,9 @@
 			private var streamName:String;
 			
 			private function init():void{
-				Logger.info("INIT");
 				if (ExternalInterface.available) {
 					try {
 						ExternalInterface.addCallback("setURLtoFlash", getDataFromJS);
-						Logger.info("Set callback function setURLtoFlash");
 					} catch (error:Error) {
 						Logger.info(error.message);
 					}
@@ -61,9 +59,7 @@
 				
 				var splittedUrl:Array = connectUrl.text.split("/");
 				streamName = splittedUrl[splittedUrl.length-1];
-				Logger.debug("Get stream from URL: "+streamName);
 				var url:String = connectUrl.text.substring(0,connectUrl.text.indexOf(splittedUrl[splittedUrl.length-1])-1);
-				Logger.debug("Get connection URL: "+url);
 				Logger.info("CONNECT: "+url);
 				nc = new NetConnection();
 				nc.client = this;
@@ -90,8 +86,6 @@
 					connect();
 				} else {
 					playStream();
-					//subscribeStream.resume();
-					//Logger.info("No stream to play");
 				}
 			}
 			
@@ -109,6 +103,7 @@
 			
 			private function stop():void{
 				Logger.info("STOP stream");
+				status.text = (status.text == "Start") ? "Stoped" : status.text;
 				if (subscribeStream != null) {
 					subscribeStream.close();
 					subscribeStream = null;
@@ -144,17 +139,21 @@
 			 **/			 
 			
 			private function handleConnectionStatus(event:NetStatusEvent):void{
-				Logger.info("handleConnectionStatus: "+event.info.code);
 				if (event.info.code != "NetConnection.Connect.Closed") {
 					parseEvent(event.info.code);
 				} 
 				if (event.info.code=="NetConnection.Connect.Success"){
 					Logger.info("Connection opened");
 					playStream();
-				} else if (event.info.code=="NetConnection.Connect.Closed"){					
+				} else if (event.info.code=="NetConnection.Connect.Closed"){		
+					Logger.info("Connection closed");
 					nc.removeEventListener(NetStatusEvent.NET_STATUS,handleConnectionStatus);
 					stop();
-					Logger.info("Connection closed");
+				} else if (event.info.code=="NetConnection.Connect.Failed") {
+					Logger.info("Connection failed");
+					playBtn.visible = true;
+					stopBtn.visible = false;
+					nc = null;
 				}
 			}
 			
@@ -184,8 +183,10 @@
 				if (status.text == "StreamNotFound" || status.text == "Failed") {
 					playBtn.visible = true;
 					stopBtn.visible = false;
-					//stop();
 					disconnect();
+				} else if (status.text == "Start") {
+					playBtn.visible = false;
+					stopBtn.visible = true;
 				}
 			}
 			

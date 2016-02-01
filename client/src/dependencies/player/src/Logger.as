@@ -2,6 +2,7 @@ package
 {
 	
 	import flash.system.Capabilities;
+	import flash.external.ExternalInterface;
 	
 	import mx.core.Application;
 	import mx.core.FlexGlobals;
@@ -50,6 +51,7 @@ package
 		
 		public static function traceLog(str:String):void{
 			//FlexGlobals.topLevelApplication.console.text = FlexGlobals.topLevelApplication.console.text + str +"\n";
+			ExternalInterface.call("console.log", str);
 		}
 
 	
