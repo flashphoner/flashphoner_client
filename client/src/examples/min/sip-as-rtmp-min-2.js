@@ -3,8 +3,10 @@ $(document).ready(function() {
             var state = $("#callBtn").text();
             if (state == "Call") {
                 startCall();
+                return false;
             } else {
                 hangup();
+                return false;
             }
         }
     );
@@ -29,16 +31,6 @@ function handleAjaxError(jqXHR, textStatus, errorThrown) {
     $("#callStatus").text("FINISHED");
     $("#callBtn").text("Call");
     $("#callBtn").removeClass("btn-danger").addClass("btn-success");
-    //if (jqXHR.responseText) {
-    //    //if (isJSON(jqXHR.responseText)) {
-    //    //    var response = JSON.parse(jqXHR.responseText);
-    //    //} else {
-    //    //
-    //    //}
-    //    $("#callStatus").text("FINISHED");
-    //    $("#callBtn").text("Call");
-    //    $("#callBtn").removeClass("btn-danger").addClass("btn-success");
-    //}
     stopCheckStatus();
 }
 
@@ -100,7 +92,7 @@ function sendDataToPlayer() {
 //Get call status by callId in GetCallStatusOrHangupForm
 function getStatus() {
     var url = document.getElementById("restUrl").value + "/getStatus";
-    var callId = { callId: $("[name=callId]").val() };
+    var callId = { callId: $('[name="callId"]').val() };
     $("#callTrace").text($('[name="callId"]').val() + " ---> " + $('[name="rtmpUrl"]').val());
     var data = JSON.stringify(callId);
     sendREST(url, data);
@@ -108,10 +100,13 @@ function getStatus() {
 
 
 //Send DTMF based on SendDTMFForm
-function sendDTMF() {
+function sendDTMF(value) {
     var url = document.getElementById("restUrl").value + "/sendDTMF";
-    var SendDTMFFormObject = $('#SendDTMFForm').serializeObject();
-    var data = JSON.stringify(SendDTMFFormObject);
+    var data = {};
+    data.callId = $("[name=callId]").val();
+    data.dtmf = value;
+    data.type = "RFC2833";
+    data = JSON.stringify(data);
     sendREST(url, data);
 }
 
