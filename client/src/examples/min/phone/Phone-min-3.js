@@ -4,12 +4,12 @@ $(document).ready(function () {
 
 // Include Filed Set HTML
 function loadCallFieldSet(){
-    $("#callFieldSet").load("../include/Call-fieldset.html",loadCallControls);
+    $("#callFieldSet").load("Call-fieldset.html",loadCallControls);
 }
 
 // Include Call Controls HTML
 function loadCallControls(){
-    $("#callControls").load("../include/Call-controls.html", page_init);
+    $("#callControls").load("Call-controls.html", page_init);
 }
 
 // Init connection and call button and bind functions
