@@ -32,14 +32,14 @@ $(document).ready(function () {
     if (f.getCookie("connection")) {
         $("#connection").val(decodeURIComponent(f.getCookie("connection")));
     } else {
-        $("#connection").text("f.connect({urlServer: \"" + setURL() + "\", appKey: \"click2call\"});");
+        $("#connection").text("f.connect({urlServer: '"+setURL()+"', appKey: 'defaultApp',sipLogin:'10000',sipPassword:'12345',sipDomain:'192.168.1.1',sipPort:5060});");
     }
 
     // Set callee field using cookies
     if (f.getCookie("callee")) {
         $("#callee").val(decodeURIComponent(f.getCookie("callee")));
     } else {
-        $("#callee").val("call.callee = \"override_by_rest\";");
+        $("#callee").val("call.callee = '10001';");
     }
 
 });
