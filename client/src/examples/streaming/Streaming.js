@@ -15,7 +15,7 @@ Streaming.prototype.connectionStatusListener = function (event) {
         $('.preload-intro').css({'display': 'none'});
         if ($('.player-communication-2').css('display') === 'none') {
             $('.connect-translation').css({'display': 'block'});
-            $('.text-previu>span').text('You have connected to Flashphoner WebRTC server. Would you like to start your stream?');
+            $('.text-previu>span').text('Connection established. Press start to begin streaming.');
         } else {
             setTimeout(function () {
                 me.playStreamButtonListener();

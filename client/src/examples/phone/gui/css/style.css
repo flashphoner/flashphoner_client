@@ -68,8 +68,7 @@ html{
 body{
 	height: 500px;
 	font-family: "Droid";
-	position: relative;
-	background:url(../img/bg.png) #fff 60% center no-repeat;}
+	position: relative;}
 .b-phone{
 	display: block;
 	left: 50px;
@@ -80,7 +79,7 @@ body{
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
-	top: 100px;
+	top: 60px;
 	-moz-user-select: -moz-none;
 	-o-user-select: none;
 	-khtml-user-select: none;

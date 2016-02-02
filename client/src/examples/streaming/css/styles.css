@@ -89,7 +89,8 @@ publish-translation/*.video {
 .videoDiv{
     width:640px;
     height:480px;
-    margin:0 auto;
+    margin-left:60px;
+    margin-top:20px;
     border: 6px solid #191919;
     border-radius: 5px;
     -webkit-border-radius: 5px;
@@ -438,15 +439,16 @@ background:url(../images/stop2.png);
     width: 28px;
 }
 .text-previu{
-	width:640px;
-	margin:5px auto;
+	width:652px;
+	margin-left: 60px;
 }
 .text-previu>span{
     display: block;
     font: 13px Verdana;
     text-align: center;
     width: 640px;
-	
+    color: #3d3d3d;
+    margin-top: -10px;
 }
 .info-previu{
     width:640px;
