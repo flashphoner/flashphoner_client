@@ -1,0 +1,25 @@
+<legend class="scheduler-border">Connection</legend>
+<form class="form-horizontal" role="form">
+    <div class="form-group">
+        <label class="control-label col-sm-3" for="urlServer">WCS URL</label>
+        <div class="col-sm-7">
+            <input class="form-control" id="urlServer" type="text"/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-sm-3" for="login">Nickname</label>
+        <div class="col-sm-7">
+            <input class="form-control" id="login" type="text" value="Alice"/>
+        </div>
+    </div>
+    <div class="form-group" id="showRoom">
+        <label class="control-label col-sm-3" for="room">Room</label>
+        <div class="col-sm-7">
+            <input class="form-control" id="room" type="text" value="room1"/>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-4 col-sm-offset-4" id="connectionStatus">Not connected</div>
+    </div>
+</form>
+<button id="connectBtn" type="button" class="btn btn-success pull-right">Connect</button>

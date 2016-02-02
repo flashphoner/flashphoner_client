@@ -1,0 +1,33 @@
+<div class="row">
+    <div class="col-sm-5 col-sm-offset-7">
+        <div class="pull-right">
+            <div class="input-group">
+                <span class="input-group-addon small">Chat with</span>
+                <input class="form-control" id="to" type="text" value="Bob"/>
+            </div>
+            <br>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <div id="chat" style="overflow-y: scroll; height: 100px;" class="text-left form-control"></div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <textarea id="message" class="form-control" rows="1"></textarea>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-5 col-sm-offset-7">
+        <div class="pull-right">
+            <button type="button" class="btn btn-success" onclick="sendMessage(); return false;">Send</button>
+        </div>
+    </div>
+</div>
