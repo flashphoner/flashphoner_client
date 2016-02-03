@@ -57,7 +57,21 @@ ConfigurationLoader.prototype = {
             trace("Can not find 'url_ws_server' in flashphoner.xml", 0);
             return;
         } else {
-            this.configuration.urlWsServer = this.getText(urlWSServer[0]);
+            var _urlWSServer = this.getText(urlWSServer[0]);
+
+            if (_urlWSServer.substring(_urlWSServer.lastIndexOf("/")+1,_urlWSServer.lastIndexOf(":")) == "") {
+                var wsProto = _urlWSServer.substring(0,_urlWSServer.lastIndexOf(":"));
+                var wsPort = _urlWSServer.substring(_urlWSServer.lastIndexOf("/")+1);
+                _urlWSServer = wsProto + window.location.hostname + wsPort;
+                console.log("Empty addr urlWsServer, set to current location.hostname : " +_urlWSServer);
+            }
+
+            if (window.location.protocol == "https:") {
+                _urlWSServer = _urlWSServer.replace("ws://","wss://").replace(":8080",":8443");
+                console.log("Secure connection, url was changed to: "+_urlWSServer);
+            }
+
+            this.configuration.urlWsServer = _urlWSServer;
         }
 
         var urlFlashServer = $(xml).find("url_flash_server");
@@ -65,7 +79,14 @@ ConfigurationLoader.prototype = {
             trace("Can not find 'url_flash_server' in flashphoner.xml", 0);
             return;
         } else {
-            this.configuration.urlFlashServer = this.getText(urlFlashServer[0]);
+           var _urlFlashServer = this.getText(urlFlashServer[0]);
+            if (_urlFlashServer.substring(_urlFlashServer.lastIndexOf("/")+1,_urlFlashServer.lastIndexOf(":")) == "") {
+                var flashProto = _urlFlashServer.substring(0,_urlFlashServer.lastIndexOf(":"));
+                var flashPort = _urlFlashServer.substring(_urlFlashServer.lastIndexOf("/")+1);
+                _urlFlashServer = flashProto + window.location.hostname + flashPort;
+                console.log("Empty addr urlFlashServer, set to current location.hostname : " +_urlFlashServer);
+            }
+            this.configuration.urlFlashServer = _urlFlashServer;
         }
 
         var sipRegisterRequired = $(xml).find("register_required");
