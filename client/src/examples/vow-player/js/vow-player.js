@@ -123,6 +123,7 @@ function playStream() {
     var stream = new Stream();
     stream.name = document.getElementById("streamId").value;
     stream.hasVideo = true;
+    stream.mediaProvider = MediaProvider.Flash;
     stream.sdp = "v=0\r\n" +
     "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
     "c=IN IP4 0.0.0.0\r\n" +

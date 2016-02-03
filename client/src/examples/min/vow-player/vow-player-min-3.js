@@ -23,9 +23,6 @@ var streamName;
 //Get API instance
 var f = Flashphoner.getInstance();
 
-//get player instance
-var wsPlayer;
-
 //Current stream
 var stream = {};
 
@@ -110,12 +107,12 @@ function initOnLoad() {
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
-    f.init();
-
-    //create player
-    var canvas = document.getElementById('videoCanvas');
-    wsPlayer = new WSPlayer(canvas);
-    wsPlayer.initLogger(3);
+    var configuration = new Configuration();
+    configuration.wsPlayerCanvas = document.getElementById('videoCanvas');
+    configuration.wsPlayerReceiverPath = "../../../dependencies/websocket-player/WSReceiver.js";
+    configuration.videoWidth = 320;
+    configuration.videoHeight = 240;
+    f.init(configuration);
     initVisibility();
 }
 
@@ -142,7 +139,7 @@ function disconnect() {
 }
 
 function playFirstSound() {
-    wsPlayer.playFirstSound();
+    f.playFirstSound();
 }
 
 function playStream() {
@@ -151,20 +148,8 @@ function playStream() {
     var stream = new Stream();
     stream.name = document.getElementById("streamId").value;
     stream.hasVideo = true;
-    stream.sdp = "v=0\r\n" +
-    "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
-    "c=IN IP4 0.0.0.0\r\n" +
-    "t=0 0\r\n" +
-    "a=sdplang:en\r\n" +
-    "m=video 0 RTP/AVP 32\r\n" +
-    "a=rtpmap:32 MPV/90000\r\n" +
-    "a=recvonly\r\n" +
-    "m=audio 0 RTP/AVP 0\r\n" +
-    "a=rtpmap:0 PCMU/8000\r\n" +
-    "a=recvonly\r\n";
-    stream.mediaProvider = "WebRTC";
+    stream.mediaProvider = MediaProvider.WSPlayer;
     this.stream = f.playStream(stream);
-    wsPlayer.play();
 }
 
 function stopStream() {
@@ -172,18 +157,12 @@ function stopStream() {
 }
 
 function pause(){
-
     disablePauseBtn();
-
-    wsPlayer.pause();
     f.pauseStream(stream);
 }
 
 function resume(){
-
     disablePauseBtn();
-
-    wsPlayer.resume();
     f.playStream(stream);
 }
 
@@ -201,19 +180,12 @@ function connectionStatusListener(event) {
     if (event.status == ConnectionStatus.Established) {
         console.log('Connection has been established. Press Play to get stream.');
         writeInfo("CONNECTED, press play");
-        //init wsPlayer
-        config.token = f.connection.authToken;
-        config.urlWsServer = $("#urlServer").val();
-        config.receiverPath = "../../../dependencies/websocket-player/WSReceiver.js";
-        wsPlayer.init(config);
         displayConnectionEstablished();
     } else if (event.status == ConnectionStatus.Disconnected) {
-        wsPlayer.stop();
         console.log("Disconnected");
         writeInfo("DISCONNECTED");
         displayConnectionDisconnected();
     } else if (event.status == ConnectionStatus.Failed) {
-        wsPlayer.stop();
         writeInfo("CONNECTION FAILED");
         f.disconnect();
         displayConnectionFailed();
@@ -228,7 +200,6 @@ function streamStatusListener(event) {
     switch (event.status) {
         case StreamStatus.Failed:
         case StreamStatus.Stoped:
-            wsPlayer.stop();
             displayStreamStopped();
             break;
         case StreamStatus.Playing:
@@ -246,7 +217,6 @@ function streamStatusListener(event) {
 //Error listener
 function errorEvent(event) {
     console.log(event.info);
-    wsPlayer.stop();
 }
 
 ///////////////////////////////////////////
@@ -397,13 +367,13 @@ function initVisibility() {
 function visibilityHandler() {
     if (document[this.hidden]) {
         console.log("Document hidden, mute player");
-        if (wsPlayer && stream && stream.status == StreamStatus.Playing) {
-            wsPlayer.mute(true);
+        if (stream && stream.status == StreamStatus.Playing) {
+            f.mute(MediaProvider.WSPlayer);
         }
     } else {
         console.log("Document active, unmute player");
-        if (wsPlayer && stream && stream.status == StreamStatus.Playing) {
-            wsPlayer.mute(false);
+        if (stream && stream.status == StreamStatus.Playing) {
+            f.unmute(MediaProvider.WSPlayer);
         }
     }
 }

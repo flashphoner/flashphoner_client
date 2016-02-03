@@ -9,6 +9,7 @@ function Flashphoner() {
     this.webRtcMediaManager = undefined;
     this.webRtcCallSessionId = undefined;
     this.flashMediaManager = undefined;
+    this.wsPlayerMediaManager = undefined;
     this.connection = null;
     this.configuration = new Configuration();
     this.calls = new DataMap();
@@ -83,6 +84,19 @@ Flashphoner.prototype = {
     initFlashMediaManager: function () {
         if (isFlashphonerAPILoaded && this.userData) {
             this.flashMediaManager.connect(this.configuration.urlFlashServer, this.userData, this.configuration);
+        }
+    },
+
+    initWSPlayerMediaManager: function () {
+        if (this.userData && this.wsPlayerMediaManager) {
+            var config = {};
+            config.token = this.userData.authToken;
+            config.urlWsServer = this.connection.urlServer;
+            config.receiverPath = this.configuration.wsPlayerReceiverPath;
+            config.videoWidth = this.configuration.videoWidth;
+            config.videoHeight = this.configuration.videoHeight;
+            this.wsPlayerMediaManager.initLogger(0);
+            this.wsPlayerMediaManager.init(config);
         }
     },
 
@@ -256,6 +270,10 @@ Flashphoner.prototype = {
         if (me.configuration.elementIdForSWF && me.configuration.pathToSWF) {
             me.initFlash(me.configuration.elementIdForSWF, me.configuration.pathToSWF);
         }
+        if (me.configuration.wsPlayerCanvas) {
+            me.wsPlayerMediaManager = new WSPlayer(me.configuration.wsPlayerCanvas);
+            me.mediaProviders.add(MediaProvider.WSPlayer, me.wsPlayerMediaManager);
+        }
 
         if (me.configuration.localMediaElementId) {
             try {
@@ -274,6 +292,9 @@ Flashphoner.prototype = {
                 me.userData = userData;
                 if (me.flashMediaManager) {
                     me.initFlashMediaManager();
+                }
+                if (me.wsPlayerMediaManager) {
+                    me.initWSPlayerMediaManager();
                 }
                 for (var prop in userData) {
                     me.connection[prop] = me.userData[prop];
@@ -942,6 +963,13 @@ Flashphoner.prototype = {
         this.mediaProviders.get(mediaProvider).unmute();
     },
 
+    //works only for WSPlayer
+    playFirstSound: function () {
+        if (this.wsPlayerMediaManager) {
+            this.wsPlayerMediaManager.playFirstSound();
+        }
+    },
+
     sendMessage: function (message) {
         var id = createUUID();
         message.id = id;
@@ -1029,9 +1057,13 @@ Flashphoner.prototype = {
 
     playStream: function (stream) {
         var me = this;
-        if (me.playStreams.get(stream.name) != null) {
+        var streamObj = me.playStreams.get(stream.name);
+        if (streamObj) {
             console.log("Request resume for stream " + stream.name);
-            me.webSocket.send("playStream", me.playStreams.get(stream.name));
+            if (streamObj.mediaProvider == MediaProvider.WSPlayer) {
+                me.wsPlayerMediaManager.resume();
+            }
+            me.webSocket.send("playStream", streamObj);
             return;
         }
         var mediaSessionId = createUUID();
@@ -1045,7 +1077,7 @@ Flashphoner.prototype = {
         }
 
 
-        if (MediaProvider.WebRTC == stream.mediaProvider && !stream.sdp) {
+        if (MediaProvider.WebRTC == stream.mediaProvider) {
 
             me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, stream.remoteMediaElementId || me.configuration.remoteMediaElementId));
 
@@ -1065,6 +1097,7 @@ Flashphoner.prototype = {
 
                 me.playStreams.add(stream.name, stream);
             }, false, false, stream.hasVideo);
+            //!stream.sdp is for wsPlayer backward compatibility
         } else if (MediaProvider.Flash == stream.mediaProvider && !stream.sdp){
             //todo add pcma/pcmu
             stream.sdp = "v=0\r\n" +
@@ -1084,6 +1117,21 @@ Flashphoner.prototype = {
             me.webSocket.send("playStream", stream);
             me.playStreams.add(stream.name, stream);
             me.flashMediaManager.playStream(stream.mediaSessionId);
+        } else if (MediaProvider.WSPlayer == stream.mediaProvider) {
+            stream.sdp = "v=0\r\n" +
+                "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
+                "c=IN IP4 0.0.0.0\r\n" +
+                "t=0 0\r\n" +
+                "a=sdplang:en\r\n" +
+                "m=video 0 RTP/AVP 32\r\n" +
+                "a=rtpmap:32 MPV/90000\r\n" +
+                "a=recvonly\r\n" +
+                "m=audio 0 RTP/AVP 0\r\n" +
+                "a=rtpmap:0 PCMU/8000\r\n" +
+                "a=recvonly\r\n";
+            me.webSocket.send("playStream", stream);
+            me.playStreams.add(stream.name, stream);
+            me.wsPlayerMediaManager.play();
         } else {
             console.log("playStream name " + stream.name);
             me.webSocket.send("playStream", stream);
@@ -1105,8 +1153,10 @@ Flashphoner.prototype = {
     //Works only with websocket streams
     pauseStream: function (stream) {
         console.log("Pause stream " + stream.name);
-        var me = this;
-        me.webSocket.send("pauseStream", stream);
+        if (MediaProvider.WSPlayer == stream.mediaProvider && this.wsPlayerMediaManager) {
+            this.wsPlayerMediaManager.pause();
+        }
+        this.webSocket.send("pauseStream", stream);
     },
 
     releaseMediaManagerStream: function (stream) {
@@ -1119,6 +1169,8 @@ Flashphoner.prototype = {
             } else {
                 me.flashMediaManager.stopStream(stream.mediaSessionId);
             }
+        } else if (MediaProvider.WSPlayer == stream.mediaProvider && me.wsPlayerMediaManager) {
+            me.wsPlayerMediaManager.stop();
         }
     },
 
@@ -2003,6 +2055,9 @@ Configuration = function () {
     this.sipRegisterRequired = true;
     this.sipContactParams = null;
 
+    this.wsPlayerCanvas = null;
+    this.wsPlayerReceiverPath = null;
+
     this.videoWidth = 640;
     this.videoHeight = 480;
     this.forceResolution = false;
@@ -2066,6 +2121,7 @@ MediaProvider = function () {
 };
 MediaProvider.WebRTC = "WebRTC";
 MediaProvider.Flash = "Flash";
+MediaProvider.WSPlayer = "WSPlayer";
 
 var CallStatus = function () {
 };
