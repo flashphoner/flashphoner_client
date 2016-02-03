@@ -1,12 +1,19 @@
 //Init WCS JavaScript API
 var f = Flashphoner.getInstance();
+var mediaProvider;
+var record = false;
+var target;
 
 //////////////////////////////////
 /////////////// Init /////////////
 
 $(document).ready(function () {
-    init_page();
+    loadFieldSet();
 });
+
+function loadFieldSet() {
+    $("#fieldset").load("Streaming-fieldset.html", init_page);
+}
 
 // Save connection and callee info in cookies
 function setCookies() {
@@ -19,7 +26,7 @@ function getCookies(){
     if (f.getCookie("urlServer")) {
         $("#urlServer").val(decodeURIComponent(f.getCookie("urlServer")));
     } else {
-        $("#urlServer").text(setURL());
+        $("#urlServer").val(setURL());
     }
 
     if (f.getCookie("publishStream")) {
@@ -32,6 +39,8 @@ function getCookies(){
 }
 
 function init_page() {
+
+    $("#downloadDiv").hide();
     $("#connectBtn").click(function () {
             var state = $("#connectBtn").text();
             if (state == "Connect") {
@@ -59,12 +68,18 @@ function init_page() {
             }
         }
     );
+    if (target == "Stream-record-min.html") {
+        $("#publishLabel").text("Record");
+        $("#playDiv").hide();
+        record = true;
+    }
 
     getCookies();
 
 };
 
 function initAPI() {
+    target = location.pathname.substring(location.pathname.lastIndexOf("/") + 1);
 
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
@@ -77,7 +92,12 @@ function initAPI() {
     f.init(configuration);
 
     if (webrtcDetectedBrowser) {
-        document.getElementById('remoteVideo').style.visibility = "visible";
+        if (target == "Stream-record-min.html") {
+            document.getElementById('remoteVideo').style.visibility = "hidden";
+            $("#localVideo").attr('width','320').attr('height','240').removeClass('fp-localVideo').addClass('fp-remoteVideo');
+        } else {
+            document.getElementById('remoteVideo').style.visibility = "visible";
+        }
         document.getElementById('flashVideoWrapper').style.visibility = "hidden";
         document.getElementById('flashVideoDiv').style.visibility = "hidden";
     } else {
@@ -104,8 +124,9 @@ function disconnect() {
 
 //Publish stream
 function publishStream(){
+    $("#downloadDiv").hide();
     var streamName = field("publishStream");
-    f.publishStream({name:streamName, record:true});
+    f.publishStream({name:streamName, record: record});
     setCookies();
 }
 
@@ -138,9 +159,12 @@ function connectionStatusListener(event) {
     if (event.status == ConnectionStatus.Established){
         trace('Connection has been established. You can start a new call.');
         $("#connectBtn").text("Disconnect");
+        mediaProvider = event.mediaProviders;
     } else {
         $("#publishBtn").text("Start");
         $("#playBtn").text("Start");
+        $("#publishStatus").text("");
+        $("#playStatus").text("");
     }
     setConnectionStatus(event.status);
 }
@@ -156,6 +180,9 @@ function streamStatusListener(event) {
         case StreamStatus.Unpublished:
             setPublishStatus(event.status);
             $("#publishBtn").text("Start");
+            if (record) {
+                showDownloadLink(event.mediaSessionId);
+            }
             break;
         case StreamStatus.Playing:
             setPlaybackStatus(event.status);
@@ -185,6 +212,17 @@ function errorEvent(event) {
 /////////////////////////////////////
 ///////////// Display UI ////////////
 /////////////////////////////////////
+
+// Show link to download recorded stream
+
+function showDownloadLink(mediaSessionId) {
+    var extension = (mediaProvider == "WebRTC") ? 'webm' : 'mp4';
+    // Set correct path for records. Stream records are saved to WCS_HOME/records directory.
+    // http://flashphoner.com/docs/wcs4/wcs_docs/html/en/wcs-developer-guide/quick_start_recording_streams.htm
+    var link = 'records/' + mediaSessionId + '.' + extension;
+    $("#link").attr('href','records/' + mediaSessionId + '.' + extension);
+    $("#downloadDiv").show();
+}
 
 // Set Connection Status
 function setConnectionStatus(status) {
