@@ -1,22 +1,35 @@
+//Init WCS JavaScript API
+var f = Flashphoner.getInstance();
+
+//////////////////////////////////
+/////////////// Init /////////////
+
 $(document).ready(function () {
-    loadConnectFieldSet();
+    init_page();
 });
 
-// Include Filed Set HTML
-function loadConnectFieldSet(){
-    $("#connectFieldSet").load("Connect-fieldset.html",loadPublishFieldSet);
+// Save connection and callee info in cookies
+function setCookies() {
+    f.setCookie("urlServer", $("#urlServer").val());
+    f.setCookie("publishStream", $("#publishStream").val());
+    f.setCookie("playStream", $("#playStream").val());
 }
 
-function loadPublishFieldSet(){
-    $("#publishFieldSet").load("Publish-fieldset.html",loadPlaybackFieldSet);
+function getCookies(){
+    if (f.getCookie("urlServer")) {
+        $("#urlServer").val(decodeURIComponent(f.getCookie("urlServer")));
+    } else {
+        $("#urlServer").text(setURL());
+    }
+
+    if (f.getCookie("publishStream")) {
+        $("#publishStream").val(decodeURIComponent(f.getCookie("publishStream")));
+    }
+
+    if (f.getCookie("playStream")) {
+        $("#playStream").val(decodeURIComponent(f.getCookie("playStream")));
+    }
 }
-
-// Include Call Controls HTML
-function loadPlaybackFieldSet(){
-    $("#playbackFieldSet").load("Playback-fieldset.html", init_page);
-}
-
-
 
 function init_page() {
     $("#connectBtn").click(function () {
@@ -47,11 +60,9 @@ function init_page() {
         }
     );
 
-    setURL();
-};
+    getCookies();
 
-//Init WCS JavaScript API
-var f = Flashphoner.getInstance();
+};
 
 function initAPI() {
 
@@ -75,21 +86,27 @@ function initAPI() {
     }
 }
 
+///////////////////////////////////
+///////////// Controls ////////////
+///////////////////////////////////
+
 //New connection
 function connect(){
     f.connect({urlServer:field("urlServer"), appKey:'defaultApp'});
+    setCookies();
 }
 
 //Disconnect
 function disconnect() {
     f.disconnect();
-    $("#connectBtn").text("Connect").removeClass("btn-danger").addClass("btn-success");
+    $("#connectBtn").text("Connect");
 }
 
 //Publish stream
 function publishStream(){
     var streamName = field("publishStream");
     f.publishStream({name:streamName, record:true});
+    setCookies();
 }
 
 //Stop stream publishing
@@ -102,6 +119,7 @@ function unPublishStream(){
 function playStream(){
     var streamName = field("playStream");
     f.playStream({name:streamName});
+    setCookies();
 }
 
 //Stop stream playback
@@ -110,15 +128,19 @@ function stopStream(){
     f.stopStream({name:streamName});
 }
 
+///////////////////////////////////
+///////////// Listeners ////////////
+///////////////////////////////////
+
 //Connection Status
 function connectionStatusListener(event) {
     trace(event.status);
     if (event.status == ConnectionStatus.Established){
         trace('Connection has been established. You can start a new call.');
-        $("#connectBtn").text("Disconnect").removeClass("btn-success").addClass("btn-danger");
+        $("#connectBtn").text("Disconnect");
     } else {
-        $("#publishBtn").text("Start").removeClass("btn-danger").addClass("btn-success");
-        $("#playBtn").text("Start").removeClass("btn-danger").addClass("btn-success");
+        $("#publishBtn").text("Start");
+        $("#playBtn").text("Start");
     }
     setConnectionStatus(event.status);
 }
@@ -129,48 +151,104 @@ function streamStatusListener(event) {
     switch (event.status) {
         case StreamStatus.Publishing:
             setPublishStatus(event.status);
-            $("#publishBtn").text("Stop").removeClass("btn-success").addClass("btn-danger");
+            $("#publishBtn").text("Stop");
             break;
         case StreamStatus.Unpublished:
             setPublishStatus(event.status);
-            $("#publishBtn").text("Start").removeClass("btn-danger").addClass("btn-success");
+            $("#publishBtn").text("Start");
             break;
         case StreamStatus.Playing:
             setPlaybackStatus(event.status);
-            $("#playBtn").text("Stop").removeClass("btn-success").addClass("btn-danger");
+            $("#playBtn").text("Stop");
             break;
         case StreamStatus.Stoped:
         case StreamStatus.Paused:
             setPlaybackStatus(event.status);
-            $("#playBtn").text("Start").removeClass("btn-danger").addClass("btn-success");
+            $("#playBtn").text("Start");
             break;
         case StreamStatus.Failed:
             setPublishStatus(event.status);
             setPlaybackStatus(event.status);
-            $("#playBtn").text("Start").removeClass("btn-danger").addClass("btn-success");
-            $("#publishBtn").text("Start").removeClass("btn-danger").addClass("btn-success");
+            $("#playBtn").text("Start");
+            $("#publishBtn").text("Start");
             break;
         default:
             break;
     }
 }
 
-function setPublishStatus(status) {
-    $("#publishStatus").text(status);
-}
-
-function setPlaybackStatus(status) {
-    $("#playStatus").text(status);
-}
-
-function setConnectionStatus(status) {
-    $("#connectionStatus").text(status);
-}
-
 //Error
 function errorEvent(event) {
     trace(event.info);
 }
+
+/////////////////////////////////////
+///////////// Display UI ////////////
+/////////////////////////////////////
+
+// Set Connection Status
+function setConnectionStatus(status) {
+
+    $("#connectionStatus").text(status);
+    $("#connectionStatus").className='';
+
+    if (status == "ESTABLISHED") {
+        $("#connectionStatus").attr("class","text-success");
+    }
+
+    if (status == "DISCONNECTED") {
+        $("#connectionStatus").attr("class","text-muted");
+    }
+
+    if (status == "FAILED") {
+        $("#connectionStatus").attr("class","text-danger");
+    }
+}
+
+// Set Stream Status
+function setPublishStatus(status) {
+
+    $("#publishStatus").text(status);
+    $("#publishStatus").className='';
+
+    if (status == "PUBLISHING") {
+        $("#publishStatus").attr("class","text-success");
+    }
+
+    if (status == "UNPUBLISHED") {
+        $("#publishStatus").attr("class","text-muted");
+    }
+
+    if (status == "FAILED") {
+        $("#publishStatus").attr("class","text-danger");
+    }
+
+}
+
+// Set Stream Status
+function setPlaybackStatus(status) {
+
+    $("#playStatus").text(status);
+    $("#playStatus").className='';
+
+    if (status == "PLAYING") {
+        $("#playStatus").attr("class","text-success");
+    }
+
+    if (status == "STOPPED") {
+        $("#playStatus").attr("class","text-muted");
+    }
+
+    if (status == "FAILED") {
+        $("#playStatus").attr("class","text-danger");
+    }
+}
+
+
+///////////////////////////////////
+///////////// Utils ////////////
+///////////////////////////////////
+
 
 //Trace
 function trace(str){
@@ -197,6 +275,5 @@ function setURL() {
     }
 
     url = proto + window.location.hostname + ":" + port;
-    document.getElementById("urlServer").value = url;
+    return url;
 }
-
