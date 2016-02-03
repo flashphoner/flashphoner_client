@@ -9,13 +9,16 @@ function loadChatFieldSet(){
 
 // Include Chat Controls HTML
 function loadCallControls(){
-    if (!$("#roomChat").length) {
-        $("#showRoom").hide();
-    }
     $("#chatControls").load("include/Chat-controls.html", initOnLoad);
 }
 
 function initOnLoad() {
+    if (!$("#roomChat").length) {
+        $("#showRoom").hide();
+    } else {
+        $("#showTo").hide();
+    }
+
     $("#connectBtn").click(function () {
             if ($(this).text() == "Connect") {
                 connect();
