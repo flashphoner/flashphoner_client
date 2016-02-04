@@ -103,7 +103,7 @@
 			
 			private function stop():void{
 				Logger.info("STOP stream");
-				status.text = (status.text == "Start") ? "Stoped" : status.text;
+				status.text = (status.text == "Started") ? "Stopped" : status.text;
 				if (subscribeStream != null) {
 					subscribeStream.close();
 					subscribeStream = null;
@@ -200,7 +200,11 @@
 			
 			private function parseEvent(event:String):void {
 				var splittedEvent:Array = event.split(".");
-				status.text = splittedEvent[2];
+				if (splittedEvent[2] == 'Start') {
+					status.text = 'Started';
+				} else {
+					status.text = splittedEvent[2];
+				}
 			}
 			
 			/**
