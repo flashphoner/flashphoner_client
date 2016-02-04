@@ -28,6 +28,10 @@ function init_page() {
             }
         }
     );
+    $("#showDialpad").click(function () {
+            $("#showDialpad").text(($(this).text() == "Show dialpad") ? "Hide dialpad" : "Show dialpad");
+        }
+    );
     // Set fields using cookies
     $("#sipLogin").val(getCookie("sipLogin"));
     $("#sipPassword").val(getCookie("sipPassword"));
@@ -207,7 +211,11 @@ $.fn.serializeObject = function()
 };
 
 function setURL() {
-    $("#restUrl").val("http://" + window.location.hostname +":9091/RESTCall");
+    if (window.location.protocol == "http:") {
+        $("#restUrl").val("http://" + window.location.hostname + ":9091/RESTCall");
+    } else {
+        $("#restUrl").val("https://" + window.location.hostname + ":8888/RESTCall");
+    }
 }
 
 function getRandomInt(min, max) {
@@ -254,10 +262,12 @@ function field(name) {
 }
 
 function setCookie(c_name, value) {
+    console.log("set cookie: "+c_name+" value "+value);
     var exdate = new Date();
     exdate.setDate(exdate.getDate() + 100);
-    var c_value = escape(value) + "; expires=" + exdate.toUTCString();
+    var c_value = encodeURI(value) + "; expires=" + exdate.toUTCString();
     document.cookie = c_name + "=" + c_value;
+    console.log(document.cookie);
     return value;
 }
 
