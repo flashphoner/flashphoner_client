@@ -84,6 +84,7 @@
 			private function play():void{
 				if (nc == null) {
 					connect();
+					status.text = "";
 				} else {
 					playStream();
 				}
