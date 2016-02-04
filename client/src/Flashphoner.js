@@ -95,6 +95,7 @@ Flashphoner.prototype = {
             config.receiverPath = this.configuration.wsPlayerReceiverPath;
             config.videoWidth = this.configuration.videoWidth;
             config.videoHeight = this.configuration.videoHeight;
+            config.startWithVideoOnly = this.configuration.wsPlayerStartWithVideoOnly;
             this.wsPlayerMediaManager.initLogger(0);
             this.wsPlayerMediaManager.init(config);
         }
@@ -2057,6 +2058,7 @@ Configuration = function () {
 
     this.wsPlayerCanvas = null;
     this.wsPlayerReceiverPath = null;
+    this.wsPlayerStartWithVideoOnly = false;
 
     this.videoWidth = 640;
     this.videoHeight = 480;
