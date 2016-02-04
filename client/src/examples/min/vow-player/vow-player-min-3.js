@@ -285,7 +285,6 @@ function displayConnectionFailed(){
 function displayConnectionEstablished(){
     // Display ESTABLISHED state
     enablePlayBtn();
-    enablePauseBtn();
     enableConnBtn();
     $("#connectBtn").text("Disconnect");
 }
