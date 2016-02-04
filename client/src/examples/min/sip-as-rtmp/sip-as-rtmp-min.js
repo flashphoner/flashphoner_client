@@ -105,6 +105,9 @@ function isJSON(str) {
 
 //Start a new call based on call details and connection details in the RESTCallForm and ConnectionDetailsForm
 function startCall() {
+    $("#callTrace").text("");
+    $("#callStatus").text("");
+
     var url = field("restUrl") + "/call";
     callId = generateCallID();
 
