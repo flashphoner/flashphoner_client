@@ -270,6 +270,7 @@ function displayConnectionDisconnected(){
     enableConnBtn();
     disablePauseBtn();
     disablePlayBtn();
+    setStreamStatus("");
     $("#pauseBtn").text("Pause");
     $("#playBtn").text("Play");
     $("#connectBtn").text("Connect");
@@ -285,7 +286,6 @@ function displayConnectionFailed(){
 function displayConnectionEstablished(){
     // Display ESTABLISHED state
     enablePlayBtn();
-    enablePauseBtn();
     enableConnBtn();
     $("#connectBtn").text("Disconnect");
 }
