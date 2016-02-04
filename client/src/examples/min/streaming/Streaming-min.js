@@ -194,10 +194,13 @@ function streamStatusListener(event) {
             $("#playBtn").text("Start");
             break;
         case StreamStatus.Failed:
-            setPublishStatus(event.status);
-            setPlaybackStatus(event.status);
-            $("#playBtn").text("Start");
-            $("#publishBtn").text("Start");
+            if (event.published) {
+                setPublishStatus(event.status);
+                $("#publishBtn").text("Start");
+            } else {
+                setPlaybackStatus(event.status);
+                $("#playBtn").text("Start");
+            }
             break;
         default:
             break;
