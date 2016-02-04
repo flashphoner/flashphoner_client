@@ -222,8 +222,8 @@ function showDownloadLink(mediaSessionId) {
     var extension = (mediaProvider == "WebRTC") ? 'webm' : 'mp4';
     // Set correct path for records. Stream records are saved to WCS_HOME/records directory.
     // http://flashphoner.com/docs/wcs4/wcs_docs/html/en/wcs-developer-guide/quick_start_recording_streams.htm
-    var link = 'records/' + mediaSessionId + '.' + extension;
-    $("#link").attr('href','records/' + mediaSessionId + '.' + extension);
+    var link = window.location.protocol + "//" + window.location.host + '/client/records/' + mediaSessionId + '.' + extension;
+    $("#link").attr("href",link);
     $("#downloadDiv").show();
 }
 
