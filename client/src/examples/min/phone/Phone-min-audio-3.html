@@ -48,7 +48,10 @@
             f.addListener(WCSEvent.RegistrationStatusEvent, registrationStatusListener);
             f.addListener(WCSEvent.CallStatusEvent, callStatusListener);
             f.addListener(WCSEvent.OnCallEvent, callListener, this);
-            f.init({flashBufferTime: 0.0});
+            var configuration = new Configuration();
+            configuration.pathToSWF = "../../../dependencies/flash/MediaManager.swf";
+            configuration.flashBufferTime = 0.0;
+            f.init(configuration);
         }
 
         //New audio call

@@ -49,6 +49,8 @@ package com.flashphoner.api
 		public var videoControl:VideoControl;
 		
 		private var mic:Microphone;
+
+		private var micIndex:int = -1;
 		
 		private var userData:Object;
 		
@@ -285,10 +287,11 @@ package com.flashphoner.api
 		 * Check access to the devices (mic,camera)
 		 **/
 		public function hasAccessToAudio():Boolean{
-			if (mic == null){
+			var m:Microphone = Microphone.getMicrophone(micIndex);
+			if (m == null){
 				return false;
 			}else{
-				if (mic.muted){
+				if (m.muted){
 					return false;
 				}else{
 					return true;
@@ -312,18 +315,21 @@ package com.flashphoner.api
 			videoControl.changeCamera(Camera.getCamera(name));
 		}
 		
-		private function defineMicrophone(useEnhanced:Boolean, index:int=-1):Microphone {
+		private function  defineMicrophone(useEnhanced:Boolean, index:int=-1):Microphone {
 			Logger.info("getMicrophone "+index);
 			if (useEnhanced){				
 				if (getFlashPlayerMajorVersion() >= 11 || Capabilities.language.indexOf("en") >= 0){
+					this.micIndex = index;
 					return Microphone.getEnhancedMicrophone(index);				
 				}else{					
 					for each (var apiNotify:APINotify in FlashAPI.apiNotifys){
 						apiNotify.addLogMessage("WARNING!!! Echo cancellation is turned off on your side (because your OS has no-english localization). Please use a headset to avoid echo for your interlocutor.");
 					}
+					this.micIndex = index;
 					return Microphone.getMicrophone(index);
 				}
 			}else{
+				this.micIndex = index;
 				return Microphone.getMicrophone(index);
 			}
 		}	
