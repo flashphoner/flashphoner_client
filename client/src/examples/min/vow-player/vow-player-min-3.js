@@ -54,6 +54,8 @@ $(document).ready(function () {
         if (str == "Play") {
             if ($("#streamId").val()) {
                 disablePlayBtn();
+                //play a sound to enable mobile loudspeakers
+                playFirstSound();
                 playStream();
             }
         } else if (str == "Stop") {
@@ -69,6 +71,10 @@ $(document).ready(function () {
         } else if (str == "Resume") {
             resume();
         }
+    });
+
+    $("#soundBtn").click(function () {
+        playFirstSound();
     });
 
     $("#infoDiv").hide();
@@ -114,6 +120,10 @@ function initOnLoad() {
     configuration.videoHeight = 240;
     f.init(configuration);
     initVisibility();
+
+    if (urlParams.streamName) {
+        connect();
+    }
 }
 
 /////////////////////////////////////////////////////
@@ -121,10 +131,11 @@ function initOnLoad() {
 /////////////////////////////////////////////////////
 
 // Connect signaling part
-function connect() {
+function connect(url) {
+    var urlServer = url || $("#urlServer").val();
     //connect to server
     f.connect({
-        urlServer: $("#urlServer").val(),
+        urlServer: urlServer,
         appKey: "defaultApp",
         useWsTunnel: true,
         useBase64BinaryEncoding: false,
@@ -140,13 +151,12 @@ function disconnect() {
 
 function playFirstSound() {
     f.playFirstSound();
+    $("#soundBtn").remove();
 }
 
-function playStream() {
-    //play a sound to enable mobile loudspeakers
-    playFirstSound();
+function playStream(streamName) {
     var stream = new Stream();
-    stream.name = document.getElementById("streamId").value;
+    stream.name = streamName || document.getElementById("streamId").value;
     stream.hasVideo = true;
     stream.mediaProvider = MediaProvider.WSPlayer;
     this.stream = f.playStream(stream);
@@ -181,6 +191,9 @@ function connectionStatusListener(event) {
         console.log('Connection has been established. Press Play to get stream.');
         writeInfo("CONNECTED, press play");
         displayConnectionEstablished();
+        if (urlParams.streamName) {
+            playStream(urlParams.streamName);
+        }
     } else if (event.status == ConnectionStatus.Disconnected) {
         console.log("Disconnected");
         writeInfo("DISCONNECTED");
@@ -377,3 +390,16 @@ function visibilityHandler() {
         }
     }
 }
+
+var urlParams;
+(window.onpopstate = function () {
+    var match,
+        pl     = /\+/g,  // Regex for replacing addition symbol with a space
+        search = /([^&=]+)=?([^&]*)/g,
+        decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+        query  = window.location.search.substring(1);
+
+    urlParams = {};
+    while (match = search.exec(query))
+        urlParams[decode(match[1])] = decode(match[2]);
+})();
