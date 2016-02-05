@@ -58,7 +58,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 				ExternalInterface.addCallback("changeRelationMyVideo",changeRelationMyVideo);
 				
 				apiNotify.notifyFlashphonerAPILoaded();
-				var checkMic:Microphone = Microphone.getMicrophone();
+				var checkMic:Microphone = Microphone.getMicrophone(flashAPI.getMicIndex());
 				if (!checkMic.muted) {
 					openSettingsButton.visible = false;
 				}
@@ -85,7 +85,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			}
 			
 			public function getAccessToAudio():Boolean {
-				var mic:Microphone = flashAPI.getMicrophone();
+				var mic:Microphone = Microphone.getMicrophone(flashAPI.getMicIndex());
 				if (mic == null){
 					return false;
 				}
@@ -111,7 +111,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			private function timerTick(event:TimerEvent):void{
 				if (flashAPI.hasAccessToAudio()){
 					timer.stop();
-					var mic:Microphone = flashAPI.getMicrophone();
+					var mic:Microphone = Microphone.getMicrophone(flashAPI.getMicIndex());
 					mic.setLoopBack(false);
 					openSettingsButton.visible = false;
 				}
