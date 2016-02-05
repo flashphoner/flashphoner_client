@@ -118,6 +118,9 @@ function initOnLoad() {
     configuration.wsPlayerReceiverPath = "../../../dependencies/websocket-player/WSReceiver.js";
     configuration.videoWidth = 320;
     configuration.videoHeight = 240;
+    if (urlParams.streamName) {
+        configuration.wsPlayerStartWithVideoOnly = true;
+    }
     f.init(configuration);
     initVisibility();
 
