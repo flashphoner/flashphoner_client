@@ -262,6 +262,11 @@ package com.flashphoner.api
 		public function getMicrophone():Microphone{
 			return mic;
 		}
+
+		public function getMicIndex():int{
+			return micIndex;
+		}
+
 		/**
 		 * Set current microphone
 		 * @param name name of microphone
