@@ -1,6 +1,7 @@
 #!/bin/sh
 FLASH_CLIENT_DIR="/client/src/dependencies/flash"
-CHAT_DIR="/client/src/examples/rtmfp-streaming-client"
+FLASH_CHAT_DIR="/client/src/examples/rtmfp-client/chat"
+FLASH_STREAMING_DIR="/client/src/examples/rtmfp-client/streaming"
 PLAYER_DIR="/client/src/dependencies/player"
 
 check_root_access(){
@@ -97,7 +98,7 @@ build_client(){
 }
 
 build_chat(){
-    cd "$1$CHAT_DIR"
+    cd "$1$FLASH_CHAT_DIR"
     
 	BUILD_RESPONSE=$(ant 2>&1|tee -a $BASE_DIR"/log" 2>&1 | grep -i FAILED)
 	if [ -n "$BUILD_RESPONSE" ]; then
@@ -105,6 +106,18 @@ build_chat(){
   	    exit 0
     else
    	    echo "Build chat has been created"
+    fi
+}
+
+build_streaming(){
+    cd "$1$FLASH_STREAMING_DIR"
+    
+	BUILD_RESPONSE=$(ant 2>&1|tee -a $BASE_DIR"/log" 2>&1 | grep -i FAILED)
+	if [ -n "$BUILD_RESPONSE" ]; then
+   	    echo "Error. Build streaming was not created"
+  	    exit 0
+    else
+   	    echo "Build streaming has been created"
     fi
 }
 

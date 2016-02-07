@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="rtmfp-streaming-chat" default="linux" basedir=".">
+<project name="rtmfp-streaming" default="linux" basedir=".">
     <property name="PRODUCT_NAME" value="WCS"/>
     <property name="DEPLOY_DIR" value="."/>
     <property file="./build.properties"/>
@@ -16,7 +16,7 @@
 
     <target name="main">
         <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
-        <mxmlc output="${DEPLOY_DIR}/bin/chat.swf" file="${basedir}/src/chat.mxml"
+        <mxmlc output="${DEPLOY_DIR}/bin/streaming.swf" file="${basedir}/src/streaming.mxml"
                swf-version="${SWF_VERSION}"
                target-player="${PLAYER_VERSION}" compatibility-version="4"
                static-link-runtime-shared-libraries="true">
@@ -29,7 +29,7 @@
     </target>
 
     <target name="clean">
-        <delete file="bin/chat.swf" includeEmptyDirs="true"/>
+        <delete file="bin/streaming.swf" includeEmptyDirs="true"/>
     	<delete dir="${DEPLOY_DIR}/asdoc" includeEmptyDirs="true"/>
     </target>
 </project>

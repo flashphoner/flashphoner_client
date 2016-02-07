@@ -7,6 +7,7 @@ echo "" > $BASE_DIR"/log"
 echo "Start clients build..."
 build_client $BASE_DIR
 build_chat $BASE_DIR
+build_streaming $BASE_DIR
 build_player $BASE_DIR
 echo "Build clients complete"
 echo ""

@@ -15,7 +15,7 @@
     <script type="text/javascript">
         var attributes = {};
         var flashvars = {};
-        var pathToSWF = "chat.swf";
+        var pathToSWF = "streaming/bin/streaming.swf";
         var elementId = "flash";
         var params = {};
         params.menu = "true";
@@ -24,13 +24,18 @@
         params.allowscriptaccess = "always";
         //params.wmode = "window";
         params.bgcolor = "#777777";
-        swfobject.embedSWF(pathToSWF, elementId, "725", "500", "11.2.202", "expressInstall.swf", flashvars, params, attributes);
+        swfobject.embedSWF(pathToSWF, elementId, "450", "550", "11.2.202", "expressInstall.swf", flashvars, params, attributes);
     </script>
 
 </head>
 <body>
-    <div class="container">
-        <div id="flash"></div>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6 text-center">
+            <h1>Flash Streamer and Player</h1>
+            <div id="flash"></div>
+        </div>
     </div>
+</div>
 </body>
 </html>

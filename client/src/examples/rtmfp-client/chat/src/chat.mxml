@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:views="rtmfptest.views.*"
+			   backgroundColor="#F2F0F0"
+			   width="415"
+			   height="484" creationComplete="init()" xmlns:local="*">
+	<fx:Declarations>
+			
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.UIComponent;
+			
+			private var nc:NetConnection;
+			private var cam:Camera;
+			private var mic:Microphone;
+			private var videoFarEnd:Video;
+			private var publishStream:NetStream;
+			private var subscribeStream:NetStream;
+			private var subscribeStreamObject:Object;
+			
+			private function init():void{
+				//var container:UIComponent = new UIComponent();
+				Logger.info("INIT FLASH CHAT");
+			}
+			
+			
+			/**
+			 * **************************
+			 * 		CONNECT / DISCONNECT
+			 * **************************
+			 **/
+			private function connect():void{
+				Logger.info("connect");
+				var url:String = connectUrl.text;
+				nc = new NetConnection();
+				nc.client = this;
+				nc.addEventListener(NetStatusEvent.NET_STATUS, handleConnectionStatus);				
+				var obj:Object = new Object();
+				obj.login = login.text; 
+				obj.appKey  = "flashChatApp";
+				nc.connect(url,obj);	
+				connectBtn.enabled = false;
+			}
+			
+			//disconnect
+			private function disconnect():void{
+				nc.close();				
+			}
+			
+			private function handleConnectionStatus(event:NetStatusEvent):void{
+				Logger.info("handleConnectionStatus: "+event.info.code);				
+				if (event.info.code=="NetConnection.Connect.Success"){
+					Logger.info("Connection opened");
+					disconnectBtn.enabled = true;
+					sendBtn.enabled = true;
+				} else if (event.info.code=="NetConnection.Connect.Closed"){					
+					nc.removeEventListener(NetStatusEvent.NET_STATUS,handleConnectionStatus);
+					Logger.info("Connection closed");
+					connectBtn.enabled = true;
+					disconnectBtn.enabled = false;
+					sendBtn.enabled = false;
+				}
+			}
+			
+			
+			/**
+			 * *************************
+			 * 		SEND / RECEIVE CHAT MESSAGE
+			 * *************************
+			 **/
+			
+			private function sendMessage():void{
+				var date:Date = new Date();
+				var hours = (date.hours<10) ? '0'+date.hours : date.hours;
+				var minutes = (date.minutes<10) ? '0'+date.minutes : date.minutes;
+				var messageDate:String = hours + ":" + minutes;
+				var message:Object = new Object();
+				message.body = messageText.text
+				message.to = To.text;
+				nc.call("sendData",null,{operationId:null, payload:message, status:null});
+				chatArea.text += messageDate + " " + login.text + " - " + message.body+"\n";
+			}
+			
+			public function ping():void{
+				nc.call("pong", null);
+			}
+			
+			public function OnDataEvent(data:Object):void{
+				var date:Date = new Date();
+				var hours = (date.hours<10) ? '0'+date.hours : date.hours;
+				var minutes = (date.minutes<10) ? '0'+date.minutes : date.minutes;
+				var messageDate:String = hours + ":" + minutes;
+				var message:Object = data.payload;
+				chatArea.text += messageDate + " " + message.from + " - " + message.body + "\n";
+			}
+			
+			/**
+			 * ****************************
+			 * 		HANDLE CONNCTION STATE
+			 * ****************************
+			 **/
+			
+			private function handleStreamStatus(event:NetStatusEvent):void{
+				Logger.info("handleStreamStatus: "+event.info.code);
+				if (event.info.code == "NetStream.Publish.BadName"){
+					Logger.info("Bad streamName. Please publish stream with other name");
+				}else if (event.info.code == "NetStream.Unpublish.Success"){
+					publishStream.removeEventListener(NetStatusEvent.NET_STATUS, handleStreamStatus);
+					publishStream=null;	
+				}
+			}
+			
+			private function handleSubscribeStreamStatus(event:NetStatusEvent):void{
+				Logger.info("handleSubscribeStreamStatus: "+event.info.code);
+			}
+			
+			private function asyncErrorHandler(event: AsyncErrorEvent):void{
+				Logger.info("asyncErrorHandler: "+event);					
+			}
+			
+			private function securityErrorHandler(event: SecurityErrorEvent):void{
+				Logger.info("securityErrorHandler: "+event);					
+			}		
+			
+		]]>
+	</fx:Script>
+	
+	<!-- connect / disconnect -->
+	<s:Button id="connectBtn" x="196" y="88" width="86" label="Login" click="connect()"/>
+	<s:TextInput id="login" x="38" y="88" width="150" height="21" text="Bob"/>
+	<s:Button id="disconnectBtn" x="290" y="88" label="Logout" click="disconnect()" width="86" enabled="false"/>
+	<s:TextInput id="connectUrl" x="38" y="39" width="200" text="rtmfp://192.168.1.5:1936/live2"/>
+	
+	<!-- chat -->
+	<s:TextArea id="messageText" x="35" y="382" width="251" height="67" text="Hey!"/>
+	<s:Button id="sendBtn" x="307" y="382" height="67" label="Send" click="sendMessage()" enabled="false"/>
+	<s:TextArea id="chatArea" x="35" y="144" width="341" height="136" text=""/>
+	<s:TextInput id="To" x="36" y="334" width="251" text="Alice"/>
+	<s:Label x="36" y="314" width="24" text="To:"/>	
+	
+	<s:Label x="35" y="362" width="89" text="Your message:"/>
+	<s:Label x="34" y="128" width="89" text="Your chat:"/>
+	<s:Label x="38" y="69" width="89" text="Your name:"/>
+	<s:Label x="38" y="19" width="89" text="Server:"/>
+</s:Application>
