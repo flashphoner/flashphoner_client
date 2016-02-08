@@ -6,6 +6,7 @@
 	font-family: "arial", sans-serif;
 	font-size: 12px;
 	line-height: 18px;
+    margin-top: 30px;
 }
 
 .player{
@@ -22,6 +23,7 @@
 	border:none;
 	cursor:pointer;
 	display: inline-block;
+    outline: none;
 }
 .playButton {
 	background: url("../images/play.png") no-repeat 0 0;
@@ -85,7 +87,7 @@
 }
 .stream-name input {
 	border: none;
-	text-align: center;
+	text-align: left;
 	margin: 0 auto;
 	display: block;
 	width: 90%;
