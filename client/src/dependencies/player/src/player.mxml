@@ -3,9 +3,9 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:views="rtmfptest.views.*"
-			   backgroundColor="#F2F0F0"
-			   width="340"
-			   height="400" creationComplete="init()" xmlns:local="*">
+			   backgroundColor="#FFFFFF"
+			   width="320"
+			   height="320" creationComplete="init()" xmlns:local="*">
 	<fx:Style source="player.css"/>
 	<fx:Declarations>
 		
@@ -224,18 +224,17 @@
 	</fx:Script>
 	
 	<!-- video view -->
-	<s:TextInput id="connectUrl" x="76" y="332" width="250" text="rtmp://rtmp-server:1935/live/streamName"/>
-	<s:BorderContainer id="border" x="10" y="10" width="324" height="251" backgroundColor="#040000">
-		<mx:Canvas id="canvas" visible="true" x="1" y="4" width="320" height="240" chromeColor="#D6D6D6">
-		</mx:Canvas>
-	</s:BorderContainer>
-	<s:Label x="15" y="337" fontSize="15" paddingLeft="0" text="Server : "/>
-	<s:Button id="playBtn" x="125" y="284" width="90" height="40" chromeColor="#CCCCCC"
+	
+	<mx:Canvas id="canvas" visible="true" x="1" y="4" width="320" height="240" backgroundColor="#000000">
+	</mx:Canvas>
+	
+	<s:Button id="playBtn" x="261" y="252" width="49" height="25"
 			  click="play()" color="#000000" enabled="true" 
-			  icon="@Embed('assets/play.png')"/>
-	<s:Button id="stopBtn" x="125" y="284" width="90" height="40" chromeColor="#CCCCCC"
-			  click="disconnect()" color="#000000" enabled="true" 
-			  icon="@Embed('assets/stop.png')"/>
-	<s:Label id="status" x="45" y="265" width="250" height="15" textAlign="center"
+			  label="Play"/>
+	<s:Button id="stopBtn" x="261" y="252" width="49" height="25" label="Stop"
+			  click="disconnect()" color="#000000" enabled="true"/>
+	<s:Label id="status" x="35" y="286" width="250" height="25" textAlign="center"
 			 verticalAlign="middle"/>
+	<s:TextInput id="connectUrl" x="10" y="252" width="243" height="26"
+				 text="rtmp://rtmp-server:1935/live/streamName"/>
 </s:Application>

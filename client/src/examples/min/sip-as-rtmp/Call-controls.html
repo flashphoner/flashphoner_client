@@ -1,73 +1,26 @@
-<div class="input-group row-space">
-    <span class="input-group-addon">Start call</span>
-    <input id="callee" type="text" class="form-control">
-    <span class="input-group-btn">
-        <button id="callBtn" class="btn btn-success">Call</button>
-    </span>
-</div>
+<div class="row">
+    <div class="col-lg-6 col-sm-offset-3 text-center">
 
-<div class="row row-space">
-    <div class="col-sm-12">
-        <div id="callTrace"></div>
-        <div id="callStatus"></div>
-    </div>
-</div>
-
-<div class="row row-space" >
-    <div class="col-sm-4"></div>
-    <div class="col-sm-3">
-        <a id="showDialpad" class="center-block text-center" data-toggle="collapse" href="#dialpad">Show dialpad</a>
-        <div id="dialpad" class="collapse">
-            <div class="btn-group btn-group-justified" role="group">
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">1</button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">2</button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">3</button>
-                </div>
-            </div>
-            <div class="btn-group btn-group-justified" role="group">
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">4</button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">5</button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">6</button>
-                </div>
-            </div>
-            <div class="btn-group btn-group-justified" role="group">
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">7</button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">8</button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">9</button>
-                </div>
-            </div>
-            <div class="btn-group btn-group-justified" role="group">
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">*</button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">0</button>
-                </div>
-                <div class="btn-group" role="group">
-                    <button onclick="sendDTMF($(this).text())" type="button" class="btn btn-default">#</button>
-                </div>
-            </div>
+        <div class="input-group row-space">
+            <input id="callee" type="text" class="form-control" placeholder="callee"/>
+            <span class="input-group-btn">
+                <button id="callBtn" class="btn btn-success" style="width: 100px">Call</button>
+            </span>
         </div>
+
+        <div class="input-group row-space" style="margin-top: 20px">
+            <input id="dtmf" type="text" class="form-control" placeholder="12345#">
+            <span class="input-group-btn">
+                <button id="dtmfBtn" class="btn btn-default" onclick="sendDTMF($(this).text())" style="width: 100px;">Send DTMF</button>
+            </span>
+        </div>
+
     </div>
 </div>
 
-<div class="row row-space">
-    <div class="col-sm-12">
-        <div id="player"></div>
+<div class="row">
+    <div class="col-lg-12" style="margin-top: 20px">
+        <span id="callTrace" class="bg-warning"></span>
+        <div id="callStatus" style="margin-top: 20px"></div>
     </div>
 </div>

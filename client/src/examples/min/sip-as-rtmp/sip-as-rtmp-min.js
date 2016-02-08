@@ -40,6 +40,7 @@ function init_page() {
     $("#rtmpUrl").val(getCookie("rtmpUrl"));
     $("#rtmpStream").val(getCookie("rtmpStream"));
 
+    $("#dtmfBtn").prop('disabled',true);
 };
 
 function loadPlayer() {
@@ -78,6 +79,8 @@ function sendREST(url, data) {
 function handleAjaxError(jqXHR, textStatus, errorThrown) {
     $("#callStatus").text("FINISHED");
     $("#callBtn").text("Call").removeClass("btn-danger").addClass("btn-success");
+    $("#dtmfBtn").prop('disabled',true);
+    setCallStatus("FINISHED")
     stopCheckStatus();
 }
 
@@ -89,6 +92,8 @@ function handleAjaxSuccess(data, textStatus, jqXHR) {
         } else {
             $("#callStatus").text(jqXHR.responseText);
             $("#callBtn").text("Hangup").removeClass("btn-success").addClass("btn-danger");
+            $("#dtmfBtn").prop('disabled',false);
+            setCallStatus(jqXHR.responseText);
         }
         sendDataToPlayer();
     }
@@ -164,7 +169,7 @@ function sendDataToPlayer() {
 function getStatus() {
     var url = field("restUrl") + "/getStatus";
     var currentCallId = { callId: callId };
-    $("#callTrace").text(callId + " ---> " + field("rtmpUrl"));
+    $("#callTrace").text(callId + " >>> " + field("rtmpUrl"));
     var data = JSON.stringify(currentCallId);
     sendREST(url, data);
 }
@@ -284,4 +289,19 @@ function getCookie (c_name) {
         }
     }
     return "";
+}
+
+// Set call status and display corresponding view
+function setCallStatus(status) {
+
+    $("#callStatus").className='';
+
+    if (status == "ESTABLISHED") {
+        $("#callStatus").attr("class","text-success");
+    }
+
+    if (status == "FINISHED") {
+        $("#callStatus").attr("class","text-muted");
+    }
+
 }
