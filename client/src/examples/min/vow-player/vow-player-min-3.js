@@ -34,6 +34,7 @@ $(document).ready(function () {
 
     disablePlayBtn();
     disablePauseBtn();
+    disableSoundBtn();
 
     var url = setURL();
     $("#urlServer").val(url);
@@ -320,6 +321,10 @@ function displayStreamPlaying(){
     enablePlayBtn();
     enablePauseBtn();
     $("#pauseBtn").text("Pause");
+    if (urlParams.streamName){
+        enableSoundBtn();
+    }
+
 }
 
 function displayStreamPaused(){
@@ -343,6 +348,14 @@ function enablePauseBtn(){
 
 function disablePauseBtn(){
     $("#pauseBtn").prop("disabled", true);
+}
+
+function disableSoundBtn(){
+    $("#soundBtn").prop("disabled", true);
+}
+
+function enableSoundBtn(){
+    $("#soundBtn").prop("disabled", false);
 }
 
 function enablePlayBtn(){
