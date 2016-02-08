@@ -1,0 +1,35 @@
+<div class="row" id="showTo">
+
+    <div class="col-sm-2">
+        &nbsp;
+    </div>
+
+    <div class="col-sm-5 fp-buttonVerticalAlign">
+        <span class="pull-right" style="margin-right: 0px !important">Chat with</span>
+    </div>
+    <div class="col-sm-5 pull-right">
+        <input class="form-control" id="to" type="text" value="Bob"/>
+    </div>
+</div>
+
+<div class="row" style="margin-top: 20px">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <div id="chat" style="overflow-y: scroll; height: 100px;" class="text-left form-control"></div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <textarea id="message" class="form-control" rows="1" style="resize: none;"></textarea>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-5 col-sm-offset-7">
+        <div class="pull-right">
+            <button id="sendBtn" type="button" class="btn btn-default" onclick="sendMessage(); return false;">Send</button>
+        </div>
+    </div>
+</div>
