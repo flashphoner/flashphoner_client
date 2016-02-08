@@ -17,13 +17,15 @@
 </div>
 
 <div class="row" style="margin-top:10px">
-    <label id="publishLabel" class="control-label col-sm-3 fp-buttonVerticalAlign  text-right"
-           for="publishStream">Publish</label>
-    <div class="col-sm-6">
-        <input type="text" class="form-control" id="publishStream" placeholder="Stream Name"/>
-    </div>
-    <div class="col-sm-3 text-left">
-        <button id="publishBtn" type="button" class="btn btn-default">Start</button>
+    <div id="publishForm" class="form-group">
+        <label id="publishLabel" class="control-label col-sm-3 fp-buttonVerticalAlign text-right"
+                     for="publishStream">Publish</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="publishStream" placeholder="Stream Name"/>
+        </div>
+        <div class="col-sm-3 text-left">
+            <button id="publishBtn" type="button" class="btn btn-default">Start</button>
+        </div>
     </div>
 </div>
 
@@ -34,19 +36,16 @@
 </div>
 
 <div id="playDiv" class="row" style="margin-top:10px">
-
-    <label class="control-label col-sm-3 fp-buttonVerticalAlign  text-right"
-           for="playStream">Play</label>
-
-    <div class="col-sm-6">
-        <input type="text" class="form-control" id="playStream" placeholder="Stream Name"/>
+    <div id="playForm" class="form-group">
+        <label class="control-label col-sm-3 fp-buttonVerticalAlign  text-right"
+               for="playStream">Play</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="playStream" placeholder="Stream Name"/>
+        </div>
+        <div class="col-sm-3 text-left">
+            <button id="playBtn" type="button" class="btn btn-default">Start</button>
+        </div>
     </div>
-
-    <div class="col-sm-3 text-left">
-        <button id="playBtn" type="button" class="btn btn-default">Start</button>
-    </div>
-
-
 </div>
 
 <div class="row">

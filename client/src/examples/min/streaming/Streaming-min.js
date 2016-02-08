@@ -3,6 +3,7 @@ var f = Flashphoner.getInstance();
 var mediaProvider;
 var record = false;
 var target;
+var sessionId;
 
 //////////////////////////////////
 /////////////// Init /////////////
@@ -50,18 +51,21 @@ function init_page() {
             }
         }
     );
-    $("#publishBtn").click(function () {
+    $("#publishBtn").prop('disabled',true).click(function () {
             var state = $("#publishBtn").text();
             if (state == "Start") {
+                if(!checkForEmptyField('#publishStream','#publishForm')) {return false};
                 publishStream();
             } else {
                 unPublishStream();
             }
         }
     );
-    $("#playBtn").click(function () {
+    $("#playBtn").prop('disabled',true).click(function () {
             var state = $("#playBtn").text();
+            var streamName = $("#publishStream").val();
             if (state == "Start") {
+                if(!checkForEmptyField('#playStream','#playForm')) {return false};
                 playStream();
             } else {
                 stopStream();
@@ -153,7 +157,7 @@ function stopStream(){
 }
 
 ///////////////////////////////////
-///////////// Listeners ////////////
+///////////// Listeners ///////////
 ///////////////////////////////////
 
 //Connection Status
@@ -163,9 +167,16 @@ function connectionStatusListener(event) {
         trace('Connection has been established. You can start a new call.');
         $("#connectBtn").text("Disconnect");
         mediaProvider = event.mediaProviders;
+        $("#publishBtn").prop('disabled',false);
+        $("#playBtn").prop('disabled',false);
     } else {
-        $("#publishBtn").text("Start");
-        $("#playBtn").text("Start");
+        if (event.status == ConnectionStatus.Disconnected) {
+            if (sessionId) {
+                showDownloadLink(sessionId);
+            }
+        }
+        $("#publishBtn").text("Start").prop('disabled',true);
+        $("#playBtn").text("Start").prop('disabled',true);
         $("#publishStatus").text("");
         $("#playStatus").text("");
     }
@@ -179,12 +190,13 @@ function streamStatusListener(event) {
         case StreamStatus.Publishing:
             setPublishStatus(event.status);
             $("#publishBtn").text("Stop");
+            sessionId = event.mediaSessionId;
             break;
         case StreamStatus.Unpublished:
             setPublishStatus(event.status);
             $("#publishBtn").text("Start");
             if (record) {
-                showDownloadLink(event.mediaSessionId);
+                showDownloadLink(sessionId);
             }
             break;
         case StreamStatus.Playing:
@@ -228,6 +240,7 @@ function showDownloadLink(mediaSessionId) {
     var link = window.location.protocol + "//" + window.location.host + '/client/records/' + mediaSessionId + '.' + extension;
     $("#link").attr("href",link);
     $("#downloadDiv").show();
+    sessionId = null;
 }
 
 // Set Connection Status
@@ -288,70 +301,14 @@ function setPlaybackStatus(status) {
     }
 }
 
-
-///////////////////////////////////
-///////////// Utils ////////////
-///////////////////////////////////
-
-
-//Trace
-function trace(str){
-    console.log(str);
-}
-
-//Get field
-function field(name){
-    var field = document.getElementById(name).value;
-    return field;
-}
-
-//Set WCS URL
-function setURL() {
-    var proto;
-    var url;
-    var port;
-    if (window.location.protocol == "http:") {
-        proto = "ws://"
-        port = "8080"
+// Check field for empty string
+function checkForEmptyField(checkField,alertDiv) {
+    if(!$(checkField).val()) {
+        $(alertDiv).addClass("has-error");
+        return false;
     } else {
-        proto = "wss://"
-        port = "8443"
-    }
-
-    url = proto + window.location.hostname + ":" + port;
-    return url;
-}
-
-// Detect IE
-function detectIE() {
-    var ua = window.navigator.userAgent;
-    var msie = ua.indexOf('MSIE ');
-    if (msie > 0) {
+        $(alertDiv).removeClass("has-error");
         return true;
     }
-    var trident = ua.indexOf('Trident/');
-    if (trident > 0) {
-        return true;
-    }
-    return false;
 }
 
-// Detect Flash
-function detectFlash() {
-    var hasFlash = false;
-    try {
-        var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
-        if (fo) {
-            hasFlash = true;
-        }
-    } catch (e) {
-        if (navigator.mimeTypes
-            && navigator.mimeTypes['application/x-shockwave-flash'] != undefined
-            && navigator.mimeTypes['application/x-shockwave-flash'].enabledPlugin) {
-            hasFlash = true;
-        }
-    }
-    if (!hasFlash) {
-        $("#notifyFlash").text("Your browser doesn't support the Flash technology necessary for work of an example");
-    }
-}
