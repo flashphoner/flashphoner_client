@@ -45,7 +45,7 @@
 				playBtn.addEventListener(MouseEvent.CLICK, mouseClickEventListener);
 				stopBtn.addEventListener(MouseEvent.CLICK, mouseClickEventListener);
 				stopBtn.visible = false;
-				border.addChild(container);
+				this.addChild(container);
 				
 			}
 			
