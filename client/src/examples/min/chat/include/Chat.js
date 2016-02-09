@@ -28,6 +28,8 @@ function initOnLoad() {
         }
     );
 
+    $("#sendBtn").prop('disabled', true);
+
     // Set websocket URL
     setURL();
 }
@@ -55,15 +57,18 @@ function disconnect() {
 function connectionStatusListener(event) {
     if (event.status == ConnectionStatus.Established) {
         console.log('Connection has been established.');
-        $("#connectBtn").text("Disconnect").removeClass("btn-success").addClass("btn-danger");
+        $("#connectBtn").text("Disconnect");
+        $("#sendBtn").prop('disabled', false);
     } else if (event.status == ConnectionStatus.Disconnected) {
         console.log("Disconnected");
-        $("#connectBtn").text("Connect").removeClass("btn-danger").addClass("btn-success");
+        $("#connectBtn").text("Connect");
+        $("#sendBtn").prop('disabled', true);
     } else if (event.status == ConnectionStatus.Failed) {
-        $("#connectBtn").text("Connect").removeClass("btn-danger").addClass("btn-success");
+        $("#connectBtn").text("Connect");
         f.disconnect();
+        $("#sendBtn").prop('disabled', true);
     }
-    $("#connectionStatus").text(event.status);
+    setConnectionStatus(event.status);
 }
 
 //Connection Status
@@ -88,6 +93,25 @@ function dataEventListener(event) {
     var newMessage = time + " " + message.from + " - " + message.body + '<br/>';
     var chat = document.getElementById("chat");
     chat.innerHTML = newMessage + chat.innerHTML;
+}
+
+// Set connection status and display corresponding view
+function setConnectionStatus(status) {
+
+    $("#connectionStatus").text(status);
+    $("#connectionStatus").className='';
+
+    if (status == "ESTABLISHED") {
+        $("#connectionStatus").attr("class","text-success");
+    }
+
+    if (status == "DISCONNECTED") {
+        $("#connectionStatus").attr("class","text-muted");
+    }
+
+    if (status == "FAILED") {
+        $("#connectionStatus").attr("class","text-danger");
+    }
 }
 
 //Set WCS URL

@@ -1,45 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
     <title>RTSP and WebRTC playback in iOS Safari browser via Websocket</title>
-    <link href="style/style.css" rel="stylesheet" type="text/css" />
-	<script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <link href="style/style.css" rel="stylesheet" type="text/css"/>
+    <style>
+        .fp-demoH1 {
+            font-size: 36px;
+            margin-top: 20px !important;
+            font-weight: 500;
+            text-align: center;
+            color: grey;
+        }
+    </style>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
     <script type="text/javascript" src="../../Flashphoner.js"></script>
-    <script type="text/javascript" src="../../dependencies/websocket-player/websocket-player.js"></script>
+    <script type="text/javascript" src="../../dependencies/websocket-player/WSPlayer.js"></script>
     <script type="text/javascript" src="js/vow-player.js"></script>
-	<!-- Bootstrap -->
-	<script src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
 </head>
 <body onload="initOnLoad()">
 <div class="container">
-	<div class="row">
-	<div class="fullPlayer">
 
-		<canvas id="videoCanvas" width="320" height="240"></canvas>
+    <div class="row">
 
-		<div class="powered-by">
-			Powered by Flashphoner
-		</div>
+        <div class="col-sm-12 text-center">
 
-		<div class="player">
+            <div class="row">
+                <div class="col-sm-3">
+                    &nbsp;
+                </div>
+                <div class="col-sm-4 text-center" style="width:360px">
 
-			<div class="stream-name">
-				<input id="streamId" type="text" placeholder="Enter stream name"/>
-			</div>
+                    <h1 class="fp-demoH1">Websocket Player</h1>
 
-			<div class="control">
-				<button id="controlButton"></button>
-			</div>
-		</div>
-	</div>
-	<div id="infoDiv" style="visibility: hidden"></div>
-	</div>
+                    <div class="fullPlayer">
+
+                        <canvas id="videoCanvas" width="320" height="240"></canvas>
+
+                        <div class="powered-by">
+                            Powered by Flashphoner
+                        </div>
+
+                        <div class="player">
+
+                            <div class="stream-name">
+                                <input id="streamId" type="text" placeholder="Enter stream name"/>
+                            </div>
+
+                            <div class="control">
+                                <button id="controlButton"></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="infoDiv" style="visibility: hidden"></div>
+                </div>
+                <div class="col-sm-3">
+                    &nbsp;
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>
