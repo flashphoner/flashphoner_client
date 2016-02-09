@@ -238,7 +238,7 @@ function errorEvent(event) {
 function showDownloadLink(name) {
     // Set correct path for records. Stream records are saved to WCS_HOME/records directory.
     // http://flashphoner.com/docs/wcs4/wcs_docs/html/en/wcs-developer-guide/quick_start_recording_streams.htm
-    var link = window.location.protocol + "//" + window.location.host + '/records/' + name;
+    var link = window.location.protocol + "//" + window.location.host + '/client/records/' + name;
     $("#link").attr("href",link);
     $("#downloadDiv").show();
     recordFileName = null;
