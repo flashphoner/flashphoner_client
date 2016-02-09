@@ -20,14 +20,49 @@
 <body onload="initAPI()">
 <div class="container">
     <div class="row">
-        <div class="col-sm-6 text-center">
+        <div class="col-sm-6 text-center" style="width:500px">
 
-            <h2 style="width:500px">Stream Recording Minimal</h2>
+            <h2>Stream Recording Minimal</h2>
 
             <fieldset id="fieldset" class="scheduler-border fp-streamingControls">
-                <!-- load Streaming-fieldset.html -->
-            </fieldset>
 
+                <div class="row" style="margin-top: 20px">
+                    <label class="control-label col-sm-3 fp-buttonVerticalAlign text-right" for="urlServer">WCS
+                        URL</label>
+
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="urlServer" placeholder="WCS Server URL"/>
+                    </div>
+                    <div class="col-sm-3 text-left">
+                        <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <span id="connectionStatus"></span>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px;margin-bottom: 10px">
+                    <div class="col-sm-12 text-center">
+                        <button id="publishBtn" type="button" class="btn btn-default" style="width: 150px">Start</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <span id="publishStatus"></span>
+                    </div>
+                </div>
+
+                <div class="row" id="downloadDiv" style="margin-top: 10px">
+                    <div class="col-sm-12 text-center">
+                        <a id="link" href="#">Download recorded stream</a>
+                    </div>
+                </div>
+
+            </fieldset>
         </div>
     </div>
     <div class="row">
@@ -35,11 +70,13 @@
             <div id="flashVideoWrapper" class="fp-flashVideoWrapper">
                 <div id="flashVideoDiv"></div>
             </div>
-            <video id="remoteVideo" width="320" height="240" autoplay
-                   class="fp-remoteVideo"></video>
-            <video id="localVideo" width="80" height="60" autoplay class="fp-localVideo"></video>
+            <video id="localVideo" width="320" height="240" autoplay class="fp-remoteVideo"></video>
+            <video id="remoteVideo" style="visibility: hidden"></video>
         </div>
     </div>
+
+    <input type="hidden" id="publishStream" value="stream"/>
+
 </div>
 </body>
 </html>

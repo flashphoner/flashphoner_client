@@ -45,5 +45,6 @@ legend.scheduler-border {
 .fp-localVideo {
     position: absolute;
     left: 85px;
+    background-color: black;
 }
 

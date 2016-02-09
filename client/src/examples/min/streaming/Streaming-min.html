@@ -23,11 +23,67 @@
         <div class="col-sm-6 text-center">
 
             <h2 style="width:500px">Streamer And Player Minimal</h2>
+
             <h2 style="width:500px" id="notifyFlash" class="text-danger"></h2>
             <fieldset id="fieldset" class="scheduler-border fp-streamingControls">
-                <!-- load Streaming-fieldset.html -->
-            </fieldset>
+                <div class="row" style="margin-top: 20px">
+                    <label class="control-label col-sm-3 fp-buttonVerticalAlign text-right" for="urlServer">WCS
+                        URL</label>
 
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="urlServer" placeholder="WCS Server URL"/>
+                    </div>
+                    <div class="col-sm-3 text-left">
+                        <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <span id="connectionStatus"></span>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div id="publishForm" class="form-group">
+                        <label id="publishLabel" class="control-label col-sm-3 fp-buttonVerticalAlign text-right"
+                               for="publishStream">Publish</label>
+
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="publishStream" placeholder="Stream Name"/>
+                        </div>
+                        <div class="col-sm-3 text-left">
+                            <button id="publishBtn" type="button" class="btn btn-default">Start</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <span id="publishStatus"></span>
+                    </div>
+                </div>
+
+                <div id="playDiv" class="row" style="margin-top:10px">
+                    <div id="playForm" class="form-group">
+                        <label class="control-label col-sm-3 fp-buttonVerticalAlign  text-right"
+                               for="playStream">Play</label>
+
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="playStream" placeholder="Stream Name"/>
+                        </div>
+                        <div class="col-sm-3 text-left">
+                            <button id="playBtn" type="button" class="btn btn-default">Start</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <span id="playStatus"></span>
+                    </div>
+                </div>
+            </fieldset>
         </div>
     </div>
     <div class="row">
