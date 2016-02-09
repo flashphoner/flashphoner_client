@@ -12,6 +12,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import flash.external.*;
+			
 			import mx.core.UIComponent;
 			
 			private var nc:NetConnection;
@@ -23,8 +25,16 @@
 			private var subscribeStreamObject:Object;
 			
 			private function init():void{
-				//var container:UIComponent = new UIComponent();
 				Logger.info("INIT FLASH CHAT");
+				if (ExternalInterface.available) {
+					try {
+						ExternalInterface.addCallback("setURLtoFlash", getDataFromJS);
+					} catch (error:Error) {
+						Logger.info(error.message);
+					}
+				} else {
+					Logger.info("Error during set callback");
+				}
 			}
 			
 			
@@ -125,6 +135,18 @@
 			private function securityErrorHandler(event: SecurityErrorEvent):void{
 				Logger.info("securityErrorHandler: "+event);					
 			}		
+			
+			/**
+			 *************************
+			 *  JavaScript callbacks
+			 ************************* 
+			 **/
+			
+			private function getDataFromJS(value:String):void {
+				if (value != null || value != "") {
+					connectUrl.text = value;
+				}
+			}
 			
 		]]>
 	</fx:Script>

@@ -583,6 +583,12 @@ Flashphoner.prototype = {
             me.connection.sipRegisterRequired = me.configuration.sipRegisterRequired;
         }
         me.connection.sipContactParams = me.connection.sipContactParams | me.configuration.sipContactParams;
+        for (var item in me.connection) {
+            if (me.connection[item] != null && me.connection[item] != undefined) {
+                me.connection[item] = $.trim(me.connection[item]);
+            }
+        }
+
         if (!me.connection.mediaProviders || me.connection.mediaProviders.length == 0) {
             me.connection.mediaProviders = Object.keys(me.mediaProviders.getData());
         }

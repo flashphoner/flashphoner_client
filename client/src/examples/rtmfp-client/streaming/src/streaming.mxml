@@ -12,6 +12,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import flash.external.*;
+			
 			import mx.core.UIComponent;
 			
 			private var nc:NetConnection;
@@ -23,6 +25,15 @@
 			private var subscribeStreamObject:Object;
 			
 			private function init():void{
+				if (ExternalInterface.available) {
+					try {
+						ExternalInterface.addCallback("setURLtoFlash", getDataFromJS);
+					} catch (error:Error) {
+						Logger.info(error.message);
+					}
+				} else {
+					Logger.info("Error during set callback");
+				}
 				cam = Camera.getCamera();
 				videoMy.attachCamera(cam);
 				mic = Microphone.getMicrophone();
@@ -301,6 +312,18 @@
 			public function OnDataEvent(data:Object):void{
 				var message:Object = data.payload;
 				Logger.info(message.body);
+			}
+			
+			/**
+			 *************************
+			 *  JavaScript callbacks
+			 ************************* 
+			 **/
+			
+			private function getDataFromJS(value:String):void {
+				if (value != null || value != "") {
+					connectUrl.text = value;
+				}
 			}
 			
 		]]>

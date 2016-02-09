@@ -18,15 +18,22 @@
         var pathToSWF = "chat/bin/chat.swf";
         var elementId = "flash";
         var params = {};
+        var callback = function(e) {
+            if (e.success) {
+                setTimeout(function() {
+                    var swf = document.getElementById("flash");
+                    var url = "rtmfp://" + window.location.hostname + ":" + "1935";
+                    swf.setURLtoFlash(url);
+                } ,2000);
+            }
+        }
         params.menu = "true";
         params.swliveconnect = "true";
         params.allowfullscreen = "true";
         params.allowscriptaccess = "always";
-        //params.wmode = "window";
         params.bgcolor = "#777777";
-        swfobject.embedSWF(pathToSWF, elementId, "410", "475", "11.2.202", "expressInstall.swf", flashvars, params, attributes);
+        swfobject.embedSWF(pathToSWF, elementId, "410", "475", "11.2.202", "expressInstall.swf", flashvars, params, attributes, callback);
     </script>
-
 </head>
 <body>
     <div class="container">
@@ -34,8 +41,10 @@
             <div class="col-sm-6 text-center">
                 <h1>Flash Chat</h1>
                 <div id="flash"></div>
+
             </div>
         </div>
     </div>
 </body>
+
 </html>
