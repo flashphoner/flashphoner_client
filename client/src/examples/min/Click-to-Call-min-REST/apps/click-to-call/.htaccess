@@ -1,9 +1,0 @@
-<IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteBase /
-RewriteRule ^click-to-call/connect /apps/click-to-call/connect.json [QSA,L]
-RewriteRule ^click-to-call/call /apps/click-to-call/call.json [QSA,L]
-RewriteRule ^click-to-call/CallStatusEvent /apps/click-to-call/CallStatusEvent.json [QSA,L]
-RewriteRule ^click-to-call/ConnectionStatusEvent /apps/click-to-call/ConnectionStatusEvent.json [QSA,L]
-RewriteRule ^click-to-call/RegistrationStatusEvent /apps/click-to-call/RegistrationStatusEvent.json [QSA,L]
-</IfModule>

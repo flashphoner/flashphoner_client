@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="include/chat.css">
+
+    <title>Room text chat</title>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+    <script type="text/javascript" src="include/chat.js"></script>
+    <!-- Bootstrap -->
+    <script src="../../../dependencies/bootstrap/js/bootstrap.js"></script>
+    <script>
+        function connect() {
+            f.connect({
+                login: field("login"),
+                room: field("room"),
+                urlServer: field("urlServer"),
+                appKey: "chatRoomApp"
+            });
+        }
+
+        function sendMessage() {
+            var message = {body: field("message")};
+            f.sendData({
+                operationId: createUUID(),
+                payload: message
+            });
+            document.getElementById("message").value = "";
+        }
+    </script>
+</head>
+<body onload="initAPI()">
+    <div class="container" id="roomChat">
+        <div class="row">
+            <div class="col-sm-6 text-center">
+                <h1>Room Text Chat</h1>
+                <fieldset id="chatFieldSet" class="scheduler-border">
+                    <!-- Include from chat-fieldset.html by jquery. See js file. -->
+                </fieldset>
+                <div id="chatControls">
+                    <!-- Include from chat-controls.html by jquery. See js file. -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

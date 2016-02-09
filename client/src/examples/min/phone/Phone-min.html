@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phone min</title>
+
+    <script type="text/javascript" src="../../../dependencies/swf/swfobject.js"></script>
+
+    <!--[if IE 8]>
+    <script type="text/javascript" src="../../../dependencies/ie8/objectkeys.js"></script>
+    <![endif]-->
+
+    <!--[if lte IE 9]>
+    <script type="text/javascript" src="../../../dependencies/ie9/web_socket.js"></script>
+    <script type="text/javascript">
+        WEB_SOCKET_SWF_LOCATION = "../../dependencies/ie9/WebSocketMain.swf";
+    </script>
+    <script type="text/javascript" src="../../../dependencies/ie9/typedarray.js"></script>
+    <![endif]-->
+
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <!-- ****** -->
+
+    <!-- WCS JavaScript API -->
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+
+    <!-- Minimum script for calls -->
+    <script type="text/javascript" src="Phone-min.js"></script>
+
+</head>
+
+<body onload="initAPI()">
+
+<h1>Phone Minimal Code</h1>
+
+<p>WCS Server URL: <input id="urlServer" type="text" value="ws://192.168.1.5:8080"/></p>
+
+<p>SIP login: <input id="sipLogin" type="text" value="alice"/></p>
+
+<p>SIP password: <input id="sipPassword" type="password" value="password"/></p>
+
+<p>SIP domain: <input id="sipDomain" type="text" value="mysipdomain.com"/></p>
+
+<p>SIP port: <input id="sipPort" type="text" value="5060"/></p>
+
+<hr/>
+
+<p>SIP callee: <input id="callee" type="text" value="callee"/></p>
+
+<p>
+    <a href="#" on onclick="connect();return false">connect</a>
+    <a href="#" on onclick="call();return false">call</a>
+    <a href="#" on onclick="answer();return false">answer</a>
+    <a href="#" on onclick="hangup();return false">hangup</a>
+    <a href="#" on onclick="mute();return false">mute</a>
+    <a href="#" on onclick="unmute();return false">unmute</a>
+</p>
+
+</body>
+</html>

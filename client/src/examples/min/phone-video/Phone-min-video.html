@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phone min</title>
+
+    <script type="text/javascript" src="../../../dependencies/swf/swfobject.js"></script>
+
+    <!--[if lte IE 9]>
+    <script type="text/javascript" src="../../../dependencies/ie9/web_socket.js"></script>
+    <script type="text/javascript">
+        WEB_SOCKET_SWF_LOCATION = "../../../dependencies/ie9/WebSocketMain.swf";
+    </script>
+    <script type="text/javascript" src="../../../dependencies/ie9/typedarray.js"></script>
+    <![endif]-->
+
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <!-- ****** -->
+
+    <!-- WCS JavaScript API -->
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+
+    <!-- Minimum script for calls -->
+    <script type="text/javascript" src="Phone-min-video.js"></script>
+
+</head>
+
+<body onload="initAPI()">
+
+<h1>Phone Video Minimal Code</h1>
+
+<p>WCS Server URL: <input id="urlServer" type="text" value="ws://192.168.1.5:8080"/></p>
+
+<p>SIP login: <input id="sipLogin" type="text" value="alice"/></p>
+
+<p>SIP password: <input id="sipPassword" type="password" value="password"/></p>
+
+<p>SIP domain: <input id="sipDomain" type="text" value="mysipdomain.com"/></p>
+
+<p>SIP port: <input id="sipPort" type="text" value="5060"/></p>
+
+<hr/>
+
+<p>SIP callee: <input id="callee" type="text" value="callee"/></p>
+
+<p>
+    <a href="#" on onclick="connect();return false">connect</a>
+    <a href="#" on onclick="call();return false">call</a>
+    <a href="#" on onclick="answer();return false">answer</a>
+    <a href="#" on onclick="hangup();return false">hangup</a>
+    <a href="#" on onclick="mute();return false">mute</a>
+    <a href="#" on onclick="unmute();return false">unmute</a>
+    <a href="#" on onclick="muteVideo();return false">mute video</a>
+    <a href="#" on onclick="unmuteVideo();return false">unmute video</a>
+    <a href="#" on onclick="isVideoMuted();return false">is video muted</a>
+    <a href="#" on onclick="releaseCameraAndMicrophone();return false">release camera and microphone</a>
+</p>
+
+
+<div id="flashVideoWrapper"
+     style=" width:320px; height:240px; position: absolute; left: 20px; top: 400px; border: 1px double black;">
+    <div id="flashVideoDiv"></div>
+</div>
+<video id="remoteVideo" width="320" height="240" autoplay
+       style="position: absolute; left: 20px; top: 400px; border: 1px double black;"></video>
+<video id="localVideo" width="80" height="60" autoplay style="position: absolute; left: 20px; top: 400px;"></video>
+</body>
+</html>

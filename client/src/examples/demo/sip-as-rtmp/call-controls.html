@@ -1,0 +1,26 @@
+<div class="row">
+    <div class="col-lg-6 col-sm-offset-3 text-center">
+
+        <div class="input-group row-space">
+            <input id="callee" type="text" class="form-control" placeholder="callee"/>
+            <span class="input-group-btn">
+                <button id="callBtn" class="btn btn-success" style="width: 100px">Call</button>
+            </span>
+        </div>
+
+        <div class="input-group row-space" style="margin-top: 20px">
+            <input id="dtmf" type="text" class="form-control" placeholder="12345#">
+            <span class="input-group-btn">
+                <button id="dtmfBtn" class="btn btn-default" onclick="sendDTMF($('#dtmf').val())" style="width: 100px;">Send DTMF</button>
+            </span>
+        </div>
+
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12" style="margin-top: 20px">
+        <span id="callTrace" class="bg-warning"></span>
+        <div id="callStatus" style="margin-top: 20px"></div>
+    </div>
+</div>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phone min</title>
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <!-- ****** -->
+
+    <!-- WCS JavaScript API -->
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+    <script type="text/javascript" src="../../ConfigurationLoader.js"></script>
+    <script type="text/javascript" src="../../../dependencies/swf/swfobject.js"></script>
+    <script type="text/javascript" src="../../../dependencies/websocket-player/WSPlayer.js"></script>
+
+    <!-- Minimum script for calls -->
+    <script type="text/javascript" src="QA.js"></script>
+
+</head>
+<body onload="initAPI()">
+<label for="mediaProvider">Media provider:</label>
+<select id="mediaProvider">
+    <option value="WebRTC">WebRTC</option>
+    <option value="Flash">Flash</option>
+    <option value="VOW">VOW</option>
+</select>
+<br>
+<br>
+<label for="accountType">Account type:</label>
+<select id="accountType">
+    <option value="CALL">Call</option>
+    <option value="STREAM">Stream</option>
+</select>
+<br>
+<br>
+<label for="client">Client:</label><input id="client" type="text" value=""/>
+<br>
+<br>
+<input id="connectButton" type="button" value="Connect" onclick="initAccess()"/>
+<br>
+<br>
+<video id="remoteVideo" autoplay style="background-color: #000000; width:320px; height:240px;"></video>
+<canvas id="videoCanvas" width="320" height="240"></canvas>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Caller</title>
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <!-- ****** -->
+
+    <!-- WCS JavaScript API -->
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+    <script type="text/javascript" src="../../../dependencies/swf/swfobject.js"></script>
+
+    <!-- Minimum script for calls -->
+    <script type="text/javascript" src="Caller.js"></script>
+    <script type="text/javascript" src="../../ConfigurationLoader.js"></script>
+
+</head>
+<!-- Establish connection on page load -->
+<body onload="initAPI()">
+STATUS: <div id="info"></div></br>
+<!-- Call to WCS2 on click by this link -->
+<video id="localMediaElement" autoplay></video>
+<video id="remoteMediaElement" style="width:320px;height:240px" autoplay></video>
+<div style="width:320px;height:240px"><div id="flashVideoDiv"></div></div>
+<a href="#" on onclick="cancel();return false">cancel</a>
+</body>
+</html>

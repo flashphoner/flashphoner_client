@@ -1,8 +1,8 @@
 #!/bin/sh
 FLASH_CLIENT_DIR="/client/src/dependencies/flash"
-FLASH_CHAT_DIR="/client/src/examples/rtmfp-client/chat"
-FLASH_STREAMING_DIR="/client/src/examples/rtmfp-client/streaming"
-PLAYER_DIR="/client/src/dependencies/player"
+FLASH_CHAT_DIR="/client/src/examples/demo/rtmfp-client/chat"
+FLASH_STREAMING_DIR="/client/src/examples/demo/rtmfp-client/streaming"
+PLAYER_DIR="/client/src/dependencies/rtmp_player"
 
 check_root_access(){
     USERID=`id | sed -e 's/).*//; s/^.*(//;'`

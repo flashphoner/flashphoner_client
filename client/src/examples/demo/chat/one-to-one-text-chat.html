@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="include/chat.css">
+
+    <title>One to One Text Chat</title>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+    <script type="text/javascript" src="include/chat.js"></script>
+    <!-- Bootstrap -->
+    <script src="../../../dependencies/bootstrap/js/bootstrap.js"></script>
+    <script>
+        function connect() {
+            f.connect({
+                login: field("login"),
+                urlServer: field("urlServer"),
+                appKey: "websocketChatApp"
+            });
+        }
+
+        function sendMessage() {
+            var date = new Date();
+            var time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
+            var message = {to: field("to"), body: field("message")};
+            f.sendData({
+                operationId: createUUID(),
+                payload: message
+            });
+            var newMessage = time + " " + field("login") + " - " + field("message") + '<br/>';
+            var chat = document.getElementById("chat");
+            chat.innerHTML = newMessage + chat.innerHTML;
+            document.getElementById("message").value = "";
+        }
+    </script>
+</head>
+<body onload="initAPI()">
+    <div class="container" id="oneToOneChat">
+        <div class="row">
+            <div class="col-sm-6 text-center">
+                <h1>One to One Text Chat</h1>
+                <fieldset id="chatFieldSet" class="scheduler-border">
+                    <!-- Include from chat-fieldset.html by jquery. See js file. -->
+                </fieldset>
+                <div id="chatControls">
+                    <!-- Include from chat-controls.html by jquery. See js file. -->
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

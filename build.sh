@@ -25,7 +25,7 @@ cp client/src/dependencies/swf output/dependencies -R
 cp client/src/dependencies/ie8 output/dependencies -R
 cp client/src/dependencies/ie9 output/dependencies -R
 cp client/src/dependencies/bootstrap output/dependencies -R
-cp client/src/dependencies/player/player.swf output/dependencies/swf
+cp client/src/dependencies/rtmp_player/player.swf output/dependencies/swf
 mkdir output/dependencies/flash
 cp client/src/dependencies/flash/asdoc output/dependencies/flash -R
 cp client/src/dependencies/flash/MediaManager.swf output/dependencies/flash

@@ -33,7 +33,7 @@ ConfigurationLoader = function (configLoadedListener) {
 
     $.ajax({
         type: "GET",
-        url: "../flashphoner.xml",
+        url: "../../flashphoner.xml",
         dataType: "xml",
         success: this.parseFlashphonerXml,
         context: this

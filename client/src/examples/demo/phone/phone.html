@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="phone.css">
+
+    <title>Phone Minimal</title>
+
+    <script type="text/javascript" src="../../../dependencies/swf/swfobject.js"></script>
+
+    <!--[if IE 8]>
+    <script type="text/javascript" src="../../../dependencies/ie8/objectkeys.js"></script>
+    <![endif]-->
+
+    <!--[if lte IE 9]>
+    <script type="text/javascript" src="../../../dependencies/ie9/web_socket.js"></script>
+    <script type="text/javascript">
+        WEB_SOCKET_SWF_LOCATION = "../../dependencies/ie9/WebSocketMain.swf";
+    </script>
+    <script type="text/javascript" src="../../../dependencies/ie9/typedarray.js"></script>
+    <![endif]-->
+
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <!-- ****** -->
+
+    <!-- WCS JavaScript API -->
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="../../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+
+    <!-- Minimum script for calls -->
+    <script type="text/javascript" src="phone.js"></script>
+
+    <script>
+
+        //Default initialization
+        function initAPI() {
+
+            f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
+            f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
+            f.addListener(WCSEvent.RegistrationStatusEvent, registrationStatusListener);
+            f.addListener(WCSEvent.CallStatusEvent, callStatusListener);
+            f.addListener(WCSEvent.OnCallEvent, callListener, this);
+            if (detectIE()) {
+                detectFlash();
+            }
+            var configuration = new Configuration();
+            configuration.pathToSWF = "../../../dependencies/flash/MediaManager.swf";
+            configuration.flashBufferTime = 0.0;
+            f.init(configuration);
+        }
+
+        //New audio call
+        function call() {
+            var call = new Call();
+            call.callee = field("callee");
+            currentCall = f.call(call);
+        }
+
+        //Answer audio call
+        function answer() {
+            f.answer(currentCall);
+        }
+
+    </script>
+
+
+</head>
+
+<body onload="initAPI()">
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-6 text-center">
+            <h1>Phone Minimal</h1>
+            <h2 id="notifyFlash" class="text-danger"></h2>
+            <fieldset id="callFieldSet" class="scheduler-border">
+                <!-- Include from call-fieldset.html by jquery. See js file. -->
+            </fieldset>
+            <div id="callControls">
+                <!-- Include from call-controls.html by jquery. See js file. -->
+            </div>
+        </div>
+        <div class="col-sm-6 text-center">
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
