@@ -3,7 +3,7 @@ var f = Flashphoner.getInstance();
 var mediaProvider;
 var record = false;
 var target;
-var sessionId;
+var recordFileName;
 
 //////////////////////////////////
 /////////////// Init /////////////
@@ -171,8 +171,8 @@ function connectionStatusListener(event) {
         $("#playBtn").prop('disabled',false);
     } else {
         if (event.status == ConnectionStatus.Disconnected) {
-            if (sessionId) {
-                showDownloadLink(sessionId);
+            if (recordFileName) {
+                showDownloadLink(recordFileName);
             }
         }
         $("#publishBtn").text("Start").prop('disabled',true);
@@ -190,13 +190,15 @@ function streamStatusListener(event) {
         case StreamStatus.Publishing:
             setPublishStatus(event.status);
             $("#publishBtn").text("Stop");
-            sessionId = event.mediaSessionId;
+            if (record) {
+                recordFileName = event.recordName;
+            }
             break;
         case StreamStatus.Unpublished:
             setPublishStatus(event.status);
             $("#publishBtn").text("Start");
             if (record) {
-                showDownloadLink(sessionId);
+                showDownloadLink(recordFileName);
             }
             break;
         case StreamStatus.Playing:
@@ -233,14 +235,13 @@ function errorEvent(event) {
 
 // Show link to download recorded stream
 
-function showDownloadLink(mediaSessionId) {
-    var extension = (mediaProvider == "WebRTC") ? 'webm' : 'mp4';
+function showDownloadLink(name) {
     // Set correct path for records. Stream records are saved to WCS_HOME/records directory.
     // http://flashphoner.com/docs/wcs4/wcs_docs/html/en/wcs-developer-guide/quick_start_recording_streams.htm
-    var link = window.location.protocol + "//" + window.location.host + '/client/records/' + mediaSessionId + '.' + extension;
+    var link = window.location.protocol + "//" + window.location.host + '/records/' + name;
     $("#link").attr("href",link);
     $("#downloadDiv").show();
-    sessionId = null;
+    recordFileName = null;
 }
 
 // Set Connection Status
