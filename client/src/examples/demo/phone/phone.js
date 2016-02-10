@@ -162,8 +162,6 @@ function setConnectionButtonText(text) {
 // Disconnect
 function disconnect() {
     f.disconnect();
-    setConnectionButtonText("Connect")
-    setStatus("NOT REGISTERED");
 }
 
 // Hangup current call
@@ -197,6 +195,13 @@ function connectionStatusListener(event) {
     if (event.status == ConnectionStatus.Established) {
         trace('Connection has been established. You can start a new call.');
         setConnectionButtonText("Disconnect");
+    } else if (event.status == ConnectionStatus.Disconnected ||
+        event.status == ConnectionStatus.Failed) {
+        setConnectionButtonText("Connect");
+        setStatus("NOT REGISTERED");
+        setCallStatus(CallStatus.FINISH);
+        showOutgoing();
+        setCallButtonText("Call");
     }
     setStatus(event.status);
 }
@@ -235,7 +240,7 @@ function callStatusListener(event) {
     if (event.status == CallStatus.FINISH || event.status == CallStatus.FAILED || event.status == CallStatus.BUSY) {
 
         showOutgoing();
-        setCallButtonText("Call")
+        setCallButtonText("Call");
 
     } else {
         setCallButtonText("Hangup");
