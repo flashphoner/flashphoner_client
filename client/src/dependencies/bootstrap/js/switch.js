@@ -52,6 +52,7 @@
             var off = $('<button class="btn btn-danger '+settings.size+disabled+'" style="float: none;display: inline-block;"></button>').html(settings.off).css('margin-left', '0px').appendTo(div);
 
             function applyChange(b) {
+                var disabled = c.is(":disabled") ? " disabled" : "";
                 if(b) {
                     on.attr('class', 'btn active btn-' + settings.onClass+settings.size+disabled).html(settings.on).blur();
                     off.attr('class', 'btn btn-default '+settings.size+disabled).html(settings.offLabel).blur();
@@ -63,8 +64,18 @@
             }
             applyChange(c.is(':checked'));
 
-            on.click(function(e) {e.preventDefault();c.prop("checked", !c.prop("checked")).trigger('change')});
-            off.click(function(e) {e.preventDefault();c.prop("checked", !c.prop("checked")).trigger('change')});
+            on.click(function(e) {
+                if (!c.is(":disabled")) {
+                    e.preventDefault();
+                    c.prop("checked", !c.prop("checked")).trigger('change')
+                }
+            });
+            off.click(function(e) {
+                if (!c.is(":disabled")) {
+                    e.preventDefault();
+                    c.prop("checked", !c.prop("checked")).trigger('change')
+                }
+            });
 
             $(this).hide().on('change', function() {
                 applyChange(c.is(':checked'))

@@ -105,6 +105,10 @@ function showOutgoing(){
     $("#incomingCall").hide();
     $("#incomingCallAlert").hide();
     $("#outgoingCall").show();
+    $muteAudioToggle.attr("disabled","").removeAttr("checked");
+    $muteAudioToggle.trigger('change');
+    $muteVideoToggle.attr("disabled", "").removeAttr("checked");
+    $muteVideoToggle.trigger('change');
 }
 
 // Display view of answered call
@@ -171,22 +175,30 @@ function hangup() {
 
 // Mute audio in the call
 function mute() {
-    f.mute();
+    if (currentCall) {
+        f.mute(currentCall.mediaProvider);
+    }
 }
 
 // Unmute audio in the call
 function unmute() {
-    f.unmute();
+    if (currentCall) {
+        f.unmute(currentCall.mediaProvider);
+    }
 }
 
 // Mute video in the call
 function muteVideo() {
-    f.muteVideo(currentCall.mediaProvider);
+    if (currentCall) {
+        f.muteVideo(currentCall.mediaProvider);
+    }
 }
 
 // Unmute video in the call
 function unmuteVideo() {
-    f.unmuteVideo(currentCall.mediaProvider);
+    if (currentCall) {
+        f.unmuteVideo(currentCall.mediaProvider);
+    }
 }
 
 //Connection Status
@@ -235,13 +247,17 @@ function callStatusListener(event) {
         if (currentCall.incoming) {
             showAnswered();
         }
+        var $muteAudioToggle = $("#muteAudioToggle");
+        var $muteVideoToggle = $("#muteVideoToggle");
+        $muteAudioToggle.removeAttr("disabled");
+        $muteAudioToggle.trigger('change');
+        $muteVideoToggle.removeAttr("disabled");
+        $muteVideoToggle.trigger('change');
     }
 
     if (event.status == CallStatus.FINISH || event.status == CallStatus.FAILED || event.status == CallStatus.BUSY) {
-
         showOutgoing();
         setCallButtonText("Call");
-
     } else {
         setCallButtonText("Hangup");
     }

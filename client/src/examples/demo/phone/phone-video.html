@@ -149,7 +149,7 @@
                         Mute Audio
                     </div>
                     <div class="col-sm-6">
-                        <input id="muteAudioToggle" type="checkbox"/>
+                        <input id="muteAudioToggle" type="checkbox" disabled/>
                     </div>
                 </div>
 
@@ -158,7 +158,7 @@
                         Mute Video
                     </div>
                     <div class="col-sm-6">
-                        <input id="muteVideoToggle" type="checkbox"/>
+                        <input id="muteVideoToggle" type="checkbox" disabled/>
                     </div>
                 </div>
 
@@ -166,7 +166,8 @@
                 <script src="../../../dependencies/bootstrap/js/switch.js"></script>
                 <script>
 
-                    $("#muteAudioToggle").change(function () {
+                    var $muteAudioToggle = $("#muteAudioToggle");
+                    $muteAudioToggle.change(function () {
                         if (this.checked) {
                             mute();
                         } else {
@@ -174,7 +175,14 @@
                         }
                     });
 
-                    $("#muteVideoToggle").change(function () {
+                    $muteAudioToggle.bootstrapSwitch({
+                        on: 'on',
+                        off: 'off',
+                        size: 'md'
+                    });
+
+                    var $muteVideoToggle = $("#muteVideoToggle");
+                    $muteVideoToggle.change(function () {
                         if (this.checked) {
                             muteVideo();
                         } else {
@@ -182,13 +190,7 @@
                         }
                     });
 
-                    $("#muteAudioToggle").bootstrapSwitch({
-                        on: 'on',
-                        off: 'off',
-                        size: 'md'
-                    });
-
-                    $("#muteVideoToggle").bootstrapSwitch({
+                    $muteVideoToggle.bootstrapSwitch({
                         on: 'on',
                         off: 'off',
                         size: 'md'
