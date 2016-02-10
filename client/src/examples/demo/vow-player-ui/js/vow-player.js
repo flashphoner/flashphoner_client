@@ -80,6 +80,7 @@ function connectionStatusListener(event) {
 function streamStatusListener(event) {
     console.log(event.status);
     if (event.status == StreamStatus.Failed) {
+        onPaused();
     } else if (event.status == StreamStatus.Stoped) {
     } else if (event.status == StreamStatus.Playing){
         onPlaying();
