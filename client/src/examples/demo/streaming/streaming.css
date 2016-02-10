@@ -26,6 +26,7 @@ legend.scheduler-border {
 .fp-flashVideoWrapper {
     position: absolute;
     border: solid 1px;
+    left: 85px;
     width: 320px;
     height: 240px;
 }
