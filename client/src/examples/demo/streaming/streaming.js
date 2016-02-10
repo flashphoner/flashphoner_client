@@ -1,6 +1,5 @@
 //Init WCS JavaScript API
 var f = Flashphoner.getInstance();
-var mediaProvider;
 
 //Filename of recorded file
 var recordFileName;
@@ -51,20 +50,19 @@ function init_page() {
             } else {
                 disconnect();
             }
+            $(this).prop('disabled',true);
         }
     );
 
     $("#publishBtn").prop('disabled', true).click(function () {
             var state = $("#publishBtn").text();
             if (state == "Start") {
-                if (!checkForEmptyField('#publishStream')) {
-                    return false
-                }
-                ;
+                if (!checkForEmptyField('#publishStream', '#publishForm')) { return false };
                 publishStream();
             } else {
                 unPublishStream();
             }
+            $(this).prop('disabled',true);
         }
     );
 
@@ -72,14 +70,12 @@ function init_page() {
             var state = $("#playBtn").text();
             var streamName = $("#publishStream").val();
             if (state == "Start") {
-                if (!checkForEmptyField('#playStream', '#playForm')) {
-                    return false
-                }
-                ;
+                if (!checkForEmptyField('#playStream', '#playForm')) { return false };
                 playStream();
             } else {
                 stopStream();
             }
+            $(this).prop('disabled',true);
         }
     );
 
@@ -165,8 +161,7 @@ function connectionStatusListener(event) {
     trace(event.status);
     if (event.status == ConnectionStatus.Established) {
         trace('Connection has been established. You can start a new call.');
-        $("#connectBtn").text("Disconnect");
-        mediaProvider = event.mediaProviders;
+        $("#connectBtn").text("Disconnect").prop('disabled',false);
         $("#publishBtn").prop('disabled', false);
         $("#playBtn").prop('disabled', false);
     } else {
@@ -175,10 +170,7 @@ function connectionStatusListener(event) {
                 showDownloadLink(recordFileName);
             }
         }
-        $("#publishBtn").text("Start").prop('disabled', true);
-        $("#playBtn").text("Start").prop('disabled', true);
-        $("#publishStatus").text("");
-        $("#playStatus").text("");
+        resetStates();
     }
     setConnectionStatus(event.status);
 }
@@ -189,34 +181,34 @@ function streamStatusListener(event) {
     switch (event.status) {
         case StreamStatus.Publishing:
             setPublishStatus(event.status);
-            $("#publishBtn").text("Stop");
+            $("#publishBtn").text("Stop").prop('disabled',false);
             if (record) {
                 recordFileName = event.recordName;
             }
             break;
         case StreamStatus.Unpublished:
             setPublishStatus(event.status);
-            $("#publishBtn").text("Start");
+            $("#publishBtn").text("Start").prop('disabled',false);
             if (record) {
                 showDownloadLink(recordFileName);
             }
             break;
         case StreamStatus.Playing:
             setPlaybackStatus(event.status);
-            $("#playBtn").text("Stop");
+            $("#playBtn").text("Stop").prop('disabled',false);
             break;
         case StreamStatus.Stoped:
         case StreamStatus.Paused:
             setPlaybackStatus(event.status);
-            $("#playBtn").text("Start");
+            $("#playBtn").text("Start").prop('disabled',false);
             break;
         case StreamStatus.Failed:
             if (event.published) {
                 setPublishStatus(event.status);
-                $("#publishBtn").text("Start");
+                $("#publishBtn").text("Start").prop('disabled',false);
             } else {
                 setPlaybackStatus(event.status);
-                $("#playBtn").text("Start");
+                $("#playBtn").text("Start").prop('disabled',false);
             }
             break;
         default:
@@ -246,20 +238,16 @@ function showDownloadLink(name) {
 
 // Set Connection Status
 function setConnectionStatus(status) {
-
-    $("#connectionStatus").text(status);
-    $("#connectionStatus").className = '';
-
     if (status == "ESTABLISHED") {
-        $("#connectionStatus").attr("class", "text-success");
+        $("#connectionStatus").text(status).removeClass().attr("class","text-success");
     }
 
     if (status == "DISCONNECTED") {
-        $("#connectionStatus").attr("class", "text-muted");
+        $("#connectionStatus").text(status).removeClass().attr("class","text-muted");
     }
 
     if (status == "FAILED") {
-        $("#connectionStatus").attr("class", "text-danger");
+        $("#connectionStatus").text(status).removeClass().attr("class","text-danger");
     }
 }
 
@@ -297,20 +285,16 @@ function setPublishStatus(status) {
 
 // Set Stream Status
 function setPlaybackStatus(status) {
-
-    $("#playStatus").text(status);
-    $("#playStatus").className = '';
-
     if (status == "PLAYING") {
-        $("#playStatus").attr("class", "text-success");
+        $("#playStatus").text(status).removeClass().attr("class","text-success");
     }
 
     if (status == "STOPPED") {
-        $("#playStatus").attr("class", "text-muted");
+        $("#playStatus").text(status).removeClass().attr("class","text-muted");
     }
 
     if (status == "FAILED") {
-        $("#playStatus").attr("class", "text-danger");
+        $("#playStatus").text(status).removeClass().attr("class","text-danger");
     }
 }
 
@@ -330,4 +314,13 @@ function notEmpty(obj) {
         return true;
     }
     return false;
+}
+
+// Reset button's and field's state
+function resetStates() {
+    $("#connectBtn").text("Connect").prop('disabled',false);
+    $("#publishBtn").text("Start").prop('disabled',true);
+    $("#playBtn").text("Start").prop('disabled',true);
+    $("#publishStatus").text("");
+    $("#playStatus").text("");
 }
