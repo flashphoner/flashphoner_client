@@ -25,6 +25,7 @@ function initOnLoad() {
             } else {
                 disconnect();
             }
+
         }
     );
 
@@ -57,14 +58,14 @@ function disconnect() {
 function connectionStatusListener(event) {
     if (event.status == ConnectionStatus.Established) {
         console.log('Connection has been established.');
-        $("#connectBtn").text("Disconnect");
+        $("#connectBtn").text("Disconnect").prop('disabled', false);
         $("#sendBtn").prop('disabled', false);
     } else if (event.status == ConnectionStatus.Disconnected) {
         console.log("Disconnected");
-        $("#connectBtn").text("Connect");
+        $("#connectBtn").text("Connect").prop('disabled', false);
         $("#sendBtn").prop('disabled', true);
     } else if (event.status == ConnectionStatus.Failed) {
-        $("#connectBtn").text("Connect");
+        $("#connectBtn").text("Connect").prop('disabled', false);
         f.disconnect();
         $("#sendBtn").prop('disabled', true);
     }
@@ -97,20 +98,16 @@ function dataEventListener(event) {
 
 // Set connection status and display corresponding view
 function setConnectionStatus(status) {
-
-    $("#connectionStatus").text(status);
-    $("#connectionStatus").className='';
-
     if (status == "ESTABLISHED") {
-        $("#connectionStatus").attr("class","text-success");
+        $("#connectionStatus").text(status).removeClass().attr("class","text-success");
     }
 
     if (status == "DISCONNECTED") {
-        $("#connectionStatus").attr("class","text-muted");
+        $("#connectionStatus").text(status).removeClass().attr("class","text-muted");
     }
 
     if (status == "FAILED") {
-        $("#connectionStatus").attr("class","text-danger");
+        $("#connectionStatus").text(status).removeClass().attr("class","text-danger");
     }
 }
 
@@ -135,4 +132,15 @@ function setURL() {
 function field(name) {
     var field = document.getElementById(name).value;
     return field;
+}
+
+// Check field for empty string
+function checkForEmptyField(checkField,alertDiv) {
+    if(!$(checkField).val()) {
+        $(alertDiv).addClass("has-error");
+        return false;
+    } else {
+        $(alertDiv).removeClass("has-error");
+        return true;
+    }
 }

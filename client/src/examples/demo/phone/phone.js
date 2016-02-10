@@ -21,16 +21,18 @@ function page_init(){
             } else {
                 disconnect();
             }
+            $(this).prop('disabled', true);
         }
     );
 
-    $("#callBtn").click(function () {
+    $("#callBtn").prop('disabled', true).click(function () {
             var state = getCallButtonText();
             if (state == "Call") {
                 call();
             } else {
                 hangup();
             }
+            $(this).prop('disabled', true);
         }
     );
 
@@ -74,20 +76,16 @@ function connect() {
 
 // Set connection status and display corresponding view
 function setStatus(status) {
-
-    $("#regStatus").text(status);
-    $("#regStatus").className='';
-
     if (status == "REGISTERED") {
-        $("#regStatus").attr("class","text-success");
+        $("#regStatus").text(status).removeClass().attr("class","text-success");
     }
 
     if (status == "DISCONNECTED") {
-        $("#regStatus").attr("class","text-muted");
+        $("#regStatus").text(status).removeClass().attr("class","text-muted");
     }
 
     if (status == "FAILED") {
-        $("#regStatus").attr("class","text-danger");
+        $("#regStatus").text(status).removeClass().attr("class","text-danger");
     }
 }
 
@@ -95,8 +93,7 @@ function setStatus(status) {
 function showIncoming(caller){
     $("#outgoingCall").hide();
     $("#incomingCall").show();
-    $("#incomingCallAlert").show();
-    $("#incomingCallAlert").text("You have a new call from "+caller);
+    $("#incomingCallAlert").show().text("You have a new call from "+caller);
     $("#answerBtn").show();
 }
 
@@ -114,41 +111,37 @@ function showOutgoing(){
 // Display view of answered call
 function showAnswered(){
     $("#answerBtn").hide();
-    $("#incomingCallAlert").hide();
-    $("#incomingCallAlert").text("");
+    $("#incomingCallAlert").hide().text("");
 }
 
 // Set call status and display corresponding view
 function setCallStatus(status) {
 
-    $("#callStatus").text(status);
-    $("#callStatus").className='';
-
     if (status == "TRYING") {
-        $("#callStatus").attr("class","text-primary");
+        $("#callStatus").text(status).removeClass().attr("class","text-primary");
     }
 
     if (status == "RING") {
-        $("#callStatus").attr("class","text-primary");
+        $("#callStatus").text(status).removeClass().attr("class","text-primary");
     }
 
     if (status == "ESTABLISHED") {
-        $("#callStatus").attr("class","text-success");
+        $("#callStatus").text(status).removeClass().attr("class","text-success");
     }
 
     if (status == "FAILED") {
-        $("#callStatus").attr("class","text-danger");
+        $("#callStatus").text(status).removeClass().attr("class","text-danger");
     }
 
     if (status == "FINISH") {
-        $("#callStatus").attr("class","text-muted");
+        $("#callStatus").text(status).removeClass().attr("class","text-muted");
     }
 
 }
 
 // Getters and setters for call and connection button text
 function setCallButtonText(text) {
-    return $("#callBtn").text(text);
+    return $("#callBtn").text(text).prop('disabled', false);
 }
 
 function getCallButtonText() {
@@ -160,12 +153,14 @@ function getConnectionButtonText(text) {
 }
 
 function setConnectionButtonText(text) {
-    $("#connectBtn").text(text);
+    $("#connectBtn").text(text).prop('disabled', false);
 }
 
 // Disconnect
 function disconnect() {
     f.disconnect();
+    setConnectionButtonText("Connect")
+    setStatus("NOT REGISTERED");
 }
 
 // Hangup current call
@@ -203,25 +198,24 @@ function unmuteVideo() {
 
 //Connection Status
 function connectionStatusListener(event) {
+    $("#callBtn").prop('disabled', false);
     trace(event.status);
     if (event.status == ConnectionStatus.Established) {
         trace('Connection has been established. You can start a new call.');
         setConnectionButtonText("Disconnect");
-    } else if (event.status == ConnectionStatus.Disconnected ||
-        event.status == ConnectionStatus.Failed) {
-        setConnectionButtonText("Connect");
-        setStatus("NOT REGISTERED");
-        setCallStatus(CallStatus.FINISH);
-        showOutgoing();
-        setCallButtonText("Call");
+    } else {
+        resetStates();
     }
     setStatus(event.status);
 }
 
 //Registration Status
 function registrationStatusListener(event) {
+    $("#callBtn").prop('disabled', false);
     if (event.status == ConnectionStatus.Registered) {
         setConnectionButtonText("Disconnect");
+    } else {
+        resetStates();
     }
     setStatus(event.status);
     trace(event.status);
@@ -329,4 +323,15 @@ function detectFlash() {
     if (!hasFlash) {
         $("#notifyFlash").text("Your browser doesn't support the Flash technology necessary for work of an example");
     }
+}
+
+// Reset button's and field's state
+function resetStates() {
+    $("#connectBtn").text("Connect").prop('disabled',false);
+    $("#callBtn").text("Call").prop('disabled',true);
+    $("#callStatus").text("").removeClass();
+    $("#outgoingCall").show();
+    $("#incomingCall").hide();
+    $("#incomingCallAlert").hide().text("");
+    $("#answerBtn").hide();
 }

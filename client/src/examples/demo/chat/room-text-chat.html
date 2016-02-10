@@ -17,6 +17,7 @@
     <script src="../../../dependencies/bootstrap/js/bootstrap.js"></script>
     <script>
         function connect() {
+            if (!checkForEmptyField('#login', '#loginForm') || !checkForEmptyField('#room', '#showRoom')) { return false };
             f.connect({
                 login: field("login"),
                 room: field("room"),

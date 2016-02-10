@@ -26,10 +26,7 @@ function init_page() {
             } else {
                 hangup();
             }
-        }
-    );
-    $("#showDialpad").click(function () {
-            $("#showDialpad").text(($(this).text() == "Show dialpad") ? "Hide dialpad" : "Show dialpad");
+            $(this).prop('disabled',true);
         }
     );
     // Set fields using cookies
@@ -41,7 +38,7 @@ function init_page() {
     $("#rtmpStream").val(getCookie("rtmpStream"));
 
     $("#dtmfBtn").prop('disabled',true);
-};
+}
 
 function loadPlayer() {
     var attributes = {};
@@ -78,9 +75,9 @@ function sendREST(url, data) {
 
 function handleAjaxError(jqXHR, textStatus, errorThrown) {
     $("#callStatus").text("FINISHED");
-    $("#callBtn").text("Call").removeClass("btn-danger").addClass("btn-success");
+    $("#callBtn").text("Call").removeClass("btn-danger").addClass("btn-success").prop('disabled',false);
     $("#dtmfBtn").prop('disabled',true);
-    setCallStatus("FINISHED")
+    setCallStatus("FINISHED");
     stopCheckStatus();
 }
 
@@ -91,7 +88,7 @@ function handleAjaxSuccess(data, textStatus, jqXHR) {
             var response = JSON.parse(jqXHR.responseText);
         } else {
             $("#callStatus").text(jqXHR.responseText);
-            $("#callBtn").text("Hangup").removeClass("btn-success").addClass("btn-danger");
+            $("#callBtn").text("Hangup").removeClass("btn-success").addClass("btn-danger").prop('disabled',false);
             $("#dtmfBtn").prop('disabled',false);
             setCallStatus(jqXHR.responseText);
         }
@@ -104,7 +101,7 @@ function isJSON(str) {
         JSON.parse(str);
     } catch(e) {
         return false;
-    };
+    }
     return true;
 }
 
@@ -270,7 +267,6 @@ function field(name) {
 }
 
 function setCookie(c_name, value) {
-    console.log("set cookie: "+c_name+" value "+value);
     var exdate = new Date();
     exdate.setDate(exdate.getDate() + 100);
     var c_value = encodeURI(value) + "; expires=" + exdate.toUTCString();
@@ -294,14 +290,12 @@ function getCookie (c_name) {
 // Set call status and display corresponding view
 function setCallStatus(status) {
 
-    $("#callStatus").className='';
-
     if (status == "ESTABLISHED") {
-        $("#callStatus").attr("class","text-success");
+        $("#callStatus").removeClass().attr("class","text-success");
     }
 
     if (status == "FINISHED") {
-        $("#callStatus").attr("class","text-muted");
+        $("#callStatus").removeClass().attr("class","text-muted");
     }
 
 }
