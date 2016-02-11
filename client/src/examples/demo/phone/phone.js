@@ -102,10 +102,12 @@ function showOutgoing(){
     $("#incomingCall").hide();
     $("#incomingCallAlert").hide();
     $("#outgoingCall").show();
-    $muteAudioToggle.attr("disabled","").removeAttr("checked");
-    $muteAudioToggle.trigger('change');
-    $muteVideoToggle.attr("disabled", "").removeAttr("checked");
-    $muteVideoToggle.trigger('change');
+    if (currentCall.hasVideo) {
+        $muteAudioToggle.attr("disabled", "").removeAttr("checked");
+        $muteAudioToggle.trigger('change');
+        $muteVideoToggle.attr("disabled", "").removeAttr("checked");
+        $muteVideoToggle.trigger('change');
+    }
 }
 
 // Display view of answered call
@@ -141,7 +143,7 @@ function setCallStatus(status) {
 
 // Getters and setters for call and connection button text
 function setCallButtonText(text) {
-    return $("#callBtn").text(text).prop('disabled', false);
+    $("#callBtn").text(text).prop('disabled', false);
 }
 
 function getCallButtonText() {
