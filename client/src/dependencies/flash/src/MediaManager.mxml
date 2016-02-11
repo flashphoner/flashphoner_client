@@ -116,6 +116,11 @@ This code and accompanying materials also available under LGPL and MPL license f
 			
 			private function onMicrophoneStatus(event:StatusEvent):void {
 				Logger.info("onMicrophoneStatus " + event.code);
+				if (event.code == "Microphone.Unmuted") {
+   					openSettingsButton.visible = false;
+                } else if (event.code == "Microphone.Muted") {
+                    openSettingsButton.visible = true;
+                }
 			}
 			
 			public function changeRelationMyVideo(relation:Number):void{
@@ -125,17 +130,12 @@ This code and accompanying materials also available under LGPL and MPL license f
 			protected function onOpenSettings(event:MouseEvent):void
 			{
 				Security.showSettings(SecurityPanel.PRIVACY);
-				var mic:Microphone = Microphone.getMicrophone();
-				mic.addEventListener(StatusEvent.STATUS, this.showSettingsButton);
-			}
-			private function showSettingsButton(event:StatusEvent):void {
-				if (event.code == "Microphone.Unmuted") {
-					openSettingsButton.visible = false;
+				var mic:Microphone = Microphone.getMicrophone(flashAPI.getMicIndex());
+				if (mic != null) {
+				    mic.addEventListener(StatusEvent.STATUS, onMicrophoneStatus);
 				}
-				
 			}
-			
-		]]>       
+		]]>
     </fx:Script>
 	<!--
 	<mx:TextArea id="messageAccess" editable="false" text="To do that, you should allow the camera and microphone. Open Security Panel and allow access to devices." width="185" height="96" fontSize="12" textAlign="center" x="10" y="13" borderThickness="0"/>
