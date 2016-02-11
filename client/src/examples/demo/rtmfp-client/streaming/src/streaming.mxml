@@ -138,6 +138,12 @@
 			 * *************************
 			 **/			 
 			private function publish():void{
+				if (publishStreamName.text == "") {
+					publishStatus.text = "Empty stream name";
+					publishStatus.setStyle("color","#FF0000");
+					return;
+				}
+				publishStatus.setStyle("color","#000000");
 				Logger.info("publish audio: "+publishAudio.selected+" video: "+publishVideo.selected)
 				publishStream = new NetStream(nc);
 				if (publishAudio.selected){
@@ -190,6 +196,12 @@
 			 * *************************
 			 **/
 			private function play():void{
+				if (playStreamName.text == "") {
+					playStatus.text = "Empty stream name";
+					playStatus.setStyle("color","#ff0000");
+					return;
+				}
+				playStatus.setStyle("color","#000000");
 				Logger.info("play");
 				subscribeStream = new NetStream(nc);
 				addListenerAndPlay();
