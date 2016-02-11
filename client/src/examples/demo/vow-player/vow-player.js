@@ -53,12 +53,11 @@ $(document).ready(function () {
     $("#playBtn").click(function () {
         var str = $("#playBtn").text();
         if (str == "Play") {
-            if ($("#streamId").val()) {
-                disablePlayBtn();
-                //play a sound to enable mobile loudspeakers
-                playFirstSound();
-                playStream();
-            }
+            if (!checkForEmptyField('#streamId', '#playForm')) { return false };
+            disablePlayBtn();
+            //play a sound to enable mobile loudspeakers
+            playFirstSound();
+            playStream();
         } else if (str == "Stop") {
             disablePlayBtn();
             stopStream();
@@ -420,3 +419,14 @@ var urlParams;
     while (match = search.exec(query))
         urlParams[decode(match[1])] = decode(match[2]);
 })();
+
+// Check field for empty string
+function checkForEmptyField(checkField, alertDiv) {
+    if (!$(checkField).val()) {
+        $(alertDiv).addClass("has-error");
+        return false;
+    } else {
+        $(alertDiv).removeClass("has-error");
+        return true;
+    }
+}
