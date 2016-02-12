@@ -37,6 +37,10 @@ $(document).ready(function () {
 });
 
 function initOnLoad() {
+    if (detectIE()) {
+        $("#notify").modal('show');
+        return false;
+    }
     //add listeners
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);

@@ -2,6 +2,13 @@ var Streaming = function () {
     this.intervalId = -1;
 };
 
+function init() {
+    if (detectIE()) {
+        $("#notify").modal('show');
+        return false;
+    }
+}
+
 Streaming.prototype.connectionStatusListener = function (event) {
     var me = this;
     trace("Streaming - connectionStatusListener status " + event.status);

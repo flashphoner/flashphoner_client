@@ -11,6 +11,7 @@
     <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
     <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
     <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../../dependencies/js/utils.js"></script>
     <script type="text/javascript" src="../../../Flashphoner.js"></script>
     <script type="text/javascript" src="../../../dependencies/websocket-player/WSPlayer.js"></script>
     <script src="../../../dependencies/bootstrap/js/bootstrap.min.js"></script>
@@ -24,6 +25,22 @@
     <div class="row">
         <div class="col-sm-6 text-center">
             <h1>WS Player Minimal</h1>
+            <div id="notify" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h2 class="modal-title text-center text-danger">Warning!</h2>
+                        </div>
+                        <div class="modal-body text-center">
+                            <h2 class="text-primary">This player works only in Chrome, Firefox and iOS Safari browsers.</h2>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <fieldset id="connectionFieldSet" class="scheduler-border">
 
                 <legend class="scheduler-border">Stream Details</legend>

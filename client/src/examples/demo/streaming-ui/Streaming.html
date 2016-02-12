@@ -3,8 +3,12 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Styles -->
+    <link rel="stylesheet" href="../../../dependencies/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="css/styles.css"/>
+
+
 
     <style>
         .fp-demoH1 {
@@ -18,13 +22,16 @@
     </style>
 
     <!-- JQuery -->
-    <script type="text/javascript" src="../../../dependencies/jquery/jquery.js"></script>
+
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-1.12.0.js"></script>
     <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
     <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
     <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../../dependencies/js/utils.js"></script>
     <!-- ****** -->
 
     <!-- Other scripts -->
+    <script src="../../../dependencies/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../../../Flashphoner.js"></script>
     <script type="text/javascript" src="../../ConfigurationLoader.js"></script>
     <script type="text/javascript" src="ZeroClipboard.js"></script>
@@ -90,15 +97,49 @@
             $('#full').removeClass('ex-size-min').addClass('ex-size');
             $('.info-anchor').css('margin-top', '141px');
         }
+        $(function() {
+            function reposition() {
+                var modal = $(this),
+                        dialog = modal.find('.modal-dialog');
+                modal.css('display', 'block');
+
+                // Dividing by two centers the modal exactly, but dividing by three
+                // or four works better for larger screens.
+                dialog.css("margin-top", Math.max(0, ($(window).height() - dialog.height()) / 4));
+            }
+            // Reposition when a modal is shown
+            $('.modal').on('show.bs.modal', reposition);
+            // Reposition when the window is resized
+            $(window).on('resize', function() {
+                $('.modal:visible').each(reposition);
+            });
+        });
     </script>
 <head>
     <title>WebRTC Live Video And Broadcasting Client For Live events and Webinars</title>
 </head>
-<body>
+<body onload="init()">
 
 <div id="video" class="video">
 
     <h1 class="fp-demoH1">Streaming WebRTC</h1>
+
+    <div id="notify" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h2 class="modal-title text-center text-danger">Warning!</h2>
+                </div>
+                <div class="modal-body text-center">
+                    <h2 class="text-primary">Your browser doesn't support WebRTC.</h2>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="text-previu"><span></span></div>
     <div class="info-previu"><span></span></div>
