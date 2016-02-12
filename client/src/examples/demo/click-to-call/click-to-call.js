@@ -59,7 +59,9 @@ function connect() {
 
     status("");
 
-    $("#callBtn").prop('disabled', true);
+    if (!detectIE()) {
+        $("#callBtn").prop('disabled', true);
+    }
 
     if (!connected) {
         if ($("#connection").val() == null) {
@@ -77,10 +79,15 @@ function connect() {
 // Cancel the current call
 function cancel() {
     if (currentCall !== null) {
+        console.log("hangup current call");
         f.hangup(currentCall);
     }
 
-    $("#callBtn").prop('disabled', true);
+    if (!detectIE()) {
+        $("#callBtn").prop('disabled', true);
+    } else {
+        displayCallButtonAsCall();
+    }
 
     callStatus("Cancelled, try to call again.");
 }
@@ -159,7 +166,7 @@ function errorEvent(event) {
         $("#error").addClass("hidden");
     }, 3000);
 
-    displayCallButtonAsCall()
+    displayCallButtonAsCall();
 }
 
 //////////////////////////////////
