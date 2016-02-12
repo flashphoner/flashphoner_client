@@ -584,7 +584,7 @@ Flashphoner.prototype = {
         }
         me.connection.sipContactParams = me.connection.sipContactParams | me.configuration.sipContactParams;
         for (var item in me.connection) {
-            if (me.connection[item] != null && me.connection[item] != undefined) {
+            if (me.connection[item] != null && me.connection[item] != undefined && !Array.isArray(me.connection[item])) {
                 me.connection[item] = $.trim(me.connection[item]);
             }
         }
