@@ -1,20 +1,6 @@
 $(document).ready(function () {
-    loadSIPFieldSet();
+    init_page();
 });
-
-// Include Filed Set HTML
-function loadSIPFieldSet(){
-    $("#SIPFieldSet").load("sip-fieldset.html",loadRTMPFieldSet);
-}
-
-function loadRTMPFieldSet(){
-    $("#RTMPFieldSet").load("rtmp-fieldset.html",loadCallControls);
-}
-
-// Include Call Controls HTML
-function loadCallControls(){
-    $("#callControls").load("call-controls.html", init_page);
-}
 
 function init_page() {
     setURL();
@@ -271,7 +257,7 @@ function setCookie(c_name, value) {
     exdate.setDate(exdate.getDate() + 100);
     var c_value = encodeURI(value) + "; expires=" + exdate.toUTCString();
     document.cookie = c_name + "=" + c_value;
-    console.log(document.cookie);
+    //console.log(document.cookie);
     return value;
 }
 
