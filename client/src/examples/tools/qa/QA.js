@@ -25,7 +25,7 @@ function initAccess() {
 
     document.getElementById("connectButton").disabled = true;
 
-    if (mediaProvider == "VOW") {
+    if (mediaProvider == "WSPlayer") {
         connectToServer();
     } else {
         getAccess(mediaProvider, false, function () {
@@ -37,22 +37,27 @@ function initAccess() {
 function connectToServer(accountId) {
     trace("Connecting to qaApp");
     var connection = {
+        urlServer: api.configuration.urlWsServer,
         authToken: authToken,
         appKey: 'qaApp',
         mediaProviders: [mediaProvider],
         client: client
     };
 
-    if (mediaProvider == "VOW") {
-        connection.mediaProviders[0] = "Flash";
+    if (mediaProvider == "WSPlayer") {
+
+        connection.mediaProviders[0] = "WSPlayer";
         connection.useWsTunnel = true;
         connection.useBase64BinaryEncoding = false;
-        var canvas = document.getElementById('videoCanvas');
-        wsPlayer = new WebsocketPlayer(canvas, function(){}, function(){});
+
         var config = new Configuration();
+        config.wsPlayerCanvas = document.getElementById('videoCanvas');
+        config.wsPlayerReceiverPath="../../../dependencies/websocket-player/WSReceiver.js";
         config.videoWidth = 320;
         config.videoHeight = 240;
-        wsPlayer.init(config);
+        config.urlWsServer = api.configuration.urlWsServer;
+        api.init(config);
+
     }
 
     if (accountId) {
@@ -70,7 +75,7 @@ function initAPI() {
     api.addListener(WCSEvent.OnDataEvent, dataEventListener);
     api.addListener(WCSEvent.OnCallEvent, onCallListener);
     api.addListener(WCSEvent.OnMessageEvent, onMessageListener);
-    api.addListener(WCSEvent.OnBinaryEvent, binaryListener);
+
     ConfigurationLoader.getInstance(function (configuration) {
         configuration.remoteMediaElementId = 'remoteVideo';
         api.init(configuration);
@@ -117,10 +122,6 @@ function getAccess(mediaProvider, hasVideo, callbackFn) {
     api.getAccess(mediaProvider, hasVideo);
 }
 
-function binaryListener(event) {
-    wsPlayer.onDataReceived(event);
-}
-
 function call(call) {
     api.call(call);
     currentCall = call;
@@ -152,18 +153,13 @@ function isCallMediaReceived(type) {
 
 function isStreamMediaReceived(streamName, type) {
     resultReady = false;
-    if (mediaProvider == "VOW" && wsPlayer != null) {
-        var before = jQuery.extend(true, {}, wsPlayer.getStreamStatistics());
-        setTimeout(function () {
-            var after = jQuery.extend(true, {}, wsPlayer.getStreamStatistics());
-            //check for type
-            if (type == "audio") {
-                result = (after.audioBytesReceived - before.audioBytesReceived > 1000);
-            } else if (type == "video") {
-                result = (after.framesDisplayed - before.framesDisplayed > 1);
-            }
+    if (mediaProvider == "WSPlayer") {
+
+        setTimeout(function() {
+            result = api.getWSPlayerStatistics(type);
             resultReady = true;
         }, 2000);
+
     } else {
         var stream = api.publishStreams.get(streamName);
         if (!stream) {

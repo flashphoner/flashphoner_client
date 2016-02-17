@@ -853,6 +853,10 @@ Flashphoner.prototype = {
         }
     },
 
+    getWSPlayerStatistics: function (type) {
+        return this.wsPlayerMediaManager.getStreamStatistics(type);
+    },
+
     setUseProxy: function (useProxy) {
         if (this.isOpened) {
             this.webSocket.send("setUseProxy", useProxy);
