@@ -251,7 +251,7 @@ Flashphoner.prototype = {
         }
 
         if (!configuration.pathToSWF) {
-            configuration.pathToSWF = '../../dependencies/flash/MediaManager.swf';
+            configuration.pathToSWF = '../../../dependencies/flash/MediaManager.swf';
         }
 
         if (!configuration.elementIdForSWF && typeof swfobject != 'undefined') {
