@@ -183,6 +183,7 @@ function streamStatusListener(event) {
         case StreamStatus.Publishing:
             setPublishStatus(event.status);
             $("#publishBtn").text("Stop").prop('disabled',false);
+            $("#publishStream").prop('disabled',true);
             if (record) {
                 recordFileName = event.recordName;
             }
@@ -190,6 +191,7 @@ function streamStatusListener(event) {
         case StreamStatus.Unpublished:
             setPublishStatus(event.status);
             $("#publishBtn").text("Start").prop('disabled',false);
+            $("#publishStream").prop('disabled',false);
             if (record) {
                 showDownloadLink(recordFileName);
             }
@@ -197,19 +199,23 @@ function streamStatusListener(event) {
         case StreamStatus.Playing:
             setPlaybackStatus(event.status);
             $("#playBtn").text("Stop").prop('disabled',false);
+            $("#playStream").prop('disabled',true);
             break;
         case StreamStatus.Stoped:
         case StreamStatus.Paused:
             setPlaybackStatus(event.status);
             $("#playBtn").text("Start").prop('disabled',false);
+            $("#playStream").prop('disabled',false);
             break;
         case StreamStatus.Failed:
             if (event.published) {
                 setPublishStatus(event.status);
                 $("#publishBtn").text("Start").prop('disabled',false);
+                $("#publishStream").prop('disabled',false);
             } else {
                 setPlaybackStatus(event.status);
                 $("#playBtn").text("Start").prop('disabled',false);
+                $("#playStream").prop('disabled',false);
             }
             break;
         default:
@@ -324,4 +330,6 @@ function resetStates() {
     $("#playBtn").text("Start").prop('disabled',true);
     $("#publishStatus").text("");
     $("#playStatus").text("");
+    $("#publishStream").prop('disabled',false);
+    $("#playStream").prop('disabled',false);
 }
