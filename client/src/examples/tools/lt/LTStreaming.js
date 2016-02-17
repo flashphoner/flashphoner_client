@@ -12,11 +12,19 @@ function initAPI() {
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
     f.addListener(WCSEvent.OnDataEvent, dataEventListener);
     f.addListener(WCSEvent.OnBinaryEvent, binaryListener);
+
     ConfigurationLoader.getInstance(function (configuration) {
         configuration.remoteMediaElementId = 'remoteVideo';
         configuration.localMediaElementId = 'localVideo';
         configuration.elementIdForSWF = "flashVideoDiv";
-        configuration.pathToSWF = "../../dependencies/flash/MediaManager.swf";
+        configuration.pathToSWF = "../../../dependencies/flash/MediaManager.swf";
+
+        if (wsPlayerEnabled) {
+            configuration.wsPlayerCanvas = document.getElementById('videoCanvas');
+            configuration.wsPlayerReceiverPath = "../../../dependencies/websocket-player/WSReceiver.js";
+            configuration.videoWidth = 320;
+            configuration.videoHeight = 240;
+        }
         f.init(configuration);
         if (webrtcDetectedBrowser) {
             console.log("WebRTC browser");
@@ -104,7 +112,8 @@ function playStream(){
     var stream = {};
     stream.name = createUUID();
     if (wsPlayerEnabled) {
-        initWsPlayer();
+        //initWsPlayer();
+        stream.mediaProvider = MediaProvider.WSPlayer;
         stream.sdp = "v=0\r\n" +
         "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
         "c=IN IP4 0.0.0.0\r\n" +
