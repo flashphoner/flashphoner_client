@@ -160,7 +160,7 @@
 	<!-- chat -->
 	<s:TextArea id="messageText" x="35" y="382" width="251" height="67" text="Hey!"/>
 	<s:Button id="sendBtn" x="307" y="382" height="67" label="Send" click="sendMessage()" enabled="false"/>
-	<s:TextArea id="chatArea" x="35" y="144" width="341" height="136" text=""/>
+	<s:TextArea id="chatArea" x="35" y="144" width="341" height="136" editable="false" text=""/>
 	<s:TextInput id="To" x="36" y="334" width="251" text="Alice"/>
 	<s:Label x="36" y="314" width="24" text="To:"/>	
 	
