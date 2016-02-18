@@ -10,9 +10,10 @@
         .fp-FlashDiv {
             width: 218px;
             height: 138px;
-            margin-top: 5px;
-            margin-left: 350px;
-            position: absolute;
+            margin: auto;
+            /*margin-top: 85px;*/
+            /*margin-left: 175px;*/
+            /*position: absolute;*/
         }
 
         .fp-Click2CallButton {
@@ -66,22 +67,24 @@
         <div class="col-md-6 text-center">
             <h1>Click To Call</h1>
             <h2 id="notifyFlash" class="text-danger"></h2>
-            <div id="flashDivWrapper" class="fp-FlashDiv">
-                <div id="flashDiv"></div>
-            </div>
-            <button id="callBtn" type="button"
-                    class="btn btn-lg btn-success btn-block center-block fp-Click2CallButton"
-                    >Call</button>
+
+            <button id="callBtn" type="button" class="btn btn-lg btn-success btn-block center-block fp-Click2CallButton">Call</button>
+
             <div style="margin-top:10px">
                 <span id="callStatus"></span>
             </div>
         </div>
-
+        <div class="col-md-6 text-center">
+            <div id="flashDivWrapper" class="fp-FlashDiv">
+                <div id="flashDiv"></div>
+            </div>
+        </div>
     </div>
+
     <div class="row row-space" style="margin-top:50px">
         <div class="col-md-6 text-center">
 
-            <div class="form-group" style="margin-top: 30px">
+            <div class="form-group" style="margin-top: 50px">
                 <label class="pull-left" for="connection">Connection</label>
                 <textarea class="form-control fp-Click2CallCode" rows="2" id="connection"></textarea>
             </div>
