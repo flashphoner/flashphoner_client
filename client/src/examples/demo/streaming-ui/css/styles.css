@@ -245,9 +245,10 @@ background:url(../images/stop2.png);
 }
 .publish-translation > .panel-translation{
     height: 41px;
-    margin-top: 439px;
+    margin-top: 427px;
+    margin-left: 2px;
     background: none repeat scroll 0 0 rgba(0, 0, 0, 0.5);
-    width: 100%;
+    width: 624px;
     
     
 }
@@ -262,7 +263,7 @@ background:url(../images/stop2.png);
 .copy-code-button{
     background-image: url(../images/copy1.png);
     float:left;
-	width:72px;
+	width:70px;
 	height:100%;
 }
 .copy-code-button.zeroclipboard-is-hover{
@@ -270,13 +271,13 @@ background:url(../images/stop2.png);
 }
 .copy-code{
     background: #ffffff;
-    width:596px;
+    width:580px;
     height:100%;
     display: inline-block;
 }
 .copy-code > span{
     color: #000000;
-    width:508px;
+    width:495px;
     display: inline-block;
     float: left;
     font: 12px verdana;
@@ -286,7 +287,7 @@ background:url(../images/stop2.png);
 	background: url("../images/stop1.png") no-repeat scroll 9px 11px rgba(0, 0, 0, 0);
     display: inline-block;
     height: 100%;
-    width: 39px;
+    width: 30px;
     position:relative;
 }
 .stop-x:hover{
