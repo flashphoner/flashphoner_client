@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Streaming min</title>
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <!-- ****** -->
+
+    <script type="text/javascript" src="../../../dependencies/swf/swfobject.js"></script>
+    <!-- WCS JavaScript API -->
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+
+    <!-- Minimum script for calls -->
+    <script type="text/javascript" src="Screen-sharing.js"></script>
+    <!--link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/nlbaajplpmleofphigmgaifhoikjmbkg"-->
+    <!-- Screen sharing extension adapter -->
+
+</head>
+<!-- Establish connection on page load -->
+<body onload="initAPI()">
+
+<h1>Streaming Minimal Code</h1>
+
+<p>WCS Server URL: <input id="urlServer" type="text" value=""/></p>
+
+<p>Stream name: <input id="streamName" type="text" value="streamName"/><p>
+
+<p>Screen sharing stream name: <input id="screenSharingStreamName" type="text" value="screenSharingStream"/><p>
+
+<p>
+    <a href="#" on onclick="connect();return false">connect</a>
+    <a href="#" on onclick="publishStream();return false">publish_stream</a>
+    <a href="#" on onclick="unPublishStream();return false">unpublish_stream</a>
+    <a href="#" on onclick="playStream();return false">play_stream</a>
+    <a href="#" on onclick="stopStream();return false">stop_stream</a>
+</p>
+
+<p>
+    <a href="#" on onclick="shareScreen();return false">share_screen</a>
+    <a href="#" on onclick="stopSharing();return false">stop_sharing</a>
+</p>
+
+<div id="flashVideoWrapper"
+     style=" width:320px; height:240px; position: absolute; left: 20px; top: 260px; border: 1px double black;">
+    <div id="flashVideoDiv"></div>
+</div>
+<video id="remoteVideo" width="320" height="240" autoplay
+       style="position: absolute; left: 20px; top: 260px; border: 1px double black;"></video>
+<video id="localVideo" width="80" height="60" autoplay style="position: absolute; left: 20px; top: 260px;"></video>
+<video id="localScreen" width="80" height="60" autoplay style="position: absolute; left: 100px; top: 260px;"></video>
+</body>
+</html>
