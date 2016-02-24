@@ -22,6 +22,7 @@ function Flashphoner() {
     this.mediaProviders = new DataMap();
     this.intervalId = -1;
     this.firefoxCodecReplaicer = {"pcma": "PCMA", "pcmu": "PCMU", "g722": "G722", "OPUS": "opus", "SHA-256": "sha-256"};
+    this.firefoxScreenSharingExtensionInstalled = false;
 }
 
 Flashphoner.getInstance = function () {
@@ -1016,40 +1017,41 @@ Flashphoner.prototype = {
         }
 
         me.checkAndGetAccess(stream.mediaProvider, stream.hasVideo, function () {
-                if (MediaProvider.WebRTC == stream.mediaProvider) {
-                    me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined));
+            if (MediaProvider.WebRTC == stream.mediaProvider) {
+                me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined));
 
-                    me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
-                        trace("Publish name " + stream.name);
-                        if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
-                            sdp = me.stripCodecsSDP(sdp, true);
-                            console.log("New SDP: " + sdp);
-                        }
-                        stream.sdp = me.removeCandidatesFromSDP(sdp);
-                        me.webSocket.send("publishStream", stream);
-                        me.publishStreams.add(stream.name, stream);
-                    }, true, stream.hasVideo);
-                } else if (MediaProvider.Flash == stream.mediaProvider) {
-                    //todo add pcma/pcmu
-                    stream.sdp = "v=0\r\n" +
-                        "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
-                        "c=IN IP4 0.0.0.0\r\n" +
-                        "t=0 0\r\n" +
-                        "a=sdplang:en\r\n"+
-                        "m=video 0 RTP/AVP 112\r\n" +
-                        "a=rtpmap:112 H264/90000\r\n" +
-                        "a=fmtp:112 packetization-mode=1; profile-level-id=420020\r\n" +
-                        "a=sendonly\r\n" +
-                        "m=audio 0 RTP/AVP 0 8 100\r\n" +
-                        "a=rtpmap:0 PCMU/8000\r\n" +
-                        "a=rtpmap:8 PCMA/8000\r\n" +
-                        "a=rtpmap:100 SPEEX/16000\r\n" +
-                        "a=sendonly\r\n";
+                me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
+                    trace("Publish name " + stream.name);
+                    if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
+                        sdp = me.stripCodecsSDP(sdp, true);
+                        console.log("New SDP: " + sdp);
+                    }
+                    stream.sdp = me.removeCandidatesFromSDP(sdp);
                     me.webSocket.send("publishStream", stream);
                     me.publishStreams.add(stream.name, stream);
-                    me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo);
-                }
+                }, true, stream.hasVideo);
+            } else if (MediaProvider.Flash == stream.mediaProvider) {
+                //todo add pcma/pcmu
+                stream.sdp = "v=0\r\n" +
+                    "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
+                    "c=IN IP4 0.0.0.0\r\n" +
+                    "t=0 0\r\n" +
+                    "a=sdplang:en\r\n" +
+                    "m=video 0 RTP/AVP 112\r\n" +
+                    "a=rtpmap:112 H264/90000\r\n" +
+                    "a=fmtp:112 packetization-mode=1; profile-level-id=420020\r\n" +
+                    "a=sendonly\r\n" +
+                    "m=audio 0 RTP/AVP 0 8 100\r\n" +
+                    "a=rtpmap:0 PCMU/8000\r\n" +
+                    "a=rtpmap:8 PCMA/8000\r\n" +
+                    "a=rtpmap:100 SPEEX/16000\r\n" +
+                    "a=sendonly\r\n";
+                me.webSocket.send("publishStream", stream);
+                me.publishStreams.add(stream.name, stream);
+                me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo);
+            }
         }, []);
+
     },
 
     unPublishStream: function (stream) {
@@ -1064,6 +1066,39 @@ Flashphoner.prototype = {
             }
             me.webSocket.send("unPublishStream", removedStream);
         }
+    },
+
+    shareScreen: function (stream, extensionId) {
+        console.log("Share screen with name " + stream.name);
+        var me = this;
+        var mediaSessionId = createUUID();
+
+        stream.mediaSessionId = mediaSessionId;
+        stream.published = true;
+        if (stream.record == undefined) {
+            stream.record = false;
+        }
+        if (stream.hasVideo == undefined) {
+            stream.hasVideo = true;
+        }
+
+        stream.mediaProvider = MediaProvider.WebRTC;
+        me.getScreenAccess(extensionId, function(response) {
+            if (response.success) {
+                me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined));
+
+                me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
+                    trace("Publish name for screen sharing " + stream.name);
+                    if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
+                        sdp = me.stripCodecsSDP(sdp, true);
+                        console.log("New SDP: " + sdp);
+                    }
+                    stream.sdp = me.removeCandidatesFromSDP(sdp);
+                    me.webSocket.send("publishStream", stream);
+                    me.publishStreams.add(stream.name, stream);
+                }, true, stream.hasVideo, false, true);
+            }
+        });
     },
 
     playStream: function (stream) {
@@ -1308,6 +1343,10 @@ Flashphoner.prototype = {
         return result;
     },
 
+    getScreenAccess: function (extensionId, callback) {
+        this.webRtcMediaManager.getScreenAccess(extensionId, callback);
+    },
+
     checkAndGetAccess: function (mediaProvider, hasVideo, func, args) {
         var me = this;
         if (args === undefined) {
@@ -1441,9 +1480,9 @@ WebRtcMediaManager.prototype.receivedEmptyRemoteSDP = function (id) {
     return !webRtcMediaConnection || webRtcMediaConnection.lastReceivedSdp == "";
 };
 
-WebRtcMediaManager.prototype.createOffer = function (id, callback, hasAudio, hasVideo, receiveVideo) {
+WebRtcMediaManager.prototype.createOffer = function (id, callback, hasAudio, hasVideo, receiveVideo, screenCapture) {
     var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
-    webRtcMediaConnection.createOffer(callback, hasAudio, hasVideo, receiveVideo);
+    webRtcMediaConnection.createOffer(callback, hasAudio, hasVideo, receiveVideo, screenCapture);
 };
 
 WebRtcMediaManager.prototype.createAnswer = function (id, callback, hasVideo) {
@@ -1539,6 +1578,99 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
     }
     return true;
 };
+
+WebRtcMediaManager.prototype.getScreenAccess = function (extensionId, callback) {
+    var me = this;
+    if (Flashphoner.getInstance().isChrome()) {
+        chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
+            if (response) {
+                chrome.runtime.sendMessage(extensionId, {type: "getSourceId"}, function (response) {
+                    if (response.error) {
+                        var status = {
+                            status: WCSError.SCREEN_ACCESS_PROBLEM,
+                            info: "Permission denied"
+                        };
+                        Flashphoner.getInstance().invokeProblem(status);
+                    } else {
+                        var screen_constraints = {
+                            audio: false,
+                            video: {
+                                mandatory: {
+                                    maxWidth: window.screen.width > 1920 ? window.screen.width : 1920,
+                                    maxHeight: window.screen.height > 1080 ? window.screen.height : 1080,
+                                    chromeMediaSourceId: response.sourceId,
+                                    chromeMediaSource: "desktop"
+                                },
+                                optional: []
+                            }
+                        };
+                        getUserMedia(screen_constraints, function (stream) {
+                                var localMediaElement2 = getElement(Flashphoner.getInstance().configuration.localMediaElementId2);
+                                if (localMediaElement2) {
+                                    attachMediaStream(localMediaElement2, stream);
+                                }
+                                me.localScreenCaptureStream = stream;
+                                callback({success: true});
+                            }, function (error) {
+                                trace("Failed to get access to screen capture. Error code was " + error.code + ".");
+                                callback({success: false});
+                                var status = {
+                                    status: WCSError.SCREEN_ACCESS_PROBLEM,
+                                    info: "Failed to get access to screen capture. Error code was " + error.code + "."
+                                };
+                                Flashphoner.getInstance().invokeProblem(status);
+                            }
+                        );
+                    }
+                });
+            } else {
+                var status = {
+                    status: WCSError.SCREEN_EXTENSION_UNAVAILABLE,
+                    info: "Screen sharing extension not available!"
+                };
+                Flashphoner.getInstance().invokeProblem(status);
+            }
+        });
+    } else if (Flashphoner.getInstance().isFF()) {
+        if (Flashphoner.getInstance().firefoxScreenSharingExtensionInstalled) {
+            var constraints = {
+                video: {
+                    mediaSource: 'window'
+                }
+            };
+            getUserMedia(constraints, function (stream) {
+                    var localMediaElement2 = getElement(Flashphoner.getInstance().configuration.localMediaElementId2);
+                    if (localMediaElement2) {
+                        attachMediaStream(localMediaElement2, stream);
+                    }
+                    me.localScreenCaptureStream = stream;
+                    callback({success: true});
+                }, function (error) {
+                    trace("Failed to get access to screen capture. Error code was " + error.code + ".");
+                    callback({success: false});
+                    var status = {
+                        status: WCSError.SCREEN_ACCESS_PROBLEM,
+                        info: "Failed to get access to screen capture. Error code was " + error.code + "."
+                    };
+                    Flashphoner.getInstance().invokeProblem(status);
+                }
+            );
+        } else {
+            var status = {
+                status: WCSError.SCREEN_EXTENSION_UNAVAILABLE,
+                info: "Screen sharing extension not available!"
+            };
+            Flashphoner.getInstance().invokeProblem(status);
+        }
+    } else {
+        var status = {
+            status: WCSError.SCREEN_EXTENSION_UNAVAILABLE,
+            info: "Screen sharing is not supported in this browser!"
+        };
+        Flashphoner.getInstance().invokeProblem(status);
+    }
+};
+
 WebRtcMediaManager.prototype.getAccessToAudio = function () {
     var me = this;
     if (!me.localAudioStream) {
@@ -1566,6 +1698,10 @@ WebRtcMediaManager.prototype.releaseCameraAndMicrophone = function () {
     if (this.localAudioVideoStream) {
         this.localAudioVideoStream.stop();
         this.localAudioVideoStream = null;
+    }
+    if (this.localScreenCaptureStream) {
+        this.localScreenCaptureStream.stop();
+        this.localScreenCaptureStream = null;
     }
     this.audioMuted = 1;
     this.videoMuted = 1;
@@ -1704,17 +1840,17 @@ WebRtcMediaConnection.prototype.waitGatheringIce = function () {
     }
 };
 
-WebRtcMediaConnection.prototype.getConstraints = function (receiveVideo) {
+WebRtcMediaConnection.prototype.getConstraints = function (receiveVideo, screenCapture) {
     var constraints = {};
     if (webrtcDetectedBrowser == "firefox") {
-        constraints = {offerToReceiveAudio: true, offerToReceiveVideo: receiveVideo};
+        constraints = {offerToReceiveAudio: !screenCapture, offerToReceiveVideo: receiveVideo};
     } else {
         constraints = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}};
     }
     return constraints;
 };
 
-WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, hasAudio, hasVideo, receiveVideo) {
+WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, hasAudio, hasVideo, receiveVideo, screenCapture) {
     trace("WebRtcMediaConnection - createOffer()");
     var me = this;
     try {
@@ -1726,7 +1862,12 @@ WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, has
         if (me.peerConnection == null) {
             trace("peerConnection is null");
             me.createPeerConnection();
-            if (hasAudio && hasVideo) {
+            if (screenCapture) {
+                if (me.webRtcMediaManager.localScreenCaptureStream) {
+                    me.peerConnection.addStream(me.webRtcMediaManager.localScreenCaptureStream);
+                    mandatory = me.getConstraints(receiveVideo, screenCapture);
+                }
+            } else if (hasAudio && hasVideo) {
                 if (me.webRtcMediaManager.videoTrack) {
                     me.webRtcMediaManager.localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
                     me.webRtcMediaManager.videoTrack = null;
@@ -2059,6 +2200,7 @@ WebRtcMediaConnection.prototype.onSetRemoteDescriptionErrorCallback = function (
 Configuration = function () {
     this.remoteMediaElementId = null;
     this.localMediaElementId = null;
+    this.localMediaElementId2 = null;
     this.elementIdForSWF = null;
     this.pathToSWF = null;
     this.urlWsServer = null;
@@ -2220,6 +2362,8 @@ var WCSError = function () {
 };
 WCSError.MIC_ACCESS_PROBLEM = "MIC_ACCESS_PROBLEM";
 WCSError.MIC_CAM_ACCESS_PROBLEM = "MIC_CAM_ACCESS_PROBLEM";
+WCSError.SCREEN_ACCESS_PROBLEM = "SCREEN_ACCESS_PROBLEM";
+WCSError.SCREEN_EXTENSION_UNAVAILABLE = "SCREEN_EXTENSION_UNAVAILABLE";
 WCSError.AUTHENTICATION_FAIL = "AUTHENTICATION_FAIL";
 WCSError.USER_NOT_AVAILABLE = "USER_NOT_AVAILABLE";
 WCSError.TOO_MANY_REGISTER_ATTEMPTS = "TOO_MANY_REGISTER_ATTEMPTS";
