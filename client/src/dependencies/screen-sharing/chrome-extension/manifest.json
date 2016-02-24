@@ -1,7 +1,7 @@
 {
   "name" : "Flashphoner Screen Sharing",
   "author": "Flashphoner",
-  "version" : "1.3",
+  "version" : "1.4",
   "manifest_version" : 2,
   "minimum_chrome_version": "34",
   "description" : "This Chrome extension is developed for http://flashphoner.com WCS Api to enable screen capture.",
@@ -12,7 +12,8 @@
   },
   "externally_connectable": {
     "matches": [
-      "https://*/*",
+      "https://flashphoner.com/*",
+      "https://*.flashphoner.com/*",
       "*://localhost/*",
       "*://127.0.0.1/*"
     ]
