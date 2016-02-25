@@ -1739,10 +1739,23 @@ WebRtcMediaConnection.prototype.close = function () {
         this.peerConnectionState = 'finished';
         if (this.peerConnection) {
             trace("WebRtcMediaConnection - PeerConnection will be closed");
-            this.peerConnection.close();
             if (this.remoteMediaElement) {
                 this.remoteMediaElement.pause();
             }
+            //check if this was screen sharing media and close it
+            if (this.webRtcMediaManager.localScreenCaptureStream) {
+                //todo use this.peerConnection.getStreamById() when available in firefox
+                var localStreams = this.peerConnection.getLocalStreams();
+                var me = this;
+                localStreams.some(function (mediaStream) {
+                    if (me.webRtcMediaManager.localScreenCaptureStream.id == mediaStream.id) {
+                        me.webRtcMediaManager.localScreenCaptureStream.getVideoTracks()[0].stop();
+                        me.webRtcMediaManager.localScreenCaptureStream = null;
+                        return true;
+                    }
+                })
+            }
+            this.peerConnection.close();
         }
     } else {
         console.log("peerConnection already closed, do nothing!");
