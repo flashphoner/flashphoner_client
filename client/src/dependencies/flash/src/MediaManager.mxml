@@ -25,13 +25,8 @@ This code and accompanying materials also available under LGPL and MPL license f
 			import com.flashphoner.api.APINotify;
 			import com.flashphoner.api.FlashAPI;
 			import com.flashphoner.api.PhoneSpeaker;
+			import com.flashphoner.util.CustomDeviceStatusListener;
 			
-			import flash.utils.setTimeout;
-			
-			import mx.binding.utils.BindingUtils;
-			import mx.controls.Alert;
-			import mx.managers.PopUpManager;
-
         	private var flashAPI:FlashAPI;
 			private var phoneSpeaker:PhoneSpeaker;
 			
@@ -41,6 +36,8 @@ This code and accompanying materials also available under LGPL and MPL license f
 			private var timer:Timer = new Timer(1000,0);
 			
 			private var count:int = 0;
+			
+			private var customDeviceStatusListener:CustomDeviceStatusListener = new CustomDeviceStatusListener();
 			
 			private function onCreationComlete():void{
 				var apiNotify:APINotify = new APINotify();
@@ -58,11 +55,22 @@ This code and accompanying materials also available under LGPL and MPL license f
 				ExternalInterface.addCallback("changeRelationMyVideo",changeRelationMyVideo);
 				
 				apiNotify.notifyFlashphonerAPILoaded();
+				
+				var fn:Function = function(e:StatusEvent):void{
+					Logger.info("mic status " + e.code);
+					if (e.code == "Microphone.Unmuted") {
+						openSettingsButton.visible = false;
+					} else if (e.code == "Microphone.Muted") {
+						openSettingsButton.visible = true;
+					}
+				};
 
-				var mic:Microphone = Microphone.getMicrophone(flashAPI.getMicIndex());
+				var mic:Microphone = Microphone.getMicrophone();
                 if (mic != null) {
-                	mic.addEventListener(StatusEvent.STATUS, onMicrophoneStatus);
+					Logger.info("mic " + mic.name);
+                	mic.addEventListener(StatusEvent.STATUS, fn, true);
                 }
+				customDeviceStatusListener.start(mic, fn);
 			}
 			
 			private function onResize(event:Event):void{
@@ -91,7 +99,6 @@ This code and accompanying materials also available under LGPL and MPL license f
 					return false;
 				}
 				if (!flashAPI.hasAccessToAudio()){
-					mic.addEventListener(StatusEvent.STATUS, onMicrophoneStatus);
 					mic.setLoopBack(true);
 					videoMy.visible = false;
 					timer.addEventListener(TimerEvent.TIMER, timerTick);
@@ -135,10 +142,6 @@ This code and accompanying materials also available under LGPL and MPL license f
 			protected function onOpenSettings(event:MouseEvent):void
 			{
 				Security.showSettings(SecurityPanel.PRIVACY);
-				var mic:Microphone = Microphone.getMicrophone(flashAPI.getMicIndex());
-				if (mic != null) {
-				    mic.addEventListener(StatusEvent.STATUS, onMicrophoneStatus);
-				}
 			}
 		]]>
     </fx:Script>
