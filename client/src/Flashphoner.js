@@ -201,6 +201,24 @@ Flashphoner.prototype = {
                 });
             };
         }
+
+        if (this.webRtcMediaManager) {
+            this.webRtcMediaManager.onLocalScreenMediaStreamEnded = function(mediaSessionId) {
+                var streams = me.publishStreams.array();
+                streams.some(function(stream) {
+                    if (stream.mediaSessionId == mediaSessionId) {
+                        stream.status = StreamStatus.LocalStreamStopped;
+                        me.invokeListener(WCSEvent.StreamStatusEvent, [
+                            stream
+                        ]);
+
+                        //stop stream
+                        me.unPublishStream(stream);
+                        return true;
+                    }
+                });
+            }
+        }
     },
 
     addListener: function (event, listener, thisArg) {
@@ -227,7 +245,7 @@ Flashphoner.prototype = {
 
             if ((!this.webRtcCallSessionId) && MediaProvider.WebRTC == call.mediaProvider) {
                 this.webRtcCallSessionId = call.callId;
-                me.webRtcMediaManager.newConnection(call.callId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, me.configuration.remoteMediaElementId));
+                me.webRtcMediaManager.newConnection(call.callId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, me.configuration.remoteMediaElementId, call.callId));
             }
 
             if (call.incoming || call.parentCallId !== undefined) {
@@ -1018,7 +1036,7 @@ Flashphoner.prototype = {
 
         me.checkAndGetAccess(stream.mediaProvider, stream.hasVideo, function () {
             if (MediaProvider.WebRTC == stream.mediaProvider) {
-                me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined));
+                me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined, mediaSessionId));
 
                 me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
                     trace("Publish name " + stream.name);
@@ -1085,7 +1103,7 @@ Flashphoner.prototype = {
         stream.mediaProvider = MediaProvider.WebRTC;
         me.getScreenAccess(extensionId, function(response) {
             if (response.success) {
-                me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined));
+                me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined, mediaSessionId));
 
                 me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
                     trace("Publish name for screen sharing " + stream.name);
@@ -1125,7 +1143,7 @@ Flashphoner.prototype = {
 
         if (MediaProvider.WebRTC == stream.mediaProvider) {
 
-            me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, stream.remoteMediaElementId || me.configuration.remoteMediaElementId));
+            me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, stream.remoteMediaElementId || me.configuration.remoteMediaElementId, mediaSessionId));
 
 
             if (stream.hasVideo == undefined) {
@@ -1409,6 +1427,7 @@ var WebRtcMediaManager = function () {
     this.audioMuted = 1;
     this.videoMuted = 1;
     this.remoteSDP = {};
+    this.onLocalScreenMediaStreamEnded = null;
 };
 
 WebRtcMediaManager.prototype.getVolume = function (id) {
@@ -1596,14 +1615,17 @@ WebRtcMediaManager.prototype.getScreenAccess = function (extensionId, callback) 
                             audio: false,
                             video: {
                                 mandatory: {
-                                    maxWidth: window.screen.width > 1920 ? window.screen.width : 1920,
-                                    maxHeight: window.screen.height > 1080 ? window.screen.height : 1080,
+                                    maxWidth: Flashphoner.getInstance().configuration.screenSharingVideoWidth,
+                                    maxHeight: Flashphoner.getInstance().configuration.screenSharingVideoHeight,
                                     chromeMediaSourceId: response.sourceId,
                                     chromeMediaSource: "desktop"
                                 },
                                 optional: []
                             }
                         };
+                        if (Flashphoner.getInstance().configuration.screenSharingVideoFps) {
+                            screen_constraints.video.mandatory.maxFrameRate = Flashphoner.getInstance().configuration.screenSharingVideoFps;
+                        }
                         getUserMedia(screen_constraints, function (stream) {
                                 var localMediaElement2 = getElement(Flashphoner.getInstance().configuration.localMediaElementId2);
                                 if (localMediaElement2) {
@@ -1635,9 +1657,18 @@ WebRtcMediaManager.prototype.getScreenAccess = function (extensionId, callback) 
         if (Flashphoner.getInstance().firefoxScreenSharingExtensionInstalled) {
             var constraints = {
                 video: {
-                    mediaSource: 'window'
+                    //can be screen, window or application
+                    //todo add to method arguments
+                    mediaSource: 'application',
+                    mandatory: {
+                        maxWidth: Flashphoner.getInstance().configuration.screenSharingVideoWidth,
+                        maxHeight: Flashphoner.getInstance().configuration.screenSharingVideoHeight
+                    }
                 }
             };
+            if (Flashphoner.getInstance().configuration.screenSharingVideoFps) {
+                constraints.video.mandatory.maxFrameRate = Flashphoner.getInstance().configuration.screenSharingVideoFps;
+            }
             getUserMedia(constraints, function (stream) {
                     var localMediaElement2 = getElement(Flashphoner.getInstance().configuration.localMediaElementId2);
                     if (localMediaElement2) {
@@ -1707,7 +1738,7 @@ WebRtcMediaManager.prototype.releaseCameraAndMicrophone = function () {
     this.videoMuted = 1;
 };
 
-var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, remoteMediaElementId) {
+var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, remoteMediaElementId, id) {
     var me = this;
     me.webRtcMediaManager = webRtcMediaManager;
     me.peerConnection = null;
@@ -1719,6 +1750,7 @@ var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, r
     me.stunServer = stunServer;
     me.useDTLS = useDTLS;
     me.lastReceivedSdp = null;
+    me.id = id;
     //stun server by default
     //commented to speedup WebRTC call establishment
     //me.stunServer = "stun.l.google.com:19302";
@@ -1879,6 +1911,11 @@ WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, has
                 if (me.webRtcMediaManager.localScreenCaptureStream) {
                     me.peerConnection.addStream(me.webRtcMediaManager.localScreenCaptureStream);
                     mandatory = me.getConstraints(receiveVideo, screenCapture);
+                    me.webRtcMediaManager.localScreenCaptureStream.onended = function(event) {
+                        if (me.peerConnectionState != 'finished') {
+                            me.webRtcMediaManager.onLocalScreenMediaStreamEnded(me.id);
+                        }
+                    }
                 }
             } else if (hasAudio && hasVideo) {
                 if (me.webRtcMediaManager.videoTrack) {
@@ -2227,6 +2264,9 @@ Configuration = function () {
 
     this.videoWidth = 640;
     this.videoHeight = 480;
+    this.screenSharingVideoWidth = 1920;
+    this.screenSharingVideoHeight = 1080;
+    this.screenSharingVideoFps = 10;
     this.forceResolution = false;
     this.audioReliable = false;
     this.videoReliable = false;
@@ -2350,6 +2390,7 @@ StreamStatus.Paused = "PAUSED";
 StreamStatus.Unpublished = "UNPUBLISHED";
 StreamStatus.Stoped = "STOPPED";
 StreamStatus.Failed = "FAILED";
+StreamStatus.LocalStreamStopped = "LOCAL_STREAM_STOPPED";
 
 var WCSEvent = function () {
 };

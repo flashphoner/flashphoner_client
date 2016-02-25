@@ -74,9 +74,12 @@ function connectionStatusListener(event) {
 
 //Connection Status
 function streamStatusListener(event) {
-    trace(event.status);
-    if (event.status == ConnectionStatus.Established){
-        trace('Connection has been established. You can start a new call.');
+    switch(event.status) {
+        case StreamStatus.LocalStreamStopped:
+            console.log("Stream " + event.name + " will be unpublished due to local media stream stop");
+            break;
+        default:
+            console.log("Stream " + event.name + " status changed to " + event.status);
     }
 }
 
