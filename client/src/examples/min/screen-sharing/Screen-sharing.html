@@ -15,7 +15,7 @@
 
     <!-- Minimum script for calls -->
     <script type="text/javascript" src="Screen-sharing.js"></script>
-    <!--link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/nlbaajplpmleofphigmgaifhoikjmbkg"-->
+    <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/nlbaajplpmleofphigmgaifhoikjmbkg">
     <!-- Screen sharing extension adapter -->
 
 </head>
@@ -41,6 +41,7 @@
 <p>
     <a href="#" on onclick="shareScreen();return false">share_screen</a>
     <a href="#" on onclick="stopSharing();return false">stop_sharing</a>
+    <input type="button" id="installExtensionButton" value="Install extension to enable screen sharing" onclick="installExtension()" style="visibility: visible;">
 </p>
 
 <div id="flashVideoWrapper"

@@ -63,6 +63,14 @@ unload(function() {
 });
 
 var tabs = require("sdk/tabs");
+
+//attach to already opened tabs
+for (let tab of tabs) {
+  tab.attach({
+    contentScript: 'if (unsafeWindow.Flashphoner) {unsafeWindow.Flashphoner.getInstance().firefoxScreenSharingExtensionInstalled = '+isDomainEnabled(tab.url)+';}'
+  });
+}
+
 tabs.on('ready', function(tab){
   tab.attach({
     contentScript: 'if (unsafeWindow.Flashphoner) {unsafeWindow.Flashphoner.getInstance().firefoxScreenSharingExtensionInstalled = '+isDomainEnabled(tab.url)+';}'

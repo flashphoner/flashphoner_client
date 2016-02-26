@@ -1365,6 +1365,20 @@ Flashphoner.prototype = {
         this.webRtcMediaManager.getScreenAccess(extensionId, callback);
     },
 
+    isScreenSharingExtensionInstalled: function(extensionId, callback) {
+        if (this.isChrome()) {
+            chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
+                if (response) {
+                    callback(true);
+                } else {
+                    callback(false);
+                }
+            });
+        } else if (this.isFF()) {
+            callback(this.firefoxScreenSharingExtensionInstalled);
+        }
+    },
+
     checkAndGetAccess: function (mediaProvider, hasVideo, func, args) {
         var me = this;
         if (args === undefined) {

@@ -1,6 +1,6 @@
 //Init WCS JavaScript API
 var f = Flashphoner.getInstance();
-
+var chromeScreenSharingExtensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 function initAPI() {
     setURL();
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
@@ -21,6 +21,19 @@ function initAPI() {
         document.getElementById('remoteVideo').style.visibility = "hidden";
         document.getElementById('flashVideoWrapper').style.visibility = "visible";
     }
+
+    //check that screen sharing extension installed
+    var installButton = document.getElementById("installExtensionButton");
+    var me = this;
+    me.checkInterval = -1;
+    var checkAccess = function(installed) {
+        if (installed) {
+            installButton.style.visibility = "hidden";
+            clearInterval(me.checkInterval);
+            me.checkInterval = -1;
+        }
+    };
+    me.checkInterval = setInterval(function(){f.isScreenSharingExtensionInstalled(chromeScreenSharingExtensionId, checkAccess)}, 500);
 }
 
 //New connection
@@ -55,7 +68,7 @@ function stopStream(){
 //Publish stream
 function shareScreen(){
     var streamName = field("screenSharingStreamName");
-    f.shareScreen({name: streamName}, "nlbaajplpmleofphigmgaifhoikjmbkg");
+    f.shareScreen({name: streamName}, chromeScreenSharingExtensionId);
 }
 
 //Stop stream publishing
@@ -114,4 +127,20 @@ function setURL() {
 
     url = proto + window.location.hostname + ":" + port;
     document.getElementById("urlServer").value = url;
+}
+
+//install extension
+function installExtension() {
+    if (f.isChrome()) {
+        chrome.webstore.install();
+    } else if (f.isFF()) {
+        var params = {
+            "Flashphoner Screen Sharing": { URL: "../../../dependencies/screen-sharing/firefox-extension/flashphoner_screen_sharing-0.0.1-fx+an.xpi",
+                IconURL: "../../../dependencies/screen-sharing/firefox-extension/icon.png",
+                Hash: "sha1:d5c83441652e01dcf5e1752da286131cd5702816",
+                toString: function () { return this.URL; }
+            }
+        };
+        InstallTrigger.install(params);
+    }
 }

@@ -2,7 +2,7 @@
   "title": "Flashphoner Screen Sharing",
   "name": "flashphoner-screen-sharing-extension",
   "id": "@flashphoner-screen-sharing-extension",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Enable screen sharing for flashphoner.com",
   "main": "index.js",
   "author": "Flashphoner",
