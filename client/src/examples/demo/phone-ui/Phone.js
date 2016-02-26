@@ -824,7 +824,7 @@ $(document).ready(function () {
         configuration.localMediaElementId = 'localMediaElement';
         configuration.remoteMediaElementId = 'remoteMediaElement';
         configuration.elementIdForSWF = "flashVideoDiv";
-        configuration.pathToSWF = "../../dependencies/flash/MediaManager.swf";
+        configuration.pathToSWF = "../../../dependencies/flash/MediaManager.swf";
 
         Flashphoner.getInstance().init(configuration);
         phone.init();
