@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="screen-sharing.css">
+    <title>Screen Sharing Minimal</title>
+    <!-- JQuery -->
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../../dependencies/js/utils.js"></script>
+    <!-- ****** -->
+
+    <script type="text/javascript" src="../../../dependencies/swf/swfobject.js"></script>
+    <!-- WCS JavaScript API -->
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+    <script src="../../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+    <!-- Minimum script for calls -->
+    <script type="text/javascript" src="screen-sharing.js"></script>
+    <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/nlbaajplpmleofphigmgaifhoikjmbkg">
+    <!-- Screen sharing extension adapter -->
+    <script>
+
+    </script>
+
+</head>
+<!-- Establish connection on page load -->
+<body onload="initAPI()">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12 text-center" style="max-width: 525px">
+                <h2 class="text-center">Screen Sharing Minimal</h2>
+                <div id="notify" class="modal fade" role="dialog">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h2 class="modal-title text-center text-danger">Warning!</h2>
+                            </div>
+                            <div class="modal-body text-center">
+                                <h2 class="text-primary">Screen sharing works only in Chrome and Firefox browsers.</h2>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <fieldset id="fieldset" class="scheduler-border fp-streamingControls">
+                    <div class="row" style="margin-top: 20px">
+                        <label class="control-label col-sm-3 fp-buttonVerticalAlign text-right" for="urlServer">WCS
+                            URL</label>
+
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="urlServer" placeholder="WCS Server URL"/>
+                        </div>
+                        <div class="col-sm-3 text-left">
+                            <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12 text-center">
+                            <span id="connectionStatus"></span>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px">
+                        <div id="publishForm" class="form-group">
+                            <label id="publishLabel" class="control-label col-sm-3 fp-buttonVerticalAlign text-right"
+                                   for="screenSharingStream">Share</label>
+
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="screenSharingStream" placeholder="Screen Sharing Stream Name"/>
+                            </div>
+                            <div class="col-sm-3 text-left">
+                                <button id="publishBtn" type="button" class="btn btn-default">Start</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12 text-center">
+                            <span id="publishStatus"></span>
+                        </div>
+                    </div>
+                    <div id="playDiv" class="row" style="margin-top:10px">
+                        <div id="playForm" class="form-group">
+                            <label class="control-label col-sm-3 fp-buttonVerticalAlign  text-right"
+                                   for="playStream">Play</label>
+
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="playStream" placeholder="Screen Sharing Stream Name""/>
+                            </div>
+                            <div class="col-sm-3 text-left">
+                                <button id="playBtn" type="button" class="btn btn-default">Start</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-12 text-center">
+                            <span id="playStatus"></span>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 text-center" style="max-width: 525px">
+                <div class="form-inline">
+                    <div class="form-group">
+                        <label class="control-label" for="fps"> FPS </label>
+                            <input type="text" class="form-control" style="width: 20% !important;" id="fps" value="10" placeholder="FPS"/>
+
+                        <label class="control-label" for="width"> Width </label>
+                            <input type="text" class="form-control" style="width: 20% !important;" id="width" value="1024" placeholder="Width"/>
+
+                        <label class="control-label" for="height"> Height </label>
+                            <input type="text" class="form-control" style="width: 20% !important;" id="height" value="768" placeholder="Height"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 text-center" style="max-width: 525px">
+                <button class="btn btn-link" type="button" id="installExtensionButton" value="Install extension to enable screen sharing"
+                onclick="installExtension()" style="visibility: visible;">Install extension to enable screen sharing</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 text-center" style="margin-top: 20px">
+                <div id="flashVideoWrapper" class="fp-flashVideoWrapper">
+                    <div id="flashVideoDiv"></div>
+                </div>
+                <video id="remoteVideo" width="320" height="240" autoplay class="fp-remoteVideo"></video>
+                <!--<video id="localVideo" width="80" height="60" autoplay class="fp-localVideo"></video>-->
+                <video id="localScreen" width="80" height="60" autoplay class="fp-localVideo"></video>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
