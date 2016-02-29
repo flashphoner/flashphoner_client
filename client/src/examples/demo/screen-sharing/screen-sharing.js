@@ -28,7 +28,7 @@ function init_page() {
 
     $("#playBtn").prop('disabled', true).click(function () {
             var state = $("#playBtn").text();
-            var streamName = $("#publishStream").val();
+            var streamName = $("#screenSharingStream").val();
             if (state == "Start") {
                 if (!checkForEmptyField('#playStream', '#playForm')) { return false };
                 playStream();
@@ -89,6 +89,12 @@ function connect(){
     setCookies();
 }
 
+//Disconnect
+function disconnect() {
+    f.disconnect();
+    $("#connectBtn").text("Connect");
+}
+
 //Play stream
 function playStream() {
     var streamName = field("playStream");
@@ -134,12 +140,12 @@ function streamStatusListener(event) {
         case StreamStatus.Publishing:
             setPublishStatus(event.status);
             $("#publishBtn").text("Stop").prop('disabled',false);
-            $("#publishStream").prop('disabled',true);
+            $("#screenSharingStream").prop('disabled',true);
             break;
         case StreamStatus.Unpublished:
             setPublishStatus(event.status);
             $("#publishBtn").text("Start").prop('disabled',false);
-            $("#publishStream").prop('disabled',false);
+            $("#screenSharingStream").prop('disabled',false);
             break;
         case StreamStatus.Playing:
             setPlaybackStatus(event.status);
@@ -156,7 +162,7 @@ function streamStatusListener(event) {
             if (event.published) {
                 setPublishStatus(event.status);
                 $("#publishBtn").text("Start").prop('disabled',false);
-                $("#publishStream").prop('disabled',false);
+                $("#screenSharingStream").prop('disabled',false);
             } else {
                 setPlaybackStatus(event.status);
                 $("#playBtn").text("Start").prop('disabled',false);
@@ -195,11 +201,11 @@ function setURL() {
     var url;
     var port;
     if (window.location.protocol == "http:") {
-        proto = "ws://"
-        port = "8080"
+        proto = "ws://";
+        port = "8080";
     } else {
-        proto = "wss://"
-        port = "8443"
+        proto = "wss://";
+        port = "8443";
     }
 
     url = proto + window.location.hostname + ":" + port;
@@ -221,6 +227,7 @@ function installExtension() {
         InstallTrigger.install(params);
     }
 }
+
 
 // Set Connection Status
 function setConnectionStatus(status) {
@@ -257,6 +264,21 @@ function setPublishStatus(status) {
     $("#publishStatus").text(status);
 }
 
+// Set Stream Status
+function setPlaybackStatus(status) {
+    if (status == "PLAYING") {
+        $("#playStatus").text(status).removeClass().attr("class","text-success");
+    }
+
+    if (status == "STOPPED") {
+        $("#playStatus").text(status).removeClass().attr("class","text-muted");
+    }
+
+    if (status == "FAILED") {
+        $("#playStatus").text(status).removeClass().attr("class","text-danger");
+    }
+}
+
 // Check field for empty string
 function checkForEmptyField(checkField, alertDiv) {
     if (!$(checkField).val()) {
@@ -274,8 +296,8 @@ function setCookies() {
         f.setCookie("urlServer", $("#urlServer").val());
     }
 
-    if (notEmpty($("#publishStream").val())) {
-        f.setCookie("publishStream", $("#publishStream").val());
+    if (notEmpty($("#screenSharingStream").val())) {
+        f.setCookie("publishStream", $("#screenSharingStream").val());
     }
 
     if (notEmpty($("#playStream").val())) {
@@ -291,7 +313,7 @@ function getCookies() {
     }
 
     if (notEmpty(f.getCookie("publishStream"))) {
-        $("#publishStream").val(decodeURIComponent(f.getCookie("publishStream")));
+        $("#screenSharingStream").val(decodeURIComponent(f.getCookie("publishStream")));
     }
 
     if (notEmpty(f.getCookie("playStream"))) {
@@ -313,6 +335,6 @@ function resetStates() {
     $("#playBtn").text("Start").prop('disabled',true);
     $("#publishStatus").text("");
     $("#playStatus").text("");
-    $("#publishStream").prop('disabled',false);
+    $("#screenSharingStream").prop('disabled',false);
     $("#playStream").prop('disabled',false);
 }
