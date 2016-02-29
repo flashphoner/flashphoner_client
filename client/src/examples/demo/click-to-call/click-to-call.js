@@ -65,10 +65,10 @@ function connect() {
 
     if (!connected) {
         if ($("#connection").val() == null) {
-            console.log("Connection body is null, trying to call default connect");
+            trace("Connection body is null, trying to call default connect");
             f.connect({urlServer: setURL(), appKey: "click2call"});
         } else {
-            console.log("Execute code from textarea");
+            trace("Execute code from textarea");
             eval($("#connection").val());
         }
     } else {
@@ -79,7 +79,7 @@ function connect() {
 // Cancel the current call
 function cancel() {
     if (currentCall !== null) {
-        console.log("hangup current call");
+        trace("hangup current call");
         f.hangup(currentCall);
     }
 
@@ -107,10 +107,10 @@ function call() {
 
     var call = new Call();
     if ($("#callee").val() == null) {
-        console.log("Callee body is null, set default callee");
+        trace("Callee body is null, set default callee");
         call.callee = "override_by_rest";
     } else {
-        console.log("Set callee from textarea");
+        trace("Set callee from textarea");
         eval($("#callee").val());
     }
 
@@ -142,6 +142,10 @@ function registrationStatusListener(event) {
 // Call Status
 function callStatusListener(event) {
     trace("callStatusListener >> " + event.status);
+
+    if ($("#callBtn").prop('disabled')) {
+        $("#callBtn").prop('disabled', false);
+    }
 
     if (event.status == CallStatus.BUSY || event.status == CallStatus.FINISH || event.status == CallStatus.FAILED) {
         displayCallButtonAsCall();
@@ -215,11 +219,11 @@ function setURL() {
     var url;
     var port;
     if (window.location.protocol == "http:") {
-        proto = "ws://"
-        port = "8080"
+        proto = "ws://";
+        port = "8080";
     } else {
-        proto = "wss://"
-        port = "8443"
+        proto = "wss://";
+        port = "8443";
     }
 
     url = proto + window.location.hostname + ":" + port;
