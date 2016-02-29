@@ -62,17 +62,18 @@ unload(function() {
   removeMyDomainOnUnInstall();
 });
 
-var tabs = require("sdk/tabs");
+var data = require("sdk/self").data;
+var pageMod = require("sdk/page-mod");
 
-//attach to already opened tabs
-for (let tab of tabs) {
-  tab.attach({
-    contentScript: 'if (unsafeWindow.Flashphoner) {unsafeWindow.Flashphoner.getInstance().firefoxScreenSharingExtensionInstalled = '+isDomainEnabled(tab.url)+';}'
-  });
-}
-
-tabs.on('ready', function(tab){
-  tab.attach({
-    contentScript: 'if (unsafeWindow.Flashphoner) {unsafeWindow.Flashphoner.getInstance().firefoxScreenSharingExtensionInstalled = '+isDomainEnabled(tab.url)+';}'
-  });
+pageMod.PageMod({
+  include: "*",
+  contentScriptFile: data.url("content-script.js"),
+  contentScriptWhen: "end",
+  attachTo: ["existing", "top", "frame"],
+  onAttach: function(worker) {
+    worker.port.on("isDomainEnabled", function(url) {
+      var ret = isDomainEnabled(url);
+      worker.port.emit("domainCheckResult", ret);
+    });
+  }
 });
