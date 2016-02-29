@@ -1673,7 +1673,7 @@ WebRtcMediaManager.prototype.getScreenAccess = function (extensionId, callback) 
                 video: {
                     //can be screen, window or application
                     //todo add to method arguments
-                    mediaSource: 'application',
+                    mediaSource: 'window',
                     mandatory: {
                         maxWidth: Flashphoner.getInstance().configuration.screenSharingVideoWidth,
                         maxHeight: Flashphoner.getInstance().configuration.screenSharingVideoHeight
