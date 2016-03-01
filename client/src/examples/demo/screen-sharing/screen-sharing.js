@@ -3,6 +3,16 @@ var f = Flashphoner.getInstance();
 var chromeScreenSharingExtensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 
 function init_page() {
+
+    if(inIframe() && f.isChrome()) {
+        $("#installExtensionButton").hide();
+        $("#installFromMarket").show();
+
+    } else {
+        $("#installExtensionButton").show();
+        $("#installFromMarket").hide();
+    }
+
     $("#connectBtn").click(function () {
             var state = $("#connectBtn").text();
             if (state == "Connect") {
@@ -70,7 +80,7 @@ function initAPI() {
     }
 
     //check that screen sharing extension installed
-    var installButton = document.getElementById("installExtensionButton");
+    var installButton = (inIframe() && f.isChrome()) ? document.getElementById("installFromMarket") : document.getElementById("installExtensionButton");
     var me = this;
     me.checkInterval = -1;
     var checkAccess = function(installed) {
@@ -228,6 +238,13 @@ function installExtension() {
     }
 }
 
+function installFromMarket() {
+    if (f.isChrome()) {
+        var url = "https://chrome.google.com/webstore/detail/flashphoner-screen-sharin/nlbaajplpmleofphigmgaifhoikjmbkg";
+        window.open(url, '_blank');
+        //window.focus();
+    }
+}
 
 // Set Connection Status
 function setConnectionStatus(status) {
@@ -337,4 +354,12 @@ function resetStates() {
     $("#playStatus").text("");
     $("#screenSharingStream").prop('disabled',false);
     $("#playStream").prop('disabled',false);
+}
+
+function inIframe () {
+    try {
+        return window.self !== window.top;
+    } catch (e) {
+        return true;
+    }
 }
