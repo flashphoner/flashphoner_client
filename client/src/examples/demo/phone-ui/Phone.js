@@ -860,6 +860,16 @@ $(document).ready(function () {
 
     // authentication
     $(".b-login input[type='button']").live("click", function () {
+        var emptyField;
+        $(".b-login :input").not(':input[type=button]').each(function(){
+            $("#"+$(this).attr('id')+'Label').css('color','');
+            if(!$(this).val()) {
+                emptyField = true;
+                $("#"+$(this).attr('id')+'Label').css('color','red');
+                return false;
+            }
+        });
+        if (emptyField) {return false};
         $(".b-display__header__login").html("Connecting");
         $(".b-login").removeClass("open").removeAttr("id");
         phone.connect();

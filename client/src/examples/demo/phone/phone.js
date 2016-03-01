@@ -17,11 +17,21 @@ function page_init(){
     $("#connectBtn").click(function () {
             var state = getConnectionButtonText();
             if (state == "Connect") {
-                connect();
+                var emptyField;
+                $("form#formConnection :input").not(':input[type=button]').each(function() {
+                   if (!checkForEmptyField('#'+$(this).attr('id'),'#'+$(this).attr('id')+'Form')) {
+                       emptyField = true;
+                       return false
+                   }
+                });
+                if (!emptyField) {
+                    connect();
+                    $(this).prop('disabled', true);
+                }
             } else {
                 disconnect();
+                $(this).prop('disabled', true);
             }
-            $(this).prop('disabled', true);
         }
     );
 
@@ -163,6 +173,13 @@ function disconnect() {
     f.disconnect();
     setConnectionButtonText("Connect")
     setStatus("NOT REGISTERED");
+}
+
+// New call
+function call() {
+    var call = new Call();
+    call.callee = field("callee");
+    currentCall = f.call(call);
 }
 
 // Hangup current call
@@ -336,4 +353,16 @@ function resetStates() {
     $("#incomingCall").hide();
     $("#incomingCallAlert").hide().text("");
     $("#answerBtn").hide();
+}
+
+// Check field for empty string
+function checkForEmptyField(checkField, alertDiv) {
+
+    if (!$(checkField).val()) {
+        $(alertDiv).addClass("has-error");
+        return false;
+    } else {
+        $(alertDiv).removeClass("has-error");
+        return true;
+    }
 }
