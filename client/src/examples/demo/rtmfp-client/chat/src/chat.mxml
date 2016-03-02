@@ -10,6 +10,12 @@
 			
 	</fx:Declarations>
 	
+	<fx:Style>
+		.header { 
+			fontSize: 36px;
+		}
+	</fx:Style>
+	
 	<fx:Script>
 		<![CDATA[
 			import flash.external.*;
@@ -150,6 +156,7 @@
 			
 		]]>
 	</fx:Script>
+	<s:Label x="115" y="10" styleName="header" text="Flash Chat"/>
 	
 	<!-- connect / disconnect -->
 	<s:Button id="connectBtn" x="196" y="88" width="86" label="Login" click="connect()"/>
