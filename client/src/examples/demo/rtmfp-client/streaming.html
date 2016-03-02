@@ -13,21 +13,32 @@
     <!-- Bootstrap -->
     <script src="../../../dependencies/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript">
-        var attributes = {};
-        var flashvars = {};
-        var pathToSWF = "streaming/bin/streaming.swf";
-        var elementId = "flash";
-        var params = {};
-        params.menu = "true";
-        params.swliveconnect = "true";
-        params.allowfullscreen = "true";
-        params.allowscriptaccess = "always";
-        params.bgcolor = "#777777";
-        swfobject.embedSWF(pathToSWF, elementId, "450", "550", "11.2.202", "expressInstall.swf", flashvars, params, attributes);
+        function bodyLoaded() {
+            var attributes = {};
+            var flashvars = {};
+            var pathToSWF = "streaming/bin/streaming.swf";
+            var elementId = "flash";
+            var params = {};
+            var callback = function (e) {
+                if (e.success) {
+                    setTimeout(function () {
+                        var swf = document.getElementById("flash");
+                        var url = "rtmfp://" + window.location.hostname + ":" + "1935";
+                        swf.setURLtoFlash(url);
+                    }, 2000);
+                }
+            }
+            params.menu = "true";
+            params.swliveconnect = "true";
+            params.allowfullscreen = "true";
+            params.allowscriptaccess = "always";
+            params.bgcolor = "#777777";
+            swfobject.embedSWF(pathToSWF, elementId, "450", "550", "11.2.202", "expressInstall.swf", flashvars, params, attributes, callback);
+        }
     </script>
 
 </head>
-<body>
+<body onload="bodyLoaded()">
 <div class="container">
     <div class="row">
         <div class="col-sm-6 text-center">
