@@ -112,7 +112,7 @@ function showOutgoing(){
     $("#incomingCall").hide();
     $("#incomingCallAlert").hide();
     $("#outgoingCall").show();
-    if (currentCall.hasVideo) {
+    if (currentCall && currentCall.hasVideo) {
         $muteAudioToggle.attr("disabled", "").removeAttr("checked");
         $muteAudioToggle.trigger('change');
         $muteVideoToggle.attr("disabled", "").removeAttr("checked");
