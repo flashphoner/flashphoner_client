@@ -5,7 +5,7 @@
 			   xmlns:views="rtmfptest.views.*"
 			   backgroundColor="#F2F0F0"
 			   width="415"
-			   height="484" creationComplete="init()" xmlns:local="*">
+			   height="548" creationComplete="init()" xmlns:local="*">
 	<fx:Declarations>
 			
 	</fx:Declarations>
@@ -156,23 +156,23 @@
 			
 		]]>
 	</fx:Script>
-	<s:Label x="115" y="10" styleName="header" text="Flash Chat"/>
+	<s:Label x="111" y="40" styleName="header" text="Flash Chat"/>
 	
 	<!-- connect / disconnect -->
-	<s:Button id="connectBtn" x="196" y="88" width="86" label="Login" click="connect()"/>
-	<s:TextInput id="login" x="38" y="88" width="150" height="21" text="Bob"/>
-	<s:Button id="disconnectBtn" x="290" y="88" label="Logout" click="disconnect()" width="86" enabled="false"/>
-	<s:TextInput id="connectUrl" x="38" y="39" width="200" text="rtmfp://192.168.1.5:1936/live2"/>
+	<s:Button id="connectBtn" x="200" y="158" width="86" label="Login" click="connect()"/>
+	<s:TextInput id="login" x="42" y="158" width="150" height="21" text="Bob"/>
+	<s:Button id="disconnectBtn" x="294" y="158" label="Logout" click="disconnect()" width="86" enabled="false"/>
+	<s:TextInput id="connectUrl" x="42" y="109" width="200" text="rtmfp://192.168.1.5:1936/live2"/>
 	
 	<!-- chat -->
-	<s:TextArea id="messageText" x="35" y="382" width="251" height="67" text="Hey!"/>
-	<s:Button id="sendBtn" x="307" y="382" height="67" label="Send" click="sendMessage()" enabled="false"/>
-	<s:TextArea id="chatArea" x="35" y="144" width="341" height="136" editable="false" text=""/>
-	<s:TextInput id="To" x="36" y="334" width="251" text="Alice"/>
-	<s:Label x="36" y="314" width="24" text="To:"/>	
+	<s:TextArea id="messageText" x="39" y="452" width="251" height="67" text="Hey!"/>
+	<s:Button id="sendBtn" x="311" y="452" height="67" label="Send" click="sendMessage()" enabled="false"/>
+	<s:TextArea id="chatArea" x="39" y="214" width="341" height="136" editable="false" text=""/>
+	<s:TextInput id="To" x="40" y="404" width="251" text="Alice"/>
+	<s:Label x="40" y="384" width="24" text="To:"/>	
 	
-	<s:Label x="35" y="362" width="89" text="Your message:"/>
-	<s:Label x="34" y="128" width="89" text="Your chat:"/>
-	<s:Label x="38" y="69" width="89" text="Your name:"/>
-	<s:Label x="38" y="19" width="89" text="Server:"/>
+	<s:Label x="39" y="432" width="89" text="Your message:"/>
+	<s:Label x="38" y="198" width="89" text="Your chat:"/>
+	<s:Label x="42" y="139" width="89" text="Your name:"/>
+	<s:Label x="42" y="93" width="89" text="Server:"/>
 </s:Application>

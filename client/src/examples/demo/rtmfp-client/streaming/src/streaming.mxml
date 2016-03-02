@@ -5,7 +5,7 @@
 			   xmlns:views="rtmfptest.views.*"
 			   backgroundColor="#F2F0F0"
 			   width="450"
-			   height="550" creationComplete="init()" xmlns:local="*">
+			   height="592" creationComplete="init()" xmlns:local="*">
 	<fx:Declarations>
 		
 	</fx:Declarations>
@@ -346,50 +346,50 @@
 			
 		]]>
 	</fx:Script>
-	<s:Label x="5" y="10" styleName="header" text="Flash Streamer and Player"/>
+	<s:Label x="96" y="34" width="265" styleName="header" text="Flash Streaming"/>
 	<!-- connect / disconnect -->
-	<s:Button id="connectBtn" x="327" y="30" width="90" label="Login" click="connect()"/>
-	<s:TextInput id="publishStreamName" x="101" y="80" width="199" text="StreamName"/>
-	<s:Button id="disconnectBtn" x="327" y="30" label="Logout" click="disconnect()" width="90" enabled="true"/>
-	<s:TextInput id="connectUrl" x="101" y="30" width="200" text="rtmfp://192.168.1.5:1936/live2"/>
+	<s:Button id="connectBtn" x="325" y="93" width="90" label="Login" click="connect()"/>
+	<s:TextInput id="publishStreamName" x="99" y="143" width="199" text="StreamName"/>
+	<s:Button id="disconnectBtn" x="325" y="93" label="Logout" click="disconnect()" width="90" enabled="true"/>
+	<s:TextInput id="connectUrl" x="99" y="93" width="200" text="rtmfp://192.168.1.5:1936/live2"/>
 	
 	<!-- publish / unpublish -->
-	<s:Button id="publishBtn" x="328" y="80" label="Start" width="90" height="21" click="publish()" enabled="true"/>
-	<s:CheckBox id="publishAudio" x="146" y="448" label="audio" selected="true" />
-	<s:CheckBox id="publishVideo" x="223" y="448" label="video" selected="true"/>	
+	<s:Button id="publishBtn" x="326" y="143" label="Start" width="90" height="21" click="publish()" enabled="true"/>
+	<s:CheckBox id="publishAudio" x="146" y="505" label="audio" selected="true" />
+	<s:CheckBox id="publishVideo" x="223" y="505" label="video" selected="true"/>	
 	
-	<s:Label x="120" y="504" text="width"/>
-	<s:TextInput id="camWidth" x="120" y="474" width="32" text="320"/>
+	<s:Label x="120" y="561" text="width"/>
+	<s:TextInput id="camWidth" x="120" y="531" width="32" text="320"/>
 	
-	<s:Label x="159" y="504" text="height"/>
-	<s:TextInput id="camHeight" x="160" y="474" width="31" text="240"/>
+	<s:Label x="159" y="561" text="height"/>
+	<s:TextInput id="camHeight" x="160" y="531" width="31" text="240"/>
 	
-	<s:Label x="206" y="504" text="fps"/>
-	<s:TextInput id="camFPS" x="200" y="474" width="31" text="15"/>
+	<s:Label x="206" y="561" text="fps"/>
+	<s:TextInput id="camFPS" x="200" y="531" width="31" text="15"/>
 	
-	<s:Label x="240" y="504" text="quality"/>
-	<s:TextInput id="camQuality" x="240" y="474" width="31" text="80"/>
+	<s:Label x="240" y="561" text="quality"/>
+	<s:TextInput id="camQuality" x="240" y="531" width="31" text="80"/>
 	
-	<s:Label x="279" y="504" text="keyframe"/>
-	<s:TextInput id="camKeyFrame" x="280" y="474" width="31" text="15"/>	
+	<s:Label x="279" y="561" text="keyframe"/>
+	<s:TextInput id="camKeyFrame" x="280" y="531" width="31" text="15"/>	
 	
 	<!-- play / stop -->
-	<s:Button id="playBtn" x="327" y="130" label="Start" width="90" height="21" click="play()" enabled="true"/>
+	<s:Button id="playBtn" x="325" y="193" label="Start" width="90" height="21" click="play()" enabled="true"/>
 	
 	<!-- video view -->
-	<mx:Canvas id = "canvas" visible="true" x="65" y="200" width="320" height="240">
+	<mx:Canvas id = "canvas" visible="true" x="65" y="257" width="320" height="240">
 		<mx:VideoDisplay id="videoMy" visible="true" x="0" y="0" width="80" height="60"  chromeColor="#EEA1A1"/>
 	</mx:Canvas>
-	<s:Label x="37" y="80" width="56" height="22" text="Publish" verticalAlign="middle"/>
-	<s:Label x="37" y="30" width="89" height="22" text="Server:" verticalAlign="middle"/>
-	<s:TextInput id="playStreamName" x="101" y="130" width="199" text="StreamName"/>
-	<s:Label x="37" y="130" height="22" text="Play" verticalAlign="middle"/>
-	<s:Button id="unpublishBtn" x="328" y="80" label="Stop" click="unpublish()" width="90" enabled="true"/>
-	<s:Button id="stopBtn" x="327" y="130" label="Stop" width="90" height="21" click="stop()" enabled="true"/>
-	<s:Label id="connectionStatus" x="125" y="56" width="150" height="20" textAlign="center"
+	<s:Label x="35" y="143" width="56" height="22" text="Publish" verticalAlign="middle"/>
+	<s:Label x="35" y="93" width="89" height="22" text="Server:" verticalAlign="middle"/>
+	<s:TextInput id="playStreamName" x="99" y="193" width="199" text="StreamName"/>
+	<s:Label x="35" y="193" height="22" text="Play" verticalAlign="middle"/>
+	<s:Button id="unpublishBtn" x="326" y="143" label="Stop" click="unpublish()" width="90" enabled="true"/>
+	<s:Button id="stopBtn" x="325" y="193" label="Stop" width="90" height="21" click="stop()" enabled="true"/>
+	<s:Label id="connectionStatus" x="123" y="119" width="150" height="20" textAlign="center"
 			 verticalAlign="top"/>
-	<s:Label id="publishStatus" x="125" y="106" width="150" height="20" textAlign="center"
+	<s:Label id="publishStatus" x="123" y="169" width="150" height="20" textAlign="center"
 			 verticalAlign="middle"/>
-	<s:Label id="playStatus" x="125" y="156" width="150" height="20" textAlign="center"
+	<s:Label id="playStatus" x="123" y="219" width="150" height="20" textAlign="center"
 			 verticalAlign="middle"/>
 </s:Application>
