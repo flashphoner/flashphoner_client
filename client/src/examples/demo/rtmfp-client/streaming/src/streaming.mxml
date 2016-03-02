@@ -10,6 +10,12 @@
 		
 	</fx:Declarations>
 	
+	<fx:Style>
+		.header { 
+			fontSize: 36px;
+		}
+	</fx:Style>
+	
 	<fx:Script>
 		<![CDATA[
 			import flash.external.*;
@@ -340,7 +346,7 @@
 			
 		]]>
 	</fx:Script>
-	
+	<s:Label x="5" y="10" styleName="header" text="Flash Streamer and Player"/>
 	<!-- connect / disconnect -->
 	<s:Button id="connectBtn" x="327" y="30" width="90" label="Login" click="connect()"/>
 	<s:TextInput id="publishStreamName" x="101" y="80" width="199" text="StreamName"/>
