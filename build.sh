@@ -29,4 +29,6 @@ cp client/src/dependencies/rtmp_player/player.swf output/dependencies/swf
 mkdir output/dependencies/flash
 cp client/src/dependencies/flash/asdoc output/dependencies/flash -R
 cp client/src/dependencies/flash/MediaManager.swf output/dependencies/flash
+mkdir -p output/dependencies/screen-sharing/firefox-extension
+cp client/src/dependencies/screen-sharing/firefox-extension/*.xpi output/dependencies/screen-sharing/firefox-extension
 echo "FINISH"
