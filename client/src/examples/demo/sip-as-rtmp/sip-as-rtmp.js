@@ -51,6 +51,9 @@ function sendREST(url, data) {
     console.info("data: " + data);
     $.ajax({
         url: url,
+        beforeSend: function ( xhr ) {
+            xhr.overrideMimeType( "text/plain;" );
+        },
         type: 'POST',
         contentType: 'application/json',
         data: data,
@@ -69,6 +72,7 @@ function handleAjaxError(jqXHR, textStatus, errorThrown) {
 
 
 function handleAjaxSuccess(data, textStatus, jqXHR) {
+    jqXHR.statusCode();
     if (jqXHR.responseText) {
         if (isJSON(jqXHR.responseText)) {
             var response = JSON.parse(jqXHR.responseText);
