@@ -99,6 +99,7 @@
 				message.to = To.text;
 				nc.call("sendData",null,{operationId:null, payload:message, status:null});
 				chatArea.text += messageDate + " " + login.text + " - " + message.body+"\n";
+				messageText.text = "";
 			}
 			
 			public function ping():void{

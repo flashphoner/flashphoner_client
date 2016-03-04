@@ -36,6 +36,7 @@
             var newMessage = time + " " + field("login") + " - " + field("message") + '<br/>';
             var chat = document.getElementById("chat");
             chat.innerHTML = newMessage + chat.innerHTML;
+            chat.scrollTo(0,chat.scrollHeight);
             document.getElementById("message").value = "";
         }
     </script>

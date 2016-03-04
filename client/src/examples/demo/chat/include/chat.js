@@ -93,7 +93,8 @@ function dataEventListener(event) {
     var message = event.payload;
     var newMessage = time + " " + message.from + " - " + message.body + '<br/>';
     var chat = document.getElementById("chat");
-    chat.innerHTML = newMessage + chat.innerHTML;
+    chat.innerHTML += newMessage;
+    chat.scrollTo(0,chat.scrollHeight);
 }
 
 // Set connection status and display corresponding view
