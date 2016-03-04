@@ -65,7 +65,7 @@ package com.flashphoner.api
 		public function FlashAPI(apiNotify:APINotify){
 			Security.allowDomain("*");
 			Logger.init();
-			this.mic = defineMicrophone(true);
+			this.mic = defineMicrophone(false);
 			initMic(this.mic);
 			apiNotifys = new ArrayCollection();
 			addAPINotify(apiNotify);
@@ -275,7 +275,7 @@ package com.flashphoner.api
 			var i:int = 0;
 			for each (var nameMic:String in Microphone.names){
 				if (nameMic == name){
-					var microphone:Microphone = defineMicrophone(true, i);
+					var microphone:Microphone = defineMicrophone(false, i);
 					if (microphone != null){
 						this.mic = microphone;
 						if (this.mic != null){	

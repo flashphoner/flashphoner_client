@@ -561,6 +561,14 @@ Flashphoner.prototype = {
                         me.releaseMediaManagerStream(removedStream);
                     }
                 } else {
+                    if (stream.mediaProvider == MediaProvider.Flash) {
+                        if (stream.status == StreamStatus.Publishing) {
+                            me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo);
+                        }
+                        if (stream.status == StreamStatus.Playing) {
+                            me.flashMediaManager.playStream(stream.mediaSessionId);
+                        }
+                    }
                     if (stream.published) {
                         me.publishStreams.update(stream.id, stream);
                     } else {
@@ -1066,7 +1074,7 @@ Flashphoner.prototype = {
                     "a=sendonly\r\n";
                 me.webSocket.send("publishStream", stream);
                 me.publishStreams.add(stream.name, stream);
-                me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo);
+
             }
         }, []);
 
@@ -1180,7 +1188,6 @@ Flashphoner.prototype = {
                 "a=recvonly\r\n";
             me.webSocket.send("playStream", stream);
             me.playStreams.add(stream.name, stream);
-            me.flashMediaManager.playStream(stream.mediaSessionId);
         } else if (MediaProvider.WSPlayer == stream.mediaProvider) {
             stream.sdp = "v=0\r\n" +
                 "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
