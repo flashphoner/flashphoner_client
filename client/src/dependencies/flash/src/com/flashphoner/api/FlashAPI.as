@@ -57,7 +57,7 @@ package com.flashphoner.api
 		private var currentGain:int = -1;
 		
 		public var configuration:Object;
-
+		
 		/**
 		 * Default contructor.
 		 * Initialize calls,modelLocato and initialize library
@@ -65,7 +65,7 @@ package com.flashphoner.api
 		public function FlashAPI(apiNotify:APINotify){
 			Security.allowDomain("*");
 			Logger.init();
-			this.mic = defineMicrophone(false);
+			this.mic = defineMicrophone(true);
 			initMic(this.mic);
 			apiNotifys = new ArrayCollection();
 			addAPINotify(apiNotify);
@@ -292,7 +292,7 @@ package com.flashphoner.api
 		 * Check access to the devices (mic,camera)
 		 **/
 		public function hasAccessToAudio():Boolean{
-			var m:Microphone = Microphone.getMicrophone(micIndex);
+			var m:Microphone = getMicrophone();
 			if (m == null){
 				return false;
 			}else{
