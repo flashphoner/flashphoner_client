@@ -18,8 +18,6 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import flash.external.*;
-			
 			import mx.core.UIComponent;
 			
 			private var nc:NetConnection;
@@ -235,8 +233,9 @@
 				soundTransform.volume=0.7;
 				subscribeStream.soundTransform = soundTransform;	
 				subscribeStreamObject = createStreamObject();
-				nc.call("playStream", null, subscribeStreamObject);
-				subscribeStream.play(subscribeStreamObject.name);
+				nc.call("playStream", new Responder(function():void{
+					subscribeStream.play(subscribeStreamObject.name);
+				}), subscribeStreamObject);
 				videoFarEnd.attachNetStream(subscribeStream);
 				videoFarEnd.width = 320;
 				videoFarEnd.height = 240;

@@ -33,7 +33,7 @@
                 operationId: createUUID(),
                 payload: message
             });
-            var newMessage = time + " " + field("login") + " - " + field("message") + '<br/>';
+            var newMessage = time + " " + field("login") + " - " + field("message").split('\n').join('<br/>') + '<br/>';
             var chat = document.getElementById("chat");
             chat.innerHTML += newMessage ;
             $("#chat").scrollTop(chat.scrollHeight);

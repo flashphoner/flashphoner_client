@@ -91,7 +91,7 @@ function dataEventListener(event) {
     var date = new Date();
     var time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
     var message = event.payload;
-    var newMessage = time + " " + message.from + " - " + message.body + '<br/>';
+    var newMessage = time + " " + message.from + " - " + message.body.split('\n').join('<br/>') + '<br/>';
     var chat = document.getElementById("chat");
     chat.innerHTML += newMessage ;
     $("#chat").scrollTop(chat.scrollHeight);
