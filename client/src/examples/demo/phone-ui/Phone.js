@@ -866,7 +866,6 @@ $(document).ready(function () {
             if(!$(this).val()) {
                 emptyField = true;
                 $("#"+$(this).attr('id')+'Label').css('color','red');
-                return false;
             }
         });
         if (emptyField) {return false};
