@@ -100,7 +100,7 @@ publish-translation/*.video {
 
 .video{
     width: 100%;
-    height: auto;
+    height: 580px;
     margin-top: 10px;
 }
 .flash-img{

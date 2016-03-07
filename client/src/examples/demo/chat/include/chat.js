@@ -118,11 +118,11 @@ function setURL() {
     var url;
     var port;
     if (window.location.protocol == "http:") {
-        proto = "ws://"
-        port = "8080"
+        proto = "ws://";
+        port = "8080";
     } else {
-        proto = "wss://"
-        port = "8443"
+        proto = "wss://";
+        port = "8443";
     }
 
     url = proto + window.location.hostname + ":" + port;
