@@ -27,6 +27,7 @@ function init_page() {
 }
 
 function loadPlayer() {
+    detectFlash();
     var attributes = {};
     attributes.id = "player";
     attributes.name = "player";
@@ -288,4 +289,24 @@ function setCallStatus(status) {
         $("#callStatus").removeClass().attr("class","text-muted");
     }
 
+}
+
+// Detect Flash
+function detectFlash() {
+    var hasFlash = false;
+    try {
+        var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+        if (fo) {
+            hasFlash = true;
+        }
+    } catch (e) {
+        if (navigator.mimeTypes
+            && navigator.mimeTypes['application/x-shockwave-flash'] != undefined
+            && navigator.mimeTypes['application/x-shockwave-flash'].enabledPlugin) {
+            hasFlash = true;
+        }
+    }
+    if (!hasFlash) {
+        $("#player").text("Your browser doesn't support the Flash technology necessary for work of an example").css("font-weight", "bold").css("font-size","200%");
+    }
 }
