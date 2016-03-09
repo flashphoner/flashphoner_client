@@ -29,7 +29,9 @@ var stream = {};
 $(document).ready(function () {
     $("#controlButton").addClass("playButton");
     $(".control").click(function () {
-        if (stream.status != undefined && stream.status != StreamStatus.Stoped) {
+        if (stream.status != undefined
+            && stream.status != StreamStatus.Stoped
+            && stream.status != StreamStatus.Failed) {
             return;
         }
         playStream();
@@ -83,13 +85,16 @@ function connectionStatusListener(event) {
 //Connection Status
 function streamStatusListener(event) {
     console.log(event.status);
-    if (event.status == StreamStatus.Failed) {
-        onPaused();
-    } else if (event.status == StreamStatus.Stoped) {
+    var streamId = document.getElementById("streamId");
+    if (event.status == StreamStatus.Failed || event.status == StreamStatus.Stoped) {
+        onFailed();
+        streamId.disabled = false;
     } else if (event.status == StreamStatus.Playing){
         onPlaying();
+        streamId.disabled = true;
     } else if (event.status == StreamStatus.Paused){
         onPaused();
+        streamId.disabled = true;
     }
     writeInfo("Stream " + event.status);
     this.stream.status = event.status;
@@ -134,6 +139,11 @@ function onPlaying(){
     $("#controlButton").click(function () {
         f.pauseStream(stream);
     });
+}
+
+function onFailed(){
+    $("#controlButton").addClass("playButton");
+    $("#controlButton").unbind();
 }
 
 function onPaused(){
