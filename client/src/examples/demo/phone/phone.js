@@ -21,7 +21,6 @@ function page_init(){
                 $("form#formConnection :input").not(':input[type=button]').each(function() {
                    if (!checkForEmptyField('#'+$(this).attr('id'),'#'+$(this).attr('id')+'Form')) {
                        emptyField = true;
-                       return false
                    }
                 });
                 if (!emptyField) {
