@@ -234,7 +234,7 @@
 				subscribeStream.soundTransform = soundTransform;	
 				subscribeStreamObject = createStreamObject();
 				nc.call("playStream", new Responder(function():void{
-					subscribeStream.play(subscribeStreamObject.name);
+					subscribeStream.play(subscribeStreamObject.mediaSessionId);
 				}), subscribeStreamObject);
 				videoFarEnd.attachNetStream(subscribeStream);
 				videoFarEnd.width = 320;
