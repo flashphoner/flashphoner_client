@@ -1058,6 +1058,7 @@ Flashphoner.prototype = {
                 }, true, stream.hasVideo);
             } else if (MediaProvider.Flash == stream.mediaProvider) {
                 //todo add pcma/pcmu
+                //Priority codec is important because of mediamanager initialize microphone with alaw by default
                 stream.sdp = "v=0\r\n" +
                     "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
                     "c=IN IP4 0.0.0.0\r\n" +
@@ -1067,7 +1068,7 @@ Flashphoner.prototype = {
                     "a=rtpmap:112 H264/90000\r\n" +
                     "a=fmtp:112 packetization-mode=1; profile-level-id=420020\r\n" +
                     "a=sendonly\r\n" +
-                    "m=audio 0 RTP/AVP 0 8 100\r\n" +
+                    "m=audio 0 RTP/AVP 8 0 100\r\n" +
                     "a=rtpmap:0 PCMU/8000\r\n" +
                     "a=rtpmap:8 PCMA/8000\r\n" +
                     "a=rtpmap:100 SPEEX/16000\r\n" +
