@@ -266,6 +266,6 @@ function detectFlash() {
         }
     }
     if (!hasFlash) {
-        $("#notifyFlash").text("Flash technology is not supported!");
+        $("#notifyFlash").text("Your browser doesn't support the Flash technology necessary for work of an example");
     }
 }
