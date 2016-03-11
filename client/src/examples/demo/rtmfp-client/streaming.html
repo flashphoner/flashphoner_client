@@ -21,13 +21,18 @@
             var params = {};
             var callback = function (e) {
                 if (e.success) {
-                    setTimeout(function () {
-                        var swf = document.getElementById("flash");
-                        var url = "rtmfp://" + window.location.hostname + ":" + "1935";
-                        swf.setURLtoFlash(url);
-                    }, 2000);
+                    var swf = document.getElementById("flash");
+                    var url = "rtmfp://" + window.location.hostname + ":" + "1935";
+                    var t = setTimeout(function () {
+                        var interval = setInterval( function() {
+                            if (swf.setURLtoFlash) {
+                                swf.setURLtoFlash(url);
+                                clearInterval(interval);
+                            } 
+                        }, 1000);
+                    }, 1000);
                 }
-            }
+            };
             params.menu = "true";
             params.swliveconnect = "true";
             params.allowfullscreen = "true";
