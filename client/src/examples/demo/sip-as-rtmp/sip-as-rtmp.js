@@ -7,12 +7,12 @@ function init_page() {
     loadPlayer();
     $("#callBtn").click(function () {
             var state = $("#callBtn").text();
+            $(this).prop('disabled',true);
             if (state == "Call") {
                 startCall();
             } else {
                 hangup();
             }
-            $(this).prop('disabled',true);
         }
     );
     // Set fields using cookies
@@ -100,6 +100,19 @@ function isJSON(str) {
 function startCall() {
     $("#callTrace").text("");
     $("#callStatus").text("");
+
+    var emptyField;
+
+    $("form :input").not(':input[type=button]').each(function() {
+        if (!checkForEmptyField('#'+$(this).attr('id'),'#'+$(this).attr('id')+'Form')) {
+            emptyField = true;
+        }
+    });
+    if(!checkForEmptyField('#callee','#callDiv')) {emptyField = true;}
+    if (emptyField) {
+        $("#callBtn").prop('disabled',false);
+        return false;
+    }
 
     var url = field("restUrl") + "/call";
     callId = generateCallID();
@@ -308,5 +321,17 @@ function detectFlash() {
     }
     if (!hasFlash) {
         $("#player").text("Your browser doesn't support the Flash technology necessary for work of an example").css("font-weight", "bold").css("font-size","200%");
+    }
+}
+
+// Check field for empty string
+function checkForEmptyField(checkField, alertDiv) {
+
+    if (!$(checkField).val()) {
+        $(alertDiv).addClass("has-error");
+        return false;
+    } else {
+        $(alertDiv).removeClass("has-error");
+        return true;
     }
 }
