@@ -378,9 +378,6 @@ Flashphoner.prototype = {
             },
 
             setRemoteSDP: function (id, sdp, isInitiator) {
-                //if (sdp.search("a=recvonly") != -1) {
-                //    sdp = me.handleVideoSSRC(sdp);
-                //}
                 console.log("setRemoteSDP: " + sdp);
                 if (me.webRtcMediaManager) {
                     if (navigator.mozGetUserMedia) {
@@ -388,12 +385,24 @@ Flashphoner.prototype = {
                             sdp = sdp.split(c).join(me.firefoxCodecReplaicer[c]);
                         }
                     }
-
                     if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
                         sdp = me.stripCodecsSDP(sdp, false);
                         console.log("Apply strip codecs");
                     }
                     me.webRtcMediaManager.setRemoteSDP(id, sdp, isInitiator);
+                    var mediaConnection = me.webRtcMediaManager.webRtcMediaConnections.get(id);
+                    if (mediaConnection) {
+                        if (mediaConnection.peerConnectionState == 'established') {
+                            //this is reinvite, trigger offer/answer
+                            var call = me.calls.get(id);
+                            if (call) {
+                                me.webRtcMediaManager.createAnswer(id, function (sdp) {
+                                    call.sdp = sdp;
+                                    me.webSocket.send("changeMediaRequest", call);
+                                }, call.hasVideo);
+                            }
+                        }
+                    }
                 }
             },
 
@@ -1119,6 +1128,36 @@ Flashphoner.prototype = {
         });
     },
 
+    switchToScreenVideoSource: function(call, extensionId) {
+        var me = this;
+        me.getScreenAccess(extensionId, function(response) {
+            if (response.success) {
+               me.webRtcMediaManager.renegotiateOffer(call.callId, function(sdp) {
+                   if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
+                       sdp = me.stripCodecsSDP(sdp, true);
+                       console.log("New SDP on renegotiation: " + sdp);
+                   }
+                   call.sdp = sdp;
+                   me.webSocket.send("changeMediaRequest", call);
+               }, call.incoming);
+            }
+        });
+    },
+
+    switchToCameraVideoSource: function (call) {
+        var me = this;
+        me.webRtcMediaManager.renegotiateOffer(call.callId, function(sdp) {
+            if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
+                sdp = me.stripCodecsSDP(sdp, true);
+                console.log("New SDP on renegotiation: " + sdp);
+            }
+            call.sdp = sdp;
+            me.webSocket.send("changeMediaRequest", call);
+        }, call.incoming);
+        //try to get camera video back to local element
+        me.mediaProviders.get(call.mediaProvider).getAccessToAudioAndVideo();
+    },
+
     playStream: function (stream) {
         var me = this;
         var streamObj = me.playStreams.get(stream.name);
@@ -1302,6 +1341,78 @@ Flashphoner.prototype = {
                     var newMLine = "";
                     for (m = 0; m < mLineSplitted.length; m++) {
                         if (pt.indexOf(mLineSplitted[m]) == -1 || m <= 2) {
+                            newMLine += mLineSplitted[m];
+                            if (m < mLineSplitted.length - 1) {
+                                newMLine = newMLine + " ";
+                            }
+                        }
+                    }
+                    sdpArray[i] = newMLine;
+                    console.log("Resulting m= line is: " + sdpArray[i]);
+                    break;
+                }
+            }
+        }
+
+        //normalize sdp after modifications
+        var result = "";
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i] != "") {
+                result += sdpArray[i] + "\n";
+            }
+        }
+
+        return result;
+    },
+
+    stripVideoCodecsSDP: function (sdp, removeCandidates, stripCodecs) {
+        var sdpArray = sdp.split("\n");
+
+        //search and delete codecs line
+        var pt = [];
+        var i;
+        for (var p = 0; p < stripCodecs.length; p++) {
+            console.log("Searching for codec " + stripCodecs[p]);
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i].search(stripCodecs[p]) != -1 && sdpArray[i].indexOf("a=rtpmap") == 0) {
+                    console.log(stripCodecs[p] + " detected");
+                    pt.push(sdpArray[i].match(/[0-9]+/)[0]);
+                    sdpArray[i] = "";
+                }
+            }
+        }
+
+        if (removeCandidates) {
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i].search("a=candidate:") != -1) {
+                    sdpArray[i] = "";
+                }
+            }
+        }
+        console.dir(pt);
+        if (pt.length) {
+            //searching for fmtp
+            for (p = 0; p < pt.length; p++) {
+                for (i = 0; i < sdpArray.length; i++) {
+                    if (sdpArray[i].search("a=fmtp:" + pt[p]) != -1) {
+                        console.log("PT " + pt[p] + " detected");
+                        sdpArray[i] = "";
+                    }
+                    if (sdpArray[i].search("a=rtcp-fb:" + pt[p]) != -1) {
+                        console.log("PT " + pt[p] + " detected");
+                        sdpArray[i] = "";
+                    }
+                }
+            }
+
+            //delete entries from m= line
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i].search("m=video") != -1) {
+                    console.log("m line detected " + sdpArray[i]);
+                    var mLineSplitted = sdpArray[i].split(" ");
+                    var newMLine = "";
+                    for (var m = 0; m < mLineSplitted.length; m++) {
+                        if (pt.indexOf(mLineSplitted[m]) == -1) {
                             newMLine += mLineSplitted[m];
                             if (m < mLineSplitted.length - 1) {
                                 newMLine = newMLine + " ";
@@ -1518,6 +1629,11 @@ WebRtcMediaManager.prototype.createOffer = function (id, callback, hasAudio, has
     webRtcMediaConnection.createOffer(callback, hasAudio, hasVideo, receiveVideo, screenCapture);
 };
 
+WebRtcMediaManager.prototype.renegotiateOffer = function (id, callback, incoming) {
+    var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
+    webRtcMediaConnection.renegotiateOffer(callback, incoming);
+};
+
 WebRtcMediaManager.prototype.createAnswer = function (id, callback, hasVideo) {
     var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
     webRtcMediaConnection.createAnswer(callback, hasVideo);
@@ -1608,6 +1724,11 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
                 Flashphoner.getInstance().invokeProblem(status);
             }
         );
+    } else {
+        var localMediaElement = getElement(Flashphoner.getInstance().configuration.localMediaElementId);
+        if (localMediaElement) {
+            attachMediaStream(localMediaElement, me.localAudioVideoStream);
+        }
     }
     return true;
 };
@@ -1673,7 +1794,7 @@ WebRtcMediaManager.prototype.getScreenAccess = function (extensionId, callback) 
                 video: {
                     //can be screen, window or application
                     //todo add to method arguments
-                    mediaSource: 'window',
+                    mediaSource: 'screen',
                     mandatory: {
                         maxWidth: Flashphoner.getInstance().configuration.screenSharingVideoWidth,
                         maxHeight: Flashphoner.getInstance().configuration.screenSharingVideoHeight
@@ -1765,6 +1886,9 @@ var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, r
     me.useDTLS = useDTLS;
     me.lastReceivedSdp = null;
     me.id = id;
+    this.audioSender = null;
+    this.videoSender = null;
+    this.localScreenCaptureStream = null;
     //stun server by default
     //commented to speedup WebRTC call establishment
     //me.stunServer = "stun.l.google.com:19302";
@@ -1835,14 +1959,24 @@ WebRtcMediaConnection.prototype.createPeerConnection = function () {
     this.peerConnection.onremovestream = function (event) {
         application.onOnRemoveStreamCallback(event);
     };
+
+    this.peerConnection.onnegotiationneeded = function (event) {
+        console.log("Negotiation needed!");
+    };
 };
 
 WebRtcMediaConnection.prototype.onOnAddStreamCallback = function (event) {
     trace("WebRtcMediaConnection - onOnAddStreamCallback(): event=" + event);
     trace("WebRtcMediaConnection - onOnAddStreamCallback(): event=" + event.stream);
     trace("WebRtcMediaConnection - onOnAddStreamCallback(): event=" + this.remoteMediaElement);
+    var me = this;
     if (this.peerConnection != null) {
         this.remoteAudioVideoMediaStream = event.stream;
+        this.remoteAudioVideoMediaStream.onaddtrack = function(event) {
+            if (event.track.kind == "video") {
+                attachMediaStream(me.remoteMediaElement, me.remoteAudioVideoMediaStream);
+            }
+        };
         if (this.remoteMediaElement) {
             attachMediaStream(this.remoteMediaElement, this.remoteAudioVideoMediaStream);
         }
@@ -1909,6 +2043,67 @@ WebRtcMediaConnection.prototype.getConstraints = function (receiveVideo, screenC
     return constraints;
 };
 
+WebRtcMediaConnection.prototype.renegotiateOffer = function (callback, incoming) {
+    console.log("Renegotiate offer");
+    var me = this;
+    if (me.peerConnection == null) {
+        console.error("Can't renegotiate offer without peerconnection");
+        return;
+    }
+    var localAudioVideoStream = me.webRtcMediaManager.localAudioVideoStream;
+    var screenSharingStream = me.webRtcMediaManager.localScreenCaptureStream;
+    if (Flashphoner.getInstance().isChrome()) {
+        var constraints = me.getConstraints(true);
+        if (me.localScreenCaptureStream) {
+            me.peerConnection.removeStream(me.localScreenCaptureStream);
+            me.localScreenCaptureStream.stop();
+            if (screenSharingStream == me.localScreenCaptureStream) {
+                me.webRtcMediaManager.localScreenCaptureStream = null;
+                localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
+                me.webRtcMediaManager.videoTrack = null;
+                me.localScreenCaptureStream = null;
+            } else {
+                me.localScreenCaptureStream = screenSharingStream;
+                me.peerConnection.addStream(me.webRtcMediaManager.localScreenCaptureStream);
+            }
+        } else {
+            me.webRtcMediaManager.videoTrack = localAudioVideoStream.getVideoTracks()[0];
+            localAudioVideoStream.removeTrack(localAudioVideoStream.getVideoTracks()[0]);
+            me.localScreenCaptureStream = screenSharingStream;
+            me.peerConnection.addStream(me.webRtcMediaManager.localScreenCaptureStream);
+        }
+        me.createOfferCallback = callback;
+        me.peerConnection.createOffer(function (offer) {
+            console.log("Renegotiation offer created");
+            //strip codecs
+            //todo normalize sdp video codecs as they were in initial answer
+            if (incoming && Flashphoner.getInstance().isChrome()) {
+                offer.sdp = Flashphoner.getInstance().stripVideoCodecsSDP(offer.sdp, true, ["VP9", "vp9", "red", "ulpfec", "rtx"]);
+            }
+            me.onCreateOfferSuccessCallback(offer);
+        }, function (error) {
+            console.error("Renegotiation offer failed! " + error);
+            me.onCreateOfferErrorCallback(error);
+        }, constraints);
+    } else {
+        //use ortc in firefox
+        if (me.localScreenCaptureStream) {
+            if (screenSharingStream == me.localScreenCaptureStream) {
+                me.videoSender.replaceTrack(localAudioVideoStream.getVideoTracks()[0]);
+                me.localScreenCaptureStream.stop();
+                me.localScreenCaptureStream = null;
+            } else {
+                me.videoSender.replaceTrack(screenSharingStream.getVideoTracks()[0]);
+                me.localScreenCaptureStream.stop();
+                me.localScreenCaptureStream = screenSharingStream;
+            }
+        } else {
+            me.localScreenCaptureStream = screenSharingStream;
+            me.videoSender.replaceTrack(screenSharingStream.getVideoTracks()[0]);
+        }
+    }
+};
+
 WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, hasAudio, hasVideo, receiveVideo, screenCapture) {
     trace("WebRtcMediaConnection - createOffer()");
     var me = this;
@@ -1936,7 +2131,12 @@ WebRtcMediaConnection.prototype.createOffer = function (createOfferCallback, has
                     me.webRtcMediaManager.localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
                     me.webRtcMediaManager.videoTrack = null;
                 }
-                me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
+                if (Flashphoner.getInstance().isChrome()) {
+                    me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
+                } else {
+                    me.audioSender = me.peerConnection.addTrack(me.webRtcMediaManager.localAudioVideoStream.getAudioTracks()[0], me.webRtcMediaManager.localAudioVideoStream);
+                    me.videoSender = me.peerConnection.addTrack(me.webRtcMediaManager.localAudioVideoStream.getVideoTracks()[0], me.webRtcMediaManager.localAudioVideoStream);
+                }
             } else if (hasAudio) {
                 if (me.webRtcMediaManager.localAudioStream) {
                     me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
@@ -1984,7 +2184,13 @@ WebRtcMediaConnection.prototype.createAnswer = function (createAnswerCallback, h
                     me.webRtcMediaManager.localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
                     me.webRtcMediaManager.videoTrack = null;
                 }
-                me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
+
+                if (Flashphoner.getInstance().isChrome()) {
+                    me.peerConnection.addStream(me.webRtcMediaManager.localAudioVideoStream);
+                } else {
+                    me.audioSender = me.peerConnection.addTrack(me.webRtcMediaManager.localAudioVideoStream.getAudioTracks()[0], me.webRtcMediaManager.localAudioVideoStream);
+                    me.videoSender = me.peerConnection.addTrack(me.webRtcMediaManager.localAudioVideoStream.getVideoTracks()[0], me.webRtcMediaManager.localAudioVideoStream);
+                }
             } else {
                 if (me.webRtcMediaManager.localAudioStream) {
                     me.peerConnection.addStream(me.webRtcMediaManager.localAudioStream);
@@ -2063,6 +2269,14 @@ WebRtcMediaConnection.prototype.getConnectionState = function () {
 WebRtcMediaConnection.prototype.setRemoteSDP = function (sdp, isInitiator) {
     trace("WebRtcMediaConnection - setRemoteSDP: isInitiator: " + isInitiator + " sdp=" + sdp);
     if (isInitiator) {
+        //check if this is reinvite
+        if (this.lastReceivedSdp && this.lastReceivedSdp != "") {
+            //fix dtls role and codecs for chrome
+            if (Flashphoner.getInstance().isChrome()) {
+                sdp = sdp.replace(/a=setup:active/g, "a=setup:passive");
+                sdp = Flashphoner.getInstance().stripVideoCodecsSDP(sdp, true, ["VP9", "vp9", "red", "ulpfec", "rtx"]);
+            }
+        }
         var sdpAnswer = new RTCSessionDescription({
             type: 'answer',
             sdp: sdp
