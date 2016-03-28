@@ -291,7 +291,7 @@ Flashphoner.prototype = {
             me.initFlash(me.configuration.elementIdForSWF, me.configuration.pathToSWF);
         }
         if (me.configuration.wsPlayerCanvas) {
-            me.wsPlayerMediaManager = new WSPlayer(me.configuration.wsPlayerCanvas);
+            me.wsPlayerMediaManager = new WSPlayer(me.configuration.wsPlayerCanvas, me);
             me.mediaProviders.add(MediaProvider.WSPlayer, me.wsPlayerMediaManager);
         }
 
@@ -1203,7 +1203,7 @@ Flashphoner.prototype = {
                 "a=recvonly\r\n";
             me.webSocket.send("playStream", stream);
             me.playStreams.add(stream.name, stream);
-            me.wsPlayerMediaManager.play();
+            me.wsPlayerMediaManager.play(stream);
         } else {
             console.log("playStream name " + stream.name);
             me.webSocket.send("playStream", stream);
@@ -2413,6 +2413,7 @@ StreamStatus.Unpublished = "UNPUBLISHED";
 StreamStatus.Stoped = "STOPPED";
 StreamStatus.Failed = "FAILED";
 StreamStatus.LocalStreamStopped = "LOCAL_STREAM_STOPPED";
+StreamStatus.PlaybackProblem = "PLAYBACK_PROBLEM";
 
 var WCSEvent = function () {
 };
