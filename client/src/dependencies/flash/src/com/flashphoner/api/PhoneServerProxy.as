@@ -57,7 +57,7 @@ package com.flashphoner.api
 		}
 		
 		public function connect(WCSUrl:String, obj:Object):void {
-			if (WCSUrl.indexOf("rtmp")){
+			if (WCSUrl.indexOf("rtmp") == 0){
 				nc.objectEncoding = ObjectEncoding.AMF0;
 			}
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
