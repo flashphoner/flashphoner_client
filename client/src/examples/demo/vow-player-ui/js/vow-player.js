@@ -184,14 +184,10 @@ function initVisibility() {
 function visibilityHandler() {
     if (document[this.hidden]) {
         console.log("Document hidden, mute player");
-        if (stream && stream.status == StreamStatus.Playing) {
-            f.mute(MediaProvider.WSPlayer);
-        }
+        f.mute(MediaProvider.WSPlayer);
     } else {
         console.log("Document active, unmute player");
-        if (stream && stream.status == StreamStatus.Playing) {
-            f.unmute(MediaProvider.WSPlayer);
-        }
+        f.unmute(MediaProvider.WSPlayer);
     }
 }
 
