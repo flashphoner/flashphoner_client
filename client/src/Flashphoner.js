@@ -810,6 +810,8 @@ Flashphoner.prototype = {
             var sessionId = this.webRtcCallSessionId;
             this.webRtcCallSessionId = undefined;
             this.mediaProviders.get(call.mediaProvider).close(sessionId);
+            //in case this was screen sharing
+            this.mediaProviders.get(call.mediaProvider).getAccessToAudioAndVideo();
         }
         if (MediaProvider.Flash == call.mediaProvider) {
             this.mediaProviders.get(call.mediaProvider).close(call.callId);
@@ -1437,6 +1439,16 @@ Flashphoner.prototype = {
         return result;
     },
 
+    getDtlsRoleFromSDP: function (sdp) {
+        var sdpArray = sdp.split("\n");
+        for (i = 0; i < sdpArray.length; i++) {
+            if (sdpArray[i].search("a=setup") != -1) {
+                var role = sdpArray[i].split(":");
+                return role[1].trim();
+            }
+        }
+    },
+
     handleVideoSSRC: function (sdp) {
         var sdpArray = sdp.split("\n");
         var videoPart = false;
@@ -1886,6 +1898,7 @@ var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, r
     me.useDTLS = useDTLS;
     me.lastReceivedSdp = null;
     me.id = id;
+    me.dtlsRole = null;
     this.audioSender = null;
     this.videoSender = null;
     this.localScreenCaptureStream = null;
@@ -1923,7 +1936,11 @@ WebRtcMediaConnection.prototype.close = function () {
                         me.webRtcMediaManager.localScreenCaptureStream = null;
                         return true;
                     }
-                })
+                });
+                if (me.webRtcMediaManager.videoTrack != null) {
+                    me.webRtcMediaManager.localAudioVideoStream.addTrack(me.webRtcMediaManager.videoTrack);
+                    me.webRtcMediaManager.videoTrack = null;
+                }
             }
             this.peerConnection.close();
         }
@@ -2268,15 +2285,21 @@ WebRtcMediaConnection.prototype.getConnectionState = function () {
 
 WebRtcMediaConnection.prototype.setRemoteSDP = function (sdp, isInitiator) {
     trace("WebRtcMediaConnection - setRemoteSDP: isInitiator: " + isInitiator + " sdp=" + sdp);
-    if (isInitiator) {
-        //check if this is reinvite
+    if (Flashphoner.getInstance().isChrome()) {
         if (this.lastReceivedSdp && this.lastReceivedSdp != "") {
-            //fix dtls role and codecs for chrome
-            if (Flashphoner.getInstance().isChrome()) {
+            //check dtls role
+            var newRole = Flashphoner.getInstance().getDtlsRoleFromSDP(sdp);
+            if (this.dtlsRole == "actpass" && newRole == "active") {
                 sdp = sdp.replace(/a=setup:active/g, "a=setup:passive");
-                sdp = Flashphoner.getInstance().stripVideoCodecsSDP(sdp, true, ["VP9", "vp9", "red", "ulpfec", "rtx"]);
+            }
+            sdp = Flashphoner.getInstance().stripVideoCodecsSDP(sdp, true, ["VP9", "vp9", "red", "ulpfec", "rtx"]);
+        } else {
+            if (this.dtlsRole == null) {
+                this.dtlsRole = Flashphoner.getInstance().getDtlsRoleFromSDP(sdp);
             }
         }
+    }
+    if (isInitiator) {
         var sdpAnswer = new RTCSessionDescription({
             type: 'answer',
             sdp: sdp
