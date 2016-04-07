@@ -1148,6 +1148,10 @@ Flashphoner.prototype = {
 
     switchToCameraVideoSource: function (call) {
         var me = this;
+        if (me.webRtcMediaManager.getMediaConnectionScreenStream(call.callId) == null) {
+            console.log("Already using camera");
+            return;
+        }
         me.webRtcMediaManager.renegotiateOffer(call.callId, function(sdp) {
             if (me.configuration.stripCodecs && me.configuration.stripCodecs.length > 0) {
                 sdp = me.stripCodecsSDP(sdp, true);
@@ -1646,6 +1650,14 @@ WebRtcMediaManager.prototype.renegotiateOffer = function (id, callback, incoming
     webRtcMediaConnection.renegotiateOffer(callback, incoming);
 };
 
+WebRtcMediaManager.prototype.getMediaConnectionScreenStream = function (id) {
+    var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
+    if (webRtcMediaConnection) {
+        return webRtcMediaConnection.localScreenCaptureStream;
+    }
+    return null;
+};
+
 WebRtcMediaManager.prototype.createAnswer = function (id, callback, hasVideo) {
     var webRtcMediaConnection = this.webRtcMediaConnections.get(id);
     webRtcMediaConnection.createAnswer(callback, hasVideo);
@@ -2087,7 +2099,7 @@ WebRtcMediaConnection.prototype.renegotiateOffer = function (callback, incoming)
             me.webRtcMediaManager.videoTrack = localAudioVideoStream.getVideoTracks()[0];
             localAudioVideoStream.removeTrack(localAudioVideoStream.getVideoTracks()[0]);
             me.localScreenCaptureStream = screenSharingStream;
-            me.peerConnection.addStream(me.webRtcMediaManager.localScreenCaptureStream);
+            me.peerConnection.addStream(screenSharingStream);
         }
         me.createOfferCallback = callback;
         me.peerConnection.createOffer(function (offer) {
