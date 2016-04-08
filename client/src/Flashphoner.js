@@ -606,6 +606,9 @@ Flashphoner.prototype = {
 
     connect: function (connection) {
         var me = this;
+        if (me.isOpened) {
+            return;
+        }
         me.connection = connection;
         if (me.connection.sipRegisterRequired == undefined) {
             me.connection.sipRegisterRequired = me.configuration.sipRegisterRequired;
@@ -811,7 +814,9 @@ Flashphoner.prototype = {
             this.webRtcCallSessionId = undefined;
             this.mediaProviders.get(call.mediaProvider).close(sessionId);
             //in case this was screen sharing
-            this.mediaProviders.get(call.mediaProvider).getAccessToAudioAndVideo();
+            if (this.hasAccess(call.mediaProvider, true)) {
+                this.mediaProviders.get(call.mediaProvider).getAccessToAudioAndVideo();
+            }
         }
         if (MediaProvider.Flash == call.mediaProvider) {
             this.mediaProviders.get(call.mediaProvider).close(call.callId);
