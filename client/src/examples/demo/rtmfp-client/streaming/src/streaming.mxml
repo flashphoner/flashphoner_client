@@ -98,9 +98,9 @@
 				trace("connect");
 				var url:String = connectUrl.text;
 				nc = new NetConnection();
-				if (url.indexOf("rtmp") == 0){
-					nc.objectEncoding = ObjectEncoding.AMF0;
-				}
+//				if (url.indexOf("rtmp") == 0){
+//					nc.objectEncoding = ObjectEncoding.AMF0;
+//				}
 				nc.client = this;
 				nc.addEventListener(NetStatusEvent.NET_STATUS, handleConnectionStatus);				
 				var obj:Object = new Object();
