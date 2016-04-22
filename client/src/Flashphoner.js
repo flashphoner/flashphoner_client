@@ -102,6 +102,10 @@ Flashphoner.prototype = {
         }
     },
 
+    checkMediaDevices: function() {
+        return !(navigator.mediaDevices === undefined || navigator.mediaDevices.getUserMedia === undefined);
+    },
+
     initWebRTC: function () {
         var me = this;
         if (navigator.mozGetUserMedia) {
@@ -1595,27 +1599,34 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
                 requestedMedia.video.mandatory.minHeight = Flashphoner.getInstance().configuration.videoHeight;
             }
         }
-        getUserMedia(requestedMedia, function (stream) {
-                var localMediaElement = getElement(Flashphoner.getInstance().configuration.localMediaElementId);
-                if (localMediaElement) {
-                    attachMediaStream(localMediaElement, stream);
-                }
-                me.localAudioVideoStream = stream;
-                if (webrtcDetectedBrowser != "firefox") {
-                    me.audioMuted = -1;
-                }
-                me.videoMuted = -1;
-            }, function (error) {
-                trace("Failed to get access to local media. Error code was " + error.code + ".");
-                me.audioMuted = 1;
-                me.videoMuted = 1;
-                var status = {
-                    status: WCSError.MIC_CAM_ACCESS_PROBLEM,
-                    info: "Failed to get access to microphone and camera. Error code was " + error.code + "."
-                };
-                Flashphoner.getInstance().invokeProblem(status);
+        var mediaStream = function (stream) {
+            var localMediaElement = getElement(Flashphoner.getInstance().configuration.localMediaElementId);
+            if (localMediaElement) {
+                attachMediaStream(localMediaElement, stream);
             }
-        );
+            me.localAudioVideoStream = stream;
+            if (webrtcDetectedBrowser != "firefox") {
+                me.audioMuted = -1;
+            }
+            me.videoMuted = -1;
+        };
+        var error = function (error) {
+            trace("Failed to get access to local media. Error code was " + error.code + ".");
+            me.audioMuted = 1;
+            me.videoMuted = 1;
+            var status = {
+                status: WCSError.MIC_CAM_ACCESS_PROBLEM,
+                info: "Failed to get access to microphone and camera. Error code was " + error.code + "."
+            };
+            Flashphoner.getInstance().invokeProblem(status);
+        };
+        if (Flashphoner.getInstance().checkMediaDevices()) {
+            navigator.mediaDevices.getUserMedia(requestedMedia)
+                .then(mediaStream)
+                .catch(error);
+        } else {
+            getUserMedia(requestedMedia, mediaStream, error);
+        }
     }
     return true;
 };
@@ -1648,23 +1659,30 @@ WebRtcMediaManager.prototype.getScreenAccess = function (extensionId, callback) 
                         if (Flashphoner.getInstance().configuration.screenSharingVideoFps) {
                             screen_constraints.video.mandatory.maxFrameRate = Flashphoner.getInstance().configuration.screenSharingVideoFps;
                         }
-                        getUserMedia(screen_constraints, function (stream) {
-                                var localMediaElement2 = getElement(Flashphoner.getInstance().configuration.localMediaElementId2);
-                                if (localMediaElement2) {
-                                    attachMediaStream(localMediaElement2, stream);
-                                }
-                                me.localScreenCaptureStream = stream;
-                                callback({success: true});
-                            }, function (error) {
-                                trace("Failed to get access to screen capture. Error code was " + error.code + ".");
-                                callback({success: false});
-                                var status = {
-                                    status: WCSError.SCREEN_ACCESS_PROBLEM,
-                                    info: "Failed to get access to screen capture. Error code was " + error.code + "."
-                                };
-                                Flashphoner.getInstance().invokeProblem(status);
+                        var mediaStream = function (stream) {
+                            var localMediaElement2 = getElement(Flashphoner.getInstance().configuration.localMediaElementId2);
+                            if (localMediaElement2) {
+                                attachMediaStream(localMediaElement2, stream);
                             }
-                        );
+                            me.localScreenCaptureStream = stream;
+                            callback({success: true});
+                        };
+                        var error = function (error) {
+                            trace("Failed to get access to screen capture. Error code was " + error.code + ".");
+                            callback({success: false});
+                            var status = {
+                                status: WCSError.SCREEN_ACCESS_PROBLEM,
+                                info: "Failed to get access to screen capture. Error code was " + error.code + "."
+                            };
+                            Flashphoner.getInstance().invokeProblem(status);
+                        };
+                        if (Flashphoner.getInstance().checkMediaDevices()) {
+                            navigator.mediaDevices.getUserMedia(screen_constraints)
+                                .then(mediaStream)
+                                .catch(error);
+                        } else {
+                            getUserMedia(screen_constraints, mediaStream, error);
+                        };
                     }
                 });
             } else {
@@ -1691,23 +1709,31 @@ WebRtcMediaManager.prototype.getScreenAccess = function (extensionId, callback) 
             if (Flashphoner.getInstance().configuration.screenSharingVideoFps) {
                 constraints.video.mandatory.maxFrameRate = Flashphoner.getInstance().configuration.screenSharingVideoFps;
             }
-            getUserMedia(constraints, function (stream) {
-                    var localMediaElement2 = getElement(Flashphoner.getInstance().configuration.localMediaElementId2);
-                    if (localMediaElement2) {
-                        attachMediaStream(localMediaElement2, stream);
-                    }
-                    me.localScreenCaptureStream = stream;
-                    callback({success: true});
-                }, function (error) {
-                    trace("Failed to get access to screen capture. Error code was " + error.code + ".");
-                    callback({success: false});
-                    var status = {
-                        status: WCSError.SCREEN_ACCESS_PROBLEM,
-                        info: "Failed to get access to screen capture. Error code was " + error.code + "."
-                    };
-                    Flashphoner.getInstance().invokeProblem(status);
+            var mediaStream = function (stream) {
+                var localMediaElement2 = getElement(Flashphoner.getInstance().configuration.localMediaElementId2);
+                if (localMediaElement2) {
+                    attachMediaStream(localMediaElement2, stream);
                 }
-            );
+                me.localScreenCaptureStream = stream;
+                callback({success: true});
+            };
+            var error = function (error) {
+                trace("Failed to get access to screen capture. Error code was " + error.code + ".");
+                callback({success: false});
+                var status = {
+                    status: WCSError.SCREEN_ACCESS_PROBLEM,
+                    info: "Failed to get access to screen capture. Error code was " + error.code + "."
+                };
+                Flashphoner.getInstance().invokeProblem(status);
+            };
+            if (Flashphoner.getInstance.checkMediaDevices()) {
+                trace("");
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(mediaStream)
+                    .catch(error);
+            } else {
+                getUserMedia(constraints, mediaStream, error);
+            }
         } else {
             var status = {
                 status: WCSError.SCREEN_EXTENSION_UNAVAILABLE,
@@ -1727,18 +1753,25 @@ WebRtcMediaManager.prototype.getScreenAccess = function (extensionId, callback) 
 WebRtcMediaManager.prototype.getAccessToAudio = function () {
     var me = this;
     if (!me.localAudioStream) {
-        getUserMedia({audio: true}, function (stream) {
-                me.localAudioStream = stream;
-                me.audioMuted = -1;
-            }, function (error) {
-                var status = {
-                    status: WCSError.MIC_ACCESS_PROBLEM,
-                    info: "Failed to get access to microphone. Error code was " + error.code + "."
-                };
-                Flashphoner.getInstance().invokeProblem(status);
-                me.audioMuted = 1;
-            }
-        );
+        var mediaStream = function (stream) {
+            me.localAudioStream = stream;
+            me.audioMuted = -1;
+        };
+        var error = function (error) {
+            var status = {
+                status: WCSError.MIC_ACCESS_PROBLEM,
+                info: "Failed to get access to microphone. Error code was " + error.code + "."
+            };
+            Flashphoner.getInstance().invokeProblem(status);
+            me.audioMuted = 1;
+        };
+        if (Flashphoner.getInstance().checkMediaDevices()) {
+            navigator.mediaDevices.getUserMedia({audio: true})
+                .then(mediaStream)
+                .catch(error);
+        } else {
+            getUserMedia({audio: true}, mediaStream, error);
+        }
     }
     return true;
 };
