@@ -7,12 +7,12 @@ function init_page() {
     loadPlayer();
     $("#callBtn").click(function () {
             var state = $("#callBtn").text();
+            $(this).prop('disabled',true);
             if (state == "Call") {
                 startCall();
             } else {
                 hangup();
             }
-            $(this).prop('disabled',true);
         }
     );
     // Set fields using cookies
@@ -27,6 +27,7 @@ function init_page() {
 }
 
 function loadPlayer() {
+    detectFlash();
     var attributes = {};
     attributes.id = "player";
     attributes.name = "player";
@@ -51,6 +52,9 @@ function sendREST(url, data) {
     console.info("data: " + data);
     $.ajax({
         url: url,
+        beforeSend: function ( xhr ) {
+            xhr.overrideMimeType( "text/plain;" );
+        },
         type: 'POST',
         contentType: 'application/json',
         data: data,
@@ -69,6 +73,7 @@ function handleAjaxError(jqXHR, textStatus, errorThrown) {
 
 
 function handleAjaxSuccess(data, textStatus, jqXHR) {
+    jqXHR.statusCode();
     if (jqXHR.responseText) {
         if (isJSON(jqXHR.responseText)) {
             var response = JSON.parse(jqXHR.responseText);
@@ -95,6 +100,19 @@ function isJSON(str) {
 function startCall() {
     $("#callTrace").text("");
     $("#callStatus").text("");
+
+    var emptyField;
+
+    $("form :input").not(':input[type=button]').each(function() {
+        if (!checkForEmptyField('#'+$(this).attr('id'),'#'+$(this).attr('id')+'Form')) {
+            emptyField = true;
+        }
+    });
+    if(!checkForEmptyField('#callee','#callDiv')) {emptyField = true;}
+    if (emptyField) {
+        $("#callBtn").prop('disabled',false);
+        return false;
+    }
 
     var url = field("restUrl") + "/call";
     callId = generateCallID();
@@ -284,4 +302,36 @@ function setCallStatus(status) {
         $("#callStatus").removeClass().attr("class","text-muted");
     }
 
+}
+
+// Detect Flash
+function detectFlash() {
+    var hasFlash = false;
+    try {
+        var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+        if (fo) {
+            hasFlash = true;
+        }
+    } catch (e) {
+        if (navigator.mimeTypes
+            && navigator.mimeTypes['application/x-shockwave-flash'] != undefined
+            && navigator.mimeTypes['application/x-shockwave-flash'].enabledPlugin) {
+            hasFlash = true;
+        }
+    }
+    if (!hasFlash) {
+        $("#player").text("Your browser doesn't support the Flash technology necessary for work of an example").css("font-weight", "bold").css("font-size","200%");
+    }
+}
+
+// Check field for empty string
+function checkForEmptyField(checkField, alertDiv) {
+
+    if (!$(checkField).val()) {
+        $(alertDiv).addClass("has-error");
+        return false;
+    } else {
+        $(alertDiv).removeClass("has-error");
+        return true;
+    }
 }

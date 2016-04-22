@@ -65,7 +65,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 					}
 				};
 
-				var mic:Microphone = Microphone.getMicrophone();
+				var mic:Microphone = flashAPI.getMicrophone();
                 if (mic != null) {
 					Logger.info("mic " + mic.name);
                 	mic.addEventListener(StatusEvent.STATUS, fn, true);
@@ -94,7 +94,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			}
 			
 			public function getAccessToAudio():Boolean {
-				var mic:Microphone = Microphone.getMicrophone(flashAPI.getMicIndex());
+				var mic:Microphone = flashAPI.getMicrophone();
 				if (mic == null){
 					return false;
 				}
@@ -120,7 +120,7 @@ This code and accompanying materials also available under LGPL and MPL license f
 			private function timerTick(event:TimerEvent):void{
 				if (flashAPI.hasAccessToAudio()){
 					timer.stop();
-					var mic:Microphone = Microphone.getMicrophone(flashAPI.getMicIndex());
+					var mic:Microphone = flashAPI.getMicrophone();
 					mic.setLoopBack(false);
 					openSettingsButton.visible = false;
 				}

@@ -23,40 +23,40 @@
         <div class="col-sm-6 text-center">
             <fieldset class="scheduler-border">
                 <legend class="scheduler-border">SIP Details</legend>
-                <form class="form-horizontal" role="form">
-                    <div class="form-group">
+                <form id="formConnection" class="form-horizontal" role="form">
+                    <div id="restUrlForm" class="form-group">
                         <div class="col-sm-9">
                             <input type="text" class="form-control" id="restUrl"/>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div id="sipLoginForm" class="form-group">
                         <label class="control-label col-sm-3" for="sipLogin">Login</label>
                         <div class="col-sm-6">
                             <input type="text" class="form-control" id="sipLogin" placeholder="SIP username"/>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div id="sipPasswordForm" class="form-group">
                         <label class="control-label col-sm-3" for="sipPassword">Password</label>
 
                         <div class="col-sm-6">
                             <input type="password" class="form-control" id="sipPassword" placeholder="SIP password"/>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div id="sipDomainForm" class="form-group">
                         <label class="control-label col-sm-3" for="sipDomain">Domain</label>
 
                         <div class="col-sm-6">
                             <input type="text" class="form-control" id="sipDomain" placeholder="SIP domain"/>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div id="sipPortForm" class="form-group">
                         <label class="control-label col-sm-3" for="sipPort">Port</label>
 
                         <div class="col-sm-3">
                             <input type="text" class="form-control" id="sipPort" placeholder="5060"/>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div id="appKeyForm" class="form-group">
                         <label class="control-label col-sm-3" for="appKey">App Key</label>
 
                         <div class="col-sm-3">
@@ -75,7 +75,7 @@
                 <div class="row">
                     <div class="col-lg-6 col-sm-offset-3 text-center">
 
-                        <div class="input-group row-space">
+                        <div id="callDiv" class="input-group row-space">
                             <input id="callee" type="text" class="form-control" placeholder="callee"/>
                             <span class="input-group-btn">
                                 <button id="callBtn" class="btn btn-success" style="width: 100px">Call</button>
@@ -110,14 +110,14 @@
         <div class="col-sm-6 text-center" style="margin-top: 0px">
             <fieldset class="scheduler-border">
                 <legend class="scheduler-border">RTMP Target Details</legend>
-                <form class="form-horizontal" role="form">
-                    <div class="form-group">
+                <form id="formRTMP" class="form-horizontal" role="form">
+                    <div id="rtmpUrlForm" class="form-group">
                         <label class="control-label col-sm-3" for="rtmpUrl">RTMP URL</label>
                         <div class="col-sm-6">
                             <input type="text" class="form-control" id="rtmpUrl" placeholder="rtmp://localhost:1935/live"/>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div id="rtmpStreamForm" class="form-group">
                         <label class="control-label col-sm-3" for="rtmpStream">Stream</label>
                         <div class="col-sm-6">
                             <input type="text" class="form-control" id="rtmpStream" placeholder="stream1"/>

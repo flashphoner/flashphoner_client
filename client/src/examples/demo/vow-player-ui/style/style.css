@@ -1,3 +1,7 @@
+input[type="text"]:disabled{
+	color:#999;
+}
+
 .fullPlayer canvas{
 }
 .fullPlayer {

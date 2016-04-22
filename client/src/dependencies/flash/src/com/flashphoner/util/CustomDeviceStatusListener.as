@@ -15,6 +15,8 @@ package com.flashphoner.util
 		
 		private var fn:Function;
 		
+		private var mic:Microphone;
+		
 		public function CustomDeviceStatusListener()
 		{
 			timer.addEventListener(TimerEvent.TIMER, timerTick);
@@ -23,11 +25,11 @@ package com.flashphoner.util
 		public function start(mic:Microphone, fn:Function):void {
 			currentStatus = mic.muted;
 			this.fn = fn;
+			this.mic = mic;
 			timer.start();
 		}
 		
 		private function timerTick(event:TimerEvent):void{
-			var mic:Microphone = Microphone.getMicrophone();
 			if (currentStatus != mic.muted) {
 				Logger.info("current mic muted - " + mic.muted);
 				var se:StatusEvent = new StatusEvent(StatusEvent.STATUS, true);

@@ -21,7 +21,6 @@ function page_init(){
                 $("form#formConnection :input").not(':input[type=button]').each(function() {
                    if (!checkForEmptyField('#'+$(this).attr('id'),'#'+$(this).attr('id')+'Form')) {
                        emptyField = true;
-                       return false
                    }
                 });
                 if (!emptyField) {
@@ -170,6 +169,10 @@ function setConnectionButtonText(text) {
 
 // Disconnect
 function disconnect() {
+    //if(currentCall) {
+        $("#remoteVideo").removeAttr('src');
+        $("#localVideo").removeAttr('src');
+    //}
     f.disconnect();
     setConnectionButtonText("Connect")
     setStatus("NOT REGISTERED");
@@ -353,6 +356,8 @@ function resetStates() {
     $("#incomingCall").hide();
     $("#incomingCallAlert").hide().text("");
     $("#answerBtn").hide();
+    $("#muteAudioToggle").prop('checked',false).attr('disabled','disabled').trigger('change');
+    $("#muteVideoToggle").prop('checked',false).attr('disabled','disabled').trigger('change');
 }
 
 // Check field for empty string

@@ -33,9 +33,10 @@
                 operationId: createUUID(),
                 payload: message
             });
-            var newMessage = time + " " + field("login") + " - " + field("message") + '<br/>';
+            var newMessage = time + " " + field("login") + " - " + field("message").split('\n').join('<br/>') + '<br/>';
             var chat = document.getElementById("chat");
-            chat.innerHTML = newMessage + chat.innerHTML;
+            chat.innerHTML += newMessage ;
+            $("#chat").scrollTop(chat.scrollHeight);
             document.getElementById("message").value = "";
         }
     </script>
@@ -43,7 +44,7 @@
 <body onload="initAPI()">
     <div class="container" id="oneToOneChat">
         <div class="row">
-            <div class="col-sm-12 text-center" style="max-width: 500px">
+            <div class="col-sm-12 text-center" style="max-width: 500px; height: 565px;">
                 <h1>One to One Text Chat</h1>
                 <fieldset id="chatFieldSet" class="scheduler-border">
                     <!-- Include from chat-fieldset.html by jquery. See js file. -->

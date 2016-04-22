@@ -29,7 +29,9 @@ var stream = {};
 $(document).ready(function () {
     $("#controlButton").addClass("playButton");
     $(".control").click(function () {
-        if (stream.status != undefined && stream.status != StreamStatus.Stoped) {
+        if (stream.status != undefined
+            && stream.status != StreamStatus.Stoped
+            && stream.status != StreamStatus.Failed) {
             return;
         }
         playStream();
@@ -83,13 +85,16 @@ function connectionStatusListener(event) {
 //Connection Status
 function streamStatusListener(event) {
     console.log(event.status);
-    if (event.status == StreamStatus.Failed) {
-        onPaused();
-    } else if (event.status == StreamStatus.Stoped) {
+    var streamId = document.getElementById("streamId");
+    if (event.status == StreamStatus.Failed || event.status == StreamStatus.Stoped) {
+        onFailed();
+        streamId.disabled = false;
     } else if (event.status == StreamStatus.Playing){
         onPlaying();
+        streamId.disabled = true;
     } else if (event.status == StreamStatus.Paused){
         onPaused();
+        streamId.disabled = true;
     }
     writeInfo("Stream " + event.status);
     this.stream.status = event.status;
@@ -136,6 +141,11 @@ function onPlaying(){
     });
 }
 
+function onFailed(){
+    $("#controlButton").addClass("playButton");
+    $("#controlButton").unbind();
+}
+
 function onPaused(){
     $("#controlButton").removeClass("pauseButton");
     $("#controlButton").addClass("playButton");
@@ -174,14 +184,10 @@ function initVisibility() {
 function visibilityHandler() {
     if (document[this.hidden]) {
         console.log("Document hidden, mute player");
-        if (stream && stream.status == StreamStatus.Playing) {
-            f.mute(MediaProvider.WSPlayer);
-        }
+        f.mute(MediaProvider.WSPlayer);
     } else {
         console.log("Document active, unmute player");
-        if (stream && stream.status == StreamStatus.Playing) {
-            f.unmute(MediaProvider.WSPlayer);
-        }
+        f.unmute(MediaProvider.WSPlayer);
     }
 }
 

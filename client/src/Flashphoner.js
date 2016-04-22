@@ -291,7 +291,7 @@ Flashphoner.prototype = {
             me.initFlash(me.configuration.elementIdForSWF, me.configuration.pathToSWF);
         }
         if (me.configuration.wsPlayerCanvas) {
-            me.wsPlayerMediaManager = new WSPlayer(me.configuration.wsPlayerCanvas);
+            me.wsPlayerMediaManager = new WSPlayer(me.configuration.wsPlayerCanvas, me);
             me.mediaProviders.add(MediaProvider.WSPlayer, me.wsPlayerMediaManager);
         }
 
@@ -561,6 +561,14 @@ Flashphoner.prototype = {
                         me.releaseMediaManagerStream(removedStream);
                     }
                 } else {
+                    if (stream.mediaProvider == MediaProvider.Flash) {
+                        if (stream.status == StreamStatus.Publishing) {
+                            me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo);
+                        }
+                        if (stream.status == StreamStatus.Playing) {
+                            me.flashMediaManager.playStream(stream.mediaSessionId);
+                        }
+                    }
                     if (stream.published) {
                         me.publishStreams.update(stream.id, stream);
                     } else {
@@ -1050,6 +1058,7 @@ Flashphoner.prototype = {
                 }, true, stream.hasVideo);
             } else if (MediaProvider.Flash == stream.mediaProvider) {
                 //todo add pcma/pcmu
+                //Priority codec is important because of mediamanager initialize microphone with alaw by default
                 stream.sdp = "v=0\r\n" +
                     "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
                     "c=IN IP4 0.0.0.0\r\n" +
@@ -1059,14 +1068,14 @@ Flashphoner.prototype = {
                     "a=rtpmap:112 H264/90000\r\n" +
                     "a=fmtp:112 packetization-mode=1; profile-level-id=420020\r\n" +
                     "a=sendonly\r\n" +
-                    "m=audio 0 RTP/AVP 0 8 100\r\n" +
+                    "m=audio 0 RTP/AVP 8 0 100\r\n" +
                     "a=rtpmap:0 PCMU/8000\r\n" +
                     "a=rtpmap:8 PCMA/8000\r\n" +
                     "a=rtpmap:100 SPEEX/16000\r\n" +
                     "a=sendonly\r\n";
                 me.webSocket.send("publishStream", stream);
                 me.publishStreams.add(stream.name, stream);
-                me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo);
+
             }
         }, []);
 
@@ -1180,7 +1189,6 @@ Flashphoner.prototype = {
                 "a=recvonly\r\n";
             me.webSocket.send("playStream", stream);
             me.playStreams.add(stream.name, stream);
-            me.flashMediaManager.playStream(stream.mediaSessionId);
         } else if (MediaProvider.WSPlayer == stream.mediaProvider) {
             stream.sdp = "v=0\r\n" +
                 "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
@@ -1195,7 +1203,7 @@ Flashphoner.prototype = {
                 "a=recvonly\r\n";
             me.webSocket.send("playStream", stream);
             me.playStreams.add(stream.name, stream);
-            me.wsPlayerMediaManager.play();
+            me.wsPlayerMediaManager.play(stream);
         } else {
             console.log("playStream name " + stream.name);
             me.webSocket.send("playStream", stream);
@@ -2405,6 +2413,7 @@ StreamStatus.Unpublished = "UNPUBLISHED";
 StreamStatus.Stoped = "STOPPED";
 StreamStatus.Failed = "FAILED";
 StreamStatus.LocalStreamStopped = "LOCAL_STREAM_STOPPED";
+StreamStatus.PlaybackProblem = "PLAYBACK_PROBLEM";
 
 var WCSEvent = function () {
 };
