@@ -236,11 +236,10 @@ function trace(str) {
     console.log(str);
 }
 
-// Detect IE
+// Detect IE, Edge
 function detectIE() {
     var ua = window.navigator.userAgent;
-    var msie = ua.indexOf('MSIE ');
-    if (msie > 0) {
+    if (ua.indexOf('MSIE ') > 0 || (navigator.userAgent.indexOf("Edge") > 0 )){
         return true;
     }
     var trident = ua.indexOf('Trident/');
