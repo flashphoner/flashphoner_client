@@ -14,6 +14,12 @@ var WebRtcMediaManager = function (localVideoPreview, remoteVideo) {
     //me.stunServer = "stun.l.google.com:19302";
 };
 
+WebRtcMediaManager.prototype.checkMediaDevices = function() {
+    trace("checkMediaDevices, navigator.mediaDevices - " + navigator.mediaDevices);
+    trace("checkMediaDevices, navigator.mediaDevices.getUserMedia - " + navigator.mediaDevices.getUserMedia);
+    return !(navigator.mediaDevices === undefined || navigator.mediaDevices.getUserMedia === undefined);
+};
+
 WebRtcMediaManager.prototype.init = function () {
     trace("WebRtcMediaManager - init");
     var me = this;
@@ -144,18 +150,27 @@ WebRtcMediaManager.prototype.unmute = function () {
 WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
     var me = this;
     if (!me.localAudioVideoStream) {
-        getUserMedia({audio: true, video: true}, function (stream) {
-                attachMediaStream(me.localVideo, stream);
-                me.localAudioVideoStream = stream;
-                me.isAudioMuted = -1;
-                me.isVideoMuted = -1;
-            }, function (error) {
-                addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
-                closeInfoView(3000);
-                me.isAudioMuted = 1;
-                me.isVideoMuted = 1;
-            }
-        );
+
+        var mediaStream = function (stream) {
+            attachMediaStream(me.localVideo, stream);
+            me.localAudioVideoStream = stream;
+            me.isAudioMuted = -1;
+            me.isVideoMuted = -1;
+        };
+
+        var error = function (error) {
+            addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+            closeInfoView(3000);
+            me.isAudioMuted = 1;
+            me.isVideoMuted = 1;
+        };
+        if (me.checkMediaDevices()) {
+            navigator.mediaDevices.getUserMedia({audio: true})
+                .then(mediaStream)
+                .catch(error);
+        } else {
+            getUserMedia({audio: true, video: true}, mediaStream, error);
+        }
     }
 };
 
@@ -163,17 +178,37 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
 WebRtcMediaManager.prototype.getAccessToAudio = function () {
     var me = this;
     if (!me.localAudioStream) {
-        getUserMedia({audio: true}, function (stream) {
-                me.localAudioStream = stream;
-                me.isAudioMuted = -1;
-            }, function (error) {
-                addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
-                closeInfoView(3000);
-                me.isAudioMuted = 1;
-            }
-        );
+
+        var mediaStream = function (stream) {
+            me.localAudioStream = stream;
+            me.isAudioMuted = -1;
+        };
+
+        var error = function (error) {
+            addLogMessage("Failed to get access to local media. Error code was " + error.code + ".");
+            closeInfoView(3000);
+            me.isAudioMuted = 1;
+        };
+
+        if (me.checkMediaDevices()) {
+            navigator.mediaDevices.getUserMedia({audio: true})
+                .then(mediaStream)
+                .catch(error);
+        } else {
+            getUserMedia({audio: true}, mediaStream, error);
+        }
     }
 };
+
+WebRtcMediaManager.prototype.getConstraints = function (receiveVideo) {
+    var constraints = {};
+    if (webrtcDetectedBrowser == "firefox") {
+        constraints = {offerToReceiveAudio: true, offerToReceiveVideo: receiveVideo};
+    } else {
+        constraints = {optional: [], mandatory: {OfferToReceiveAudio: true, OfferToReceiveVideo: receiveVideo}};
+    }
+    return constraints;
+}
 
 WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVideo) {
     trace("WebRtcMediaManager - createOffer()");
@@ -183,6 +218,7 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
             trace("Connection state is not established. Initializing...");
             me.init();
         }
+        var mandatory = {};
         if (me.peerConnection == null) {
             trace("peerConnection is null");
             me.createPeerConnection();
@@ -192,12 +228,13 @@ WebRtcMediaManager.prototype.createOffer = function (createOfferCallback, hasVid
                 me.peerConnection.addStream(me.localAudioStream);
             }
         }
+        mandatory = me.getConstraints(hasVideo);
         me.createOfferCallback = createOfferCallback;
         me.peerConnection.createOffer(function (offer) {
             me.onCreateOfferSuccessCallback(offer);
         }, function (error) {
             me.onCreateOfferErrorCallback(error);
-        });
+        }, mandatory);
 
     }
     catch (exception) {
