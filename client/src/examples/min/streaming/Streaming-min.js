@@ -10,7 +10,7 @@ function initAPI() {
     configuration.remoteMediaElementId = 'remoteVideo';
     configuration.localMediaElementId = 'localVideo';
     configuration.elementIdForSWF = "flashVideoDiv";
-    configuration.pathToSWF = "../../dependencies/flash/MediaManager.swf";
+    configuration.pathToSWF = "../../../dependencies/flash/MediaManager.swf";
     f.init(configuration);
 
     if (webrtcDetectedBrowser) {
