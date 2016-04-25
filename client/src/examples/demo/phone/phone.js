@@ -73,8 +73,11 @@ function connect() {
         sipLogin: field("sipLogin"),
         sipPassword: field("sipPassword"),
         sipDomain: field("sipDomain"),
-        sipPort: field("sipPort")
+        sipPort: field("sipPort"),
+        sipRegisterRequired: field("sipRegisterRequired")
     };
+
+    console.log(connection);
 
     f.connect(connection);
 
@@ -369,5 +372,14 @@ function checkForEmptyField(checkField, alertDiv) {
     } else {
         $(alertDiv).removeClass("has-error");
         return true;
+    }
+}
+
+function setValue(name) {
+    var id = "#"+name.id;
+    if ($(id).is(':checked')) {
+        $(id).val('true');
+    } else {
+        $(id).val('false');
     }
 }
