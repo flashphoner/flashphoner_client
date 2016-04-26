@@ -1,0 +1,65 @@
+/* Field set styles*/
+fieldset.scheduler-border {
+    border: 1px groove #ddd !important;
+    padding: 0 1.4em 1.4em 1.4em !important;
+    margin: 0 0 1.5em 0 !important;
+    -webkit-box-shadow: 0px 0px 0px 0px #000;
+    box-shadow: 0px 0px 0px 0px #000;
+}
+
+/* Field set legend*/
+legend.scheduler-border {
+    width: inherit; /* Or auto */
+    padding: 0 10px; /* To give a bit of padding on the left and right */
+    border-bottom: none;
+    text-align: left;
+}
+
+/* Vertical alignment for text and buttons */
+.fp-buttonVerticalAlign {
+    vertical-align: middle;
+    display: inline-block;
+    height: 34px;
+    line-height: 34px;
+}
+
+/* Video block */
+.fp-videoBlock {
+    left: 0px;
+    top: 85px;
+}
+
+/* Flash Video Wrapper */
+.fp-flashVideoWrapper {
+    position: absolute;
+    border: solid 1px;
+    width: 320px;
+    height: 240px;
+}
+
+/* Remote Video*/
+.fp-remoteVideo {
+    position: absolute;
+    border: 1px solid;
+}
+
+/* Local Video*/
+.fp-localVideo {
+    border: solid 1px;
+    background-color: black;
+    position: absolute;
+}
+
+/* Mute Video Controls */
+.fp-muteVideoControls {
+    position: absolute;
+    top:250px;
+}
+
+input[type="checkbox"] {
+    line-height: normal;
+}
+
+.form-horizontal .checkbox {
+    min-height: 55px;
+}
