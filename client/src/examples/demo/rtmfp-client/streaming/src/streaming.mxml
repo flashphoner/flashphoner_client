@@ -219,9 +219,6 @@
 					subscribeStream.close();
 					subscribeStream = null;
 				}
-				if (nc != null && nc.connected) {
-					nc.call("stopStream", null, subscribeStreamObject);
-				}
 				subscribeStreamObject = null;
 				videoFarEnd.visible = false;
 			}
@@ -236,9 +233,7 @@
 				soundTransform.volume=0.7;
 				subscribeStream.soundTransform = soundTransform;	
 				subscribeStreamObject = createStreamObject();
-				nc.call("playStream", new Responder(function():void{
-					subscribeStream.play(subscribeStreamObject.mediaSessionId);
-				}), subscribeStreamObject);
+				subscribeStream.play(playStreamName.text);
 				videoFarEnd.attachNetStream(subscribeStream);
 				videoFarEnd.width = 320;
 				videoFarEnd.height = 240;
@@ -312,6 +307,11 @@
 						break;
 					case "NetStream.Play.StreamNotFound":
 						setPlayStatus("STREAM NOT FOUND");
+						playBtn.visible = true;
+						stopBtn.visible = false;
+						break;
+					case "NetStream.Play.Failed":
+						setPlayStatus("STREAM FAILED");
 						playBtn.visible = true;
 						stopBtn.visible = false;
 						break;
