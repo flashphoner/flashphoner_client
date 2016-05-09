@@ -17,16 +17,16 @@ function page_init(){
     $("#connectBtn").click(function () {
             var state = getConnectionButtonText();
             if (state == "Connect") {
-                var emptyField;
-                $("form#formConnection :input").not(':input[type=button]').each(function() {
-                   if (!checkForEmptyField('#'+$(this).attr('id'),'#'+$(this).attr('id')+'Form')) {
-                       emptyField = true;
-                   }
-                });
-                if (!emptyField) {
+                //var emptyField;
+                //$("form#formConnection :input").not(':input[type=button]').each(function() {
+                //   if (!checkForEmptyField('#'+$(this).attr('id'),'#'+$(this).attr('id')+'Form')) {
+                //       emptyField = true;
+                //   }
+                //});
+                //if (!emptyField) {
                     connect();
                     $(this).prop('disabled', true);
-                }
+                //}
             } else {
                 disconnect();
                 $(this).prop('disabled', true);
@@ -36,7 +36,7 @@ function page_init(){
 
     $("#callBtn").prop('disabled', true).click(function () {
             var state = getCallButtonText();
-            if (state == "Call") {
+            if (state == "Start") {
                 call();
             } else {
                 hangup();
@@ -48,18 +48,16 @@ function page_init(){
     // Set websocket URL
     setURL();
 
-    // Set fields using cookies
-    $("#sipLogin").val(f.getCookie("sipLogin"));
-    $("#sipPassword").val(f.getCookie("sipPassword"));
-    $("#sipDomain").val(f.getCookie("sipDomain"));
-    $("#sipPort").val(f.getCookie("sipPort"));
 
     // Display outgoing call controls
     showOutgoing();
+
+
 }
 
 //Init WCS JavaScript API
 var f = Flashphoner.getInstance();
+var conf = ConfigurationLoader.getInstance().configuration;
 
 //Current call
 var currentCall;
@@ -67,14 +65,20 @@ var currentCall;
 //New connection
 function connect() {
 
+    //SIP parameters
+    var sipPort = 0;
+    var sipPassword = generatePassword();
+    var sipDomain = conf.urlWsServer.substring(conf.urlWsServer.lastIndexOf("/")+1,conf.urlWsServer.lastIndexOf(":"));
+    var sipRegisterRequired = false;
+
     var connection = {
         urlServer: field("urlServer"),
         appKey: 'defaultApp',
         sipLogin: field("sipLogin"),
-        sipPassword: field("sipPassword"),
-        sipDomain: field("sipDomain"),
-        sipPort: field("sipPort"),
-        sipRegisterRequired: field("sipRegisterRequired")
+        sipPassword: sipPassword,
+        sipDomain: sipDomain,
+        sipPort: sipPort,
+        sipRegisterRequired: sipRegisterRequired
     };
 
     console.log(connection);
@@ -89,6 +93,10 @@ function connect() {
 // Set connection status and display corresponding view
 function setStatus(status) {
     if (status == "REGISTERED") {
+        $("#regStatus").text(status).removeClass().attr("class","text-success");
+    }
+
+    if (status == "ESTABLISHED") {
         $("#regStatus").text(status).removeClass().attr("class","text-success");
     }
 
@@ -276,9 +284,9 @@ function callStatusListener(event) {
 
     if (event.status == CallStatus.FINISH || event.status == CallStatus.FAILED || event.status == CallStatus.BUSY) {
         showOutgoing();
-        setCallButtonText("Call");
+        setCallButtonText("Start");
     } else {
-        setCallButtonText("Hangup");
+        setCallButtonText("Stop");
     }
 
 }
@@ -353,7 +361,7 @@ function detectFlash() {
 // Reset button's and field's state
 function resetStates() {
     $("#connectBtn").text("Connect").prop('disabled',false);
-    $("#callBtn").text("Call").prop('disabled',true);
+    $("#callBtn").text("Start").prop('disabled',true);
     $("#callStatus").text("").removeClass();
     $("#outgoingCall").show();
     $("#incomingCall").hide();
@@ -382,4 +390,19 @@ function setValue(name) {
     } else {
         $(id).val('false');
     }
+}
+
+function generatePassword (){
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    var password;
+
+    for( var i=0; i < getRandomInt(6,10); i++ )
+        password += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return password;
+}
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
 }

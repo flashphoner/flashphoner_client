@@ -387,7 +387,8 @@ ConfigurationLoader.prototype = {
                 }
             });
         } else {
-            me.configLoadedListener.apply(this, [me.configuration]);
+            if (typeof me.configLoadedListener != 'undefined')
+                me.configLoadedListener.apply(this, [me.configuration]);
         }
     }
 

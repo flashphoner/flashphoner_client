@@ -71,8 +71,6 @@ function initOnLoad() {
     var configuration = new Configuration();
     configuration.wsPlayerCanvas = document.getElementById('videoCanvas');
     configuration.wsPlayerReceiverPath = "../../../dependencies/websocket-player/WSReceiver.js";
-    configuration.videoWidth = 320;
-    configuration.videoHeight = 240;
     f.init(configuration);
     initVisibility();
 }
