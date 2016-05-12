@@ -2,6 +2,12 @@
 ///////////// Utils ////////////
 ///////////////////////////////////
 
+function notEmpty(obj) {
+    if (obj != null && obj != 'undefined' && obj != '') {
+        return true;
+    }
+    return false;
+}
 
 //Trace
 function trace(str){
@@ -26,6 +32,15 @@ function setURL() {
         proto = "wss://"
         port = "8443"
     }
+
+    url = proto + window.location.hostname + ":" + port;
+    return url;
+}
+
+function getHLSUrl() {
+    var proto = "http://";
+    var url;
+    var port = 8082;
 
     url = proto + window.location.hostname + ":" + port;
     return url;
