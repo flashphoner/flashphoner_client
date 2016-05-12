@@ -43,7 +43,7 @@ Flashphoner.prototype = {
 
         var me = this;
 
-        if (me.isChrome() || me.isFF()) {
+        if ( (me.isChrome() || me.isFF()) && !me.configuration.forceFlashForWebRTCBrowser ) {
             //Don't init Flash player for Chrome browser because it has some bugs in version 46 (Flash no longer detects webcam in Chrome)
             //Once Flash is not loaded, WebRTC will be used everywhere in Chrome until the Flash Player bug is not resolved
             //https://productforums.google.com/forum/#!topic/chrome/QjT1GR2IYzM;context-place=forum/chrome
@@ -431,6 +431,7 @@ Flashphoner.prototype = {
             },
 
             notifyVideoFormat: function (videoFormat) {
+                me.invokeListener(WCSEvent.OnVideoFormatEvent, [videoFormat]);
             },
 
             talk: function (call) {
@@ -965,6 +966,16 @@ Flashphoner.prototype = {
             this.mediaProviders.get(call.mediaProvider).setVolume(call.callId, value);
         } else {
             this.mediaProviders.get(call.mediaProvider).setVolume(this.webRtcCallSessionId, value);
+        }
+    },
+
+    setVolumeOnStreaming: function (provider, value) {
+        if (provider == MediaProvider.WSPlayer) {
+            this.mediaProviders.get(provider).setVolume(value);
+        } else if (provider == MediaProvider.Flash) {
+            this.mediaProviders.get(provider).setVolume(0, value);
+        } else {
+           getElement(this.configuration.remoteMediaElementId).volume = value;
         }
     },
 
@@ -2310,6 +2321,7 @@ Configuration = function () {
     this.pathToSWF = null;
     this.urlWsServer = null;
     this.urlFlashServer = null;
+    this.forceFlashForWebRTCBrowser = null;
     this.sipRegisterRequired = true;
     this.sipContactParams = null;
 
@@ -2467,6 +2479,7 @@ WCSEvent.DataStatusEvent = "DATA_STATUS_EVENT";
 WCSEvent.TransferStatusEvent = "TRANSFER_STATUS_EVENT";
 WCSEvent.OnTransferEvent = "ON_TRANSFER_EVENT";
 WCSEvent.OnBinaryEvent = "ON_BINARY_EVENT";
+WCSEvent.OnVideoFormatEvent = "ON_VIDEO_FORMAT_EVENT";
 
 var WCSError = function () {
 };
