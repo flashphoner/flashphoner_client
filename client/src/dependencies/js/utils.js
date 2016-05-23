@@ -82,3 +82,35 @@ $(function() {
         $('.modal:visible').each(reposition);
     });
 });
+
+function detectBrowser() {
+    var browser;
+    // Opera 8.0+
+    var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+    if (isOpera)
+        return "Opera";
+    // Firefox 1.0+
+    var isFirefox = typeof InstallTrigger !== 'undefined';
+    if (isFirefox)
+        return "Firefox";
+    // At least Safari 3+: "[object HTMLElementConstructor]"
+    var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+    if (isSafari)
+        return "Safari";
+    // Internet Explorer 6-11
+    var isIE = /*@cc_on!@*/false || !!document.documentMode;
+    if (isIE)
+        return "IE";
+    // Edge 20+
+    var isEdge = !isIE && !!window.StyleMedia;
+    if (isEdge)
+        return "Edge";
+    // Chrome 1+
+    var isChrome = !!window.chrome && !!window.chrome.webstore;
+    if (isChrome)
+        return "Chrome";
+    // Blink engine detection
+    var isBlink = (isChrome || isOpera) && !!window.CSS;
+    if (isBlink)
+        return "Blink";
+}

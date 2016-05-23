@@ -9,6 +9,7 @@ function Flashphoner() {
     this.webRtcMediaManager = undefined;
     this.webRtcCallSessionId = undefined;
     this.flashMediaManager = undefined;
+    this.swfLoaded = undefined;
     this.wsPlayerMediaManager = undefined;
     this.connection = null;
     this.configuration = new Configuration();
@@ -72,6 +73,7 @@ Flashphoner.prototype = {
             if (swfobject.hasFlashPlayerVersion("11.2")) {
                 swfobject.embedSWF(pathToSWF, elementId, "100%", "100%", "11.2.202", "expressInstall.swf", flashvars, params, attributes, function (e) {
                     me.flashMediaManager = e.ref;
+                    me.swfLoaded = true;
                     me.mediaProviders.add(MediaProvider.Flash, me.flashMediaManager);
                 });
             } else {
@@ -961,6 +963,14 @@ Flashphoner.prototype = {
         }
     },
 
+    getVolumeOnStreaming: function(provider) {
+        if(provider == MediaProvider.WebRTC) {
+            return getElement(this.configuration.remoteMediaElementId).volume;
+        } else {
+            return this.mediaProviders.get(provider).getVolume();
+        }
+    },
+
     setVolume: function (call, value) {
         if (MediaProvider.Flash == call.mediaProvider) {
             this.mediaProviders.get(call.mediaProvider).setVolume(call.callId, value);
@@ -971,11 +981,11 @@ Flashphoner.prototype = {
 
     setVolumeOnStreaming: function (provider, value) {
         if (provider == MediaProvider.WSPlayer) {
-            this.mediaProviders.get(provider).setVolume(value);
+            this.mediaProviders.get(provider).setVolume(value/100);
         } else if (provider == MediaProvider.Flash) {
             this.mediaProviders.get(provider).setVolume(0, value);
         } else {
-           getElement(this.configuration.remoteMediaElementId).volume = value;
+           getElement(this.configuration.remoteMediaElementId).volume = value/100;
         }
     },
 
