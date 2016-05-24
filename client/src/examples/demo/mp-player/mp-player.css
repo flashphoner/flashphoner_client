@@ -1,0 +1,89 @@
+.fp-main {
+    border: 1px solid black;
+    width: 864px;
+    height: 480px;
+    max-height: 480px;
+    max-width: 864px;
+    display: table;
+    position: relative;
+}
+.fp-input {
+    position: absolute !important;
+    height: 50px;
+    width: inherit;
+    padding: 0;
+    margin: -1px 0 0 -1px;
+    text-align: center;
+    border: inherit;
+    border-bottom: 1px solid black;
+    z-index: 999999;
+}
+.fp-playButton {
+    position: absolute !important;
+    margin-left: 401px;
+    margin-top: 209px;
+    z-index: 2147483647;
+}
+.fp-remoteVideo-320x240 {
+    position: absolute !important;
+    z-index: 0;
+}
+.fp-remoteVideo {
+    position: absolute !important;
+    top: 0;
+    display: inline-block;
+    max-width: 864px;
+}
+
+.fp-fps {
+    text-align: right;
+    margin-right: 10px;
+    z-index: 2147483647;
+}
+
+.fp-footer {
+    position: absolute !important;
+    width: 99.8%;
+    height: 50px;
+    bottom: 1px;
+    background: #EEEEEE;
+}
+.fp-footer >div {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+.fp-footer >div>button>i {
+    font-size: 32px;
+    color: #999999;
+}
+
+#waiting {
+    font-size: 48px;
+}
+
+.ui-slider {
+    height: 3px !important;
+    width: 100px !important;
+    left: 5px !important;
+    background: black;
+}
+
+.ui-slider-handle {
+    width: 12px !important;
+    height: 12px !important;
+    position:absolute;
+    -moz-border-radius: 50px;
+    -webkit-border-radius: 50px;
+    border-radius: 50px;
+}
+
+.ui-slider-range-min {
+    width:80px;
+    position:absolute;
+    top:-7px;
+    z-index:200;
+    background: black;
+}
+
+
