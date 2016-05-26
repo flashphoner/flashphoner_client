@@ -251,7 +251,7 @@ Flashphoner.prototype = {
 
             if ((!this.webRtcCallSessionId) && MediaProvider.WebRTC == call.mediaProvider) {
                 this.webRtcCallSessionId = call.callId;
-                me.webRtcMediaManager.newConnection(call.callId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, me.configuration.remoteMediaElementId, call.callId));
+                me.webRtcMediaManager.newConnection(call.callId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, me.configuration.remoteMediaElementId, call.callId));
             }
 
             if (call.incoming || call.parentCallId !== undefined) {
@@ -1069,7 +1069,7 @@ Flashphoner.prototype = {
 
         me.checkAndGetAccess(stream.mediaProvider, stream.hasVideo, function () {
             if (MediaProvider.WebRTC == stream.mediaProvider) {
-                me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined, mediaSessionId));
+                me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, undefined, mediaSessionId));
 
                 me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
                     trace("Publish name " + stream.name);
@@ -1137,7 +1137,7 @@ Flashphoner.prototype = {
         stream.mediaProvider = MediaProvider.WebRTC;
         me.getScreenAccess(extensionId, function(response) {
             if (response.success) {
-                me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, undefined, mediaSessionId));
+                me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, undefined, mediaSessionId));
 
                 me.webRtcMediaManager.createOffer(mediaSessionId, function (sdp) {
                     trace("Publish name for screen sharing " + stream.name);
@@ -1177,7 +1177,7 @@ Flashphoner.prototype = {
 
         if (MediaProvider.WebRTC == stream.mediaProvider) {
 
-            me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS | true, stream.remoteMediaElementId || me.configuration.remoteMediaElementId, mediaSessionId));
+            me.webRtcMediaManager.newConnection(mediaSessionId, new WebRtcMediaConnection(me.webRtcMediaManager, me.configuration.stunServer, me.configuration.useDTLS, stream.remoteMediaElementId || me.configuration.remoteMediaElementId, mediaSessionId));
 
 
             if (stream.hasVideo == undefined) {
@@ -1824,7 +1824,14 @@ var WebRtcMediaConnection = function (webRtcMediaManager, stunServer, useDTLS, r
         me.remoteMediaElement = getElement(remoteMediaElementId);
     }
     me.stunServer = stunServer;
-    me.useDTLS = useDTLS;
+
+    //If we set false immediately, we use false, if it is undefined
+    if (useDTLS===false || useDTLS==='false'){
+        me.useDTLS = false;
+    }else{
+        me.useDTLS = true;
+    }
+
     me.lastReceivedSdp = null;
     me.id = id;
     //stun server by default
