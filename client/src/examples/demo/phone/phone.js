@@ -88,7 +88,7 @@ function connect() {
 
 // Set connection status and display corresponding view
 function setStatus(status) {
-    if (status == "REGISTERED") {
+    if (status == "REGISTERED" || status == "ESTABLISHED") {
         $("#regStatus").text(status).removeClass().attr("class","text-success");
     }
 

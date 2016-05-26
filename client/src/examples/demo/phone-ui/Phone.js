@@ -650,6 +650,7 @@ Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
         if (MediaProvider.Flash == mediaProvider) {
             this.hideFlashAccess();
         } else {
+            $(".b-video").draggable();
             $(".b-video").draggable("enable");
             $("body").removeClass("mike");
         }
@@ -661,6 +662,7 @@ Phone.prototype.hasAccess = function (mediaProvider, hasVideo) {
 Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
     if (MediaProvider.Flash == mediaProvider) {
         $(".b-video").addClass("flash_access");
+        $(".b-video").draggable();
         $(".b-video").draggable("disable");
         $(".b-video").resizable("disable");
         $(".b-video__flash").addClass("access");
@@ -674,6 +676,7 @@ Phone.prototype.getAccess = function (mediaProvider, hasVideo) {
 
     } else {
         //hide flash div
+        $(".b-video").draggable();
         $(".b-video").draggable("enable");
         $(".b-video__flash").zIndex(0);
         hasVideo ? $(".b-alert").html("Please <span>allow</span> access to your web camera and microphone.") : $(".b-alert").html("please <span>allow</span> access to audio device");

@@ -316,13 +316,6 @@ function checkForEmptyField(checkField, alertDiv) {
     }
 }
 
-function notEmpty(obj) {
-    if (obj != null && obj != 'undefined' && obj != '') {
-        return true;
-    }
-    return false;
-}
-
 // Reset button's and field's state
 function resetStates() {
     $("#connectBtn").text("Connect").prop('disabled',false);

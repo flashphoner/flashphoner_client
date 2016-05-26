@@ -9,6 +9,7 @@ function Flashphoner() {
     this.webRtcMediaManager = undefined;
     this.webRtcCallSessionId = undefined;
     this.flashMediaManager = undefined;
+    this.swfLoaded = undefined;
     this.wsPlayerMediaManager = undefined;
     this.connection = null;
     this.configuration = new Configuration();
@@ -43,7 +44,7 @@ Flashphoner.prototype = {
 
         var me = this;
 
-        if (me.isChrome() || me.isFF()) {
+        if ( (me.isChrome() || me.isFF()) && !me.configuration.forceFlashForWebRTCBrowser ) {
             //Don't init Flash player for Chrome browser because it has some bugs in version 46 (Flash no longer detects webcam in Chrome)
             //Once Flash is not loaded, WebRTC will be used everywhere in Chrome until the Flash Player bug is not resolved
             //https://productforums.google.com/forum/#!topic/chrome/QjT1GR2IYzM;context-place=forum/chrome
@@ -72,6 +73,7 @@ Flashphoner.prototype = {
             if (swfobject.hasFlashPlayerVersion("11.2")) {
                 swfobject.embedSWF(pathToSWF, elementId, "100%", "100%", "11.2.202", "expressInstall.swf", flashvars, params, attributes, function (e) {
                     me.flashMediaManager = e.ref;
+                    me.swfLoaded = true;
                     me.mediaProviders.add(MediaProvider.Flash, me.flashMediaManager);
                 });
             } else {
@@ -431,6 +433,7 @@ Flashphoner.prototype = {
             },
 
             notifyVideoFormat: function (videoFormat) {
+                me.invokeListener(WCSEvent.OnVideoFormatEvent, [videoFormat]);
             },
 
             talk: function (call) {
@@ -960,11 +963,29 @@ Flashphoner.prototype = {
         }
     },
 
+    getVolumeOnStreaming: function(provider) {
+        if(provider == MediaProvider.WebRTC) {
+            return getElement(this.configuration.remoteMediaElementId).volume;
+        } else {
+            return this.mediaProviders.get(provider).getVolume();
+        }
+    },
+
     setVolume: function (call, value) {
         if (MediaProvider.Flash == call.mediaProvider) {
             this.mediaProviders.get(call.mediaProvider).setVolume(call.callId, value);
         } else {
             this.mediaProviders.get(call.mediaProvider).setVolume(this.webRtcCallSessionId, value);
+        }
+    },
+
+    setVolumeOnStreaming: function (provider, value) {
+        if (provider == MediaProvider.WSPlayer) {
+            this.mediaProviders.get(provider).setVolume(value/100);
+        } else if (provider == MediaProvider.Flash) {
+            this.mediaProviders.get(provider).setVolume(0, value);
+        } else {
+           getElement(this.configuration.remoteMediaElementId).volume = value/100;
         }
     },
 
@@ -2310,6 +2331,7 @@ Configuration = function () {
     this.pathToSWF = null;
     this.urlWsServer = null;
     this.urlFlashServer = null;
+    this.forceFlashForWebRTCBrowser = null;
     this.sipRegisterRequired = true;
     this.sipContactParams = null;
 
@@ -2467,6 +2489,7 @@ WCSEvent.DataStatusEvent = "DATA_STATUS_EVENT";
 WCSEvent.TransferStatusEvent = "TRANSFER_STATUS_EVENT";
 WCSEvent.OnTransferEvent = "ON_TRANSFER_EVENT";
 WCSEvent.OnBinaryEvent = "ON_BINARY_EVENT";
+WCSEvent.OnVideoFormatEvent = "ON_VIDEO_FORMAT_EVENT";
 
 var WCSError = function () {
 };

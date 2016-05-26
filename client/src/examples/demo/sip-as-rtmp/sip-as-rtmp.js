@@ -83,7 +83,6 @@ function handleAjaxSuccess(data, textStatus, jqXHR) {
             $("#dtmfBtn").prop('disabled',false);
             setCallStatus(jqXHR.responseText);
         }
-        sendDataToPlayer();
     }
 }
 
@@ -147,6 +146,7 @@ function startCall() {
 
     sendREST(url, data);
     startCheckStatus();
+    sendDataToPlayer();
 }
 
 function startCheckStatus() {
@@ -161,7 +161,11 @@ function stopCheckStatus() {
 //Call embedded AS3 function (setURLtoFlash)
 function sendDataToPlayer() {
     var player = document.getElementById("player");
-    var url = field("rtmpUrl") + "/" + field("rtmpStream");
+    var host = field("rtmpUrl")
+        .replace("localhost", window.location.hostname)
+        .replace("127.0.0.1", window.location.hostname);
+
+    var url = host + "/" + field("rtmpStream");
     player.setURLtoFlash(url);
 }
 

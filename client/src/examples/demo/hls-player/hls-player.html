@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="hls-player.css">
+    <title>HLS Player Minimal</title>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../../dependencies/js/utils.js"></script>
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+    <script type="text/javascript" src="hls-player.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="../../../dependencies/bootstrap/js/bootstrap.js"></script>
+</head>
+<body onload="initPage()">
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12 text-center" style="max-width: 525px">
+
+            <h2>HLS Player Minimal</h2>
+
+            <h2 id="notifyFlash" class="text-danger"></h2>
+            <fieldset id="fieldset" class="scheduler-border fp-streamingControls">
+                <div class="row" style="margin-top: 20px">
+                    <label class="control-label col-sm-3 fp-buttonVerticalAlign text-right" for="urlServer">WCS
+                        URL</label>
+
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="urlServer" placeholder="WCS Server URL"/>
+                    </div>
+                </div>
+
+                <div id="playDiv" class="row" style="margin-top:10px">
+                    <div id="playForm" class="form-group">
+                        <label class="control-label col-sm-3 fp-buttonVerticalAlign  text-right"
+                               for="playStream">Stream Name</label>
+
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="playStream" placeholder="Stream Name"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 20px">
+                    <div class="col-sm-12 text-center">
+                        <button id="applyBtn" type="button" class="btn btn-default">Apply</button>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 text-center" style="margin-top: 20px">
+            <video id="remoteVideo" width="320" height="240"
+                   controls="controls"
+                   type="application/vnd.apple.mpegurl"></video>
+        </div>
+    </div>
+</div>
+</body>
+</html>
