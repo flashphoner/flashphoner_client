@@ -48,11 +48,9 @@ function page_init(){
     // Set websocket URL
     setURL();
 
-
     // Display outgoing call controls
     showOutgoing();
-
-
+    $("#notify").modal('show');
 }
 
 //Init WCS JavaScript API
@@ -80,8 +78,6 @@ function connect() {
         sipPort: sipPort,
         sipRegisterRequired: sipRegisterRequired
     };
-
-    console.log(connection);
 
     f.connect(connection);
 
