@@ -265,8 +265,18 @@ function setStatus(status) {
 // Set Stream Status
 function setStreamStatus(status) {
 
-    $("#streamStatus").text(status);
-    $("#streamStatus").className='';
+    if (status == StreamStatus.PlaybackProblem) {
+        $("#playbackStatus").text(status);
+        $("#playbackStatus").className = '';
+        $("#playbackStatus").attr("class", "text-danger");
+        $("#playbackStatus").show();
+        setTimeout(function() {
+            $("#playbackStatus").hide();
+        },3000);
+    } else {
+        $("#streamStatus").text(status);
+        $("#streamStatus").className = '';
+    }
 
     if (status == "FAILED") {
         $("#streamStatus").attr("class","text-danger");
