@@ -96,6 +96,7 @@ Flashphoner.prototype = {
             config.token = this.userData.authToken;
             config.urlWsServer = this.connection.urlServer;
             config.receiverPath = this.configuration.wsPlayerReceiverPath;
+            config.decoderPath = this.configuration.wsPlayerDecoderPath;
             config.videoWidth = this.configuration.videoWidth;
             config.videoHeight = this.configuration.videoHeight;
             config.startWithVideoOnly = this.configuration.wsPlayerStartWithVideoOnly;
