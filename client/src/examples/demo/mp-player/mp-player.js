@@ -1,11 +1,13 @@
 //Init WCS JavaScript API
-var f = Flashphoner.getInstance();
+var f ;//= Flashphoner.getInstance();
 var timerTimeout;
 var useNativeResolution = true;
 var streamStatus;
 // This element will be used for playing video (canvas or video)
 var videoElement;
 var mediaProvider;
+var replay = false;
+var reinit = false;
 
 ////////////////////////////////////
 ///////////// Initialize ///////////
@@ -63,19 +65,9 @@ function init_page() {
         trace("Switch to " + $("#proto").val());
         if (streamStatus == StreamStatus.Playing)
             stopStream();
-        initAPI();
-        if (MediaProvider.Flash == mediaProvider) {
-            var waitForFlashInit = setInterval(function() {
-                if (isFlashphonerAPILoaded) {
-                    clearInterval(waitForFlashInit);
-                    setTimeout(playStream,2000);
-                } else {
-                    setInterval(waitForFlashInit, 1000);
-                }
-            }, 1000);
-        } else {
-            playStream();
-        }
+        reinit = true;
+        replay = true;
+        disconnect();
     });
 
     $("#playButton").click(function() {
@@ -95,7 +87,7 @@ function init_page() {
         step: 10,
         animate: true,
         slide: function(event, ui) {
-            setVolume(ui.value/100);
+            setVolume(ui.value);
         }
     });
     initAPI();
@@ -103,11 +95,12 @@ function init_page() {
 }
 
 function initAPI() {
+    f = Flashphoner.getInstance();
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
     f.addListener(WCSEvent.OnVideoFormatEvent, videoFormatListener);
-
+    console.log("InitAPI "+isFlashphonerAPILoaded);
     if (detectIE()) {
         detectFlash();
     }
@@ -133,6 +126,7 @@ function initAPI() {
 
 // Init HLS
 function initHLS() {
+    isFlashphonerAPILoaded = false;
     trace("Init HLS");
     $("#videoCanvas").hide();
     $("#remoteVideo").show();
@@ -176,6 +170,7 @@ function initRTC() {
     if (webrtcDetectedBrowser) {
         document.getElementById('flashVideoWrapper').style.visibility = "hidden";
         document.getElementById('flashVideoDiv').style.visibility = "hidden";
+        document.getElementById('remoteVideo').style.visibility = "visible";
         videoElement = $("#remoteVideo");
     } else {
         document.getElementById('remoteVideo').style.visibility = "hidden";
@@ -191,6 +186,7 @@ function initRTC() {
 
 // Init WebSocket
 function initWSPlayer() {
+    isFlashphonerAPILoaded = false;
     trace("Init WSPlayer");
     videoElement = $("#videoCanvas");
     mediaProvider = MediaProvider.WSPlayer;
@@ -201,6 +197,8 @@ function initWSPlayer() {
     var configuration = new Configuration();
     configuration.wsPlayerCanvas = document.getElementById('videoCanvas');
     configuration.wsPlayerReceiverPath = "../../../dependencies/websocket-player/WSReceiver.js";
+    configuration.videoWidth = getVideoResParam('width');
+    configuration.videoHeight = getVideoResParam('height');
     f.init(configuration);
 
     initVisibility();
@@ -213,6 +211,11 @@ function initWSPlayer() {
         useWsTunnel: true,
         useBase64BinaryEncoding: false,
     });
+}
+
+// Disconnect
+function disconnect() {
+    f.disconnect();
 }
 
 /////////////////////////////////////////////////////
@@ -258,11 +261,11 @@ function visibilityHandler() {
 
 //Play stream
 function playStream(width,height) {
-    if ($(videoElement).attr('src')) {
+    if ($("#proto").val() == "HLS") {
         $(videoElement).attr('src',getHLSUrl()+"/"+field("playStream")+"/"+field("playStream")+".m3u8");
         $(videoElement).load();
     } else {
-        trace("Play stream " + field("playStream") + " , provider - " + mediaProvider);
+        trace("Play stream " + field("playStream"));
         var stream = new Stream();
         stream.name = field("playStream");
         stream.hasVideo = true;
@@ -284,6 +287,7 @@ function playStream(width,height) {
 
 //Stop stream playback
 function stopStream() {
+    replay = false;
     var streamName = field("playStream");
     f.stopStream({name: streamName});
     $("#playButton").show();
@@ -299,10 +303,30 @@ function connectionStatusListener(event) {
     trace(event.status);
     if (event.status == ConnectionStatus.Established) {
         trace('Connection has been established. You can start a new call.');
+        if (replay) {
+            if (mediaProvider == MediaProvider.Flash) {
+                replay = false;
+                setTimeout(function () {
+                    var waitForFlashInit = setInterval(function () {
+                        if (isFlashphonerAPILoaded) {
+                            clearInterval(waitForFlashInit);
+                            setTimeout(playStream, 2000);
+                        } else {
+                            setInterval(waitForFlashInit, 1000);
+                        }
+                    }, 1000);
+                }, 3000);
+            } else {
+                playStream();
+            }
+        }
     } else if (event.status == ConnectionStatus.Failed) {
         $("#playStatus").show().text("Connection failed!");
         $("#playButton").show();
         $("#waiting").hide();
+    }
+    else if (event.status == ConnectionStatus.Disconnected && reinit) {
+        initAPI();
     }
 }
 
@@ -328,7 +352,8 @@ function streamStatusListener(event) {
 
 function videoFormatListener(event) {
     if (useNativeResolution) {
-        trace(">>> Set native resolution from publisher " + event.playerVideoWidth + "x" + event.playerVideoHeight);
+        console.log($(videoElement).attr('id'));
+        trace("Set native resolution from publisher " + event.playerVideoWidth + "x" + event.playerVideoHeight);
         var marginLeft;
         var marginTop;
 
@@ -405,7 +430,7 @@ function onPlayActions() {
             }
             if ($("#playStream").is(':visible')) {
                 setTimeout(function () {
-                    $("#playStream").hide('blind', {direction: "up"}, 1500);
+                    $("#playStream").hide('blind', {direction: "down"}, 1500);
                 }, 5000);
             } else {
                 $("#playStream").show();
