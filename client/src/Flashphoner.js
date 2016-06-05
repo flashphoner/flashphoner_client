@@ -1502,7 +1502,7 @@ WebRtcMediaManager.prototype.muteVideo = function () {
 };
 
 WebRtcMediaManager.prototype.unmuteVideo = function () {
-    if (this.localAudioVideoStream) {
+    if (this.localAudioVideoStream && this.localAudioVideoStream.getVideoTracks().length > 0) {
         this.localAudioVideoStream.getVideoTracks()[0].enabled = true;
     }
 };
