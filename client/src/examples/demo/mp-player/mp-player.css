@@ -18,6 +18,16 @@
     border-bottom: 1px solid black;
     z-index: 999999;
 }
+
+.fp-playStatus {
+    position: absolute;
+    margin: 20% 35%;
+    width: 250px;
+    text-align: center;
+    z-index: 2147483647;
+    font-size: 14pt;
+}
+
 .fp-playButton {
     position: absolute !important;
     margin-left: 401px;

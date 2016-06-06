@@ -1,6 +1,6 @@
 //Init WCS JavaScript API
-var f ;//= Flashphoner.getInstance();
-var timerTimeout;
+var f ;
+var timer;
 var useNativeResolution = true;
 var streamStatus;
 // This element will be used for playing video (canvas or video)
@@ -8,6 +8,12 @@ var videoElement;
 var mediaProvider;
 var replay = false;
 var reinit = false;
+var resolutions = [256,320,512,640,800,1024,1280];
+var conf = ConfigurationLoader.getInstance().configuration;
+// swfobject params
+var params = {};
+params.bgcolor = "696969";
+params.wmode = "auto";
 
 ////////////////////////////////////
 ///////////// Initialize ///////////
@@ -23,8 +29,6 @@ function loadFooter() {
 
 // Init elements
 function init_page() {
-    //setVideoResDiv();
-
     trace("Detected browser: " + detectBrowser());
 
     hideProto();
@@ -57,14 +61,16 @@ function init_page() {
        //}
     });
     $("#resolutions").change(function() {
+        $("#playStatus").text("Switching to " + getVideoResParam('width') + "x" + getVideoResParam('height')).show();
         stopStream();
         playStream(getVideoResParam('width'),getVideoResParam('height'));
         setVideoResDiv();
     });
     $("#proto").change(function() {
-        trace("Switch to " + $("#proto").val());
+        trace("Switching to " + $("#proto").val());
+        $("#playStatus").text("Switching to " + $("#proto").val()).show();
         if (streamStatus == StreamStatus.Playing)
-            stopStream();
+            stopStream(true);
         reinit = true;
         replay = true;
         disconnect();
@@ -100,7 +106,7 @@ function initAPI() {
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
     f.addListener(WCSEvent.OnVideoFormatEvent, videoFormatListener);
-    console.log("InitAPI "+isFlashphonerAPILoaded);
+
     if (detectIE()) {
         detectFlash();
     }
@@ -115,6 +121,7 @@ function initAPI() {
             initWSPlayer();
             break;
         case "RTMP":
+        case "RTMFP":
             mediaProvider = MediaProvider.Flash;
             initRTMP();
             break;
@@ -127,7 +134,7 @@ function initAPI() {
 // Init HLS
 function initHLS() {
     isFlashphonerAPILoaded = false;
-    trace("Init HLS");
+    trace("Init " + $("#proto").val());
     $("#videoCanvas").hide();
     $("#remoteVideo").show();
     videoElement = $("#remoteVideo");
@@ -136,7 +143,7 @@ function initHLS() {
 
 // Init Flash
 function initRTMP() {
-    trace("Init RTMP");
+    trace("Init " + $("#proto").val());
     $("#videoCanvas").hide();
     videoElement = $("#flashVideoWrapper");
 
@@ -145,6 +152,10 @@ function initRTMP() {
     configuration.elementIdForSWF = "flashVideoDiv";
     configuration.pathToSWF = "../../../dependencies/flash/MediaManager.swf";
     configuration.forceFlashForWebRTCBrowser = true;
+    configuration.swfParams = params;
+
+    if ($("#proto").val() == "RTMP")
+        configuration.urlFlashServer = conf.urlFlashServer.replace('rtmfp','rtmp');
 
     f.init(configuration);
 
@@ -156,7 +167,7 @@ function initRTMP() {
 
 // Init WebRTC
 function initRTC() {
-    trace("Init WebRTC");
+    trace("Init " + $("#proto").val());
     $("#videoCanvas").hide();
     $("#remoteVideo").show();
 
@@ -164,6 +175,7 @@ function initRTC() {
     configuration.remoteMediaElementId = 'remoteVideo';
     configuration.elementIdForSWF = "flashVideoDiv";
     configuration.pathToSWF = "../../../dependencies/flash/MediaManager.swf";
+    configuration.swfParams = params;
 
     f.init(configuration);
 
@@ -187,7 +199,7 @@ function initRTC() {
 // Init WebSocket
 function initWSPlayer() {
     isFlashphonerAPILoaded = false;
-    trace("Init WSPlayer");
+    trace("Init " + $("#proto").val());
     videoElement = $("#videoCanvas");
     mediaProvider = MediaProvider.WSPlayer;
 
@@ -286,12 +298,18 @@ function playStream(width,height) {
 }
 
 //Stop stream playback
-function stopStream() {
+function stopStream(reinit) {
     replay = false;
     var streamName = field("playStream");
     f.stopStream({name: streamName});
-    $("#playButton").show();
-    $("#waiting").hide();
+    if (reinit) {
+        $("#playButton").hide();
+        $("#waiting").show();
+    } else {
+        $("#playButton").show();
+        $("#waiting").hide();
+    }
+    clearInterval(timer);
 }
 
 ///////////////////////////////////
@@ -303,6 +321,7 @@ function connectionStatusListener(event) {
     trace(event.status);
     if (event.status == ConnectionStatus.Established) {
         trace('Connection has been established. You can start a new call.');
+        // replay stream on connect
         if (replay) {
             if (mediaProvider == MediaProvider.Flash) {
                 replay = false;
@@ -324,9 +343,8 @@ function connectionStatusListener(event) {
         $("#playStatus").show().text("Connection failed!");
         $("#playButton").show();
         $("#waiting").hide();
-    }
-    else if (event.status == ConnectionStatus.Disconnected && reinit) {
-        initAPI();
+    } else if (event.status == ConnectionStatus.Disconnected && reinit) {
+        setTimeout(initAPI,2000);
     }
 }
 
@@ -351,8 +369,7 @@ function streamStatusListener(event) {
 }
 
 function videoFormatListener(event) {
-    if (useNativeResolution) {
-        console.log($(videoElement).attr('id'));
+    if (useNativeResolution && mediaProvider != MediaProvider.WSPlayer) {
         trace("Set native resolution from publisher " + event.playerVideoWidth + "x" + event.playerVideoHeight);
         var marginLeft;
         var marginTop;
@@ -387,17 +404,38 @@ function videoFormatListener(event) {
             }
         }
 
-        if (event.playerVideoWidth > 320) {
-            $(videoElement).removeAttr('class').addClass('fp-remoteVideo');
-            marginLeft = ($("#player").width() - event.playerVideoWidth) / 2 + 'px';
-            $(videoElement).css('margin-left', marginLeft);
+        // Hide resolutions greater then native
+        var a = resolutions.filter(filterResolutions(event.playerVideoWidth));
+        var i = a.length;
+        if (i > 0) {
+            var s = "\(";
+            while (i--) {
+                s += (i > 0) ? (a[i] + "|") : ((a[i]) + "\)");
+            }
+            $("#resolutions option").each(function () {
+                if (!$(this).val().match(s)) {
+                    $(this).hide();
+                }
+            });
         } else {
-            marginTop = ($("#player").height() - event.playerVideoHeight) / 2 + 'px';
-            $(videoElement).removeAttr('class').addClass('fp-remoteVideo-320x240');
-            $(videoElement).css('margin-top', marginTop);
-            marginLeft = ($("#player").width() - event.playerVideoWidth) / 2 + 'px';
-            $(videoElement).css('margin-left', marginLeft);
+            $("#resolutions option").each(function () {
+                $(this).hide();
+            });
         }
+        // Set current resolution to list
+        var nativeRes = event.playerVideoWidth + "x" + event.playerVideoHeight;
+        $("#resolutions").prepend($('<option>', {
+            value: nativeRes,
+            text: nativeRes,
+            id: "nativeRes"
+        }));
+        $("#resolutions option[value=" + nativeRes + "]").attr('selected', 'selected');
+    }
+}
+
+function filterResolutions(res) {
+    return function (element) {
+        return (res >= element);
     }
 }
 
@@ -412,37 +450,39 @@ function errorEvent(event) {
 ///////////////////////////////////
 
 function onPlayActions() {
+    $("#playStatus").hide();
     $("#playButton").hide();
     $("#waiting").hide();
 
     $("#playStream").css('background','#EEEEEE').hide();
+    $("#footer").css('background','#EEEEEE').hide();
     $("#player").css('background','dimgray');
 
     $("#player").click(function(e) {
         var target = $(e.target);
-        if (target.is($(videoElement)) || target.is("#player")) {
-            if ($("#footer").is(':visible')) {
+        if ((target.is($(videoElement)) || target.is("#player")) && typeof target != 'undefined') {
+            if ($("#footer").is(':visible') && $("#playStream").is(':visible')) {
                 setTimeout(function () {
                     $("#footer").hide('blind', {direction: "down"}, 1500);
-                }, 5000);
-            } else {
-                $("#footer").show();
-            }
-            if ($("#playStream").is(':visible')) {
-                setTimeout(function () {
                     $("#playStream").hide('blind', {direction: "down"}, 1500);
                 }, 5000);
             } else {
+                $("#footer").show();
                 $("#playStream").show();
             }
         }
     });
     $("#timer").text("00:00:00");
-    startCallTimer();
+    timer = setInterval(startCallTimer, 1000);
+    if (field("playStream").indexOf("rtsp://") != -1) {
+        $("#proto option[value='HLS']").hide();
+    } else {
+        $("#proto option[value='RTMP']").show();
+    }
 }
 
 function onFailedActions() {
-    $("#playStatus").show().text("Playback failed!");
+    $("#playStatus").show().text("Playback failed!").css('color','red');
     $("#playButton").show();
     $("#waiting").hide();
 }
@@ -450,7 +490,6 @@ function onFailedActions() {
 function onStopActions() {
     $("#playButton").show();
     $("#waiting").hide();
-    clearTimeout(timerTimeout);
 }
 
 ///////////////////////////////////
@@ -506,7 +545,7 @@ function getVideoResParam(param) {
     }
 }
 
-function startCallTimer(clear) {
+function startCallTimer() {
     var arr = $("#timer").text().split(":");
     var h = arr[0];
     var m = arr[1];
@@ -528,7 +567,6 @@ function startCallTimer(clear) {
     if (s < 10) s = "0" + s;
 
     $("#timer").text(h + ":" + m + ":" + s);
-    timerTimeout = setTimeout(startCallTimer, 1000);
 }
 
 function setVolume(value) {
@@ -553,10 +591,18 @@ function hideProto() {
             $("#proto option[value='RTMP']").attr('selected','selected');
             break;
         case "Firefox":
-            $("#proto").find('option').not("option[value='WebRTC'],option[value='RTMP']").hide();
+            $("#proto").find('option').not("option[value='WebRTC'],option[value='RTMP'],option[value='RTMFP']").hide();
             $("#proto option[value='WebRTC']").attr('selected','selected');
             break;
         case "Chrome":
+            break;
+        case "Android":
+            $("#proto").find('option').not("option[value='WebRTC'],option[value='HLS']").hide();
+            $("#proto option[value='WebRTC']").attr('selected','selected');
+            break;
+        case "iOS":
+            $("#proto").find('option').not("option[value='WebSocket'],option[value='HLS]").hide();
+            $("#proto option[value='WebSocket']").attr('selected','selected');
             break;
     }
 }

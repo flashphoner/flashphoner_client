@@ -128,4 +128,10 @@ function detectBrowser() {
     var isBlink = (isChrome || isOpera) && !!window.CSS;
     if (isBlink)
         return "Blink";
+    var isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
+    if (isAndroid)
+        return "Android";
+    var isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isiOS)
+        return "iOS";
 }

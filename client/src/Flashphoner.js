@@ -58,15 +58,16 @@ Flashphoner.prototype = {
             params.swliveconnect = "true";
             params.allowfullscreen = "true";
             params.allowscriptaccess = "always";
+            params.bgcolor = (Object.keys(me.configuration.swfParams).length === 0) ? "000000" : me.configuration.swfParams.bgcolor;
             //in case of Safari wmode should be "window"
             if ((navigator.userAgent.indexOf("Safari") > -1) && !(navigator.userAgent.indexOf("Chrome") > -1)) {
-                params.wmode = "window";
+                params.wmode = (Object.keys(me.configuration.swfParams).length === 0) ? "window" : me.configuration.swfParams.wmode;
                 //workaround for safari browser, FPNR-403
                 swfobject.switchOffAutoHideShow();
             } else if ((navigator.userAgent.indexOf("Mozilla") > -1) && (navigator.userAgent.indexOf("Firefox") > -1)) {
-                params.wmode = "window";
+                params.wmode = (Object.keys(me.configuration.swfParams).length === 0) ? "window" : me.configuration.swfParams.wmode;
             } else {
-                params.wmode = "transparent";
+                params.wmode = (Object.keys(me.configuration.swfParams).length === 0) ? "transparent" : me.configuration.swfParams.wmode;
             }
             var attributes = {};
             var flashvars = {};
@@ -2336,6 +2337,7 @@ Configuration = function () {
     this.localMediaElementId2 = null;
     this.elementIdForSWF = null;
     this.pathToSWF = null;
+    this.swfParams = {};
     this.urlWsServer = null;
     this.urlFlashServer = null;
     this.forceFlashForWebRTCBrowser = null;
