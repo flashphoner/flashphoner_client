@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RTSP and WebRTC playback in iOS Safari browser via Websocket - Flashphoner VoW Player minimal
+        configuration</title>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+    <script type="text/javascript" src="../../../dependencies/websocket-player/WSPlayer2.js"></script>
+    <script type="text/javascript" src="vow-player-min2.js"></script>
+</head>
+
+<body onload="initOnLoad()">
+
+<h1>Websocket Player Minimal Code</h1>
+
+<p>
+    Connect <input id="urlServer" type="text" value="ws://192.168.1.5:8080" size="24"/>
+    <button type="button" id="connectButton">Connect</button>
+</p>
+
+<p>
+    Stream <input id="streamId" type="text" size="21"/>
+    <button type="button" id="playButton">Play</button>
+    <button type="button" id="pauseButton">Pause</button>
+</p>
+
+<canvas id="videoCanvas" width="320" height="240" style="border: 1px solid; width: 640px; height: 480px;"></canvas>
+
+<div id="infoDiv" style='overflow:auto; width:300px;height:100px;border: 1px solid'></div>
+
+</body>
+</html>
