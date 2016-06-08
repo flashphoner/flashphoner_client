@@ -9,17 +9,21 @@ var mediaProvider;
 var replay = false;
 var reinit = false;
 var resolutions = [256,320,512,640,800,1024,1280];
+var playerHeight;
+var playerWidth;
 var conf = ConfigurationLoader.getInstance().configuration;
 // swfobject params
 var params = {};
 params.bgcolor = "696969";
-params.wmode = "auto";
+params.wmode = "opaque";
 
 ////////////////////////////////////
 ///////////// Initialize ///////////
 ////////////////////////////////////
 
 $(document).ready(function () {
+    playerHeight = $("#player").height();
+    playerWidth = $("#player").width();
     loadFooter();
 });
 
@@ -62,24 +66,24 @@ function init_page() {
     });
     $("#resolutions").change(function() {
         $("#playStatus").text("Switching to " + getVideoResParam('width') + "x" + getVideoResParam('height')).show();
-        stopStream();
+        stopStream(true);
         playStream(getVideoResParam('width'),getVideoResParam('height'));
-        setVideoResDiv();
+        //setVideoResDiv();
     });
     $("#proto").change(function() {
         trace("Switching to " + $("#proto").val());
         $("#playStatus").text("Switching to " + $("#proto").val()).show();
-        if (streamStatus == StreamStatus.Playing)
-            stopStream(true);
         reinit = true;
         replay = true;
-        disconnect();
+        if (streamStatus == StreamStatus.Playing)
+            stopStream(true);
     });
 
     $("#playButton").click(function() {
         playStream();
     });
     $("#stopButton").click(function() {
+        replay = false;
         stopStream();
     });
     $("#scaleButton").click(function() {
@@ -110,7 +114,7 @@ function initAPI() {
     if (detectIE()) {
         detectFlash();
     }
-
+    isFlashphonerAPILoaded = false;
     switch (($("#proto").val())) {
         case "WebRTC":
             mediaProvider = MediaProvider.WebRTC;
@@ -133,7 +137,6 @@ function initAPI() {
 
 // Init HLS
 function initHLS() {
-    isFlashphonerAPILoaded = false;
     trace("Init " + $("#proto").val());
     $("#videoCanvas").hide();
     $("#remoteVideo").show();
@@ -198,7 +201,6 @@ function initRTC() {
 
 // Init WebSocket
 function initWSPlayer() {
-    isFlashphonerAPILoaded = false;
     trace("Init " + $("#proto").val());
     videoElement = $("#videoCanvas");
     mediaProvider = MediaProvider.WSPlayer;
@@ -299,7 +301,6 @@ function playStream(width,height) {
 
 //Stop stream playback
 function stopStream(reinit) {
-    replay = false;
     var streamName = field("playStream");
     f.stopStream({name: streamName});
     if (reinit) {
@@ -325,6 +326,7 @@ function connectionStatusListener(event) {
         if (replay) {
             if (mediaProvider == MediaProvider.Flash) {
                 replay = false;
+                // Wait for FlashAPI loading
                 setTimeout(function () {
                     var waitForFlashInit = setInterval(function () {
                         if (isFlashphonerAPILoaded) {
@@ -357,7 +359,6 @@ function streamStatusListener(event) {
             onPlayActions();
             break;
         case StreamStatus.Stoped:
-        case StreamStatus.Paused:
             onStopActions();
             break;
         case StreamStatus.Failed:
@@ -370,39 +371,55 @@ function streamStatusListener(event) {
 
 function videoFormatListener(event) {
     if (useNativeResolution && mediaProvider != MediaProvider.WSPlayer) {
-        trace("Set native resolution from publisher " + event.playerVideoWidth + "x" + event.playerVideoHeight);
-        var marginLeft;
-        var marginTop;
+        trace("Got native resolution from publisher " + event.playerVideoWidth + "x" + event.playerVideoHeight);
+        var marginLeft, marginTop;
 
-        if (event.playerVideoHeight > $("#player").height()) {
+
+        // Correct height
+        if (event.playerVideoHeight > playerHeight) {
+            trace("Native height [" + event.playerVideoHeight + "] greater than player's [" + playerHeight + "]");
             $(videoElement).removeAttr('class').addClass('fp-remoteVideo');
-            if (event.playerVideoWidth > $("#player").width()) {
-                $(videoElement).prop('width', event.playerVideoWidth).prop('height', $("#player").height());
-            } else if (event.playerVideoWidth == 800) {
-                $(videoElement).prop('width', 640).prop('height', 480);
+            if (mediaProvider == MediaProvider.Flash) {
+                $(videoElement).css('height', playerHeight);
+            } else {
+                $(videoElement).prop('height', playerHeight);
             }
         } else {
-            $(videoElement).removeAttr('class').addClass('fp-remoteVideo-320x240');
-            marginLeft = ($("#player").width() - event.playerVideoWidth) / 2 + 'px';
-            marginTop = ($("#player").height() - event.playerVideoHeight) / 2 + 'px';
+            trace("Set native height [" + event.playerVideoHeight + "]");
+            $(videoElement).removeAttr('class').addClass('fp-remoteVideo-sm');
+            marginLeft = (playerWidth - event.playerVideoWidth) / 2 + 'px';
+            marginTop = (playerHeight - event.playerVideoHeight) / 2 + 'px';
             $(videoElement).css({'margin-left' : marginLeft, 'margin-top' : marginTop});
+            if (mediaProvider == MediaProvider.Flash) {
+                $(videoElement).css('height', event.playerVideoHeight);
+            } else {
+                $(videoElement).prop('height', event.playerVideoHeight);
+            }
         }
 
-
-        if (event.playerVideoHeight > $("#player").height()) {
+        // Correct width
+        if (event.playerVideoWidth > playerWidth) {
+            trace("Native width [" + event.playerVideoWidth + "] greater than player's [" + playerWidth + "]");
             if (mediaProvider == MediaProvider.Flash) {
-                $(videoElement).css('width', event.playerVideoWidth).css('height', $("#player").height());
+                $(videoElement).css('width', playerWidth)
             } else {
-                $(videoElement).prop('width', event.playerVideoWidth).prop('height', $("#player").height());
+                $(videoElement).prop('width', playerWidth);
             }
-
         } else {
+            trace("Set native width [" + event.playerVideoWidth + "]");
+            $(videoElement).removeAttr('class').addClass('fp-remoteVideo-sm');
+            marginLeft = (playerWidth - event.playerVideoWidth) / 2 + 'px';
+            marginTop = (playerHeight - event.playerVideoHeight) / 2 + 'px';
+            $(videoElement).css({'margin-left' : marginLeft, 'margin-top' : marginTop});
             if (mediaProvider == MediaProvider.Flash) {
-                $(videoElement).css('width', event.playerVideoWidth).css('height', event.playerVideoHeight);
+                $(videoElement).css('width', event.playerVideoWidth);
             } else {
-                $(videoElement).prop('width', event.playerVideoWidth).prop('height', event.playerVideoHeight);
+                $(videoElement).prop('width', event.playerVideoWidth);
             }
         }
+
+        trace("Set video element size to " + $(videoElement).width() + "x" + $(videoElement).height());
+
 
         // Hide resolutions greater then native
         var a = resolutions.filter(filterResolutions(event.playerVideoWidth));
@@ -430,6 +447,9 @@ function videoFormatListener(event) {
             id: "nativeRes"
         }));
         $("#resolutions option[value=" + nativeRes + "]").attr('selected', 'selected');
+    } else {
+        trace("Set resolution: "+getVideoResParam('width') + "x" + getVideoResParam('height'));
+        setVideoResDiv();
     }
 }
 
@@ -456,22 +476,18 @@ function onPlayActions() {
 
     $("#playStream").css('background','#EEEEEE').hide();
     $("#footer").css('background','#EEEEEE').hide();
-    $("#player").css('background','dimgray');
-
-    $("#player").click(function(e) {
-        var target = $(e.target);
-        if ((target.is($(videoElement)) || target.is("#player")) && typeof target != 'undefined') {
-            if ($("#footer").is(':visible') && $("#playStream").is(':visible')) {
-                setTimeout(function () {
-                    $("#footer").hide('blind', {direction: "down"}, 1500);
-                    $("#playStream").hide('blind', {direction: "down"}, 1500);
-                }, 5000);
-            } else {
-                $("#footer").show();
-                $("#playStream").show();
-            }
-        }
-    });
+    $("#player").
+        css('background','dimgray').
+        mouseenter(function(e) {
+            $("#footer").show();
+            $("#playStream").show();
+        }).
+        mouseleave(function(e) {
+            if ($(e.target).attr('id') == 'resolutions' || $(e.target).attr('id') == 'proto')
+                return;
+            $("#footer").hide();
+            $("#playStream").hide();
+        });
     $("#timer").text("00:00:00");
     timer = setInterval(startCallTimer, 1000);
     if (field("playStream").indexOf("rtsp://") != -1) {
@@ -481,13 +497,14 @@ function onPlayActions() {
     }
 }
 
-function onFailedActions() {
-    $("#playStatus").show().text("Playback failed!").css('color','red');
-    $("#playButton").show();
-    $("#waiting").hide();
+function onStopActions() {
+    if (replay) {
+        initAPI();
+    }
 }
 
-function onStopActions() {
+function onFailedActions() {
+    $("#playStatus").show().text("Playback failed!").css('color','red');
     $("#playButton").show();
     $("#waiting").hide();
 }
@@ -504,31 +521,31 @@ function setVideoResDiv() {
     trace("Set video div, width - " + res[0] + " , height - " + res[1]);
 
     // 256x144, 320x180, 512x288, 640x360, 800x450
-    if (width < $("#player").width() && height < $("#player").height()) {
+    if (width < playerWidth && height < playerHeight) {
         if (mediaProvider == MediaProvider.Flash) {
             $(videoElement).css('width', width).css('height', height);
         } else {
             $(videoElement).prop('width', width).prop('height', height);
         }
-        marginLeft = ($("#player").width() - width) / 2 + 'px';
-        marginTop = ($("#player").height() - height) / 2 + 'px';
+        marginLeft = (playerWidth - width) / 2 + 'px';
+        marginTop = (playerHeight - height) / 2 + 'px';
         $(videoElement).css({'margin-left' : marginLeft, 'margin-top' : marginTop});
 
     // 1024x576, 1280x720
-    } else if (height > $("#player").height()) {
+    } else if (height > playerHeight) {
         $(videoElement).css({'margin-left' : 0, 'margin-top' : 0});
-        if (width > $("#player").width()) {
+        if (width > playerWidth) {
             if (mediaProvider == MediaProvider.Flash) {
-                $(videoElement).css('width', $("#player").width()).css('height', $("#player").height());
+                $(videoElement).css('width', playerWidth).css('height', playerHeight);
             } else {
-                $(videoElement).prop('width', $("#player").width()).prop('height', $("#player").height());
+                $(videoElement).prop('width', playerWidth).prop('height', playerHeight);
             }
         } else {
-            marginLeft = ($("#player").width() - width) / 2 + 'px';
+            marginLeft = (playerWidth - width) / 2 + 'px';
             if (mediaProvider == MediaProvider.Flash) {
-                $(videoElement).css('width', width).css('height', $("#player").height());
+                $(videoElement).css('width', width).css('height', playerHeight);
             } else {
-                $(videoElement).prop('width', width).prop('height', $("#player").height());
+                $(videoElement).prop('width', width).prop('height', playerHeight);
             }
             $(videoElement).css('margin-left', marginLeft);
         }

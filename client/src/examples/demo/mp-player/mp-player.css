@@ -34,15 +34,16 @@
     margin-top: 209px;
     z-index: 2147483647;
 }
-.fp-remoteVideo-320x240 {
+.fp-remoteVideo-sm {
     position: absolute !important;
     z-index: 0;
 }
 .fp-remoteVideo {
     position: absolute !important;
     top: 0;
-    display: inline-block;
-    max-width: 864px;
+    /*display: inline-block;*/
+    /*max-width: 864px;*/
+    object-fit: cover;
 }
 
 .fp-fps {
