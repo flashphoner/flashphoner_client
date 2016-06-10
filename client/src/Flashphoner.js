@@ -2378,6 +2378,7 @@ Configuration = function () {
     this.videoReliable = false;
     this.flashBufferTime = null;
 
+    // kbps (ex. minBitRate=200 means 200kpbs)
     this.minBitRate = null;
     this.maxBitRate = null;
 
