@@ -2132,6 +2132,25 @@ WebRtcMediaConnection.prototype.getConnectionState = function () {
 };
 
 WebRtcMediaConnection.prototype.setRemoteSDP = function (sdp, isInitiator) {
+    if (webrtcDetectedBrowser == "chrome" && (Flashphoner.getInstance().configuration.maxBitRate != null || Flashphoner.getInstance().configuration.minBitRate != null)) {
+        // Search VP8 payload in SDP
+        var a = sdp.split("\r\n");
+        var attr = "a=fmtp:";
+        for (var i=0; i< a.length; i++) {
+            if (/a=rtpmap:\d+ VP8.*/gi.test(a[i])) {
+                attr += a[i].replace(/(a=rtpmap:)(\d+)( VP8.*)/,'$2');
+            }
+        }
+        if (Flashphoner.getInstance().configuration.minBitRate != null) {
+            attr += " x-google-min-bitrate=" + Flashphoner.getInstance().configuration.minBitRate + ";";
+        }
+        if (Flashphoner.getInstance().configuration.maxBitRate != null) {
+            attr += " x-google-max-bitrate=" + Flashphoner.getInstance().configuration.maxBitRate + ";";
+        }
+        attr += "\r\n";
+        trace("Appending bitrate limit: " + attr);
+        sdp = sdp.replace(/(a=rtpmap:100 .*\r\n)/g, '$1'+attr);
+    }
     trace("WebRtcMediaConnection - setRemoteSDP: isInitiator: " + isInitiator + " sdp=" + sdp);
     if (isInitiator) {
         var sdpAnswer = new RTCSessionDescription({
@@ -2358,6 +2377,9 @@ Configuration = function () {
     this.audioReliable = false;
     this.videoReliable = false;
     this.flashBufferTime = null;
+
+    this.minBitRate = null;
+    this.maxBitRate = null;
 
     this.stunServer = "";
 
