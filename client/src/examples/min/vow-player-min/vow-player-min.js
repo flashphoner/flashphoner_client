@@ -121,6 +121,9 @@ function streamStatusListener(event) {
             $("#pauseButton").text("Pause");
             $("#pauseButton").prop("disabled", false);
             $("#playButton").prop("disabled", false);
+            if (event.info == "FIRST_FRAME_RENDERED") {
+                console.log(event.info);
+            }
             break;
         case StreamStatus.Paused:
             $("#pauseButton").text("Resume");

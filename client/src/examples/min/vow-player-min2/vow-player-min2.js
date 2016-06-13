@@ -67,6 +67,7 @@ function initOnLoad() {
     //add listeners
     f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
     f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
+    f.addListener(WCSEvent.MediaProviderStatusEvent, mediaProviderStatusListener);
     f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
     var configuration = new Configuration();
     configuration.wsPlayerCanvas = document.getElementById('videoCanvas');
@@ -106,6 +107,10 @@ function connectionStatusListener(event) {
     }
 }
 
+function mediaProviderStatusListener(e) {
+    console.log("mediaProvider " + e.mediaProvider + " status " + e.status);
+}
+
 //Connection Status
 function streamStatusListener(event) {
     console.log(event.status);
@@ -122,6 +127,9 @@ function streamStatusListener(event) {
             $("#pauseButton").text("Pause");
             $("#pauseButton").prop("disabled", false);
             $("#playButton").prop("disabled", false);
+            if (event.info == "FIRST_FRAME_RENDERED") {
+                console.log(event.info);
+            }
             break;
         case StreamStatus.Paused:
             $("#pauseButton").text("Resume");
