@@ -1293,6 +1293,44 @@ Flashphoner.prototype = {
         return result;
     },
 
+    notifyMediaProviderEvent: function (e) {
+        if (e.mediaProvider == MediaProvider.WSPlayer) {
+            switch (e.status) {
+                case "failed":
+                    if (this.connection.status != ConnectionStatus.Disconnected) {
+                        this.invokeListener(WCSEvent.MediaProviderStatusEvent, [
+                            {mediaProvider: MediaProvider.WSPlayer, status: ConnectionStatus.Failed}
+                        ]);
+                        this.initWSPlayerMediaManager();
+                    }
+                    break;
+                case "closed":
+                    if (this.connection.status != ConnectionStatus.Disconnected) {
+                        this.invokeListener(WCSEvent.MediaProviderStatusEvent, [
+                            {mediaProvider: MediaProvider.WSPlayer, status: ConnectionStatus.Disconnected}
+                        ]);
+                    }
+                    break;
+                case "connected":
+                    var playStreamsArray = this.playStreams.array();
+                    var i;
+                    //check if we have active stream
+                    for (i = 0; i < playStreamsArray.length; i++) {
+                        if (playStreamsArray[i].mediaProvider == MediaProvider.WSPlayer &&
+                            playStreamsArray[i].status == StreamStatus.Playing ||
+                            playStreamsArray[i].status == StreamStatus.Paused) {
+                            this.wsPlayerMediaManager.play(playStreamsArray[i]);
+                            break;
+                        }
+                    }
+                    this.invokeListener(WCSEvent.MediaProviderStatusEvent, [
+                        {mediaProvider: MediaProvider.WSPlayer, status: ConnectionStatus.Established}
+                    ]);
+                    break;
+            }
+        }
+    },
+
     stripCodecsSDP: function (sdp, removeCandidates) {
         var sdpArray = sdp.split("\n");
 
@@ -2507,6 +2545,7 @@ var WCSEvent = function () {
 };
 WCSEvent.ErrorStatusEvent = "ERROR_STATUS_EVENT";
 WCSEvent.ConnectionStatusEvent = "CONNECTION_STATUS_EVENT";
+WCSEvent.MediaProviderStatusEvent = "MEDIA_PROVIDER_STATUS_EVENT";
 WCSEvent.RegistrationStatusEvent = "REGISTRATION_STATUS_EVENT";
 WCSEvent.OnCallEvent = "ON_CALL_EVENT";
 WCSEvent.CallStatusEvent = "CALL_STATUS_EVENT";
