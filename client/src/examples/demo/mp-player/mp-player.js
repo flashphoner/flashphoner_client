@@ -1,5 +1,5 @@
 //Init WCS JavaScript API
-var f ;
+var f;
 var timer;
 var useNativeResolution = true;
 var streamStatus;
@@ -65,18 +65,22 @@ function init_page() {
        //}
     });
     $("#resolutions").change(function() {
-        $("#playStatus").text("Switching to " + getVideoResParam('width') + "x" + getVideoResParam('height')).show();
+        $("#playStatus").text("Switching to " + getVideoResParam('width') + "x" + getVideoResParam('height')).removeClass().addClass('fp-playStatus text-info').show();
         stopStream(true);
         playStream(getVideoResParam('width'),getVideoResParam('height'));
-        //setVideoResDiv();
     });
+
     $("#proto").change(function() {
         trace("Switching to " + $("#proto").val());
-        $("#playStatus").text("Switching to " + $("#proto").val()).show();
+        $("#playStatus").text("Switching to " + $(this).val()).removeClass().addClass('fp-playStatus text-primary').show();
         reinit = true;
         replay = true;
-        if (streamStatus == StreamStatus.Playing)
-            stopStream(true);
+        clearResolutions();
+        if (streamStatus == StreamStatus.Playing) {
+            stopStream(reinit);
+        } else {
+            disconnect();
+        }
     });
 
     $("#playButton").click(function() {
@@ -165,7 +169,7 @@ function initRTMP() {
     document.getElementById('remoteVideo').style.visibility = "hidden";
     document.getElementById('flashVideoWrapper').style.visibility = "visible";
     document.getElementById('flashVideoDiv').style.visibility = "visible";
-    f.connect({urlServer: setURL(), appKey: 'defaultApp'});
+    f.connect({urlServer: setURL(), appKey: 'defaultApp', width: 0, height: 0});
 }
 
 // Init WebRTC
@@ -194,7 +198,7 @@ function initRTC() {
         videoElement = $("#flashVideoWrapper");
     }
 
-    f.connect({urlServer: setURL(), appKey: 'defaultApp'});
+    f.connect({urlServer: setURL(), appKey: 'defaultApp', width: 0, height: 0});
 
     $("#resolutions").find('option').show();
 }
@@ -211,8 +215,6 @@ function initWSPlayer() {
     var configuration = new Configuration();
     configuration.wsPlayerCanvas = document.getElementById('videoCanvas');
     configuration.wsPlayerReceiverPath = "../../../dependencies/websocket-player/WSReceiver.js";
-    configuration.videoWidth = getVideoResParam('width');
-    configuration.videoHeight = getVideoResParam('height');
     f.init(configuration);
 
     initVisibility();
@@ -224,6 +226,8 @@ function initWSPlayer() {
         appKey: 'defaultApp',
         useWsTunnel: true,
         useBase64BinaryEncoding: false,
+        width: getVideoResParam('width'),
+        height: getVideoResParam('height')
     });
 }
 
@@ -291,6 +295,8 @@ function playStream(width,height) {
             stream.height = height;
             f.playStream(stream);
         } else {
+            stream.width = 0;
+            stream.height = 0;
             f.playStream(stream);
         }
     }
@@ -374,7 +380,6 @@ function videoFormatListener(event) {
         trace("Got native resolution from publisher " + event.playerVideoWidth + "x" + event.playerVideoHeight);
         var marginLeft, marginTop;
 
-
         // Correct height
         if (event.playerVideoHeight > playerHeight) {
             trace("Native height [" + event.playerVideoHeight + "] greater than player's [" + playerHeight + "]");
@@ -439,14 +444,25 @@ function videoFormatListener(event) {
                 $(this).hide();
             });
         }
-        // Set current resolution to list
+
         var nativeRes = event.playerVideoWidth + "x" + event.playerVideoHeight;
-        $("#resolutions").prepend($('<option>', {
-            value: nativeRes,
-            text: nativeRes,
-            id: "nativeRes"
-        }));
-        $("#resolutions option[value=" + nativeRes + "]").attr('selected', 'selected');
+        var set = false;
+        // Check whether resolution list contains native res or not
+        $("#resolutions option").each(function() {
+            if ($(this).val() == nativeRes) {
+                $(this).attr('selected', 'selected');
+                set = true;
+            }
+        });
+        // Append native resolution to list
+        if (!set) {
+            $("#resolutions").prepend($('<option>', {
+                value: nativeRes,
+                text: nativeRes,
+                id: "nativeRes"
+            }));
+            $("#resolutions option[value=" + nativeRes + "]").attr('selected', 'selected');
+        }
     } else {
         trace("Set resolution: "+getVideoResParam('width') + "x" + getVideoResParam('height'));
         setVideoResDiv();
@@ -499,12 +515,13 @@ function onPlayActions() {
 
 function onStopActions() {
     if (replay) {
-        initAPI();
+        disconnect();
+        //initAPI();
     }
 }
 
 function onFailedActions() {
-    $("#playStatus").show().text("Playback failed!").css('color','red');
+    $("#playStatus").show().text("Playback failed!").removeClass().attr("class","text-danger");
     $("#playButton").show();
     $("#waiting").hide();
 }
@@ -518,7 +535,6 @@ function setVideoResDiv() {
     var marginLeft, marginTop;
     var width = res[0];
     var height = res[1];
-    trace("Set video div, width - " + res[0] + " , height - " + res[1]);
 
     // 256x144, 320x180, 512x288, 640x360, 800x450
     if (width < playerWidth && height < playerHeight) {
@@ -622,4 +638,14 @@ function hideProto() {
             $("#proto option[value='WebSocket']").attr('selected','selected');
             break;
     }
+}
+
+function clearResolutions() {
+    $("#resolutions option").each(function() {
+        if ($(this).attr('id') == "nativeRes") {
+            $(this).remove();
+        } else {
+            $(this).show();
+        }
+    });
 }
