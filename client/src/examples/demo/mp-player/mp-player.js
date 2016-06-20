@@ -5,12 +5,16 @@ var useNativeResolution = true;
 var streamStatus;
 // This element will be used for playing video (canvas or video)
 var videoElement;
+//
+var isIE = false;
 var mediaProvider;
 var replay = false;
 var reinit = false;
 var resolutions = [256,320,512,640,800,1024,1280];
-var playerHeight;
-var playerWidth;
+var $resolutions;
+var playerHeight = 480;
+var playerWidth = 864;
+var nativeResolution = null;
 var conf = ConfigurationLoader.getInstance().configuration;
 // swfobject params
 var params = {};
@@ -22,8 +26,6 @@ params.wmode = "opaque";
 ////////////////////////////////////
 
 $(document).ready(function () {
-    playerHeight = $("#player").height();
-    playerWidth = $("#player").width();
     loadFooter();
 });
 
@@ -33,16 +35,17 @@ function loadFooter() {
 
 // Init elements
 function init_page() {
+    $resolutions = $("#resolutions");
+    $resolutions.data("originalRes",$resolutions.html());
     trace("Detected browser: " + detectBrowser());
 
     hideProto();
 
     $("#playStream").keyup(function() {
         $("#playButton").prop('disabled',!$("#playStream").val());
-    }).focus();
+    }).focus().prop('disabled');
 
     // Hide some elements
-    //$("#fps").hide();
     $("#footer").hide();
     $("#waiting").hide();
 
@@ -58,11 +61,6 @@ function init_page() {
        } else {
            $("#resolutions").show();
        }
-       //if ($("#fps").is(":visible")) {
-       //    $("#fps").hide();
-       //} else {
-       //    $("#fps").show();
-       //}
     });
     $("#resolutions").change(function() {
         $("#playStatus").text("Switching to " + getVideoResParam('width') + "x" + getVideoResParam('height')).removeClass().addClass('fp-playStatus text-info').show();
@@ -75,7 +73,6 @@ function init_page() {
         $("#playStatus").text("Switching to " + $(this).val()).removeClass().addClass('fp-playStatus text-primary').show();
         reinit = true;
         replay = true;
-        clearResolutions();
         if (streamStatus == StreamStatus.Playing) {
             stopStream(reinit);
         } else {
@@ -119,6 +116,10 @@ function initAPI() {
         detectFlash();
     }
     isFlashphonerAPILoaded = false;
+    f.wsPlayerMediaManager = undefined;
+    resetResolutions();
+    if (nativeResolution != null)
+        stripResolutions();
     switch (($("#proto").val())) {
         case "WebRTC":
             mediaProvider = MediaProvider.WebRTC;
@@ -199,8 +200,6 @@ function initRTC() {
     }
 
     f.connect({urlServer: setURL(), appKey: 'defaultApp', width: 0, height: 0});
-
-    $("#resolutions").find('option').show();
 }
 
 // Init WebSocket
@@ -220,7 +219,7 @@ function initWSPlayer() {
     initVisibility();
     // Hide unsupported resolutions
     $("#resolutions").find('option').not("option[value='640x360'],option[value='320x180']").hide();
-    $("#resolutions option[value=320x180]").attr('selected','selected');
+    $("#resolutions option[value=320x180]").prop('selected',true);
     f.connect({
         urlServer: setURL(),
         appKey: 'defaultApp',
@@ -317,6 +316,7 @@ function stopStream(reinit) {
         $("#waiting").hide();
     }
     clearInterval(timer);
+    timer = null;
 }
 
 ///////////////////////////////////
@@ -327,6 +327,7 @@ function stopStream(reinit) {
 function connectionStatusListener(event) {
     trace(event.status);
     if (event.status == ConnectionStatus.Established) {
+        $("#playStream").removeProp('disabled');
         trace('Connection has been established. You can start a new call.');
         // replay stream on connect
         if (replay) {
@@ -352,6 +353,9 @@ function connectionStatusListener(event) {
         $("#playButton").show();
         $("#waiting").hide();
     } else if (event.status == ConnectionStatus.Disconnected && reinit) {
+        if (f.wsPlayerMediaManager != null ) {
+            f.wsPlayerMediaManager.audioPlayer.context.close();
+        }
         setTimeout(initAPI,2000);
     }
 }
@@ -376,10 +380,10 @@ function streamStatusListener(event) {
 }
 
 function videoFormatListener(event) {
+    nativeResolution = event.playerVideoWidth + "x" + event.playerVideoHeight;
+    trace("Got native resolution from publisher " + nativeResolution);
     if (useNativeResolution && mediaProvider != MediaProvider.WSPlayer) {
-        trace("Got native resolution from publisher " + event.playerVideoWidth + "x" + event.playerVideoHeight);
         var marginLeft, marginTop;
-
         // Correct height
         if (event.playerVideoHeight > playerHeight) {
             trace("Native height [" + event.playerVideoHeight + "] greater than player's [" + playerHeight + "]");
@@ -425,44 +429,8 @@ function videoFormatListener(event) {
 
         trace("Set video element size to " + $(videoElement).width() + "x" + $(videoElement).height());
 
+        stripResolutions();
 
-        // Hide resolutions greater then native
-        var a = resolutions.filter(filterResolutions(event.playerVideoWidth));
-        var i = a.length;
-        if (i > 0) {
-            var s = "\(";
-            while (i--) {
-                s += (i > 0) ? (a[i] + "|") : ((a[i]) + "\)");
-            }
-            $("#resolutions option").each(function () {
-                if (!$(this).val().match(s)) {
-                    $(this).hide();
-                }
-            });
-        } else {
-            $("#resolutions option").each(function () {
-                $(this).hide();
-            });
-        }
-
-        var nativeRes = event.playerVideoWidth + "x" + event.playerVideoHeight;
-        var set = false;
-        // Check whether resolution list contains native res or not
-        $("#resolutions option").each(function() {
-            if ($(this).val() == nativeRes) {
-                $(this).attr('selected', 'selected');
-                set = true;
-            }
-        });
-        // Append native resolution to list
-        if (!set) {
-            $("#resolutions").prepend($('<option>', {
-                value: nativeRes,
-                text: nativeRes,
-                id: "nativeRes"
-            }));
-            $("#resolutions option[value=" + nativeRes + "]").attr('selected', 'selected');
-        }
     } else {
         trace("Set resolution: "+getVideoResParam('width') + "x" + getVideoResParam('height'));
         setVideoResDiv();
@@ -472,6 +440,54 @@ function videoFormatListener(event) {
 function filterResolutions(res) {
     return function (element) {
         return (res >= element);
+    }
+}
+
+function stripResolutions() {
+    var res = nativeResolution.split("x");
+    // Hide resolutions greater then native
+    var a = resolutions.filter(filterResolutions(res[0]));
+    var i = a.length;
+    if (i > 0) {
+        var s = "\(";
+        while (i--) {
+            s += (i > 0) ? (a[i] + "|") : ((a[i]) + "\)");
+        }
+        $("#resolutions option").each(function () {
+            if (!$(this).val().match(s)) {
+                if (isIE) {
+                    $(this).remove();
+                } else {
+                    $(this).hide();
+                }
+            }
+        });
+    } else {
+        $("#resolutions option").each(function () {
+            if (isIE) {
+                $(this).remove();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+
+    var set = false;
+    // Check whether resolution list contains native res or not
+    $("#resolutions option").each(function() {
+        if ($(this).val() == nativeResolution) {
+            $(this).prop('selected', true);
+            set = true;
+        }
+    });
+    // Append native resolution to list
+    if (!set) {
+        $("#resolutions").prepend($('<option>', {
+            value: nativeResolution,
+            text: nativeResolution,
+            id: "nativeRes"
+        }));
+        $("#resolutions option[value=" + nativeResolution + "]").prop('selected', true);
     }
 }
 
@@ -506,7 +522,7 @@ function onPlayActions() {
         });
     $("#timer").text("00:00:00");
     timer = setInterval(startCallTimer, 1000);
-    if (field("playStream").indexOf("rtsp://") != -1) {
+    if ($("#playStream").val().indexOf("rtsp://") != -1) {
         $("#proto option[value='HLS']").hide();
     } else {
         $("#proto option[value='RTMP']").show();
@@ -620,7 +636,8 @@ function fullScreenMode() {
 function hideProto() {
     switch (detectBrowser()) {
         case "IE":
-            $("#proto").find('option').not("option[value='RTMP']").hide();
+            isIE = true;
+            $("#proto").find('option').not("option[value='RTMP'],option[value='RTMFP']").remove();
             $("#proto option[value='RTMP']").attr('selected','selected');
             break;
         case "Firefox":
@@ -640,12 +657,14 @@ function hideProto() {
     }
 }
 
-function clearResolutions() {
-    $("#resolutions option").each(function() {
-        if ($(this).attr('id') == "nativeRes") {
-            $(this).remove();
-        } else {
-            $(this).show();
-        }
-    });
+function resetResolutions() {
+    trace("Reset resolutions");
+    $resolutions.html($resolutions.data("originalRes"));
+    //$("#resolutions option").each(function() {
+    //    if ($(this).attr('id') == "nativeRes") {
+    //        $(this).remove();
+    //    } else {
+    //        $(this).show();
+    //    }
+    //});
 }
