@@ -523,9 +523,17 @@ function onPlayActions() {
     $("#timer").text("00:00:00");
     timer = setInterval(startCallTimer, 1000);
     if ($("#playStream").val().indexOf("rtsp://") != -1) {
-        $("#proto option[value='HLS']").hide();
+        if (detectBrowser() == "Safari" || detectBrowser() == "iOS") {
+            $("#proto option[value='HLS']").prop('disabled', true);
+        } else {
+            $("#proto option[value='HLS']").hide();
+        }
     } else {
-        $("#proto option[value='RTMP']").show();
+        if (detectBrowser() == "Safari" || detectBrowser() == "iOS") {
+            $("#proto option[value='HLS']").removeProp('disabled');
+        } else {
+            $("#proto option[value='RTMP']").show();
+        }
     }
 }
 
@@ -650,9 +658,13 @@ function hideProto() {
             $("#proto").find('option').not("option[value='WebRTC'],option[value='HLS']").hide();
             $("#proto option[value='WebRTC']").attr('selected','selected');
             break;
+        case "Safari":
         case "iOS":
-            $("#proto").find('option').not("option[value='WebSocket'],option[value='HLS]").hide();
+            $("#proto").find('option').not("option[value='WebSocket'],option[value='HLS']").remove();
+            $("#flashVideoWrapper").remove();
+            $("#flashVideoDiv").remove();
             $("#proto option[value='WebSocket']").attr('selected','selected');
+            swfobject = undefined;
             break;
     }
 }
@@ -660,11 +672,4 @@ function hideProto() {
 function resetResolutions() {
     trace("Reset resolutions");
     $resolutions.html($resolutions.data("originalRes"));
-    //$("#resolutions option").each(function() {
-    //    if ($(this).attr('id') == "nativeRes") {
-    //        $(this).remove();
-    //    } else {
-    //        $(this).show();
-    //    }
-    //});
 }
