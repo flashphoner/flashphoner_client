@@ -11,6 +11,12 @@ function Flashphoner() {
     this.flashMediaManager = undefined;
     this.swfLoaded = undefined;
     this.wsPlayerMediaManager = undefined;
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    try {
+        this.audioContext = new AudioContext();
+    } catch(e) {
+        console.warn("Failed to create audio context");
+    }
     this.connection = null;
     this.configuration = new Configuration();
     this.calls = new DataMap();
@@ -102,7 +108,7 @@ Flashphoner.prototype = {
             config.videoHeight = this.configuration.videoHeight;
             config.startWithVideoOnly = this.configuration.wsPlayerStartWithVideoOnly;
             this.wsPlayerMediaManager.initLogger(0);
-            this.wsPlayerMediaManager.init(config);
+            this.wsPlayerMediaManager.init(config, this.audioContext);
         }
     },
 
@@ -1030,9 +1036,15 @@ Flashphoner.prototype = {
 
     //works only for WSPlayer
     playFirstSound: function () {
-        if (this.wsPlayerMediaManager) {
-            this.wsPlayerMediaManager.playFirstSound();
+        var audioBuffer = this.audioContext.createBuffer(1, 441, 44100);
+        var output = audioBuffer.getChannelData(0);
+        for (var i = 0; i < output.length; i++) {
+            output[i] = Math.random() * 2 - 1;
         }
+        var src = this.audioContext.createBufferSource();
+        src.buffer = audioBuffer;
+        src.connect(this.audioContext.destination);
+        src.start(0);
     },
 
     sendMessage: function (message) {
