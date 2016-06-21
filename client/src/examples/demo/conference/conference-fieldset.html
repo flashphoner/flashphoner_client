@@ -1,0 +1,33 @@
+<legend class="scheduler-border">Connection</legend>
+<form class="form-horizontal" role="form">
+    <div class="form-group">
+        <label class="control-label col-sm-3" for="urlServer">URL</label>
+        <div class="col-sm-9">
+            <input class="form-control" id="urlServer" type="text"/>
+        </div>
+    </div>
+    <div class="form-group" id="showRoom">
+        <label class="control-label col-sm-3" for="room">Room</label>
+        <div class="col-sm-9">
+            <input class="form-control" id="room" type="text" value="room1"/>
+        </div>
+    </div>
+    <div id="loginForm" class="form-group">
+        <label class="control-label col-sm-3" for="login">Nickname</label>
+        <div class="col-sm-3">
+            <input class="form-control" id="login" type="text" value="Alice"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            &nbsp;
+        </div>
+        <div class="col-sm-6 fp-buttonVerticalAlign">
+            <span id="connectionStatus"></span>
+        </div>
+        <div class="col-sm-3">
+            <button id="connectBtn" type="button" class="btn btn-default pull-right">Connect</button>
+        </div>
+    </div>
+</form>
+

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="conference.css">
+
+    <title>Conference Room Minimal</title>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+    <script type="text/javascript" src="conference.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="../../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container" id="roomChat">
+    <div class="row">
+        <div class="col-sm-12 text-center" style="max-width: 500px; height: 565px;">
+            <h1>Conference Room Minimal</h1>
+            <fieldset id="chatFieldSet" class="scheduler-border">
+                <!-- Include from conference-fieldset.html by jquery. See js file. -->
+            </fieldset>
+            <div id="chatControls">
+                <!-- Include from conference-controls.html by jquery. See js file. -->
+            </div>
+        </div>
+
+        <div class="col-sm-12" style="width: 650px; height: 450px;">
+            <div class="row">
+                <div class="row-space">&nbsp</div>
+                <div class="row-space">&nbsp</div>
+                <div class="row-space">&nbsp</div>
+                <div class="col-sm-4 participant free" style="margin-top: 10px">
+                    <video id="remote-video-1" class="fp-videoFrameAlign"></video>
+                    <div class="text-center text-info">
+                        <span class="glyphicon fp-userState"></span>
+                        <span class="p-login">Offline</span>
+                    </div>
+                </div>
+                <div class="col-sm-4 participant free" style="margin-top: 10px">
+                    <video id="remote-video-2" class="fp-videoFrameAlign"></video>
+                    <div class="text-center text-info">
+                        <span class="glyphicon fp-userState"></span>
+                        <span class="p-login">Offline</span>
+                    </div>
+                </div>
+                <div class="col-sm-4 participant free" style="margin-top: 10px">
+                    <video id="remote-video-3" class="fp-videoFrameAlign"></video>
+                    <div class="text-center text-info">
+                        <span class="glyphicon fp-userState"></span>
+                        <span class="p-login">Offline</span>
+                    </div>
+                </div>
+                <div class="col-sm-4 participant free" style="margin-top: 10px">
+                    <video id="remote-video-4" class="fp-videoFrameAlign"></video>
+                    <div class="text-center text-info">
+                        <span class="glyphicon fp-userState"></span>
+                        <span class="p-login">Offline</span>
+                    </div>
+                </div>
+                <div class="col-sm-4 participant free" style="margin-top: 10px">
+                    <video id="remote-video-5" class="fp-videoFrameAlign"></video>
+                    <div class="text-center text-info">
+                        <span class="glyphicon fp-userState"></span>
+                        <span class="p-login">Offline</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <div id="chat" style="overflow-y: scroll; height: 100px;" class="text-left form-control"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
