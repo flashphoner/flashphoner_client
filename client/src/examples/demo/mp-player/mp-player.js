@@ -65,6 +65,7 @@ function init_page() {
     $("#resolutions").change(function() {
         $("#playStatus").text("Switching to " + getVideoResParam('width') + "x" + getVideoResParam('height')).removeClass().addClass('fp-playStatus text-info').show();
         stopStream(true);
+        muteFooterElements();
         playStream(getVideoResParam('width'),getVideoResParam('height'));
     });
 
@@ -73,6 +74,7 @@ function init_page() {
         $("#playStatus").text("Switching to " + $(this).val()).removeClass().addClass('fp-playStatus text-primary').show();
         reinit = true;
         replay = true;
+        muteFooterElements();
         if (streamStatus == StreamStatus.Playing) {
             stopStream(reinit);
         } else {
@@ -352,6 +354,7 @@ function connectionStatusListener(event) {
         $("#playStatus").show().text("Connection failed!");
         $("#playButton").show();
         $("#waiting").hide();
+        unmuteFooterElements();
     } else if (event.status == ConnectionStatus.Disconnected && reinit) {
         if (f.wsPlayerMediaManager != null ) {
             f.wsPlayerMediaManager.audioPlayer.context.close();
@@ -502,6 +505,7 @@ function errorEvent(event) {
 ///////////////////////////////////
 
 function onPlayActions() {
+    unmuteFooterElements();
     $("#playStatus").hide();
     $("#playButton").hide();
     $("#waiting").hide();
@@ -545,6 +549,7 @@ function onStopActions() {
 }
 
 function onFailedActions() {
+    unmuteFooterElements();
     $("#playStatus").show().text("Playback failed!").removeClass().attr("class","text-danger");
     $("#playButton").show();
     $("#waiting").hide();
@@ -672,4 +677,16 @@ function hideProto() {
 function resetResolutions() {
     trace("Reset resolutions");
     $resolutions.html($resolutions.data("originalRes"));
+}
+
+function muteFooterElements() {
+    $("#proto").prop('disabled','disabled');
+    $("#resolutions").prop('disabled','disabled');
+    $("#stopButton").prop('disabled','disabled');
+}
+
+function unmuteFooterElements() {
+    $("#proto").removeProp('disabled');
+    $("#resolutions").removeProp('disabled');
+    $("#stopButton").removeProp('disabled');
 }

@@ -23,6 +23,7 @@ function initOnLoad() {
             } else {
                 disconnect();
             }
+            $(this).prop('disabled',true);
         }
     );
 
