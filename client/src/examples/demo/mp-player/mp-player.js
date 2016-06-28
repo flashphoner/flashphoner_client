@@ -356,9 +356,6 @@ function connectionStatusListener(event) {
         $("#waiting").hide();
         unmuteFooterElements();
     } else if (event.status == ConnectionStatus.Disconnected && reinit) {
-        if (f.wsPlayerMediaManager != null ) {
-            f.wsPlayerMediaManager.audioPlayer.context.close();
-        }
         setTimeout(initAPI,2000);
     }
 }
