@@ -173,7 +173,12 @@ Flashphoner.prototype = {
                 attachMediaStream = function (element, stream) {
                     var URL = window.URL || window.webkitURL;
                     element.src = URL.createObjectURL(stream);
-                    element.play();
+                    var playPromise = element.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(function(error){
+                            trace(error);
+                        })
+                    }
                 };
 
                 reattachMediaStream = function (to, from) {
