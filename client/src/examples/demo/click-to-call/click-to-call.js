@@ -3,7 +3,7 @@ var f = Flashphoner.getInstance();
 
 var currentCall;
 var connected;
-
+var call;
 /////////////////////////////
 ///////// Init //////////////
 
@@ -72,7 +72,7 @@ function connect() {
             eval($("#connection").val());
         }
     } else {
-        call();
+        makeCall();
     }
 }
 
@@ -99,13 +99,13 @@ function setCookies() {
 }
 
 //New call
-function call() {
+function makeCall() {
 
     displayCallButtonAsHangup();
 
     setCookies();
 
-    var call = new Call();
+    call = new Call();
     if ($("#callee").val() == null) {
         trace("Callee body is null, set default callee");
         call.callee = "override_by_rest";
@@ -127,7 +127,7 @@ function connectionStatusListener(event) {
         connected = true;
         trace('Connection has been established. Calling');
         status("Calling");
-        call();
+        makeCall();
     } else if (event.status == ConnectionStatus.Failed) {
         $("#callBtn").prop('disabled', false);
     }
@@ -161,13 +161,14 @@ function callStatusListener(event) {
 // Error
 function errorEvent(event) {
     trace("error: " + event.info);
-
-    $("#error").removeClass();
-    $("#error").addClass("alert center-block text-center alert-danger");
-    $("#error").text(event.info);
+    connected = false;
+    f.finish(call);
+    $("#callStatus").removeClass();
+    $("#callStatus").addClass("alert center-block text-center alert-danger");
+    $("#callStatus").text(event.info);
     setTimeout(function () {
-        $("#error").removeClass();
-        $("#error").addClass("hidden");
+        $("#callStatus").removeClass();
+        $("#callStatus").addClass("hidden");
     }, 3000);
 
     displayCallButtonAsCall();
