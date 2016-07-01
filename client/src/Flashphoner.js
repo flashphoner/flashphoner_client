@@ -573,9 +573,9 @@ Flashphoner.prototype = {
                 if (stream.status == StreamStatus.Failed) {
                     var removedStream;
                     if (stream.published) {
-                        removedStream = me.publishStreams.remove(stream.name);
+                        removedStream = me.publishStreams.remove(stream.mediaSessionId);
                     } else {
-                        removedStream = me.playStreams.remove(stream.name);
+                        removedStream = me.playStreams.remove(stream.mediaSessionId);
                     }
                     if (removedStream) {
                         me.releaseMediaManagerStream(removedStream);
@@ -590,9 +590,9 @@ Flashphoner.prototype = {
                         }
                     }
                     if (stream.published) {
-                        me.publishStreams.update(stream.id, stream);
+                        me.publishStreams.update(stream.mediaSessionId, stream);
                     } else {
-                        me.playStreams.update(stream.id, stream);
+                        me.playStreams.update(stream.mediaSessionId, stream);
                     }
                 }
                 me.invokeListener(WCSEvent.StreamStatusEvent, [
@@ -1098,7 +1098,7 @@ Flashphoner.prototype = {
                     }
                     stream.sdp = me.removeCandidatesFromSDP(sdp);
                     me.webSocket.send("publishStream", stream);
-                    me.publishStreams.add(stream.name, stream);
+                    me.publishStreams.add(stream.mediaSessionId, stream);
                 }, true, stream.hasVideo);
             } else if (MediaProvider.Flash == stream.mediaProvider) {
                 //todo add pcma/pcmu
@@ -1118,7 +1118,7 @@ Flashphoner.prototype = {
                     "a=rtpmap:100 SPEEX/16000\r\n" +
                     "a=sendonly\r\n";
                 me.webSocket.send("publishStream", stream);
-                me.publishStreams.add(stream.name, stream);
+                me.publishStreams.add(stream.mediaSessionId, stream);
 
             }
         }, []);
@@ -1128,8 +1128,9 @@ Flashphoner.prototype = {
     unPublishStream: function (stream) {
         console.log("Unpublish stream " + stream.name);
         var me = this;
-        var removedStream = me.publishStreams.remove(stream.name);
+        var removedStream = me.publishStreams.search('name',stream.name);
         if (removedStream) {
+            me.publishStreams.remove(removedStream.mediaSessionId);
             if (MediaProvider.WebRTC == removedStream.mediaProvider) {
                 me.webRtcMediaManager.close(removedStream.mediaSessionId);
             } else if (MediaProvider.Flash == removedStream.mediaProvider) {
@@ -1166,7 +1167,7 @@ Flashphoner.prototype = {
                     }
                     stream.sdp = me.removeCandidatesFromSDP(sdp);
                     me.webSocket.send("publishStream", stream);
-                    me.publishStreams.add(stream.name, stream);
+                    me.publishStreams.add(stream.mediaSessionId, stream);
                 }, true, stream.hasVideo, false, true);
             }
         });
@@ -1174,14 +1175,16 @@ Flashphoner.prototype = {
 
     playStream: function (stream) {
         var me = this;
-        var streamObj = me.playStreams.get(stream.name);
-        if (streamObj) {
-            console.log("Request resume for stream " + stream.name);
-            if (streamObj.mediaProvider == MediaProvider.WSPlayer) {
-                me.wsPlayerMediaManager.resume();
+        if (!stream.remoteMediaElementId) {
+            var streamObj = me.playStreams.search('name',stream.name);
+            if (streamObj) {
+                console.log("Request resume for stream " + stream.name);
+                if (streamObj.mediaProvider == MediaProvider.WSPlayer) {
+                    me.wsPlayerMediaManager.resume();
+                }
+                me.webSocket.send("playStream", streamObj);
+                return;
             }
-            me.webSocket.send("playStream", streamObj);
-            return;
         }
         var mediaSessionId = createUUID();
         stream.mediaSessionId = mediaSessionId;
@@ -1212,7 +1215,7 @@ Flashphoner.prototype = {
                 stream.sdp = me.removeCandidatesFromSDP(sdp);
                 me.webSocket.send("playStream", stream);
 
-                me.playStreams.add(stream.name, stream);
+                me.playStreams.add(stream.mediaSessionId, stream);
             }, false, false, stream.hasVideo);
             //!stream.sdp is for wsPlayer backward compatibility
         } else if (MediaProvider.Flash == stream.mediaProvider && !stream.sdp){
@@ -1232,7 +1235,7 @@ Flashphoner.prototype = {
                 "a=rtpmap:100 SPEEX/16000\r\n" +
                 "a=recvonly\r\n";
             me.webSocket.send("playStream", stream);
-            me.playStreams.add(stream.name, stream);
+            me.playStreams.add(stream.mediaSessionId, stream);
         } else if (MediaProvider.WSPlayer == stream.mediaProvider) {
             stream.sdp = "v=0\r\n" +
                 "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
@@ -1246,12 +1249,12 @@ Flashphoner.prototype = {
                 "a=rtpmap:0 PCMU/8000\r\n" +
                 "a=recvonly\r\n";
             me.webSocket.send("playStream", stream);
-            me.playStreams.add(stream.name, stream);
+            me.playStreams.add(stream.mediaSessionId, stream);
             me.wsPlayerMediaManager.play(stream);
         } else {
             console.log("playStream name " + stream.name);
             me.webSocket.send("playStream", stream);
-            me.playStreams.add(stream.name, stream);
+            me.playStreams.add(stream.mediaSessionId, stream);
         }
         return stream;
     },
@@ -1259,10 +1262,16 @@ Flashphoner.prototype = {
     stopStream: function (stream) {
         console.log("unSubscribe stream " + stream.name);
         var me = this;
-        var removedStream = me.playStreams.remove(stream.name);
-        if (removedStream) {
-            me.releaseMediaManagerStream(removedStream);
-            me.webSocket.send("stopStream", removedStream);
+        var streamObj;
+        if (stream.remoteMediaElementId) {
+            streamObj = me.playStreams.search('remoteMediaElementId', stream.remoteMediaElementId);
+        } else {
+            streamObj = me.playStreams.search('name',stream.name);
+        }
+        if (streamObj) {
+            me.playStreams.remove(streamObj.mediaSessionId);
+            me.releaseMediaManagerStream(streamObj);
+            me.webSocket.send("stopStream", streamObj);
         }
     },
 
@@ -2615,7 +2624,11 @@ DataMap.prototype = {
     },
 
     update: function (id, data) {
-        this.data[id] = data;
+        if (this.get(id)) {
+            this.data[id] = data;
+        } else {
+            console.log("Update failed, key " + id + " doesn't exist");
+        }
     },
 
     get: function (id) {
@@ -2642,6 +2655,14 @@ DataMap.prototype = {
             callArray.push(this.data[o]);
         }
         return callArray;
+    },
+
+    search: function(key,value) {
+        for (var o in this.data) {
+            if (this.data[o].hasOwnProperty(key) && this.data[o][key] == value) {
+                return this.data[o];
+            }
+        }
     }
 };
 
