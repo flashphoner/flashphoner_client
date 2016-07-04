@@ -16,7 +16,11 @@ function loadCallControls() {
 }
 
 function initOnLoad() {
-    //$(".col-sm-4").hide();
+    if (detectBrowser() == "Android" || detectBrowser() == "iOS") {
+        for (var i = 0; i < 3; i++) {
+            $("#mobile").append("<div class=\"row-space\">&nbsp</div>");
+        }
+    }
     $("#connectBtn").click(function () {
             if ($(this).text() == "Connect") {
                 connect();
