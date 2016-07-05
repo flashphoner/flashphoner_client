@@ -107,6 +107,7 @@ Flashphoner.prototype = {
             config.videoWidth = this.configuration.videoWidth;
             config.videoHeight = this.configuration.videoHeight;
             config.startWithVideoOnly = this.configuration.wsPlayerStartWithVideoOnly;
+            config.keepLastFrame = this.configuration.wsPlayerKeepLastFrame;
             this.wsPlayerMediaManager.initLogger(0);
             this.wsPlayerMediaManager.init(config, this.audioContext);
         }
@@ -1520,6 +1521,12 @@ Flashphoner.prototype = {
         var c_value = escape(value) + "; expires=" + exdate.toUTCString();
         document.cookie = c_name + "=" + c_value;
         return value;
+    },
+
+    getWsPlayerLastVideoFrame: function () {
+        if (this.wsPlayerMediaManager && this.wsPlayerMediaManager.getLastVideoFrame) {
+            return this.wsPlayerMediaManager.getLastVideoFrame();
+        }
     }
 };
 
@@ -2431,6 +2438,7 @@ Configuration = function () {
     this.wsPlayerCanvas = null;
     this.wsPlayerReceiverPath = null;
     this.wsPlayerStartWithVideoOnly = false;
+    this.wsPlayerKeepLastFrame = false;
 
     this.videoWidth = 640;
     this.videoHeight = 480;
