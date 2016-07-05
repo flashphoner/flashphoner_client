@@ -39,10 +39,8 @@
     z-index: 0;
 }
 .fp-remoteVideo {
-    position: absolute !important;
+    /*position: absolute !important;*/
     top: 0;
-    /*display: inline-block;*/
-    /*max-width: 864px;*/
     object-fit: cover;
 }
 
