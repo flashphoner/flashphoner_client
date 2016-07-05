@@ -39,7 +39,7 @@
     z-index: 0;
 }
 .fp-remoteVideo {
-    /*position: absolute !important;*/
+    position: absolute !important;
     top: 0;
     object-fit: cover;
 }

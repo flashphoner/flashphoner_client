@@ -109,6 +109,7 @@ function initAPI() {
     }
     isFlashphonerAPILoaded = false;
     f.wsPlayerMediaManager = undefined;
+    f.flashMediaManager = undefined;
     resetResolutions();
     if (nativeResolution != null)
         stripResolutions();
@@ -146,6 +147,7 @@ function initRTMP() {
     trace("Init " + $("#proto").val());
     $("#videoCanvas").hide();
     $videoElement = $("#flashVideoWrapper");
+    $videoElement.show();
 
     var configuration = new Configuration();
     configuration.remoteMediaElementId = 'remoteVideo';
@@ -510,6 +512,7 @@ function changeProto(proto) {
 function changeResolution() {
     $("#playStatus").text("Switching to " + getVideoResParam('width') + "x" + getVideoResParam('height')).removeClass().addClass('fp-playStatus text-info').show();
     replay = false;
+    lastResolution = null;
     stopStream(true);
     muteFooterElements();
     playStream(getVideoResParam('width'),getVideoResParam('height'));
