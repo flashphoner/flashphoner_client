@@ -590,10 +590,10 @@ Flashphoner.prototype = {
             },
             close: function (event) {
                 me.isOpened = false;
-                if (!event.originalEvent.wasClean) {
-                    me.connection.status = ConnectionStatus.Failed;
-                } else {
+                if (event.originalEvent.wasClean || event.originalEvent.code == 1000) {
                     me.connection.status = ConnectionStatus.Disconnected;
+                } else {
+                    me.connection.status = ConnectionStatus.Failed;
                 }
                 me.invokeListener(WCSEvent.ConnectionStatusEvent, [
                     me.connection, event.originalEvent
