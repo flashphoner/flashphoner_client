@@ -1,9 +1,9 @@
 .fp-main {
     border: 1px solid black;
-    width: 864px;
-    height: 480px;
-    max-height: 480px;
-    max-width: 864px;
+    width: 868px;
+    height: 484px;
+    max-width: 868px;
+    max-height: 484px;
     display: table;
     position: relative;
 }
@@ -38,10 +38,48 @@
     position: absolute !important;
     z-index: 0;
 }
+
+.fp-remoteVideo-sm:-webkit-full-screen {
+    position: initial !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    width: 100%;
+    height: 100%;
+}
+
+.fp-remoteVideo-sm:-moz-full-screen {
+    position: initial !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    width: 100%;
+    height: 100%;
+}
+
+.fp-remoteVideo-sm:fullscreen {
+    position: initial !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    width: 100%;
+    height: 100%;
+}
+
 .fp-remoteVideo {
     position: absolute !important;
     top: 0;
     object-fit: cover;
+}
+
+.fp-remoteVideo:-webkit-full-screen {
+    width: 100%;
+    height: 100%;
+}
+.fp-remoteVideo:-moz-full-screen {
+    width: 100%;
+    height: 100%;
+}
+.fp-remoteVideo:fullscreen {
+    width: 100%;
+    height: 100%;
 }
 
 .fp-fps {
@@ -52,9 +90,9 @@
 
 .fp-footer {
     position: absolute !important;
-    width: 99.8%;
+    width: 866px;
     height: 50px;
-    bottom: 1px;
+    margin-top: 432px;
     background: #EEEEEE;
 }
 .fp-footer >div {
