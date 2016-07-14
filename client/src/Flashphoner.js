@@ -604,6 +604,9 @@ Flashphoner.prototype = {
                 if (me.flashMediaManager) {
                     me.flashMediaManager.disconnect();
                 }
+                if (me.wsPlayerMediaManager) {
+                    me.wsPlayerMediaManager.stop();
+                }
                 me.webRtcCallSessionId = undefined;
                 me.calls = new DataMap();
                 me.publishStreams = new DataMap();
