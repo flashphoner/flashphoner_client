@@ -158,6 +158,7 @@ function connect(url) {
         urlServer: urlServer,
         appKey: "defaultApp",
         useWsTunnel: true,
+        useWsTunnelPacketization2: true,
         useBase64BinaryEncoding: false,
         width: config.videoWidth,
         height: config.videoHeight
