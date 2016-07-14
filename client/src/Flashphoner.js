@@ -505,7 +505,7 @@ Flashphoner.prototype = {
                 } else {
                     if (stream.mediaProvider == MediaProvider.Flash) {
                         if (stream.status == StreamStatus.Publishing) {
-                            me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo);
+                            me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo, (stream.bitrate)?stream.bitrate:0, (stream.quality)?stream.quality:0);
                         }
                         if (stream.status == StreamStatus.Playing) {
                             me.flashMediaManager.playStream(stream.mediaSessionId);

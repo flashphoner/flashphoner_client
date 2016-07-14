@@ -143,7 +143,8 @@ package com.flashphoner.api
 			phoneServerProxy.unpublish(getPublishStreamName(userData.sipLogin, callId));
 		}
 		
-		public  function publishStream(mediaSessionId:String, hasAudio:Boolean, hasVideo:Boolean):void{
+		public  function publishStream(mediaSessionId:String, hasAudio:Boolean, hasVideo:Boolean, bitrate:int, quality:int):void{
+			videoControl.setCamParams(bitrate, quality);
 			phoneServerProxy.publish(getPublishStreamName(null, mediaSessionId), hasAudio, hasVideo);
 		}
 		
