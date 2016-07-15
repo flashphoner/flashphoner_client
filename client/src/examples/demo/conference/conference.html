@@ -72,14 +72,23 @@
                         <span class="p-login">Offline</span>
                     </div>
                 </div>
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div id="chat" style="overflow-y: scroll; height: 100px;" class="text-left form-control"></div>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <textarea id="message" class="form-control" rows="1" style="resize: none;"></textarea>
+                    </div>
+                </div>
+                <div class="col-sm-5 col-sm-offset-7">
+                    <div class="pull-right">
+                        <button id="sendBtn" type="button" class="btn btn-default" onclick="sendMessage(); return false;">Send</button>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-sm-6">
-            <div class="form-group">
-                <div id="chat" style="overflow-y: scroll; height: 100px;" class="text-left form-control"></div>
-            </div>
-        </div>
-
     </div>
 </div>
 </body>

@@ -87,6 +87,15 @@ function disconnect() {
     f.disconnect();
 }
 
+function sendMessage() {
+    var message = {body: field("message")};
+    f.sendData({
+        operationId: createUUID(),
+        payload: message
+    });
+    document.getElementById("message").value = "";
+}
+
 ///////////////////////////////////////////
 //////////////Listeners////////////////////
 function connectionStatusListener(event) {
@@ -198,7 +207,11 @@ function dataEventListener(event) {
 
         }
     }
-    var newMessage = time + " " + message.login + " " + message.body.split('\n').join('<br/>') + '<br/>';
+    if (message.status == "MESSAGE") {
+        var newMessage = time + " " + message.login + " - " + message.body.split('\n').join('<br/>') + '<br/>';
+    } else {
+        var newMessage = time + '<i>' + " " + message.login + " " + message.body.split('\n').join('<br/>') + '<br/>' + '</i>';
+    }
     var chat = document.getElementById("chat");
     chat.innerHTML += newMessage;
     $("#chat").scrollTop(chat.scrollHeight);
