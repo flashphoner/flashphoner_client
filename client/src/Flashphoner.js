@@ -1080,7 +1080,7 @@ Flashphoner.prototype = {
         if (stream.hasVideo == undefined) {
             stream.hasVideo = true;
         }
-
+        stream.hasAudio = false;
         stream.mediaProvider = MediaProvider.WebRTC;
         me.getScreenAccess(extensionId, function(response) {
             if (response.success) {
