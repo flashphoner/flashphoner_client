@@ -65,7 +65,9 @@ function connect() {
         login: login,
         room: field("room"),
         urlServer: field("urlServer"),
-        appKey: "conferenceApp"
+        appKey: "conferenceApp",
+        width: 0,
+        height:0
     });
 }
 

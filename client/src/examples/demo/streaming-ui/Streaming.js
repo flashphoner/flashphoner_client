@@ -164,7 +164,7 @@ Streaming.prototype.textId = function () {
 
 Streaming.prototype.connect = function () {
     this.info("");
-    Flashphoner.getInstance().connect({appKey: "defaultApp"});
+    Flashphoner.getInstance().connect({appKey: "defaultApp", width: 0, height:0});
     $('.preload-intro').css({'display': 'block'});
 };
 
