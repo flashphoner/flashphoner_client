@@ -114,6 +114,13 @@ package com.flashphoner.api
 			return cam; 			
 		}
 		
+		public function setCamParams(bandwidth:int, quality:int):void {
+			this.cam.setQuality(
+				(bandwidth <= 0) ? this.BANDWIDTH : bandwidth, 
+				(quality <= 0) ? this.QUALITY : quality);
+			Logger.info("Set camera params, b="+cam.bandwidth+" ; q="+cam.quality);
+		}
+		
 		/**
 		 * Get current camera to used Flashphoner
 		 **/

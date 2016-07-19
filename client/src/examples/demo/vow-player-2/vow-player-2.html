@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>RTSP and WebRTC playback in iOS Safari browser via Websocket - Flashphoner VoW Player minimal
+        configuration</title>
+
+    <link rel="stylesheet" href="../../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../vow-player/vow-player.css">
+
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="../../../dependencies/js/utils.js"></script>
+    <script type="text/javascript" src="../../../Flashphoner.js"></script>
+    <script type="text/javascript" src="../../../dependencies/websocket-player/WSPlayer2.js"></script>
+    <script src="../../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../vow-player-2/vow-player-2.js"></script>
+
+
+</head>
+<body onload="initOnLoad()">
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12" style="max-width: 500px; height: 600px;">
+            <h1 class="text-center">WS Player Minimal 2</h1>
+            <div id="notify" class="modal fade" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h2 class="modal-title text-center text-danger">Warning!</h2>
+                        </div>
+                        <div class="modal-body text-center">
+                            <h2 class="text-primary">This player works only in Chrome, Firefox and iOS Safari browsers.</h2>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <fieldset id="connectionFieldSet" class="scheduler-border">
+
+                <legend class="scheduler-border">Stream Details</legend>
+
+                <div class="row">
+
+                    <label class="control-label col-sm-3 fp-buttonVerticalAlign text-right" for="urlServer">WCS
+                        URL</label>
+
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control" id="urlServer" placeholder="WCS Server URL"/>
+                    </div>
+                    <div class="col-sm-3 text-left">
+                        <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <span id="connStatus"></span>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div id="playForm" class="form-group">
+                        <label class="control-label col-sm-3 fp-buttonVerticalAlign  text-right"
+                               for="urlServer">Stream</label>
+
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="streamId" placeholder="Stream Name"/>
+                        </div>
+
+                        <div class="col-sm-3 text-left">
+                            <button id="playBtn" type="button" class="btn btn-default">Play</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <span id="streamStatus"></span>
+                    </div>
+                </div>
+
+            </fieldset>
+
+            <div class="row-space">
+
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <canvas id="videoCanvas" width="320" height="240" style="border: 1px solid width: 320px; height: 240px;"></canvas>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div class="col-sm-12 text-center">
+                        <button name="pauseBtn" id="pauseBtn" type="button" class="btn btn-default"
+                                disabled>
+                            Pause
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div class="col-sm-12 text-center">
+                        <button id="soundBtn" type="button" class="btn btn-default">Enable audio</button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <span id="playbackStatus"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12" style="max-width: 500px">
+            <div id="infoDiv" class="fp-infoDiv"></div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

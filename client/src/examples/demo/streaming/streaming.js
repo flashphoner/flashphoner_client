@@ -116,7 +116,7 @@ function initAPI() {
 
 //New connection
 function connect() {
-    f.connect({urlServer: field("urlServer"), appKey: 'defaultApp'});
+    f.connect({urlServer: field("urlServer"), appKey: 'defaultApp', width: 0, height:0});
     setCookies();
 }
 

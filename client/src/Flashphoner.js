@@ -506,7 +506,7 @@ Flashphoner.prototype = {
                 } else {
                     if (stream.mediaProvider == MediaProvider.Flash) {
                         if (stream.status == StreamStatus.Publishing) {
-                            me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo);
+                            me.flashMediaManager.publishStream(stream.mediaSessionId, true, stream.hasVideo, (stream.bitrate)?stream.bitrate:0, (stream.quality)?stream.quality:0);
                         }
                         if (stream.status == StreamStatus.Playing) {
                             me.flashMediaManager.playStream(stream.mediaSessionId);
@@ -610,6 +610,9 @@ Flashphoner.prototype = {
                 }
                 if (me.flashMediaManager) {
                     me.flashMediaManager.disconnect();
+                }
+                if (me.wsPlayerMediaManager) {
+                    me.wsPlayerMediaManager.stop();
                 }
                 me.webRtcCallSessionId = undefined;
                 me.calls = new DataMap();
@@ -1084,7 +1087,7 @@ Flashphoner.prototype = {
         if (stream.hasVideo == undefined) {
             stream.hasVideo = true;
         }
-
+        stream.hasAudio = false; 
         stream.mediaProvider = MediaProvider.WebRTC;
         me.getScreenAccess(extensionId, function(response) {
             if (response.success) {

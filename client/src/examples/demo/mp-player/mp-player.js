@@ -17,6 +17,8 @@ var playerHeight = 480;
 var playerWidth = 864;
 var nativeResolution;
 var lastResolution;
+var lastStream;
+var lastVolumeValue = 50;
 var conf = ConfigurationLoader.getInstance().configuration;
 // swfobject params
 var params = {};
@@ -54,14 +56,14 @@ function init_page() {
     // Set clickers
     $("#menuButton").click(function() {
        if ($("#proto").is(":visible")) {
-           $(this).hide();
+           $("#proto").hide();
        } else {
-           $(this).show();
+           $("#proto").show();
        }
        if ($("#resolutions").is(":visible")) {
-           $(this).hide();
+           $("#resolutions").hide();
        } else {
-           $(this).show();
+           $("#resolutions").show();
        }
     });
 
@@ -86,7 +88,7 @@ function init_page() {
         range: "min",
         min: 0,
         max: 100,
-        value: 50,
+        value: lastVolumeValue,
         step: 10,
         animate: true,
         slide: function(event, ui) {
@@ -107,9 +109,8 @@ function initAPI() {
     if (detectIE()) {
         detectFlash();
     }
-    isFlashphonerAPILoaded = false;
-    f.wsPlayerMediaManager = undefined;
-    f.flashMediaManager = undefined;
+
+    cleanInstance();
     resetResolutions();
     if (nativeResolution != null)
         stripResolutions();
@@ -164,7 +165,7 @@ function initRTMP() {
     document.getElementById('remoteVideo').style.visibility = "hidden";
     document.getElementById('flashVideoWrapper').style.visibility = "visible";
     document.getElementById('flashVideoDiv').style.visibility = "visible";
-    f.connect({urlServer: setURL(), appKey: 'defaultApp', width: 0, height: 0});
+    f.connect({urlServer: setURL(), appKey: 'defaultApp'});
 }
 
 // Init WebRTC
@@ -226,6 +227,8 @@ function initWSPlayer() {
 
 // Disconnect
 function disconnect() {
+    $("#playButton").hide();
+    $("#waiting").show();
     f.disconnect();
 }
 
@@ -274,11 +277,16 @@ function visibilityHandler() {
 
 //Play stream
 function playStream(width,height) {
+    trace("Play stream " + field("playStream"));
+    if (lastStream != field("playStream")) {
+        resetResolutions();
+        useNativeResolution = true;
+    }
+    lastStream = field("playStream");
     if ($("#proto").val() == "HLS") {
         $videoElement.attr('src',getHLSUrl()+"/"+field("playStream")+"/"+field("playStream")+".m3u8");
         $videoElement.load();
     } else {
-        trace("Play stream " + field("playStream"));
         var stream = new Stream();
         stream.name = field("playStream");
         stream.hasVideo = true;
@@ -493,6 +501,13 @@ function errorEvent(event) {
 
 ///////////////////////////////////
 
+function cleanInstance() {
+    isFlashphonerAPILoaded = false;
+    f.wsPlayerMediaManager = undefined;
+    f.flashMediaManager = undefined;
+    f.userData = undefined;
+}
+
 function changeProto(proto) {
     trace("Switching to " + $("#proto").val());
     $("#playStatus").text("Switching to " + proto).removeClass().addClass('fp-playStatus text-primary').show();
@@ -528,7 +543,7 @@ function onPlayActions() {
     $("#playButton").hide();
     $("#waiting").hide();
 
-    $("#playStream").css('background','#EEEEEE').hide();
+    $("#playStream").css('background','#EEEEEE').hide().prop('disabled',true);
     $("#footer").css('background','#EEEEEE').hide();
     $("#player").
         css('background','dimgray').
@@ -575,6 +590,7 @@ function onPlayActions() {
 }
 
 function onStopActions() {
+    $("#playStream").removeProp('disabled');
     if (replay) {
         disconnect();
     }
@@ -582,6 +598,7 @@ function onStopActions() {
 
 function onFailedActions() {
     unmuteFooterElements();
+    $("#playStream").removeProp('disabled');
     $("#playStatus").show().text("Playback failed!").removeClass().attr("class","text-danger");
     $("#playButton").show();
     $("#waiting").hide();
@@ -671,11 +688,20 @@ function startCallTimer() {
 }
 
 function setVolume(value) {
+    lastVolumeValue = value;
     f.setVolumeOnStreaming(mediaProvider, value);
 }
 
 function fullScreenMode() {
-    var video = document.getElementById("remoteVideo");
+    var video;
+    if (mediaProvider == MediaProvider.WebRTC) {
+        video = document.getElementById("remoteVideo");
+    } else if (mediaProvider == MediaProvider.WSPlayer) {
+        video = document.getElementById("videoCanvas");
+    } else {
+        video = document.getElementById("flashVideoWrapper");
+    }
+
     if (video.requestFullscreen) {
         video.requestFullscreen();
     } else if (video.mozRequestFullScreen) {
@@ -730,4 +756,8 @@ function unmuteFooterElements() {
     $("#proto").removeProp('disabled');
     $("#resolutions").removeProp('disabled');
     $("#stopButton").removeProp('disabled');
+}
+
+function trace(message) {
+    console.log("> " + message);
 }
