@@ -10,7 +10,7 @@
     <!-- custom css -->
     <link rel="stylesheet" href="video-chat.css">
 
-    <title>Phone Video Minimal</title>
+    <title>Room Chat</title>
 
     <!-- swfobject -->
     <script type="text/javascript" src="../../../dependencies/swf/swfobject.js"></script>
@@ -34,6 +34,8 @@
     <script type="text/javascript" src="../../../dependencies/jquery/jquery.json.js"></script>
     <!-- ****** -->
 
+    <script type="text/javascript" src="../../../dependencies/js/utils.js"></script>
+
     <!-- WCS JavaScript API -->
     <script type="text/javascript" src="../../ConfigurationLoader.js"></script>
     <script type="text/javascript" src="../../../Flashphoner.js"></script>
@@ -44,75 +46,16 @@
 
     <!-- Minimum script for calls -->
     <script type="text/javascript" src="video-chat.js"></script>
-
-    <script>
-
-        /**
-         * Here we add Flashphoner API initialization code
-         */
-        function initAPI() {
-
-            setURL();
-
-            f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
-            f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
-            f.addListener(WCSEvent.RegistrationStatusEvent, registrationStatusListener);
-            f.addListener(WCSEvent.CallStatusEvent, callStatusListener);
-            f.addListener(WCSEvent.OnCallEvent, callListener, this);
-            if (detectIE()) {
-                detectFlash();
-            }
-            // Configure remote and local video elements
-            var configuration = new Configuration();
-            configuration.remoteMediaElementId = 'remoteVideo';
-            configuration.localMediaElementId = 'localVideo';
-            configuration.elementIdForSWF = "flashVideoDiv";
-            configuration.pathToSWF = "../../../dependencies/flash/MediaManager.swf";
-            configuration.flashBufferTime = 0.0;
-
-            f.init(configuration);
-
-            // Hide WebRTC elements for IE and Flash based browsers. Hide flash elements for WebRTC based browsers.
-            if (webrtcDetectedBrowser) {
-                document.getElementById('remoteVideo').style.visibility = "visible";
-                document.getElementById('flashVideoWrapper').style.visibility = "hidden";
-                document.getElementById('flashVideoDiv').style.visibility = "hidden";
-            } else {
-                document.getElementById('remoteVideo').style.visibility = "hidden";
-                document.getElementById('flashVideoWrapper').style.visibility = "visible";
-                document.getElementById('localVideo').style.visibility = "hidden";
-            }
-        }
-
-        //New video call
-        function call() {
-            var call = new Call();
-            call.callee = field("callee");
-            // set true to make a video call
-            call.hasVideo = true;
-            currentCall = f.call(call);
-        }
-
-        //Answer with video
-        function answer() {
-            // set true to answer with video
-            currentCall.hasVideo = true;
-            f.answer(currentCall);
-        }
-
-
-    </script>
-
 </head>
 
-<body onload="initAPI()">
+<body>
 
 <!-- full size container -->
 <div class="container-fluid">
     <div class="row" style="max-width: 1024px">
         <div class="col-sm-7 text-center">
 
-            <h1>Video Chat Minimal</h1>
+            <h1>Room Chat</h1>
             <div id="notify" class="modal fade" role="dialog">
                 <div class="modal-dialog modal-sm">
                     <div class="modal-content">
@@ -132,19 +75,41 @@
             <h2 id="notifyFlash" class="text-danger"></h2>
 
             <!-- Connection fields -->
-            <fieldset id="callFieldSet" class="scheduler-border">
-                <!-- Include from call-fieldset.html by jquery. See js file. -->
+            <fieldset id="connectionFieldSet" class="scheduler-border">
+                <!-- Include from connect-fieldset.html by jquery. See js file. -->
             </fieldset>
 
-            <!-- Call controls -->
-            <div id="callControls">
-                <!-- Include from call-controls.html. See js file. -->
-            </div>
 
+            <div class="row" style="margin-top: 20px">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <div id="chat" style="overflow-y: scroll; height: 100px;" class="text-left form-control"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <textarea id="message" class="form-control" rows="1" style="resize: none;"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-5 col-sm-offset-7">
+                    <div class="pull-right">
+                        <button id="sendBtn" type="button" class="btn btn-default" onclick="sendMessage(); return false;">Send</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Video block -->
-        <div class="col-sm-4 text-left fp-videoBlock">
+        <div class="col-sm-4 text-left fp-videoBlock participant free">
+
+            <div class="text-center text-info">
+                <span class="glyphicon fp-userState"></span>
+                <span class="p-login">Offline</span>
+            </div>
 
             <!-- 320x240 Flash Video Block -->
             <div id="flashVideoWrapper" class="fp-flashVideoWrapper">
@@ -160,8 +125,22 @@
                    class="fp-localVideo">
             </video>
 
+
+
             <!-- Mute video controls -->
-            <div class="fp-muteVideoControls" id="videoControls">
+            <div class="fp-muteVideoControls text-center" id="videoControls">
+                <div class="row" style="margin-top: 20px">
+                    <div class="col-sm-12">
+                        <button id="publishBtn" type="button" class="btn btn-default">Start</button>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div class="col-sm-12 text-center">
+                        <span id="publishStatus"></span>
+                    </div>
+                </div>
+
                 <div class="row row-space">
                     <div class="col-sm-6 fp-buttonVerticalAlign">
                         Mute Audio
@@ -214,6 +193,16 @@
                         size: 'md'
                     });
                 </script>
+            </div>
+        </div>
+
+        <div class="col-sm-12 text-left" style="margin-top:20px">
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="inviteLink">Invite Link</label>
+
+                <div class="col-sm-9">
+                    <input type="text" class="form-control" id="inviteLink"/>
+                </div>
             </div>
         </div>
     </div>
