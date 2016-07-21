@@ -1784,7 +1784,7 @@ WebRtcMediaManager.prototype.getScreenAccess = function (extensionId, callback) 
                 };
                 Flashphoner.getInstance().invokeProblem(status);
             };
-            if (Flashphoner.getInstance.checkMediaDevices()) {
+            if (Flashphoner.getInstance().checkMediaDevices()) {
                 trace("");
                 navigator.mediaDevices.getUserMedia(constraints)
                     .then(mediaStream)
