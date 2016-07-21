@@ -1,45 +1,48 @@
+//Get API instance
+var f = Flashphoner.getInstance();
+var login;
+var roomName;
 $(document).ready(function () {
-    loadCallFieldSet();
+    $("#connectionFieldSet").load("connect-fieldset.html", initOnLoad);
 });
 
-// Include Filed Set HTML
-function loadCallFieldSet(){
-    $("#callFieldSet").load("call-fieldset.html",loadCallControls);
+function retrieveRoomName() {
+    var address = window.location.toString();
+    var pattern = /https?:\/\/.*\?roomName\=(.*)/;
+    var match = address.match(pattern);
+    if (match) {
+        return match[1];
+    } else {
+        return null;
+    }
 }
 
-// Include Call Controls HTML
-function loadCallControls(){
-    $("#callControls").load("call-controls.html", page_init);
-}
+function initOnLoad() {
+    if (detectBrowser() == "Android" || detectBrowser() == "iOS") {
+        for (var i = 0; i < 3; i++) {
+            $("#mobile").append("<div class=\"row-space\">&nbsp</div>");
+        }
+    }
 
-// Init connection and call button and bind functions
-function page_init(){
     $("#connectBtn").click(function () {
-            var state = getConnectionButtonText();
-            if (state == "Connect") {
-                //var emptyField;
-                //$("form#formConnection :input").not(':input[type=button]').each(function() {
-                //   if (!checkForEmptyField('#'+$(this).attr('id'),'#'+$(this).attr('id')+'Form')) {
-                //       emptyField = true;
-                //   }
-                //});
-                //if (!emptyField) {
-                    connect();
-                    $(this).prop('disabled', true);
-                //}
+            if ($(this).text() == "Connect") {
+                if (connect()) {
+                    $(this).prop('disabled',true);
+                }
             } else {
                 disconnect();
-                $(this).prop('disabled', true);
+                $(this).prop('disabled',true);
             }
+
         }
     );
 
-    $("#callBtn").prop('disabled', true).click(function () {
-            var state = getCallButtonText();
+    $("#publishBtn").prop('disabled', true).click(function () {
+            var state = $("#publishBtn").text();
             if (state == "Start") {
-                call();
+                publishStream();
             } else {
-                hangup();
+                unPublishStream();
             }
             $(this).prop('disabled', true);
         }
@@ -48,328 +51,272 @@ function page_init(){
     // Set websocket URL
     setURL();
 
-    // Display outgoing call controls
-    showOutgoing();
-    $("#notify").modal('show');
+    //add listeners
+    f.addListener(WCSEvent.ErrorStatusEvent, errorEvent);
+    f.addListener(WCSEvent.ConnectionStatusEvent, connectionStatusListener);
+    f.addListener(WCSEvent.StreamStatusEvent, streamStatusListener);
+
+    if (detectIE()) {
+        detectFlash();
+    }
+    // Configure remote and local video elements
+    var configuration = new Configuration();
+    configuration.remoteMediaElementId = 'remoteVideo';
+    configuration.localMediaElementId = 'localVideo';
+    configuration.elementIdForSWF = "flashVideoDiv";
+    configuration.pathToSWF = "../../../dependencies/flash/MediaManager.swf";
+    configuration.flashBufferTime = 0.0;
+
+    f.init(configuration);
+
+    // Hide WebRTC elements for IE and Flash based browsers. Hide flash elements for WebRTC based browsers.
+    if (webrtcDetectedBrowser) {
+        document.getElementById('remoteVideo').style.visibility = "visible";
+        document.getElementById('flashVideoWrapper').style.visibility = "hidden";
+        document.getElementById('flashVideoDiv').style.visibility = "hidden";
+    } else {
+        document.getElementById('remoteVideo').style.visibility = "hidden";
+        document.getElementById('flashVideoWrapper').style.visibility = "visible";
+        document.getElementById('localVideo').style.visibility = "hidden";
+    }
 }
 
-//Init WCS JavaScript API
-var f = Flashphoner.getInstance();
-var conf = ConfigurationLoader.getInstance().configuration;
 
-//Current call
-var currentCall;
-
-//New connection
 function connect() {
-
-    //SIP parameters
-    var sipPort = 0;
-    var sipPassword = generatePassword();
-    var sipDomain = conf.urlWsServer.substring(conf.urlWsServer.lastIndexOf("/")+1,conf.urlWsServer.lastIndexOf(":"));
-    var sipRegisterRequired = false;
-
-    var connection = {
+    if (!checkForEmptyField('#login', '#loginForm')) {
+        return false;
+    }
+    login = field("login").replace(/\s+/g, '');
+    f.connect({
+        login: login,
         urlServer: field("urlServer"),
-        appKey: 'defaultApp',
-        sipLogin: field("sipLogin"),
-        sipPassword: sipPassword,
-        sipDomain: sipDomain,
-        sipPort: sipPort,
-        sipRegisterRequired: sipRegisterRequired
-    };
-
-    f.connect(connection);
-
-    for (var key in connection) {
-        f.setCookie(key, connection[key]);
-    }
+        appKey: 'defaultApp'
+    });
 }
 
-// Set connection status and display corresponding view
-function setStatus(status) {
-    if (status == "REGISTERED") {
-        $("#regStatus").text(status).removeClass().attr("class","text-success");
-    }
-
-    if (status == "ESTABLISHED") {
-        $("#regStatus").text(status).removeClass().attr("class","text-success");
-    }
-
-    if (status == "DISCONNECTED") {
-        $("#regStatus").text(status).removeClass().attr("class","text-muted");
-    }
-
-    if (status == "FAILED") {
-        $("#regStatus").text(status).removeClass().attr("class","text-danger");
-    }
+//Publish stream
+function publishStream() {
+    $("#downloadDiv").hide();
+    var streamName = "stream-" + login;
+    f.publishStream({name: streamName});
 }
 
-// Display view for incoming call
-function showIncoming(caller){
-    $("#outgoingCall").hide();
-    $("#incomingCall").show();
-    $("#incomingCallAlert").show().text("You have a new call from "+caller);
-    $("#answerBtn").show();
+//Stop stream publishing
+function unPublishStream() {
+    var streamName = "stream-" + login;
+    f.unPublishStream({name: streamName});
 }
 
-// Display view for outgoing call
-function showOutgoing(){
-    $("#incomingCall").hide();
-    $("#incomingCallAlert").hide();
-    $("#outgoingCall").show();
-    if (currentCall && currentCall.hasVideo) {
-        $muteAudioToggle.attr("disabled", "").removeAttr("checked");
-        $muteAudioToggle.trigger('change');
-        $muteVideoToggle.attr("disabled", "").removeAttr("checked");
-        $muteVideoToggle.trigger('change');
-    }
-}
 
-// Display view of answered call
-function showAnswered(){
-    $("#answerBtn").hide();
-    $("#incomingCallAlert").hide().text("");
-}
-
-// Set call status and display corresponding view
-function setCallStatus(status) {
-
-    if (status == "TRYING") {
-        $("#callStatus").text(status).removeClass().attr("class","text-primary");
-    }
-
-    if (status == "RING") {
-        $("#callStatus").text(status).removeClass().attr("class","text-primary");
-    }
-
-    if (status == "ESTABLISHED") {
-        $("#callStatus").text(status).removeClass().attr("class","text-success");
-    }
-
-    if (status == "FAILED") {
-        $("#callStatus").text(status).removeClass().attr("class","text-danger");
-    }
-
-    if (status == "FINISH") {
-        $("#callStatus").text(status).removeClass().attr("class","text-muted");
-    }
-
-}
-
-// Getters and setters for call and connection button text
-function setCallButtonText(text) {
-    $("#callBtn").text(text).prop('disabled', false);
-}
-
-function getCallButtonText() {
-    return $("#callBtn").text();
-}
-
-function getConnectionButtonText(text) {
-    return $("#connectBtn").text();
-}
-
-function setConnectionButtonText(text) {
-    $("#connectBtn").text(text).prop('disabled', false);
-}
-
-// Disconnect
 function disconnect() {
-    //if(currentCall) {
-        $("#remoteVideo").removeAttr('src');
-        $("#localVideo").removeAttr('src');
-    //}
     f.disconnect();
-    setConnectionButtonText("Connect")
-    setStatus("NOT REGISTERED");
 }
 
-// New call
-function call() {
-    var call = new Call();
-    call.callee = field("callee");
-    currentCall = f.call(call);
-}
-
-// Hangup current call
-function hangup() {
-    f.hangup(currentCall);
-}
-
-// Mute audio in the call
-function mute() {
-    if (currentCall) {
-        f.mute(currentCall.mediaProvider);
-    }
-}
-
-// Unmute audio in the call
-function unmute() {
-    if (currentCall) {
-        f.unmute(currentCall.mediaProvider);
-    }
-}
-
-// Mute video in the call
-function muteVideo() {
-    if (currentCall) {
-        f.muteVideo(currentCall.mediaProvider);
-    }
-}
-
-// Unmute video in the call
-function unmuteVideo() {
-    if (currentCall) {
-        f.unmuteVideo(currentCall.mediaProvider);
-    }
-}
-
-//Connection Status
+///////////////////////////////////////////
+//////////////Listeners////////////////////
 function connectionStatusListener(event) {
-    $("#callBtn").prop('disabled', false);
-    trace(event.status);
     if (event.status == ConnectionStatus.Established) {
-        trace('Connection has been established. You can start a new call.');
-        setConnectionButtonText("Disconnect");
-    } else {
-        resetStates();
-    }
-    setStatus(event.status);
-}
-
-//Registration Status
-function registrationStatusListener(event) {
-    $("#callBtn").prop('disabled', false);
-    if (event.status == ConnectionStatus.Registered) {
-        setConnectionButtonText("Disconnect");
-    } else {
-        resetStates();
-    }
-    setStatus(event.status);
-    trace(event.status);
-}
-
-//Incoming call handler
-function callListener(event) {
-    var call = event;
-    trace("Phone - callListener " + call.callId + " call.mediaProvider: " + call.mediaProvider + " call.status: " + call.status);
-    currentCall = call;
-    showIncoming(call.caller);
-
-}
-
-//Call Status handler
-function callStatusListener(event) {
-    trace(event.status);
-
-    setCallStatus(event.status);
-
-    if (event.status == CallStatus.ESTABLISHED) {
-        trace('Call ' + event.callId + ' is established');
-        if (currentCall.incoming) {
-            showAnswered();
+        console.log('Connection has been established.');
+        $("#connectBtn").text("Disconnect").prop('disabled', false);
+        $("#publishBtn").prop('disabled', false);
+        roomName = retrieveRoomName();
+        if (!roomName) {
+            roomName = createUUID();
         }
-        var $muteAudioToggle = $("#muteAudioToggle");
-        var $muteVideoToggle = $("#muteVideoToggle");
-        $muteAudioToggle.removeAttr("disabled");
-        $muteAudioToggle.trigger('change');
-        $muteVideoToggle.removeAttr("disabled");
-        $muteVideoToggle.trigger('change');
-    }
+        setInviteLink();
 
-    if (event.status == CallStatus.FINISH || event.status == CallStatus.FAILED || event.status == CallStatus.BUSY) {
-        showOutgoing();
-        setCallButtonText("Start");
-    } else {
-        setCallButtonText("Stop");
+        f.subscribeRoom(roomName, roomStatusEventListener, this);
+    } else if (event.status == ConnectionStatus.Disconnected || event.status == ConnectionStatus.Failed) {
+        $("#connectBtn").text("Connect").prop('disabled', false);
+        $("#publishBtn").text("Start").prop('disabled', true);
+        var chat = document.getElementById("chat");
+        chat.innerHTML = "";
+        setPublishStatus("");
+        var participantEl = $(".participant").first();
+        if (participantEl) {
+            participantEl.find(".p-login").text("Offline");
+            participantEl.find(".fp-userState").removeClass("online").removeClass("streaming");
+            participantEl.addClass("free").removeAttr("login").removeAttr("stream");
+            var video = participantEl.find("video").get(0);
+            video.pause();
+            video.src = '';
+        }
     }
+    if (event.status == ConnectionStatus.Failed) {
 
+        f.disconnect();
+    }
+    setConnectionStatus(event.status);
 }
 
+function streamStatusListener(event) {
+    if (event.published) {
+        trace("streamStatusListener >> " + event.status);
+        switch (event.status) {
+            case StreamStatus.Publishing:
+                setPublishStatus(event.status);
+                $("#publishBtn").text("Stop").prop('disabled', false);
+                break;
+            case StreamStatus.Unpublished:
+            case StreamStatus.Failed:
+                setPublishStatus(event.status);
+                $("#publishBtn").text("Start").prop('disabled', false);
+                break;
+            default:
+                break;
+        }
+    }
+}
 //Error
 function errorEvent(event) {
-    trace(event.info);
+    console.log(event.info);
 }
 
-//Trace
-function trace(str) {
+function writeInfo(str) {
     console.log(str);
 }
 
-//Get field
-function field(name) {
-    var field = document.getElementById(name).value;
-    return field;
+function sendMessage() {
+    var date = new Date();
+    var time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
+    f.sendRoomData(roomName, {
+        operationId: createUUID(),
+        payload: field("message")
+    });
+    var newMessage = time + " " + field("login") + " - " + field("message").split('\n').join('<br/>') + '<br/>';
+    var chat = document.getElementById("chat");
+    chat.innerHTML += newMessage ;
+    $("#chat").scrollTop(chat.scrollHeight);
+    document.getElementById("message").value = "";
 }
 
-//Set WCS URL based on browser URL location string
+
+function roomStatusEventListener(event) {
+    var date = new Date();
+    var time = date.getHours() + ":" + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+    var message = event;
+    var participantEl;
+    if (message.owner.login != login) {
+        switch (message.status) {
+
+            case "JOINED":
+                participantEl = $(".participant.free").first();
+                if (participantEl) {
+                    participantEl.find(".p-login").text(message.owner.login);
+                    participantEl.find(".fp-userState").addClass("online");
+                    participantEl.removeClass("free").attr("login", message.owner.login);
+                }
+                break;
+            case "DISCONNECTED":
+                participantEl = $(".participant[login='" + message.owner.login +"']").first();
+                if (participantEl) {
+                    participantEl.find(".p-login").text("Offline");
+                    participantEl.find(".fp-userState").removeClass("online").removeClass("streaming");
+                    participantEl.addClass("free").removeAttr("login").removeAttr("stream");
+                    var video = participantEl.find("video").get(0);
+                    video.pause();
+                    video.src = '';
+                }
+                break;
+            case "PUBLISHING":
+                participantEl = $(".participant[login='" + message.owner.login +"']").first();
+                if (participantEl) {
+                    var remoteMediaElementId = participantEl.find("video").attr("id");
+                    f.playStream({name: message.streamName, remoteMediaElementId: remoteMediaElementId});
+                    participantEl.find(".fp-userState").addClass("streaming");
+                    participantEl.attr("stream", message.streamName);
+                }
+                break;
+            case "UNPUBLISHED":
+                f.stopStream({name: message.streamName});
+                participantEl = $(".participant[login='" + message.owner.login +"']").first();
+                if (participantEl) {
+                    var video = participantEl.find("video").get(0);
+                    video.pause();
+                    video.src = '';
+                    participantEl.find(".fp-userState").removeClass("streaming");
+                    participantEl.removeAttr("stream");
+
+                }
+                break;
+            case "SENT_DATA":
+                var newMessage = time + " " + message.owner.login + " - " + message.data.payload.split('\n').join('<br/>') + '<br/>';
+                var chat = document.getElementById("chat");
+                chat.innerHTML += newMessage;
+                $("#chat").scrollTop(chat.scrollHeight);
+                break;
+            default:
+                break;
+
+        }
+    }
+
+}
+
+// Set connection status and display corresponding view
+function setConnectionStatus(status) {
+    if (status == "ESTABLISHED") {
+        $("#connectionStatus").text(status).removeClass().attr("class", "text-success");
+    }
+
+    if (status == "DISCONNECTED") {
+        $("#connectionStatus").text(status).removeClass().attr("class", "text-muted");
+    }
+
+    if (status == "FAILED") {
+        $("#connectionStatus").text(status).removeClass().attr("class", "text-danger");
+    }
+}
+
+// Set Stream Status
+function setPublishStatus(status) {
+
+    $("#publishStatus").className = '';
+
+    if (status == "PUBLISHING") {
+        $("#publishStatus").attr("class", "text-success");
+    }
+
+    if (status == "UNPUBLISHED") {
+        $("#publishStatus").attr("class", "text-muted");
+    }
+
+    if (status == "FAILED") {
+        $("#publishStatus").attr("class", "text-danger");
+    }
+
+    $("#publishStatus").text(status);
+}
+
+//Set WCS URL
 function setURL() {
     var proto;
     var url;
     var port;
     if (window.location.protocol == "http:") {
-        proto = "ws://"
-        port = "8080"
+        proto = "ws://";
+        port = "8080";
     } else {
-        proto = "wss://"
-        port = "8443"
+        proto = "wss://";
+        port = "8443";
     }
 
     url = proto + window.location.hostname + ":" + port;
-    $("#urlServer").val(url);
+    document.getElementById("urlServer").value = url;
 }
 
-// Detect IE
-function detectIE() {
-    var ua = window.navigator.userAgent;
-    var msie = ua.indexOf('MSIE ');
-    if (msie > 0) {
-        return true;
-    }
-    var trident = ua.indexOf('Trident/');
-    if (trident > 0) {
-        return true;
-    }
-    return false;
+function setInviteLink() {
+    url = window.location.href + "?roomName=" + roomName;
+    document.getElementById("inviteLink").value = url;
 }
 
-// Detect Flash
-function detectFlash() {
-    var hasFlash = false;
-    try {
-        var fo = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
-        if (fo) {
-            hasFlash = true;
-        }
-    } catch (e) {
-        if (navigator.mimeTypes
-            && navigator.mimeTypes['application/x-shockwave-flash'] != undefined
-            && navigator.mimeTypes['application/x-shockwave-flash'].enabledPlugin) {
-            hasFlash = true;
-        }
-    }
-    if (!hasFlash) {
-        $("#notifyFlash").text("Your browser doesn't support the Flash technology necessary for work of an example");
-    }
-}
-
-// Reset button's and field's state
-function resetStates() {
-    $("#connectBtn").text("Connect").prop('disabled',false);
-    $("#callBtn").text("Start").prop('disabled',true);
-    $("#callStatus").text("").removeClass();
-    $("#outgoingCall").show();
-    $("#incomingCall").hide();
-    $("#incomingCallAlert").hide().text("");
-    $("#answerBtn").hide();
-    $("#muteAudioToggle").prop('checked',false).attr('disabled','disabled').trigger('change');
-    $("#muteVideoToggle").prop('checked',false).attr('disabled','disabled').trigger('change');
+//Get field
+function field(name) {
+    return document.getElementById(name).value;
 }
 
 // Check field for empty string
 function checkForEmptyField(checkField, alertDiv) {
-
     if (!$(checkField).val()) {
         $(alertDiv).addClass("has-error");
         return false;
@@ -377,28 +324,4 @@ function checkForEmptyField(checkField, alertDiv) {
         $(alertDiv).removeClass("has-error");
         return true;
     }
-}
-
-function setValue(name) {
-    var id = "#"+name.id;
-    if ($(id).is(':checked')) {
-        $(id).val('true');
-    } else {
-        $(id).val('false');
-    }
-}
-
-function generatePassword (){
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    var password;
-
-    for( var i=0; i < getRandomInt(6,10); i++ )
-        password += possible.charAt(Math.floor(Math.random() * possible.length));
-
-    return password;
-}
-
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
 }

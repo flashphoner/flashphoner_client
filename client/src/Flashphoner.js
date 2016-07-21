@@ -27,6 +27,7 @@ function Flashphoner() {
     this.messages = {};
     this.isOpened = false;
     this.listeners = {};
+    this.roomListeners = {};
     this.version = undefined;
     this.mediaProviders = new DataMap();
     this.intervalId = -1;
@@ -532,6 +533,12 @@ Flashphoner.prototype = {
             DataStatusEvent: function (status) {
                 me.invokeListener(WCSEvent.DataStatusEvent, [
                     status
+                ]);
+            },
+
+            notifyRoomStatusEvent: function (roomStatusEventListener) {
+                me.invokeRoomStatusEventListener(roomStatusEventListener.room, [
+                    roomStatusEventListener
                 ]);
             }
         };
@@ -1209,6 +1216,27 @@ Flashphoner.prototype = {
             this.wsPlayerMediaManager.pause();
         }
         this.webSocket.send("pauseStream", stream);
+    },
+
+    subscribeRoom:function (roomName, roomEventListener, thisArg) {
+        this.roomListeners[roomName] = {func: roomEventListener, thisArg: thisArg};
+        this.webSocket.send("subscribeRoom", {name:roomName});
+    },
+
+    sendRoomData:function (roomName, data) {
+        this.webSocket.send("sendRoomData", {name:roomName, data:data});
+    },
+
+    invokeRoomStatusEventListener: function (roomName, argsArray) {
+        var listener = this.roomListeners[roomName];
+        if (listener) {
+            listener.func.apply(listener.thisArg ? listener.thisArg : window, argsArray);
+        }
+    },
+
+    unsubscribeRoom: function (roomName) {
+        delete this.roomListeners[roomName];
+        this.webSocket.send("unsubscribeRoom", {name:roomName});
     },
 
     releaseMediaManagerStream: function (stream) {
@@ -2415,6 +2443,14 @@ var Connection = function () {
     this.mediaProviders = [];
     this.width = "";
     this.height = "";
+};
+
+var RoomStatusEvent = function() {
+    this.room = null;
+    this.status = null;
+    this.login = null;
+    this.streamName = null;
+    this.time = null;
 };
 
 var ConnectionStatus = function () {

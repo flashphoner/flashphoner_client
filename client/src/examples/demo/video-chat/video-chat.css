@@ -54,6 +54,7 @@ legend.scheduler-border {
 .fp-muteVideoControls {
     position: absolute;
     top:250px;
+    width:320px;
 }
 
 input[type="checkbox"] {
@@ -62,4 +63,19 @@ input[type="checkbox"] {
 
 .form-horizontal .checkbox {
     min-height: 55px;
+}
+
+.fp-userState {
+    border-radius: 50%;
+    border-color: lightgray !important;
+    background-color: lightgray;
+    width: 15px;
+    height: 15px;
+}
+
+.fp-userState.online {
+    background-color: #d5f114;
+}
+.fp-userState.streaming {
+    background-color: #196a23;
 }
