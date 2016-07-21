@@ -1410,6 +1410,13 @@ Flashphoner.prototype = {
         if (args === undefined) {
             args = [];
         }
+        var localMediaVideoSourceId = Flashphoner.getInstance().configuration.videoSourceId;
+        if (localMediaVideoSourceId != null && localMediaVideoSourceId != lastVideoSourceId) {
+            trace("Video source was changed from " + lastVideoSourceId + " to " + localMediaVideoSourceId);
+            me.releaseCameraAndMicrophone(mediaProvider);
+            me.webRtcMediaManager.localAudioVideoStream = undefined;
+        }
+
         if (!this.hasAccess(mediaProvider, hasVideo)) {
             if (this.intervalId == -1) {
                 var checkAccessFunc = function () {
@@ -1588,7 +1595,7 @@ WebRtcMediaManager.prototype.disconnect = function () {
         this.webRtcMediaConnections.remove(id).close();
     }
 };
-
+var lastVideoSourceId;
 WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
     var me = this;
     if (!me.localAudioVideoStream) {
@@ -1599,6 +1606,10 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
         if (webrtcDetectedBrowser == "firefox") {
             requestedMedia.video.width = Flashphoner.getInstance().configuration.videoWidth;
             requestedMedia.video.height = Flashphoner.getInstance().configuration.videoHeight;
+            if (Flashphoner.getInstance().configuration.videoSourceId != null) {
+                requestedMedia.video.optional = [{sourceId: Flashphoner.getInstance().configuration.videoSourceId}];
+                lastVideoSourceId = Flashphoner.getInstance().configuration.videoSourceId;
+            }
         } else {
             requestedMedia.video = {
                 mandatory: {
@@ -1607,6 +1618,11 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
                 },
                 optional: []
             };
+
+            if (Flashphoner.getInstance().configuration.videoSourceId != null) {
+                requestedMedia.video.optional = [{sourceId: Flashphoner.getInstance().configuration.videoSourceId}];
+                lastVideoSourceId = Flashphoner.getInstance().configuration.videoSourceId;
+            }
 
             if (Flashphoner.getInstance().configuration.forceResolution) {
                 requestedMedia.video.mandatory.minWidth = Flashphoner.getInstance().configuration.videoWidth;
@@ -2346,6 +2362,7 @@ Configuration = function () {
     this.remoteMediaElementId = null;
     this.localMediaElementId = null;
     this.localMediaElementId2 = null;
+    this.videoSourceId = null;
     this.elementIdForSWF = null;
     this.pathToSWF = null;
     this.swfParams = {};
