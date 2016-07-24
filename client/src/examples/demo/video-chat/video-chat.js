@@ -1,5 +1,6 @@
 //Get API instance
 var f = Flashphoner.getInstance();
+var clientId;
 var login;
 var roomName;
 $(document).ready(function () {
@@ -87,29 +88,64 @@ function connect() {
         return false;
     }
     login = field("login").replace(/\s+/g, '');
+    clientId = createUUID();
     f.connect({
+        clientId: clientId,
         login: login,
         urlServer: field("urlServer"),
-        appKey: 'defaultApp'
+        appKey: 'defaultApp',
+        width:0,
+        height:0
     });
 }
+
+var currentStream;
 
 //Publish stream
 function publishStream() {
     $("#downloadDiv").hide();
-    var streamName = "stream-" + login;
-    f.publishStream({name: streamName});
+    var streamName = "stream-" + clientId;
+    currentStream = {name: streamName};
+    f.publishStream(currentStream);
 }
 
 //Stop stream publishing
 function unPublishStream() {
-    var streamName = "stream-" + login;
-    f.unPublishStream({name: streamName});
+    var streamName = "stream-" + clientId;
+    f.unPublishStream(currentStream);
+    currentStream = null;
 }
 
 
 function disconnect() {
     f.disconnect();
+}
+
+function mute() {
+    if (currentStream) {
+        f.mute(currentStream.mediaProvider);
+    }
+}
+
+// Unmute audio in the call
+function unmute() {
+    if (currentStream) {
+        f.unmute(currentStream.mediaProvider);
+    }
+}
+
+// Mute video in the call
+function muteVideo() {
+    if (currentStream) {
+        f.muteVideo(currentStream.mediaProvider);
+    }
+}
+
+// Unmute video in the call
+function unmuteVideo() {
+    if (currentStream) {
+        f.unmuteVideo(currentStream.mediaProvider);
+    }
 }
 
 ///////////////////////////////////////////
@@ -129,9 +165,10 @@ function connectionStatusListener(event) {
     } else if (event.status == ConnectionStatus.Disconnected || event.status == ConnectionStatus.Failed) {
         $("#connectBtn").text("Connect").prop('disabled', false);
         $("#publishBtn").text("Start").prop('disabled', true);
-        var chat = document.getElementById("chat");
-        chat.innerHTML = "";
         setPublishStatus("");
+        $("#muteAudioToggle").prop('checked',false).attr('disabled','disabled').trigger('change');
+        $("#muteVideoToggle").prop('checked',false).attr('disabled','disabled').trigger('change');
+        currentStream = null;
         var participantEl = $(".participant").first();
         if (participantEl) {
             participantEl.find(".p-login").text("Offline");
@@ -156,11 +193,19 @@ function streamStatusListener(event) {
             case StreamStatus.Publishing:
                 setPublishStatus(event.status);
                 $("#publishBtn").text("Stop").prop('disabled', false);
+                var $muteAudioToggle = $("#muteAudioToggle");
+                var $muteVideoToggle = $("#muteVideoToggle");
+                $muteAudioToggle.removeAttr("disabled");
+                $muteAudioToggle.trigger('change');
+                $muteVideoToggle.removeAttr("disabled");
+                $muteVideoToggle.trigger('change');
                 break;
             case StreamStatus.Unpublished:
             case StreamStatus.Failed:
                 setPublishStatus(event.status);
                 $("#publishBtn").text("Start").prop('disabled', false);
+                $("#muteAudioToggle").prop('checked',false).attr('disabled','disabled').trigger('change');
+                $("#muteVideoToggle").prop('checked',false).attr('disabled','disabled').trigger('change');
                 break;
             default:
                 break;
@@ -196,10 +241,11 @@ function roomStatusEventListener(event) {
     var time = date.getHours() + ":" + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
     var message = event;
     var participantEl;
-    if (message.owner.login != login) {
+    if (message.owner.clientId != clientId) {
         switch (message.status) {
 
             case "JOINED":
+                addMessage(time + " " + "<i>" + message.owner.login + " joined" + '<br/></i>');
                 participantEl = $(".participant.free").first();
                 if (participantEl) {
                     participantEl.find(".p-login").text(message.owner.login);
@@ -208,6 +254,7 @@ function roomStatusEventListener(event) {
                 }
                 break;
             case "DISCONNECTED":
+                addMessage(time + " " + "<i>" + message.owner.login + " disconnected" + '<br/></i>');
                 participantEl = $(".participant[login='" + message.owner.login +"']").first();
                 if (participantEl) {
                     participantEl.find(".p-login").text("Offline");
@@ -219,6 +266,7 @@ function roomStatusEventListener(event) {
                 }
                 break;
             case "PUBLISHING":
+                addMessage(time + " " + "<i>" + message.owner.login + " started a stream" + '<br/></i>');
                 participantEl = $(".participant[login='" + message.owner.login +"']").first();
                 if (participantEl) {
                     var remoteMediaElementId = participantEl.find("video").attr("id");
@@ -228,6 +276,7 @@ function roomStatusEventListener(event) {
                 }
                 break;
             case "UNPUBLISHED":
+                addMessage(time + " " + "<i>" + message.owner.login + " stopped a stream" + '<br/></i>');
                 f.stopStream({name: message.streamName});
                 participantEl = $(".participant[login='" + message.owner.login +"']").first();
                 if (participantEl) {
@@ -240,10 +289,7 @@ function roomStatusEventListener(event) {
                 }
                 break;
             case "SENT_DATA":
-                var newMessage = time + " " + message.owner.login + " - " + message.data.payload.split('\n').join('<br/>') + '<br/>';
-                var chat = document.getElementById("chat");
-                chat.innerHTML += newMessage;
-                $("#chat").scrollTop(chat.scrollHeight);
+                addMessage(time + " " + message.owner.login + " - " + message.data.payload.split('\n').join('<br/>') + '<br/>');
                 break;
             default:
                 break;
@@ -251,6 +297,12 @@ function roomStatusEventListener(event) {
         }
     }
 
+}
+
+function addMessage(msg) {
+    var chat = document.getElementById("chat");
+    chat.innerHTML += msg;
+    $("#chat").scrollTop(chat.scrollHeight);
 }
 
 // Set connection status and display corresponding view
