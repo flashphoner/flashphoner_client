@@ -491,6 +491,12 @@ Flashphoner.prototype = {
                 ]);
             },
 
+            notifyStreamInfoEvent: function (streamInfo) {
+                me.invokeListener(WCSEvent.StreamInfoEvent, [
+                    streamInfo
+                ]);
+            },
+
             notifyStreamStatusEvent: function (stream) {
                 //clean resources if status is failed
                 if (stream.status == StreamStatus.Failed) {
@@ -1002,6 +1008,11 @@ Flashphoner.prototype = {
 
     sendData: function (data) {
         this.webSocket.send("sendData", data);
+    },
+
+    requestStreamInfo:function(stream) {
+        console.log("requestStreamInfo stream " + stream.name);
+        this.webSocket.send("requestStreamInfo", stream);
     },
 
     publishStream: function (stream) {
@@ -2524,6 +2535,14 @@ MessageStatus.IMDN_FORBIDDEN = "IMDN_FORBIDDEN";
 MessageStatus.IMDN_ERROR = "IMDN_ERROR";
 MessageStatus.RECEIVED = "RECEIVED";
 
+var StreamInfo = function() {
+    this.mediaSessionId = null;
+    this.name = null;
+    this.samplingTime = null;
+    this.recordTimestamp = null;
+    this.recordStarted = null;
+};
+
 var Stream = function () {
     this.mediaSessionId = null;
     this.name = "";
@@ -2561,6 +2580,7 @@ WCSEvent.MessageStatusEvent = "MESSAGE_STATUS_EVENT";
 WCSEvent.RecordingStatusEvent = "RECORDING_STATUS_EVENT";
 WCSEvent.SubscriptionStatusEvent = "SUBSCRIPTION_STATUS_EVENT";
 WCSEvent.StreamStatusEvent = "ON_STREAM_STATUS_EVENT";
+WCSEvent.StreamInfoEvent= "ON_STREAM_INFO_EVENT";
 WCSEvent.XcapStatusEvent = "XCAP_STATUS_EVENT";
 WCSEvent.BugReportStatusEvent = "BUG_REPORT_STATUS_EVENT";
 WCSEvent.OnDataEvent = "ON_DATA_EVENT";
