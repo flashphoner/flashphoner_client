@@ -100,6 +100,12 @@ $(function() {
 
 function detectBrowser() {
     var browser;
+    var isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
+    if (isAndroid)
+        return "Android";
+    var isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isiOS)
+        return "iOS";
     // Opera 8.0+
     var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
     if (isOpera)
@@ -128,10 +134,5 @@ function detectBrowser() {
     var isBlink = (isChrome || isOpera) && !!window.CSS;
     if (isBlink)
         return "Blink";
-    var isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
-    if (isAndroid)
-        return "Android";
-    var isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (isiOS)
-        return "iOS";
+
 }

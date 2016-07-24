@@ -78,7 +78,27 @@ function init_page() {
             $(this).prop('disabled',true);
         }
     );
-
+    if (detectBrowser() == "Android") {
+        if (navigator.mediaDevices.enumerateDevices) {
+            navigator.mediaDevices.enumerateDevices()
+                .then(function(devices) {
+                    devices.forEach(function(device) {
+                        console.log(device);
+                        if (device.kind === 'videoinput') {
+                            var option = document.createElement("option");
+                            option.text = device.label;
+                            option.value = device.deviceId;
+                            var select = document.getElementById("videoSources");
+                            select.appendChild(option);
+                        }
+                    });
+                })
+                .catch(function(err) {
+                    console.log(err.name + ": " + error.message);
+                });
+            document.getElementById("cameraSelect").style.display = '';
+        }
+    }
     getCookies();
 
 };
@@ -130,6 +150,11 @@ function disconnect() {
 function publishStream() {
     $("#downloadDiv").hide();
     var streamName = field("publishStream");
+    if (detectBrowser() == "Android") {
+        var source = document.getElementById("videoSources");
+        var camera = source.options[source.selectedIndex].value;
+        Flashphoner.getInstance().configuration.videoSourceId = camera;
+    }
     f.publishStream({name: streamName, record: record});
     setCookies();
 }
@@ -184,6 +209,9 @@ function streamStatusListener(event) {
             setPublishStatus(event.status);
             $("#publishBtn").text("Stop").prop('disabled',false);
             $("#publishStream").prop('disabled',true);
+            if ($("#cameraSelect").is(':visible')) {
+                $("#videoSources").prop('disabled',true);
+            }
             if (record) {
                 recordFileName = event.recordName;
             }
@@ -192,6 +220,9 @@ function streamStatusListener(event) {
             setPublishStatus(event.status);
             $("#publishBtn").text("Start").prop('disabled',false);
             $("#publishStream").prop('disabled',false);
+            if ($("#cameraSelect").is(':visible')) {
+                $("#videoSources").prop('disabled',false);
+            }
             if (record) {
                 showDownloadLink(recordFileName);
             }
@@ -212,6 +243,9 @@ function streamStatusListener(event) {
                 setPublishStatus(event.status);
                 $("#publishBtn").text("Start").prop('disabled',false);
                 $("#publishStream").prop('disabled',false);
+                if ($("#cameraSelect").is(':visible')) {
+                    $("#videoSources").prop('disabled',false);
+                }
             } else {
                 setPlaybackStatus(event.status);
                 $("#playBtn").text("Start").prop('disabled',false);
