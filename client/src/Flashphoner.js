@@ -1962,6 +1962,7 @@ WebRtcMediaConnection.prototype.onOnAddStreamCallback = function (event) {
         this.remoteAudioVideoMediaStream = event.stream;
         if (this.remoteMediaElement) {
             attachMediaStream(this.remoteMediaElement, this.remoteAudioVideoMediaStream);
+            this.remoteMediaElement.play();
         }
     }
     else {
