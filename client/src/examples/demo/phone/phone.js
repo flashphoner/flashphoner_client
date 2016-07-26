@@ -77,8 +77,6 @@ function connect() {
         sipRegisterRequired: field("sipRegisterRequired")
     };
 
-    console.log(connection);
-
     f.connect(connection);
 
     for (var key in connection) {
