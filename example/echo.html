@@ -5,10 +5,7 @@
     <title>ECHO APP</title>
 </head>
 <body>
-<script type="text/javascript" src="../adapter-latest.js"></script>
-<script type="text/javascript" src="../uuid.js"></script>
-<script type="text/javascript" src="../flashphoner-core.js"></script>
-<script type="text/javascript" src="../WebRTCMediaProvider.js"></script>
+<script type="text/javascript" src="../flashphoner.js"></script>
 <video id="local" width="640" height="480"></video>
 <video id="remote" width="640" height="480"></video>
 <BR>
@@ -16,15 +13,15 @@
     Flashphoner.init();
     Flashphoner.createSession({
         urlServer: "ws://192.168.88.234:8080"
-    }).on(Flashphoner.SessionStatus.established, function(session) {
+    }).on(Flashphoner.constants.SESSION_STATUS.ESTABLISHED, function(session) {
         session.createStream({
             name: "echoTest",
             remoteElement: document.getElementById('local')
-        }).on(Flashphoner.StreamStatus.publishing, function(publishStream) {
+        }).on(Flashphoner.constants.STREAM_STATUS.PUBLISHING, function(publishStream) {
             session.createStream({
                 name: "echoTest",
                 remoteElement: document.getElementById('remote')
-            }).on(Flashphoner.StreamStatus.playing, function(playingStream) {
+            }).on(Flashphoner.constants.STREAM_STATUS.PLAYING, function(playingStream) {
                 console.log("Playing");
             }).play();
         }).publish();

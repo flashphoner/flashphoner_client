@@ -1,3 +1,7 @@
+//status alias
+var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
+var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+
 describe('flashphoner', function() {
     var sOptions;
     before(function(){
@@ -15,9 +19,9 @@ describe('flashphoner', function() {
         var session = Flashphoner.createSession({urlServer: "ws://192.168.88.234:8080"});
         expect(Flashphoner.getSession(session.id())).to.be.equal(session);
         expect(Flashphoner.getSessions()).to.contain(session);
-        session.on(Flashphoner.SessionStatus.established, function(){
+        session.on(SESSION_STATUS.ESTABLISHED, function(){
             session.disconnect();
-        }).on(Flashphoner.SessionStatus.disconnected, function(){
+        }).on(SESSION_STATUS.DISCONNECTED, function(){
             expect(Flashphoner.getSession(session.id())).to.be.undefined;
             expect(Flashphoner.getSessions()).to.not.contain(session);
             done();
@@ -34,18 +38,18 @@ describe('flashphoner', function() {
         });
         it('should connect', function(done){
             var session = Flashphoner.createSession(sOptions);
-            session.on(Flashphoner.SessionStatus.established, function(){
+            session.on(SESSION_STATUS.ESTABLISHED, function(){
                 session.disconnect();
                 done();
             });
         });
         it('should disconnect', function(done) {
             var session = Flashphoner.createSession(sOptions);
-            session.on(Flashphoner.SessionStatus.established, function(){
+            session.on(SESSION_STATUS.ESTABLISHED, function(){
                 session.disconnect();
-            }).on(Flashphoner.SessionStatus.disconnected, function(){
+            }).on(SESSION_STATUS.DISCONNECTED, function(){
                 done();
-            }).on(Flashphoner.SessionStatus.failed, function() {
+            }).on(SESSION_STATUS.FAILED, function() {
                 throw Error('Session failed');
             });
         });
@@ -53,7 +57,7 @@ describe('flashphoner', function() {
         it('should create stream', function(done) {
             var session = Flashphoner.createSession(sOptions);
             expect(session.createStream).to.throw(Error, 'Invalid session state');
-            session.on(Flashphoner.SessionStatus.established, function() {
+            session.on(SESSION_STATUS.ESTABLISHED, function() {
                 expect(session.createStream).to.throw(TypeError, 'options must be provided');
                 expect(session.createStream.bind(this, {})).to.throw(TypeError, 'options.name must be provided');
                 expect(session.createStream({name: "test"})).to.be.an('object');
@@ -65,7 +69,7 @@ describe('flashphoner', function() {
         describe('streams', function(){
             var session;
             before(function(done){
-                session = Flashphoner.createSession(sOptions).on(Flashphoner.SessionStatus.established, function(){
+                session = Flashphoner.createSession(sOptions).on(SESSION_STATUS.ESTABLISHED, function(){
                     done();
                 });
             });
@@ -84,9 +88,9 @@ describe('flashphoner', function() {
                 mediaElement.width = 640;
                 mediaElement.height = 480;
                 var stream = session.createStream({name: "test2", remoteElement: mediaElement});
-                stream.on(Flashphoner.StreamStatus.publishing, function(){
+                stream.on(STREAM_STATUS.PUBLISHING, function(){
                     var playStream = session.createStream({name: "test2"});
-                    playStream.on(Flashphoner.StreamStatus.playing, function(){
+                    playStream.on(STREAM_STATUS.PLAYING, function(){
                         playStream.stop();
                         stream.stop();
                         done();
@@ -99,4 +103,3 @@ describe('flashphoner', function() {
 
     });
 });
-
