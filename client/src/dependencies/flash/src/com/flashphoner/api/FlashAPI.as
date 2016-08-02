@@ -82,8 +82,8 @@ package com.flashphoner.api
 			ExternalInterface.addCallback("stopStream", stopStream);
 			ExternalInterface.addCallback("hasAccessToAudio",hasAccessToAudio);
 			ExternalInterface.addCallback("disconnect",disconnect);
-			ExternalInterface.addCallback("getMicVolume",getMicVolume);
-			ExternalInterface.addCallback("setMicVolume",setMicVolume);
+			ExternalInterface.addCallback("getMicrophoneGain",getMicVolume);
+			ExternalInterface.addCallback("setMicrophoneGain",setMicVolume);
 			ExternalInterface.addCallback("muteVideo",muteVideo);
 			ExternalInterface.addCallback("unmuteVideo",unmuteVideo);
 			ExternalInterface.addCallback("isVideoMuted",isVideoMuted);

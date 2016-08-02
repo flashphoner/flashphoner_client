@@ -910,9 +910,9 @@ Flashphoner.prototype = {
 
     getVolume: function (call) {
         if (MediaProvider.Flash == call.mediaProvider) {
-            this.mediaProviders.get(call.mediaProvider).setVolume(call.callId, value);
+            this.mediaProviders.get(call.mediaProvider).getVolume(call.callId, value);
         } else {
-            this.mediaProviders.get(call.mediaProvider).setVolume(this.webRtcCallSessionId, value);
+            this.mediaProviders.get(call.mediaProvider).getVolume(this.webRtcCallSessionId, value);
         }
     },
 
@@ -977,6 +977,17 @@ Flashphoner.prototype = {
             mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
         }
         this.mediaProviders.get(mediaProvider).unmute();
+    },
+
+    setMicrophoneGain: function(volume,mediaProvider) {
+        if (MediaProvider.WSPlayer == mediaProvider) {
+            console.warn("Flash or WebRTC media provider supported only!");
+            return;
+        }
+        if (!mediaProvider) {
+            mediaProvider = Object.keys(Flashphoner.getInstance().mediaProviders.getData())[0];
+        }
+        this.mediaProviders.get(mediaProvider).setMicrophoneGain(volume);
     },
 
     //works only for WSPlayer
@@ -1526,6 +1537,11 @@ WebRtcMediaManager.prototype.setVolume = function (id, volume) {
     webRtcMediaConnection.remoteMediaElement.volume = volume / 100;
 };
 
+WebRtcMediaManager.prototype.setMicrophoneGain = function (volume) {
+    if (this.microphoneGain)
+        this.microphoneGain.gain.value = volume;
+};
+
 WebRtcMediaManager.prototype.isVideoMuted = function () {
     if (this.localAudioVideoStream) {
         return !this.localAudioVideoStream.getVideoTracks()[0].enabled;
@@ -1634,6 +1650,25 @@ WebRtcMediaManager.prototype.disconnect = function () {
         this.webRtcMediaConnections.remove(id).close();
     }
 };
+
+
+function createGainNode(stream) {
+    var audioCtx = Flashphoner.getInstance().audioContext;
+    var source = audioCtx.createMediaStreamSource(stream);
+    var gainNode = audioCtx.createGain();
+    var destination = audioCtx.createMediaStreamDestination();
+    var outputStream = destination.stream;
+    // source -> gainNode -> destination -> peerConnection
+    source.connect(gainNode);
+    gainNode.connect(destination);
+    // replace audiotrack to new which contain gainNode
+    var newTrack = outputStream.getAudioTracks()[0];
+    stream.addTrack(newTrack);
+    var originalTrack = stream.getAudioTracks()[0];
+    stream.removeTrack(originalTrack);
+    return gainNode;
+}
+
 var lastVideoSourceId;
 WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
     var me = this;
@@ -1674,6 +1709,11 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
                 attachMediaStream(localMediaElement, stream);
             }
             me.localAudioVideoStream = stream;
+
+            if (webrtcDetectedBrowser == "chrome") {
+                me.microphoneGain = createGainNode(stream);
+            }
+
             if (webrtcDetectedBrowser != "firefox") {
                 me.audioMuted = -1;
             }
