@@ -1710,7 +1710,7 @@ WebRtcMediaManager.prototype.getAccessToAudioAndVideo = function () {
             }
             me.localAudioVideoStream = stream;
 
-            if (webrtcDetectedBrowser == "chrome") {
+            if (webrtcDetectedBrowser == "chrome" && Flashphoner.getInstance().configuration.gainControllerEnabled) {
                 me.microphoneGain = createGainNode(stream);
             }
 
@@ -2475,6 +2475,8 @@ Configuration = function () {
     // kbps (ex. minBitRate=200 means 200kbps)
     this.minBitRate = null;
     this.maxBitRate = null;
+
+    this.gainControllerEnabled = false;
 
     this.stunServer = "";
 
