@@ -87,9 +87,9 @@ describe('flashphoner', function() {
                 var mediaElement = document.createElement('video');
                 mediaElement.width = 640;
                 mediaElement.height = 480;
-                var stream = session.createStream({name: "test2", remoteElement: mediaElement});
+                var stream = session.createStream({name: "test2", display: mediaElement});
                 stream.on(STREAM_STATUS.PUBLISHING, function(){
-                    var playStream = session.createStream({name: "test2"});
+                    var playStream = session.createStream({name: "test2", display: mediaElement});
                     playStream.on(STREAM_STATUS.PLAYING, function(){
                         playStream.stop();
                         stream.stop();

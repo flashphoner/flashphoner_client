@@ -3,7 +3,8 @@
 var uuid = require('node-uuid');
 var constants = require("./constants.js");
 var MediaProvider = {
-    WebRTC: require("./webrtc-media-provider.js")
+    WebRTC: require("./webrtc-media-provider.js"),
+    Flash: require("./flash-media-provider.js")
 };
 
 var sessions = {};
@@ -42,9 +43,8 @@ var createSession = function(options) {
     var urlServer = options.urlServer;
     var appKey = options.appKey || "defaultApp";
     var authToken;
-    var mediaConnections = {};
-    var streamRefreshHandlers = {};
     var streams = {};
+    var streamRefreshHandlers = {};
     var exports = {};
     var callbacks = {};
 
@@ -69,7 +69,6 @@ var createSession = function(options) {
         }));
     };
     wsConnection.onmessage = function(event) {
-        //console.dir(event);
         var data = JSON.parse(event.data);
         var message = data.message;
         var obj = data.data[0];
@@ -82,13 +81,12 @@ var createSession = function(options) {
                 onSessionStatusChange(constants.SESSION_STATUS.ESTABLISHED);
                 break;
             case 'setRemoteSDP':
-                var mediaConnectionId = data.data[0].trim();
+                var mediaSessionId = data.data[0].trim();
                 var sdp = data.data[1];
-                if (mediaConnections[mediaConnectionId]) {
-                    mediaConnections[mediaConnectionId].setRemoteSdp(sdp).then(function(){
-                    });
+                if (streamRefreshHandlers[mediaSessionId]) {
+                    streamRefreshHandlers[mediaSessionId](null, sdp);
                 } else {
-                    console.error("Media connection not found, id " + mediaConnectionId);
+                    console.error("Media connection not found, id " + mediaSessionId);
                 }
                 break;
             case 'notifyStreamStatusEvent':
@@ -104,6 +102,12 @@ var createSession = function(options) {
     function onSessionStatusChange(newStatus) {
         sessionStatus = newStatus;
         if (sessionStatus == constants.SESSION_STATUS.DISCONNECTED || sessionStatus == constants.SESSION_STATUS.FAILED) {
+            //remove streams
+            for (var prop in streamRefreshHandlers) {
+                if (streamRefreshHandlers.hasOwnProperty(prop) && typeof streamRefreshHandlers[prop] === 'function') {
+                    streamRefreshHandlers[prop]({status: constants.STREAM_STATUS.FAILED});
+                }
+            }
             //remove session from list
             delete sessions[id];
         }
@@ -128,19 +132,25 @@ var createSession = function(options) {
 
         var id = uuid.v1();
         var name = options.name;
-        var mediaProvider = "WebRTC";
+        var mediaProvider = options.mediaProvider || "WebRTC";
+        var mediaConnection;
+        var display = options.display;
+
         var published = false;
         var status = constants.STREAM_STATUS.NEW;
-        var remoteElement = options.remoteElement || document.createElement('video');
         var callbacks = {};
-        streamRefreshHandlers[id] = function(stream) {
+        streamRefreshHandlers[id] = function(stream, sdp) {
+            //set remote sdp
+            if (sdp && sdp !== '') {
+                mediaConnection.setRemoteSdp(sdp).then(function(){});
+                return;
+            }
             status = stream.status;
             if (status == constants.STREAM_STATUS.FAILED || status == constants.STREAM_STATUS.STOPPED ||
                 status == constants.STREAM_STATUS.UNPUBLISHED) {
                 delete streams[id];
                 delete streamRefreshHandlers[id];
-                mediaConnections[id].close();
-                delete mediaConnections[id];
+                mediaConnection.close();
             }
             if (callbacks[status]) {
                 callbacks[status](exports);
@@ -152,23 +162,36 @@ var createSession = function(options) {
                 throw new Error("Invalid stream state");
             }
             //create mediaProvider connection
-            var mediaConnection = MediaProvider[mediaProvider].createConnection({
+            MediaProvider[mediaProvider].createConnection({
                 id: id,
-                remoteElement: remoteElement
-            });
-            mediaConnections[id] = mediaConnection;
-            mediaConnection.createOffer().then(function(sdp){
+                display: display,
+                authToken: authToken,
+                mainUrl: urlServer
+            }).then(function(newConnection) {
+                mediaConnection = newConnection;
+                return mediaConnection.createOffer({
+                    receiveAudio: true,
+                    receiveVideo: true
+                });
+            }).then(function (sdp) {
                 //webrtc offer created, request stream
-                wsConnection.send(JSON.stringify({message: "playStream", data: [{
-                    mediaSessionId: id,
-                    name: name,
-                    published: published,
-                    hasVideo: true,
-                    hasAudio: true,
-                    status: status,
-                    record: false,
-                    sdp: sdp
-                }]}));
+                wsConnection.send(JSON.stringify({
+                    message: "playStream",
+                    data: [{
+                        mediaSessionId: id,
+                        name: name,
+                        published: published,
+                        hasVideo: true,
+                        hasAudio: true,
+                        status: status,
+                        record: false,
+                        mediaProvider: mediaProvider,
+                        sdp: sdp
+                    }]
+                }));
+            }).catch(function(error) {
+                //todo fire stream failed status
+                throw error;
             });
         };
 
@@ -177,31 +200,35 @@ var createSession = function(options) {
                 throw new Error("Invalid stream state");
             }
             //get access to camera
-            MediaProvider[mediaProvider].getAccessToAudioAndVideo().then(function(stream){
-                //show local camera
-                remoteElement.srcObject = stream;
-                //mute audio
-                remoteElement.muted = true;
-                remoteElement.play();
+            MediaProvider[mediaProvider].getAccessToAudioAndVideo(display).then(function(stream){
                 published = true;
                 //create mediaProvider connection
-                var mediaConnection = MediaProvider[mediaProvider].createConnection({
+                MediaProvider[mediaProvider].createConnection({
                     id: id,
-                    localStream: stream
-                });
-                mediaConnections[id] = mediaConnection;
-                mediaConnection.createOffer().then(function(sdp){
+                    display: display,
+                    authToken: authToken,
+                    mainUrl: urlServer
+                }).then(function(newConnection) {
+                    mediaConnection = newConnection;
+                    return mediaConnection.createOffer({
+                        sendAudio: true,
+                        sendVideo: true
+                    });
+                }).then(function (sdp) {
                     //webrtc offer created, request stream
-                    wsConnection.send(JSON.stringify({message: "publishStream", data: [{
-                        mediaSessionId: id,
-                        name: name,
-                        published: published,
-                        hasVideo: true,
-                        hasAudio: true,
-                        status: status,
-                        record: false,
-                        sdp: sdp
-                    }]}));
+                    wsConnection.send(JSON.stringify({
+                        message: "publishStream", data: [{
+                            mediaSessionId: id,
+                            name: name,
+                            published: published,
+                            hasVideo: true,
+                            hasAudio: true,
+                            status: status,
+                            record: false,
+                            mediaProvider: mediaProvider,
+                            sdp: sdp
+                        }]
+                    }));
                 });
 
             }).catch(function(error){
@@ -211,9 +238,6 @@ var createSession = function(options) {
 
         exports.stop = function() {
             if (published) {
-                if (remoteElement) {
-                    remoteElement.pause();
-                }
                 wsConnection.send(JSON.stringify({message: "unPublishStream", data: [{
                     mediaSessionId: id,
                     name: name,

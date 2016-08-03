@@ -72,7 +72,7 @@ Entity.prototype.encode = function encode(data, enc, /* internal */ reporter) {
   return this._getEncoder(enc).encode(data, reporter);
 };
 
-},{"../asn1":1,"inherits":91,"vm":134}],3:[function(require,module,exports){
+},{"../asn1":1,"inherits":91,"vm":135}],3:[function(require,module,exports){
 var inherits = require('inherits');
 var Reporter = require('../base').Reporter;
 var Buffer = require('buffer').Buffer;
@@ -19380,7 +19380,7 @@ function CorkedRequest(state) {
   };
 }
 }).call(this,require('_process'))
-},{"./_stream_duplex":112,"_process":103,"buffer":45,"buffer-shims":43,"core-util-is":47,"events":81,"inherits":91,"process-nextick-args":102,"util-deprecate":133}],117:[function(require,module,exports){
+},{"./_stream_duplex":112,"_process":103,"buffer":45,"buffer-shims":43,"core-util-is":47,"events":81,"inherits":91,"process-nextick-args":102,"util-deprecate":134}],117:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
 },{"./lib/_stream_passthrough.js":113}],118:[function(require,module,exports){
@@ -21275,6 +21275,12 @@ function base64DetectIncompleteChar(buffer) {
 }
 
 },{"buffer":45}],133:[function(require,module,exports){
+/*	SWFObject v2.2 <http://code.google.com/p/swfobject/> 
+	is released under the MIT License <http://www.opensource.org/licenses/mit-license.php> 
+*/
+var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="ShockwaveFlash.ShockwaveFlash",q="application/x-shockwave-flash",R="SWFObjectExprInst",x="onreadystatechange",O=window,j=document,t=navigator,T=false,U=[h],o=[],N=[],I=[],l,Q,E,B,J=false,a=false,n,G,m=true,M=function(){var aa=typeof j.getElementById!=D&&typeof j.getElementsByTagName!=D&&typeof j.createElement!=D,ah=t.userAgent.toLowerCase(),Y=t.platform.toLowerCase(),ae=Y?/win/.test(Y):/win/.test(ah),ac=Y?/mac/.test(Y):/mac/.test(ah),af=/webkit/.test(ah)?parseFloat(ah.replace(/^.*webkit\/(\d+(\.\d+)?).*$/,"$1")):false,X=!+"\v1",ag=[0,0,0],ab=null;if(typeof t.plugins!=D&&typeof t.plugins[S]==r){ab=t.plugins[S].description;if(ab&&!(typeof t.mimeTypes!=D&&t.mimeTypes[q]&&!t.mimeTypes[q].enabledPlugin)){T=true;X=false;ab=ab.replace(/^.*\s+(\S+\s+\S+$)/,"$1");ag[0]=parseInt(ab.replace(/^(.*)\..*$/,"$1"),10);ag[1]=parseInt(ab.replace(/^.*\.(.*)\s.*$/,"$1"),10);ag[2]=/[a-zA-Z]/.test(ab)?parseInt(ab.replace(/^.*[a-zA-Z]+(.*)$/,"$1"),10):0}}else{if(typeof O[(['Active'].concat('Object').join('X'))]!=D){try{var ad=new window[(['Active'].concat('Object').join('X'))](W);if(ad){ab=ad.GetVariable("$version");if(ab){X=true;ab=ab.split(" ")[1].split(",");ag=[parseInt(ab[0],10),parseInt(ab[1],10),parseInt(ab[2],10)]}}}catch(Z){}}}return{w3:aa,pv:ag,wk:af,ie:X,win:ae,mac:ac}}(),k=function(){if(!M.w3){return}if((typeof j.readyState!=D&&j.readyState=="complete")||(typeof j.readyState==D&&(j.getElementsByTagName("body")[0]||j.body))){f()}if(!J){if(typeof j.addEventListener!=D){j.addEventListener("DOMContentLoaded",f,false)}if(M.ie&&M.win){j.attachEvent(x,function(){if(j.readyState=="complete"){j.detachEvent(x,arguments.callee);f()}});if(O==top){(function(){if(J){return}try{j.documentElement.doScroll("left")}catch(X){setTimeout(arguments.callee,0);return}f()})()}}if(M.wk){(function(){if(J){return}if(!/loaded|complete/.test(j.readyState)){setTimeout(arguments.callee,0);return}f()})()}s(f)}}();function f(){if(J){return}try{var Z=j.getElementsByTagName("body")[0].appendChild(C("span"));Z.parentNode.removeChild(Z)}catch(aa){return}J=true;var X=U.length;for(var Y=0;Y<X;Y++){U[Y]()}}function K(X){if(J){X()}else{U[U.length]=X}}function s(Y){if(typeof O.addEventListener!=D){O.addEventListener("load",Y,false)}else{if(typeof j.addEventListener!=D){j.addEventListener("load",Y,false)}else{if(typeof O.attachEvent!=D){i(O,"onload",Y)}else{if(typeof O.onload=="function"){var X=O.onload;O.onload=function(){X();Y()}}else{O.onload=Y}}}}}function h(){if(T){V()}else{H()}}function V(){var X=j.getElementsByTagName("body")[0];var aa=C(r);aa.setAttribute("type",q);var Z=X.appendChild(aa);if(Z){var Y=0;(function(){if(typeof Z.GetVariable!=D){var ab=Z.GetVariable("$version");if(ab){ab=ab.split(" ")[1].split(",");M.pv=[parseInt(ab[0],10),parseInt(ab[1],10),parseInt(ab[2],10)]}}else{if(Y<10){Y++;setTimeout(arguments.callee,10);return}}X.removeChild(aa);Z=null;H()})()}else{H()}}function H(){var ag=o.length;if(ag>0){for(var af=0;af<ag;af++){var Y=o[af].id;var ab=o[af].callbackFn;var aa={success:false,id:Y};if(M.pv[0]>0){var ae=c(Y);if(ae){if(F(o[af].swfVersion)&&!(M.wk&&M.wk<312)){w(Y,true);if(ab){aa.success=true;aa.ref=z(Y);ab(aa)}}else{if(o[af].expressInstall&&A()){var ai={};ai.data=o[af].expressInstall;ai.width=ae.getAttribute("width")||"0";ai.height=ae.getAttribute("height")||"0";if(ae.getAttribute("class")){ai.styleclass=ae.getAttribute("class")}if(ae.getAttribute("align")){ai.align=ae.getAttribute("align")}var ah={};var X=ae.getElementsByTagName("param");var ac=X.length;for(var ad=0;ad<ac;ad++){if(X[ad].getAttribute("name").toLowerCase()!="movie"){ah[X[ad].getAttribute("name")]=X[ad].getAttribute("value")}}P(ai,ah,Y,ab)}else{p(ae);if(ab){ab(aa)}}}}}else{w(Y,true);if(ab){var Z=z(Y);if(Z&&typeof Z.SetVariable!=D){aa.success=true;aa.ref=Z}ab(aa)}}}}}function z(aa){var X=null;var Y=c(aa);if(Y&&Y.nodeName=="OBJECT"){if(typeof Y.SetVariable!=D){X=Y}else{var Z=Y.getElementsByTagName(r)[0];if(Z){X=Z}}}return X}function A(){return !a&&F("6.0.65")&&(M.win||M.mac)&&!(M.wk&&M.wk<312)}function P(aa,ab,X,Z){a=true;E=Z||null;B={success:false,id:X};var ae=c(X);if(ae){if(ae.nodeName=="OBJECT"){l=g(ae);Q=null}else{l=ae;Q=X}aa.id=R;if(typeof aa.width==D||(!/%$/.test(aa.width)&&parseInt(aa.width,10)<310)){aa.width="310"}if(typeof aa.height==D||(!/%$/.test(aa.height)&&parseInt(aa.height,10)<137)){aa.height="137"}j.title=j.title.slice(0,47)+" - Flash Player Installation";var ad=M.ie&&M.win?(['Active'].concat('').join('X')):"PlugIn",ac="MMredirectURL="+O.location.toString().replace(/&/g,"%26")+"&MMplayerType="+ad+"&MMdoctitle="+j.title;if(typeof ab.flashvars!=D){ab.flashvars+="&"+ac}else{ab.flashvars=ac}if(M.ie&&M.win&&ae.readyState!=4){var Y=C("div");X+="SWFObjectNew";Y.setAttribute("id",X);ae.parentNode.insertBefore(Y,ae);ae.style.display="none";(function(){if(ae.readyState==4){ae.parentNode.removeChild(ae)}else{setTimeout(arguments.callee,10)}})()}u(aa,ab,X)}}function p(Y){if(M.ie&&M.win&&Y.readyState!=4){var X=C("div");Y.parentNode.insertBefore(X,Y);X.parentNode.replaceChild(g(Y),X);Y.style.display="none";(function(){if(Y.readyState==4){Y.parentNode.removeChild(Y)}else{setTimeout(arguments.callee,10)}})()}else{Y.parentNode.replaceChild(g(Y),Y)}}function g(ab){var aa=C("div");if(M.win&&M.ie){aa.innerHTML=ab.innerHTML}else{var Y=ab.getElementsByTagName(r)[0];if(Y){var ad=Y.childNodes;if(ad){var X=ad.length;for(var Z=0;Z<X;Z++){if(!(ad[Z].nodeType==1&&ad[Z].nodeName=="PARAM")&&!(ad[Z].nodeType==8)){aa.appendChild(ad[Z].cloneNode(true))}}}}}return aa}function u(ai,ag,Y){var X,aa=c(Y);if(M.wk&&M.wk<312){return X}if(aa){if(typeof ai.id==D){ai.id=Y}if(M.ie&&M.win){var ah="";for(var ae in ai){if(ai[ae]!=Object.prototype[ae]){if(ae.toLowerCase()=="data"){ag.movie=ai[ae]}else{if(ae.toLowerCase()=="styleclass"){ah+=' class="'+ai[ae]+'"'}else{if(ae.toLowerCase()!="classid"){ah+=" "+ae+'="'+ai[ae]+'"'}}}}}var af="";for(var ad in ag){if(ag[ad]!=Object.prototype[ad]){af+='<param name="'+ad+'" value="'+ag[ad]+'" />'}}aa.outerHTML='<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"'+ah+">"+af+"</object>";N[N.length]=ai.id;X=c(ai.id)}else{var Z=C(r);Z.setAttribute("type",q);for(var ac in ai){if(ai[ac]!=Object.prototype[ac]){if(ac.toLowerCase()=="styleclass"){Z.setAttribute("class",ai[ac])}else{if(ac.toLowerCase()!="classid"){Z.setAttribute(ac,ai[ac])}}}}for(var ab in ag){if(ag[ab]!=Object.prototype[ab]&&ab.toLowerCase()!="movie"){e(Z,ab,ag[ab])}}aa.parentNode.replaceChild(Z,aa);X=Z}}return X}function e(Z,X,Y){var aa=C("param");aa.setAttribute("name",X);aa.setAttribute("value",Y);Z.appendChild(aa)}function y(Y){var X=c(Y);if(X&&X.nodeName=="OBJECT"){if(M.ie&&M.win){X.style.display="none";(function(){if(X.readyState==4){b(Y)}else{setTimeout(arguments.callee,10)}})()}else{X.parentNode.removeChild(X)}}}function b(Z){var Y=c(Z);if(Y){for(var X in Y){if(typeof Y[X]=="function"){Y[X]=null}}Y.parentNode.removeChild(Y)}}function c(Z){var X=null;try{X=j.getElementById(Z)}catch(Y){}return X}function C(X){return j.createElement(X)}function i(Z,X,Y){Z.attachEvent(X,Y);I[I.length]=[Z,X,Y]}function F(Z){var Y=M.pv,X=Z.split(".");X[0]=parseInt(X[0],10);X[1]=parseInt(X[1],10)||0;X[2]=parseInt(X[2],10)||0;return(Y[0]>X[0]||(Y[0]==X[0]&&Y[1]>X[1])||(Y[0]==X[0]&&Y[1]==X[1]&&Y[2]>=X[2]))?true:false}function v(ac,Y,ad,ab){if(M.ie&&M.mac){return}var aa=j.getElementsByTagName("head")[0];if(!aa){return}var X=(ad&&typeof ad=="string")?ad:"screen";if(ab){n=null;G=null}if(!n||G!=X){var Z=C("style");Z.setAttribute("type","text/css");Z.setAttribute("media",X);n=aa.appendChild(Z);if(M.ie&&M.win&&typeof j.styleSheets!=D&&j.styleSheets.length>0){n=j.styleSheets[j.styleSheets.length-1]}G=X}if(M.ie&&M.win){if(n&&typeof n.addRule==r){n.addRule(ac,Y)}}else{if(n&&typeof j.createTextNode!=D){n.appendChild(j.createTextNode(ac+" {"+Y+"}"))}}}function w(Z,X){if(!m){return}var Y=X?"visible":"hidden";if(J&&c(Z)){c(Z).style.visibility=Y}else{v("#"+Z,"visibility:"+Y)}}function L(Y){var Z=/[\\\"<>\.;]/;var X=Z.exec(Y)!=null;return X&&typeof encodeURIComponent!=D?encodeURIComponent(Y):Y}var d=function(){if(M.ie&&M.win){window.attachEvent("onunload",function(){var ac=I.length;for(var ab=0;ab<ac;ab++){I[ab][0].detachEvent(I[ab][1],I[ab][2])}var Z=N.length;for(var aa=0;aa<Z;aa++){y(N[aa])}for(var Y in M){M[Y]=null}M=null;for(var X in swfobject){swfobject[X]=null}swfobject=null})}}();return{registerObject:function(ab,X,aa,Z){if(M.w3&&ab&&X){var Y={};Y.id=ab;Y.swfVersion=X;Y.expressInstall=aa;Y.callbackFn=Z;o[o.length]=Y;w(ab,false)}else{if(Z){Z({success:false,id:ab})}}},getObjectById:function(X){if(M.w3){return z(X)}},embedSWF:function(ab,ah,ae,ag,Y,aa,Z,ad,af,ac){var X={success:false,id:ah};if(M.w3&&!(M.wk&&M.wk<312)&&ab&&ah&&ae&&ag&&Y){w(ah,false);K(function(){ae+="";ag+="";var aj={};if(af&&typeof af===r){for(var al in af){aj[al]=af[al]}}aj.data=ab;aj.width=ae;aj.height=ag;var am={};if(ad&&typeof ad===r){for(var ak in ad){am[ak]=ad[ak]}}if(Z&&typeof Z===r){for(var ai in Z){if(typeof am.flashvars!=D){am.flashvars+="&"+ai+"="+Z[ai]}else{am.flashvars=ai+"="+Z[ai]}}}if(F(Y)){var an=u(aj,am,ah);if(aj.id==ah){w(ah,true)}X.success=true;X.ref=an}else{if(aa&&A()){aj.data=aa;P(aj,am,ah,ac);return}else{w(ah,true)}}if(ac){ac(X)}})}else{if(ac){ac(X)}}},switchOffAutoHideShow:function(){m=false},ua:M,getFlashPlayerVersion:function(){return{major:M.pv[0],minor:M.pv[1],release:M.pv[2]}},hasFlashPlayerVersion:F,createSWF:function(Z,Y,X){if(M.w3){return u(Z,Y,X)}else{return undefined}},showExpressInstall:function(Z,aa,X,Y){if(M.w3&&A()){P(Z,aa,X,Y)}},removeSWF:function(X){if(M.w3){y(X)}},createCSS:function(aa,Z,Y,X){if(M.w3){v(aa,Z,Y,X)}},addDomLoadEvent:K,addLoadEvent:s,getQueryParamValue:function(aa){var Z=j.location.search||j.location.hash;if(Z){if(/\?/.test(Z)){Z=Z.split("?")[1]}if(aa==null){return L(Z)}var Y=Z.split("&");for(var X=0;X<Y.length;X++){if(Y[X].substring(0,Y[X].indexOf("="))==aa){return L(Y[X].substring((Y[X].indexOf("=")+1)))}}}return""},expressInstallCallback:function(){if(a){var X=c(R);if(X&&l){X.parentNode.replaceChild(l,X);if(Q){w(Q,true);if(M.ie&&M.win){l.style.display="block"}}if(E){E(B)}}a=false}}}}();module.exports=swfobject;
+
+},{}],134:[function(require,module,exports){
 (function (global){
 
 /**
@@ -21345,7 +21351,7 @@ function config (name) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],134:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 var indexOf = require('indexof');
 
 var Object_keys = function (obj) {
@@ -21485,7 +21491,7 @@ exports.createContext = Script.createContext = function (context) {
     return copy;
 };
 
-},{"indexof":90}],135:[function(require,module,exports){
+},{"indexof":90}],136:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -21579,7 +21585,7 @@ exports.createContext = Script.createContext = function (context) {
   }
 })();
 
-},{"./chrome/chrome_shim":136,"./edge/edge_shim":138,"./firefox/firefox_shim":140,"./safari/safari_shim":142,"./utils":143}],136:[function(require,module,exports){
+},{"./chrome/chrome_shim":137,"./edge/edge_shim":139,"./firefox/firefox_shim":141,"./safari/safari_shim":143,"./utils":144}],137:[function(require,module,exports){
 
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
@@ -21864,7 +21870,7 @@ module.exports = {
   reattachMediaStream: chromeShim.reattachMediaStream
 };
 
-},{"../utils.js":143,"./getusermedia":137}],137:[function(require,module,exports){
+},{"../utils.js":144,"./getusermedia":138}],138:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -22055,7 +22061,7 @@ module.exports = function() {
   }
 };
 
-},{"../utils.js":143}],138:[function(require,module,exports){
+},{"../utils.js":144}],139:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -23106,7 +23112,7 @@ module.exports = {
   reattachMediaStream: edgeShim.reattachMediaStream
 };
 
-},{"../utils":143,"./getusermedia":139,"sdp":122}],139:[function(require,module,exports){
+},{"../utils":144,"./getusermedia":140,"sdp":122}],140:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -23140,7 +23146,7 @@ module.exports = function() {
   };
 };
 
-},{}],140:[function(require,module,exports){
+},{}],141:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -23311,7 +23317,7 @@ module.exports = {
   reattachMediaStream: firefoxShim.reattachMediaStream
 };
 
-},{"../utils":143,"./getusermedia":141}],141:[function(require,module,exports){
+},{"../utils":144,"./getusermedia":142}],142:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -23463,7 +23469,7 @@ module.exports = function() {
   };
 };
 
-},{"../utils":143}],142:[function(require,module,exports){
+},{"../utils":144}],143:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -23499,7 +23505,7 @@ module.exports = {
   // reattachMediaStream: safariShim.reattachMediaStream
 };
 
-},{}],143:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -23644,7 +23650,7 @@ module.exports = {
   extractVersion: utils.extractVersion
 };
 
-},{}],144:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 'use strict';
 
 var sessionStatus = {};
@@ -23677,13 +23683,260 @@ function define(obj, name, value) {
 }
 
 module.exports = constants;
-},{}],145:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
+'use strict';
+
+var swfobject = require('swfobject');
+var connections = {};
+var flashScope;
+var DEFAULT_SDP = "v=0\r\n" +
+    "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
+    "c=IN IP4 0.0.0.0\r\n" +
+    "t=0 0\r\n" +
+    "a=sdplang:en\r\n" +
+    "m=video 0 RTP/AVP 112\r\n" +
+    "a=rtpmap:112 H264/90000\r\n" +
+    "a=fmtp:112 packetization-mode=1; profile-level-id=420020\r\n" +
+    "a=VIDEO_STATE\r\n" +
+    "m=audio 0 RTP/AVP 8 0 100\r\n" +
+    "a=rtpmap:0 PCMU/8000\r\n" +
+    "a=rtpmap:8 PCMA/8000\r\n" +
+    "a=rtpmap:100 SPEEX/16000\r\n" +
+    "a=AUDIO_STATE\r\n";
+
+var CACHED_INSTANCE_ID = "CACHED_FLASH_INSTANCE";
+
+var createConnection = function(options) {
+    return new Promise(function(resolve, reject) {
+        var id = options.id;
+        var authToken = options.authToken;
+        var display = options.display;
+
+        var url = getConnectionUrl(options.mainUrl);
+
+        //todo state from flash instance
+        var state = function () {
+            return "new";
+        };
+
+        var flash = getCacheInstance(display);
+        if (flash) {
+            flash.reset(id);
+            flash.id = id;
+            installCallback(id, 'addLogMessage', function(message){
+                console.log("Flash["+id+"]:" + message);
+            });
+            installCallback(id, 'connectionStatus', function(status){
+                removeCallback(id, 'connectionStatus');
+                if (status === "Success") {
+                    connections[id] = exports;
+                    resolve(exports);
+                } else {
+                    reject(new Error("Flash connection returned status " + status));
+                }
+            });
+            flash.connect(url, authToken);
+        } else {
+            loadSwf(id, display).then(function (swf) {
+                installCallback(id, 'connectionStatus', function (status) {
+                    removeCallback(id, 'connectionStatus');
+                    if (status === "Success") {
+                        connections[id] = exports;
+                        resolve(exports);
+                    } else {
+                        reject(new Error("Flash connection returned status " + status));
+                    }
+                });
+                flash = swf;
+                flash.connect(url, authToken);
+            }).catch(reject);
+        }
+
+        var createOffer = function (options) {
+            return new Promise(function (resolve, reject) {
+                var receiveAudio = options.receiveAudio == undefined ? false : options.receiveAudio;
+                var receiveVideo = options.receiveVideo == undefined ? false : options.receiveVideo;
+                var sendAudio = options.sendAudio == undefined ? false : options.sendAudio;
+                var sendVideo = options.sendVideo == undefined ? false : options.sendVideo;
+                var sdp = DEFAULT_SDP;
+                if (receiveAudio && sendAudio) {
+                    sdp = sdp.replace("AUDIO_STATE", "sendrecv");
+                } else if (receiveAudio && !sendAudio) {
+                    sdp = sdp.replace("AUDIO_STATE", "recvonly");
+                } else if (!receiveAudio && sendAudio) {
+                    sdp = sdp.replace("AUDIO_STATE", "sendonly");
+                } else {
+                    sdp = sdp.replace("AUDIO_STATE", "inactive");
+                }
+                if (receiveVideo && sendVideo) {
+                    sdp = sdp.replace("VIDEO_STATE", "sendrecv");
+                } else if (receiveVideo && !sendVideo) {
+                    sdp = sdp.replace("VIDEO_STATE", "recvonly");
+                } else if (!receiveVideo && sendVideo) {
+                    sdp = sdp.replace("VIDEO_STATE", "sendonly");
+                } else {
+                    sdp = sdp.replace("VIDEO_STATE", "inactive");
+                }
+                resolve(sdp);
+            });
+        };
+
+        var setRemoteSdp = function(sdp) {
+            return new Promise(function(resolve, reject){
+                var state = extractMediaState(sdp);
+                setTimeout(function(){
+                    flash.setup(state.incoming, state.outgoing, true, true);
+                }, 100);
+                resolve(connections[id]);
+            });
+        };
+
+        var close = function() {
+            clearCallbacks(id);
+            flash.disconnect();
+            if (!getCacheInstance(display) && flash.hasAccessToAudio()) {
+                flash.reset(CACHED_INSTANCE_ID);
+                flash.id = CACHED_INSTANCE_ID;
+            } else {
+                swfobject.removeSWF(flash.id);
+            }
+        };
+
+        var exports = {};
+        exports.state = state;
+        exports.createOffer = createOffer;
+        exports.setRemoteSdp = setRemoteSdp;
+        exports.close = close;
+    });
+};
+
+//install global part to use flash ExternalInterface
+function installFlashScope() {
+    if (flashScope == undefined) {
+        var globalApiObject = window.Flashphoner;
+        if (globalApiObject == undefined) {
+            throw new Error("Can't install global scope, there is no window.Flashphoner variable.");
+        }
+        globalApiObject['FlashApiScope'] = {};
+        flashScope = window.Flashphoner.FlashApiScope;
+    }
+}
+
+function installCallback(id, name, value) {
+    installFlashScope();
+    if (flashScope[id] == undefined) {
+        flashScope[id] = {};
+    }
+    flashScope[id][name] = value;
+}
+
+function removeCallback(id, name) {
+    delete flashScope[id][name];
+}
+
+function clearCallbacks(id) {
+    delete flashScope[id];
+}
+
+var getAccessToAudioAndVideo = function(display) {
+    return new Promise(function(resolve, reject) {
+        if (!getCacheInstance(display)) {
+            loadSwf(CACHED_INSTANCE_ID, display).then(function (swf) {
+                //todo return camera and mic id
+                installCallback(CACHED_INSTANCE_ID, "accessGranted", function () {
+                    removeCallback(CACHED_INSTANCE_ID, "accessGranted");
+                    resolve({});
+                });
+                if (!swf.getAccessToAudioAndVideo()) {
+                    reject(new Error("Failed to get access to audio and video"));
+                }
+            });
+        } else {
+            resolve();
+        }
+    });
+};
+
+//swf helpers
+var loadSwf = function(id, display) {
+    return new Promise(function(resolve, reject){
+        var swf;
+        var divWrapper = document.createElement('div');
+        divWrapper.id = id;
+        display.appendChild(divWrapper);
+        var flashvars = {id: id};
+        var params = {};
+        params.menu = "true";
+        params.swliveconnect = "true";
+        params.allowfullscreen = "true";
+        params.allowscriptaccess = "always";
+        params.wmode = "opaque";
+        var attributes = {};
+        installCallback(id, 'addLogMessage', function(message){
+            console.log("Flash["+id+"]:" + message);
+        });
+        installCallback(id, 'initialized', function(){
+            resolve(swf);
+        });
+        //todo switch from id to element (divWrapper)
+        swfobject.embedSWF("media-provider.swf", id, "100%", "100%", "11.2.0", "expressInstall.swf", flashvars, params, attributes, function (ret) {
+            swf = ret.ref;
+            if (!ret.success) {
+                reject(new Error("Failed to load flash media provider swf with id " + id));
+            }
+        });
+    });
+};
+
+function getCacheInstance(display) {
+    var i;
+    for (i = 0; i < display.children.length; i++) {
+        if (display.children[i] && display.children[i].id == CACHED_INSTANCE_ID) {
+            console.log("FOUND FLASH CACHED INSTANCE");
+            return display.children[i];
+        }
+    }
+}
+
+//sdp helper, extract state from server sdp
+function extractMediaState(sdp) {
+    var state = {
+        incoming: false,
+        outgoing: false
+    };
+    if (sdp.indexOf("a=sendrecv") != -1) {
+        state.incoming = true;
+        state.outgoing = true;
+    } else if (sdp.indexOf("a=recvonly") != -1) {
+        state.outgoing = true;
+    } else if (sdp.indexOf("a=sendonly") != -1) {
+        state.incoming = true;
+    }
+    return state;
+}
+
+//connection ip
+function getConnectionUrl(mainUrl) {
+    var a = document.createElement('a');
+    a.href = mainUrl;
+    return "rtmfp://"+ a.hostname+":1935/";
+}
+
+module.exports = {
+    createConnection: createConnection,
+    getAccessToAudioAndVideo: getAccessToAudioAndVideo
+};
+
+
+
+},{"swfobject":133}],147:[function(require,module,exports){
 'use strict';
 
 var uuid = require('node-uuid');
 var constants = require("./constants.js");
 var MediaProvider = {
-    WebRTC: require("./webrtc-media-provider.js")
+    WebRTC: require("./webrtc-media-provider.js"),
+    Flash: require("./flash-media-provider.js")
 };
 
 var sessions = {};
@@ -23722,9 +23975,8 @@ var createSession = function(options) {
     var urlServer = options.urlServer;
     var appKey = options.appKey || "defaultApp";
     var authToken;
-    var mediaConnections = {};
-    var streamRefreshHandlers = {};
     var streams = {};
+    var streamRefreshHandlers = {};
     var exports = {};
     var callbacks = {};
 
@@ -23749,7 +24001,6 @@ var createSession = function(options) {
         }));
     };
     wsConnection.onmessage = function(event) {
-        //console.dir(event);
         var data = JSON.parse(event.data);
         var message = data.message;
         var obj = data.data[0];
@@ -23762,13 +24013,12 @@ var createSession = function(options) {
                 onSessionStatusChange(constants.SESSION_STATUS.ESTABLISHED);
                 break;
             case 'setRemoteSDP':
-                var mediaConnectionId = data.data[0].trim();
+                var mediaSessionId = data.data[0].trim();
                 var sdp = data.data[1];
-                if (mediaConnections[mediaConnectionId]) {
-                    mediaConnections[mediaConnectionId].setRemoteSdp(sdp).then(function(){
-                    });
+                if (streamRefreshHandlers[mediaSessionId]) {
+                    streamRefreshHandlers[mediaSessionId](null, sdp);
                 } else {
-                    console.error("Media connection not found, id " + mediaConnectionId);
+                    console.error("Media connection not found, id " + mediaSessionId);
                 }
                 break;
             case 'notifyStreamStatusEvent':
@@ -23784,6 +24034,12 @@ var createSession = function(options) {
     function onSessionStatusChange(newStatus) {
         sessionStatus = newStatus;
         if (sessionStatus == constants.SESSION_STATUS.DISCONNECTED || sessionStatus == constants.SESSION_STATUS.FAILED) {
+            //remove streams
+            for (var prop in streamRefreshHandlers) {
+                if (streamRefreshHandlers.hasOwnProperty(prop) && typeof streamRefreshHandlers[prop] === 'function') {
+                    streamRefreshHandlers[prop]({status: constants.STREAM_STATUS.FAILED});
+                }
+            }
             //remove session from list
             delete sessions[id];
         }
@@ -23808,19 +24064,25 @@ var createSession = function(options) {
 
         var id = uuid.v1();
         var name = options.name;
-        var mediaProvider = "WebRTC";
+        var mediaProvider = options.mediaProvider || "WebRTC";
+        var mediaConnection;
+        var display = options.display;
+
         var published = false;
         var status = constants.STREAM_STATUS.NEW;
-        var remoteElement = options.remoteElement || document.createElement('video');
         var callbacks = {};
-        streamRefreshHandlers[id] = function(stream) {
+        streamRefreshHandlers[id] = function(stream, sdp) {
+            //set remote sdp
+            if (sdp && sdp !== '') {
+                mediaConnection.setRemoteSdp(sdp).then(function(){});
+                return;
+            }
             status = stream.status;
             if (status == constants.STREAM_STATUS.FAILED || status == constants.STREAM_STATUS.STOPPED ||
                 status == constants.STREAM_STATUS.UNPUBLISHED) {
                 delete streams[id];
                 delete streamRefreshHandlers[id];
-                mediaConnections[id].close();
-                delete mediaConnections[id];
+                mediaConnection.close();
             }
             if (callbacks[status]) {
                 callbacks[status](exports);
@@ -23832,23 +24094,36 @@ var createSession = function(options) {
                 throw new Error("Invalid stream state");
             }
             //create mediaProvider connection
-            var mediaConnection = MediaProvider[mediaProvider].createConnection({
+            MediaProvider[mediaProvider].createConnection({
                 id: id,
-                remoteElement: remoteElement
-            });
-            mediaConnections[id] = mediaConnection;
-            mediaConnection.createOffer().then(function(sdp){
+                display: display,
+                authToken: authToken,
+                mainUrl: urlServer
+            }).then(function(newConnection) {
+                mediaConnection = newConnection;
+                return mediaConnection.createOffer({
+                    receiveAudio: true,
+                    receiveVideo: true
+                });
+            }).then(function (sdp) {
                 //webrtc offer created, request stream
-                wsConnection.send(JSON.stringify({message: "playStream", data: [{
-                    mediaSessionId: id,
-                    name: name,
-                    published: published,
-                    hasVideo: true,
-                    hasAudio: true,
-                    status: status,
-                    record: false,
-                    sdp: sdp
-                }]}));
+                wsConnection.send(JSON.stringify({
+                    message: "playStream",
+                    data: [{
+                        mediaSessionId: id,
+                        name: name,
+                        published: published,
+                        hasVideo: true,
+                        hasAudio: true,
+                        status: status,
+                        record: false,
+                        mediaProvider: mediaProvider,
+                        sdp: sdp
+                    }]
+                }));
+            }).catch(function(error) {
+                //todo fire stream failed status
+                throw error;
             });
         };
 
@@ -23857,31 +24132,35 @@ var createSession = function(options) {
                 throw new Error("Invalid stream state");
             }
             //get access to camera
-            MediaProvider[mediaProvider].getAccessToAudioAndVideo().then(function(stream){
-                //show local camera
-                remoteElement.srcObject = stream;
-                //mute audio
-                remoteElement.muted = true;
-                remoteElement.play();
+            MediaProvider[mediaProvider].getAccessToAudioAndVideo(display).then(function(stream){
                 published = true;
                 //create mediaProvider connection
-                var mediaConnection = MediaProvider[mediaProvider].createConnection({
+                MediaProvider[mediaProvider].createConnection({
                     id: id,
-                    localStream: stream
-                });
-                mediaConnections[id] = mediaConnection;
-                mediaConnection.createOffer().then(function(sdp){
+                    display: display,
+                    authToken: authToken,
+                    mainUrl: urlServer
+                }).then(function(newConnection) {
+                    mediaConnection = newConnection;
+                    return mediaConnection.createOffer({
+                        sendAudio: true,
+                        sendVideo: true
+                    });
+                }).then(function (sdp) {
                     //webrtc offer created, request stream
-                    wsConnection.send(JSON.stringify({message: "publishStream", data: [{
-                        mediaSessionId: id,
-                        name: name,
-                        published: published,
-                        hasVideo: true,
-                        hasAudio: true,
-                        status: status,
-                        record: false,
-                        sdp: sdp
-                    }]}));
+                    wsConnection.send(JSON.stringify({
+                        message: "publishStream", data: [{
+                            mediaSessionId: id,
+                            name: name,
+                            published: published,
+                            hasVideo: true,
+                            hasAudio: true,
+                            status: status,
+                            record: false,
+                            mediaProvider: mediaProvider,
+                            sdp: sdp
+                        }]
+                    }));
                 });
 
             }).catch(function(error){
@@ -23891,9 +24170,6 @@ var createSession = function(options) {
 
         exports.stop = function() {
             if (published) {
-                if (remoteElement) {
-                    remoteElement.pause();
-                }
                 wsConnection.send(JSON.stringify({message: "unPublishStream", data: [{
                     mediaSessionId: id,
                     name: name,
@@ -23987,103 +24263,157 @@ module.exports = {
     getSessions: getSessions,
     constants: constants
 };
-},{"./constants.js":144,"./webrtc-media-provider.js":146,"node-uuid":96}],146:[function(require,module,exports){
+},{"./constants.js":145,"./flash-media-provider.js":146,"./webrtc-media-provider.js":148,"node-uuid":96}],148:[function(require,module,exports){
 'use strict';
 
 require('webrtc-adapter');
 var connections = {};
+var CACHED_INSTANCE_ID = "CACHED_WEBRTC_INSTANCE";
 
 var createConnection = function(options) {
-    var id = options.id;
-    var connectionConfig = options.connectionConfig || {"iceServers": []};
-    var connection = new RTCPeerConnection(connectionConfig, {
-        "optional": [
-            {"DtlsSrtpKeyAgreement": true}
-        ]
-    });
-    var remoteStream;
-    var remoteElement = options.remoteElement;
-    if (options.localStream) {
-        connection.addStream(options.localStream);
-    }
-    connection.onaddstream = function(event) {
-        remoteStream = event.stream;
-        if (remoteElement) {
-            remoteElement.srcObject = remoteStream;
-            remoteElement.play();
+    return new Promise(function(resolve, reject) {
+        var id = options.id;
+        var connectionConfig = options.connectionConfig || {"iceServers": []};
+        var connection = new RTCPeerConnection(connectionConfig, {
+            "optional": [
+                {"DtlsSrtpKeyAgreement": true}
+            ]
+        });
+        var remoteStream;
+        var display = options.display;
+        var localStream = getCacheInstance(display);
+        var video;
+        if (localStream) {
+            connection.addStream(localStream.srcObject);
+            localStream.id = id;
+        } else {
+            video = document.createElement('video');
+            video.id = id;
+            display.appendChild(video);
         }
-    };
-    connection.onremovestream = function(event) {
-        remoteStream = null;
-        if (remoteElement) {
-            remoteElement.pause();
-        }
-    };
-    connection.onsignalingstatechange = function(event){
-    };
-    connection.oniceconnectionstatechange = function(event){
-    };
-    var state = function(){
-        return connection.signalingState;
-    };
-    var close = function(){
-        if (remoteElement) {
-            remoteElement.pause();
-        }
-        connection.close();
-        delete connections[id];
-    };
-    var createOffer = function() {
-        return new Promise(function (resolve, reject) {
-            var constraints = {offerToReceiveAudio: true, offerToReceiveVideo: true};
-            //create offer and set local sdp
-            return connection.createOffer(constraints).then(function (offer) {
-                connection.setLocalDescription(offer).then(function () {
-                    resolve(offer.sdp);
+        connection.onaddstream = function (event) {
+            remoteStream = event.stream;
+            if (video) {
+                video.srcObject = remoteStream;
+                video.play();
+            }
+        };
+        connection.onremovestream = function (event) {
+            remoteStream = null;
+            if (video) {
+                video.pause();
+            }
+        };
+        connection.onsignalingstatechange = function (event) {
+        };
+        connection.oniceconnectionstatechange = function (event) {
+        };
+        var state = function () {
+            return connection.signalingState;
+        };
+        var close = function () {
+            if (video) {
+                removeVideoElement(display, video);
+            }
+            if (localStream && !getCacheInstance(display)) {
+                localStream.id = CACHED_INSTANCE_ID;
+            } else if (localStream) {
+                removeVideoElement(display, localStream);
+            }
+            connection.close();
+            delete connections[id];
+        };
+        var createOffer = function (options) {
+            return new Promise(function (resolve, reject) {
+                var constraints = {
+                    offerToReceiveAudio: options.receiveAudio == undefined ? true : options.receiveAudio,
+                    offerToReceiveVideo: options.receiveVideo == undefined ? true : options.receiveVideo
+                };
+                //create offer and set local sdp
+                connection.createOffer(constraints).then(function (offer) {
+                    connection.setLocalDescription(offer).then(function () {
+                        resolve(offer.sdp);
+                    });
                 });
             });
-        });
-    };
-    var setRemoteSdp = function(sdp) {
-        return new Promise(function (resolve, reject) {
-            //todo check signalling state
-            var sdpAnswer = new RTCSessionDescription({
-                type: 'answer',
-                sdp: sdp
+        };
+        var setRemoteSdp = function (sdp) {
+            return new Promise(function (resolve, reject) {
+                //todo check signalling state
+                var sdpAnswer = new RTCSessionDescription({
+                    type: 'answer',
+                    sdp: sdp
+                });
+                connection.setRemoteDescription(sdpAnswer).then(function () {
+                    resolve();
+                }).catch(function (error) {
+                    reject(error);
+                });
             });
-            connection.setRemoteDescription(sdpAnswer).then(function(){
-                resolve();
-            }).catch(function(error){
-                reject(error);
-            });
-        });
-    };
+        };
 
-    var exports = {};
-    exports.state = state;
-    exports.createOffer = createOffer;
-    exports.setRemoteSdp = setRemoteSdp;
-    exports.close = close;
-    connections[id] = exports;
-    return exports;
+        var exports = {};
+        exports.state = state;
+        exports.createOffer = createOffer;
+        exports.setRemoteSdp = setRemoteSdp;
+        exports.close = close;
+        connections[id] = exports;
+        resolve(exports);
+    });
 };
 
-var getAccessToAudioAndVideo = function() {
+var getAccessToAudioAndVideo = function(display) {
     return new Promise(function(resolve, reject) {
+        if (getCacheInstance(display)) {
+            resolve();
+            return;
+        }
         var constraints = {
             audio: true,
             video: {
-                width: 640,
-                height: 480
+                width: 320,
+                height: 240
             }
         };
-        navigator.getUserMedia(constraints, resolve, reject);
+        navigator.getUserMedia(constraints, function(stream){
+            var video = document.createElement('video');
+            display.appendChild(video);
+            video.id = CACHED_INSTANCE_ID;
+            //show local camera
+            video.srcObject = stream;
+            //mute audio
+            video.muted = true;
+            video.play();
+            resolve(stream);
+        }, reject);
     });
 };
+
+function getCacheInstance(display) {
+    var i;
+    for (i = 0; i < display.children.length; i++) {
+        if (display.children[i] && display.children[i].id == CACHED_INSTANCE_ID) {
+            console.log("FOUND WEBRTC CACHED INSTANCE");
+            return display.children[i];
+        }
+    }
+}
+
+function removeVideoElement(display, video) {
+    //pause
+    video.pause();
+    //stop media tracks
+    var tracks = video.srcObject.getTracks();
+    for (var i = 0; i < tracks.length; i++) {
+        tracks[i].stop();
+    }
+    video.srcObject = '';
+    display.removeChild(video);
+}
 
 module.exports = {
     createConnection: createConnection,
     getAccessToAudioAndVideo: getAccessToAudioAndVideo
 };
-},{"webrtc-adapter":135}]},{},[145])(145)
+},{"webrtc-adapter":136}]},{},[147])(147)
 });

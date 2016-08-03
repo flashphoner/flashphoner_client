@@ -6,8 +6,8 @@
 </head>
 <body>
 <script type="text/javascript" src="../flashphoner.js"></script>
-<video id="local" width="640" height="480"></video>
-<video id="remote" width="640" height="480"></video>
+<div id="local" style="width: 320px; height: 240px"></div>
+<div id="remote" style="width: 320px; height: 240px"></div>
 <BR>
 <script>
     Flashphoner.init();
@@ -16,11 +16,11 @@
     }).on(Flashphoner.constants.SESSION_STATUS.ESTABLISHED, function(session) {
         session.createStream({
             name: "echoTest",
-            remoteElement: document.getElementById('local')
+            display: document.getElementById('local')
         }).on(Flashphoner.constants.STREAM_STATUS.PUBLISHING, function(publishStream) {
             session.createStream({
                 name: "echoTest",
-                remoteElement: document.getElementById('remote')
+                display: document.getElementById('remote')
             }).on(Flashphoner.constants.STREAM_STATUS.PLAYING, function(playingStream) {
                 console.log("Playing");
             }).play();

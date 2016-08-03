@@ -1,16 +1,18 @@
 {
   "name": "flashphoner-api",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "./src/flashphoner-core.js",
   "description": "Flashphoner Web Call Server API",
   "dependencies": {
     "node-uuid": "^1.4.7",
+    "swfobject": "^2.2.1",
     "webrtc-adapter": "^1.4.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "grunt": "^1.0.1",
     "grunt-browserify": "^5.0.0",
+    "grunt-flash-compiler": "^0.2.1",
     "mocha": "^2.5.3"
   }
 }
