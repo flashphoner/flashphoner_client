@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Streaming</title>
+</head>
+<body>
+<p>WCS Server URL: <input id="urlServer" type="text" value=""/></p>
+
+<p>Stream name: <input id="streamName" type="text" value="streamName"/><p>
+
+<p>
+    <input type="button" id="connect" value="connect" onclick="connect()">
+    <input type="button" id="disconnect" value="disconnect" onclick="disconnect()">
+    <input type="button" id="publish" value="publish" onclick="publish()">
+    <input type="button" id="play" value="play" onclick="play()">
+</p>
+<div id="display" style="width: 100%; height: 100%"></div>
+<!-- WCS JavaScript API -->
+<script type="text/javascript" src="../flashphoner.js"></script>
+<script>
+    //init api
+    Flashphoner.init({});
+    var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
+    var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+    var currentSession;
+    var display = document.getElementById("display");
+    function connect() {
+        if (currentSession && currentSession.status() == SESSION_STATUS.ESTABLISHED) {
+            console.warn("Already connected, session id " + currentSession.id());
+            return;
+        }
+        var url = elementValue('urlServer');
+        console.log("Create new session with url " + url);
+        currentSession = Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.FAILED, function(session){
+            console.warn("Session failed, id " + session.id());
+            removeSession(session);
+        }).on(SESSION_STATUS.DISCONNECTED, function(session) {
+            console.log("Session diconnected, id " + session.id());
+            removeSession(session);
+        }).on(SESSION_STATUS.ESTABLISHED, function(session) {
+            console.log("Session established " + session.id());
+        });
+    }
+
+    function disconnect() {
+        if (!currentSession) {
+            console.warn("Nothing to disconnect");
+            return;
+        }
+        currentSession.disconnect();
+    }
+
+    function play() {
+        if (!currentSession || currentSession.status() != SESSION_STATUS.ESTABLISHED) {
+            console.warn("Session is not ready or null");
+            return;
+        }
+
+        var streamName = elementValue('streamName');
+
+        var streamDisplay = setupDisplay(streamName + "-PLAY", streamName);
+        if (!streamDisplay) {
+            console.error("Stream already playing");
+            return;
+        }
+
+        //add stream status to div
+        var streamStatusDisplay = addStatusDisplay(streamDisplay);
+
+        var handleStopped = function(stream) {
+            console.log("Stream stopped with status " + stream.status());
+            //remove stream display
+            display.removeChild(streamDisplay);
+        };
+
+        currentSession.createStream({name: elementValue('streamName'), display: streamDisplay}).on(STREAM_STATUS.PLAYING, function(stream){
+            addControlButton(streamDisplay, stream);
+            streamStatusDisplay.innerHTML = "Status: " + stream.status();
+        }).on(STREAM_STATUS.FAILED, handleStopped).on(STREAM_STATUS.STOPPED, handleStopped).play();
+    }
+
+    function publish() {
+        if (!currentSession || currentSession.status() != SESSION_STATUS.ESTABLISHED) {
+            console.warn("Session is not ready or null");
+            return;
+        }
+
+        var streamName = elementValue('streamName');
+
+        var streamDisplay = setupDisplay(streamName + "-PUBLISH", streamName);
+        if (!streamDisplay) {
+            console.error("Stream already publishing");
+            return;
+        }
+
+        //add stream status to div
+        var streamStatusDisplay = addStatusDisplay(streamDisplay);
+
+        var handleUnpublished = function(stream) {
+            console.log("Stream unpublished with status " + stream.status());
+            //remove stream display
+            display.removeChild(streamDisplay);
+        };
+
+        currentSession.createStream({name: elementValue('streamName'), display: streamDisplay, cacheLocalResources: false}).on(STREAM_STATUS.PUBLISHING, function(stream){
+            addControlButton(streamDisplay, stream);
+            streamStatusDisplay.innerHTML = "Status: " + stream.status();
+
+        }).on(STREAM_STATUS.FAILED, handleUnpublished).on(STREAM_STATUS.UNPUBLISHED, handleUnpublished).publish();
+    }
+
+    //stream display helpers
+    function setupDisplay(id, name) {
+        var streamDisplay = document.getElementById(id);
+        if (streamDisplay) {
+            return;
+        }
+
+        streamDisplay = document.createElement('div');
+        streamDisplay.id = id;
+        streamDisplay.setAttribute("style","width:320px; height:284px; border: solid; border-width: 1px");
+        display.appendChild(streamDisplay);
+
+        var streamNameDisplay = document.createElement("div");
+        streamNameDisplay.innerHTML = "Name: " + name;
+        streamNameDisplay.setAttribute("style","width:160px; height:20px; display:inline-block");
+        streamDisplay.appendChild(streamNameDisplay);
+        return streamDisplay;
+    }
+
+    function addStatusDisplay(streamDisplay) {
+        var streamStatusDisplay = document.createElement("div");
+        streamStatusDisplay.innerHTML = "Status: NEW";
+        streamStatusDisplay.setAttribute("style","width:160px; height:20px; display:inline-block");
+        streamDisplay.appendChild(streamStatusDisplay);
+        return streamStatusDisplay;
+    }
+
+    function addControlButton(streamDisplay, stream) {
+        var button = document.createElement("input");
+        button.type = "button";
+        button.setAttribute("style","width:320px; height:20px");
+        if (stream.published()) {
+            button.value = "Unpublish";
+        } else {
+            button.value = "Stop";
+        }
+        button.onclick = function() {
+            stream.stop();
+        };
+        streamDisplay.appendChild(button);
+    }
+
+    //helpers
+    function elementValue(name){
+        return document.getElementById(name).value;
+    }
+
+    function removeSession(session) {
+        if (currentSession.id() == session.id()) {
+            currentSession = null;
+        }
+    }
+
+    //Set WCS URL
+    function setURL() {
+        var proto;
+        var url;
+        var port;
+        if (window.location.protocol == "http:") {
+            proto = "ws://";
+            port = "8080";
+        } else {
+            proto = "wss://";
+            port = "8443";
+        }
+
+        url = proto + window.location.hostname + ":" + port;
+        document.getElementById("urlServer").value = url;
+    }
+    setURL();
+</script>
+</body>
+</html>

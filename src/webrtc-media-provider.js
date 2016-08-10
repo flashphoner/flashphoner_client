@@ -45,11 +45,11 @@ var createConnection = function(options) {
         var state = function () {
             return connection.signalingState;
         };
-        var close = function () {
+        var close = function (cacheCamera) {
             if (video) {
                 removeVideoElement(display, video);
             }
-            if (localStream && !getCacheInstance(display)) {
+            if (localStream && !getCacheInstance(display) && cacheCamera) {
                 localStream.id = CACHED_INSTANCE_ID;
             } else if (localStream) {
                 removeVideoElement(display, localStream);
@@ -134,18 +134,28 @@ function getCacheInstance(display) {
 }
 
 function removeVideoElement(display, video) {
-    //pause
-    video.pause();
-    //stop media tracks
-    var tracks = video.srcObject.getTracks();
-    for (var i = 0; i < tracks.length; i++) {
-        tracks[i].stop();
+    if (video.srcObject) {
+        //pause
+        video.pause();
+        //stop media tracks
+        var tracks = video.srcObject.getTracks();
+        for (var i = 0; i < tracks.length; i++) {
+            tracks[i].stop();
+        }
     }
-    video.srcObject = '';
     display.removeChild(video);
 }
+/**
+ * Check WebRTC available
+ *
+ * @returns {boolean} webrtc available
+ */
+var available = function(){
+    return navigator.getUserMedia && RTCPeerConnection;
+};
 
 module.exports = {
     createConnection: createConnection,
-    getAccessToAudioAndVideo: getAccessToAudioAndVideo
+    getAccessToAudioAndVideo: getAccessToAudioAndVideo,
+    available: available
 };

@@ -1,20 +1,59 @@
 'use strict';
 
 var uuid = require('node-uuid');
-var constants = require("./constants.js");
-var MediaProvider = {
-    WebRTC: require("./webrtc-media-provider.js"),
-    Flash: require("./flash-media-provider.js")
-};
+var constants = require("./constants");
 
+/**
+ * @namespace Flashphoner
+ */
+
+var SESSION_STATUS = constants.SESSION_STATUS;
+var STREAM_STATUS = constants.STREAM_STATUS;
+var MediaProvider = {};
 var sessions = {};
-
 var initialized = false;
 
+/**
+ * Static initializer.
+ *
+ * @param {Object} options Global api options
+ * @throws {Error} Error if none of MediaProviders available
+ * @memberof Flashphoner
+ */
 var init = function(options) {
-    initialized = true;
+    if (!initialized) {
+        var webRtcProvider = require("./webrtc-media-provider");
+        if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
+            MediaProvider.WebRTC = webRtcProvider;
+        }
+        var flashProvider = require("./flash-media-provider");
+        if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available()) {
+            MediaProvider.Flash = flashProvider;
+        }
+        //check at least 1 provider available
+        if (getMediaProviders().length == 0) {
+            throw new Error('None of MediaProviders available');
+        }
+        initialized = true;
+    }
 };
 
+/**
+ * Get available MediaProviders.
+ *
+ * @returns {Array} Available MediaProviders
+ * @memberof Flashphoner
+ */
+var getMediaProviders = function() {
+    return Object.keys(MediaProvider);
+};
+
+/**
+ * Get active sessions.
+ *
+ * @returns {Array} Array containing active sessions
+ * @memberof Flashphoner
+ */
 var getSessions = function() {
     var sessionsCopy = [];
     for (var prop in sessions) {
@@ -25,10 +64,28 @@ var getSessions = function() {
     return sessionsCopy;
 };
 
+/**
+ * Get session by id.
+ *
+ * @param {string} id Session id
+ * @returns {Session} Session
+ * @memberof Flashphoner
+ */
 var getSession = function(id) {
     return sessions[id];
 };
 
+/**
+ * Create new session and connect to server.
+ *
+ * @param {Object} options Session options
+ * @param {string} options.urlServer Server address in form of [ws,wss]://host.domain:port
+ * @param {string=} options.appKey REST App key
+ * @returns {Session} Created session
+ * @throws {Error} Error if API is not initialized
+ * @throws {TypeError} Error if options.urlServer is not specified
+ * @memberof Flashphoner
+ */
 var createSession = function(options) {
     if (!initialized) {
         throw new Error("Flashphoner API is not initialized");
@@ -38,59 +95,67 @@ var createSession = function(options) {
         throw new TypeError("options.urlServer must be provided");
     }
 
-    var id = uuid.v1();
-    var sessionStatus = constants.SESSION_STATUS.PENDING;
+    var id_ = uuid.v1();
+    var sessionStatus = SESSION_STATUS.PENDING;
     var urlServer = options.urlServer;
     var appKey = options.appKey || "defaultApp";
+    //media provider auth token received from server
     var authToken;
+    //object for storing new and active streams
     var streams = {};
+    //session to stream callbacks
     var streamRefreshHandlers = {};
-    var exports = {};
+    /**
+     * Represents connection to REST App.
+     * Can create and store Streams.
+     *
+     * @see Flashphoner.createSession
+     * @namespace Session
+     */
+    var session = {};
+    //callbacks added using session.on()
     var callbacks = {};
 
     //connect session to server
     var wsConnection = new WebSocket(urlServer);
     wsConnection.onerror = function() {
-        onSessionStatusChange(constants.SESSION_STATUS.FAILED);
+        onSessionStatusChange(SESSION_STATUS.FAILED);
     };
     wsConnection.onclose = function() {
-        onSessionStatusChange(constants.SESSION_STATUS.DISCONNECTED);
+        onSessionStatusChange(SESSION_STATUS.DISCONNECTED);
     };
     wsConnection.onopen = function() {
-        onSessionStatusChange(constants.SESSION_STATUS.CONNECTED);
-        wsConnection.send(JSON.stringify({
-            message: "connection",
-            data: [
-                {
-                    appKey: appKey,
-                    mediaProviders: ["WebRTC"]
-                }
-            ]
-        }));
+        onSessionStatusChange(SESSION_STATUS.CONNECTED);
+        //connect to REST App
+        send("connection", {
+            appKey: appKey,
+            mediaProviders: Object.keys(MediaProvider)
+        });
     };
     wsConnection.onmessage = function(event) {
         var data = JSON.parse(event.data);
-        var message = data.message;
         var obj = data.data[0];
-        switch (message) {
+        switch (data.message) {
             case 'ping':
-                wsConnection.send(JSON.stringify({message: "pong", data: []}));
+                send("pong", null);
                 break;
             case 'getUserData':
                 authToken = obj.authToken;
-                onSessionStatusChange(constants.SESSION_STATUS.ESTABLISHED);
+                onSessionStatusChange(SESSION_STATUS.ESTABLISHED);
                 break;
             case 'setRemoteSDP':
-                var mediaSessionId = data.data[0].trim();
+                var mediaSessionId = data.data[0];
                 var sdp = data.data[1];
                 if (streamRefreshHandlers[mediaSessionId]) {
+                    //pass server's sdp to stream
                     streamRefreshHandlers[mediaSessionId](null, sdp);
                 } else {
-                    console.error("Media connection not found, id " + mediaSessionId);
+                    console.error("Stream not found, id " + mediaSessionId);
                 }
                 break;
             case 'notifyStreamStatusEvent':
                 if (streamRefreshHandlers[obj.mediaSessionId]) {
+                    //update stream status
                     streamRefreshHandlers[obj.mediaSessionId](obj);
                 }
                 break;
@@ -99,26 +164,50 @@ var createSession = function(options) {
         }
     };
 
+    //WebSocket send helper
+    function send(message, data) {
+        wsConnection.send(JSON.stringify({
+            message: message,
+            data: [data]
+        }));
+    }
+
+    //Session status update helper
     function onSessionStatusChange(newStatus) {
         sessionStatus = newStatus;
-        if (sessionStatus == constants.SESSION_STATUS.DISCONNECTED || sessionStatus == constants.SESSION_STATUS.FAILED) {
+        if (sessionStatus == SESSION_STATUS.DISCONNECTED || sessionStatus == SESSION_STATUS.FAILED) {
             //remove streams
             for (var prop in streamRefreshHandlers) {
                 if (streamRefreshHandlers.hasOwnProperty(prop) && typeof streamRefreshHandlers[prop] === 'function') {
-                    streamRefreshHandlers[prop]({status: constants.STREAM_STATUS.FAILED});
+                    streamRefreshHandlers[prop]({status: STREAM_STATUS.FAILED});
                 }
             }
             //remove session from list
-            delete sessions[id];
+            delete sessions[id_];
         }
         if (callbacks[sessionStatus]) {
-            callbacks[sessionStatus](exports);
+            callbacks[sessionStatus](session);
         }
     }
 
-    var createStream = function(options){
+    /**
+     * Create stream.
+     *
+     * @param {Object} options Stream options
+     * @param {string} options.name Stream name
+     * @param {string} options.mediaProvider MediaProvider type to use with this stream
+     * @param {Boolean=} options.cacheLocalResources Display will contain local video after stream release
+     * @param {HTMLElement} options.display Div element stream should be displayed in
+     * @returns {Stream} Stream
+     * @throws {TypeError} Error if no options provided
+     * @throws {TypeError} Error if options.name is not specified
+     * @throws {Error} Error if session state is not ESTABLISHED
+     * @memberof Session
+     * @inner
+     */
+    var createStream = function(options) {
         //check session state
-        if (sessionStatus !== constants.SESSION_STATUS.ESTABLISHED) {
+        if (sessionStatus !== SESSION_STATUS.ESTABLISHED) {
             throw new Error('Invalid session state');
         }
 
@@ -130,40 +219,58 @@ var createSession = function(options) {
             throw new TypeError("options.name must be provided");
         }
 
-        var id = uuid.v1();
-        var name = options.name;
-        var mediaProvider = options.mediaProvider || "WebRTC";
+        var id_ = uuid.v1();
+        var name_ = options.name;
+        var mediaProvider = options.mediaProvider || getMediaProviders()[0];
         var mediaConnection;
         var display = options.display;
 
-        var published = false;
-        var status = constants.STREAM_STATUS.NEW;
+        var published_ = false;
+        var cacheLocalResources = options.cacheLocalResources;
+        var status_ = STREAM_STATUS.NEW;
+        //callbacks added using stream.on()
         var callbacks = {};
-        streamRefreshHandlers[id] = function(stream, sdp) {
+        /**
+         * Represents media stream.
+         *
+         * @namespace Stream
+         * @see Session~createStream
+         */
+        var stream = {};
+        streamRefreshHandlers[id_] = function(streamInfo, sdp) {
             //set remote sdp
             if (sdp && sdp !== '') {
                 mediaConnection.setRemoteSdp(sdp).then(function(){});
                 return;
             }
-            status = stream.status;
-            if (status == constants.STREAM_STATUS.FAILED || status == constants.STREAM_STATUS.STOPPED ||
-                status == constants.STREAM_STATUS.UNPUBLISHED) {
-                delete streams[id];
-                delete streamRefreshHandlers[id];
-                mediaConnection.close();
+            status_ = streamInfo.status;
+            //release stream
+            if (status_ == STREAM_STATUS.FAILED || status_ == STREAM_STATUS.STOPPED ||
+                status_ == STREAM_STATUS.UNPUBLISHED) {
+                delete streams[id_];
+                delete streamRefreshHandlers[id_];
+                mediaConnection.close(cacheLocalResources);
             }
-            if (callbacks[status]) {
-                callbacks[status](exports);
+            //fire stream event
+            if (callbacks[status_]) {
+                callbacks[status_](stream);
             }
         };
-        var exports = {};
-        exports.play = function() {
-            if (status !== constants.STREAM_STATUS.NEW) {
+
+        /**
+         * Play stream.
+         *
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.NEW}
+         * @memberof Stream
+         * @inner
+         */
+        var play = function() {
+            if (status_ !== STREAM_STATUS.NEW) {
                 throw new Error("Invalid stream state");
             }
             //create mediaProvider connection
             MediaProvider[mediaProvider].createConnection({
-                id: id,
+                id: id_,
                 display: display,
                 authToken: authToken,
                 mainUrl: urlServer
@@ -174,37 +281,41 @@ var createSession = function(options) {
                     receiveVideo: true
                 });
             }).then(function (sdp) {
-                //webrtc offer created, request stream
-                wsConnection.send(JSON.stringify({
-                    message: "playStream",
-                    data: [{
-                        mediaSessionId: id,
-                        name: name,
-                        published: published,
-                        hasVideo: true,
-                        hasAudio: true,
-                        status: status,
-                        record: false,
-                        mediaProvider: mediaProvider,
-                        sdp: sdp
-                    }]
-                }));
+                //request stream with offer sdp from server
+                send("playStream", {
+                    mediaSessionId: id_,
+                    name: name_,
+                    published: published_,
+                    hasVideo: true,
+                    hasAudio: true,
+                    status: status_,
+                    record: false,
+                    mediaProvider: mediaProvider,
+                    sdp: sdp
+                });
             }).catch(function(error) {
                 //todo fire stream failed status
                 throw error;
             });
         };
 
-        exports.publish = function() {
-            if (status !== constants.STREAM_STATUS.NEW) {
+        /**
+         * Publish stream.
+         *
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.NEW}
+         * @memberof Stream
+         * @inner
+         */
+        var publish = function() {
+            if (status_ !== STREAM_STATUS.NEW) {
                 throw new Error("Invalid stream state");
             }
             //get access to camera
-            MediaProvider[mediaProvider].getAccessToAudioAndVideo(display).then(function(stream){
-                published = true;
+            MediaProvider[mediaProvider].getAccessToAudioAndVideo(display).then(function(){
+                published_ = true;
                 //create mediaProvider connection
                 MediaProvider[mediaProvider].createConnection({
-                    id: id,
+                    id: id_,
                     display: display,
                     authToken: authToken,
                     mainUrl: urlServer
@@ -215,98 +326,207 @@ var createSession = function(options) {
                         sendVideo: true
                     });
                 }).then(function (sdp) {
-                    //webrtc offer created, request stream
-                    wsConnection.send(JSON.stringify({
-                        message: "publishStream", data: [{
-                            mediaSessionId: id,
-                            name: name,
-                            published: published,
-                            hasVideo: true,
-                            hasAudio: true,
-                            status: status,
-                            record: false,
-                            mediaProvider: mediaProvider,
-                            sdp: sdp
-                        }]
-                    }));
+                    //publish stream with offer sdp to server
+                    send("publishStream", {
+                        mediaSessionId: id_,
+                        name: name_,
+                        published: published_,
+                        hasVideo: true,
+                        hasAudio: true,
+                        status: status_,
+                        record: false,
+                        mediaProvider: mediaProvider,
+                        sdp: sdp
+                    });
                 });
-
             }).catch(function(error){
+                //todo fire event instead
                 throw error;
             });
         };
 
-        exports.stop = function() {
-            if (published) {
-                wsConnection.send(JSON.stringify({message: "unPublishStream", data: [{
-                    mediaSessionId: id,
-                    name: name,
-                    published: published,
+        /**
+         * Stop stream.
+         *
+         * @memberof Stream
+         * @inner
+         */
+        var stop = function() {
+            if (published_) {
+                send("unPublishStream", {
+                    mediaSessionId: id_,
+                    name: name_,
+                    published: published_,
                     hasVideo: true,
                     hasAudio: true,
-                    status: status,
+                    status: status_,
                     record: false
-                }]}));
+                });
             } else {
-                wsConnection.send(JSON.stringify({message: "stopStream", data: [{
-                    mediaSessionId: id,
-                    name: name,
-                    published: published,
+                send("stopStream", {
+                    mediaSessionId: id_,
+                    name: name_,
+                    published: published_,
                     hasVideo: true,
                     hasAudio: true,
-                    status: status,
+                    status: status_,
                     record: false
-                }]}));
+                });
             }
         };
 
-        exports.status = function() {
-            return status;
+        /**
+         * Get stream status.
+         *
+         * @returns {string} One of {@link Flashphoner.constants.STREAM_STATUS}
+         * @memberof Stream
+         * @inner
+         */
+        var status = function() {
+            return status_;
         };
 
-        exports.id = function() {
-            return id;
+        /**
+         * Get stream id.
+         *
+         * @returns {string} Stream id
+         * @memberof Stream
+         * @inner
+         */
+        var id = function() {
+            return id_;
         };
 
-        exports.name = function() {
-            return name;
+        /**
+         * Get stream name.
+         *
+         * @returns {string} Stream name
+         * @memberof Stream
+         * @inner
+         */
+        var name = function() {
+            return name_;
         };
 
-        exports.on = function(event, callback) {
+        /**
+         * Is stream published.
+         *
+         * @returns {Boolean} True if stream published, otherwise false
+         * @memberof Stream
+         * @inner
+         */
+        var published = function() {
+            return published_;
+        };
+
+        /**
+         * Stream event callback.
+         *
+         * @callback Stream~eventCallback
+         * @param {Stream} stream Stream that corresponds to the event
+         */
+
+        /**
+         * Add stream event callback.
+         *
+         * @param {string} event One of {@link Flashphoner.constants.STREAM_STATUS} events
+         * @param {Stream~eventCallback} callback Callback function
+         * @returns {Stream} Stream callback was attached to
+         * @throws {TypeError} Error if event is not specified
+         * @throws {Error} Error if callback is not a valid function
+         * @memberof Stream
+         * @inner
+         */
+        var on = function(event, callback) {
             if (!event) {
-                throw new Error("Event can't be null", "TypeError");
+                throw new TypeError("Event can't be null");
             }
             if (!callback || typeof callback !== 'function') {
                 throw new Error("Callback needs to be a valid function");
             }
             callbacks[event] = callback;
-            return exports;
+            return stream;
         };
 
-        streams[id] = exports;
-        return exports;
+        stream.play = play;
+        stream.publish = publish;
+        stream.stop = stop;
+        stream.id = id;
+        stream.status = status;
+        stream.name = name;
+        stream.published = published;
+        stream.on = on;
+
+        streams[id_] = stream;
+        return stream;
 
     };
 
-    exports.disconnect = function(){
+    /**
+     * Disconnect session.
+     *
+     * @memberof Session
+     * @inner
+     */
+    var disconnect = function() {
         if (wsConnection) {
             wsConnection.close();
         }
     };
 
-    exports.id = function() {
-        return id;
+    /**
+     * Get session id
+     *
+     * @returns {string} session id
+     * @memberof Session
+     * @inner
+     */
+    var id = function() {
+        return id_;
     };
 
-    exports.status = function() {
+    /**
+     * Get session status
+     *
+     * @returns {string} One of {@link Flashphoner.constants.SESSION_STATUS}
+     * @memberof Session
+     * @inner
+     */
+    var status = function() {
         return sessionStatus;
     };
 
-    exports.getStream = function(streamId) {
+    /**
+     * Get stream by id.
+     *
+     * @param {string} streamId Stream id
+     * @returns {Stream} Stream
+     * @memberof Session
+     * @inner
+     */
+    var getStream = function(streamId) {
         return streams[streamId];
     };
 
-    exports.on = function(event, callback) {
+    /**
+     * Session event callback.
+     *
+     * @callback Session~eventCallback
+     * @param {Session} session Session that corresponds to the event
+     */
+
+    /**
+     * Add session event callback.
+     *
+     * @param {string} event One of {@link Flashphoner.constants.SESSION_STATUS} events
+     * @param {Session~eventCallback} callback Callback function
+     * @returns {Session} Session
+     * @throws {TypeError} Error if event is not specified
+     * @throws {Error} Error if callback is not a valid function
+     * @memberof Session
+     * @inner
+     */
+    var on = function(event, callback) {
         if (!event) {
             throw new Error("Event can't be null", "TypeError");
         }
@@ -314,20 +534,27 @@ var createSession = function(options) {
             throw new Error("Callback needs to be a valid function");
         }
         callbacks[event] = callback;
-        return exports;
+        return session;
     };
 
-    exports.createStream = createStream;
+    //export Session
+    session.id = id;
+    session.status = status;
+    session.createStream = createStream;
+    session.getStream = getStream;
+    session.disconnect = disconnect;
+    session.on = on;
 
     //save interface to global map
-    sessions[id] = exports;
-    return exports;
+    sessions[id_] = session;
+    return session;
 };
 
 module.exports = {
     init: init,
-    createSession: createSession,
-    getSession: getSession,
+    getMediaProviders: getMediaProviders,
     getSessions: getSessions,
+    getSession: getSession,
+    createSession: createSession,
     constants: constants
 };

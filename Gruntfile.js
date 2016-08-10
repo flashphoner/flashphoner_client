@@ -29,6 +29,56 @@ module.exports = function(grunt) {
                         standalone: 'Flashphoner'
                     }
                 }
+            },
+            flashphonerGlobalObjectNoWebRTC: {
+                src: ['./src/flashphoner-core.js'],
+                dest: './flashphoner-no-webrtc.js',
+                options: {
+                    ignore: ['./src/webrtc-media-provider.js'],
+                    browserifyOptions: {
+                        standalone: 'Flashphoner'
+                    }
+                }
+            },
+            flashphonerGlobalObjectNoFlash: {
+                src: ['./src/flashphoner-core.js'],
+                dest: './flashphoner-no-flash.js',
+                options: {
+                    ignore: ['./src/flash-media-provider.js'],
+                    browserifyOptions: {
+                        standalone: 'Flashphoner'
+                    }
+                }
+            }
+        },
+        jsdoc: {
+            src: ['./src/flashphoner-core.js', './src/constants.js'],
+            options: {
+                destination: 'doc'
+            }
+        },
+        copy: {
+            main: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: './',
+                        src: ['flashphoner.js', 'media-provider.swf'],
+                        dest: 'release/<%= pkg.name %>-<%= pkg.version %>'
+                    },
+                    {
+                        expand: true,
+                        cwd: './',
+                        src: ['doc/**'],
+                        dest: 'release/<%= pkg.name %>-<%= pkg.version %>'
+                    },
+                    {
+                        expand: true,
+                        cwd: './',
+                        src: ['example/**'],
+                        dest: 'release/<%= pkg.name %>-<%= pkg.version %>'
+                    }
+                ]
             }
         }
     });
@@ -36,5 +86,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-flash-compiler');
     grunt.registerTask('build_flash', ['flash']);
     grunt.loadNpmTasks('grunt-browserify');
-    grunt.registerTask('build', ['flash', 'browserify']);
+    grunt.loadNpmTasks('grunt-jsdoc');
+    grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.registerTask('build', ['flash', 'browserify', 'jsdoc']);
+    grunt.registerTask('release', ['build', 'copy']);
 };

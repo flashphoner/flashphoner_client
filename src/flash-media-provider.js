@@ -105,10 +105,10 @@ var createConnection = function(options) {
             });
         };
 
-        var close = function() {
+        var close = function(cacheCamera) {
             clearCallbacks(id);
             flash.disconnect();
-            if (!getCacheInstance(display) && flash.hasAccessToAudio()) {
+            if (!getCacheInstance(display) && flash.hasAccessToAudio() && cacheCamera) {
                 flash.reset(CACHED_INSTANCE_ID);
                 flash.id = CACHED_INSTANCE_ID;
             } else {
@@ -236,9 +236,19 @@ function getConnectionUrl(mainUrl) {
     return "rtmfp://"+ a.hostname+":1935/";
 }
 
+/**
+ * Check Flash Player available
+ *
+ * @returns {boolean} flash player available
+ */
+var available = function() {
+    return swfobject.hasFlashPlayerVersion("11.2.0");
+};
+
 module.exports = {
     createConnection: createConnection,
-    getAccessToAudioAndVideo: getAccessToAudioAndVideo
+    getAccessToAudioAndVideo: getAccessToAudioAndVideo,
+    available: available
 };
 
 
