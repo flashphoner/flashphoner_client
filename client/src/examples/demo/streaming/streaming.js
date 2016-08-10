@@ -79,25 +79,36 @@ function init_page() {
         }
     );
     if (detectBrowser() == "Android") {
-        if (navigator.mediaDevices.enumerateDevices) {
-            navigator.mediaDevices.enumerateDevices()
-                .then(function(devices) {
-                    devices.forEach(function(device) {
-                        console.log(device);
-                        if (device.kind === 'videoinput') {
+        var gotStream = function(stream) {
+            stream.stop();
+            return navigator.mediaDevices.enumerateDevices();
+        };
+
+        var gotDevices = function(devices) {
+            devices.forEach(function(device) {
+                console.log(device);
+                if (device.kind === 'videoinput') {
+                    if (device.label != "") {
+                        var select = document.getElementById("videoSources");
+                        if (select.length <= 2) {
                             var option = document.createElement("option");
                             option.text = device.label;
                             option.value = device.deviceId;
-                            var select = document.getElementById("videoSources");
                             select.appendChild(option);
                         }
-                    });
-                })
-                .catch(function(err) {
-                    console.log(err.name + ": " + error.message);
-                });
-            document.getElementById("cameraSelect").style.display = '';
-        }
+                    }
+                }
+            });
+        };
+
+        navigator.mediaDevices.getUserMedia({video: true, audio: true})
+            .then(gotStream)
+            .then(gotDevices)
+            .catch(function(err) {
+                console.log(err.name + ": " + error.message);
+            });
+
+        document.getElementById("cameraSelect").style.display = '';
     }
     getCookies();
 
