@@ -129,7 +129,8 @@ var createSession = function(options) {
         //connect to REST App
         send("connection", {
             appKey: appKey,
-            mediaProviders: Object.keys(MediaProvider)
+            mediaProviders: Object.keys(MediaProvider),
+            clientVersion: "0.2.1"
         });
     };
     wsConnection.onmessage = function(event) {

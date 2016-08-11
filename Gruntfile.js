@@ -1,6 +1,21 @@
 module.exports = function(grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        'string-replace': {
+            version: {
+                files: {
+                    'src/flashphoner-core.js': 'src/flashphoner-core.js'
+                },
+                options: {
+                    replacements: [
+                        {
+                            pattern: /clientVersion: "([0-9]+).([0-9]+).([0-9]+)"/,
+                            replacement: 'clientVersion: "<%= pkg.version %>"'
+                        }
+                    ]
+                }
+            }
+        },
         flash: {
             options: {
                 sdk: env.FLEX_HOME,
@@ -88,6 +103,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.registerTask('build', ['flash', 'browserify', 'jsdoc']);
+    grunt.loadNpmTasks('grunt-string-replace');
+    grunt.registerTask('build', ['string-replace:version','flash', 'browserify', 'jsdoc']);
     grunt.registerTask('release', ['build', 'copy']);
 };
