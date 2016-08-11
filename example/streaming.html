@@ -68,13 +68,16 @@
         //add stream status to div
         var streamStatusDisplay = addStatusDisplay(streamDisplay);
 
+        //add stream video display
+        var streamVideoDisplay = addVideoDisplay(streamDisplay);
+
         var handleStopped = function(stream) {
             console.log("Stream stopped with status " + stream.status());
             //remove stream display
             display.removeChild(streamDisplay);
         };
 
-        currentSession.createStream({name: elementValue('streamName'), display: streamDisplay}).on(STREAM_STATUS.PLAYING, function(stream){
+        currentSession.createStream({name: elementValue('streamName'), display: streamVideoDisplay}).on(STREAM_STATUS.PLAYING, function(stream){
             addControlButton(streamDisplay, stream);
             streamStatusDisplay.innerHTML = "Status: " + stream.status();
         }).on(STREAM_STATUS.FAILED, handleStopped).on(STREAM_STATUS.STOPPED, handleStopped).play();
@@ -97,13 +100,16 @@
         //add stream status to div
         var streamStatusDisplay = addStatusDisplay(streamDisplay);
 
+        //add stream video display
+        var streamVideoDisplay = addVideoDisplay(streamDisplay);
+
         var handleUnpublished = function(stream) {
             console.log("Stream unpublished with status " + stream.status());
             //remove stream display
             display.removeChild(streamDisplay);
         };
 
-        currentSession.createStream({name: elementValue('streamName'), display: streamDisplay, cacheLocalResources: false}).on(STREAM_STATUS.PUBLISHING, function(stream){
+        currentSession.createStream({name: elementValue('streamName'), display: streamVideoDisplay, cacheLocalResources: false}).on(STREAM_STATUS.PUBLISHING, function(stream){
             addControlButton(streamDisplay, stream);
             streamStatusDisplay.innerHTML = "Status: " + stream.status();
 
@@ -135,6 +141,13 @@
         streamStatusDisplay.setAttribute("style","width:160px; height:20px; display:inline-block");
         streamDisplay.appendChild(streamStatusDisplay);
         return streamStatusDisplay;
+    }
+
+    function addVideoDisplay(streamDisplay) {
+        var streamVideoDisplay = document.createElement("div");
+        streamVideoDisplay.setAttribute("style","width:320px; height:240px;");
+        streamDisplay.appendChild(streamVideoDisplay);
+        return streamVideoDisplay;
     }
 
     function addControlButton(streamDisplay, stream) {

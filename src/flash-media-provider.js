@@ -1,6 +1,7 @@
 'use strict';
 
 var swfobject = require('swfobject');
+var Promise = require('promise-polyfill');
 var connections = {};
 var flashScope;
 var DEFAULT_SDP = "v=0\r\n" +
