@@ -1,0 +1,12 @@
+.fp-remoteVideo {
+    border: 1px double black;
+    width: 322px;
+    height: 242px;
+    margin: 0 auto;
+}
+.fp-remoteVideo>video {
+    width: 320px;
+    height: 240px;
+}
+
+
