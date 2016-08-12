@@ -95,7 +95,7 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd: './',
-                        src: ['example/**'],
+                        src: ['examples/**'],
                         dest: 'release/<%= pkg.name %>-<%= pkg.version %>'
                     }
                 ]
