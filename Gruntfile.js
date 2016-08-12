@@ -78,7 +78,12 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd: './',
-                        src: ['flashphoner.js', 'media-provider.swf'],
+                        src: [
+                            'flashphoner.js',
+                            'flashphoner-no-flash.js',
+                            'flashphoner-no-webrtc.js',
+                            'media-provider.swf'
+                        ],
                         dest: 'release/<%= pkg.name %>-<%= pkg.version %>'
                     },
                     {
@@ -95,15 +100,37 @@ module.exports = function(grunt) {
                     }
                 ]
             }
+        },
+        clean: {
+            build: [
+                'flashphoner.js',
+                'flashphoner-no-flash.js',
+                'flashphoner-no-webrtc.js',
+                'media-provider.swf',
+                'doc/'
+            ],
+            release: [
+                'release'
+            ]
         }
     });
 
     grunt.loadNpmTasks('grunt-flash-compiler');
-    grunt.registerTask('build_flash', ['flash']);
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-string-replace');
-    grunt.registerTask('build', ['string-replace:version','flash', 'browserify', 'jsdoc']);
-    grunt.registerTask('release', ['build', 'copy']);
+    grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.registerTask('build', [
+        'clean:build',
+        'string-replace:version',
+        'flash:release',
+        'browserify',
+        'jsdoc'
+    ]);
+    grunt.registerTask('release', [
+        'clean:release',
+        'build',
+        'copy'
+    ]);
 };

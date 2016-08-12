@@ -4,6 +4,7 @@ var swfobject = require('swfobject');
 var Promise = require('promise-polyfill');
 var connections = {};
 var flashScope;
+var swfLocation = "media-provider.swf";
 var DEFAULT_SDP = "v=0\r\n" +
     "o=- 1988962254 1988962254 IN IP4 0.0.0.0\r\n" +
     "c=IN IP4 0.0.0.0\r\n" +
@@ -194,7 +195,7 @@ var loadSwf = function(id, display) {
             resolve(swf);
         });
         //todo switch from id to element (divWrapper)
-        swfobject.embedSWF("media-provider.swf", id, "100%", "100%", "11.2.0", "expressInstall.swf", flashvars, params, attributes, function (ret) {
+        swfobject.embedSWF(swfLocation, id, "100%", "100%", "11.2.0", "expressInstall.swf", flashvars, params, attributes, function (ret) {
             swf = ret.ref;
             if (!ret.success) {
                 reject(new Error("Failed to load flash media provider swf with id " + id));
@@ -249,7 +250,10 @@ var available = function() {
 module.exports = {
     createConnection: createConnection,
     getAccessToAudioAndVideo: getAccessToAudioAndVideo,
-    available: available
+    available: available,
+    configure: function(flashLocation){
+        swfLocation = flashLocation;
+    }
 };
 
 

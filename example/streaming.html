@@ -20,7 +20,10 @@
 <script type="text/javascript" src="../flashphoner.js"></script>
 <script>
     //init api
-    Flashphoner.init({});
+    Flashphoner.init({
+        //flash media support
+        flashMediaProviderSwfLocation: "../media-provider.swf"
+    });
     var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
     var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
     var currentSession;

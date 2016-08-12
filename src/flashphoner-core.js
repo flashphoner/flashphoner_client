@@ -17,6 +17,7 @@ var initialized = false;
  * Static initializer.
  *
  * @param {Object} options Global api options
+ * @param {string=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
  * @throws {Error} Error if none of MediaProviders available
  * @memberof Flashphoner
  */
@@ -29,6 +30,9 @@ var init = function(options) {
         var flashProvider = require("./flash-media-provider");
         if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available()) {
             MediaProvider.Flash = flashProvider;
+            if (options && options.flashMediaProviderSwfLocation) {
+                flashProvider.configure(options.flashMediaProviderSwfLocation);
+            }
         }
         //check at least 1 provider available
         if (getMediaProviders().length == 0) {
@@ -130,7 +134,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.2.1"
+            clientVersion: "0.2.3"
         });
     };
     wsConnection.onmessage = function(event) {
