@@ -1,7 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="e5faa371-8c28-47e4-a1e8-926c37427e94" name="Default" comment="" />
+    <list default="true" id="e5faa371-8c28-47e4-a1e8-926c37427e94" name="Default" comment="">
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap-theme.css" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap-theme.css.map" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap-theme.min.css" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap.css" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap.css.map" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap.min.css" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\HELP-US-OUT.txt" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\css\font-awesome.css" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\css\font-awesome.min.css" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\FontAwesome.otf" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\fontawesome-webfont.eot" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\fontawesome-webfont.svg" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\fontawesome-webfont.ttf" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\fontawesome-webfont.woff" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\fontawesome-webfont.woff2" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\animated.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\bordered-pulled.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\core.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\fixed-width.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\font-awesome.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\icons.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\larger.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\list.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\mixins.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\path.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\rotated-flipped.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\screen-reader.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\stacked.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\variables.less" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_animated.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_bordered-pulled.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_core.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_fixed-width.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_icons.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_larger.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_list.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_mixins.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_path.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_rotated-flipped.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_screen-reader.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_stacked.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_variables.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\font-awesome.scss" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\FontAwesome.otf" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\fontawesome-webfont.eot" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\fontawesome-webfont.svg" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\fontawesome-webfont.ttf" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\fontawesome-webfont.woff" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\fontawesome-webfont.woff2" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\glyphicons-halflings-regular.eot" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\glyphicons-halflings-regular.svg" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\glyphicons-halflings-regular.ttf" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\glyphicons-halflings-regular.woff" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\glyphicons-halflings-regular.woff2" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\icons\font-awesome.min.css" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\js\bootstrap.js" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\js\bootstrap.min.js" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\js\npm.js" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\js\switch.js" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\jquery\jquery-1.12.0.js" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\jquery\jquery-ui.js" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\jquery\jquery.js" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\jquery\jquery.json.js" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\jquery\jquery.websocket.js" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\js\utils.js" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\streaming\streamer\streamer.css" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\streaming\streamer\streamer.html" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\streaming\streamer\streamer.js" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\min\echo.html" afterPath="" />
+      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\min\streaming.html" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    </list>
     <ignored path="wcs_api-2.0.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -22,8 +94,30 @@
   <component name="FavoritesManager">
     <favorites_list name="wcs_api-2.0" />
   </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="package.json" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/package.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="867">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/example/min/echo.html" />
+        <option value="$PROJECT_DIR$/example/min/streaming.html" />
+      </list>
+    </option>
   </component>
   <component name="JsGruntFileManager">
     <initial>false</initial>
@@ -32,8 +126,8 @@
     <detection-done>true</detection-done>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1770" />
-    <option name="y" value="-195" />
+    <option name="x" value="2079" />
+    <option name="y" value="145" />
     <option name="width" value="1936" />
     <option name="height" value="1056" />
   </component>
@@ -89,7 +183,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="example" />
+              <option name="myItemId" value="test" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -103,19 +197,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="example" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="demo" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="streaming" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="streamer" />
+              <option name="myItemId" value="src" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -129,7 +211,25 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="example" />
+              <option name="myItemId" value="examples" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="min" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wcs_api-2.0" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wcs_api-2.0" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="examples" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -145,6 +245,11 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="HbShouldOpenHtmlAsHb" value="" />
     <property name="FullScreen" value="false" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Data\projects\wcs\client\wcs_api-2.0\example\min" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration default="true" type="DartUnitRunConfigurationType" factoryName="DartUnit">
@@ -195,15 +300,15 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1770" y="-195" width="1936" height="1056" extended-state="0" />
-    <editor active="false" />
+    <frame x="2079" y="145" width="1936" height="1056" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -238,5 +343,15 @@
   <component name="XDebuggerManager">
     <breakpoint-manager />
     <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="893">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
   </component>
 </project>
