@@ -78,7 +78,7 @@ function init_page() {
             $(this).prop('disabled',true);
         }
     );
-    if (detectBrowser() == "Android") {
+    if (detectBrowser() == "Android" && navigator.userAgent.indexOf("OPR") == -1) {
         var gotStream = function(stream) {
             stream.stop();
             return navigator.mediaDevices.enumerateDevices();
@@ -161,7 +161,7 @@ function disconnect() {
 function publishStream() {
     $("#downloadDiv").hide();
     var streamName = field("publishStream");
-    if (detectBrowser() == "Android") {
+    if (detectBrowser() == "Android" && navigator.userAgent.indexOf("OPR") == -1) {
         var source = document.getElementById("videoSources");
         var camera = source.options[source.selectedIndex].value;
         Flashphoner.getInstance().configuration.videoSourceId = camera;

@@ -2004,9 +2004,9 @@ WebRtcMediaConnection.prototype.onOnAddStreamCallback = function (event) {
             attachMediaStream(this.remoteMediaElement, this.remoteAudioVideoMediaStream);
             var playPromise = this.remoteMediaElement.play();
             if (playPromise !== undefined) {
-                playPromise.catch(function(error){
+                playPromise.catch(function (error) {
                     trace(error);
-                })
+                });
             }
         }
     }
@@ -3024,7 +3024,7 @@ if (typeof window === 'undefined' || !window.navigator) {
             });
         };
     }
-} else if (navigator.webkitGetUserMedia && !!window.chrome) {
+} else if (navigator.webkitGetUserMedia && (!!window.chrome || navigator.userAgent.match(/Opera|OPR\//))) {
     webrtcUtils.log('This appears to be Chrome');
 
     webrtcDetectedBrowser = 'chrome';
@@ -3280,7 +3280,8 @@ if (typeof window === 'undefined' || !window.navigator) {
 } else if (navigator.mediaDevices && navigator.userAgent.match(
         /Edge\/(\d+).(\d+)$/)) {
     webrtcUtils.log('This appears to be Edge');
-    webrtcDetectedBrowser = 'edge';
+    // Setup FLASH as media provider for Edge
+    webrtcDetectedBrowser = null;
 
     webrtcDetectedVersion =
         parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10);
