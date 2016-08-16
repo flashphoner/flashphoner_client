@@ -42,10 +42,6 @@ package com.flashphoner.api2.media
 
 		public function LocalMediaControl(display:VideoDisplay){
             this.display = display;
-
-            this.mic = defineMicrophone(true);
-            initMic(this.mic);
-            init({});
 		}
 		
 		private function getIntConfigurationProperty(value:String, def: int):int{
@@ -65,29 +61,49 @@ package com.flashphoner.api2.media
 		}
 		
 		/**
-		 * Init width,height,fps and another parameters
+		 * Init width,height,fps and other parameters
 		 **/ 
-		public function init(configuration:Object):void{			
-			Logger.info("Configuration object: "+configuration.videoWidth+" Height: "+configuration.videoHeight+" FPS: "+configuration.flashCameraFPS+" KEEP_RATIO: "+configuration.flashCameraKeepRatio+" KEY_INT: "+configuration.flashCameraKeyFrameInterval +" QUALITY: "+configuration.flashCameraQuality+" MOTION_LEVEL: "+configuration.flashCameraMotionLevel+" BANDWIDTH: "+configuration.flashCameraBandwidth);
-			this.width = getIntConfigurationProperty(configuration.videoWidth, this.width);
-			this.height = getIntConfigurationProperty(configuration.videoHeight, this.height);
-			this.FPS = getIntConfigurationProperty(configuration.flashCameraFPS, this.FPS);
-			this.KEEP_RATIO = getBooleanConfigurationProperty(configuration.flashCameraKeepRatio, this.KEEP_RATIO);
-			this.KEY_INT = getIntConfigurationProperty(configuration.flashCameraKeyFrameInterval, this.KEY_INT);
-			this.QUALITY = getIntConfigurationProperty(configuration.flashCameraQuality, this.QUALITY);
-			this.MOTION_LEVEL = getIntConfigurationProperty(configuration.flashCameraMotionLevel, this.MOTION_LEVEL);
-			this.BANDWIDTH = getIntConfigurationProperty(configuration.flashCameraBandwidth, this.BANDWIDTH);
-			Logger.info("Final configuration: WIDTH: "+width+" Height: "+height+" FPS: "+FPS+" KEEP_RATIO: "+KEEP_RATIO+" KEY_INT: "+KEY_INT +" QUALITY: "+QUALITY+" MOTION_LEVEL: "+MOTION_LEVEL+" BANDWIDTH: "+BANDWIDTH);
-			
-			var camera:Camera = getCam(); 
-			if (camera != null){
-				supportedResolutions(camera, "1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60");
-				camera.setMode(this.width,this.height,FPS,KEEP_RATIO);
-				camera.setKeyFrameInterval(KEY_INT);
-				camera.setQuality(BANDWIDTH,QUALITY);
-				camera.setMotionLevel(0,this.MOTION_LEVEL);
+		public function init(constraints:Object):Boolean{
+			if (constraints.hasOwnProperty("video") && constraints.video is Object) {
+				var videoConstraints:Object = constraints.video;
+				this.width = getIntConfigurationProperty(videoConstraints.width, this.width);
+				this.height = getIntConfigurationProperty(videoConstraints.height, this.height);
+				this.FPS = getIntConfigurationProperty(videoConstraints.frameRate, this.FPS);
+				var cameraId:String = videoConstraints.deviceId;
+				var cameraName:String = null;
+				if (cameraId != null && Camera.names.length > int(cameraId)) {
+					cameraName = Camera.names[int(cameraId)];
+				}
+				if (this.cam != null) {
+					removeLocalMedia();
+				}
+				Logger.info("Init camera " + cameraId + ":" + cameraName + ", resolution " + this.width + "x" + this.height + ", fps " + this.FPS);
+				this.cam = Camera.getCamera(cameraId);
+				if (this.cam == null) {
+					//failed to get camera
+					Logger.info("Failed to get camera");
+					return false;
+				}
+				//init
+				this.cam.setMode(this.width,this.height,FPS,KEEP_RATIO);
+				this.cam.setKeyFrameInterval(KEY_INT);
+				this.cam.setQuality(BANDWIDTH,QUALITY);
+				this.cam.setMotionLevel(0,this.MOTION_LEVEL);
 			}
-			
+
+			if (constraints.hasOwnProperty("audio")) {
+				var micId:int = -1;
+				if (!(constraints.audio is Boolean)) {
+					micId = getIntConfigurationProperty(constraints.audio.deviceId, -1);
+				}
+				this.mic = defineMicrophone(true, micId);
+				if (this.mic == null) {
+					Logger.info("Failed to get microphone");
+					return false;
+				}
+				initMic(this.mic);
+			}
+			return true;
 		}		
 		
 		private function supportedResolutions(camera:Camera, resolutions:String):void {					
@@ -113,9 +129,6 @@ package com.flashphoner.api2.media
 		}
 		
 		public function getCam():Camera {
-			if (cam == null){
-				cam = Camera.getCamera();
-			}
 			return cam; 			
 		}
 		
@@ -152,6 +165,16 @@ package com.flashphoner.api2.media
 			if ((width>0)&&(height>0)){
 				getCam().setMode(width,height,FPS,KEEP_RATIO);
 			}			
+		}
+
+		public function hasAccess():Boolean {
+			if (mic != null && !mic.muted) {
+				return true;
+			}
+			if (cam != null && !cam.muted) {
+				return true;
+			}
+			return false;
 		}
 
         public function hasAccessToAudio():Boolean{
@@ -233,5 +256,31 @@ package com.flashphoner.api2.media
         public function getMicrophone():Microphone{
             return mic;
         }
+
+		public function listMicrophones():Array{
+			var list = [];
+			var i = 0;
+			for (i = 0; i < Microphone.names.length; i++) {
+				var mic = {};
+				mic.id = i;
+				mic.label = Microphone.names[i];
+				mic.type = "mic";
+				list.push(mic);
+			}
+			return list;
+		}
+
+		public function listCameras():Array{
+			var list = [];
+			var i = 0;
+			for (i = 0; i < Camera.names.length; i++) {
+				var camera = {};
+				camera.id = i;
+				camera.label = Camera.names[i];
+				camera.type = "camera";
+				list.push(camera);
+			}
+			return list;
+		}
     }
 }

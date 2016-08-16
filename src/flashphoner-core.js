@@ -17,7 +17,8 @@ var initialized = false;
  * Static initializer.
  *
  * @param {Object} options Global api options
- * @param {string=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
+ * @param {String=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
+ * @param {String=} options.screenSharingExtensionId Chrome screen sharing extension id
  * @throws {Error} Error if none of MediaProviders available
  * @memberof Flashphoner
  */
@@ -26,6 +27,9 @@ var init = function(options) {
         var webRtcProvider = require("./webrtc-media-provider");
         if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
             MediaProvider.WebRTC = webRtcProvider;
+            if (options && options.screenSharingExtensionId) {
+                webRtcProvider.configure(options.screenSharingExtensionId);
+            }
         }
         var flashProvider = require("./flash-media-provider");
         if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available()) {
@@ -53,9 +57,104 @@ var getMediaProviders = function() {
 };
 
 /**
+ * @typedef Flashphoner.MediaDeviceList
+ * @type Object
+ * @property {Flashphoner.MediaDevice[]} audio Audio devices (microphones)
+ * @property {Flashphoner.MediaDevice[]} video Video devices (cameras)
+ */
+
+/**
+ * @typedef Flashphoner.MediaDevice
+ * @type Object
+ * @property {String} type Type of device: mic, camera, screen
+ * @property {String} id Unique id
+ * @property {String} label Device label
+ */
+
+/**
+ * Get available local media devices
+ *
+ * @param {String=} mediaProvider Media provider that will be asked for device list
+ * @param {Boolean=} labels Ask user for microphone access before getting device list.
+ * This will make device label available.
+ * @returns {Promise.<Flashphoner.MediaDeviceList>} Promise with media device list on fulfill
+ * @throws {Error} Error if API is not initialized
+ * @memberof Flashphoner
+ */
+var getMediaDevices = function(mediaProvider, labels) {
+    if (!initialized) {
+        throw new Error("Flashphoner API is not initialized");
+    }
+    if (!mediaProvider) {
+        mediaProvider = getMediaProviders()[0];
+    }
+    return MediaProvider[mediaProvider].listDevices(labels);
+};
+
+/**
+ * Get access to local media
+ *
+ * @param {Object} constraints Media constraints
+ * @param {Object} constraints.audio Audio constraints
+ * @param {String=} constraints.audio.deviceId Audio device id
+ * @param {Object} constraints.video Video constraints
+ * @param {String=} constraints.video.deviceId Video device id
+ * @param {number} constraints.video.width Video width
+ * @param {number} constraints.video.height Video height
+ * @param {number} constraints.video.frameRate Video fps
+ * @param {String} constraints.video.type Video device type: camera, screen
+ * @param {HTMLElement} display Div element local media should be displayed in
+ * @param {String} mediaProvider Media provider type
+ * @returns {Promise.<HTMLElement>} Promise with display on fulfill
+ * @throws {Error} Error if API is not initialized
+ * @memberof Flashphoner
+ */
+
+var getMediaAccess = function(constraints, display, mediaProvider) {
+    if (!initialized) {
+        throw new Error("Flashphoner API is not initialized");
+    }
+    if (!mediaProvider) {
+        mediaProvider = getMediaProviders()[0];
+    }
+    return MediaProvider[mediaProvider].getMediaAccess(constraints, display);
+};
+
+//default constraints helper
+var getDefaultMediaConstraints = function() {
+    return {
+        audio: true,
+        video: {
+            width: 320,
+            height: 240
+        }
+    };
+};
+
+/**
+ * Release local media
+ *
+ * @param {HTMLElement} display Div element with local media
+ * @param {String=} mediaProvider Media provider type
+ * @returns {Boolean} True if media was found and released
+ * @throws {Error} Error if API is not initialized
+ * @memberof Flashphoner
+ */
+
+var releaseLocalMedia = function(display, mediaProvider) {
+    if (!initialized) {
+        throw new Error("Flashphoner API is not initialized");
+    }
+    if (!mediaProvider) {
+        mediaProvider = getMediaProviders()[0];
+    }
+    return MediaProvider[mediaProvider].releaseMedia(display);
+};
+
+/**
  * Get active sessions.
  *
- * @returns {Array} Array containing active sessions
+ * @returns {Session[]} Array containing active sessions
  * @memberof Flashphoner
  */
 var getSessions = function() {
@@ -134,7 +233,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.2.3"
+            clientVersion: "0.3.0"
         });
     };
     wsConnection.onmessage = function(event) {
@@ -316,7 +415,7 @@ var createSession = function(options) {
                 throw new Error("Invalid stream state");
             }
             //get access to camera
-            MediaProvider[mediaProvider].getAccessToAudioAndVideo(display).then(function(){
+            MediaProvider[mediaProvider].getMediaAccess(getDefaultMediaConstraints(), display).then(function(){
                 published_ = true;
                 //create mediaProvider connection
                 MediaProvider[mediaProvider].createConnection({
@@ -558,8 +657,12 @@ var createSession = function(options) {
 module.exports = {
     init: init,
     getMediaProviders: getMediaProviders,
+    getMediaDevices: getMediaDevices,
+    getMediaAccess: getMediaAccess,
+    releaseLocalMedia: releaseLocalMedia,
     getSessions: getSessions,
     getSession: getSession,
     createSession: createSession,
-    constants: constants
+    constants: constants,
+    firefoxScreenSharingExtensionInstalled: false
 };

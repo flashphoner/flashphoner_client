@@ -62,8 +62,8 @@ package com.flashphoner.api2 {
             remoteDisplayHolder.visible = false;
             this.canvas.addChild(remoteDisplayHolder);
             this.localDisplay = new VideoDisplay();
-            this.localDisplay.width = 320;
-            this.localDisplay.height = 240;
+            this.localDisplay.percentWidth = 100;
+            this.localDisplay.percentHeight = 100;
             this.localDisplay.visible = false;
             this.canvas.addChild(this.localDisplay);
             this.openSettingsButton = new Button();
@@ -78,12 +78,12 @@ package com.flashphoner.api2 {
 
             ExternalInterface.addCallback("connect", connect);
             ExternalInterface.addCallback("disconnect", disconnect);
-            ExternalInterface.addCallback("getAccessToAudio", getAccessToAudio);
-            ExternalInterface.addCallback("getAccessToAudioAndVideo", getAccessToAudioAndVideo);
+            ExternalInterface.addCallback("getMediaAccess", getMediaAccess);
             ExternalInterface.addCallback("hasAccessToAudio", hasAccessToAudio);
             ExternalInterface.addCallback("setup", setup);
             ExternalInterface.addCallback("reset", reset);
             ExternalInterface.addCallback("getId", getId);
+            ExternalInterface.addCallback("listDevices", listDevices);
             callExternalInterface("initialized", null);
         }
 
@@ -125,6 +125,13 @@ package com.flashphoner.api2 {
             return config.id;
         }
 
+        public function listDevices():Object{
+            var list = {};
+            list.audio = this.localMediaControl.listMicrophones();
+            list.video = this.localMediaControl.listCameras();
+            return list;
+        }
+
         public static  function callExternalInterface(jsCallback:String, status:String):void {
             var callback:String = "Flashphoner.FlashApiScope['"+config.id+"']."+jsCallback;
             if (callbackExists(jsCallback)) {
@@ -158,6 +165,27 @@ package com.flashphoner.api2 {
             Security.showSettings(SecurityPanel.PRIVACY);
         }
 
+        public function getMediaAccess(constraints:Object):Boolean {
+            if (localMediaControl.init(constraints)) {
+                //check if we have access already
+                if(localMediaControl.hasAccess()) {
+                    onAccessGranted();
+                    return true;
+                }
+                //ask user for permission
+                var mic:Microphone = localMediaControl.getMicrophone();
+                if (mic != null) {
+                    mic.setLoopBack(true);
+                }
+                timer.addEventListener(TimerEvent.TIMER, timerTick);
+                timer.start();
+                openSettingsButton.visible = true;
+                return true;
+            }
+            return false;
+
+        }
+
         public function getAccessToAudio():Boolean {
             var mic:Microphone = localMediaControl.getMicrophone();
             if (mic == null){
@@ -183,20 +211,22 @@ package com.flashphoner.api2 {
         }
 
         private function timerTick(event:TimerEvent):void{
-            if (localMediaControl.hasAccessToAudio()){
+            if (localMediaControl.hasAccess()){
                 timer.stop();
                 var mic:Microphone = localMediaControl.getMicrophone();
-                mic.setLoopBack(false);
-                openSettingsButton.visible = false;
-                if (localMediaControl.getCam() != null) {
-                    localMediaControl.attachLocalMedia();
-                    localDisplay.visible = true;
+                if (mic != null) {
+                    mic.setLoopBack(false);
                 }
+                openSettingsButton.visible = false;
                 onAccessGranted();
             }
         }
 
         private function onAccessGranted(){
+            if (localMediaControl.getCam() != null) {
+                localMediaControl.attachLocalMedia();
+                localDisplay.visible = true;
+            }
             callExternalInterface('accessGranted', null);
         }
 

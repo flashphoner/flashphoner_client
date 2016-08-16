@@ -2,6 +2,7 @@
 
 var swfobject = require('swfobject');
 var Promise = require('promise-polyfill');
+var uuid = require('node-uuid');
 var connections = {};
 var flashScope;
 var swfLocation = "media-provider.swf";
@@ -20,7 +21,7 @@ var DEFAULT_SDP = "v=0\r\n" +
     "a=rtpmap:100 SPEEX/16000\r\n" +
     "a=AUDIO_STATE\r\n";
 
-var CACHED_INSTANCE_ID = "CACHED_FLASH_INSTANCE";
+var CACHED_INSTANCE_POSTFIX = "CACHED_FLASH_INSTANCE";
 
 var createConnection = function(options) {
     return new Promise(function(resolve, reject) {
@@ -111,8 +112,8 @@ var createConnection = function(options) {
             clearCallbacks(id);
             flash.disconnect();
             if (!getCacheInstance(display) && flash.hasAccessToAudio() && cacheCamera) {
-                flash.reset(CACHED_INSTANCE_ID);
-                flash.id = CACHED_INSTANCE_ID;
+                flash.reset(flash.id + CACHED_INSTANCE_POSTFIX);
+                flash.id = flash.id + CACHED_INSTANCE_POSTFIX;
             } else {
                 swfobject.removeSWF(flash.id);
             }
@@ -154,23 +155,41 @@ function clearCallbacks(id) {
     delete flashScope[id];
 }
 
-var getAccessToAudioAndVideo = function(display) {
+var getMediaAccess = function(constraints, display) {
     return new Promise(function(resolve, reject) {
-        if (!getCacheInstance(display)) {
-            loadSwf(CACHED_INSTANCE_ID, display).then(function (swf) {
+        var flash = getCacheInstance(display);
+        if (!flash) {
+            var id = uuid.v1() + CACHED_INSTANCE_POSTFIX;
+            loadSwf(id, display).then(function (swf) {
                 //todo return camera and mic id
-                installCallback(CACHED_INSTANCE_ID, "accessGranted", function () {
-                    removeCallback(CACHED_INSTANCE_ID, "accessGranted");
-                    resolve({});
+                installCallback(id, "accessGranted", function () {
+                    removeCallback(id, "accessGranted");
+                    resolve(display);
                 });
-                if (!swf.getAccessToAudioAndVideo()) {
+                if (!swf.getMediaAccess(constraints)) {
                     reject(new Error("Failed to get access to audio and video"));
                 }
             });
         } else {
-            resolve();
+            installCallback(flash.id, "accessGranted", function () {
+                removeCallback(flash.id, "accessGranted");
+                resolve(display);
+            });
+            if (!flash.getMediaAccess(constraints)) {
+                reject(new Error("Failed to get access to audio and video"));
+            }
         }
     });
+};
+
+var releaseMedia = function(display) {
+    var flash = getCacheInstance(display);
+    if (flash) {
+        clearCallbacks(flash.id);
+        swfobject.removeSWF(flash.id);
+        return true;
+    }
+    return false;
 };
 
 //swf helpers
@@ -207,8 +226,8 @@ var loadSwf = function(id, display) {
 function getCacheInstance(display) {
     var i;
     for (i = 0; i < display.children.length; i++) {
-        if (display.children[i] && display.children[i].id == CACHED_INSTANCE_ID) {
-            console.log("FOUND FLASH CACHED INSTANCE");
+        if (display.children[i] && display.children[i].id.indexOf(CACHED_INSTANCE_POSTFIX) != -1) {
+            console.log("FOUND FLASH CACHED INSTANCE, id " + display.children[i].id);
             return display.children[i];
         }
     }
@@ -247,10 +266,28 @@ var available = function() {
     return swfobject.hasFlashPlayerVersion("11.2.0");
 };
 
+var listDevices = function() {
+    return new Promise(function(resolve, reject) {
+        var display = document.createElement('div');
+        var id = uuid.v1();
+        //attach display to document, otherwise swf won't be loaded
+        document.body.appendChild(display);
+        loadSwf(id, display).then(function(swf){
+            var list = swf.listDevices();
+            //remove swf, display
+            swfobject.removeSWF(id);
+            document.body.removeChild(display);
+            resolve(list);
+        }, reject);
+    });
+};
+
 module.exports = {
     createConnection: createConnection,
-    getAccessToAudioAndVideo: getAccessToAudioAndVideo,
+    getMediaAccess: getMediaAccess,
+    releaseMedia: releaseMedia,
     available: available,
+    listDevices: listDevices,
     configure: function(flashLocation){
         swfLocation = flashLocation;
     }

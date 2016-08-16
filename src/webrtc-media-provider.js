@@ -1,8 +1,10 @@
 'use strict';
 
 require('webrtc-adapter');
+var uuid = require('node-uuid');
 var connections = {};
-var CACHED_INSTANCE_ID = "CACHED_WEBRTC_INSTANCE";
+var CACHED_INSTANCE_POSTFIX = "-CACHED_WEBRTC_INSTANCE";
+var extensionId;
 
 var createConnection = function(options) {
     return new Promise(function(resolve, reject) {
@@ -50,7 +52,7 @@ var createConnection = function(options) {
                 removeVideoElement(display, video);
             }
             if (localStream && !getCacheInstance(display) && cacheCamera) {
-                localStream.id = CACHED_INSTANCE_ID;
+                localStream.id = localStream.id + CACHED_INSTANCE_POSTFIX;
             } else if (localStream) {
                 removeVideoElement(display, localStream);
             }
@@ -96,38 +98,87 @@ var createConnection = function(options) {
     });
 };
 
-var getAccessToAudioAndVideo = function(display) {
+var getMediaAccess = function(constraints, display) {
     return new Promise(function(resolve, reject) {
         if (getCacheInstance(display)) {
-            resolve();
+            resolve(display);
             return;
         }
-        var constraints = {
-            audio: true,
-            video: {
-                width: 320,
-                height: 240
-            }
-        };
-        navigator.getUserMedia(constraints, function(stream){
-            var video = document.createElement('video');
-            display.appendChild(video);
-            video.id = CACHED_INSTANCE_ID;
-            //show local camera
-            video.srcObject = stream;
-            //mute audio
-            video.muted = true;
-            video.play();
-            resolve(stream);
-        }, reject);
+        //check if this is screen sharing
+        if (constraints.video && constraints.video.type && constraints.video.type == "screen") {
+            delete constraints.video.type;
+            getScreenDeviceId().then(function(screenSharingConstraints){
+                //copy constraints
+                for (var prop in screenSharingConstraints) {
+                    if (screenSharingConstraints.hasOwnProperty(prop)) {
+                        constraints.video[prop] = screenSharingConstraints[prop];
+                    }
+                }
+                getAccess(constraints);
+            }, reject);
+        } else {
+            getAccess(constraints);
+        }
+
+        function getAccess(constraints) {
+            console.dir(constraints);
+            navigator.getUserMedia(constraints, function(stream){
+                var video = document.createElement('video');
+                display.appendChild(video);
+                video.id = uuid.v1() + CACHED_INSTANCE_POSTFIX;
+                //show local camera
+                video.srcObject = stream;
+                //mute audio
+                video.muted = true;
+                video.play();
+                resolve(display);
+            }, reject);
+        }
     });
+};
+
+var getScreenDeviceId = function() {
+    return new Promise(function(resolve, reject){
+        if (window.chrome) {
+            chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
+                if (response) {
+                    chrome.runtime.sendMessage(extensionId, {type: "getSourceId"}, function (response) {
+                        if (response.error) {
+                            reject(new Error("Screen access denied"));
+                        } else {
+                            resolve({
+                                mandatory: {
+                                    chromeMediaSourceId: response.sourceId,
+                                    chromeMediaSource: "desktop"
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    reject(new Error("Screen sharing extension is not available"));
+                }
+            });
+        } else {
+            //firefox case
+            resolve({mediaSource: "screen"});
+        }
+    });
+};
+
+var releaseMedia = function(display) {
+    var video = getCacheInstance(display);
+    if (video) {
+        removeVideoElement(display, video);
+        return true;
+    }
+    return false;
 };
 
 function getCacheInstance(display) {
     var i;
     for (i = 0; i < display.children.length; i++) {
-        if (display.children[i] && display.children[i].id == CACHED_INSTANCE_ID) {
-            console.log("FOUND WEBRTC CACHED INSTANCE");
+        if (display.children[i] && display.children[i].id.indexOf(CACHED_INSTANCE_POSTFIX) != -1) {
+            console.log("FOUND WEBRTC CACHED INSTANCE, id " + display.children[i].id);
             return display.children[i];
         }
     }
@@ -154,8 +205,53 @@ var available = function(){
     return navigator.getUserMedia && RTCPeerConnection;
 };
 
+var listDevices = function(labels) {
+    return new Promise(function(resolve, reject) {
+        var list = {
+            audio: [],
+            video: []
+        };
+        if (labels) {
+            var display = document.createElement("div");
+            getMediaAccess({audio: true, video: {}}, display).then(function(){
+                releaseMedia(display);
+                populateList();
+            }, reject);
+        } else {
+            populateList();
+        }
+
+        function populateList() {
+            navigator.mediaDevices.enumerateDevices().then(function (devices) {
+                for (var i = 0; i < devices.length; i++) {
+                    var device = devices[i];
+                    var ret = {
+                        id: device.deviceId,
+                        label: device.label
+                    };
+                    if (device.kind == "audioinput") {
+                        ret.type = "mic";
+                        list.audio.push(ret);
+                    } else if (device.kind == "videoinput") {
+                        ret.type = "camera";
+                        list.video.push(ret);
+                    } else {
+                        console.log("unknown device " + device.kind + " id " + device.deviceId);
+                    }
+                }
+                resolve(list);
+            }, reject);
+        }
+    });
+};
+
 module.exports = {
     createConnection: createConnection,
-    getAccessToAudioAndVideo: getAccessToAudioAndVideo,
-    available: available
+    getMediaAccess: getMediaAccess,
+    releaseMedia: releaseMedia,
+    listDevices: listDevices,
+    available: available,
+    configure: function(screenSharingExtensionId) {
+        extensionId = screenSharingExtensionId;
+    }
 };
