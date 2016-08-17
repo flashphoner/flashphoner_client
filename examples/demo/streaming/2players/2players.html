@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="2players.css">
+    <title>2 players</title>
+    <script type="text/javascript" src="../../../../flashphoner.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
+
+    <script type="text/javascript" src="2players.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
+</head>
+<body onload="initAPI()">
+<div class="container">
+    <div class="row">
+
+        <h2 id="notifyFlash" class="text-danger"></h2>
+
+        <div class="col-sm-9 text-center">
+
+            <h2 class="text-center">2 players</h2>
+
+            <div class="col-sm-6">
+                <div class="text-center text-muted">Player 1</div>
+                <div id="player1" class="fp-remoteVideo"></div>
+                <div id="form1" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                    <input class="form-control" type="text" id="url1" value="">
+                    <div class="input-group-btn">
+                        <button id="playBtn1" type="button" class="btn btn-default" onclick="connectAndPlay(player1, 'url1')">Start</button>
+                    </div>
+                </div>
+                <div class="text-center" style="margin-top: 20px">
+                    <div id="status1"></div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="text-center text-muted">Player 2</div>
+                <div id="player2" class="fp-remoteVideo"></div>
+                <div id="form2" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                    <input class="form-control" type="text" id="url2" value="">
+                    <div class="input-group-btn">
+                        <button id="playBtn2" type="button" class="btn btn-default" onclick="connectAndPlay(player2, 'url2')">Start</button>
+                    </div>
+                </div>
+                <div class="text-center" style="margin-top: 20px">
+                    <div id="status2"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
