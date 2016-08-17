@@ -300,6 +300,7 @@ var createSession = function(options) {
      * @param {Object} options Stream options
      * @param {string} options.name Stream name
      * @param {string} options.mediaProvider MediaProvider type to use with this stream
+     * @param {Boolean=} options.record Enable stream recording
      * @param {Boolean=} options.cacheLocalResources Display will contain local video after stream release
      * @param {HTMLElement} options.display Div element stream should be displayed in
      * @returns {Stream} Stream
@@ -330,6 +331,8 @@ var createSession = function(options) {
         var display = options.display;
 
         var published_ = false;
+        var record_ = options.record || false;
+        var recordFileName = null;
         var cacheLocalResources = options.cacheLocalResources;
         var status_ = STREAM_STATUS.NEW;
         //callbacks added using stream.on()
@@ -348,9 +351,17 @@ var createSession = function(options) {
                 return;
             }
             status_ = streamInfo.status;
+
+            if (status_ == STREAM_STATUS.PUBLISHING) {
+                if (record_) {
+                    recordFileName = streamInfo.recordName;
+                }
+            }
+
             //release stream
             if (status_ == STREAM_STATUS.FAILED || status_ == STREAM_STATUS.STOPPED ||
                 status_ == STREAM_STATUS.UNPUBLISHED) {
+
                 delete streams[id_];
                 delete streamRefreshHandlers[id_];
                 mediaConnection.close(cacheLocalResources);
@@ -438,7 +449,7 @@ var createSession = function(options) {
                         hasVideo: true,
                         hasAudio: true,
                         status: status_,
-                        record: false,
+                        record: record_,
                         mediaProvider: mediaProvider,
                         sdp: sdp
                     });
@@ -524,6 +535,16 @@ var createSession = function(options) {
         };
 
         /**
+         * Get record file name
+         * @returns {string} File name
+         * @memberof Stream
+         * @inner
+         */
+        var getRecordInfo = function() {
+            return recordFileName;
+        };
+
+        /**
          * Stream event callback.
          *
          * @callback Stream~eventCallback
@@ -559,6 +580,7 @@ var createSession = function(options) {
         stream.status = status;
         stream.name = name;
         stream.published = published;
+        stream.getRecordInfo = getRecordInfo;
         stream.on = on;
 
         streams[id_] = stream;
