@@ -29,9 +29,9 @@
                 <div class="text-center text-muted">Player 1</div>
                 <div id="player1" class="fp-remoteVideo"></div>
                 <div id="form1" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
-                    <input class="form-control" type="text" id="url1" value="">
+                    <input class="form-control" type="text" id="streamName1">
                     <div class="input-group-btn">
-                        <button id="playBtn1" type="button" class="btn btn-default" onclick="connectAndPlay(player1, 'url1')">Start</button>
+                        <button id="playBtn1" type="button" class="btn btn-default" onclick="playStream(player1, 'streamName1')">Start</button>
                     </div>
                 </div>
                 <div class="text-center" style="margin-top: 20px">
@@ -43,18 +43,29 @@
                 <div class="text-center text-muted">Player 2</div>
                 <div id="player2" class="fp-remoteVideo"></div>
                 <div id="form2" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
-                    <input class="form-control" type="text" id="url2" value="">
+                    <input class="form-control" type="text" id="streamName2">
                     <div class="input-group-btn">
-                        <button id="playBtn2" type="button" class="btn btn-default" onclick="connectAndPlay(player2, 'url2')">Start</button>
+                        <button id="playBtn2" type="button" class="btn btn-default" onclick="playStream(player2, 'streamName2')">Start</button>
                     </div>
                 </div>
                 <div class="text-center" style="margin-top: 20px">
                     <div id="status2"></div>
                 </div>
             </div>
-
         </div>
-
+    </div>
+    <div class="row row-space">
+        <div class="col-sm-5 col-sm-offset-2">
+            <div class="input-group">
+                <input class="form-control" id="url" type="text" value="ws://192.168.33.200:8080">
+                <div class="input-group-btn">
+                    <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
+                </div>
+            </div>
+            <div class="text-center">
+                <div id="connectStatus"></div>
+            </div>
+        </div>
     </div>
 </div>
 </body>

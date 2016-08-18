@@ -31,7 +31,10 @@ var createConnection = function(options) {
             remoteStream = event.stream;
             if (video) {
                 video.srcObject = remoteStream;
-                video.play();
+                var playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(function(e) {console.warn(e)});
+                }
             }
         };
         connection.onremovestream = function (event) {
