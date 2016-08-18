@@ -41,6 +41,8 @@ function initAPI() {
     $("#streamName1").val("streamName1");
     $("#streamName2").val("streamName2");
 
+    $("#url").val(setURL());
+
 }
 
 ///////////////////////////////////
