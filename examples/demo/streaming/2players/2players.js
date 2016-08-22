@@ -43,6 +43,9 @@ function initAPI() {
 
     $("#url").val(setURL());
 
+    player1.button.attr('disabled',true);
+    player2.button.attr('disabled',true);
+
 }
 
 ///////////////////////////////////
@@ -55,18 +58,22 @@ function connect() {
         return;
     }
     var url = field('url');
-    console.log("connection to " , url);
     currentSession = Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.FAILED, function(session){
         console.warn("Session failed, id " + session.id());
-        //removeSession(session);
+        player1.button.attr('disabled', true);
+        player2.button.attr('disabled', true);
         setStatus("",session.status());
     }).on(SESSION_STATUS.DISCONNECTED, function(session) {
         console.log("Session diconnected, id " + session.id());
         removeSession(session);
+        player1.button.attr('disabled', true);
+        player2.button.attr('disabled', true);
         $("#url").attr('disabled', true);
         setStatus("",session.status());
     }).on(SESSION_STATUS.ESTABLISHED, function(session) {
         console.log("Session established, id" + session.id());
+        player1.button.removeAttr('disabled');
+        player2.button.removeAttr('disabled');
         setStatus("",session.status());
     });
 }
@@ -84,6 +91,13 @@ function disconnect() {
 function playStream(player, streamName) {
     if (!checkForEmptyField(streamName, player.formElement)) { return false;}
 
+    if ((player == player1 && player2.stream && player2.stream.name() == field(streamName)) ||
+        (player == player2 && player1.stream && player1.stream.name() == field(streamName))) {
+        console.warn("Stream " + field(streamName) + " alreay playing");
+        setStatus(player, "FAILED");
+        return false;
+    }
+
     player.button.attr('disabled', true);
     if (player.button.text() == "Stop") {
         stopStream(player);
@@ -92,9 +106,19 @@ function playStream(player, streamName) {
     player.streamName = field(streamName);
     console.log("Play stream name : " + player.streamName);
     var handleStream = function(stream) {
-        player.stream = stream;
-        setStatus(player, stream.status());
-        player.button.removeAttr('disabled');
+        switch (stream.status()) {
+            case "PLAYING" :
+                player.stream = stream;
+                setStatus(player, stream.status());
+                player.button.removeAttr('disabled');
+                break;
+            case "STOPPED" :
+            case "FAILED" :
+                player.stream = null;
+                setStatus(player, stream.status());
+                player.button.removeAttr('disabled');
+                break;
+        }
     };
     currentSession.createStream({name: player.streamName, display: player.videoElement, cacheLocalResources: false})
         .on(STREAM_STATUS.PLAYING, handleStream)
@@ -118,7 +142,7 @@ function setStatus(player, status) {
         if (player != "") {
             player.statusElement.text(status).removeClass().attr("class", "text-success");
             player.button.text("Stop");
-            player.urlElement.attr('disabled',true);
+            player.urlElement.attr('disabled', true);
         }
     }
 
@@ -126,7 +150,7 @@ function setStatus(player, status) {
         if (player != "") {
             player.statusElement.text(status).removeClass().attr("class", "text-muted");
             player.button.text("Start");
-            player.urlElement.removeAttr('disabled',true);
+            player.urlElement.removeAttr('disabled');
         } else {
             $("#connectStatus").text(status);
             $("#url").removeAttr('disabled');
@@ -137,7 +161,10 @@ function setStatus(player, status) {
         if (player != "") {
             player.statusElement.text(status).removeClass().attr("class", "text-danger");
             player.button.text("Start");
-            player.urlElement.removeAttr('disabled',true);
+            player.urlElement.removeAttr('disabled');
+        } else {
+            $("#connectStatus").text(status);
+            $("#url").removeAttr('disabled');
         }
     }
 
@@ -151,7 +178,6 @@ function setStatus(player, status) {
 // Check field for empty string
 function checkForEmptyField(checkField, alertDiv) {
     if (document.getElementById(checkField).value == "") {
-        console.log(checkField + " is empty");
         $(alertDiv).addClass("has-error");
         return false;
     } else {
