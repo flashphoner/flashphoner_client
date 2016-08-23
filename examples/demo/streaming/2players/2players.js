@@ -93,7 +93,7 @@ function playStream(player, streamName) {
 
     if ((player == player1 && player2.stream && player2.stream.name() == field(streamName)) ||
         (player == player2 && player1.stream && player1.stream.name() == field(streamName))) {
-        console.warn("Stream " + field(streamName) + " alreay playing");
+        console.warn("Stream " + field(streamName) + " already playing");
         setStatus(player, "FAILED");
         return false;
     }

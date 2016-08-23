@@ -91,6 +91,13 @@ define(streamStatus, 'STOPPED', 'STOPPED');
  */
 define(streamStatus, 'FAILED', 'FAILED');
 
+/**
+ * Fires if {@link Stream} resize
+ * @event RESIZE
+ * @memberof Flashphoner.constants.STREAM_STATUS
+ */
+define(streamStatus, 'RESIZE', 'RESIZE');
+
 var constants = {};
 define(constants, 'SESSION_STATUS', sessionStatus);
 define(constants, 'STREAM_STATUS', streamStatus);

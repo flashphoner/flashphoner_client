@@ -84,6 +84,7 @@ package com.flashphoner.api2 {
             ExternalInterface.addCallback("reset", reset);
             ExternalInterface.addCallback("getId", getId);
             ExternalInterface.addCallback("listDevices", listDevices);
+            ExternalInterface.addCallback("resize", resize);
             callExternalInterface("initialized", null);
         }
 
@@ -246,6 +247,11 @@ package com.flashphoner.api2 {
 
         private function onResize(event:Event):void{
             Logger.info("Changed size to " + remoteDisplayHolder.width + "x" + remoteDisplayHolder.height);
+        }
+
+        public function resize(width:int, height:int):void {
+            remoteDisplay.width = width;
+            remoteDisplay.height = height;
         }
     }
 }

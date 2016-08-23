@@ -126,7 +126,8 @@ var getDefaultMediaConstraints = function() {
         audio: true,
         video: {
             width: 320,
-            height: 240
+            height: 240,
+            frameRate: 0
         }
     };
 };
@@ -257,6 +258,7 @@ var createSession = function(options) {
                     console.error("Stream not found, id " + mediaSessionId);
                 }
                 break;
+            case 'notifyVideoFormat':
             case 'notifyStreamStatusEvent':
                 if (streamRefreshHandlers[obj.mediaSessionId]) {
                     //update stream status
@@ -330,6 +332,8 @@ var createSession = function(options) {
         var mediaConnection;
         var display = options.display;
 
+        var dimension = {};
+
         var published_ = false;
         var record_ = options.record || false;
         var recordFileName = null;
@@ -356,6 +360,11 @@ var createSession = function(options) {
                 if (record_) {
                     recordFileName = streamInfo.recordName;
                 }
+            }
+
+            if (status_ == STREAM_STATUS.RESIZE) {
+                dimension.width = streamInfo.playerVideoWidth;
+                dimension.height = streamInfo.playerVideoHeight;
             }
 
             //release stream
@@ -545,6 +554,20 @@ var createSession = function(options) {
         };
 
         /**
+         * Get stream dimension
+         * @returns {Object} Dimension
+         * @memberof Stream
+         * @inner
+         */
+        var getStreamDimension = function() {
+          if (!published_) {
+              return dimension;
+          } else {
+              throw new Error("This function available only on playing stream");
+          }
+        };
+
+        /**
          * Stream event callback.
          *
          * @callback Stream~eventCallback
@@ -581,6 +604,7 @@ var createSession = function(options) {
         stream.name = name;
         stream.published = published;
         stream.getRecordInfo = getRecordInfo;
+        stream.getStreamDimension = getStreamDimension;
         stream.on = on;
 
         streams[id_] = stream;
