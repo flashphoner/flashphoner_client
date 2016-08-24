@@ -114,7 +114,7 @@ function playStream() {
             if (Flashphoner.getMediaProviders()[0] == "Flash") {
                 document.getElementById(playingStream.id()).resize(W,H);
             }
-            if (W >= remoteVideo.offsetWidth && H >= remoteVideo.offsetHeight) {
+            if (W >= (remoteVideo.offsetWidth-2) && H >= (remoteVideo.offsetHeight-2)) {
                 var scale = Math.max(W / 800, H / 400);
                 var rescale = Math.floor(W / scale) + "px";
                 if (Flashphoner.getMediaProviders()[0] == "WebRTC") {
