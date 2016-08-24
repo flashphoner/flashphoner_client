@@ -117,8 +117,13 @@ function playStream() {
             if (W > remoteVideo.offsetWidth && H > remoteVideo.offsetHeight) {
                 var scale = Math.max(W / 800, H / 400);
                 var rescale = Math.floor(W / scale) + "px";
+                if (Flashphoner.getMediaProviders()[0] == "WebRTC") {
+                    document.getElementsByTagName("video")[0].setAttribute('width', rescale);
+                    document.getElementsByTagName("video")[0].setAttribute('height', 400);
+                }
                 d.style.width = rescale;
                 d.style.height = 400 + "px";
+                d.style.margin = "0 auto";
             } else {
                 var marginTop = (400 - H) / 2 + "px";
                 d.style.width = W + "px";
