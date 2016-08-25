@@ -185,6 +185,7 @@ var getSession = function(id) {
  * @param {Object} options Session options
  * @param {string} options.urlServer Server address in form of [ws,wss]://host.domain:port
  * @param {string=} options.appKey REST App key
+ * @param {Object=} options.custom User provided custom object that will be available in REST App code
  * @returns {Session} Created session
  * @throws {Error} Error if API is not initialized
  * @throws {TypeError} Error if options.urlServer is not specified
@@ -234,7 +235,8 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.0"
+            clientVersion: "0.3.2",
+            custom: options.custom
         });
     };
     wsConnection.onmessage = function(event) {
@@ -263,6 +265,16 @@ var createSession = function(options) {
                 if (streamRefreshHandlers[obj.mediaSessionId]) {
                     //update stream status
                     streamRefreshHandlers[obj.mediaSessionId](obj);
+                }
+                break;
+            case 'DataStatusEvent':
+                if (callbacks[SESSION_STATUS.SEND_DATA_STATUS]) {
+                    callbacks[SESSION_STATUS.SEND_DATA_STATUS](obj);
+                }
+                break;
+            case 'OnDataEvent':
+                if (callbacks[SESSION_STATUS.APP_DATA]) {
+                    callbacks[SESSION_STATUS.APP_DATA](obj);
                 }
                 break;
             default:
@@ -305,6 +317,7 @@ var createSession = function(options) {
      * @param {Boolean=} options.record Enable stream recording
      * @param {Boolean=} options.cacheLocalResources Display will contain local video after stream release
      * @param {HTMLElement} options.display Div element stream should be displayed in
+     * @param {Object=} options.custom User provided custom object that will be available in REST App code
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
      * @throws {TypeError} Error if options.name is not specified
@@ -415,7 +428,8 @@ var createSession = function(options) {
                     status: status_,
                     record: false,
                     mediaProvider: mediaProvider,
-                    sdp: sdp
+                    sdp: sdp,
+                    custom: options.custom
                 });
             }).catch(function(error) {
                 //todo fire stream failed status
@@ -460,7 +474,8 @@ var createSession = function(options) {
                         status: status_,
                         record: record_,
                         mediaProvider: mediaProvider,
-                        sdp: sdp
+                        sdp: sdp,
+                        custom: options.custom
                     });
                 });
             }).catch(function(error){
@@ -687,11 +702,16 @@ var createSession = function(options) {
         return session;
     };
 
+    var sendData = function(data) {
+        send("sendData", data);
+    };
+
     //export Session
     session.id = id;
     session.status = status;
     session.createStream = createStream;
     session.getStream = getStream;
+    session.sendData = sendData;
     session.disconnect = disconnect;
     session.on = on;
 
@@ -709,6 +729,7 @@ module.exports = {
     getSessions: getSessions,
     getSession: getSession,
     createSession: createSession,
+    roomModule: require('./room-module'),
     constants: constants,
     firefoxScreenSharingExtensionInstalled: false
 };
