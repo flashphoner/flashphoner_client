@@ -105,25 +105,26 @@ function playStream() {
             remoteVideo.removeChild(displayEl);
             setStatus(playingStream.status());
         })
-        .on(STREAM_STATUS.RESIZE, function(playingStream){
+        .on(STREAM_STATUS.RESIZE, function(playingStream) {
             var dimension = playingStream.getStreamDimension();
             var W = dimension.width;
             var H = dimension.height;
             console.log("Got native resolution " + W + "x" + H);
 
-            if (Flashphoner.getMediaProviders()[0] == "Flash") {
-                document.getElementById(playingStream.id()).resize(W,H);
-            }
-            if (W >= (remoteVideo.offsetWidth-2) && H >= (remoteVideo.offsetHeight-2)) {
+
+            if (W >= (remoteVideo.offsetWidth - 2) || H >= (remoteVideo.offsetHeight - 2)) {
                 var scale = Math.max(W / 800, H / 400);
-                var rescale = Math.floor(W / scale) + "px";
+                var rescale = Math.floor(W / scale);
                 if (Flashphoner.getMediaProviders()[0] == "WebRTC") {
-                    document.getElementsByTagName("video")[0].setAttribute('width', rescale);
+                    document.getElementsByTagName("video")[0].setAttribute('width', rescale + "px");
                     document.getElementsByTagName("video")[0].setAttribute('height', 400);
                 }
-                d.style.width = rescale;
+                d.style.width = rescale + "px";
                 d.style.height = 400 + "px";
                 d.style.margin = "0 auto";
+                if (Flashphoner.getMediaProviders()[0] == "Flash") {
+                    document.getElementById(playingStream.id()).resize(rescale, 400);
+                }
             } else {
                 var marginTop = (400 - H) / 2 + "px";
                 d.style.width = W + "px";
