@@ -19,24 +19,32 @@ var initialized = false;
  * @param {Object} options Global api options
  * @param {String=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
  * @param {String=} options.screenSharingExtensionId Chrome screen sharing extension id
+ * @param {Object=} options.constraints Default local media constraints
  * @throws {Error} Error if none of MediaProviders available
  * @memberof Flashphoner
  */
 var init = function(options) {
     if (!initialized) {
+        if (!options) {
+            options = {};
+        }
         var webRtcProvider = require("./webrtc-media-provider");
         if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
             MediaProvider.WebRTC = webRtcProvider;
-            if (options && options.screenSharingExtensionId) {
-                webRtcProvider.configure(options.screenSharingExtensionId);
-            }
+            var webRtcConf = {
+                defaultConstraints: options.constraints || getDefaultMediaConstraints(),
+                extensionId: options.screenSharingExtensionId
+            };
+            webRtcProvider.configure(webRtcConf);
         }
         var flashProvider = require("./flash-media-provider");
         if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available()) {
             MediaProvider.Flash = flashProvider;
-            if (options && options.flashMediaProviderSwfLocation) {
-                flashProvider.configure(options.flashMediaProviderSwfLocation);
-            }
+            var flashConf = {
+                defaultConstraints: options.constraints || getDefaultMediaConstraints(),
+                flashMediaProviderSwfLocation: options.flashMediaProviderSwfLocation
+            };
+            flashProvider.configure(flashConf);
         }
         //check at least 1 provider available
         if (getMediaProviders().length == 0) {
@@ -234,7 +242,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.0"
+            clientVersion: "0.3.1"
         });
     };
     wsConnection.onmessage = function(event) {
@@ -301,6 +309,7 @@ var createSession = function(options) {
      *
      * @param {Object} options Stream options
      * @param {string} options.name Stream name
+     * @param {Object} options.constraints Stream constraints
      * @param {string} options.mediaProvider MediaProvider type to use with this stream
      * @param {Boolean=} options.record Enable stream recording
      * @param {Boolean=} options.cacheLocalResources Display will contain local video after stream release
@@ -331,7 +340,8 @@ var createSession = function(options) {
         var mediaProvider = options.mediaProvider || getMediaProviders()[0];
         var mediaConnection;
         var display = options.display;
-
+        // Constraints
+        var constraints = options.constraints;
         var dimension = {};
 
         var published_ = false;
@@ -435,7 +445,7 @@ var createSession = function(options) {
                 throw new Error("Invalid stream state");
             }
             //get access to camera
-            MediaProvider[mediaProvider].getMediaAccess(getDefaultMediaConstraints(), display).then(function(){
+            MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function(){
                 published_ = true;
                 //create mediaProvider connection
                 MediaProvider[mediaProvider].createConnection({

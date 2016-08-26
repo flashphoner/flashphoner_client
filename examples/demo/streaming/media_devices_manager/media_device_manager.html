@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="manager.css">
+    <title>Media Devices</title>
+    <script type="text/javascript" src="../../../../flashphoner.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
+
+    <script type="text/javascript" src="manager.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
+</head>
+<body onload="initAPI()">
+<div class="container">
+    <div class="row">
+        <div class="col-sm-8">
+            <h2 class="text-center">Media Devices</h2>
+        </div>
+    </div>
+    <div class="row">
+        <h2 id="notifyFlash" class="text-danger"></h2>
+        <div class="col-sm-4">
+            <div class="text-muted text-center">Local</div>
+            <div class="fp-remoteVideo text-center" id="localVideo"></div>
+            <form id="form" class="form-horizontal" role="form" style="margin-top: 10px; margin-left: 10px">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">FPS</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="url">
+                        <div class="text-center">
+                            <div id="streamStatus"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Cam</label>
+                    <div class="col-sm-6">
+                        <select class="form-control" id="videoInput">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Mic</label>
+                    <div class="col-sm-6">
+                        <select class="form-control" id="audioInput">
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">FPS</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="fps" value="60">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Width</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="width" value="320">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Height</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="height" value="240">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label"></label>
+                    <div class="col-sm-4">
+                        <button type="button" class="btn btn-default" id="applyBtn">Start</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+        <div class="col-sm-1 text-center" style="margin: 8% auto">
+            <i class="fa fa-arrow-right" aria-hidden="true" style="font-size: 42px"></i>
+
+        </div>
+        <div class="col-sm-4">
+            <div class="text-muted text-center">Preview</div>
+            <div class="fp-remoteVideo" id="remoteVideo"></div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

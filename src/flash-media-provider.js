@@ -22,6 +22,7 @@ var DEFAULT_SDP = "v=0\r\n" +
     "a=AUDIO_STATE\r\n";
 
 var CACHED_INSTANCE_POSTFIX = "CACHED_FLASH_INSTANCE";
+var defaultConstraints;
 
 var createConnection = function(options) {
     return new Promise(function(resolve, reject) {
@@ -157,6 +158,9 @@ function clearCallbacks(id) {
 
 var getMediaAccess = function(constraints, display) {
     return new Promise(function(resolve, reject) {
+        if (!constraints) {
+            constraints = defaultConstraints;
+        }
         var flash = getCacheInstance(display);
         if (!flash) {
             var id = uuid.v1() + CACHED_INSTANCE_POSTFIX;
@@ -288,8 +292,9 @@ module.exports = {
     releaseMedia: releaseMedia,
     available: available,
     listDevices: listDevices,
-    configure: function(flashLocation){
-        swfLocation = flashLocation;
+    configure: function(configuration) {
+        swfLocation = configuration.flashMediaProviderSwfLocation;
+        defaultConstraints = configuration.constraints;
     }
 };
 

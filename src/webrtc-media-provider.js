@@ -5,6 +5,7 @@ var uuid = require('node-uuid');
 var connections = {};
 var CACHED_INSTANCE_POSTFIX = "-CACHED_WEBRTC_INSTANCE";
 var extensionId;
+var defaultConstraints;
 
 var createConnection = function(options) {
     return new Promise(function(resolve, reject) {
@@ -103,9 +104,14 @@ var createConnection = function(options) {
 
 var getMediaAccess = function(constraints, display) {
     return new Promise(function(resolve, reject) {
-        if (getCacheInstance(display)) {
-            resolve(display);
-            return;
+        if (!constraints) {
+            constraints = defaultConstraints;
+            if (getCacheInstance(display)) {
+                resolve(display);
+                return;
+            }
+        } else {
+            releaseMedia(display);
         }
         //check if this is screen sharing
         if (constraints.video && constraints.video.type && constraints.video.type == "screen") {
@@ -254,7 +260,8 @@ module.exports = {
     releaseMedia: releaseMedia,
     listDevices: listDevices,
     available: available,
-    configure: function(screenSharingExtensionId) {
-        extensionId = screenSharingExtensionId;
+    configure: function(configuration) {
+        extensionId = configuration.screenSharingExtensionId;
+        defaultConstraints = configuration.constraints;
     }
 };
