@@ -35,6 +35,22 @@ define(sessionStatus, 'DISCONNECTED', 'DISCONNECTED');
  */
 define(sessionStatus, 'FAILED', 'FAILED');
 
+/**
+ * Fires when {@link Session} receives custom REST App message.
+ *
+ * @event APP_DATA
+ * @memberof Flashphoner.constants.SESSION_STATUS
+ */
+define(sessionStatus, 'APP_DATA', 'APP_DATA');
+
+/**
+ * Fires when {@link Session} receives status of sendData operation.
+ *
+ * @event SEND_DATA_STATUS
+ * @memberof Flashphoner.constants.SESSION_STATUS
+ */
+define(sessionStatus, 'SEND_DATA_STATUS', 'SEND_DATA_STATUS');
+
 //State of newly created Session
 define(sessionStatus, 'PENDING', 'PENDING');
 
