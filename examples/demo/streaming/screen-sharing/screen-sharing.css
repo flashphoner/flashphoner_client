@@ -1,0 +1,19 @@
+.fp-localVideo {
+    border: 1px double black;
+    width: 322px;
+    height: 242px;
+    margin: 10px auto;
+}
+.fp-localVideo>video {
+    width: 320px;
+    height: 240px;
+}
+
+.fp-previewVideo {
+    border: 1px double black;
+    width: 802px;
+    height: 402px;
+    margin: 10px auto;
+}
+
+
