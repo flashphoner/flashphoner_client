@@ -130,6 +130,9 @@ function playStream() {
                 d.style.width = W + "px";
                 d.style.height = H + "px";
                 d.style.margin = marginTop + " auto";
+                if (Flashphoner.getMediaProviders()[0] == "Flash") {
+                    document.getElementById(playingStream.id()).resize(W, H);
+                }
             }
         }).play();
 }
