@@ -135,7 +135,6 @@ var getDefaultMediaConstraints = function() {
         video: {
             width: 320,
             height: 240,
-            frameRate: 0
         }
     };
 };

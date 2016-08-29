@@ -26,6 +26,11 @@ var createConnection = function(options) {
         } else {
             video = document.createElement('video');
             video.id = id;
+            if (display.children.length) {
+                if (display.childNodes[0].nodeName == "VIDEO") {
+                    display.removeChild(display.childNodes[0]);
+                }
+            }
             display.appendChild(video);
         }
         connection.onaddstream = function (event) {
@@ -139,7 +144,10 @@ var getMediaAccess = function(constraints, display) {
                 video.srcObject = stream;
                 //mute audio
                 video.muted = true;
-                video.play();
+                var playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(function(e) {console.warn(e)});
+                }
                 resolve(display);
             }, reject);
         }
