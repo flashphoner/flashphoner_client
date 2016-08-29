@@ -32,7 +32,7 @@ var init = function(options) {
         if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
             MediaProvider.WebRTC = webRtcProvider;
             var webRtcConf = {
-                defaultConstraints: options.constraints || getDefaultMediaConstraints(),
+                constraints: options.constraints || getDefaultMediaConstraints(),
                 extensionId: options.screenSharingExtensionId
             };
             webRtcProvider.configure(webRtcConf);
@@ -41,7 +41,7 @@ var init = function(options) {
         if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available()) {
             MediaProvider.Flash = flashProvider;
             var flashConf = {
-                defaultConstraints: options.constraints || getDefaultMediaConstraints(),
+                constraints: options.constraints || getDefaultMediaConstraints(),
                 flashMediaProviderSwfLocation: options.flashMediaProviderSwfLocation
             };
             flashProvider.configure(flashConf);

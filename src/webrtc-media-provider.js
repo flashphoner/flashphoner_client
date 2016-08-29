@@ -116,6 +116,7 @@ var getMediaAccess = function(constraints, display) {
                 return;
             }
         } else {
+            constraints = checkConstraints(constraints);
             releaseMedia(display);
         }
         //check if this is screen sharing
@@ -262,6 +263,34 @@ var listDevices = function(labels) {
     });
 };
 
+function checkConstraints(constraints) {
+    if (constraints.video) {
+        if (constraints.video.hasOwnProperty('frameRate')) {
+            var frameRate = constraints.video.frameRate;
+            if (frameRate == 0 || isNaN(frameRate)) {
+                delete constraints.video.frameRate;
+            }
+        }
+        if (constraints.video.hasOwnProperty('width')) {
+            var width = constraints.video.width;
+            if (width == 0 || isNaN(width)) {
+                console.warn("Width or height property has zero/NaN value, set default resolution 320x240");
+                constraints.video.width = 320;
+                constraints.video.height = 240;
+            }
+        }
+        if (constraints.video.hasOwnProperty('height')) {
+            var height = constraints.video.height;
+            if (height == 0 || isNaN(height)) {
+                console.warn("Width or height property has zero/NaN value, set default resolution 320x240");
+                constraints.video.width = 320;
+                constraints.video.height = 240;
+            }
+        }
+    }
+    return constraints;
+}
+
 module.exports = {
     createConnection: createConnection,
     getMediaAccess: getMediaAccess,
@@ -269,7 +298,7 @@ module.exports = {
     listDevices: listDevices,
     available: available,
     configure: function(configuration) {
-        extensionId = configuration.screenSharingExtensionId;
+        extensionId = configuration.extensionId;
         defaultConstraints = configuration.constraints;
     }
 };
