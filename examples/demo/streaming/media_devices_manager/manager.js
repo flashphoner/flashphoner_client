@@ -17,6 +17,17 @@ var _constraints = {};
 /////////////// Init /////////////
 
 function startTest() {
+    var emptyField;
+    $("form :input").not(':input[type=button]').each(function() {
+        if (!checkForEmptyField('#'+$(this).attr('id'),'#'+$(this).attr('id')+'Form')) {
+            emptyField = true;
+        }
+    });
+
+    if(emptyField) {
+        $("#applyBtn").removeProp("disabled");
+        return false;
+    }
 
     var audioSelect = document.getElementById("audioInput");
     var selectedAudio = audioSelect.options[audioSelect.selectedIndex].value;
@@ -33,6 +44,11 @@ function startTest() {
         frameRate: parseInt(document.getElementById("fps").value),
         type: "camera"
     };
+
+    $("#form :input").prop('readonly', true);
+    document.getElementById("videoInput").disabled = true;
+    document.getElementById("audioInput").disabled = true;
+
     connectAndPublish();
 }
 
@@ -48,21 +64,18 @@ function initAPI() {
     }
 
     $("#applyBtn").click(function() {
+        $("#applyBtn").prop("disabled",true);
         var state = $("#applyBtn").text();
         if (state == "Start") {
-            $("#form :input").prop('readonly', true);
-            document.getElementById("videoInput").disabled = true;
-            document.getElementById("audioInput").disabled = true;
             startTest();
         } else {
             if (_stream)
                 _stream.stop();
         }
-        $("#applyBtn").prop("disabled",true);
+
     });
     Flashphoner.getMediaDevices(Flashphoner.getMediaProviders()[0],true).then(function(list){
         list.audio.forEach(function(device) {
-            console.log(device);
             var audio = document.getElementById("audioInput");
             var i;
             var deviceInList = false;
@@ -187,3 +200,13 @@ function playStream() {
         }).play();
 }
 
+// Check field for empty string
+function checkForEmptyField(checkField, alertDiv) {
+    if (!$(checkField).val()) {
+        $(alertDiv).addClass("has-error");
+        return false;
+    } else {
+        $(alertDiv).removeClass("has-error");
+        return true;
+    }
+}
