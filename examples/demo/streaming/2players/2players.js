@@ -58,24 +58,38 @@ function connect() {
         return;
     }
     var url = field('url');
-    currentSession = Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.FAILED, function(session){
-        console.warn("Session failed, id " + session.id());
-        player1.button.attr('disabled', true);
-        player2.button.attr('disabled', true);
-        setStatus("",session.status());
-    }).on(SESSION_STATUS.DISCONNECTED, function(session) {
-        console.log("Session diconnected, id " + session.id());
-        removeSession(session);
-        player1.button.attr('disabled', true);
-        player2.button.attr('disabled', true);
-        $("#url").attr('disabled', true);
-        setStatus("",session.status());
-    }).on(SESSION_STATUS.ESTABLISHED, function(session) {
-        console.log("Session established, id" + session.id());
-        player1.button.removeAttr('disabled');
-        player2.button.removeAttr('disabled');
-        setStatus("",session.status());
-    });
+
+    var handleSession = function(session) {
+        var status = session.status();
+        switch (status) {
+            case "FAILED":
+                console.warn("Session failed, id " + session.id());
+                removeSession(session);
+                player1.button.attr('disabled', true);
+                player2.button.attr('disabled', true);
+                setStatus("",session.status());
+                break;
+            case "DISCONNECTED":
+                console.log("Session diconnected, id " + session.id());
+                removeSession(session);
+                player1.button.attr('disabled', true);
+                player2.button.attr('disabled', true);
+                $("#url").attr('disabled', true);
+                setStatus("",session.status());
+                break;
+            case "ESTABLISHED":
+                console.log("Session established, id " + session.id());
+                player1.button.removeAttr('disabled');
+                player2.button.removeAttr('disabled');
+                setStatus("",session.status());
+                break;
+        }
+    };
+
+    currentSession = Flashphoner.createSession({urlServer: url})
+        .on(SESSION_STATUS.FAILED, handleSession)
+        .on(SESSION_STATUS.DISCONNECTED, handleSession)
+        .on(SESSION_STATUS.ESTABLISHED, handleSession);
 }
 
 function disconnect() {
