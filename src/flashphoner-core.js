@@ -242,7 +242,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.2",
+            clientVersion: "0.3.3",
             custom: options.custom
         });
     };
@@ -275,9 +275,7 @@ var createSession = function(options) {
                 }
                 break;
             case 'DataStatusEvent':
-                if (callbacks[SESSION_STATUS.SEND_DATA_STATUS]) {
-                    callbacks[SESSION_STATUS.SEND_DATA_STATUS](obj);
-                }
+                restAppCommunicator.resolveData(obj);
                 break;
             case 'OnDataEvent':
                 if (callbacks[SESSION_STATUS.APP_DATA]) {
@@ -711,16 +709,42 @@ var createSession = function(options) {
         return session;
     };
 
-    var sendData = function(data) {
-        send("sendData", data);
-    };
+    var restAppCommunicator = function() {
+        var pending = {};
+        var exports = {};
+        exports.sendData = function(data) {
+            return new Promise(function(resolve, reject){
+                var obj = {
+                    operationId: uuid.v1(),
+                    payload: data
+                };
+                pending[obj.operationId] = {
+                    FAILED: function(){
+                        reject();
+                    },
+                    ACCEPTED: function(){
+                        resolve();
+                    }
+                };
+                send("sendData", obj);
+            });
+        };
+        exports.resolveData = function(data) {
+            if (pending[data.operationId]) {
+                var handler = pending[data.operationId];
+                delete pending[data.operationId];
+                handler[data.status]();
+            }
+        };
+        return exports;
+    }();
 
     //export Session
     session.id = id;
     session.status = status;
     session.createStream = createStream;
     session.getStream = getStream;
-    session.sendData = sendData;
+    session.sendData = restAppCommunicator.sendData;
     session.disconnect = disconnect;
     session.on = on;
 
@@ -738,7 +762,7 @@ module.exports = {
     getSessions: getSessions,
     getSession: getSession,
     createSession: createSession,
-    roomModule: require('./room-module'),
+    roomApi: require('./room-module'),
     constants: constants,
     firefoxScreenSharingExtensionInstalled: false
 };

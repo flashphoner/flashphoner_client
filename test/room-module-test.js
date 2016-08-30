@@ -5,7 +5,7 @@ describe('Room api', function() {
             flashMediaProviderSwfLocation: "../media-provider.swf",
             screenSharingExtensionId: "nlbaajplpmleofphigmgaifhoikjmbkg"
         });
-        roomApi = Flashphoner.roomModule;
+        roomApi = Flashphoner.roomApi;
     });
 
     it('join room', function(done) {
@@ -15,28 +15,27 @@ describe('Room api', function() {
                 urlServer: "ws://192.168.88.234:8080",
                 username: "test"
             }
-        ).on("CONNECTED", function(api){
+        ).on("ESTABLISHED", function(api){
             //join room
+            console.log("Connected");
             api.join({name: "my_test_room"}).on("JOINED", function(participant){
                 console.log("Participant joined with name " + participant.name);
                 api.getRooms()[0].leave();
                 api.disconnect();
-            }).on("STATE", function(participants){
+            }).on("STATE", function(room){
                 //create second connection
                 roomApi.connect(
                     {
                         urlServer: "ws://192.168.88.234:8080",
                         username: "test2"
                     }
-                ).on("CONNECTED", function(api){
+                ).on("ESTABLISHED", function(api){
                     //join room
                     api.join({name: "my_test_room"}).on("LEFT", function(participant){
                         console.log("Participant left with name " + participant.name);
                         api.disconnect();
                         done();
                     });
-                }).on("STATE", function(participants){
-                    console.dir(participants);
                 });
             });
         });
@@ -49,9 +48,9 @@ describe('Room api', function() {
                 urlServer: "ws://192.168.88.234:8080",
                 username: "test"
             }
-        ).on("CONNECTED", function(api){
+        ).on("ESTABLISHED", function(api){
             //join room
-            api.join({name: "my_test_room"}).on("STATE", function(participants){
+            api.join({name: "my_test_room"}).on("STATE", function(room){
                 var display = document.createElement("div");
                 display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
                 document.body.appendChild(display);
@@ -74,12 +73,12 @@ describe('Room api', function() {
                 urlServer: "ws://192.168.88.234:8080",
                 username: "test"
             }
-        ).on("CONNECTED", function(api){
+        ).on("ESTABLISHED", function(api){
             var display = document.createElement("div");
             display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
             document.body.appendChild(display);
             //join room
-            api.join({name: "my_test_room"}).on("STATE", function(participants){
+            api.join({name: "my_test_room"}).on("STATE", function(room){
                 api.getRooms()[0].publish(display).on("PUBLISHING", function(stream){
                     //create second connection and subscribe
                     roomApi.connect(
@@ -87,14 +86,14 @@ describe('Room api', function() {
                             urlServer: "ws://192.168.88.234:8080",
                             username: "test2"
                         }
-                    ).on("CONNECTED", function(api){
+                    ).on("ESTABLISHED", function(api){
                         //join room
-                        api.join({name: "my_test_room"}).on("STATE", function(participants){
-                            console.log("Joined room with state " + participants);
+                        api.join({name: "my_test_room"}).on("STATE", function(room){
+                            console.log("Joined room with state " + room);
                             var display = document.createElement("div");
                             display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
                             document.body.appendChild(display);
-                            participants["test"].subscribe(display).on("PLAYING", function(stream){
+                            room.getParticipants()[0].play(display).on("PLAYING", function(stream){
                                 setTimeout(function(){
                                     stream.stop();
                                     document.body.removeChild(display);
@@ -119,21 +118,21 @@ describe('Room api', function() {
                 urlServer: "ws://192.168.88.234:8080",
                 username: "test"
             }
-        ).on("CONNECTED", function(api){
+        ).on("ESTABLISHED", function(api){
             var display = document.createElement("div");
             display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
             document.body.appendChild(display);
             //join room
-            api.join({name: "my_test_room"}).on("STATE", function(participants){
+            api.join({name: "my_test_room"}).on("STATE", function(room){
                 //create second connection and publish
                 roomApi.connect(
                     {
                         urlServer: "ws://192.168.88.234:8080",
                         username: "test2"
                     }
-                ).on("CONNECTED", function(api){
+                ).on("ESTABLISHED", function(api){
                     //join room
-                    api.join({name: "my_test_room"}).on("STATE", function(participants){
+                    api.join({name: "my_test_room"}).on("STATE", function(room){
                         var display = document.createElement("div");
                         display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
                         document.body.appendChild(display);
@@ -148,7 +147,7 @@ describe('Room api', function() {
                 });
             }).on("PUBLISHED", function(participant){
                 console.log("Stream published, subscribe");
-                participant.subscribe(display).on("FAILED", function(stream){
+                participant.play(display).on("FAILED", function(stream){
                     document.body.removeChild(display);
                     api.disconnect();
                     done();
@@ -165,20 +164,20 @@ describe('Room api', function() {
                 urlServer: "ws://192.168.88.234:8080",
                 username: "test"
             }
-        ).on("CONNECTED", function(api){
+        ).on("ESTABLISHED", function(api){
             //join room
-            api.join({name: "my_test_room"}).on("STATE", function(participants){
+            api.join({name: "my_test_room"}).on("STATE", function(room){
                 //create second connection
                 roomApi.connect(
                     {
                         urlServer: "ws://192.168.88.234:8080",
                         username: "test2"
                     }
-                ).on("CONNECTED", function(api){
+                ).on("ESTABLISHED", function(api){
                     //join room
-                    api.join({name: "my_test_room"}).on("STATE", function(participants){
-                        console.log("Joined room with state " + participants);
-                        participants["test"].sendMessage(MESSAGE_TEXT);
+                    api.join({name: "my_test_room"}).on("STATE", function(room){
+                        console.log("Joined room with state " + room);
+                        room.getParticipants()[0].sendMessage(MESSAGE_TEXT);
                     }).on("LEFT", function(){
                         api.disconnect();
                         done();
@@ -187,6 +186,55 @@ describe('Room api', function() {
             }).on("MESSAGE", function(message){
                 expect(message.text).to.equal(MESSAGE_TEXT);
                 api.disconnect();
+            });
+        });
+    });
+
+    it("join with error", function(done){
+        this.timeout(20000);
+        roomApi.connect(
+            {
+                urlServer: "ws://192.168.88.234:8080",
+                username: "throw_join_exception"
+            }
+        ).on("ESTABLISHED", function(api){
+            //join room
+            api.join({name: "my_test_room"}).on("STATE", function(room){
+                done(new Error("Joined"));
+            }).on("FAILED", function(){
+                api.disconnect();
+                done();
+            });
+        });
+    });
+
+    it("sendMessage with error", function(done){
+        this.timeout(20000);
+        roomApi.connect(
+            {
+                urlServer: "ws://192.168.88.234:8080",
+                username: "test"
+            }
+        ).on("ESTABLISHED", function(api){
+            //join room
+            api.join({name: "my_test_room"}).on("STATE", function(room){
+                roomApi.connect(
+                    {
+                        urlServer: "ws://192.168.88.234:8080",
+                        username: "throw_message_exception"
+                    }
+                ).on("ESTABLISHED", function(api){
+                    //join room
+                    api.join({name: "my_test_room"}).on("STATE", function(room){
+                        room.getParticipants()[0].sendMessage("my message", function(){
+                            //message failed
+                            api.disconnect();
+                        })
+                    });
+                });
+            }).on("LEFT", function(){
+                api.disconnect();
+                done();
             });
         });
     });
