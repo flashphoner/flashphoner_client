@@ -11,7 +11,7 @@ var ROOM_REST_APP = "roomApp";
  * @param {String} options.urlServer Server address in form of [ws,wss]://host.domain:port
  * @param {String} options.username Username to login with
  */
-var appSession = function(options){
+var appSession = function(options) {
     var callbacks = {};
     var rooms = {};
     var username = options.username;
@@ -24,8 +24,8 @@ var appSession = function(options){
             login: options.username
         }
     }).on(SESSION_STATUS.ESTABLISHED, function(session){
-        if (callbacks["CONNECTED"]) {
-            callbacks["CONNECTED"](exports);
+        if (callbacks[session.status()]) {
+            callbacks[session.status()](exports);
         }
     }).on(SESSION_STATUS.APP_DATA, function(data){
         if (roomHandlers[data.payload.roomName]) {
@@ -37,8 +37,8 @@ var appSession = function(options){
 
     //teardown helper
     function sessionDied(session) {
-        if (callbacks["DISCONNECTED"]) {
-            callbacks["DISCONNECTED"](exports);
+        if (callbacks[session.status()]) {
+            callbacks[session.status()](exports);
         }
     }
 
@@ -46,14 +46,16 @@ var appSession = function(options){
         session.disconnect();
     };
 
+    exports.status = function() {
+        return session.status();
+    };
+
+    exports.id = function() {
+        return session.id();
+    };
+
     exports.getRooms = function(){
-        var roomsCopy = [];
-        for (var prop in rooms) {
-            if(rooms.hasOwnProperty(prop)) {
-                roomsCopy.push(rooms[prop]);
-            }
-        }
-        return roomsCopy;
+        return copyObjectToArray(rooms);
     };
 
     exports.on = function(event, callback) {
@@ -78,7 +80,7 @@ var appSession = function(options){
         var name_ = options.name;
         var participants = {};
         var callbacks = {};
-        roomHandlers[name_] = function(data){
+        roomHandlers[name_] = function(data) {
             var participant;
             if (data.name == "STATE") {
                 if (data.info) {
@@ -87,7 +89,7 @@ var appSession = function(options){
                         if (pState.hasOwnProperty("login")) {
                             participants[pState.login] = {
                                 name: pState.login,
-                                subscribe: attachSubscribe(pState.name),
+                                play: attachPlay(pState.name),
                                 sendMessage: attachSendMessage(pState.name)
                             }
                         } else {
@@ -99,7 +101,7 @@ var appSession = function(options){
                     }
                 }
                 if (callbacks["STATE"]) {
-                    callbacks["STATE"](participants);
+                    callbacks["STATE"](room);
                 }
             } else if (data.name == "JOINED") {
                 participant = {
@@ -118,7 +120,7 @@ var appSession = function(options){
                 }
             } else if (data.name == "PUBLISHED") {
                 participant = participants[data.info.login];
-                participant.subscribe = attachSubscribe(data.info.name);
+                participant.play = attachPlay(data.info.name);
                 if (callbacks["PUBLISHED"]) {
                     callbacks["PUBLISHED"](participant);
                 }
@@ -145,7 +147,7 @@ var appSession = function(options){
          * Leave room
          */
         room.leave = function() {
-            sendAppCommand("leave", {name: name_});
+            sendAppCommand("leave", {name: name_}).then(function(){});
             delete roomHandlers[name_];
             delete rooms[name_];
         };
@@ -173,8 +175,12 @@ var appSession = function(options){
             return room;
         };
 
+        room.getParticipants = function() {
+            return copyObjectToArray(participants);
+        };
+
         //participant helpers
-        function attachSubscribe(streamName) {
+        function attachPlay(streamName) {
             return function(display){
                 var stream = session.createStream({name: streamName, display: display, custom: {name: name_}});
                 stream.play();
@@ -183,7 +189,7 @@ var appSession = function(options){
         }
 
         function attachSendMessage(recipientName) {
-            return function(text) {
+            return function(text, error) {
                 var message = {
                     roomConfig: {
                         name: name_
@@ -191,23 +197,28 @@ var appSession = function(options){
                     to: recipientName,
                     text: text
                 };
-                sendAppCommand("sendMessage", message);
+                sendAppCommand("sendMessage", message).then(function(){}, function(){
+                    if (error) {
+                        error();
+                    }
+                });
             }
         }
 
         //sendData helper
         function sendAppCommand(commandName, data) {
             var command = {
-                operationId: uuid.v1(),
-                payload: {
-                    command: commandName,
-                    options: data
-                }
+                command: commandName,
+                options: data
             };
-            session.sendData(command);
+            return session.sendData(command);
         }
 
-        sendAppCommand("join", {name: name_});
+        sendAppCommand("join", {name: name_}).then(function(){}, function(){
+            if (callbacks["FAILED"]) {
+                callbacks["FAILED"](room);
+            }
+        });
         rooms[name_] = room;
         return room;
     };
@@ -215,11 +226,22 @@ var appSession = function(options){
     return exports;
 };
 
+function copyObjectToArray(obj) {
+    var ret = [];
+    for (var prop in obj) {
+        if(obj.hasOwnProperty(prop)) {
+            ret.push(obj[prop]);
+        }
+    }
+    return ret;
+}
+
 var events = {
-    CONNECTED: "CONNECTED",
+    STATE: "STATE",
     JOINED: "JOINED",
     LEFT: "LEFT",
     PUBLISHED: "PUBLISHED",
+    MESSAGE: "MESSAGE",
     FAILED: "FAILED"
 };
 

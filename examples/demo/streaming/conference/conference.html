@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="conference.css">
+    <title>conference</title>
+    <script type="text/javascript" src="../../../../flashphoner.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
+
+    <script type="text/javascript" src="conference.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
+</head>
+<body onload="init()">
+<div class="container">
+    <div class="row">
+
+        <h2 id="notifyFlash" class="text-danger"></h2>
+
+        <h2 class="text-center">Conference</h2>
+
+        <div class="col-sm-9 text-center">
+            <form class="form-horizontal" role="form" style="margin-top: 10px">
+                <div id="connForm" class="form-group">
+                    <label class="col-sm-2 control-label">WCS URL</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="url">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Login</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="login">
+                    </div>
+                    <div class="col-sm-2 text-right">
+                        <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
+                    </div>
+                    <div class="col-sm-4 text-left">
+                        <div id="status"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-sm-9 text-center">
+
+            <div class="col-sm-6">
+                <div id="participant1Display" class="fp-remoteVideo"></div>
+                <div id="participant1Name" class="text-center text-muted">NONE</div>
+                <div class="text-center" style="margin-top: 20px">
+                    <div id="participant1Status"></div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div id="participant2Display" class="fp-remoteVideo"></div>
+                <div id="participant2Name" class="text-center text-muted">NONE</div>
+                <div class="text-center" style="margin-top: 20px">
+                    <div id="participant2Status"></div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-sm-9 text-center">
+            <div id="localDisplay" class="fp-localVideo"></div>
+            <div class="text-center" style="margin-top: 20px">
+                <div id="localStatus"></div>
+            </div>
+            <div class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                <div class="input-group-btn">
+                    <button id="localStopBtn" type="button" class="btn btn-default">Stop</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-sm-9 text-center" style="margin-top: 20px">
+            <div class="col-sm-8">Invite</div>
+            <div class="col-sm-8 text-center">
+                <div id="inviteAddress" class="text-muted" style="border: 1px solid">Not connected</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
