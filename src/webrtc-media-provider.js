@@ -122,7 +122,7 @@ var getMediaAccess = function(constraints, display) {
         //check if this is screen sharing
         if (constraints.video && constraints.video.type && constraints.video.type == "screen") {
             delete constraints.video.type;
-            getScreenDeviceId().then(function(screenSharingConstraints){
+            getScreenDeviceId(constraints).then(function(screenSharingConstraints){
                 //copy constraints
                 for (var prop in screenSharingConstraints) {
                     if (screenSharingConstraints.hasOwnProperty(prop)) {
@@ -155,21 +155,32 @@ var getMediaAccess = function(constraints, display) {
     });
 };
 
-var getScreenDeviceId = function() {
+var getScreenDeviceId = function(constraints) {
     return new Promise(function(resolve, reject){
+        var mandatory = {};
+        mandatory.maxWidth = constraints.video.width;
+        mandatory.maxHeight = constraints.video.height;
+        mandatory.maxFrameRate = constraints.video.frameRate;
+
         if (window.chrome) {
             chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
                 if (response) {
+                    mandatory.chromeMediaSource = "desktop";
                     chrome.runtime.sendMessage(extensionId, {type: "getSourceId"}, function (response) {
                         if (response.error) {
                             reject(new Error("Screen access denied"));
                         } else {
-                            resolve({
-                                mandatory: {
-                                    chromeMediaSourceId: response.sourceId,
-                                    chromeMediaSource: "desktop"
-                                }
-                            });
+                            mandatory.chromeMediaSourceId = response.sourceId;
+                            //resolve({
+                            //    mandatory: {
+                            //        chromeMediaSourceId: response.sourceId,
+                            //        chromeMediaSource: "desktop",
+                            //        maxFrameRate: 10,
+                            //        maxWidth: 1024,
+                            //        maxHeight: 768
+                            //    }
+                            //});
+                            resolve(mandatory);
                         }
                     });
                 } else {
@@ -178,7 +189,10 @@ var getScreenDeviceId = function() {
             });
         } else {
             //firefox case
-            resolve({mediaSource: "screen"});
+            var o = {};
+            o.mediaSource = "screen";
+            o.mandatory = mandatory;
+            resolve(o);
         }
     });
 };

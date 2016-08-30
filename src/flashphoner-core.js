@@ -488,8 +488,12 @@ var createSession = function(options) {
                     });
                 });
             }).catch(function(error){
-                //todo fire event instead
-                throw error;
+                stream.info = error.message;
+                status_ = STREAM_STATUS.FAILED;
+                //fire stream event
+                if (callbacks[status_]) {
+                    callbacks[status_](stream);
+                }
             });
         };
 
@@ -578,6 +582,16 @@ var createSession = function(options) {
         };
 
         /**
+         * Get stream info
+         * @returns {string} Info
+         * @memberof Stream
+         * @inner
+         */
+        var getInfo = function() {
+            return stream.info;
+        };
+
+        /**
          * Get stream dimension
          * @returns {Object} Dimension
          * @memberof Stream
@@ -628,6 +642,7 @@ var createSession = function(options) {
         stream.name = name;
         stream.published = published;
         stream.getRecordInfo = getRecordInfo;
+        stream.getInfo = getInfo;
         stream.getStreamDimension = getStreamDimension;
         stream.on = on;
 
