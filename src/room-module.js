@@ -1,8 +1,13 @@
 'use strict';
-var uuid = require('node-uuid');
 var SESSION_STATUS = require('./constants').SESSION_STATUS;
 
 var ROOM_REST_APP = "roomApp";
+
+/**
+ * Room api based on core api
+ *
+ * @namespace roomApi
+ */
 
 /**
  * Initialize connection
@@ -10,12 +15,20 @@ var ROOM_REST_APP = "roomApp";
  * @param {Object} options session options
  * @param {String} options.urlServer Server address in form of [ws,wss]://host.domain:port
  * @param {String} options.username Username to login with
+ * @returns {roomApi.Session}
+ * @memberof roomApi
+ * @method connect
  */
 var appSession = function(options) {
+    /**
+     * Represents connection to room api app
+     *
+     * @namespace roomApi.Session
+     */
     var callbacks = {};
     var rooms = {};
     var username = options.username;
-    var exports = {};
+    var exports;
     var roomHandlers = {};
     var session = Flashphoner.createSession({
         urlServer: options.urlServer,
@@ -42,23 +55,62 @@ var appSession = function(options) {
         }
     }
 
-    exports.disconnect = function(){
+    /**
+     * Disconnect session
+     *
+     * @memberof roomApi.Session
+     * @inner
+     */
+    var disconnect = function(){
         session.disconnect();
     };
 
-    exports.status = function() {
+    /**
+     * Get session status
+     *
+     * @returns {string} One of {@link Flashphoner.constants.SESSION_STATUS}
+     * @memberof roomApi.Session
+     * @inner
+     */
+    var status = function() {
         return session.status();
     };
 
-    exports.id = function() {
+    /**
+     * Get session id
+     *
+     * @returns {string} session id
+     * @memberof roomApi.Session
+     * @inner
+     */
+    var id = function() {
         return session.id();
     };
 
-    exports.getRooms = function(){
+    /**
+     * Get rooms
+     *
+     * @returns {roomApi.Room[]}
+     * @memberof roomApi.Session
+     * @inner
+     */
+    var getRooms = function(){
         return copyObjectToArray(rooms);
     };
 
-    exports.on = function(event, callback) {
+
+    /**
+     * Add session event callback.
+     *
+     * @param {string} event One of {@link Flashphoner.constants.SESSION_STATUS} events
+     * @param {Session~eventCallback} callback Callback function
+     * @returns {roomApi.Session} Session
+     * @throws {TypeError} Error if event is not specified
+     * @throws {Error} Error if callback is not a valid function
+     * @memberof roomApi.Session
+     * @inner
+     */
+    var on = function(event, callback) {
         if (!event) {
             throw new Error("Event can't be null", "TypeError");
         }
@@ -74,13 +126,26 @@ var appSession = function(options) {
      *
      * @param {Object} options Room options
      * @param {String} options.name Room name
+     * @returns {roomApi.Room}
+     * @memberof roomApi.Session
+     * @inner
      */
-    exports.join = function(options) {
+    var join = function(options) {
+        /**
+         * Room
+         *
+         * @namespace roomApi.Room
+         */
         var room = {};
         var name_ = options.name;
         var participants = {};
         var callbacks = {};
         roomHandlers[name_] = function(data) {
+            /**
+             * Room participant
+             *
+             * @namespace roomApi.Room.Participant
+             */
             var participant;
             if (data.name == "STATE") {
                 if (data.info) {
@@ -88,8 +153,33 @@ var appSession = function(options) {
                         var pState = data.info[i];
                         if (pState.hasOwnProperty("login")) {
                             participants[pState.login] = {
-                                name: pState.login,
+                                /**
+                                 * Get participant name
+                                 *
+                                 * @returns {String} Participant name
+                                 * @memberof roomApi.Room.Participant
+                                 * @inner
+                                 */
+                                name: function(){
+                                    return pState.login;
+                                },
+                                /**
+                                 * Play participant stream
+                                 *
+                                 * @param {HTMLElement} display Div element stream should be displayed in
+                                 * @returns {Stream} Local stream object
+                                 * @memberof roomApi.Room.Participant
+                                 * @inner
+                                 */
                                 play: attachPlay(pState.name),
+                                /**
+                                 * Send message to participant
+                                 *
+                                 * @param {String} message Message to send
+                                 * @param {Function} error Error callback
+                                 * @memberof roomApi.Room.Participant
+                                 * @inner
+                                 */
                                 sendMessage: attachSendMessage(pState.name)
                             }
                         } else {
@@ -138,33 +228,51 @@ var appSession = function(options) {
          * Get room name
          *
          * @returns {String} Room name
+         * @memberof roomApi.Room
+         * @inner
          */
-        room.name = function() {
+        var name = function() {
             return name_;
         };
 
         /**
          * Leave room
+         *
+         * @memberof roomApi.Room
+         * @inner
          */
-        room.leave = function() {
+        var leave = function() {
             sendAppCommand("leave", {name: name_}).then(function(){});
             delete roomHandlers[name_];
             delete rooms[name_];
         };
 
         /**
-         * Publish stream
+         * Publish stream inside room
          *
          * @param {HTMLElement} display Div element stream should be displayed in
          * @returns {Stream}
+         * @memberof roomApi.Room
+         * @inner
          */
-        room.publish = function(display) {
+        var publish = function(display) {
             var stream = session.createStream({name: (name_ + "-" + username), display: display, custom: {name: name_}});
             stream.publish();
             return stream;
         };
 
-        room.on = function(event, callback) {
+        /**
+         * Add room event callback.
+         *
+         * @param {string} event One of {@link roomApi.events} events
+         * @param {roomApi.Room~eventCallback} callback Callback function
+         * @returns {roomApi.Room} room
+         * @throws {TypeError} Error if event is not specified
+         * @throws {Error} Error if callback is not a valid function
+         * @memberof roomApi.Room
+         * @inner
+         */
+        var on = function(event, callback) {
             if (!event) {
                 throw new Error("Event can't be null", "TypeError");
             }
@@ -175,7 +283,14 @@ var appSession = function(options) {
             return room;
         };
 
-        room.getParticipants = function() {
+        /**
+         * Get participants
+         *
+         * @returns {roomApi.Room.Participant}
+         * @memberof roomApi.Room
+         * @inner
+         */
+        var getParticipants = function() {
             return copyObjectToArray(participants);
         };
 
@@ -219,10 +334,23 @@ var appSession = function(options) {
                 callbacks["FAILED"](room);
             }
         });
+        room.name = name;
+        room.leave = leave;
+        room.publish = publish;
+        room.getParticipants = getParticipants;
         rooms[name_] = room;
         return room;
     };
 
+
+    exports =  {
+        disconnect: disconnect,
+        id: id,
+        status: status,
+        getRooms: getRooms,
+        join: join,
+        on: on
+    };
     return exports;
 };
 

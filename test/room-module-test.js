@@ -19,7 +19,7 @@ describe('Room api', function() {
             //join room
             console.log("Connected");
             api.join({name: "my_test_room"}).on("JOINED", function(participant){
-                console.log("Participant joined with name " + participant.name);
+                console.log("Participant joined with name " + participant.name());
                 api.getRooms()[0].leave();
                 api.disconnect();
             }).on("STATE", function(room){
@@ -32,7 +32,7 @@ describe('Room api', function() {
                 ).on("ESTABLISHED", function(api){
                     //join room
                     api.join({name: "my_test_room"}).on("LEFT", function(participant){
-                        console.log("Participant left with name " + participant.name);
+                        console.log("Participant left with name " + participant.name());
                         api.disconnect();
                         done();
                     });

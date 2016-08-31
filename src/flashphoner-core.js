@@ -727,6 +727,16 @@ var createSession = function(options) {
     var restAppCommunicator = function() {
         var pending = {};
         var exports = {};
+        /**
+         * Send data to REST App
+         *
+         * @param {Object} data Object to send
+         * @returns {Promise} Resolves if data accepted, otherwise rejects
+         * @memberof Session
+         * @name sendData
+         * @method
+         * @inner
+         */
         exports.sendData = function(data) {
             return new Promise(function(resolve, reject){
                 var obj = {
