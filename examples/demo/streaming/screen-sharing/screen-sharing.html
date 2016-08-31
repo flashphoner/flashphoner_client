@@ -14,33 +14,56 @@
     <script type="text/javascript" src="screen-sharing.js"></script>
     <!-- Bootstrap JS -->
     <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
+    <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/nlbaajplpmleofphigmgaifhoikjmbkg">
 </head>
 <body onload="initAPI()">
 <div class="container">
     <div class="row">
         <h2 class="text-center col-sm-9">Screen Sharing</h2>
     </div>
-    <div class="row">
-        <div id="extension">Extension</div>
+    <div id="notify" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h2 class="modal-title text-center text-danger">Warning!</h2>
+                </div>
+                <div class="modal-body text-center">
+                    <h2 class="text-primary">Screen sharing works only in Chrome and Firefox browsers.</h2>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="extension">
+        <div class="col-sm-5 text-center">
+            <span class="text-muted" style="padding: 0 10px">Extension required</span>
+            <button class="btn btn-toolbar" type="button" id="installExtensionButton"
+                    onclick="installExtension()" style="display: none;">Install Now</button>
+            <button class="btn btn-toolbar" type="button" id="installFromMarket"
+                    onclick="installFromMarket();return false;" style="display: none;">Install Now</button>
+        </div>
     </div>
     <div id="row">
         <h2 id="notifyFlash" class="text-danger"></h2>
         <div class="col-sm-10 text-center">
             <div class="col-sm-5">
-                <!--<div class="row">-->
-                    <!--<div class="col-sm-4">-->
-                        <!--<span class="text-muted">FPS</span>-->
-                        <!--<input type="text" class="form-control" id="fps" value="30"/>-->
-                    <!--</div>-->
-                    <!--<div class="col-sm-4">-->
-                        <!--<span class="text-muted">Width</span>-->
-                        <!--<input type="text" class="form-control" id="width" value="640"/>-->
-                    <!--</div>-->
-                    <!--<div class="col-sm-4">-->
-                        <!--<span class="text-muted">Height</span>-->
-                        <!--<input type="text" class="form-control" id="height" value="480"/>-->
-                    <!--</div>-->
-                <!--</div>-->
+                <div class="col-sm-12 text-center">
+                    <div class="col-sm-4">
+                        <span class="text-muted">FPS</span>
+                        <input type="text" class="form-control" id="fps" value="30"/>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted">Width</span>
+                        <input type="text" class="form-control" id="width" value="640"/>
+                    </div>
+                    <div class="col-sm-4">
+                        <span class="text-muted">Height</span>
+                        <input type="text" class="form-control" id="height" value="480"/>
+                    </div>
+                </div>
                 <div id="localVideo" class="fp-localVideo" style="margin-top: 90px"></div>
                 <div class="text-center text-muted">My Screen</div>
                 <div class="row row-space" style="margin-top: 20px">

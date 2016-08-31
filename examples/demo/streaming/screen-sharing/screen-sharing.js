@@ -1,5 +1,4 @@
 //Init API
-Flashphoner.init({screenSharingExtensionId: 'nlbaajplpmleofphigmgaifhoikjmbkg'});
 
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
@@ -8,13 +7,47 @@ var _stream;
 var _streamName;
 var localVideo;
 var remoteVideo;
+var browser = detectBrowser();
+var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 
+Flashphoner.init({screenSharingExtensionId: extensionId});
 
 //////////////////////////////////
 /////////////// Init /////////////
 
 function init_page() {
-    //$("#url").val(setURL() + "/" + createUUID(8));
+
+    $("#url").val(setURL() + "/" + createUUID(8));
+
+    var interval;
+
+    if (browser == "Firefox") {
+        $("#installExtensionButton").show();
+        interval = setInterval(function() {
+            if (Flashphoner.firefoxScreenSharingExtensionInstalled) {
+                $("#extension").hide();
+                $("#installExtensionButton").hide();
+                clearInterval(interval);
+            }
+        }, 500);
+
+    } else if (browser == "Chrome") {
+        interval = setInterval(function() {
+            chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
+                if (response) {
+                    $("#extension").hide();
+                } else {
+                    (inIframe()) ? $("#installFromMarket").show() : $("#installExtensionButton").show();
+                }
+            });
+        }, 500);
+
+    } else {
+        $("#notify").modal('show');
+        return false;
+    }
+
+
     $("#url").val("wss://46.101.241.42:8443" + "/" + createUUID(8));
     $("#publishBtn").click(function () {
             var state = $("#publishBtn").text();
@@ -25,7 +58,7 @@ function init_page() {
             }
         }
     );
-};
+}
 
 function initAPI() {
 
@@ -84,27 +117,42 @@ function publishStream() {
         return;
     }
 
-    var handleUnpublished = function(stream) {
-        console.log("Stream unpublished with status " + stream.status());
-        setStatus(stream.status());
+    var handleStream = function(stream) {
+
+        var status = stream.status();
+        console.log("Stream status: " + status);
+        switch (status) {
+            case "PUBLISHING":
+                _stream = stream;
+                playStream();
+            case "FAILED":
+                var info = stream.getInfo();
+                console.log("Stream info: " + info);
+                if (info == "Screen sharing extension is not available") {
+                    if(detectBrowser() == "Chrome") {
+
+                    }
+                }
+            case "UNPUBLISHED":
+                setStatus(status);
+                break;
+
+        }
     };
 
     var constraints = {
         video: {
-            //width: parseInt(document.getElementById("width").value),
-            //height: parseInt(document.getElementById("height").value),
-            //frameRate: parseInt(document.getElementById("fps").value),
+            width: parseInt(document.getElementById("width").value),
+            height: parseInt(document.getElementById("height").value),
+            frameRate: parseInt(document.getElementById("fps").value),
             type: "screen"
         }
     };
 
     currentSession.createStream({name: _streamName, constraints: constraints, display: localVideo, cacheLocalResources: false})
-        .on(STREAM_STATUS.PUBLISHING, function(stream){
-        _stream = stream;
-        setStatus(stream.status());
-        playStream();})
-        .on(STREAM_STATUS.FAILED, handleUnpublished)
-        .on(STREAM_STATUS.UNPUBLISHED, handleUnpublished).publish();
+        .on(STREAM_STATUS.PUBLISHING, handleStream)
+        .on(STREAM_STATUS.FAILED, handleStream)
+        .on(STREAM_STATUS.UNPUBLISHED, handleStream).publish();
 
 }
 
@@ -164,5 +212,36 @@ function checkForEmptyField(checkField, alertDiv) {
 function removeSession(session) {
     if (currentSession.id() == session.id()) {
         currentSession = null;
+    }
+}
+
+//install extension
+function installExtension() {
+    if (browser == "Chrome") {
+        chrome.webstore.install();
+    } else if (browser == "Firefox") {
+        var params = {
+            "Flashphoner Screen Sharing": { URL: "../../dependencies/screen-sharing/firefox-extension/flashphoner_screen_sharing-0.0.3-fx+an.xpi",
+                IconURL: "../../dependencies/screen-sharing/firefox-extension/icon.png",
+                Hash: "sha1:1a2c433b21a8ff74ac0ce93d61c1ea8dce5288aa",
+                toString: function () { return this.URL; }
+            }
+        };
+        InstallTrigger.install(params);
+    }
+}
+
+function installFromMarket() {
+    if (browser == "Chrome") {
+        var url = "https://chrome.google.com/webstore/detail/flashphoner-screen-sharin/nlbaajplpmleofphigmgaifhoikjmbkg";
+        window.open(url, '_blank');
+    }
+}
+
+function inIframe () {
+    try {
+        return window.self !== window.top;
+    } catch (e) {
+        return true;
     }
 }

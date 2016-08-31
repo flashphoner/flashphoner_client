@@ -1,0 +1,15 @@
+{
+  "title": "Flashphoner Screen Sharing",
+  "name": "flashphoner-screen-sharing-extension",
+  "id": "@flashphoner-screen-sharing-extension",
+  "version": "0.0.3",
+  "description": "Enable screen sharing for flashphoner.com",
+  "main": "index.js",
+  "author": "Flashphoner",
+  "engines": {
+    "firefox": ">=38.0a1",
+    "fennec": ">=38.0a1"
+  },
+  "homepage": "http://flashphoner.com",
+  "license": "MIT"
+}

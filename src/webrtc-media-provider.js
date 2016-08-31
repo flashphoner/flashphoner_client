@@ -171,15 +171,6 @@ var getScreenDeviceId = function(constraints) {
                             reject(new Error("Screen access denied"));
                         } else {
                             mandatory.chromeMediaSourceId = response.sourceId;
-                            //resolve({
-                            //    mandatory: {
-                            //        chromeMediaSourceId: response.sourceId,
-                            //        chromeMediaSource: "desktop",
-                            //        maxFrameRate: 10,
-                            //        maxWidth: 1024,
-                            //        maxHeight: 768
-                            //    }
-                            //});
                             resolve(mandatory);
                         }
                     });
