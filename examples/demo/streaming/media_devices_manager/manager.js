@@ -12,6 +12,7 @@ var _streamName;
 var localVideo;
 var remoteVideo;
 var _constraints = {};
+var browser = detectBrowser();
 
 //////////////////////////////////
 /////////////// Init /////////////
@@ -41,7 +42,10 @@ function startTest() {
         deviceId: selectedVideo,
         width: parseInt(document.getElementById("width").value),
         height: parseInt(document.getElementById("height").value),
-        frameRate: parseInt(document.getElementById("fps").value),
+        frameRate: {
+            ideal: parseInt(document.getElementById("fps").value),
+            max: parseInt(document.getElementById("fps").value)
+        },
         type: "camera"
     };
 

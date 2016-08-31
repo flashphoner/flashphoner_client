@@ -272,8 +272,10 @@ function checkConstraints(constraints) {
     if (constraints.video) {
         if (constraints.video.hasOwnProperty('frameRate')) {
             var frameRate = constraints.video.frameRate;
-            if (frameRate == 0 || isNaN(frameRate)) {
-                delete constraints.video.frameRate;
+            if (frameRate.hasOwnProperty('max')) {
+                if(frameRate.max == 0) {
+                    delete constraints.video.frameRate;
+                }
             }
         }
         if (constraints.video.hasOwnProperty('width')) {
