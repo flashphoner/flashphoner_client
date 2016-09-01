@@ -1,6 +1,6 @@
 'use strict';
 var SESSION_STATUS = require('./constants').SESSION_STATUS;
-
+var Promise = require('promise-polyfill');
 var ROOM_REST_APP = "roomApp";
 
 /**
@@ -150,61 +150,25 @@ var appSession = function(options) {
             if (data.name == "STATE") {
                 if (data.info) {
                     for (var i = 0; i < data.info.length; i++) {
-                        var pState = data.info[i];
-                        if (pState.hasOwnProperty("login")) {
-                            participants[pState.login] = {
-                                /**
-                                 * Get participant name
-                                 *
-                                 * @returns {String} Participant name
-                                 * @memberof roomApi.Room.Participant
-                                 * @inner
-                                 */
-                                name: function(){
-                                    return pState.login;
-                                },
-                                /**
-                                 * Play participant stream
-                                 *
-                                 * @param {HTMLElement} display Div element stream should be displayed in
-                                 * @returns {Stream} Local stream object
-                                 * @memberof roomApi.Room.Participant
-                                 * @inner
-                                 */
-                                play: attachPlay(pState.name),
-                                /**
-                                 * Send message to participant
-                                 *
-                                 * @param {String} message Message to send
-                                 * @param {Function} error Error callback
-                                 * @memberof roomApi.Room.Participant
-                                 * @inner
-                                 */
-                                sendMessage: attachSendMessage(pState.name)
-                            }
-                        } else {
-                            participants[pState] = {
-                                name: pState,
-                                sendMessage: attachSendMessage(pState)
-                            }
-                        }
+                        participantFromState(data.info[i]);
                     }
                 }
                 if (callbacks["STATE"]) {
                     callbacks["STATE"](room);
                 }
             } else if (data.name == "JOINED") {
-                participant = {
-                    name: data.info,
+                participants[data.info] = {
+                    name: function(){
+                        return data.info;
+                    },
                     sendMessage: attachSendMessage(data.info)
                 };
-                participants[participant.name] = participant;
                 if (callbacks["JOINED"]) {
-                    callbacks["JOINED"](participant);
+                    callbacks["JOINED"](participants[data.info]);
                 }
             } else if (data.name == "LEFT") {
                 participant = participants[data.info];
-                delete participants[participant.name];
+                delete participants[data.info];
                 if (callbacks["LEFT"]) {
                     callbacks["LEFT"](participant);
                 }
@@ -223,6 +187,54 @@ var appSession = function(options) {
                 }
             }
         };
+
+        //participant creation helper
+        function participantFromState(state) {
+            var participant = {};
+            if (state.hasOwnProperty("login")) {
+                var login = state.login;
+                var streamName = state.name;
+                participant = {
+                    /**
+                     * Get participant name
+                     *
+                     * @returns {String} Participant name
+                     * @memberof roomApi.Room.Participant
+                     * @inner
+                     */
+                    name: function(){
+                        return login;
+                    },
+                    /**
+                     * Play participant stream
+                     *
+                     * @param {HTMLElement} display Div element stream should be displayed in
+                     * @returns {Stream} Local stream object
+                     * @memberof roomApi.Room.Participant
+                     * @inner
+                     */
+                    play: attachPlay(streamName),
+                    /**
+                     * Send message to participant
+                     *
+                     * @param {String} message Message to send
+                     * @param {Function} error Error callback
+                     * @memberof roomApi.Room.Participant
+                     * @inner
+                     */
+                    sendMessage: attachSendMessage(login)
+                }
+            } else {
+                participant = {
+                    name: function(){
+                        return state;
+                    },
+                    sendMessage: attachSendMessage(state)
+                }
+            }
+            participants[participant.name()] = participant;
+            return participant;
+        }
 
         /**
          * Get room name
@@ -256,7 +268,7 @@ var appSession = function(options) {
          * @inner
          */
         var publish = function(display) {
-            var stream = session.createStream({name: (name_ + "-" + username), display: display, custom: {name: name_}});
+            var stream = session.createStream({name: (name_ + "-" + username), display: display, cacheLocalResources: true, custom: {name: name_}});
             stream.publish();
             return stream;
         };
@@ -329,15 +341,16 @@ var appSession = function(options) {
             return session.sendData(command);
         }
 
-        sendAppCommand("join", {name: name_}).then(function(){}, function(){
+        sendAppCommand("join", {name: name_}).then(function(){}, function(info){
             if (callbacks["FAILED"]) {
-                callbacks["FAILED"](room);
+                callbacks["FAILED"](room, info.info);
             }
         });
         room.name = name;
         room.leave = leave;
         room.publish = publish;
         room.getParticipants = getParticipants;
+        room.on = on;
         rooms[name_] = room;
         return room;
     };

@@ -2,6 +2,7 @@
 
 var uuid = require('node-uuid');
 var constants = require("./constants");
+var Promise = require('promise-polyfill');
 
 /**
  * @namespace Flashphoner
@@ -134,7 +135,7 @@ var getDefaultMediaConstraints = function() {
         audio: true,
         video: {
             width: 320,
-            height: 240,
+            height: 240
         }
     };
 };
@@ -242,7 +243,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.3",
+            clientVersion: "0.3.4",
             custom: options.custom
         });
     };
@@ -744,11 +745,11 @@ var createSession = function(options) {
                     payload: data
                 };
                 pending[obj.operationId] = {
-                    FAILED: function(){
-                        reject();
+                    FAILED: function(info){
+                        reject(info);
                     },
-                    ACCEPTED: function(){
-                        resolve();
+                    ACCEPTED: function(info){
+                        resolve(info);
                     }
                 };
                 send("sendData", obj);
@@ -758,7 +759,8 @@ var createSession = function(options) {
             if (pending[data.operationId]) {
                 var handler = pending[data.operationId];
                 delete pending[data.operationId];
-                handler[data.status]();
+                delete data.operationId;
+                handler[data.status](data);
             }
         };
         return exports;

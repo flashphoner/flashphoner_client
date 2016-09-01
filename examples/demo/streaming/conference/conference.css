@@ -11,13 +11,13 @@
 
 .fp-localVideo {
     border: 1px double black;
-    width: 162px;
-    height: 122px;
+    width: 222px;
+    height: 167px;
     margin: 0 auto;
 }
 .fp-localVideo>video {
-    width: 160px;
-    height: 120px;
+    width: 220px;
+    height: 165px;
 }
 
 

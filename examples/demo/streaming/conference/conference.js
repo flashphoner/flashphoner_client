@@ -33,6 +33,7 @@ function connect() {
     }
     var url = field('url');
     var username = field('login');
+    $('#failedInfo').text("");
     currentApi = Flashphoner.roomApi.connect({urlServer: url, username: username}).on(SESSION_STATUS.FAILED, function(session){
         console.warn("Session failed, id " + session.id());
         setConnectionStatus(session.status());
@@ -51,9 +52,25 @@ function connect() {
                     installParticipant(participants[i]);
                 }
             }
+            //attach send message
+            $('#sendMessageBtn').click(function(){
+                var date = new Date();
+                var time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
+                var newMessage = time + " " + username + " - " + field("message").split('\n').join('<br/>') + '<br/>';
+                //broadcast message
+                var participants = room.getParticipants();
+                for (var i = 0; i < participants.length; i++) {
+                    participants[i].sendMessage(field('message'));
+                }
+                var chat = $("#chat");
+                chat.html(chat.html() + newMessage);
+                chat.scrollTop(chat.prop('scrollHeight'));
+                $('#message').text("");
+            });
             //publish local video
             function publishLocalMedia() {
                 var control = $("#localStopBtn");
+                control.attr('disabled', true);
                 room.publish(document.getElementById("localDisplay")).on(STREAM_STATUS.FAILED, function (stream) {
                     console.warn("Local stream failed!");
                     setStreamStatus(stream.status());
@@ -87,38 +104,49 @@ function connect() {
             installParticipant(participant);
         }).on(ROOM_EVENT.LEFT, function(participant){
             //remove participant
-            if ($('#participant1Name').text() == participant.name) {
+            if ($('#participant1Name').text() == participant.name()) {
                 $('#participant1Name').text("NONE");
-            } else if ($('#participant2Name').text() == participant.name) {
+            } else if ($('#participant2Name').text() == participant.name()) {
                 $('#participant2Name').text("NONE");
             } else {
-                console.warn("Ignored participant left, name " + participant.name);
+                console.warn("Ignored participant left, name " + participant.name());
             }
         }).on(ROOM_EVENT.PUBLISHED, function(participant){
-            if ($('#participant1Name').text() == participant.name) {
+            if ($('#participant1Name').text() == participant.name()) {
                 participant.play(document.getElementById('participant1Display'));
-            } else if ($('#participant2Name').text() == participant.name) {
+            } else if ($('#participant2Name').text() == participant.name()) {
                 participant.play(document.getElementById('participant2Display'));
             } else {
-                console.warn("Ignored participant published, name " + participant.name);
+                console.warn("Ignored participant published, name " + participant.name());
             }
+        }).on(ROOM_EVENT.FAILED, function(room, info){
+            session.disconnect();
+            $('#failedInfo').text(info);
+        }).on(ROOM_EVENT.MESSAGE, function(message){
+
+            var date = new Date();
+            var time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
+            var newMessage = time + " " + message.from.name() + " - " + message.text.split('\n').join('<br/>') + '<br/>';
+            var chat = $("#chat");
+            chat.html(chat.html() + newMessage);
+            chat.scrollTop(chat.prop('scrollHeight'));
         });
     });
 }
 
 function installParticipant(participant) {
     if ($('#participant1Name').text() == "NONE") {
-        $('#participant1Name').text(participant.name);
+        $('#participant1Name').text(participant.name());
         if (participant.play) {
             participant.play(document.getElementById('participant1Display'));
         }
     } else if ($('#participant2Name').text() == "NONE") {
-        $('#participant2Name').text(participant.name);
+        $('#participant2Name').text(participant.name());
         if (participant.play) {
             participant.play(document.getElementById('participant2Display'));
         }
     } else {
-        console.warn("More than 3 participants, ignore participant " + participant.name);
+        console.warn("More than 3 participants, ignore participant " + participant.name());
     }
 }
 
@@ -158,6 +186,7 @@ function setConnectionStatus(status) {
             $("#localStopBtn").attr('disabled',true);
             $("#localStopBtn").off();
             $("#connectBtn").text("Connect");
+            $('#sendMessageBtn').off();
             break;
     }
 }
