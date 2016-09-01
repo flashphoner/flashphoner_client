@@ -455,6 +455,7 @@ var createSession = function(options) {
             if (status_ !== STREAM_STATUS.NEW) {
                 throw new Error("Invalid stream state");
             }
+            var hasAudio = (constraints.video.type == "screen") ? false : true;
             //get access to camera
             MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function(){
                 published_ = true;
@@ -467,7 +468,7 @@ var createSession = function(options) {
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
-                        sendAudio: true,
+                        sendAudio: hasAudio,
                         sendVideo: true
                     });
                 }).then(function (sdp) {
@@ -477,7 +478,7 @@ var createSession = function(options) {
                         name: name_,
                         published: published_,
                         hasVideo: true,
-                        hasAudio: true,
+                        hasAudio: hasAudio,
                         status: status_,
                         record: record_,
                         mediaProvider: mediaProvider,

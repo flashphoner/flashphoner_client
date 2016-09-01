@@ -47,9 +47,8 @@ function init_page() {
         return false;
     }
 
-
-    $("#url").val("wss://46.101.241.42:8443" + "/" + createUUID(8));
     $("#publishBtn").click(function () {
+            $(this).prop('disabled',true);
             var state = $("#publishBtn").text();
             if (state == "Start") {
                 connectAndShare();
@@ -78,6 +77,7 @@ function initAPI() {
 
 //New connection
 function connectAndShare() {
+    muteInputs();
     if (currentSession && currentSession.status() == SESSION_STATUS.ESTABLISHED) {
         console.warn("Already connected, session id " + currentSession.id());
         publishStream();
@@ -85,18 +85,32 @@ function connectAndShare() {
     }
     var url = field('url');
     console.log("Create new session with url " + url);
-    currentSession = Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.FAILED, function(session){
-        console.warn("Session failed, id " + session.id());
-        //removeSession(session);
-        setStatus(session.status());
 
-    }).on(SESSION_STATUS.DISCONNECTED, function(session) {
-        console.log("Session diconnected, id " + session.id());
-        removeSession(session);
-    }).on(SESSION_STATUS.ESTABLISHED, function(session) {
-        console.log("Session established " + session.id());
-        publishStream();
-    });
+    var handleSession = function(session) {
+        var status = session.status();
+
+        switch(status) {
+            case "FAILED":
+                $("#publishBtn").removeProp('disabled');
+                console.warn("Session failed, id " + session.id());
+                setStatus(session.status());
+                removeSession(session);
+                break;
+            case "DISCONNECTED":
+                console.log("Session diconnected, id " + session.id());
+                removeSession(session);
+                break;
+            case "ESTABLISHED":
+                console.log("Session established " + session.id());
+                publishStream();
+                break;
+        }
+    };
+
+    currentSession = Flashphoner.createSession({urlServer: url})
+        .on(SESSION_STATUS.FAILED, handleSession)
+        .on(SESSION_STATUS.DISCONNECTED, handleSession)
+        .on(SESSION_STATUS.ESTABLISHED, handleSession);
 }
 
 //Disconnect
@@ -125,16 +139,12 @@ function publishStream() {
             case "PUBLISHING":
                 _stream = stream;
                 playStream();
-            case "FAILED":
-                var info = stream.getInfo();
-                console.log("Stream info: " + info);
-                if (info == "Screen sharing extension is not available") {
-                    if(detectBrowser() == "Chrome") {
-
-                    }
-                }
             case "UNPUBLISHED":
                 setStatus(status);
+                break;
+            case "FAILED":
+                var cause = stream.getInfo();
+                setStatus(status,cause);
                 break;
 
         }
@@ -181,19 +191,22 @@ function playStream() {
 /////////////////////////////////////
 
 // Set Connection Status
-function setStatus(status) {
+function setStatus(status, cause) {
+    $("#publishBtn").removeProp('disabled');
     if (status == "PUBLISHING") {
         $("#status").text(status).removeClass().attr("class","text-success");
         $("#publishBtn").text("Stop");
     }
 
     if (status == "DISCONNECTED" || status == "UNPUBLISHED") {
+        unmuteInputs();
         $("#status").text(status).removeClass().attr("class","text-muted");
         $("#publishBtn").text("Start");
     }
 
     if (status == "FAILED") {
-        $("#status").text(status).removeClass().attr("class","text-danger");
+        unmuteInputs();
+        $("#status").text((cause) ? cause : status).removeClass().attr("class","text-danger");
         $("#publishBtn").text("Start");
     }
 }
@@ -221,9 +234,9 @@ function installExtension() {
         chrome.webstore.install();
     } else if (browser == "Firefox") {
         var params = {
-            "Flashphoner Screen Sharing": { URL: "../../dependencies/screen-sharing/firefox-extension/flashphoner_screen_sharing-0.0.3-fx+an.xpi",
+            "Flashphoner Screen Sharing": { URL: "../../dependencies/screen-sharing/firefox-extension/flashphoner_screen_sharing-0.0.4-fx+an.xpi",
                 IconURL: "../../dependencies/screen-sharing/firefox-extension/icon.png",
-                Hash: "sha1:1a2c433b21a8ff74ac0ce93d61c1ea8dce5288aa",
+                Hash: "sha1:9c2bd6b0a22473cc721d7b3d3ecc72707b507f75",
                 toString: function () { return this.URL; }
             }
         };
@@ -244,4 +257,16 @@ function inIframe () {
     } catch (e) {
         return true;
     }
+}
+
+function muteInputs() {
+    $(":input").each(function() {
+       $(this).prop('disabled',true);
+    });
+}
+
+function unmuteInputs() {
+    $(":input").each(function() {
+        $(this).removeProp('disabled');
+    });
 }

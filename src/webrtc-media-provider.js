@@ -71,8 +71,8 @@ var createConnection = function(options) {
         var createOffer = function (options) {
             return new Promise(function (resolve, reject) {
                 var constraints = {
-                    offerToReceiveAudio: options.receiveAudio == undefined ? true : options.receiveAudio,
-                    offerToReceiveVideo: options.receiveVideo == undefined ? true : options.receiveVideo
+                    offerToReceiveAudio: options.receiveAudio == undefined ? options.sendAudio : options.receiveAudio,
+                    offerToReceiveVideo: options.receiveVideo == undefined ? options.sendVideo : options.receiveVideo
                 };
                 //create offer and set local sdp
                 connection.createOffer(constraints).then(function (offer) {
@@ -171,7 +171,7 @@ var getScreenDeviceId = function(constraints) {
                             reject(new Error("Screen access denied"));
                         } else {
                             mandatory.chromeMediaSourceId = response.sourceId;
-                            resolve(mandatory);
+                            resolve({mandatory: mandatory});
                         }
                     });
                 } else {
@@ -181,7 +181,7 @@ var getScreenDeviceId = function(constraints) {
         } else {
             //firefox case
             var o = {};
-            o.mediaSource = "screen";
+            o.mediaSource = "window";
             o.mandatory = mandatory;
             resolve(o);
         }
