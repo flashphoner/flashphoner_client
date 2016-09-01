@@ -112,7 +112,6 @@ function playStream() {
             var H = dimension.height;
             console.log("Got native resolution " + W + "x" + H);
 
-
             if (W >= (remoteVideo.offsetWidth - 2) || H >= (remoteVideo.offsetHeight - 2)) {
                 var scale = Math.max(W / 800, H / 400);
                 var rescale = Math.floor(W / scale);
@@ -133,6 +132,10 @@ function playStream() {
                 d.style.margin = marginTop + " auto";
                 if (Flashphoner.getMediaProviders()[0] == "Flash") {
                     document.getElementById(playingStream.id()).resize(W, H);
+                }
+                if (Flashphoner.getMediaProviders()[0] == "WebRTC") {
+                    document.getElementsByTagName("video")[0].setAttribute('width', W);
+                    document.getElementsByTagName("video")[0].setAttribute('height', H);
                 }
             }
         }).play();
