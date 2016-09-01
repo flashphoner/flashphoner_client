@@ -67,7 +67,7 @@ module.exports = function(grunt) {
             }
         },
         jsdoc: {
-            src: ['./src/flashphoner-core.js', './src/constants.js'],
+            src: ['./src/flashphoner-core.js', './src/constants.js', './src/room-module.js'],
             options: {
                 destination: 'doc'
             }

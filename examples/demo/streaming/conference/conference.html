@@ -42,6 +42,9 @@
                     <div class="col-sm-4 text-left">
                         <div id="status"></div>
                     </div>
+                    <div class="col-sm-4 text-left text-danger">
+                        <div id="failedInfo"></div>
+                    </div>
                 </div>
             </form>
         </div>
@@ -76,6 +79,21 @@
                 </div>
             </div>
 
+        </div>
+        <div class="col-sm-12" style="margin-top: 20px">
+            <div class="form-group">
+                <div id="chat" style="overflow-y: scroll; height: 100px;" class="text-left form-control"></div>
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <textarea id="message" class="form-control" rows="1" style="resize: none;"></textarea>
+            </div>
+        </div>
+        <div class="col-sm-5 col-sm-offset-7">
+            <div class="pull-right">
+                <input id="sendMessageBtn" type="button" class="btn btn-default">Send</input>
+            </div>
         </div>
 
         <div class="col-sm-9 text-center" style="margin-top: 20px">
