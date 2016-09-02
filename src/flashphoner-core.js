@@ -243,7 +243,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.4",
+            clientVersion: "0.3.6",
             custom: options.custom
         });
     };
@@ -456,7 +456,7 @@ var createSession = function(options) {
             if (status_ !== STREAM_STATUS.NEW) {
                 throw new Error("Invalid stream state");
             }
-            var hasAudio = (constraints.video.type == "screen") ? false : true;
+            var hasAudio = (constraints && constraints.video && constraints.video.type == "screen") ? false : true;
             //get access to camera
             MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function(){
                 published_ = true;

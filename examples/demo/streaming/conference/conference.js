@@ -48,24 +48,28 @@ function connect() {
             setInviteAddress(room.name());
             var participants = room.getParticipants();
             if (participants.length > 0) {
+                var chatState = "participants: ";
                 for (var i = 0; i < participants.length; i++) {
                     installParticipant(participants[i]);
+                    chatState += participants[i].name();
+                    if (i != participants.length - 1) {
+                        chatState += ",";
+                    }
                 }
+                addMessage("chat", chatState);
+            } else {
+                addMessage("chat", " room is empty");
             }
             //attach send message
             $('#sendMessageBtn').click(function(){
-                var date = new Date();
-                var time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
-                var newMessage = time + " " + username + " - " + field("message").split('\n').join('<br/>') + '<br/>';
+                var message = field('message');
+                addMessage(username, message);
+                $('#message').val("");
                 //broadcast message
                 var participants = room.getParticipants();
                 for (var i = 0; i < participants.length; i++) {
-                    participants[i].sendMessage(field('message'));
+                    participants[i].sendMessage(message);
                 }
-                var chat = $("#chat");
-                chat.html(chat.html() + newMessage);
-                chat.scrollTop(chat.prop('scrollHeight'));
-                $('#message').text("");
             });
             //publish local video
             function publishLocalMedia() {
@@ -102,6 +106,7 @@ function connect() {
             publishLocalMedia();
         }).on(ROOM_EVENT.JOINED, function(participant){
             installParticipant(participant);
+            addMessage(participant.name(), "joined");
         }).on(ROOM_EVENT.LEFT, function(participant){
             //remove participant
             if ($('#participant1Name').text() == participant.name()) {
@@ -111,6 +116,7 @@ function connect() {
             } else {
                 console.warn("Ignored participant left, name " + participant.name());
             }
+            addMessage(participant.name(), "left");
         }).on(ROOM_EVENT.PUBLISHED, function(participant){
             if ($('#participant1Name').text() == participant.name()) {
                 participant.play(document.getElementById('participant1Display'));
@@ -123,15 +129,18 @@ function connect() {
             session.disconnect();
             $('#failedInfo').text(info);
         }).on(ROOM_EVENT.MESSAGE, function(message){
-
-            var date = new Date();
-            var time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
-            var newMessage = time + " " + message.from.name() + " - " + message.text.split('\n').join('<br/>') + '<br/>';
-            var chat = $("#chat");
-            chat.html(chat.html() + newMessage);
-            chat.scrollTop(chat.prop('scrollHeight'));
+            addMessage(message.from.name(), message.text);
         });
     });
+}
+
+function addMessage(login, message) {
+    var date = new Date();
+    var time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
+    var newMessage = time + " " + login + " - " + message.split('\n').join('<br/>') + '<br/>';
+    var chat = $("#chat");
+    chat.html(chat.html() + newMessage);
+    chat.scrollTop(chat.prop('scrollHeight'));
 }
 
 function installParticipant(participant) {
