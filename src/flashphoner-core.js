@@ -243,7 +243,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.6",
+            clientVersion: "0.3.7",
             custom: options.custom
         });
     };
@@ -394,7 +394,9 @@ var createSession = function(options) {
 
                 delete streams[id_];
                 delete streamRefreshHandlers[id_];
-                mediaConnection.close(cacheLocalResources);
+                if (mediaConnection) {
+                    mediaConnection.close(cacheLocalResources);
+                }
             }
             //fire stream event
             if (callbacks[status_]) {

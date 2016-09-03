@@ -51,16 +51,15 @@ describe('Room api', function() {
         ).on("ESTABLISHED", function(api){
             //join room
             api.join({name: "my_test_room"}).on("STATE", function(room){
-                var display = document.createElement("div");
-                display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
-                document.body.appendChild(display);
+                var display = addDisplay();
                 api.getRooms()[0].publish(display).on("PUBLISHING", function(stream){
                     setTimeout(function(){
                         stream.stop();
-                        api.disconnect();
-                        document.body.removeChild(display);
-                        done();
                     }, 3000);
+                }).on("UNPUBLISHED", function(){
+                    removeDisplay(display);
+                    api.disconnect();
+                    done();
                 });
             });
         });
@@ -74,9 +73,7 @@ describe('Room api', function() {
                 username: "test"
             }
         ).on("ESTABLISHED", function(api){
-            var display = document.createElement("div");
-            display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
-            document.body.appendChild(display);
+            var display = addDisplay();
             //join room
             api.join({name: "my_test_room"}).on("STATE", function(room){
                 api.getRooms()[0].publish(display).on("PUBLISHING", function(stream){
@@ -90,23 +87,23 @@ describe('Room api', function() {
                         //join room
                         api.join({name: "my_test_room"}).on("STATE", function(room){
                             console.log("Joined room with state " + room);
-                            var display = document.createElement("div");
-                            display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
-                            document.body.appendChild(display);
+                            var display = addDisplay();
                             room.getParticipants()[0].play(display).on("PLAYING", function(stream){
                                 setTimeout(function(){
                                     stream.stop();
-                                    document.body.removeChild(display);
-                                    api.disconnect();
                                 }, 3000);
+                            }).on("STOPPED", function(){
+                                removeDisplay(display);
+                                api.disconnect();
+                                stream.stop();
                             });
                         });
                     });
+                }).on("UNPUBLISHED", function(){
+                    removeDisplay(display);
+                    api.disconnect();
+                    done();
                 });
-            }).on("LEFT", function(){
-                api.disconnect();
-                document.body.removeChild(display);
-                done();
             });
         });
     });
@@ -119,9 +116,7 @@ describe('Room api', function() {
                 username: "test"
             }
         ).on("ESTABLISHED", function(api){
-            var display = document.createElement("div");
-            display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
-            document.body.appendChild(display);
+            var display = addDisplay();
             //join room
             api.join({name: "my_test_room"}).on("STATE", function(room){
                 //create second connection and publish
@@ -133,22 +128,21 @@ describe('Room api', function() {
                 ).on("ESTABLISHED", function(api){
                     //join room
                     api.join({name: "my_test_room"}).on("STATE", function(room){
-                        var display = document.createElement("div");
-                        display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
-                        document.body.appendChild(display);
+                        var display = addDisplay();
                         api.getRooms()[0].publish(display).on("PUBLISHING", function(stream){
                             setTimeout(function(){
                                 stream.stop();
-                                document.body.removeChild(display);
-                                api.disconnect();
                             }, 3000);
+                        }).on("UNPUBLISHED",function(){
+                            removeDisplay(display);
+                            api.disconnect();
                         });
                     });
                 });
             }).on("PUBLISHED", function(participant){
                 console.log("Stream published, subscribe");
                 participant.play(display).on("FAILED", function(stream){
-                    document.body.removeChild(display);
+                    removeDisplay(display);
                     api.disconnect();
                     done();
                 });

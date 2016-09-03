@@ -1,9 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>test</title>
-</head>
 <body>
 <div id="mocha"></div>
 <script src="../flashphoner.js"></script>
@@ -14,10 +10,38 @@
     mocha.setup('bdd');
     mocha.reporter('html');
     var expect = chai.expect;
+    var sOptions = {urlServer: "ws://192.168.88.234:8080"};
+    var initOptions = {
+        flashMediaProviderSwfLocation: "../media-provider.swf",
+        screenSharingExtensionId: "nlbaajplpmleofphigmgaifhoikjmbkg"
+    };
+
+    //display helpers
+    function addDisplay(width, height) {
+        if (!width) {
+            width = 320;
+        }
+        if (!height) {
+            height = 240;
+        }
+        var display = document.createElement("div");
+        display.setAttribute("style","width:" + width + "px; height:" + height + "px; border: solid; border-width: 1px");
+        document.body.insertBefore(display, document.body.firstChild);
+        return display;
+    }
+    function removeDisplay(display) {
+        document.body.removeChild(display);
+    }
 </script>
+<script src="test.js"></script>
 <script src="media-device-test.js"></script>
+<script src="room-module-test.js"></script>
 <script>
     mocha.run();
 </script>
 </body>
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+</head>
 </html>
