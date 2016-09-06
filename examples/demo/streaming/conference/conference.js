@@ -13,6 +13,7 @@ function init() {
     }
 
     $("#connectBtn").click(function() {
+        $(this).attr('disabled',true);
         var state = $(this).text();
         console.log(state);
         if (state == "Connect") {
@@ -198,6 +199,7 @@ function setConnectionStatus(status) {
             $('#sendMessageBtn').off();
             break;
     }
+    $("#connectBtn").removeAttr('disabled');
 }
 
 function setStreamStatus(status) {
