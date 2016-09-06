@@ -39,6 +39,17 @@ describe('flashphoner', function() {
                 done();
             });
         });
+        it('status should be FAILED when connecting to closed port', function(done){
+            this.timeout(30000);
+            var comp = sOptions.urlServer.split(":");
+            var badUrl = comp[0] + ":" + comp[1] + ":" + "32434";
+            var session = Flashphoner.createSession({urlServer: badUrl});
+            session.on(SESSION_STATUS.FAILED, function(){
+                done();
+            }).on(SESSION_STATUS.DISCONNECTED, function(){
+                done(new Error("Got DISCONNECTED status"));
+            });
+        });
         it('should disconnect', function(done) {
             var session = Flashphoner.createSession(sOptions);
             session.on(SESSION_STATUS.ESTABLISHED, function(){
