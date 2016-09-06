@@ -264,7 +264,9 @@ var createSession = function(options) {
         onSessionStatusChange(SESSION_STATUS.FAILED);
     };
     wsConnection.onclose = function() {
-        onSessionStatusChange(SESSION_STATUS.DISCONNECTED);
+        if (sessionStatus !== SESSION_STATUS.FAILED) {
+            onSessionStatusChange(SESSION_STATUS.DISCONNECTED);
+        }
     };
     wsConnection.onopen = function() {
         onSessionStatusChange(SESSION_STATUS.CONNECTED);
@@ -272,7 +274,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.4",
+            clientVersion: "0.3.8",
             custom: options.custom
         });
     };
@@ -425,7 +427,9 @@ var createSession = function(options) {
 
                 delete streams[id_];
                 delete streamRefreshHandlers[id_];
-                mediaConnection.close(cacheLocalResources);
+                if (mediaConnection) {
+                    mediaConnection.close(cacheLocalResources);
+                }
             }
             //fire stream event
             if (callbacks[status_]) {

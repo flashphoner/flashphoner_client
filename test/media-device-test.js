@@ -1,9 +1,6 @@
 describe('MediaDevices', function(){
     before(function(){
-        Flashphoner.init({
-            flashMediaProviderSwfLocation: "../media-provider.swf",
-            screenSharingExtensionId: "nlbaajplpmleofphigmgaifhoikjmbkg"
-        });
+        Flashphoner.init(initOptions);
     });
 
     it('getMediaDevices should return device list', function(done) {
@@ -32,13 +29,11 @@ describe('MediaDevices', function(){
                 frameRate: 30
             }
         };
-        var display = document.createElement("div");
-        display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
-        document.body.appendChild(display);
+        var display = addDisplay();
         Flashphoner.getMediaAccess(constraints, display).then(function(display){
             setTimeout(function(){
                 expect(Flashphoner.releaseLocalMedia(display)).to.be.true;
-                document.body.removeChild(display);
+                removeDisplay(display);
                 done();
             }, 2000);
         }, done);
@@ -57,14 +52,12 @@ describe('MediaDevices', function(){
                     deviceId: list.video[0].id
                 }
             };
-            var display = document.createElement("div");
-            display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
-            document.body.appendChild(display);
+            var display = addDisplay();
             return Flashphoner.getMediaAccess(constraints, display);
         }).then(function(display){
             setTimeout(function(){
                 Flashphoner.releaseLocalMedia(display);
-                document.body.removeChild(display);
+                removeDisplay(display);
                 done();
             }, 2000);
         }).catch(done);
@@ -74,9 +67,7 @@ describe('MediaDevices', function(){
         this.timeout(30000);
         var mediaProvider = "Flash";
         if (Flashphoner.getMediaProviders().indexOf(mediaProvider) != -1) {
-            var display = document.createElement("div");
-            display.setAttribute("style","width:320px; height:240px; border: solid; border-width: 1px");
-            document.body.appendChild(display);
+            var display = addDisplay();
             Flashphoner.getMediaDevices(mediaProvider).then(function(list){
                 var constraints = {
                     audio: {
@@ -95,7 +86,7 @@ describe('MediaDevices', function(){
                         Flashphoner.getMediaAccess(constraints, display, mediaProvider).then(function(display){
                             setTimeout(function(){
                                 Flashphoner.releaseLocalMedia(display, mediaProvider);
-                                document.body.removeChild(display);
+                                removeDisplay(display);
                                 done();
                             }, 2000);
                         });
@@ -112,9 +103,7 @@ describe('MediaDevices', function(){
         if (Flashphoner.getMediaProviders()[0] !== "WebRTC") {
             throw new Error("No WebRTC");
         }
-        var display = document.createElement("div");
-        display.setAttribute("style","width:640px; height:480px; border: solid; border-width: 1px");
-        document.body.appendChild(display);
+        var display = addDisplay(640,480);
         var constraints = {
             video: {
                 width: 640,
@@ -126,7 +115,7 @@ describe('MediaDevices', function(){
         Flashphoner.getMediaAccess(constraints, display).then(function(){
             setTimeout(function(){
                 Flashphoner.releaseLocalMedia(display);
-                document.body.removeChild(display);
+                removeDisplay(display);
                 done();
             }, 4000);
         }, done);
