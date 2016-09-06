@@ -55,17 +55,17 @@ function connectAndPublish() {
     var handleSession = function (session) {
         var status = session.status();
         switch (status) {
-            case "FAILED":
+            case SESSION_STATUS.FAILED:
                 console.warn("Session failed, id " + session.id());
                 removeSession(session);
                 setStatus(status);
                 break;
-            case "DISCONNECTED":
+            case SESSION_STATUS.DISCONNECTED:
                 console.log("Session diconnected, id " + session.id());
                 removeSession(session);
                 setStatus(status);
                 break;
-            case "ESTABLISHED":
+            case SESSION_STATUS.ESTABLISHED:
                 console.log("Session established, id " + session.id());
                 publishStream();
                 break;
@@ -99,19 +99,19 @@ function publishStream() {
         var status = stream.status();
         console.log("Stream status: " + status);
         switch (status) {
-            case "PUBLISHING":
+            case STREAM_STATUS.PUBLISHING:
                 _stream = stream;
                 _fileName = stream.getRecordInfo();
                 console.log("File name " + _fileName);
-            case "FAILED":
-            case "UNPUBLISHED":
+            case STREAM_STATUS.FAILED:
+            case STREAM_STATUS.UNPUBLISHED:
                 setStatus(status);
                 break;
 
         }
     };
 
-    currentSession.createStream({name: _streamName, record: true, mediaProvider: Flashphoner.getMediaProviders()[0], display: localVideo, cacheLocalResources: false})
+    currentSession.createStream({name: _streamName, record: true, mediaProvider: Flashphoner.getMediaProviders()[0], display: localVideo, cacheLocalResources: true})
         .on(STREAM_STATUS.PUBLISHING, handleStream)
         .on(STREAM_STATUS.FAILED, handleStream)
         .on(STREAM_STATUS.UNPUBLISHED, handleStream).publish();
@@ -131,12 +131,12 @@ function unPublishStream() {
 function setStatus(status) {
     if (status == "PUBLISHING") {
         $("#status").text(status).removeClass().attr("class","text-success");
-        $("#publishBtn").text("Stop").removeProp("disabled");
+        $("#publishBtn").text("Stop");
     }
 
     if (status == "DISCONNECTED" || status == "UNPUBLISHED") {
         $("#status").text(status).removeClass().attr("class","text-muted");
-        $("#publishBtn").text("Start").removeProp("disabled");
+        $("#publishBtn").text("Start");
         if (_fileName) {
             showDownloadLink(_fileName);
         }
@@ -144,8 +144,9 @@ function setStatus(status) {
 
     if (status == "FAILED") {
         $("#status").text(status).removeClass().attr("class","text-danger");
-        $("#publishBtn").text("Start").removeProp("disabled");
+        $("#publishBtn").text("Start");
     }
+    $("#publishBtn").prop("disabled",false);
 }
 
 // Check field for empty string
