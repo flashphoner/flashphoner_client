@@ -62,14 +62,14 @@ function connect() {
     var handleSession = function(session) {
         var status = session.status();
         switch (status) {
-            case "FAILED":
+            case SESSION_STATUS.FAILED:
                 console.warn("Session failed, id " + session.id());
                 removeSession(session);
                 player1.button.prop('disabled', true);
                 player2.button.prop('disabled', true);
                 setStatus("",session.status());
                 break;
-            case "DISCONNECTED":
+            case SESSION_STATUS.DISCONNECTED:
                 console.log("Session diconnected, id " + session.id());
                 removeSession(session);
                 player1.button.prop('disabled', true);
@@ -77,7 +77,7 @@ function connect() {
                 $("#url").prop('disabled', false);
                 setStatus("",session.status());
                 break;
-            case "ESTABLISHED":
+            case SESSION_STATUS.ESTABLISHED:
                 console.log("Session established, id " + session.id());
                 player1.button.prop('disabled',false);
                 player2.button.prop('disabled',false);
@@ -121,13 +121,13 @@ function playStream(player, streamName) {
     console.log("Play stream name : " + player.streamName);
     var handleStream = function(stream) {
         switch (stream.status()) {
-            case "PLAYING" :
+            case STREAM_STATUS.PLAYING:
                 player.stream = stream;
                 setStatus(player, stream.status());
                 player.button.prop('disabled',false);
                 break;
-            case "STOPPED" :
-            case "FAILED" :
+            case STREAM_STATUS.STOPPED:
+            case STREAM_STATUS.FAILED:
                 player.stream = null;
                 setStatus(player, stream.status());
                 player.button.prop('disabled',false);
@@ -154,7 +154,6 @@ function setStatus(player, status) {
     console.log("Status: " + status);
 
     if (player) {
-        console.log(player);
         player.urlElement.prop('disabled', true);
         if (status == "PUBLISHING" || status == "PLAYING") {
             player.statusElement.text(status).removeClass().attr("class", "text-success");
@@ -179,43 +178,6 @@ function setStatus(player, status) {
         $("#connectStatus").text(status).removeClass().attr("class", textClass);
     }
 
-    //if (status == "PUBLISHING" || status == "PLAYING") {
-    //    if (player) {
-    //        player.statusElement.text(status).removeClass().attr("class", "text-success");
-    //        player.button.text("Stop");
-    //        player.urlElement.prop('disabled', true);
-    //    }
-    //}
-    //
-    //if (status == "DISCONNECTED" || status == "UNPUBLISHED" || status == "STOPPED") {
-    //    if (player) {
-    //        player.statusElement.text(status).removeClass().attr("class", "text-muted");
-    //        player.button.text("Start");
-    //        player.urlElement.prop('disabled',false);
-    //    } else {
-    //        $("#connectStatus").text(status);
-    //        $("#connectBtn").text("Connect").prop('disabled',false);
-    //        $("#url").prop('disabled',false);
-    //    }
-    //}
-    //
-    //if (status == "FAILED") {
-    //    if (player) {
-    //        player.statusElement.text(status).removeClass().attr("class", "text-danger");
-    //        player.button.text("Start");
-    //        player.urlElement.prop('disabled',false);
-    //    } else {
-    //        $("#connectStatus").text(status);
-    //        $("#connectBtn").text("Connect").prop('disabled',false);
-    //        $("#url").prop('disabled',false);
-    //    }
-    //}
-    //
-    //if (status == "ESTABLISHED") {
-    //    $("#connectStatus").text(status).removeClass().attr("class", "text-success");
-    //    $("#connectBtn").text("Disconnect").prop('disabled',false);
-    //    $("#url").attr('disabled',true);
-    //}
 }
 
 // Check field for empty string

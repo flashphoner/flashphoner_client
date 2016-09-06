@@ -151,26 +151,28 @@ function stopStream() {
 
 // Set Connection Status
 function setStatus(status) {
+    var statusTextClass;
+    var playBtnText = "Start";
+    var muteStreamName = false;
+    var muteUrl = false;
+
     if (status == "PLAYING") {
-        $("#status").text(status).removeClass().attr("class","text-success");
-        $("#playBtn").text("Stop").removeProp("disabled");
-        $("#streamName").prop("disabled",true);
-        $("#url").prop("disabled",true);
+        statusTextClass = "text-success";
+        playBtnText = "Stop";
+        muteStreamName = true;
+        muteUrl = true;
     }
-
     if (status == "DISCONNECTED" || status == "STOPPED") {
-        $("#status").text(status).removeClass().attr("class","text-muted");
-        $("#playBtn").text("Start").removeProp("disabled");
-        $("#streamName").removeProp("disabled");
-        $("#url").removeProp("disabled");
+        statusTextClass = "text-muted";
+    }
+    if (status == "FAILED") {
+        statusTextClass = "text-danger";
     }
 
-    if (status == "FAILED") {
-        $("#status").text(status).removeClass().attr("class","text-danger");
-        $("#playBtn").text("Start").removeProp("disabled");
-        $("#streamName").removeProp("disabled");
-        $("#url").removeProp("disabled");
-    }
+    $("#url").prop("disabled",muteUrl);
+    $("#streamName").prop("disabled",muteStreamName);
+    $("#status").text(status).removeClass().attr("class",statusTextClass);
+    $("#playBtn").text(playBtnText).prop("disabled",false);
 }
 
 // Check field for empty string
