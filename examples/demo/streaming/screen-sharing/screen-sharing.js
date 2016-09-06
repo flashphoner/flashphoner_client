@@ -51,6 +51,9 @@ function init_page() {
             $(this).prop('disabled',true);
             var state = $("#publishBtn").text();
             if (state == "Start") {
+                if (!checkInputs()) {
+                    return false;
+                }
                 connectAndShare();
             } else {
                 unPublishStream();
@@ -132,12 +135,19 @@ function publishStream() {
     }
 
     var handleStream = function(stream) {
-
         var status = stream.status();
         console.log("Stream status: " + status);
         switch (status) {
             case "PUBLISHING":
                 _stream = stream;
+                // To catch screen access state we should add callback to 'ended' event on videoTrack
+                // 1. Get video element by stream id - document.getElementById(stream.id())
+                // 2. Get stream - .srcObject
+                // 3. Get 1st element of video tracks from stream - .getVideoTracks()[0]
+                // 4. Add callback - .onended
+                document.getElementById(stream.id()).srcObject.getVideoTracks()[0].onended = function (e) {
+                    unPublishStream();
+                };
                 playStream();
             case "UNPUBLISHED":
                 setStatus(status);
@@ -159,7 +169,7 @@ function publishStream() {
         }
     };
 
-    currentSession.createStream({name: _streamName, constraints: constraints, display: localVideo, cacheLocalResources: false})
+    currentSession.createStream({name: _streamName, constraints: constraints, display: localVideo, cacheLocalResources: true})
         .on(STREAM_STATUS.PUBLISHING, handleStream)
         .on(STREAM_STATUS.FAILED, handleStream)
         .on(STREAM_STATUS.UNPUBLISHED, handleStream).publish();
@@ -172,15 +182,23 @@ function unPublishStream() {
 }
 
 function playStream() {
-    currentSession.createStream({name: _streamName, display: remoteVideo, cacheLocalResources: false})
+    var displayEl = document.createElement('div');
+    displayEl.setAttribute('id','displayDiv');
+    remoteVideo.appendChild(displayEl);
+    var d = document.getElementById('displayDiv');
+
+    currentSession.createStream({name: _streamName, display: d, cacheLocalResources: false})
         .on(STREAM_STATUS.PLAYING, function(playingStream) {
             console.log("Playing");
         })
+        .on(STREAM_STATUS.FAILED, function() {
+            remoteVideo.removeChild(displayEl);
+        })
+        .on(STREAM_STATUS.STOPPED, function () {
+            remoteVideo.removeChild(displayEl);
+        })
         .on(STREAM_STATUS.RESIZE, function(playingStream) {
-            var dimension = playingStream.getStreamDimension();
-            var W = dimension.width;
-            var H = dimension.height;
-            console.log("Got native resolution " + W + "x" + H);
+            resizePreview(playingStream,d);
         })
         .play();
 }
@@ -209,6 +227,20 @@ function setStatus(status, cause) {
         $("#status").text((cause) ? cause : status).removeClass().attr("class","text-danger");
         $("#publishBtn").text("Start");
     }
+}
+
+function checkInputs() {
+    var emptyField = false;
+    $(":input").not(':input[type=button]').each(function() {
+        if (!checkForEmptyField('#'+$(this).attr('id'),'#'+$(this).attr('id')+'Form')) {
+            emptyField = true;
+        }
+    });
+    if(emptyField) {
+        $("#publishBtn").removeProp("disabled");
+        return false;
+    }
+    return true;
 }
 
 // Check field for empty string
@@ -261,12 +293,36 @@ function inIframe () {
 
 function muteInputs() {
     $(":input").each(function() {
-       $(this).prop('disabled',true);
+       $(this).attr('disabled','disabled');
     });
 }
 
 function unmuteInputs() {
     $(":input").each(function() {
-        $(this).removeProp('disabled');
+        $(this).removeAttr('disabled');
     });
+}
+
+function resizePreview(stream, display) {
+    var dimension = stream.getStreamDimension();
+    var W = dimension.width;
+    var H = dimension.height;
+    console.log("Got native resolution " + W + "x" + H);
+    var videoEl = document.getElementById(stream.id());
+    if (W >= (remoteVideo.offsetWidth - 2) || H >= (remoteVideo.offsetHeight - 2)) {
+        var scale = Math.max(W / 800, H / 400);
+        var rescale = Math.floor(W / scale);
+        videoEl.setAttribute('width', rescale + "px");
+        videoEl.setAttribute('height', 400);
+        display.style.width = rescale + "px";
+        display.style.height = 400 + "px";
+        display.style.margin = "0 auto";
+    } else {
+        var marginTop = (400 - H) / 2 + "px";
+        display.style.width = W + "px";
+        display.style.height = H + "px";
+        display.style.margin = marginTop + " auto";
+        videoEl.setAttribute('width', W);
+        videoEl.setAttribute('height', H);
+    }
 }

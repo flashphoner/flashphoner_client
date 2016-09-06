@@ -140,6 +140,35 @@ var getDefaultMediaConstraints = function() {
     };
 };
 
+function checkConstraints(constraints) {
+    if (constraints.video) {
+        if (constraints.video.hasOwnProperty('frameRate')) {
+            var frameRate = constraints.video.frameRate;
+            if (frameRate == 0 || isNaN(frameRate)) {
+                delete constraints.video.frameRate;
+            }
+        }
+        if (constraints.video.hasOwnProperty('width')) {
+            var width = constraints.video.width;
+            if (width == 0 || isNaN(width)) {
+                console.warn("Width or height property has zero/NaN value, set default resolution 320x240");
+                constraints.video.width = 320;
+                constraints.video.height = 240;
+            }
+        }
+        if (constraints.video.hasOwnProperty('height')) {
+            var height = constraints.video.height;
+            if (height == 0 || isNaN(height)) {
+                console.warn("Width or height property has zero/NaN value, set default resolution 320x240");
+                constraints.video.width = 320;
+                constraints.video.height = 240;
+            }
+        }
+    }
+    return constraints;
+}
+
+
 /**
  * Release local media
  *
@@ -352,7 +381,9 @@ var createSession = function(options) {
         var mediaConnection;
         var display = options.display;
         // Constraints
-        var constraints = options.constraints;
+        if (options.constraints) {
+            var constraints = checkConstraints(options.constraints);
+        }
         var dimension = {};
 
         var published_ = false;
@@ -456,7 +487,7 @@ var createSession = function(options) {
             if (status_ !== STREAM_STATUS.NEW) {
                 throw new Error("Invalid stream state");
             }
-            var hasAudio = (constraints && constraints.video && constraints.video.type == "screen") ? false : true;
+
             //get access to camera
             MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function(){
                 published_ = true;
@@ -469,7 +500,7 @@ var createSession = function(options) {
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
-                        sendAudio: hasAudio,
+                        sendAudio: true,
                         sendVideo: true
                     });
                 }).then(function (sdp) {
@@ -479,7 +510,7 @@ var createSession = function(options) {
                         name: name_,
                         published: published_,
                         hasVideo: true,
-                        hasAudio: hasAudio,
+                        hasAudio: true,
                         status: status_,
                         record: record_,
                         mediaProvider: mediaProvider,

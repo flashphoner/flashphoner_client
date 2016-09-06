@@ -70,9 +70,19 @@ var createConnection = function(options) {
         };
         var createOffer = function (options) {
             return new Promise(function (resolve, reject) {
+                var hasAudio = true;
+                var hasVideo = true;
+                if (localStream) {
+                    if (!localStream.srcObject.getAudioTracks()[0]) {
+                        hasAudio = false;
+                    }
+                    if (!localStream.srcObject.getVideoTracks()[0]) {
+                        hasVideo = false;
+                    }
+                }
                 var constraints = {
-                    offerToReceiveAudio: options.receiveAudio == undefined ? options.sendAudio : options.receiveAudio,
-                    offerToReceiveVideo: options.receiveVideo == undefined ? options.sendVideo : options.receiveVideo
+                    offerToReceiveAudio: hasAudio,
+                    offerToReceiveVideo: hasVideo
                 };
                 //create offer and set local sdp
                 connection.createOffer(constraints).then(function (offer) {
@@ -116,7 +126,7 @@ var getMediaAccess = function(constraints, display) {
                 return;
             }
         } else {
-            constraints = checkConstraints(constraints);
+            constraints = normalizeConstraints(constraints);
             releaseMedia(display);
         }
         //check if this is screen sharing
@@ -129,6 +139,9 @@ var getMediaAccess = function(constraints, display) {
                         constraints.video[prop] = screenSharingConstraints[prop];
                     }
                 }
+                delete constraints.video.frameRate;
+                delete constraints.video.height;
+                delete constraints.video.width;
                 getAccess(constraints);
             }, reject);
         } else {
@@ -160,7 +173,7 @@ var getScreenDeviceId = function(constraints) {
         var mandatory = {};
         mandatory.maxWidth = constraints.video.width;
         mandatory.maxHeight = constraints.video.height;
-        mandatory.maxFrameRate = constraints.video.frameRate;
+        mandatory.maxFrameRate = constraints.video.frameRate.max;
 
         if (window.chrome) {
             chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
@@ -268,30 +281,14 @@ var listDevices = function(labels) {
     });
 };
 
-function checkConstraints(constraints) {
+function normalizeConstraints(constraints) {
     if (constraints.video) {
         if (constraints.video.hasOwnProperty('frameRate')) {
-            var frameRate = constraints.video.frameRate;
-            if (frameRate.hasOwnProperty('max')) {
-                if(frameRate.max == 0) {
-                    delete constraints.video.frameRate;
-                }
-            }
-        }
-        if (constraints.video.hasOwnProperty('width')) {
-            var width = constraints.video.width;
-            if (width == 0 || isNaN(width)) {
-                console.warn("Width or height property has zero/NaN value, set default resolution 320x240");
-                constraints.video.width = 320;
-                constraints.video.height = 240;
-            }
-        }
-        if (constraints.video.hasOwnProperty('height')) {
-            var height = constraints.video.height;
-            if (height == 0 || isNaN(height)) {
-                console.warn("Width or height property has zero/NaN value, set default resolution 320x240");
-                constraints.video.width = 320;
-                constraints.video.height = 240;
+            // Set default FPS value
+            var frameRate = (constraints.video.frameRate == 0) ? 30 : constraints.video.frameRate;
+            constraints.video.frameRate = {
+                min: frameRate,
+                max: frameRate
             }
         }
     }

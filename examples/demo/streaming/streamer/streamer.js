@@ -113,7 +113,7 @@ function publishStream() {
         }
     };
 
-    currentSession.createStream({name: _streamName, mediaProvider: Flashphoner.getMediaProviders()[0], display: localVideo, cacheLocalResources: false})
+    currentSession.createStream({name: _streamName, mediaProvider: Flashphoner.getMediaProviders()[0], display: localVideo, cacheLocalResources: true})
         .on(STREAM_STATUS.PUBLISHING, handleStream)
         .on(STREAM_STATUS.FAILED, handleStream)
         .on(STREAM_STATUS.UNPUBLISHED, handleStream).publish();
@@ -126,7 +126,7 @@ function unPublishStream() {
 }
 
 function playStream() {
-    currentSession.createStream({name: _streamName, display: remoteVideo, cacheLocalResources: false})
+    currentSession.createStream({name: _streamName, display: remoteVideo, cacheLocalResources: true})
         .on(STREAM_STATUS.PLAYING, function(playingStream) {
             console.log("Playing");
         }).play();

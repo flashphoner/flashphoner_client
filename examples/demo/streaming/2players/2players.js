@@ -29,8 +29,8 @@ function initAPI() {
     }
 
     $("#connectBtn").click(function() {
+        $(this).prop('disabled',true);
         var state = $(this).text();
-        console.log(state);
         if (state == "Connect") {
             connect();
         } else {
@@ -167,7 +167,7 @@ function setStatus(player, status) {
             player.urlElement.removeAttr('disabled');
         } else {
             $("#connectStatus").text(status);
-            $("#url").removeAttr('disabled');
+            $("#url").removeProp('disabled');
         }
     }
 
@@ -178,7 +178,7 @@ function setStatus(player, status) {
             player.urlElement.removeAttr('disabled');
         } else {
             $("#connectStatus").text(status);
-            $("#url").removeAttr('disabled');
+            $("#url").removeProp('disabled');
         }
     }
 
