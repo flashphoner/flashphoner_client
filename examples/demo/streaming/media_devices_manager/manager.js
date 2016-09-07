@@ -42,10 +42,7 @@ function startTest() {
         deviceId: selectedVideo,
         width: parseInt(document.getElementById("width").value),
         height: parseInt(document.getElementById("height").value),
-        frameRate: {
-            ideal: parseInt(document.getElementById("fps").value),
-            max: parseInt(document.getElementById("fps").value)
-        },
+        frameRate: document.getElementById("fps").value,
         type: "camera"
     };
 
@@ -68,13 +65,16 @@ function initAPI() {
     }
 
     $("#applyBtn").click(function() {
-        $("#applyBtn").prop("disabled",true);
-        var state = $("#applyBtn").text();
+        $(this).prop("disabled",true);
+        var state = $(this).text();
         if (state == "Start") {
             startTest();
         } else {
-            if (_stream)
+            if (_stream) {
                 _stream.stop();
+            } else {
+                console.error("Nothing to stop!");
+            }
         }
 
     });
@@ -156,52 +156,41 @@ function connectAndPublish() {
 
 //Publish stream
 function publishStream() {
-    _streamName = field("url").split('/')[3];
-    if (!currentSession || currentSession.status() != SESSION_STATUS.ESTABLISHED) {
-        console.warn("Session is not ready or null");
-        return;
-    }
-
-    var handleStream = function(stream) {
-        var status = stream.status();
-        console.log("Stream status: " + status);
+    Flashphoner.getMediaAccess(_constraints, localVideo).then(function(){
+        _streamName = field("url").split('/')[3];
+        _stream = currentSession.createStream({name: _streamName, display: localVideo, cacheLocalResources: true})
+            .on(STREAM_STATUS.PUBLISHING, function(publisher) {
+                $("#streamStatus").text(publisher.status()).removeClass().attr("class","text-muted");
+                //create preview
+                currentSession.createStream({name: _streamName, display: remoteVideo})
+                    .on(STREAM_STATUS.PLAYING, function(playingStream){
+                        console.log("Playing stream " + playingStream.name() + " ; id " + playingStream.id());
+                        $("#applyBtn").text("Stop");
+                        $("#applyBtn").removeAttr("disabled");
+                    })
+                    .on(STREAM_STATUS.FAILED, function(){
+                        console.warn("Preview stream failed");
+                        publisher.stop();
+                    })
+                    .play();
+            })
+            .on(STREAM_STATUS.FAILED, streamTerminated)
+            .on(STREAM_STATUS.UNPUBLISHED, streamTerminated);
+        _stream.publish();
+    }, function(error){
+        console.warn("Failed to get access to media " + error);
         $("#applyBtn").removeProp("disabled");
-        switch (status) {
-            case "PUBLISHING":
-                console.log("Publishing stream " + _streamName + " ; id " + stream.id());
-                _stream = stream;
-                playStream();
-                $("#applyBtn").text("Stop");
-                $("#streamStatus").text(status).removeClass().attr("class","text-success");
-                break;
-            case "UNPUBLISHED":
-                $("#form :input").prop('readonly', false);
-                document.getElementById("videoInput").disabled = false;
-                document.getElementById("audioInput").disabled = false;
-                $("#applyBtn").text("Start");
-                $("#streamStatus").text(status).removeClass().attr("class","text-muted");
-                break;
-        }
-    };
+    });
 
-    currentSession.createStream({name: _streamName, constraints: _constraints, mediaProvider: Flashphoner.getMediaProviders()[0], display: localVideo, cacheLocalResources: true})
-        .on(STREAM_STATUS.PUBLISHING, handleStream)
-        .on(STREAM_STATUS.FAILED, handleStream)
-        .on(STREAM_STATUS.UNPUBLISHED, handleStream).publish();
-
-}
-
-function playStream() {
-    currentSession.createStream({name: _streamName, display: remoteVideo, cacheLocalResources: true})
-        .on(STREAM_STATUS.PLAYING, function(playingStream) {
-            console.log("Playing stream " + playingStream.name() + " ; id " + playingStream.id());
-        })
-        .on(STREAM_STATUS.RESIZE, function(playingStream) {
-            var dimension = playingStream.getStreamDimension();
-            var W = dimension.width;
-            var H = dimension.height;
-            console.log("Got native resolution " + W + "x" + H);
-        }).play();
+    function streamTerminated(stream) {
+        var status = stream.status();
+        $("#form :input").prop('readonly', false);
+        document.getElementById("videoInput").disabled = false;
+        document.getElementById("audioInput").disabled = false;
+        $("#applyBtn").text("Start");
+        $("#applyBtn").removeAttr("disabled");
+        $("#streamStatus").text(status).removeClass().attr("class","text-muted");
+    }
 }
 
 // Check field for empty string

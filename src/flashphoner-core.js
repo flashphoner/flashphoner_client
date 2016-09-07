@@ -2,6 +2,7 @@
 
 var uuid = require('node-uuid');
 var constants = require("./constants");
+var util = require('./util');
 var Promise = require('promise-polyfill');
 
 /**
@@ -196,13 +197,7 @@ var releaseLocalMedia = function(display, mediaProvider) {
  * @memberof Flashphoner
  */
 var getSessions = function() {
-    var sessionsCopy = [];
-    for (var prop in sessions) {
-        if(sessions.hasOwnProperty(prop)) {
-            sessionsCopy.push(sessions[prop]);
-        }
-    }
-    return sessionsCopy;
+    return util.copyObjectToArray(sessions);
 };
 
 /**
@@ -274,7 +269,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.8",
+            clientVersion: "0.3.9",
             custom: options.custom
         });
     };
@@ -408,22 +403,23 @@ var createSession = function(options) {
                 mediaConnection.setRemoteSdp(sdp).then(function(){});
                 return;
             }
-            status_ = streamInfo.status;
+            var event = streamInfo.status;
+            if (event == STREAM_STATUS.RESIZE) {
+                dimension.width = streamInfo.playerVideoWidth;
+                dimension.height = streamInfo.playerVideoHeight;
+            } else {
+                status_ = event;
+            }
 
-            if (status_ == STREAM_STATUS.PUBLISHING) {
+            if (event == STREAM_STATUS.PUBLISHING) {
                 if (record_) {
                     recordFileName = streamInfo.recordName;
                 }
             }
 
-            if (status_ == STREAM_STATUS.RESIZE) {
-                dimension.width = streamInfo.playerVideoWidth;
-                dimension.height = streamInfo.playerVideoHeight;
-            }
-
             //release stream
-            if (status_ == STREAM_STATUS.FAILED || status_ == STREAM_STATUS.STOPPED ||
-                status_ == STREAM_STATUS.UNPUBLISHED) {
+            if (event == STREAM_STATUS.FAILED || event == STREAM_STATUS.STOPPED ||
+                event == STREAM_STATUS.UNPUBLISHED) {
 
                 delete streams[id_];
                 delete streamRefreshHandlers[id_];
@@ -432,8 +428,8 @@ var createSession = function(options) {
                 }
             }
             //fire stream event
-            if (callbacks[status_]) {
-                callbacks[status_](stream);
+            if (callbacks[event]) {
+                callbacks[event](stream);
             }
         };
 
@@ -448,6 +444,7 @@ var createSession = function(options) {
             if (status_ !== STREAM_STATUS.NEW) {
                 throw new Error("Invalid stream state");
             }
+            status_ = STREAM_STATUS.PENDING;
             //create mediaProvider connection
             MediaProvider[mediaProvider].createConnection({
                 id: id_,
@@ -491,10 +488,10 @@ var createSession = function(options) {
             if (status_ !== STREAM_STATUS.NEW) {
                 throw new Error("Invalid stream state");
             }
-
+            status_ = STREAM_STATUS.PENDING;
+            published_ = true;
             //get access to camera
             MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function(){
-                published_ = true;
                 //create mediaProvider connection
                 MediaProvider[mediaProvider].createConnection({
                     id: id_,
@@ -539,6 +536,18 @@ var createSession = function(options) {
          * @inner
          */
         var stop = function() {
+            if (status_ == STREAM_STATUS.NEW) {
+                //trigger FAILED status
+                streamRefreshHandlers[id_]({status: STREAM_STATUS.FAILED});
+                return;
+            } else if (status_ == STREAM_STATUS.PENDING) {
+                console.warn("Stopping stream before server response");
+                setTimeout(stop, 200);
+                return;
+            } else if (status_ == STREAM_STATUS.FAILED) {
+                console.warn("Stream status FAILED");
+                return;
+            }
             if (published_) {
                 send("unPublishStream", {
                     mediaSessionId: id_,
@@ -733,6 +742,17 @@ var createSession = function(options) {
     };
 
     /**
+     * Get streams.
+     *
+     * @returns {Array<Stream>} Streams
+     * @memberof Session
+     * @inner
+     */
+    var getStreams = function() {
+        return util.copyObjectToArray(streams);
+    };
+
+    /**
      * Session event callback.
      *
      * @callback Session~eventCallback
@@ -807,6 +827,7 @@ var createSession = function(options) {
     session.status = status;
     session.createStream = createStream;
     session.getStream = getStream;
+    session.getStreams = getStreams;
     session.sendData = restAppCommunicator.sendData;
     session.disconnect = disconnect;
     session.on = on;

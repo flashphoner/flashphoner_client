@@ -1,6 +1,7 @@
 'use strict';
 var SESSION_STATUS = require('./constants').SESSION_STATUS;
 var Promise = require('promise-polyfill');
+var util = require('./util');
 var ROOM_REST_APP = "roomApp";
 
 /**
@@ -95,7 +96,7 @@ var appSession = function(options) {
      * @inner
      */
     var getRooms = function(){
-        return copyObjectToArray(rooms);
+        return util.copyObjectToArray(rooms);
     };
 
 
@@ -303,7 +304,7 @@ var appSession = function(options) {
          * @inner
          */
         var getParticipants = function() {
-            return copyObjectToArray(participants);
+            return util.copyObjectToArray(participants);
         };
 
         //participant helpers
@@ -366,16 +367,6 @@ var appSession = function(options) {
     };
     return exports;
 };
-
-function copyObjectToArray(obj) {
-    var ret = [];
-    for (var prop in obj) {
-        if(obj.hasOwnProperty(prop)) {
-            ret.push(obj[prop]);
-        }
-    }
-    return ret;
-}
 
 var events = {
     STATE: "STATE",

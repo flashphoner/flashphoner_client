@@ -12,6 +12,7 @@ describe('flashphoner', function() {
         expect(Flashphoner.createSession(sOptions)).to.have.property('id');
     });
     it('should expose sessions', function(done){
+        this.timeout(10000);
         var session = Flashphoner.createSession(sOptions);
         expect(Flashphoner.getSession(session.id())).to.be.equal(session);
         expect(Flashphoner.getSessions()).to.contain(session);
@@ -70,6 +71,22 @@ describe('flashphoner', function() {
                 expect(session.createStream({name: "test"})).to.be.an('object');
                 session.on(SESSION_STATUS.DISCONNECTED, function(){
                    done();
+                });
+                session.disconnect();
+            });
+
+        });
+
+        it('should expose streams', function(done) {
+            var session = Flashphoner.createSession(sOptions);
+            session.on(SESSION_STATUS.ESTABLISHED, function() {
+                var stream = session.createStream({name: "test"});
+                expect(stream).to.be.an('object');
+                stream.stop();
+                expect(session.getStream(stream.id())).to.be.undefined;
+                expect(session.getStreams()).to.not.contain(stream);
+                session.on(SESSION_STATUS.DISCONNECTED, function(){
+                    done();
                 });
                 session.disconnect();
             });
@@ -144,6 +161,37 @@ describe('flashphoner', function() {
                     removeDisplay(publishDisplay);
                     done();
                 }).publish();
+            });
+            it('instant publish stop should result in UNPUBLISHED event', function(done) {
+                this.timeout(20000);
+                var display = addDisplay();
+                var stream = session.createStream({name: "test", display: display}).on(STREAM_STATUS.UNPUBLISHED, function(){
+                    removeDisplay(display);
+                    done();
+                });
+                stream.publish();
+                stream.stop();
+            });
+            it('instant play stop should result in STOPPED/FAILED event', function(done) {
+                this.timeout(20000);
+                var display = addDisplay();
+                var stream = session.createStream({name: "test", display: display}).on(STREAM_STATUS.STOPPED, function(){
+                    removeDisplay(display);
+                    done();
+                }).on(STREAM_STATUS.FAILED, function(){
+                    removeDisplay(display);
+                    done();
+                });
+                stream.play();
+                stream.stop();
+            });
+            it('play stream that is not available should result in FAILED event', function(done) {
+                this.timeout(20000);
+                var display = addDisplay();
+                var stream = session.createStream({name: "qweiofjiqwejfiqwjef", display: display}).on(STREAM_STATUS.FAILED, function(){
+                    removeDisplay(display);
+                    done();
+                }).play();
             });
             after(function(){
                 session.disconnect();

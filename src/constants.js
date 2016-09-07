@@ -62,7 +62,7 @@ define(sessionStatus, 'PENDING', 'PENDING');
 var streamStatus = {};
 //State of newly created Stream
 define(streamStatus, 'NEW', 'NEW');
-//todo remove?
+//State between publish/play and server response
 define(streamStatus, 'PENDING', 'PENDING');
 
 /**
