@@ -93,17 +93,17 @@ function connectAndShare() {
         var status = session.status();
 
         switch(status) {
-            case "FAILED":
-                $("#publishBtn").removeProp('disabled');
+            case SESSION_STATUS.FAILED:
+                $("#publishBtn").prop('disabled',false);
                 console.warn("Session failed, id " + session.id());
                 setStatus(session.status());
                 removeSession(session);
                 break;
-            case "DISCONNECTED":
+            case SESSION_STATUS.DISCONNECTED:
                 console.log("Session diconnected, id " + session.id());
                 removeSession(session);
                 break;
-            case "ESTABLISHED":
+            case SESSION_STATUS.ESTABLISHED:
                 console.log("Session established " + session.id());
                 publishStream();
                 break;
@@ -138,7 +138,7 @@ function publishStream() {
         var status = stream.status();
         console.log("Stream status: " + status);
         switch (status) {
-            case "PUBLISHING":
+            case STREAM_STATUS.PUBLISHING:
                 _stream = stream;
                 // To catch screen access state we should add callback to 'ended' event on videoTrack
                 // 1. Get video element by stream id - document.getElementById(stream.id())
@@ -149,10 +149,10 @@ function publishStream() {
                     unPublishStream();
                 };
                 playStream();
-            case "UNPUBLISHED":
+            case STREAM_STATUS.UNPUBLISHED:
                 setStatus(status);
                 break;
-            case "FAILED":
+            case STREAM_STATUS.FAILED:
                 var cause = stream.getInfo();
                 setStatus(status,cause);
                 break;
@@ -169,7 +169,7 @@ function publishStream() {
         }
     };
 
-    currentSession.createStream({name: _streamName, constraints: constraints, display: localVideo, cacheLocalResources: true})
+    currentSession.createStream({name: _streamName, constraints: constraints, display: localVideo, cacheLocalResources: false})
         .on(STREAM_STATUS.PUBLISHING, handleStream)
         .on(STREAM_STATUS.FAILED, handleStream)
         .on(STREAM_STATUS.UNPUBLISHED, handleStream).publish();
@@ -210,7 +210,7 @@ function playStream() {
 
 // Set Connection Status
 function setStatus(status, cause) {
-    $("#publishBtn").removeProp('disabled');
+    $("#publishBtn").prop('disabled',false);
     if (status == "PUBLISHING") {
         $("#status").text(status).removeClass().attr("class","text-success");
         $("#publishBtn").text("Stop");
@@ -237,7 +237,7 @@ function checkInputs() {
         }
     });
     if(emptyField) {
-        $("#publishBtn").removeProp("disabled");
+        $("#publishBtn").prop('disabled',false);
         return false;
     }
     return true;
@@ -293,13 +293,13 @@ function inIframe () {
 
 function muteInputs() {
     $(":input").each(function() {
-       $(this).attr('disabled','disabled');
+       $(this).prop('disabled',true);
     });
 }
 
 function unmuteInputs() {
     $(":input").each(function() {
-        $(this).removeAttr('disabled');
+        $(this).prop('disabled',false);
     });
 }
 

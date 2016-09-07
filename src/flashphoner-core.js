@@ -490,6 +490,10 @@ var createSession = function(options) {
             }
             status_ = STREAM_STATUS.PENDING;
             published_ = true;
+            var hasAudio = true;
+            if (constraints && constraints.video && constraints.video.type && constraints.video.type == "screen") {
+                hasAudio = false;
+            }
             //get access to camera
             MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function(){
                 if (status_ == STREAM_STATUS.FAILED) {
@@ -518,7 +522,7 @@ var createSession = function(options) {
                         name: name_,
                         published: published_,
                         hasVideo: true,
-                        hasAudio: true,
+                        hasAudio: hasAudio,
                         status: status_,
                         record: record_,
                         mediaProvider: mediaProvider,

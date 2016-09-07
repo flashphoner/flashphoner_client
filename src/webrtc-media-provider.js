@@ -1,6 +1,6 @@
 'use strict';
 
-require('webrtc-adapter');
+var adapter = require('webrtc-adapter');
 var uuid = require('node-uuid');
 var connections = {};
 var CACHED_INSTANCE_POSTFIX = "-CACHED_WEBRTC_INSTANCE";
@@ -134,9 +134,11 @@ var getMediaAccess = function(constraints, display) {
                         constraints.video[prop] = screenSharingConstraints[prop];
                     }
                 }
-                delete constraints.video.frameRate;
-                delete constraints.video.height;
-                delete constraints.video.width;
+                if (adapter.browserDetails.browser == "chrome" ) {
+                    delete constraints.video.frameRate;
+                    delete constraints.video.height;
+                    delete constraints.video.width;
+                }
                 getAccess(constraints);
             }, reject);
         } else {
@@ -165,21 +167,20 @@ var getMediaAccess = function(constraints, display) {
 
 var getScreenDeviceId = function(constraints) {
     return new Promise(function(resolve, reject){
-        var mandatory = {};
-        mandatory.maxWidth = constraints.video.width;
-        mandatory.maxHeight = constraints.video.height;
-        mandatory.maxFrameRate = constraints.video.frameRate.max;
-
+        var o = {};
         if (window.chrome) {
             chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
                 if (response) {
-                    mandatory.chromeMediaSource = "desktop";
+                    o.maxWidth = constraints.video.width;
+                    o.maxHeight = constraints.video.height;
+                    o.maxFrameRate = constraints.video.frameRate.max;
+                    o.chromeMediaSource = "desktop";
                     chrome.runtime.sendMessage(extensionId, {type: "getSourceId"}, function (response) {
                         if (response.error) {
                             reject(new Error("Screen access denied"));
                         } else {
-                            mandatory.chromeMediaSourceId = response.sourceId;
-                            resolve({mandatory: mandatory});
+                            o.chromeMediaSourceId = response.sourceId;
+                            resolve({mandatory: o});
                         }
                     });
                 } else {
@@ -188,9 +189,19 @@ var getScreenDeviceId = function(constraints) {
             });
         } else {
             //firefox case
-            var o = {};
             o.mediaSource = "window";
-            o.mandatory = mandatory;
+            o.width = {
+                min: constraints.video.width,
+                max: constraints.video.width
+            };
+            o.height = {
+                min: constraints.video.height,
+                max: constraints.video.height
+            };
+            o.frameRate = {
+                min: constraints.video.frameRate.max,
+                max: constraints.video.frameRate.max
+            };
             resolve(o);
         }
     });

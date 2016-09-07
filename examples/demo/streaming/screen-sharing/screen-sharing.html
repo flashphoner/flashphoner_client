@@ -52,23 +52,31 @@
             <div class="col-sm-5">
                 <div class="col-sm-12 text-center">
                     <div class="col-sm-4">
-                        <span class="text-muted">FPS</span>
-                        <input type="text" class="form-control" id="fps" value="30"/>
+                        <div class="form-group" id="fpsForm">
+                            <span class="text-muted">FPS</span>
+                            <input type="text" class="form-control" id="fps" value="30"/>
+                        </div>
                     </div>
                     <div class="col-sm-4">
-                        <span class="text-muted">Width</span>
-                        <input type="text" class="form-control" id="width" value="640"/>
+                        <div class="form-group" id="widthForm">
+                            <span class="text-muted">Width</span>
+                            <input type="text" class="form-control" id="width" value="640"/>
+                        </div>
                     </div>
                     <div class="col-sm-4">
-                        <span class="text-muted">Height</span>
-                        <input type="text" class="form-control" id="height" value="480"/>
+                        <div class="form-group" id="heightForm">
+                            <span class="text-muted">Height</span>
+                            <input type="text" class="form-control" id="height" value="480"/>
+                        </div>
                     </div>
                 </div>
                 <div id="localVideo" class="fp-localVideo" style="margin-top: 90px"></div>
                 <div class="text-center text-muted">My Screen</div>
                 <div class="row row-space" style="margin-top: 20px">
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="url" placeholder="Enter url with stream name"/>
+                        <div class="form-group" id="urlForm">
+                            <input type="text" class="form-control" id="url" placeholder="Enter url with stream name"/>
+                        </div>
                     </div>
                     <div class="col-sm-3 text-left">
                         <button id="publishBtn" type="button" class="btn btn-default">Start</button>
