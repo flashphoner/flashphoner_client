@@ -269,7 +269,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.9",
+            clientVersion: "0.3.10",
             custom: options.custom
         });
     };
@@ -492,6 +492,13 @@ var createSession = function(options) {
             published_ = true;
             //get access to camera
             MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function(){
+                if (status_ == STREAM_STATUS.FAILED) {
+                    //stream failed while we were waiting for media access, release media
+                    if (!cacheLocalResources) {
+                        releaseLocalMedia(display, mediaProvider);
+                    }
+                    return;
+                }
                 //create mediaProvider connection
                 MediaProvider[mediaProvider].createConnection({
                     id: id_,
