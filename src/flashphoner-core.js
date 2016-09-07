@@ -269,7 +269,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.10",
+            clientVersion: "0.3.11",
             custom: options.custom
         });
     };
@@ -381,7 +381,7 @@ var createSession = function(options) {
         if (options.constraints) {
             var constraints = checkConstraints(options.constraints);
         }
-        var dimension = {};
+        var resolution = {};
 
         var published_ = false;
         var record_ = options.record || false;
@@ -405,8 +405,8 @@ var createSession = function(options) {
             }
             var event = streamInfo.status;
             if (event == STREAM_STATUS.RESIZE) {
-                dimension.width = streamInfo.playerVideoWidth;
-                dimension.height = streamInfo.playerVideoHeight;
+                resolution.width = streamInfo.playerVideoWidth;
+                resolution.height = streamInfo.playerVideoHeight;
             } else {
                 status_ = event;
             }
@@ -647,14 +647,14 @@ var createSession = function(options) {
         };
 
         /**
-         * Get stream dimension
-         * @returns {Object} Dimension
+         * Get stream video size
+         * @returns {Object} Video size
          * @memberof Stream
          * @inner
          */
-        var getStreamDimension = function() {
+        var videoResolution = function() {
           if (!published_) {
-              return dimension;
+              return resolution;
           } else {
               throw new Error("This function available only on playing stream");
           }
@@ -698,7 +698,7 @@ var createSession = function(options) {
         stream.published = published;
         stream.getRecordInfo = getRecordInfo;
         stream.getInfo = getInfo;
-        stream.getStreamDimension = getStreamDimension;
+        stream.videoResolution = videoResolution;
         stream.on = on;
 
         streams[id_] = stream;
