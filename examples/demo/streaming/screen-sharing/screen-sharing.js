@@ -304,7 +304,7 @@ function unmuteInputs() {
 }
 
 function resizePreview(stream, display) {
-    var dimension = stream.getStreamDimension();
+    var dimension = stream.videoResolution();
     var W = dimension.width;
     var H = dimension.height;
     console.log("Got native resolution " + W + "x" + H);

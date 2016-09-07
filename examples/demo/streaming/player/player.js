@@ -107,7 +107,7 @@ function playStream() {
             setStatus(playingStream.status());
         })
         .on(STREAM_STATUS.RESIZE, function(playingStream) {
-            var dimension = playingStream.getStreamDimension();
+            var dimension = playingStream.videoResolution();
             var W = dimension.width;
             var H = dimension.height;
             console.log("Got native resolution " + W + "x" + H);
