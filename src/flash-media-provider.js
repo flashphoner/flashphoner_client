@@ -158,12 +158,6 @@ function clearCallbacks(id) {
 
 var getMediaAccess = function(constraints, display) {
     return new Promise(function(resolve, reject) {
-        if (!constraints) {
-            constraints = defaultConstraints;
-        } else {
-            constraints = normalizeConstraints(constraints);
-        }
-
         var flash = getCacheInstance(display);
         if (!flash) {
             var id = uuid.v1() + CACHED_INSTANCE_POSTFIX;
@@ -173,7 +167,10 @@ var getMediaAccess = function(constraints, display) {
                     removeCallback(id, "accessGranted");
                     resolve(display);
                 });
-                if (!swf.getMediaAccess(constraints)) {
+                if (!constraints) {
+                    constraints = defaultConstraints;
+                }
+                if (!swf.getMediaAccess(normalizeConstraints(constraints))) {
                     reject(new Error("Failed to get access to audio and video"));
                 }
             });
@@ -182,7 +179,7 @@ var getMediaAccess = function(constraints, display) {
                 removeCallback(flash.id, "accessGranted");
                 resolve(display);
             });
-            if (!flash.getMediaAccess(constraints)) {
+            if (!flash.getMediaAccess(normalizeConstraints(constraints))) {
                 reject(new Error("Failed to get access to audio and video"));
             }
         }
@@ -290,7 +287,7 @@ var listDevices = function() {
 };
 
 function normalizeConstraints(constraints) {
-    if (constraints.video) {
+    if (constraints && constraints.video) {
         if (constraints.video.hasOwnProperty('frameRate')) {
             var frameRate = constraints.video.frameRate;
             if (frameRate == 0 || isNaN(frameRate)) {

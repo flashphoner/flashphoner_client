@@ -172,6 +172,10 @@ function publishStream() {
                         console.warn("Preview stream failed");
                         publisher.stop();
                     })
+                    .on(STREAM_STATUS.RESIZE, function(stream){
+                        var res = stream.videoResolution();
+                        console.log("Preview video resolution " + res.width + "x" + res.height);
+                    })
                     .play();
             })
             .on(STREAM_STATUS.FAILED, streamTerminated)
@@ -179,6 +183,9 @@ function publishStream() {
         _stream.publish();
     }, function(error){
         console.warn("Failed to get access to media " + error);
+        $("#form :input").prop('readonly', false);
+        document.getElementById("videoInput").disabled = false;
+        document.getElementById("audioInput").disabled = false;
         $("#applyBtn").removeProp("disabled");
     });
 

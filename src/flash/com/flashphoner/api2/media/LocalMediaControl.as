@@ -64,6 +64,14 @@ package com.flashphoner.api2.media
 		 * Init width,height,fps and other parameters
 		 **/ 
 		public function init(constraints:Object):Boolean{
+			if (constraints == null) {
+				if (this.cam != null && this.mic != null) {
+					return true;
+				}
+				constraints = {};
+				constraints.video = {};
+				constraints.audio = true;
+			}
 			if (constraints.hasOwnProperty("video") && constraints.video is Object) {
 				var videoConstraints:Object = constraints.video;
 				this.width = getIntConfigurationProperty(videoConstraints.width, this.width);
