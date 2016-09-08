@@ -143,12 +143,6 @@ var getDefaultMediaConstraints = function() {
 
 function checkConstraints(constraints) {
     if (constraints.video) {
-        if (constraints.video.hasOwnProperty('frameRate')) {
-            var frameRate = constraints.video.frameRate;
-            if (frameRate == 0 || isNaN(frameRate)) {
-                delete constraints.video.frameRate;
-            }
-        }
         if (constraints.video.hasOwnProperty('width')) {
             var width = constraints.video.width;
             if (width == 0 || isNaN(width)) {
