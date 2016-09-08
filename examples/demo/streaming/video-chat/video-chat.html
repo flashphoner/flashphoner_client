@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="conference.css">
-    <title>Conference</title>
+    <link rel="stylesheet" href="video-chat.css">
+    <title>Two Way Video Chat</title>
     <script type="text/javascript" src="../../../../flashphoner.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
     <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
 
-    <script type="text/javascript" src="conference.js"></script>
+    <script type="text/javascript" src="../conference/conference.js"></script>
     <!-- Bootstrap JS -->
     <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
-    <script>var _participants = 3</script>
+    <script>var _participants = 2</script>
 </head>
 <body onload="init()">
 <div class="container">
@@ -22,11 +22,10 @@
 
         <h2 id="notifyFlash" class="text-danger"></h2>
 
-        <div class="col-sm-9 text-center">
-            <h2 class="text-center">Conference</h2>
+        <div class="col-sm-7 text-center">
+            <h2>Two Way Video Chat</h2>
         </div>
-
-        <div class="col-sm-9 text-center">
+        <div class="col-sm-7">
             <form class="form-horizontal" role="form" style="margin-top: 10px">
                 <div id="connForm" class="form-group">
                     <label class="col-sm-2 control-label">WCS URL</label>
@@ -34,16 +33,14 @@
                         <input type="text" class="form-control" id="url">
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="loginForm">
                     <label class="col-sm-2 control-label">Login</label>
                     <div class="col-sm-4">
                         <input type="text" class="form-control" id="login">
                     </div>
-                    <div class="col-sm-2 text-right">
+                    <div class="col-sm-4 text-right">
                         <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
-                    </div>
-                    <div class="col-sm-4 text-left">
-                        <div id="status"></div>
+                        <label id="status"></label>
                     </div>
                     <div class="col-sm-4 text-left text-danger">
                         <div id="failedInfo"></div>
@@ -51,55 +48,39 @@
                 </div>
             </form>
         </div>
-
-        <div class="col-sm-9 text-center">
-
-            <div class="col-sm-6">
-                <div id="participant1Display" class="fp-remoteVideo"></div>
-                <div id="participant1Name" class="text-center text-muted">NONE</div>
-                <div class="text-center" style="margin-top: 20px">
-                    <div id="participant1Status"></div>
-                </div>
+        <div class="col-sm-7">
+            <div id="participant1Display" class="fp-remoteVideo">
+                <div id="localDisplay" class="fp-localVideo"></div>
             </div>
-
-            <div class="col-sm-6">
-                <div id="participant2Display" class="fp-remoteVideo"></div>
-                <div id="participant2Name" class="text-center text-muted">NONE</div>
-                <div class="text-center" style="margin-top: 20px">
-                    <div id="participant2Status"></div>
-                </div>
-            </div>
-
-        </div>
-        <div class="col-sm-9 text-center">
-            <div id="localDisplay" class="fp-localVideo"></div>
+            <div id="participant1Name" class="text-center text-muted">NONE</div>
             <div class="text-center" style="margin-top: 20px">
-                <div id="localStatus"></div>
+                <div id="participant1Status"></div>
             </div>
-            <div class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
-                <div class="input-group-btn">
-                    <button id="localStopBtn" type="button" class="btn btn-default">Stop</button>
-                </div>
-            </div>
-
         </div>
-        <div class="col-sm-9" style="margin-top: 20px">
+
+        <div class="col-sm-7">
+            <div class="col-sm-6">
+                <button id="localStopBtn" type="button" class="btn btn-default">Stop</button>
+                <label id="localStatus"></label>
+            </div>
+        </div>
+        <div class="col-sm-7" style="margin-top: 20px">
             <div class="form-group">
                 <div id="chat" style="overflow-y: scroll; height: 100px;" class="text-left form-control"></div>
             </div>
         </div>
-        <div class="col-sm-9">
+        <div class="col-sm-7">
             <div class="form-group">
                 <textarea id="message" class="form-control" rows="1" style="resize: none;"></textarea>
             </div>
         </div>
-        <div class="col-sm-9">
+        <div class="col-sm-7">
             <div class="pull-right">
                 <button id="sendMessageBtn" type="button" class="btn btn-default">Send</button>
             </div>
         </div>
 
-        <div class="col-sm-9" style="margin-top: 20px">
+        <div class="col-sm-7" style="margin-top: 20px">
             <span class="text-muted text-left">Invite</span>
             <div id="inviteAddress" class="text-muted text-center" style="border: 1px solid">Not connected</div>
         </div>

@@ -1,0 +1,33 @@
+.fp-remoteVideo {
+    border: 1px double black;
+    width: 642px;
+    height: 482px;
+    margin: 0 auto;
+}
+.fp-remoteVideo>video {
+    width: 640px;
+    height: 480px;
+}
+
+.fp-localVideo {
+    border: 1px double black;
+    position: absolute !important;
+    width: 222px;
+    height: 167px;
+    margin-top: 44%;
+    margin-left: 2%;
+    z-index: 2147483647;
+}
+.fp-localVideo>video {
+    width: 220px;
+    height: 165px;
+}
+
+.fp-userState {
+    border-radius: 50%;
+    border-color: lightgray !important;
+    background-color: lightgray;
+    width: 15px;
+    height: 15px;
+}
+
