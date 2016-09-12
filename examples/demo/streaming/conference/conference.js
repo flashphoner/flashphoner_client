@@ -11,6 +11,7 @@ function init() {
     if (detectIE()) {
         detectFlash();
     }
+    $('#sendMessageBtn').prop('disabled',true);
     $("#connectBtn").click(function() {
         $(this).prop('disabled',true);
         var state = $(this).text();
@@ -44,10 +45,11 @@ function connect() {
         setConnectionStatus(session.status());
         //join room
         currentApi.join({name: getRoomName()}).on(ROOM_EVENT.STATE, function(room){
-            console.log("Participant count: " + room.getParticipants().length);
+            console.log("Current number of participants at the room: " + room.getParticipants().length);
             if (room.getParticipants().length >= _participants) {
                 console.warn("Current room is full");
-                $("#failedInfo").text("Current room is full");
+                $("#failedInfo").text("Current room is full.");
+                room.leave();
                 return false;
             }
             setInviteAddress(room.name());
@@ -75,7 +77,7 @@ function connect() {
                 for (var i = 0; i < participants.length; i++) {
                     participants[i].sendMessage(message);
                 }
-            });
+            }).prop('disabled',false);
             //publish local video
             function publishLocalMedia() {
                 var control = $("#localStopBtn");
@@ -138,7 +140,7 @@ function addMessage(login, message) {
 }
 
 function installParticipant(participant) {
-    if ($("[id$=Name]").not(":contains('NONE')").length == _participants) {
+    if (($("[id$=Name]").not(":contains('NONE')").length + 1) == _participants) {
         console.warn("More than " + _participants + " participants, ignore participant " + participant.name());
     } else {
         var p = $("[id$=Name]:contains('NONE')")[0].id.replace('Name','');
@@ -199,9 +201,11 @@ function setConnectionStatus(status) {
             break;
         case SESSION_STATUS.FAILED:
         case SESSION_STATUS.DISCONNECTED:
-            $('#participant1Name').text("NONE");
-            $('#participant2Name').text("NONE");
+            $("[id$=Name]").each(function(index,value) {
+                $(value).text('NONE');
+            });
             $('#status').text(status).removeClass().attr("class", "text-danger");
+            $('#sendMessageBtn').prop('disabled',true);
             $("#localStopBtn").prop('disabled',true);
             $("#localStopBtn").off();
             $("#connectBtn").text("Connect");
