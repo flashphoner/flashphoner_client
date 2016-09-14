@@ -5,9 +5,8 @@
     margin: 0 auto;
 }
 
-.fp-remoteVideo>video {
-    width: 320px;
-    height: 240px;
+video, object {
+    width: 100%;
+    height: 100%;
 }
-
 

@@ -63,5 +63,10 @@ package com.flashphoner.api2.media
 			this.display.height=height;
 			this.display.clear();
 		}
+
+		public function onVideoResolutionChange():void {
+			Logger.info("onVideoResolutionChange Size is " + display.videoWidth + "x" + display.videoHeight);
+			application.resize(display.videoWidth, display.videoHeight);
+		}
 	}
 }

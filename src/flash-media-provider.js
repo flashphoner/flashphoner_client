@@ -41,11 +41,11 @@ var createConnection = function(options) {
         if (flash) {
             flash.reset(id);
             flash.id = id;
-            installCallback(id, 'addLogMessage', function(message){
+            installCallback(flash, 'addLogMessage', function(message){
                 console.log("Flash["+id+"]:" + message);
             });
-            installCallback(id, 'connectionStatus', function(status){
-                removeCallback(id, 'connectionStatus');
+            installCallback(flash, 'connectionStatus', function(status){
+                removeCallback(flash, 'connectionStatus');
                 if (status === "Success") {
                     connections[id] = exports;
                     resolve(exports);
@@ -56,8 +56,8 @@ var createConnection = function(options) {
             flash.connect(url, authToken);
         } else {
             loadSwf(id, display).then(function (swf) {
-                installCallback(id, 'connectionStatus', function (status) {
-                    removeCallback(id, 'connectionStatus');
+                installCallback(swf, 'connectionStatus', function (status) {
+                    removeCallback(swf, 'connectionStatus');
                     if (status === "Success") {
                         connections[id] = exports;
                         resolve(exports);
@@ -110,12 +110,11 @@ var createConnection = function(options) {
         };
 
         var close = function(cacheCamera) {
-            clearCallbacks(id);
             flash.disconnect();
             if (!getCacheInstance(display) && flash.hasAccessToAudio() && cacheCamera) {
-                flash.reset(flash.id + CACHED_INSTANCE_POSTFIX);
-                flash.id = flash.id + CACHED_INSTANCE_POSTFIX;
+                cacheInstance(flash);
             } else {
+                clearCallbacks(flash);
                 swfobject.removeSWF(flash.id);
             }
         };
@@ -140,20 +139,56 @@ function installFlashScope() {
     }
 }
 
+/**
+ *
+ * @param id This can be string representing scopeId or object element (swf)
+ * @param name callback name
+ * @param value callback function
+ */
 function installCallback(id, name, value) {
     installFlashScope();
-    if (flashScope[id] == undefined) {
-        flashScope[id] = {};
+    var scopeId = getInstanceScopeId(id);
+    if (flashScope[scopeId] == undefined) {
+        flashScope[scopeId] = {};
     }
-    flashScope[id][name] = value;
+    flashScope[scopeId][name] = value;
 }
 
+/**
+ *
+ * @param id This can be string representing scopeId or object element (swf)
+ * @param name callback name
+ */
 function removeCallback(id, name) {
-    delete flashScope[id][name];
+    delete flashScope[getInstanceScopeId(id)][name];
 }
 
+function cacheInstance(flash) {
+    installCallback(flash, 'addLogMessage', function(message){
+        console.log("Flash["+flash.id+"]:" + message);
+    });
+    removeCallback(flash, "connectionStatus");
+    flash.reset(flash.id + CACHED_INSTANCE_POSTFIX);
+    flash.id = flash.id + CACHED_INSTANCE_POSTFIX;
+}
+
+/**
+ *
+ * @param id This can be string representing scopeId or object element (swf)
+ */
 function clearCallbacks(id) {
-    delete flashScope[id];
+    delete flashScope[getInstanceScopeId(id)];
+}
+
+function getInstanceScopeId(flash) {
+    if (typeof flash === "string") {
+        return flash;
+    }
+    for (var i = 0; i < flash.children.length; i++) {
+        if (flash.children[i].name == "scopeId") {
+            return flash.children[i].value;
+        }
+    }
 }
 
 var getMediaAccess = function(constraints, display) {
@@ -163,8 +198,8 @@ var getMediaAccess = function(constraints, display) {
             var id = uuid.v1() + CACHED_INSTANCE_POSTFIX;
             loadSwf(id, display).then(function (swf) {
                 //todo return camera and mic id
-                installCallback(id, "accessGranted", function () {
-                    removeCallback(id, "accessGranted");
+                installCallback(swf, "accessGranted", function () {
+                    removeCallback(swf, "accessGranted");
                     resolve(display);
                 });
                 if (!constraints) {
@@ -175,8 +210,8 @@ var getMediaAccess = function(constraints, display) {
                 }
             });
         } else {
-            installCallback(flash.id, "accessGranted", function () {
-                removeCallback(flash.id, "accessGranted");
+            installCallback(flash, "accessGranted", function () {
+                removeCallback(flash, "accessGranted");
                 resolve(display);
             });
             if (!flash.getMediaAccess(normalizeConstraints(constraints))) {
@@ -189,7 +224,7 @@ var getMediaAccess = function(constraints, display) {
 var releaseMedia = function(display) {
     var flash = getCacheInstance(display);
     if (flash) {
-        clearCallbacks(flash.id);
+        clearCallbacks(flash);
         swfobject.removeSWF(flash.id);
         return true;
     }
@@ -203,19 +238,30 @@ var loadSwf = function(id, display) {
         var divWrapper = document.createElement('div');
         divWrapper.id = id;
         display.appendChild(divWrapper);
-        var flashvars = {id: id};
+        var flashvars = {
+            id: id
+        };
         var params = {};
         params.menu = "true";
         params.swliveconnect = "true";
         params.allowfullscreen = "true";
         params.allowscriptaccess = "always";
         params.wmode = "opaque";
+        params.scopeId = id;
         var attributes = {};
         installCallback(id, 'addLogMessage', function(message){
             console.log("Flash["+id+"]:" + message);
         });
         installCallback(id, 'initialized', function(){
             resolve(swf);
+        });
+        installCallback(id, 'videoResolution', function(width, height){
+            swf.videoWidth = width;
+            swf.videoHeight = height;
+            setTimeout(function(){
+                var event = new CustomEvent("resize");
+                swf.dispatchEvent(event);
+            }, 10);
         });
         //todo switch from id to element (divWrapper)
         swfobject.embedSWF(swfLocation, id, "100%", "100%", "11.2.0", "expressInstall.swf", flashvars, params, attributes, function (ret) {
@@ -273,6 +319,7 @@ var available = function() {
 var listDevices = function() {
     return new Promise(function(resolve, reject) {
         var display = document.createElement('div');
+        display.setAttribute("style","width:1px;height:1px");
         var id = uuid.v1();
         //attach display to document, otherwise swf won't be loaded
         document.body.appendChild(display);
@@ -297,6 +344,20 @@ function normalizeConstraints(constraints) {
     }
     return constraints;
 }
+
+//CustomEvent IE polyfill
+(function () {
+    function CustomEvent ( event, params ) {
+        params = params || { bubbles: false, cancelable: false, detail: undefined };
+        var evt = document.createEvent( 'CustomEvent' );
+        evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+        return evt;
+    }
+
+    CustomEvent.prototype = window.Event.prototype;
+
+    window.CustomEvent = CustomEvent;
+})();
 
 module.exports = {
     createConnection: createConnection,

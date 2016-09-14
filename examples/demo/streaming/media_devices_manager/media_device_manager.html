@@ -26,7 +26,9 @@
         <h2 id="notifyFlash" class="text-danger"></h2>
         <div class="col-sm-4">
             <div class="text-muted text-center">Local</div>
-            <div class="fp-remoteVideo text-center" id="localVideo"></div>
+            <div class="fp-remoteVideo">
+                <div id="localVideo"></div>
+            </div>
             <form id="form" class="form-horizontal" role="form" style="margin-top: 10px; margin-left: 10px">
                 <div class="form-group" id="urlForm">
                     <label class="col-sm-2 control-label">WCS</label>
@@ -54,7 +56,7 @@
                 <div class="form-group" id="fpsForm">
                     <label class="col-sm-2 control-label">FPS</label>
                     <div class="col-sm-4">
-                        <input type="text" class="form-control" id="fps" value="60">
+                        <input type="text" class="form-control" id="fps" value="30">
                     </div>
                 </div>
                 <div class="form-group" id="widthForm">
@@ -84,7 +86,9 @@
         </div>
         <div class="col-sm-4">
             <div class="text-muted text-center">Preview</div>
-            <div class="fp-remoteVideo" id="remoteVideo"></div>
+            <div class="fp-remoteVideo">
+                <div id="remoteVideo"></div>
+            </div>
 
         </div>
     </div>

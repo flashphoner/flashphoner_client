@@ -5,4 +5,7 @@
     margin: 0 auto;
 }
 
-
+video, object {
+    width: 100%;
+    height: 100%;
+}

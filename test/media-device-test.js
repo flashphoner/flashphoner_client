@@ -120,4 +120,67 @@ describe('MediaDevices', function(){
             }, 4000);
         }, done);
     });
+
+    describe('video resolution', function(){
+        before(function(done){
+            Flashphoner.init(initOptions);
+            Flashphoner.createSession(sOptions).on("ESTABLISHED", function(){
+                done();
+            });
+        });
+
+        it('resize should fire after getMediaAccess', function(done){
+            this.timeout(10000);
+            var display = addDisplay(320,240);
+            Flashphoner.getMediaAccess(null, display).then(function(){
+                display.children[0].addEventListener('resize', function(event){
+                    Flashphoner.releaseLocalMedia(display);
+                    removeDisplay(display);
+                    done();
+                });
+            });
+        });
+        it('resize should show requested resolution', function(done){
+            this.timeout(10000);
+            var display = addDisplay(320,240);
+            Flashphoner.getMediaAccess({audio: true, video: {width: 640, height: 480}}, display).then(function(){
+                display.children[0].addEventListener('resize', function(event){
+                    expect(event.target.videoWidth).to.equal(640);
+                    expect(event.target.videoHeight).to.equal(480);
+                    Flashphoner.releaseLocalMedia(display);
+                    removeDisplay(display);
+                    done();
+                });
+            });
+        });
+        it('playing stream should fire resize event', function(done){
+            this.timeout(20000);
+            var display1 = addDisplay(320, 240);
+            var display2 = addDisplay(320, 240);
+            var session = Flashphoner.getSessions()[0];
+            var stream = session.createStream({name: "test2", display: display1});
+            stream.on(STREAM_STATUS.PUBLISHING, function(){
+                var playStream = session.createStream({name: "test2", display: display2});
+                playStream.on(STREAM_STATUS.PLAYING, function(){
+                    document.getElementById(playStream.id()).addEventListener('resize', function(event){
+                        playStream.stop();
+                    });
+
+
+                }).on(STREAM_STATUS.STOPPED, function(){
+                    stream.stop();
+                });
+                playStream.play();
+            }).on(STREAM_STATUS.UNPUBLISHED, function(){
+                removeDisplay(display1);
+                removeDisplay(display2);
+                done();
+            });
+            stream.publish();
+        });
+
+        after(function(){
+            Flashphoner.getSessions()[0].disconnect();
+        });
+    });
 });

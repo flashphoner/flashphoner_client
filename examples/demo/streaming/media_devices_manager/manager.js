@@ -157,6 +157,12 @@ function connectAndPublish() {
 //Publish stream
 function publishStream() {
     Flashphoner.getMediaAccess(_constraints, localVideo).then(function(){
+        if (localVideo.children.length > 1) {
+            console.error("Display has 2 video elements!");
+        }
+        //todo remove
+        localVideo.children[0].removeEventListener('resize', resizeLocalVideo);
+        localVideo.children[0].addEventListener('resize', resizeLocalVideo);
         _streamName = field("url").split('/')[3];
         _stream = currentSession.createStream({name: _streamName, display: localVideo, cacheLocalResources: true})
             .on(STREAM_STATUS.PUBLISHING, function(publisher) {
@@ -164,6 +170,9 @@ function publishStream() {
                 //create preview
                 currentSession.createStream({name: _streamName, display: remoteVideo})
                     .on(STREAM_STATUS.PLAYING, function(playingStream){
+                        document.getElementById(playingStream.id()).addEventListener('resize', function(event){
+                            resizeVideo(event.target);
+                        });
                         console.log("Playing stream " + playingStream.name() + " ; id " + playingStream.id());
                         $("#applyBtn").text("Stop");
                         $("#applyBtn").removeAttr("disabled");
@@ -171,10 +180,6 @@ function publishStream() {
                     .on(STREAM_STATUS.FAILED, function(){
                         console.warn("Preview stream failed");
                         publisher.stop();
-                    })
-                    .on(STREAM_STATUS.RESIZE, function(stream){
-                        var res = stream.videoResolution();
-                        console.log("Preview video resolution " + res.width + "x" + res.height);
                     })
                     .play();
             })
@@ -198,6 +203,14 @@ function publishStream() {
         $("#applyBtn").removeAttr("disabled");
         $("#streamStatus").text(status).removeClass().attr("class","text-muted");
     }
+}
+
+function resizeLocalVideo(event) {
+    var requested = _constraints.video;
+    if (requested.width != event.target.videoWidth || requested.height != event.target.videoHeight) {
+        console.warn("Camera does not support requested resolution, actual resolution is " + event.target.videoWidth + "x" + event.target.videoHeight);
+    }
+    resizeVideo(event.target);
 }
 
 // Check field for empty string

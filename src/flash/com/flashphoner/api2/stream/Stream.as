@@ -21,6 +21,7 @@ public class Stream
         private var usingLocalMedia:Boolean;
         private var hasAudio:Boolean;
         private var hasVideo:Boolean;
+        private var remoteControl:RemoteMediaControl;
 
 		public function Stream(application:Main, nc:NetConnection)
 		{
@@ -45,6 +46,7 @@ public class Stream
                 localMediaControl.attachStream(ncStream, hasAudio, hasVideo);
                 ncStream.publish(getPublishStreamName());
             } else {
+                this.remoteControl = remoteMediaControl;
                 //subscribe
                 this.usingLocalMedia = false;
                 remoteMediaControl.attachStream(ncStream);
@@ -70,6 +72,9 @@ public class Stream
             for(var id:String in event.info) {
                 var value:Object = event.info[id];
                 eventInfoStr += id + "=" + value + "; ";
+            }
+            if (event.info.code == "NetStream.Video.DimensionChange") {
+                remoteControl.onVideoResolutionChange();
             }
             Logger.info("NetStream " + event + " - " + eventInfoStr);
         }

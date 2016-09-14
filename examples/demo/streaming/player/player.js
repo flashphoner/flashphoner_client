@@ -94,6 +94,9 @@ function playStream() {
 
     currentSession.createStream({name: _streamName, display: d, cacheLocalResources: false})
         .on(STREAM_STATUS.PLAYING, function(playingStream) {
+            document.getElementById(playingStream.id()).addEventListener("resize", function(event){
+                resizeVideo(event.target);
+            });
             _stream = playingStream;
             console.log("Stream id " + _stream.id());
             setStatus(playingStream.status());
@@ -106,39 +109,7 @@ function playStream() {
             remoteVideo.removeChild(displayEl);
             setStatus(playingStream.status());
         })
-        .on(STREAM_STATUS.RESIZE, function(playingStream) {
-            var dimension = playingStream.videoResolution();
-            var W = dimension.width;
-            var H = dimension.height;
-            console.log("Got native resolution " + W + "x" + H);
-
-            if (W >= (remoteVideo.offsetWidth - 2) || H >= (remoteVideo.offsetHeight - 2)) {
-                var scale = Math.max(W / 800, H / 400);
-                var rescale = Math.floor(W / scale);
-                if (Flashphoner.getMediaProviders()[0] == "WebRTC") {
-                    document.getElementsByTagName("video")[0].setAttribute('width', rescale + "px");
-                    document.getElementsByTagName("video")[0].setAttribute('height', 400);
-                }
-                d.style.width = rescale + "px";
-                d.style.height = 400 + "px";
-                d.style.margin = "0 auto";
-                if (Flashphoner.getMediaProviders()[0] == "Flash") {
-                    document.getElementById(playingStream.id()).resize(rescale, 400);
-                }
-            } else {
-                var marginTop = (400 - H) / 2 + "px";
-                d.style.width = W + "px";
-                d.style.height = H + "px";
-                d.style.margin = marginTop + " auto";
-                if (Flashphoner.getMediaProviders()[0] == "Flash") {
-                    document.getElementById(playingStream.id()).resize(W, H);
-                }
-                if (Flashphoner.getMediaProviders()[0] == "WebRTC") {
-                    document.getElementsByTagName("video")[0].setAttribute('width', W);
-                    document.getElementsByTagName("video")[0].setAttribute('height', H);
-                }
-            }
-        }).play();
+        .play();
 }
 
 function stopStream() {

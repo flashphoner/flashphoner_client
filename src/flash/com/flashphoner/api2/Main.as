@@ -1,5 +1,7 @@
 package com.flashphoner.api2 {
 
+    import com.flashphoner.Logger;
+    import com.flashphoner.api2.Main;
     import com.flashphoner.api2.media.LocalMediaControl;
     import com.flashphoner.api2.media.RemoteMediaControl;
     import com.flashphoner.api2.connection.Connection;
@@ -22,7 +24,7 @@ package com.flashphoner.api2 {
     import spark.components.Application;
     import flash.system.Capabilities;
     import flash.media.Microphone;
-
+    import flash.display.*;
     import com.flashphoner.Logger;
 
     public class Main extends Application {
@@ -41,13 +43,17 @@ package com.flashphoner.api2 {
 
         private var timer:Timer = new Timer(1000,0);
 
+        private static var scopeId:String;
+
         public function Main() {
             addEventListener(FlexEvent.CREATION_COMPLETE, creationHandler);
+            addEventListener(Event.ADDED_TO_STAGE, addedToStage);
         }
 
         private function creationHandler(e:FlexEvent):void {
             //save config
             Main.config = parameters;
+            scopeId = parameters.id;
             Logger.init();
             //create elements
             this.canvas = new Canvas();
@@ -58,7 +64,6 @@ package com.flashphoner.api2 {
             remoteDisplayHolder.percentWidth = 100;
             remoteDisplayHolder.percentHeight = 100;
             remoteDisplayHolder.addChild(this.remoteDisplay);
-            remoteDisplayHolder.addEventListener(Event.RESIZE,onResize);
             remoteDisplayHolder.visible = false;
             this.canvas.addChild(remoteDisplayHolder);
             this.localDisplay = new VideoDisplay();
@@ -73,9 +78,8 @@ package com.flashphoner.api2 {
             this.canvas.addChild(this.openSettingsButton);
             addElement(this.canvas);
             //create media controls
-            this.localMediaControl = new LocalMediaControl(localDisplay);
+            this.localMediaControl = new LocalMediaControl(this, localDisplay);
             this.remoteMediaControl = new RemoteMediaControl(this, remoteDisplay);
-
             ExternalInterface.addCallback("connect", connect);
             ExternalInterface.addCallback("disconnect", disconnect);
             ExternalInterface.addCallback("getMediaAccess", getMediaAccess);
@@ -86,6 +90,10 @@ package com.flashphoner.api2 {
             ExternalInterface.addCallback("listDevices", listDevices);
             ExternalInterface.addCallback("resize", resize);
             callExternalInterface("initialized", null);
+        }
+
+        function addedToStage(e:Event) {
+            stage.addEventListener(Event.RESIZE, onResize);
         }
 
         public function reset(id:String):void {
@@ -134,7 +142,7 @@ package com.flashphoner.api2 {
         }
 
         public static  function callExternalInterface(jsCallback:String, status:String):void {
-            var callback:String = "Flashphoner.FlashApiScope['"+config.id+"']."+jsCallback;
+            var callback:String = "Flashphoner.FlashApiScope['"+scopeId+"']."+jsCallback;
             if (callbackExists(jsCallback)) {
                 ExternalInterface.call(callback, status);
             }
@@ -142,8 +150,8 @@ package com.flashphoner.api2 {
 
         private static function callbackExists(jsCallback:String):Boolean {
             var check:String = 'function(){' +
-                    "if(typeof(Flashphoner.FlashApiScope['"+config.id+"']) === \"object\" && " +
-                    "typeof(Flashphoner.FlashApiScope['" + config.id+"']."+jsCallback+") === \"function\"){return true}}";
+                    "if(typeof(Flashphoner.FlashApiScope['"+scopeId+"']) === \"object\" && " +
+                    "typeof(Flashphoner.FlashApiScope['" +scopeId+"']."+jsCallback+") === \"function\"){return true}}";
             return ExternalInterface.call(check);
         }
 
@@ -224,11 +232,11 @@ package com.flashphoner.api2 {
         }
 
         private function onAccessGranted(){
+            callExternalInterface('accessGranted', null);
             if (localMediaControl.getCam() != null) {
                 localMediaControl.attachLocalMedia();
                 localDisplay.visible = true;
             }
-            callExternalInterface('accessGranted', null);
         }
 
         public function hasAccessToAudio():Boolean{
@@ -246,12 +254,19 @@ package com.flashphoner.api2 {
         }
 
         private function onResize(event:Event):void{
-            Logger.info("Changed size to " + remoteDisplayHolder.width + "x" + remoteDisplayHolder.height);
+            Logger.info("Stage size " + this.stage.width + "x" + this.stage.height);
+            if (this.remoteDisplayHolder.visible) {
+                this.remoteDisplay.width = this.remoteDisplayHolder.width;
+                this.remoteDisplay.height = this.remoteDisplayHolder.height;
+            }
         }
 
         public function resize(width:int, height:int):void {
-            remoteDisplay.width = width;
-            remoteDisplay.height = height;
+            Logger.info("Resize to " + width + "x" + height);
+            var callback:String = "Flashphoner.FlashApiScope['"+scopeId+"'].videoResolution";
+            if (callbackExists("videoResolution")) {
+                ExternalInterface.call(callback, width, height);
+            }
         }
     }
 }

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8>
+    <title>Mirror</title>
+
+    <style>
+        * { margin: 0; padding: 0; }
+        body {
+            font: 16px/1.4 Georgia, Serif;
+            margin: 80px auto;
+            width: 50%;
+        }
+        #containerDiv {
+            background: black;
+            padding: 1px;
+        }
+        #localCamera {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+        }
+        object {
+            position: absolute;
+            display: block;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        video {
+            width: 100%    !important;
+            height: auto   !important;
+        }
+    </style>
+</head>
+
+<body>
+<script type="text/javascript" src="../../flashphoner.js"></script>
+<div id="containerDiv">
+    <div id="localCamera"></div>
+</div>
+<script>
+    Flashphoner.init({
+        flashMediaProviderSwfLocation: "../../media-provider.swf"
+    });
+    var display = document.getElementById("localCamera");
+    Flashphoner.getMediaAccess({
+        audio: true,
+        video: {
+            width: 640,
+            height: 480
+        }
+    }, display, "Flash").then(function(){
+        display.children[0].addEventListener('resize', function(event){
+            var padding = event.target.videoHeight / event.target.videoWidth * 100;
+            console.log("padding is " + padding);
+            display.style.cssText = "padding-bottom: "+padding+"%;";
+        });
+    });
+
+</script>
+</body>
+
+</html>

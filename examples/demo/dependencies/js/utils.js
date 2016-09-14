@@ -161,3 +161,32 @@ function createUUID(length) {
 
     return uuid.substring(0, length);
 }
+
+/**
+ * Resize video object to fit parent div.
+ * Div structure: div WxH -> div wrapper (display) -> video
+ * @param video HTML element from resize event target
+ */
+function resizeVideo(video){
+    var display = video.parentNode;
+    var parentSize = {
+        w: display.parentNode.offsetWidth - 2,
+        h: display.parentNode.offsetHeight - 2
+    };
+    var W = video.videoWidth;
+    var H = video.videoHeight;
+
+    if (W >= (parentSize.w) || H >= (parentSize.h)) {
+        var scale = Math.max(W / parentSize.w, H / parentSize.h);
+        var rescale = Math.floor(W / scale);
+        display.style.width = rescale + "px";
+        display.style.height = parentSize.h + "px";
+        display.style.margin = "0 auto";
+    } else {
+        var marginTop = (parentSize.h - H) / 2 + "px";
+        display.style.width = W + "px";
+        display.style.height = H + "px";
+        display.style.margin = marginTop + " auto";
+    }
+    console.log("Resize from " + W + "x" + H + " to " + display.offsetWidth + "x" + display.offsetHeight);
+}

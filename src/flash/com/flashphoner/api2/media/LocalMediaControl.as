@@ -22,6 +22,7 @@ package com.flashphoner.api2.media
 	 **/
 	public class LocalMediaControl
 	{
+		private var application:Main;
         //video
 		private var display:VideoDisplay;
 		private var cam:Camera;
@@ -40,8 +41,9 @@ package com.flashphoner.api2.media
         private var micIndex:int = -1;
         private var currentGain:int = -1;
 
-		public function LocalMediaControl(display:VideoDisplay){
+		public function LocalMediaControl(application:Main, display:VideoDisplay){
             this.display = display;
+			this.application = application;
 		}
 		
 		private function getIntConfigurationProperty(value:String, def: int):int{
@@ -158,6 +160,7 @@ package com.flashphoner.api2.media
 		
 		public function attachLocalMedia():void{
 			display.attachCamera(getCam());
+			this.application.resize(getCam().width, getCam().height);
 		}
 		
 		public function removeLocalMedia():void{
