@@ -168,6 +168,9 @@ function createUUID(length) {
  * @param video HTML element from resize event target
  */
 function resizeVideo(video){
+    if (!video.parentNode) {
+        return;
+    }
     var display = video.parentNode;
     var parentSize = {
         w: display.parentNode.clientWidth,
