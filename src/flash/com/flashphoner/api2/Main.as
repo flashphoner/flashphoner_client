@@ -267,6 +267,7 @@ package com.flashphoner.api2 {
             if (callbackExists("videoResolution")) {
                 ExternalInterface.call(callback, width, height);
             }
+            onResize(null);
         }
     }
 }

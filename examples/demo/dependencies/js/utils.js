@@ -170,23 +170,42 @@ function createUUID(length) {
 function resizeVideo(video){
     var display = video.parentNode;
     var parentSize = {
-        w: display.parentNode.offsetWidth - 2,
-        h: display.parentNode.offsetHeight - 2
+        w: display.parentNode.clientWidth,
+        h: display.parentNode.clientHeight
     };
-    var W = video.videoWidth;
-    var H = video.videoHeight;
+    var newSize = downScaleToFitSize(video.videoWidth, video.videoHeight, parentSize.w, parentSize.h);
+    display.style.width = newSize.w + "px";
+    display.style.height = newSize.h + "px";
 
-    if (W >= (parentSize.w) || H >= (parentSize.h)) {
-        var scale = Math.max(W / parentSize.w, H / parentSize.h);
-        var rescale = Math.floor(W / scale);
-        display.style.width = rescale + "px";
-        display.style.height = parentSize.h + "px";
-        display.style.margin = "0 auto";
-    } else {
-        var marginTop = (parentSize.h - H) / 2 + "px";
-        display.style.width = W + "px";
-        display.style.height = H + "px";
-        display.style.margin = marginTop + " auto";
+    //vertical align
+    var margin = 0;
+    if (parentSize.h - newSize.h > 1) {
+        margin = Math.floor((parentSize.h - newSize.h) / 2);
     }
-    console.log("Resize from " + W + "x" + H + " to " + display.offsetWidth + "x" + display.offsetHeight);
+    display.style.margin = margin + "px auto";
+    console.log("Resize from " + video.videoWidth + "x" + video.videoHeight + " to " + display.offsetWidth + "x" + display.offsetHeight);
+}
+
+
+function downScaleToFitSize(videoWidth, videoHeight, newWidth, newHeight) {
+    if (videoWidth > newWidth || videoHeight > newHeight) {
+        var ratio = videoWidth / videoHeight;
+        if (ratio > 1) {
+            newHeight = Math.floor(newWidth / ratio);
+        } else if (ratio == 1) {
+            var side = Math.min(newWidth, newHeight);
+            newWidth = side;
+            newHeight = side;
+        } else {
+            newWidth = Math.floor(ratio * newHeight);
+        }
+        return {
+            w: newWidth,
+            h: newHeight
+        }
+    }
+    return {
+        w: videoWidth,
+        h: videoHeight
+    }
 }

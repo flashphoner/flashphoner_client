@@ -2,7 +2,14 @@
     border: 1px double black;
     width: 322px;
     height: 242px;
-    margin: 0 auto;
+    text-align: center;
+    background: #c0c0c0;
+}
+
+.display {
+    width: 100%;
+    height: 100%;
+    display: inline-block;
 }
 
 video, object {
