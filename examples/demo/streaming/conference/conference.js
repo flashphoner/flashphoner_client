@@ -5,128 +5,119 @@ var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var ROOM_EVENT = Flashphoner.roomApi.events;
 var currentApi;
+var currentRoom;
+var control;
+var localStream;
+var username;
+var participantStreams = {};
 
 //initialize interface
 function init() {
     if (detectIE()) {
         detectFlash();
     }
-    $('#sendMessageBtn').prop('disabled',true);
-    $("#connectBtn").click(function() {
+    // Bind an event handlers
+    $("#joinBtn").click(function() {
         $(this).prop('disabled',true);
         var state = $(this).text();
-        if (state == "Connect") {
+        if (state == "Join") {
             connect();
         } else {
-            disconnect();
+            leaveRoom();
         }
     });
+    $("#localStopBtn").click(function() {
+        $(this).prop('disabled',true);
+        var state = $(this).text();
+        if (state == "Publish") {
+            publishLocalMedia();
+        } else {
+            unpublishLocalMedia();
+        }
+    }).prop('disabled',true);
+    $('#sendMessageBtn').click(function(){
+        var message = field('message');
+        addMessage(username, message);
+        $('#message').val("");
+        //broadcast message
+        var participants = currentRoom.getParticipants();
+        for (var i = 0; i < participants.length; i++) {
+            participants[i].sendMessage(message);
+        }
+    }).prop('disabled',true);
+
     $("#url").val(setURL());
-    $("#localStopBtn").prop('disabled',true);
 }
 
 //connect
 function connect() {
     if (currentApi && currentApi.status() == SESSION_STATUS.ESTABLISHED) {
         console.warn("Already connected, session id " + currentApi.id());
+        joinRoom();
         return;
     }
     var url = field('url');
-    var username = field('login');
+    username = field('login');
     $('#failedInfo').text("");
     currentApi = Flashphoner.roomApi.connect({urlServer: url, username: username}).on(SESSION_STATUS.FAILED, function(session){
         console.warn("Session failed, id " + session.id());
-        setConnectionStatus(session.status());
+        setJoinionStatus(session.status());
     }).on(SESSION_STATUS.DISCONNECTED, function(session) {
         console.log("Session diconnected, id " + session.id());
-        setConnectionStatus(session.status());
+        setJoinionStatus(session.status());
     }).on(SESSION_STATUS.ESTABLISHED, function(session) {
         console.log("Session established, id" + session.id());
-        setConnectionStatus(session.status());
+        setJoinionStatus(session.status());
         //join room
-        currentApi.join({name: getRoomName()}).on(ROOM_EVENT.STATE, function(room){
-            console.log("Current number of participants at the room: " + room.getParticipants().length);
-            if (room.getParticipants().length >= _participants) {
-                console.warn("Current room is full");
-                $("#failedInfo").text("Current room is full.");
-                room.leave();
-                return false;
-            }
-            setInviteAddress(room.name());
-            var participants = room.getParticipants();
-            if (participants.length > 0) {
-                var chatState = "participants: ";
-                for (var i = 0; i < participants.length; i++) {
-                    installParticipant(participants[i]);
-                    chatState += participants[i].name();
-                    if (i != participants.length - 1) {
-                        chatState += ",";
-                    }
-                }
-                addMessage("chat", chatState);
-            } else {
-                addMessage("chat", " room is empty");
-            }
-            //attach send message
-            $('#sendMessageBtn').click(function(){
-                var message = field('message');
-                addMessage(username, message);
-                $('#message').val("");
-                //broadcast message
-                var participants = room.getParticipants();
-                for (var i = 0; i < participants.length; i++) {
-                    participants[i].sendMessage(message);
-                }
-            }).prop('disabled',false);
-            //publish local video
-            function publishLocalMedia() {
-                var control = $("#localStopBtn");
-                control.prop('disabled',true);
-                room.publish(document.getElementById("localDisplay")).on(STREAM_STATUS.FAILED, function (stream) {
-                    console.warn("Local stream failed!");
-                    setStreamStatus(stream.status());
-                    localStreamTerminated();
-                }).on(STREAM_STATUS.PUBLISHING, function (stream) {
-                    control.text("Stop");
-                    control.click(function () {
-                        control.off("click");
-                        stream.stop();
-                        control.prop('disabled',true);
-                    });
-                    control.prop('disabled',false);
-                    setStreamStatus(stream.status());
-                }).on(STREAM_STATUS.UNPUBLISHED, function(stream) {
-                    setStreamStatus(stream.status());
-                    localStreamTerminated();
-                });
+        joinRoom();
+    });
+}
 
-                function localStreamTerminated() {
-                    control.text("Publish");
-                    control.click(function () {
-                        control.off("click");
-                        control.prop('disabled',true);
-                        publishLocalMedia();
-                    });
-                    control.prop('disabled',false);
+function joinRoom() {
+    currentApi.join({name: getRoomName()}).on(ROOM_EVENT.STATE, function(room){
+        // Unmute buttons
+        $("#joinBtn").text("Leave");
+        unmuteButtons();
+        // Save room to global
+        currentRoom = room;
+        console.log("Current number of participants at the room: " + room.getParticipants().length);
+        if (room.getParticipants().length >= _participants) {
+            console.warn("Current room is full");
+            $("#failedInfo").text("Current room is full.");
+            $("#joinBtn").text("Join");
+            room.leave();
+            return false;
+        }
+        setInviteAddress(room.name());
+        var participants = room.getParticipants();
+        if (participants.length > 0) {
+            var chatState = "participants: ";
+            for (var i = 0; i < participants.length; i++) {
+                installParticipant(participants[i]);
+                chatState += participants[i].name();
+                if (i != participants.length - 1) {
+                    chatState += ",";
                 }
             }
-            publishLocalMedia();
-        }).on(ROOM_EVENT.JOINED, function(participant){
-            installParticipant(participant);
-            addMessage(participant.name(), "joined");
-        }).on(ROOM_EVENT.LEFT, function(participant){
-            //remove participant
-            removeParticipant(participant);
-            addMessage(participant.name(), "left");
-        }).on(ROOM_EVENT.PUBLISHED, function(participant){
-            playParticipantsStream(participant);
-
-        }).on(ROOM_EVENT.FAILED, function(room, info){
-            session.disconnect();
-            $('#failedInfo').text(info);
-        }).on(ROOM_EVENT.MESSAGE, function(message){
-            addMessage(message.from.name(), message.text);
-        });
+            addMessage("chat", chatState);
+        } else {
+            addMessage("chat", " room is empty");
+        }
+        publishLocalMedia();
+    }).on(ROOM_EVENT.JOINED, function(participant){
+        installParticipant(participant);
+        addMessage(participant.name(), "joined");
+    }).on(ROOM_EVENT.LEFT, function(participant){
+        //remove participant
+        removeParticipant(participant);
+        addMessage(participant.name(), "left");
+    }).on(ROOM_EVENT.PUBLISHED, function(participant){
+        playParticipantsStream(participant);
+    }).on(ROOM_EVENT.FAILED, function(room, info){
+        session.disconnect();
+        $('#failedInfo').text(info);
+    }).on(ROOM_EVENT.MESSAGE, function(message){
+        addMessage(message.from.name(), message.text);
     });
 }
 
@@ -148,7 +139,8 @@ function installParticipant(participant) {
         var pDisplay = p + 'Display';
         $(pName).text(participant.name());
         if (participant.play) {
-            participant.play(document.getElementById(pDisplay));
+            // Save participant stream
+            participantStreams[participant.name()] = participant.play(document.getElementById(pDisplay));
         }
     }
 }
@@ -156,6 +148,7 @@ function installParticipant(participant) {
 function removeParticipant(participant) {
     $("[id$=Name]").each(function(index,value) {
        if ($(value).text() == participant.name()) {
+           delete participantStreams[participant.name()];
            $(value).text('NONE');
        }
     });
@@ -166,18 +159,31 @@ function playParticipantsStream(participant) {
         if ($(value).text() == participant.name()) {
             var p = value.id.replace('Name','');
             var pDisplay = p + 'Display';
-            participant.play(document.getElementById(pDisplay));
+            // Save participant stream
+            participantStreams[participant.name()] = participant.play(document.getElementById(pDisplay));
         }
     });
 }
 
-function disconnect() {
-    if (!currentApi) {
-        console.warn("Nothing to disconnect");
-        return;
+function leaveRoom() {
+    currentRoom.leave();
+    // Stop local stream
+    if (localStream) {
+        localStream.stop();
+        localStream = null;
+        Flashphoner.releaseLocalMedia(document.getElementById("localDisplay"));
     }
-    currentApi.disconnect();
-    $("#connectBtn").text("Connect");
+    // Stop participant streams
+    for (var key in participantStreams) {
+        if (participantStreams.hasOwnProperty(key)){
+            participantStreams[key].stop();
+        }
+    }
+    $("[id$=Name]").not(":contains('NONE')").each(function(index,value) {
+        $(value).text('NONE');
+    });
+    muteButtons();
+    $("#joinBtn").text("Join").prop('disabled',false);
 }
 
 function getRoomName() {
@@ -192,12 +198,12 @@ function getRoomName() {
 ///////////// Display UI ////////////
 /////////////////////////////////////
 
-// Set Connection Status
-function setConnectionStatus(status) {
+// Set Joinion Status
+function setJoinionStatus(status) {
     switch (status) {
         case SESSION_STATUS.ESTABLISHED:
             $('#status').text(status).removeClass().attr("class", "text-success");
-            $("#connectBtn").text("Disconnect");
+            $("#joinBtn").text("Leave");
             break;
         case SESSION_STATUS.FAILED:
         case SESSION_STATUS.DISCONNECTED:
@@ -205,14 +211,12 @@ function setConnectionStatus(status) {
                 $(value).text('NONE');
             });
             $('#status').text(status).removeClass().attr("class", "text-danger");
-            $('#sendMessageBtn').prop('disabled',true);
-            $("#localStopBtn").prop('disabled',true);
-            $("#localStopBtn").off();
-            $("#connectBtn").text("Connect");
-            $('#sendMessageBtn').off();
+            $('#sendMessageBtn').prop('disabled',true).off();
+            $("#localStopBtn").prop('disabled',true).off();
+            $("#joinBtn").text("Join");
             break;
     }
-    $("#connectBtn").prop('disabled',false);
+    $("#joinBtn").prop('disabled',false);
 }
 
 function setStreamStatus(status) {
@@ -229,4 +233,40 @@ function setStreamStatus(status) {
 
 function setInviteAddress(name) {
     $('#inviteAddress').text(window.location.href.split("?")[0] + "?roomName="+name);
+}
+
+// Helpers
+
+function unpublishLocalMedia() {
+    if (localStream) {
+        localStream.stop();
+    }
+    $("#localStopBtn").text("Publish").prop('disabled',false);
+}
+
+//publish local video
+function publishLocalMedia() {
+    currentRoom.publish(document.getElementById("localDisplay")).on(STREAM_STATUS.FAILED, function (stream) {
+        console.warn("Local stream failed!");
+        setStreamStatus(stream.status());
+        unpublishLocalMedia();
+    }).on(STREAM_STATUS.PUBLISHING, function (stream) {
+        localStream = stream;
+        $("#localStopBtn").text("Stop").prop('disabled',false);
+        setStreamStatus(stream.status());
+    }).on(STREAM_STATUS.UNPUBLISHED, function(stream) {
+        setStreamStatus(stream.status());
+        unpublishLocalMedia();
+    });
+}
+
+function unmuteButtons() {
+    $("#joinBtn").prop('disabled',false);
+    $('#sendMessageBtn').prop('disabled',false);
+    $("#localStopBtn").prop('disabled',false);
+}
+
+function muteButtons() {
+    $('#sendMessageBtn').prop('disabled',true);
+    $("#localStopBtn").prop('disabled',true);
 }
