@@ -18,14 +18,7 @@ var browser = detectBrowser();
 /////////////// Init /////////////
 
 function startTest() {
-    var emptyField;
-    $("form :input").not(':input[type=button]').each(function() {
-        if (!checkForEmptyField('#'+$(this).attr('id'),'#'+$(this).attr('id')+'Form')) {
-            emptyField = true;
-        }
-    });
-
-    if(emptyField) {
+    if(!validateForm()) {
         $("#applyBtn").removeProp("disabled");
         return false;
     }
@@ -213,13 +206,28 @@ function resizeLocalVideo(event) {
     resizeVideo(event.target);
 }
 
-// Check field for empty string
-function checkForEmptyField(checkField, alertDiv) {
-    if (!$(checkField).val()) {
-        $(alertDiv).addClass("has-error");
-        return false;
-    } else {
-        $(alertDiv).removeClass("has-error");
-        return true;
+function validateForm() {
+    var valid = true;
+    $('#form :input:text, select').each(function(){
+        if (!$(this).val()) {
+            highlightInput($(this));
+            valid = false;
+        } else {
+            var numericFields = ['fps', 'width', 'height'];
+            if (numericFields.indexOf(this.id) != -1 && !(parseInt($(this).val()) > 0)) {
+                highlightInput($(this));
+                valid = false;
+            } else {
+                removeHighlight($(this));
+            }
+        }
+    });
+    return valid;
+
+    function highlightInput(input) {
+        input.closest('.form-group').addClass("has-error");
+    }
+    function removeHighlight(input) {
+        input.closest('.form-group').removeClass("has-error");
     }
 }
