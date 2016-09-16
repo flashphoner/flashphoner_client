@@ -74,6 +74,7 @@ function connect() {
 }
 
 function joinRoom() {
+    $("#failedInfo").text("");
     currentApi.join({name: getRoomName()}).on(ROOM_EVENT.STATE, function(room){
         // Unmute buttons
         $("#joinBtn").text("Leave");
@@ -114,7 +115,7 @@ function joinRoom() {
     }).on(ROOM_EVENT.PUBLISHED, function(participant){
         playParticipantsStream(participant);
     }).on(ROOM_EVENT.FAILED, function(room, info){
-        session.disconnect();
+        currentApi.disconnect();
         $('#failedInfo').text(info);
     }).on(ROOM_EVENT.MESSAGE, function(message){
         addMessage(message.from.name(), message.text);
@@ -222,10 +223,15 @@ function setJoinionStatus(status) {
 function setStreamStatus(status) {
     switch (status) {
         case STREAM_STATUS.UNPUBLISHED:
+            $("#localStopBtn").text("Publish").prop('disabled',false);
+            $('#localStatus').text(status).removeClass().attr("class", "text-success");
+            break;
         case STREAM_STATUS.PUBLISHING:
+            $("#localStopBtn").text("Stop").prop('disabled',false);
             $('#localStatus').text(status).removeClass().attr("class", "text-success");
             break;
         case STREAM_STATUS.FAILED:
+            $("#localStopBtn").text("Publish").prop('disabled',false);
             $('#localStatus').text(status).removeClass().attr("class", "text-danger");
             break;
     }
@@ -240,8 +246,9 @@ function setInviteAddress(name) {
 function unpublishLocalMedia() {
     if (localStream) {
         localStream.stop();
+        localStream = null;
     }
-    $("#localStopBtn").text("Publish").prop('disabled',false);
+
 }
 
 //publish local video
