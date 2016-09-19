@@ -263,7 +263,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.12",
+            clientVersion: "0.3.13",
             custom: options.custom
         });
     };
@@ -655,6 +655,113 @@ var createSession = function(options) {
         };
 
         /**
+         * Media controls
+         */
+
+        /**
+         * Set volume of remote media
+         *
+         * @param {number} volume Volume between 0 and 100
+         * @memberof Stream
+         * @inner
+         */
+        var setVolume = function(volume) {
+            if (mediaConnection) {
+                mediaConnection.setVolume(volume);
+            }
+        };
+
+        /**
+         * Get current volume
+         *
+         * @returns {number} Volume or -1 if audio is not available
+         * @memberof Stream
+         * @inner
+         */
+        var getVolume = function() {
+            if (mediaConnection) {
+                return mediaConnection.getVolume();
+            }
+            return -1;
+        };
+
+        /**
+         * Mute outgoing audio
+         *
+         * @memberof Stream
+         * @inner
+         */
+        var muteAudio = function() {
+            if (mediaConnection) {
+                mediaConnection.muteAudio();
+            }
+        };
+
+        /**
+         * Unmute outgoing audio
+         *
+         * @memberof Stream
+         * @inner
+         */
+        var unmuteAudio = function() {
+            if (mediaConnection) {
+                mediaConnection.unmuteAudio();
+            }
+        };
+
+        /**
+         * Check outgoing audio mute state
+         *
+         * @returns {boolean} True if audio is muted or not available
+         * @memberof Stream
+         * @inner
+         */
+        var isAudioMuted = function() {
+            if (mediaConnection) {
+                return mediaConnection.isAudioMuted();
+            }
+            return true;
+        };
+
+        /**
+         * Mute outgoing video
+         *
+         * @memberof Stream
+         * @inner
+         */
+        var muteVideo = function() {
+            if (mediaConnection) {
+                mediaConnection.muteVideo();
+            }
+        };
+
+        /**
+         * Unmute outgoing video
+         *
+         * @memberof Stream
+         * @inner
+         */
+        var unmuteVideo = function() {
+            if (mediaConnection) {
+                mediaConnection.unmuteVideo();
+            }
+        };
+
+        /**
+         * Check outgoing video mute state
+         *
+         * @returns {boolean} True if video is muted or not available
+         * @memberof Stream
+         * @inner
+         */
+        var isVideoMuted = function() {
+            if (mediaConnection) {
+                return mediaConnection.isVideoMuted();
+            }
+            return true;
+        };
+
+        /**
          * Stream event callback.
          *
          * @callback Stream~eventCallback
@@ -693,6 +800,14 @@ var createSession = function(options) {
         stream.getRecordInfo = getRecordInfo;
         stream.getInfo = getInfo;
         stream.videoResolution = videoResolution;
+        stream.setVolume = setVolume;
+        stream.getVolume = getVolume;
+        stream.muteAudio = muteAudio;
+        stream.unmuteAudio = unmuteAudio;
+        stream.isAudioMuted = isAudioMuted;
+        stream.muteVideo = muteVideo;
+        stream.unmuteVideo = unmuteVideo;
+        stream.isVideoMuted = isVideoMuted;
         stream.on = on;
 
         streams[id_] = stream;

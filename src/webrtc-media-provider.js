@@ -102,11 +102,63 @@ var createConnection = function(options) {
             });
         };
 
+        var getVolume = function() {
+            if (video && video.srcObject && video.srcObject.getAudioTracks().length > 0) {
+                return video.srcObject.getAudioTracks()[0].volume;
+            }
+            return -1;
+        };
+        var setVolume = function(volume) {
+            if (video && video.srcObject && video.srcObject.getAudioTracks().length > 0) {
+                video.srcObject.getAudioTracks()[0].volume = volume/100;
+            }
+        };
+        var muteAudio = function() {
+            if (localStream && localStream.srcObject && localStream.srcObject.getAudioTracks().length > 0) {
+                localStream.srcObject.getAudioTracks()[0].enabled = false;
+            }
+        };
+        var unmuteAudio = function() {
+            if (localStream && localStream.srcObject && localStream.srcObject.getAudioTracks().length > 0) {
+                localStream.srcObject.getAudioTracks()[0].enabled = true;
+            }
+        };
+        var isAudioMuted = function() {
+            if (localStream && localStream.srcObject && localStream.srcObject.getAudioTracks().length > 0) {
+                return !localStream.srcObject.getAudioTracks()[0].enabled;
+            }
+            return true;
+        };
+        var muteVideo = function() {
+            if (localStream && localStream.srcObject && localStream.srcObject.getVideoTracks().length > 0) {
+                localStream.srcObject.getVideoTracks()[0].enabled = false;
+            }
+        };
+        var unmuteVideo = function() {
+            if (localStream && localStream.srcObject && localStream.srcObject.getVideoTracks().length > 0) {
+                localStream.srcObject.getVideoTracks()[0].enabled = true;
+            }
+        };
+        var isVideoMuted = function() {
+            if (localStream && localStream.srcObject && localStream.srcObject.getVideoTracks().length > 0) {
+                return !localStream.srcObject.getVideoTracks()[0].enabled;
+            }
+            return true;
+        };
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
         exports.setRemoteSdp = setRemoteSdp;
         exports.close = close;
+        exports.setVolume = setVolume;
+        exports.getVolume = getVolume;
+        exports.muteAudio = muteAudio;
+        exports.unmuteAudio = unmuteAudio;
+        exports.isAudioMuted = isAudioMuted;
+        exports.muteVideo = muteVideo;
+        exports.unmuteVideo = unmuteVideo;
+        exports.isVideoMuted = isVideoMuted;
         connections[id] = exports;
         resolve(exports);
     });
