@@ -162,7 +162,13 @@ function installParticipant(participant) {
         $(pName).text(participant.name());
         if (participant.play) {
             // Save participant stream
-            participantStreams[participant.name()] = participant.play(document.getElementById(pDisplay));
+            var stream = participant.play(document.getElementById(pDisplay));
+            stream.on(STREAM_STATUS.PLAYING, function(playingStream){
+                document.getElementById(playingStream.id()).addEventListener('resize', function(event){
+                    resizeVideo(event.target);
+                });
+            });
+            participantStreams[participant.name()] = stream;
         }
     }
 }
@@ -182,18 +188,27 @@ function playParticipantsStream(participant) {
             var p = value.id.replace('Name','');
             var pDisplay = p + 'Display';
             // Save participant stream
-            participantStreams[participant.name()] = participant.play(document.getElementById(pDisplay));
+            var stream = participant.play(document.getElementById(pDisplay));
+            stream.on(STREAM_STATUS.PLAYING, function(playingStream){
+                document.getElementById(playingStream.id()).addEventListener('resize', function(event){
+                    resizeVideo(event.target);
+                });
+            });
+            participantStreams[participant.name()] = stream;
         }
     });
 }
 
 function leaveRoom() {
     currentRoom.leave();
+    $("#joinBtn").text("Join");
     // Stop local stream
     if (localStream) {
         localStream.stop();
         localStream = null;
         Flashphoner.releaseLocalMedia(document.getElementById("localDisplay"));
+    } else {
+        $("#joinBtn").prop('disabled',false);
     }
     // Stop participant streams
     for (var key in participantStreams) {
@@ -205,7 +220,6 @@ function leaveRoom() {
         $(value).text('NONE');
     });
     muteButtons();
-    $("#joinBtn").text("Join").prop('disabled',false);
 }
 
 function getRoomName() {
@@ -224,8 +238,9 @@ function getRoomName() {
 function setJoinionStatus(status) {
     switch (status) {
         case SESSION_STATUS.ESTABLISHED:
+            $("#login").prop('disabled',true);
+            $("#url").prop('disabled',true);
             $('#status').text(status).removeClass().attr("class", "text-success");
-            $("#joinBtn").text("Leave");
             break;
         case SESSION_STATUS.FAILED:
         case SESSION_STATUS.DISCONNECTED:
@@ -235,10 +250,11 @@ function setJoinionStatus(status) {
             $('#status').text(status).removeClass().attr("class", "text-danger");
             $('#sendMessageBtn').prop('disabled',true).off();
             $("#localStopBtn").prop('disabled',true).off();
-            $("#joinBtn").text("Join");
+            $("#joinBtn").text("Join").prop('disabled',false);
+            $("#login").prop('disabled',false);
+            $("#url").prop('disabled',false);
             break;
     }
-    $("#joinBtn").prop('disabled',false);
 }
 
 function setStreamStatus(status) {
@@ -252,6 +268,8 @@ function setStreamStatus(status) {
         case STREAM_STATUS.PUBLISHING:
             $("#localStopBtn").text("Stop").prop('disabled',false);
             $('#localStatus').text(status).removeClass().attr("class", "text-success");
+            $("#localAudioToggle").text("Mute A").prop('disabled', false);
+            $("#localVideoToggle").text("Mute V").prop('disabled', false);
             break;
         case STREAM_STATUS.FAILED:
             $("#localStopBtn").text("Publish").prop('disabled',false);
@@ -260,6 +278,7 @@ function setStreamStatus(status) {
             $("#localVideoToggle").prop('disabled', true);
             break;
     }
+    $("#joinBtn").prop('disabled',false);
 }
 
 function setInviteAddress(name) {
@@ -284,9 +303,6 @@ function publishLocalMedia() {
         unpublishLocalMedia();
     }).on(STREAM_STATUS.PUBLISHING, function (stream) {
         localStream = stream;
-        $("#localStopBtn").text("Stop").prop('disabled',false);
-        $("#localAudioToggle").text("Mute A").prop('disabled', false);
-        $("#localVideoToggle").text("Mute V").prop('disabled', false);
         setStreamStatus(stream.status());
     }).on(STREAM_STATUS.UNPUBLISHED, function(stream) {
         setStreamStatus(stream.status());
@@ -295,7 +311,6 @@ function publishLocalMedia() {
 }
 
 function unmuteButtons() {
-    $("#joinBtn").prop('disabled',false);
     $('#sendMessageBtn').prop('disabled',false);
     $("#localStopBtn").prop('disabled',false);
 }
