@@ -190,22 +190,22 @@ function resizeVideo(video){
 }
 
 
-function downScaleToFitSize(videoWidth, videoHeight, newWidth, newHeight) {
-    if (videoWidth > newWidth || videoHeight > newHeight) {
+function downScaleToFitSize(videoWidth, videoHeight, dstWidth, dstHeight) {
+    if (videoWidth > dstWidth || videoHeight > dstHeight) {
         var ratio = videoWidth / videoHeight;
-        if (ratio > 1) {
+        var newWidth = dstWidth;
+        var newHeight = videoHeight;
+        if (videoWidth > newWidth) {
             newHeight = Math.floor(newWidth / ratio);
-        } else if (ratio == 1) {
-            var side = Math.min(newWidth, newHeight);
-            newWidth = side;
-            newHeight = side;
-        } else {
-            newWidth = Math.floor(ratio * newHeight);
+        }
+        if (newHeight > dstHeight) {
+            newWidth = Math.floor(ratio * dstHeight);
+            newHeight = dstHeight;
         }
         return {
             w: newWidth,
             h: newHeight
-        }
+        };
     }
     return {
         w: videoWidth,
