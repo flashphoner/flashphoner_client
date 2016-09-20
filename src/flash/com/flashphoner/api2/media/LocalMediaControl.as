@@ -41,6 +41,10 @@ package com.flashphoner.api2.media
         private var micIndex:int = -1;
         private var currentGain:int = -1;
 
+		private var videoMuted:Boolean = false;
+
+		private var stream:NetStream;
+
 		public function LocalMediaControl(application:Main, display:VideoDisplay){
             this.display = display;
 			this.application = application;
@@ -150,12 +154,23 @@ package com.flashphoner.api2.media
 		}
 
 		public function attachStream(stream:NetStream, hasAudio:Boolean, hasVideo:Boolean):void{
+			this.stream = stream;
             if (hasAudio) {
                 stream.attachAudio(mic);
             }
-            if (hasVideo) {
+            if (hasVideo && !this.videoMuted) {
                 stream.attachCamera(getCam());
             }
+		}
+
+		public function removeStream():void{
+			this.stream = null;
+			if (this.videoMuted) {
+				unmuteVideo();
+			}
+			if (this.isAudioMuted()) {
+				unmuteAudio();
+			}
 		}
 		
 		public function attachLocalMedia():void{
@@ -292,6 +307,54 @@ package com.flashphoner.api2.media
 				list.push(camera);
 			}
 			return list;
+		}
+
+		public function muteAudio():void{
+			if (mic != null){
+				if (mic.gain != 0) {
+					currentGain = mic.gain;
+					mic.gain = 0;
+					Logger.info("Mute local audio");
+				} else {
+					Logger.info("Local audio already muted");
+				}
+			}
+		}
+
+		public function unmuteAudio():void{
+			if (mic != null && currentGain != -1){
+				mic.gain = currentGain;
+				Logger.info("Unmute local audio");
+				currentGain = -1;
+			}
+		}
+
+		public function isAudioMuted():Boolean{
+			return this.mic == null || this.mic.gain == 0;
+		}
+
+		public function muteVideo():void{
+			if (this.stream != null) {
+				this.stream.attachCamera(null);
+			}
+			removeLocalMedia();
+			this.videoMuted = true;
+		}
+
+		public function unmuteVideo():void{
+			if (this.videoMuted) {
+				if (this.stream != null) {
+					this.stream.attachCamera(getCam());
+				}
+				attachLocalMedia();
+				this.videoMuted = false;
+			} else {
+				Logger.info("Local video is already in unmuted state");
+			}
+		}
+
+		public function isVideoMuted():Boolean{
+			return this.videoMuted;
 		}
     }
 }

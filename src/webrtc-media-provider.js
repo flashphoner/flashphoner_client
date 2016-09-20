@@ -57,6 +57,8 @@ var createConnection = function(options) {
             }
             if (localStream && !getCacheInstance(display) && cacheCamera) {
                 localStream.id = localStream.id + CACHED_INSTANCE_POSTFIX;
+                unmuteAudio();
+                unmuteVideo();
             } else if (localStream) {
                 removeVideoElement(display, localStream);
             }
@@ -104,7 +106,7 @@ var createConnection = function(options) {
 
         var getVolume = function() {
             if (video && video.srcObject && video.srcObject.getAudioTracks().length > 0) {
-                return video.srcObject.getAudioTracks()[0].volume;
+                return video.srcObject.getAudioTracks()[0].volume * 100;
             }
             return -1;
         };

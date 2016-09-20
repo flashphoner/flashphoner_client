@@ -89,6 +89,14 @@ package com.flashphoner.api2 {
             ExternalInterface.addCallback("getId", getId);
             ExternalInterface.addCallback("listDevices", listDevices);
             ExternalInterface.addCallback("resize", resize);
+            ExternalInterface.addCallback("setVolume", setVolume);
+            ExternalInterface.addCallback("getVolume", getVolume);
+            ExternalInterface.addCallback("muteAudio", muteAudio);
+            ExternalInterface.addCallback("unmuteAudio", unmuteAudio);
+            ExternalInterface.addCallback("isAudioMuted", isAudioMuted);
+            ExternalInterface.addCallback("muteVideo", muteVideo);
+            ExternalInterface.addCallback("unmuteVideo", unmuteVideo);
+            ExternalInterface.addCallback("isVideoMuted", isVideoMuted);
             callExternalInterface("initialized", null);
         }
 
@@ -251,6 +259,38 @@ package com.flashphoner.api2 {
                 }
 
             }
+        }
+
+        public function getVolume():int{
+            return this.remoteMediaControl.getVolume();
+        }
+
+        public function setVolume(volume:int):void{
+            this.remoteMediaControl.setVolume(volume);
+        }
+
+        public function muteAudio():void{
+            this.localMediaControl.muteAudio();
+        }
+
+        public function unmuteAudio():void{
+            this.localMediaControl.unmuteAudio();
+        }
+
+        public function isAudioMuted():Boolean{
+            return this.localMediaControl.isAudioMuted();
+        }
+
+        public function muteVideo():void{
+            this.localMediaControl.muteVideo();
+        }
+
+        public function unmuteVideo():void{
+            this.localMediaControl.unmuteVideo();
+        }
+
+        public function isVideoMuted():Boolean{
+            return this.localMediaControl.isVideoMuted();
         }
 
         private function onResize(event:Event):void{

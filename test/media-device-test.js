@@ -183,4 +183,78 @@ describe('MediaDevices', function(){
             Flashphoner.getSessions()[0].disconnect();
         });
     });
+
+    describe('media controls', function(){
+        before(function(done){
+            Flashphoner.init(initOptions);
+            Flashphoner.createSession(sOptions).on("ESTABLISHED", function(){
+                done();
+            });
+        });
+
+        it('local audio  should mute/unmute', function(done){
+            this.timeout(10000);
+            var display = addDisplay(320,240);
+            var session = Flashphoner.getSessions()[0];
+            var stream = session.createStream({name: "test2", display: display});
+            stream.on(STREAM_STATUS.PUBLISHING, function(){
+                expect(stream.isAudioMuted()).to.be.false;
+                stream.muteAudio();
+                expect(stream.isAudioMuted()).to.be.true;
+                stream.unmuteAudio();
+                expect(stream.isAudioMuted()).to.be.false;
+                stream.stop();
+            }).on(STREAM_STATUS.UNPUBLISHED, function(){
+                removeDisplay(display);
+                done();
+            });
+            stream.publish();
+        });
+        it('local video should mute/unmute', function(done){
+            this.timeout(10000);
+            var display = addDisplay(320,240);
+            var session = Flashphoner.getSessions()[0];
+            var stream = session.createStream({name: "test2", display: display});
+            stream.on(STREAM_STATUS.PUBLISHING, function(){
+                expect(stream.isVideoMuted()).to.be.false;
+                stream.muteVideo();
+                expect(stream.isVideoMuted()).to.be.true;
+                stream.unmuteVideo();
+                expect(stream.isVideoMuted()).to.be.false;
+                stream.stop();
+            }).on(STREAM_STATUS.UNPUBLISHED, function(){
+                removeDisplay(display);
+                done();
+            });
+            stream.publish();
+        });
+
+        it('playing stream volume control', function(done){
+            this.timeout(20000);
+            var display1 = addDisplay(320, 240);
+            var display2 = addDisplay(320, 240);
+            var session = Flashphoner.getSessions()[0];
+            var stream = session.createStream({name: "test2", display: display1});
+            stream.on(STREAM_STATUS.PUBLISHING, function(){
+                var playStream = session.createStream({name: "test2", display: display2});
+                playStream.on(STREAM_STATUS.PLAYING, function(){
+                    playStream.setVolume(70);
+                    expect(playStream.getVolume()).to.equal(70);
+                    playStream.stop();
+                }).on(STREAM_STATUS.STOPPED, function(){
+                    stream.stop();
+                });
+                playStream.play();
+            }).on(STREAM_STATUS.UNPUBLISHED, function(){
+                removeDisplay(display1);
+                removeDisplay(display2);
+                done();
+            });
+            stream.publish();
+        });
+
+        after(function(){
+            Flashphoner.getSessions()[0].disconnect();
+        });
+    });
 });

@@ -119,11 +119,63 @@ var createConnection = function(options) {
             }
         };
 
+        var getVolume = function() {
+            if (flash) {
+                return flash.getVolume();
+            }
+            return -1;
+        };
+        var setVolume = function(volume) {
+            if (flash) {
+                flash.setVolume(volume);
+            }
+        };
+        var muteAudio = function() {
+            if (flash) {
+                flash.muteAudio();
+            }
+        };
+        var unmuteAudio = function() {
+            if (flash) {
+                flash.unmuteAudio();
+            }
+        };
+        var isAudioMuted = function() {
+            if (flash) {
+                return flash.isAudioMuted();
+            }
+            return true;
+        };
+        var muteVideo = function() {
+            if (flash) {
+                flash.muteVideo();
+            }
+        };
+        var unmuteVideo = function() {
+            if (flash) {
+                flash.unmuteVideo();
+            }
+        };
+        var isVideoMuted = function() {
+            if (flash) {
+                return flash.isVideoMuted();
+            }
+            return true;
+        };
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
         exports.setRemoteSdp = setRemoteSdp;
         exports.close = close;
+        exports.setVolume = setVolume;
+        exports.getVolume = getVolume;
+        exports.muteAudio = muteAudio;
+        exports.unmuteAudio = unmuteAudio;
+        exports.isAudioMuted = isAudioMuted;
+        exports.muteVideo = muteVideo;
+        exports.unmuteVideo = unmuteVideo;
+        exports.isVideoMuted = isVideoMuted;
     });
 };
 

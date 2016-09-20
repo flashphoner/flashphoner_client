@@ -263,7 +263,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.13",
+            clientVersion: "0.3.14",
             custom: options.custom
         });
     };

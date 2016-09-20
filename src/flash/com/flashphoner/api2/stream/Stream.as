@@ -18,10 +18,10 @@ public class Stream
 		private var application:Main;
 		private var ncStream:NetStream;
 
-        private var usingLocalMedia:Boolean;
         private var hasAudio:Boolean;
         private var hasVideo:Boolean;
         private var remoteControl:RemoteMediaControl;
+        private var localMediaControl:LocalMediaControl;
 
 		public function Stream(application:Main, nc:NetConnection)
 		{
@@ -38,7 +38,7 @@ public class Stream
             this.hasVideo = hasVideo;
             if (localMediaControl != null) {
                 //publish
-                this.usingLocalMedia = true;
+                this.localMediaControl = localMediaControl;
                 //attach video
                 var settings:H264VideoStreamSettings= new H264VideoStreamSettings();
                 settings.setProfileLevel(H264Profile.BASELINE, H264Level.LEVEL_3);
@@ -48,23 +48,18 @@ public class Stream
             } else {
                 this.remoteControl = remoteMediaControl;
                 //subscribe
-                this.usingLocalMedia = false;
                 remoteMediaControl.attachStream(ncStream);
                 ncStream.play(getPlayStreamName());
             }
         }
 
         public function release():void {
-            if (usingLocalMedia) {
-                //ncStream.publish(false);
+            if (this.localMediaControl != null) {
+                this.localMediaControl.removeStream();
             } else {
                 ncStream.play(false);
             }
             ncStream.close();
-        }
-
-        public function isUsingLocalMedia():Boolean {
-            return this.usingLocalMedia;
         }
 
         private function onNetStatus(event : NetStatusEvent) : void{
