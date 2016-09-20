@@ -6,7 +6,6 @@ var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var ROOM_EVENT = Flashphoner.roomApi.events;
 var currentApi;
 var currentRoom;
-var control;
 var localStream;
 var username;
 var participantStreams = {};
@@ -33,6 +32,28 @@ function init() {
             publishLocalMedia();
         } else {
             unpublishLocalMedia();
+        }
+    }).prop('disabled',true);
+    $("#localAudioToggle").click(function() {
+        if (localStream) {
+            if (localStream.isAudioMuted()) {
+                $(this).text("Mute A");
+                localStream.unmuteAudio();
+            } else {
+                $(this).text("Unmute A");
+                localStream.muteAudio();
+            }
+        }
+    }).prop('disabled',true);
+    $("#localVideoToggle").click(function() {
+        if (localStream) {
+            if (localStream.isVideoMuted()) {
+                $(this).text("Mute V");
+                localStream.unmuteVideo();
+            } else {
+                $(this).text("Unmute V");
+                localStream.muteVideo();
+            }
         }
     }).prop('disabled',true);
     $('#sendMessageBtn').click(function(){
@@ -225,6 +246,8 @@ function setStreamStatus(status) {
         case STREAM_STATUS.UNPUBLISHED:
             $("#localStopBtn").text("Publish").prop('disabled',false);
             $('#localStatus').text(status).removeClass().attr("class", "text-success");
+            $("#localAudioToggle").prop('disabled', true);
+            $("#localVideoToggle").prop('disabled', true);
             break;
         case STREAM_STATUS.PUBLISHING:
             $("#localStopBtn").text("Stop").prop('disabled',false);
@@ -233,6 +256,8 @@ function setStreamStatus(status) {
         case STREAM_STATUS.FAILED:
             $("#localStopBtn").text("Publish").prop('disabled',false);
             $('#localStatus').text(status).removeClass().attr("class", "text-danger");
+            $("#localAudioToggle").prop('disabled', true);
+            $("#localVideoToggle").prop('disabled', true);
             break;
     }
 }
@@ -260,6 +285,8 @@ function publishLocalMedia() {
     }).on(STREAM_STATUS.PUBLISHING, function (stream) {
         localStream = stream;
         $("#localStopBtn").text("Stop").prop('disabled',false);
+        $("#localAudioToggle").text("Mute A").prop('disabled', false);
+        $("#localVideoToggle").text("Mute V").prop('disabled', false);
         setStreamStatus(stream.status());
     }).on(STREAM_STATUS.UNPUBLISHED, function(stream) {
         setStreamStatus(stream.status());
