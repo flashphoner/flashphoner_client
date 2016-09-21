@@ -54,15 +54,20 @@ var createConnection = function(options) {
         var close = function (cacheCamera) {
             if (video) {
                 removeVideoElement(display, video);
+                video = null;
             }
             if (localStream && !getCacheInstance(display) && cacheCamera) {
                 localStream.id = localStream.id + CACHED_INSTANCE_POSTFIX;
                 unmuteAudio();
                 unmuteVideo();
+                localStream = null;
             } else if (localStream) {
                 removeVideoElement(display, localStream);
+                localStream = null;
             }
-            connection.close();
+            if (connection.signalingState !== "closed") {
+                connection.close();
+            }
             delete connections[id];
         };
         var createOffer = function (options) {

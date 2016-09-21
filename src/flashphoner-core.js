@@ -263,7 +263,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.14",
+            clientVersion: "0.3.15",
             custom: options.custom
         });
     };
@@ -573,6 +573,10 @@ var createSession = function(options) {
                     status: status_,
                     record: false
                 });
+            }
+            //free media provider
+            if (mediaConnection) {
+                mediaConnection.close(cacheLocalResources);
             }
         };
 

@@ -102,20 +102,21 @@ var createConnection = function(options) {
         var setRemoteSdp = function(sdp) {
             return new Promise(function(resolve, reject){
                 var state = extractMediaState(sdp);
-                setTimeout(function(){
-                    flash.setup(state.incoming, state.outgoing, true, true);
-                }, 100);
+                flash.setup(state.incoming, state.outgoing, true, true);
                 resolve(connections[id]);
             });
         };
 
         var close = function(cacheCamera) {
-            flash.disconnect();
-            if (!getCacheInstance(display) && flash.hasAccessToAudio() && cacheCamera) {
-                cacheInstance(flash);
-            } else {
-                clearCallbacks(flash);
-                swfobject.removeSWF(flash.id);
+            if (flash) {
+                flash.disconnect();
+                if (!getCacheInstance(display) && flash.hasAccessToAudio() && cacheCamera) {
+                    cacheInstance(flash);
+                } else {
+                    clearCallbacks(flash);
+                    swfobject.removeSWF(flash.id);
+                }
+                flash = null;
             }
         };
 

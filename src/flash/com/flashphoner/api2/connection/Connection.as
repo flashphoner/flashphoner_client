@@ -51,6 +51,13 @@ package com.flashphoner.api2.connection {
 		public function disconnect():void {
 			Logger.info("disconnect");
 			hasDisconnectAttempt = true;
+			//tear down streams
+			if (incomingStream != null) {
+				incomingStream.release();
+			}
+			if (outgoingStream != null) {
+				outgoingStream.release();
+			}
 			nc.close();
 		}
 		
