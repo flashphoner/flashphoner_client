@@ -1,77 +1,19 @@
-//Init API
-Flashphoner.init({
-    flashMediaProviderSwfLocation: '../../../../media-provider.swf',
-    screenSharingExtensionId: "nlbaajplpmleofphigmgaifhoikjmbkg"
-});
-
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
-var currentSession;
-var _stream;
-var _streamName;
 var localVideo;
 var remoteVideo;
-var _constraints = {};
-var browser = detectBrowser();
+var constraints;
 
-//////////////////////////////////
-/////////////// Init /////////////
-
-function startTest() {
-    if(!validateForm()) {
-        $("#applyBtn").removeProp("disabled");
-        return false;
+function init_page() {
+    //init api
+    try {
+        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
+    } catch(e) {
+        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
+        return;
     }
 
-    var audioSelect = document.getElementById("audioInput");
-    var selectedAudio = audioSelect.options[audioSelect.selectedIndex].value;
-    var videoSelect = document.getElementById("videoInput");
-    var selectedVideo = videoSelect.options[videoSelect.selectedIndex].value;
-
-    _constraints.audio = {
-        deviceId: selectedAudio
-    };
-    _constraints.video = {
-        deviceId: selectedVideo,
-        width: parseInt(document.getElementById("width").value),
-        height: parseInt(document.getElementById("height").value),
-        frameRate: document.getElementById("fps").value,
-        type: "camera"
-    };
-
-    $("#form :input").prop('readonly', true);
-    document.getElementById("videoInput").disabled = true;
-    document.getElementById("audioInput").disabled = true;
-
-    connectAndPublish();
-}
-
-function initAPI() {
-
-    localVideo = document.getElementById("localVideo");
-    remoteVideo = document.getElementById("remoteVideo");
-
-    $("#url").val(setURL() + "/" + createUUID(8));
-
-    if (detectIE()) {
-        detectFlash();
-    }
-
-    $("#applyBtn").click(function() {
-        $(this).prop("disabled",true);
-        var state = $(this).text();
-        if (state == "Start") {
-            startTest();
-        } else {
-            if (_stream) {
-                _stream.stop();
-            } else {
-                console.error("Nothing to stop!");
-            }
-        }
-
-    });
-    Flashphoner.getMediaDevices(Flashphoner.getMediaProviders()[0],true).then(function(list){
+    Flashphoner.getMediaDevices(null,true).then(function(list){
         list.audio.forEach(function(device) {
             var audio = document.getElementById("audioInput");
             var i;
@@ -107,101 +49,155 @@ function initAPI() {
                 video.appendChild(option);
             }
         });
+        //local and remote displays
+        localVideo = document.getElementById("localVideo");
+        remoteVideo = document.getElementById("remoteVideo");
+
+        $("#url").val(setURL() + "/" + createUUID(8));
+        //set initial button callback
+        onStopped();
     }).catch(function(error) {
-        console.warn(error.message);
+        $("#notifyFlash").text("Failed to get media devices");
     });
 }
 
-//New connection
-function connectAndPublish() {
-    var url = field('url');
-    if (currentSession && currentSession.status() == SESSION_STATUS.ESTABLISHED) {
-        console.warn("Already connected, session id " + currentSession.id());
-        publishStream();
-        return;
-    }
-    console.log("Create new session with url " + url);
-
-    var handleSession = function (session) {
-       var status = session.status();
-       switch (status) {
-           case "FAILED":
-               console.warn("Session failed, id " + session.id());
-               $("#applyBtn").removeProp("disabled");
-               $("#form :input").prop('readonly', false);
-               document.getElementById("videoInput").disabled = false;
-               document.getElementById("audioInput").disabled = false;
-               break;
-           case "DISCONNECTED":
-               console.log("Session diconnected, id " + session.id());
-               $("#applyBtn").removeProp("disabled");
-               break;
-           case "ESTABLISHED":
-               console.log("Session established, id " + session.id());
-               publishStream();
-               break;
-       }
-    };
-
-    currentSession = Flashphoner.createSession({urlServer: url})
-        .on(SESSION_STATUS.FAILED, handleSession)
-        .on(SESSION_STATUS.DISCONNECTED, handleSession)
-        .on(SESSION_STATUS.ESTABLISHED, handleSession);
+function onStarted(publishStream, previewStream) {
+    $("#publishBtn").text("Stop").off('click').click(function(){
+        $(this).prop('disabled', true);
+        previewStream.stop();
+    }).prop('disabled', false);
 }
 
-//Publish stream
-function publishStream() {
-    Flashphoner.getMediaAccess(_constraints, localVideo).then(function(){
-        if (localVideo.children.length > 1) {
-            console.error("Display has 2 video elements!");
+function onStopped() {
+    $("#publishBtn").text("Start").off('click').click(function(){
+        if (validateForm()) {
+            muteInputs();
+            $(this).prop('disabled', true);
+            start();
         }
-        //todo remove
-        localVideo.children[0].removeEventListener('resize', resizeLocalVideo);
-        localVideo.children[0].addEventListener('resize', resizeLocalVideo);
-        _streamName = field("url").split('/')[3];
-        _stream = currentSession.createStream({name: _streamName, display: localVideo, cacheLocalResources: true})
-            .on(STREAM_STATUS.PUBLISHING, function(publisher) {
-                $("#streamStatus").text(publisher.status()).removeClass().attr("class","text-muted");
-                //create preview
-                currentSession.createStream({name: _streamName, display: remoteVideo})
-                    .on(STREAM_STATUS.PLAYING, function(playingStream){
-                        document.getElementById(playingStream.id()).addEventListener('resize', function(event){
-                            resizeVideo(event.target);
-                        });
-                        console.log("Playing stream " + playingStream.name() + " ; id " + playingStream.id());
-                        $("#applyBtn").text("Stop");
-                        $("#applyBtn").removeAttr("disabled");
-                    })
-                    .on(STREAM_STATUS.FAILED, function(){
-                        console.warn("Preview stream failed");
-                        publisher.stop();
-                    })
-                    .play();
-            })
-            .on(STREAM_STATUS.FAILED, streamTerminated)
-            .on(STREAM_STATUS.UNPUBLISHED, streamTerminated);
-        _stream.publish();
+    }).prop('disabled', false);
+    unmuteInputs();
+}
+
+function start() {
+    //check if we already have session
+    var url = $('#url').val();
+    //check if we already have session
+    if (Flashphoner.getSessions().length > 0) {
+        var session = Flashphoner.getSessions()[0];
+        if (session.getServerUrl() == url) {
+            startStreaming(session);
+            return;
+        } else {
+            //remove session DISCONNECTED and FAILED callbacks
+            session.on(SESSION_STATUS.DISCONNECTED, function(){});
+            session.on(SESSION_STATUS.FAILED, function(){});
+            session.disconnect();
+        }
+    }
+
+    console.log("Create new session with url " + url);
+    Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function(session){
+        //session connected, start streaming
+        startStreaming(session);
+    }).on(SESSION_STATUS.DISCONNECTED, function(){
+        setStatus(SESSION_STATUS.DISCONNECTED);
+        onStopped();
+    }).on(SESSION_STATUS.FAILED, function(){
+        setStatus(SESSION_STATUS.FAILED);
+        onStopped();
+    });
+}
+
+function startStreaming(session) {
+    var streamName = field("url").split('/')[3];
+    constraints = {
+        audio: {
+            deviceId: $('#audioInput').val()
+        },
+        video: {
+            deviceId: $('#videoInput').val(),
+            width: parseInt($('#width').val()),
+            height: parseInt($('#height').val()),
+            frameRate: parseInt($('#fps').val())
+        }
+    };
+    Flashphoner.getMediaAccess(constraints, localVideo).then(function(){
+        session.createStream({
+            name: streamName,
+            display: localVideo,
+            cacheLocalResources: true
+        }).on(STREAM_STATUS.PUBLISHING, function(publishStream){
+            var video = document.getElementById(publishStream.id());
+            //resize local if resolution is available
+            if (video.videoWidth > 0 && video.videoHeight > 0) {
+                resizeLocalVideo({target: video});
+            }
+            //remove resize listener in case this video was cached earlier
+            video.removeEventListener('resize', resizeLocalVideo);
+            video.addEventListener('resize', resizeLocalVideo);
+            setStatus(STREAM_STATUS.PUBLISHING);
+            //play preview
+            session.createStream({
+                name: streamName,
+                display: remoteVideo
+            }).on(STREAM_STATUS.PLAYING, function(previewStream){
+                document.getElementById(previewStream.id()).addEventListener('resize', function(event){
+                    resizeVideo(event.target);
+                });
+                //enable stop button
+                onStarted(publishStream, previewStream);
+            }).on(STREAM_STATUS.STOPPED, function(){
+                publishStream.stop();
+            }).on(STREAM_STATUS.FAILED, function(){
+                //preview failed, stop publishStream
+                if (publishStream.status() == STREAM_STATUS.PUBLISHING) {
+                    setStatus(STREAM_STATUS.FAILED);
+                    publishStream.stop();
+                }
+            }).play();
+        }).on(STREAM_STATUS.UNPUBLISHED, function(){
+            setStatus(STREAM_STATUS.UNPUBLISHED);
+            //enable start button
+            onStopped();
+        }).on(STREAM_STATUS.FAILED, function(){
+            setStatus(STREAM_STATUS.FAILED);
+            //enable start button
+            onStopped();
+        }).publish();
     }, function(error){
         console.warn("Failed to get access to media " + error);
-        $("#form :input").prop('readonly', false);
-        document.getElementById("videoInput").disabled = false;
-        document.getElementById("audioInput").disabled = false;
-        $("#applyBtn").removeProp("disabled");
+        onStopped();
     });
+}
 
-    function streamTerminated(stream) {
-        var status = stream.status();
-        $("#form :input").prop('readonly', false);
-        document.getElementById("videoInput").disabled = false;
-        document.getElementById("audioInput").disabled = false;
-        $("#applyBtn").text("Start");
-        $("#applyBtn").removeAttr("disabled");
-        $("#streamStatus").text(status).removeClass().attr("class","text-muted");
+//show connection or local stream status
+function setStatus(status) {
+    var statusField = $("#status");
+    statusField.text(status).removeClass();
+    if (status == "PUBLISHING") {
+        statusField.attr("class","text-success");
+    } else if (status == "DISCONNECTED" || status == "UNPUBLISHED") {
+        statusField.attr("class","text-muted");
+    } else if (status == "FAILED") {
+        statusField.attr("class","text-danger");
     }
+}
+
+function muteInputs() {
+    $(":input, select").each(function() {
+        $(this).prop('disabled',true);
+    });
+}
+
+function unmuteInputs() {
+    $(":input, select").each(function() {
+        $(this).prop('disabled',false);
+    });
 }
 
 function resizeLocalVideo(event) {
-    var requested = _constraints.video;
+    var requested = constraints.video;
     if (requested.width != event.target.videoWidth || requested.height != event.target.videoHeight) {
         console.warn("Camera does not support requested resolution, actual resolution is " + event.target.videoWidth + "x" + event.target.videoHeight);
     }
@@ -210,7 +206,7 @@ function resizeLocalVideo(event) {
 
 function validateForm() {
     var valid = true;
-    $('#form :input:text, select').each(function(){
+    $('#form :text, select').each(function(){
         if (!$(this).val()) {
             highlightInput($(this));
             valid = false;
