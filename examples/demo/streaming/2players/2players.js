@@ -62,6 +62,9 @@ function playStream(index) {
         name: streamName,
         display: display
     }).on(STREAM_STATUS.PLAYING, function(stream) {
+        document.getElementById(stream.id()).addEventListener('resize', function(event){
+            resizeVideo(event.target);
+        });
         setStatus("#status" + index, stream.status());
         onPlaying(index, stream);
     }).on(STREAM_STATUS.STOPPED, function() {
@@ -112,7 +115,7 @@ function setStatus(selector, status) {
 
 function validateForm(formId) {
     var valid = true;
-    $('#' + formId + ' :input:text').each(function(){
+    $('#' + formId + ' :text').each(function(){
         if (!$(this).val()) {
             highlightInput($(this));
             valid = false;

@@ -53,7 +53,7 @@ var createConnection = function(options) {
         };
         var close = function (cacheCamera) {
             if (video) {
-                removeVideoElement(display, video);
+                removeVideoElement(video);
                 video = null;
             }
             if (localStream && !getCacheInstance(display) && cacheCamera) {
@@ -62,7 +62,7 @@ var createConnection = function(options) {
                 unmuteVideo();
                 localStream = null;
             } else if (localStream) {
-                removeVideoElement(display, localStream);
+                removeVideoElement(localStream);
                 localStream = null;
             }
             if (connection.signalingState !== "closed") {
@@ -269,7 +269,7 @@ var getScreenDeviceId = function(constraints) {
 var releaseMedia = function(display) {
     var video = getCacheInstance(display);
     if (video) {
-        removeVideoElement(display, video);
+        removeVideoElement(video);
         return true;
     }
     return false;
@@ -285,7 +285,7 @@ function getCacheInstance(display) {
     }
 }
 
-function removeVideoElement(display, video) {
+function removeVideoElement(video) {
     if (video.srcObject) {
         //pause
         video.pause();
@@ -295,7 +295,9 @@ function removeVideoElement(display, video) {
             tracks[i].stop();
         }
     }
-    display.removeChild(video);
+    if (video.parentNode) {
+        video.parentNode.removeChild(video);
+    }
 }
 /**
  * Check WebRTC available

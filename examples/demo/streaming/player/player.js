@@ -104,7 +104,7 @@ function setStatus(status) {
 
 function validateForm() {
     var valid = true;
-    $('#form :input:text').each(function(){
+    $('#form :text').each(function(){
         if (!$(this).val()) {
             highlightInput($(this));
             valid = false;
