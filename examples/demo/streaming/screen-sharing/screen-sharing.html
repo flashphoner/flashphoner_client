@@ -16,7 +16,7 @@
     <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
     <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/nlbaajplpmleofphigmgaifhoikjmbkg">
 </head>
-<body onload="initAPI()">
+<body onload="init_page()">
 <div class="container">
     <div class="row">
         <h2 class="text-center col-sm-9">Screen Sharing</h2>
@@ -70,7 +70,9 @@
                         </div>
                     </div>
                 </div>
-                <div id="localVideo" class="fp-localVideo" style="margin-top: 90px"></div>
+                <div class="fp-localVideo" style="margin-top: 90px">
+                    <div id="localVideo" class="display"></div>
+                </div>
                 <div class="text-center text-muted">My Screen</div>
                 <div class="row row-space" style="margin-top: 20px">
                     <div class="col-sm-9">
@@ -91,7 +93,9 @@
                 <i class="fa fa-arrow-right" aria-hidden="true" style="font-size: 42px"></i>
             </div>
             <div class="col-sm-5">
-                <div id="remoteVideo" class="fp-previewVideo"></div>
+                <div class="fp-previewVideo">
+                    <div id="remoteVideo" class="display"></div>
+                </div>
                 <div class="text-center text-muted">Preview</div>
             </div>
         </div>
