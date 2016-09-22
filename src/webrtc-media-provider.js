@@ -303,7 +303,7 @@ function removeVideoElement(display, video) {
  * @returns {boolean} webrtc available
  */
 var available = function(){
-    return navigator.getUserMedia && RTCPeerConnection;
+    return (adapter.browserDetails.browser != "edge") ? navigator.getUserMedia && RTCPeerConnection : false;
 };
 
 var listDevices = function(labels) {

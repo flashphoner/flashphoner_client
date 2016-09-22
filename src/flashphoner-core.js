@@ -4,7 +4,6 @@ var uuid = require('node-uuid');
 var constants = require("./constants");
 var util = require('./util');
 var Promise = require('promise-polyfill');
-var browser = require('bowser');
 
 /**
  * @namespace Flashphoner
@@ -31,7 +30,7 @@ var init = function(options) {
         if (!options) {
             options = {};
         }
-        var webRtcProvider = (!browser.msedge) ? require("./webrtc-media-provider") : undefined;
+        var webRtcProvider = require("./webrtc-media-provider");
         if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
             MediaProvider.WebRTC = webRtcProvider;
             var webRtcConf = {
