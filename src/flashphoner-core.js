@@ -263,7 +263,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.15",
+            clientVersion: "0.3.16",
             custom: options.custom
         });
     };
@@ -843,6 +843,17 @@ var createSession = function(options) {
     };
 
     /**
+     * Get server address
+     *
+     * @returns {string} Server url
+     * @memberof Session
+     * @inner
+     */
+    var getServerUrl = function() {
+        return urlServer;
+    };
+
+    /**
      * Get session status
      *
      * @returns {string} One of {@link Flashphoner.constants.SESSION_STATUS}
@@ -949,6 +960,7 @@ var createSession = function(options) {
     //export Session
     session.id = id;
     session.status = status;
+    session.getServerUrl = getServerUrl;
     session.createStream = createStream;
     session.getStream = getStream;
     session.getStreams = getStreams;

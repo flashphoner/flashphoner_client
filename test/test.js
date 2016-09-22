@@ -162,6 +162,18 @@ describe('flashphoner', function() {
                     done();
                 }).publish();
             });
+            it('stream should fail on session disconnect', function(done){
+                this.timeout(10000);
+                Flashphoner.createSession(sOptions).on(SESSION_STATUS.ESTABLISHED, function(session){
+                    var display = addDisplay();
+                    session.createStream({name: "test", display: display}).on(STREAM_STATUS.PUBLISHING, function(){
+                        session.disconnect();
+                    }).on(STREAM_STATUS.FAILED, function(){
+                        removeDisplay(display);
+                        done();
+                    }).publish();
+                });
+            });
             it('instant publish stop should result in UNPUBLISHED event', function(done) {
                 this.timeout(20000);
                 var display = addDisplay();

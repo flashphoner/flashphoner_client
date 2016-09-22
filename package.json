@@ -1,6 +1,6 @@
 {
   "name": "flashphoner-api",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "main": "./src/flashphoner-core.js",
   "description": "Flashphoner Web Call Server API",
   "dependencies": {

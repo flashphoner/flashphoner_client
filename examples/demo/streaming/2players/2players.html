@@ -15,7 +15,7 @@
     <!-- Bootstrap JS -->
     <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
 </head>
-<body onload="initAPI()">
+<body onload="init_page()">
 <div class="container">
     <div class="row">
 
@@ -27,11 +27,14 @@
 
             <div class="col-sm-6">
                 <div class="text-center text-muted">Player 1</div>
-                <div id="player1" class="fp-remoteVideo"></div>
+                <div class="fp-remoteVideo">
+                    <div id="player1" class="display"></div>
+                </div>
+
                 <div id="form1" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
-                    <input class="form-control" type="text" id="streamName1">
+                    <input class="form-control" type="text" id="streamName1" value="streamName1">
                     <div class="input-group-btn">
-                        <button id="playBtn1" type="button" class="btn btn-default" onclick="playStream(player1, 'streamName1')">Start</button>
+                        <button id="playBtn1" type="button" class="btn btn-default">Play</button>
                     </div>
                 </div>
                 <div class="text-center" style="margin-top: 20px">
@@ -41,11 +44,13 @@
 
             <div class="col-sm-6">
                 <div class="text-center text-muted">Player 2</div>
-                <div id="player2" class="fp-remoteVideo"></div>
+                <div class="fp-remoteVideo">
+                    <div id="player2" class="display"></div>
+                </div>
                 <div id="form2" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
-                    <input class="form-control" type="text" id="streamName2">
+                    <input class="form-control" type="text" id="streamName2" value="streamName2">
                     <div class="input-group-btn">
-                        <button id="playBtn2" type="button" class="btn btn-default" onclick="playStream(player2, 'streamName2')">Start</button>
+                        <button id="playBtn2" type="button" class="btn btn-default">Play</button>
                     </div>
                 </div>
                 <div class="text-center" style="margin-top: 20px">
@@ -56,7 +61,7 @@
     </div>
     <div class="row row-space">
         <div class="col-sm-5 col-sm-offset-2">
-            <div class="input-group">
+            <div id="connectionForm" class="input-group">
                 <input class="form-control" id="url" type="text">
                 <div class="input-group-btn">
                     <button id="connectBtn" type="button" class="btn btn-default">Connect</button>

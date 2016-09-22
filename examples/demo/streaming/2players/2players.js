@@ -1,198 +1,131 @@
-//Init API
-Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
-
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
-var currentSession;
-var player1 = {};
-var player2 = {};
 
-//////////////////////////////////
-/////////////// Init /////////////
-
-function initAPI() {
-
-    player2.videoElement = document.getElementById("player2");
-    player2.statusElement = $("#status2");
-    player2.button = $("#playBtn2");
-    player2.formElement = $("#form2");
-    player2.urlElement = $("#streamName2");
-
-    player1.videoElement = document.getElementById("player1");
-    player1.statusElement = $("#status1");
-    player1.button = $("#playBtn1");
-    player1.formElement = $("#form1");
-    player1.urlElement = $("#streamName1");
-
-    if (detectIE()) {
-        detectFlash();
+function init_page() {
+    //init api
+    try {
+        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
+    } catch(e) {
+        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
+        return;
     }
-
-    $("#connectBtn").click(function() {
-        $(this).prop('disabled',true);
-        var state = $(this).text();
-        if (state == "Connect") {
-            connect();
-        } else {
-            disconnect();
-        }
-    });
-
-    $("#streamName1").val("streamName1");
-    $("#streamName2").val("streamName2");
 
     $("#url").val(setURL());
-
-    player1.button.attr('disabled',true);
-    player2.button.attr('disabled',true);
-
+    onDisconnected();
+    onStopped(1);
+    onStopped(2);
 }
-
-///////////////////////////////////
-///////////// Controls ////////////
-///////////////////////////////////
 
 function connect() {
-    if (currentSession && currentSession.status() == SESSION_STATUS.ESTABLISHED) {
-        console.warn("Already connected, session id " + currentSession.id());
-        return;
-    }
-    var url = field('url');
+    var url = $('#url').val();
+    //create session
+    console.log("Create new session with url " + url);
+    Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function(session){
+        setStatus("#connectStatus", session.status());
+        onConnected(session)
+    }).on(SESSION_STATUS.DISCONNECTED, function(){
+        setStatus("#connectStatus", SESSION_STATUS.DISCONNECTED);
+        onDisconnected();
+    }).on(SESSION_STATUS.FAILED, function(){
+        setStatus("#connectStatus", SESSION_STATUS.FAILED);
+        onDisconnected();
+    });
+}
 
-    var handleSession = function(session) {
-        var status = session.status();
-        switch (status) {
-            case SESSION_STATUS.FAILED:
-                console.warn("Session failed, id " + session.id());
-                removeSession(session);
-                player1.button.prop('disabled', true);
-                player2.button.prop('disabled', true);
-                setStatus("",session.status());
-                break;
-            case SESSION_STATUS.DISCONNECTED:
-                console.log("Session diconnected, id " + session.id());
-                removeSession(session);
-                player1.button.prop('disabled', true);
-                player2.button.prop('disabled', true);
-                $("#url").prop('disabled', false);
-                setStatus("",session.status());
-                break;
-            case SESSION_STATUS.ESTABLISHED:
-                console.log("Session established, id " + session.id());
-                player1.button.prop('disabled',false);
-                player2.button.prop('disabled',false);
-                setStatus("",session.status());
-                break;
+function onConnected(session) {
+    $("#connectBtn").text("Disconnect").off('click').click(function(){
+        $(this).prop('disabled', true);
+        session.disconnect();
+    }).prop('disabled', false);
+    onStopped(1);
+    onStopped(2);
+}
+
+function onDisconnected() {
+    $("#connectBtn").text("Connect").off('click').click(function(){
+        if (validateForm("connectionForm")) {
+            $('#url').prop('disabled', true);
+            $(this).prop('disabled', true);
+            connect();
         }
-    };
-
-    currentSession = Flashphoner.createSession({urlServer: url})
-        .on(SESSION_STATUS.FAILED, handleSession)
-        .on(SESSION_STATUS.DISCONNECTED, handleSession)
-        .on(SESSION_STATUS.ESTABLISHED, handleSession);
+    }).prop('disabled', false);
+    $('#url').prop('disabled', false);
+    onStopped(1);
+    onStopped(2);
 }
 
-function disconnect() {
-    if (!currentSession) {
-        console.warn("Nothing to disconnect");
-        return;
-    }
-    currentSession.disconnect();
-    $("#connectBtn").text("Connect");
+function playStream(index) {
+    var session = Flashphoner.getSessions()[0];
+    var streamName = $('#streamName' + index).val();
+    var display = document.getElementById("player" + index);
+    session.createStream({
+        name: streamName,
+        display: display
+    }).on(STREAM_STATUS.PLAYING, function(stream) {
+        setStatus("#status" + index, stream.status());
+        onPlaying(index, stream);
+    }).on(STREAM_STATUS.STOPPED, function() {
+        setStatus("#status" + index, STREAM_STATUS.STOPPED);
+        onStopped(index);
+    }).on(STREAM_STATUS.FAILED, function() {
+        setStatus("#status" + index, STREAM_STATUS.FAILED);
+        onStopped(index);
+    }).play();
 }
 
+function onPlaying(index, stream) {
+    $("#playBtn" + index).text("Stop").off('click').click(function(){
+        $(this).prop('disabled', true);
+        stream.stop();
+    }).prop('disabled', false);
+}
 
-function playStream(player, streamName) {
-    if (!checkForEmptyField(streamName, player.formElement)) { return false;}
-
-    if ((player == player1 && player2.stream && player2.stream.name() == field(streamName)) ||
-        (player == player2 && player1.stream && player1.stream.name() == field(streamName))) {
-        console.warn("Stream " + field(streamName) + " already playing");
-        setStatus(player, "FAILED");
-        return false;
-    }
-
-    player.button.prop('disabled', true);
-    if (player.button.text() == "Stop") {
-        stopStream(player);
-        return;
-    }
-    player.streamName = field(streamName);
-    console.log("Play stream name : " + player.streamName);
-    var handleStream = function(stream) {
-        switch (stream.status()) {
-            case STREAM_STATUS.PLAYING:
-                player.stream = stream;
-                setStatus(player, stream.status());
-                player.button.prop('disabled',false);
-                break;
-            case STREAM_STATUS.STOPPED:
-            case STREAM_STATUS.FAILED:
-                player.stream = null;
-                setStatus(player, stream.status());
-                player.button.prop('disabled',false);
-                break;
+function onStopped(index) {
+    $("#playBtn" + index).text("Play").off('click').click(function(){
+        if (validateForm("form" + index)) {
+            $('#streamName' + index).prop('disabled', true);
+            $(this).prop('disabled', true);
+            playStream(index);
         }
-    };
-    currentSession.createStream({name: player.streamName, display: player.videoElement, cacheLocalResources: false})
-        .on(STREAM_STATUS.PLAYING, handleStream)
-        .on(STREAM_STATUS.STOPPED, handleStream)
-        .on(STREAM_STATUS.FAILED, handleStream)
-        .play();
-}
-
-function stopStream(player) {
-    player.stream.stop();
-}
-
-/////////////////////////////////////
-///////////// Display UI ////////////
-/////////////////////////////////////
-
-// Set Connection Status
-function setStatus(player, status) {
-    console.log("Status: " + status);
-
-    if (player) {
-        player.urlElement.prop('disabled', true);
-        if (status == "PUBLISHING" || status == "PLAYING") {
-            player.statusElement.text(status).removeClass().attr("class", "text-success");
-            player.button.text("Stop");
-            player.urlElement.prop('disabled', true);
-        } else {
-            player.statusElement.text(status).removeClass().attr("class", (status == "FAILED") ? "text-danger" : "text-muted");
-            player.button.text("Start");
-            player.urlElement.prop('disabled',false);
-        }
+    });
+    if (Flashphoner.getSessions()[0] && Flashphoner.getSessions()[0].status() == SESSION_STATUS.ESTABLISHED) {
+        $("#playBtn" + index).prop('disabled', false);
+        $('#streamName' + index).prop('disabled', false);
     } else {
-        var textClass;
-        if (status == "DISCONNECTED" || status == "FAILED") {
-            textClass = (status == "FAILED") ? "text-danger" : "text-muted";
-            $("#connectBtn").text("Connect").prop('disabled',false);
-            $("#url").prop('disabled',false);
+        $("#playBtn" + index).prop('disabled', true);
+        $('#streamName' + index).prop('disabled', true);
+    }
+}
+
+//show connection or remote stream status
+function setStatus(selector, status) {
+    var statusField = $(selector);
+    statusField.text(status).removeClass();
+    if (status == "PLAYING" || status == "ESTABLISHED") {
+        statusField.attr("class","text-success");
+    } else if (status == "DISCONNECTED" || status == "STOPPED") {
+        statusField.attr("class","text-muted");
+    } else if (status == "FAILED") {
+        statusField.attr("class","text-danger");
+    }
+}
+
+function validateForm(formId) {
+    var valid = true;
+    $('#' + formId + ' :input:text').each(function(){
+        if (!$(this).val()) {
+            highlightInput($(this));
+            valid = false;
         } else {
-            textClass = "text-success";
-            $("#connectBtn").text("Disconnect").prop('disabled',false);
-            $("#url").attr('disabled',true);
+            removeHighlight($(this));
         }
-        $("#connectStatus").text(status).removeClass().attr("class", textClass);
+    });
+    return valid;
+
+    function highlightInput(input) {
+        input.closest('.input-group').addClass("has-error");
     }
-
-}
-
-// Check field for empty string
-function checkForEmptyField(checkField, alertDiv) {
-    if (document.getElementById(checkField).value == "") {
-        $(alertDiv).addClass("has-error");
-        return false;
-    } else {
-        $(alertDiv).removeClass("has-error");
-        return true;
-    }
-}
-
-function removeSession(session) {
-    if (currentSession.id() == session.id()) {
-        currentSession = null;
+    function removeHighlight(input) {
+        input.closest('.input-group').removeClass("has-error");
     }
 }

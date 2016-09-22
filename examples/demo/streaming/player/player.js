@@ -1,164 +1,123 @@
-//Init API
-Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
-
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
-var currentSession;
-var _stream;
-var _streamName;
-var _url;
 var remoteVideo;
 
-
-//////////////////////////////////
-/////////////// Init /////////////
-
 function init_page() {
-    $("#url").val(setURL());
-    $("#streamName").val("stream-"+createUUID(6));
-    $("#playBtn").click(function () {
-            $(this).prop('disabled', true);
-            var state = $("#playBtn").text();
-            if (state == "Start") {
-                if (!checkForEmptyField('#url', '#connForm')) return;
-                if (!checkForEmptyField('#streamName', '#playForm')) return;
-                connectAndPlay();
-            } else {
-                stopStream();
-            }
-        }
-    );
-};
-
-function initAPI() {
-
-    remoteVideo = document.getElementById("remoteVideo");
-
-    if (detectIE()) {
-        detectFlash();
-    }
-
-    init_page();
-}
-
-///////////////////////////////////
-///////////// Controls ////////////
-///////////////////////////////////
-
-//New connection
-function connectAndPlay() {
-    var url = field('url');
-
-    if (currentSession && currentSession.status() == SESSION_STATUS.ESTABLISHED) {
-        if (_url == url) {
-            console.warn("Already connected, session id " + currentSession.id());
-            playStream();
-            return;
-        } else {
-            removeSession(currentSession);
-        }
-    }
-
-    _url = url;
-
-    console.log("Create new session with url " + url);
-    currentSession = Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.FAILED, function(session){
-        console.warn("Session failed, id " + session.id());
-        setStatus(session.status());
-    }).on(SESSION_STATUS.DISCONNECTED, function(session) {
-        console.log("Session diconnected, id " + session.id());
-        removeSession(session);
-    }).on(SESSION_STATUS.ESTABLISHED, function(session) {
-        console.log("Session established " + session.id());
-        playStream();
-    });
-}
-
-//Disconnect
-function disconnect() {
-    if (!currentSession) {
-        console.warn("Nothing to disconnect");
+    //init api
+    try {
+        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
+    } catch(e) {
+        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
     }
-    currentSession.disconnect();
-    $("#connectBtn").text("Connect");
+
+    //video display
+    remoteVideo = document.getElementById("remoteVideo");
+
+    $("#url").val(setURL());
+    onStopped();
 }
 
-function playStream() {
-    _streamName = field("streamName");
-
-    var displayEl = document.createElement('div');
-    displayEl.setAttribute('id','displayDiv');
-    remoteVideo.appendChild(displayEl);
-    var d = document.getElementById('displayDiv');
-
-    currentSession.createStream({name: _streamName, display: d, cacheLocalResources: false})
-        .on(STREAM_STATUS.PLAYING, function(playingStream) {
-            document.getElementById(playingStream.id()).addEventListener("resize", function(event){
-                resizeVideo(event.target);
-            });
-            _stream = playingStream;
-            console.log("Stream id " + _stream.id());
-            setStatus(playingStream.status());
-        })
-        .on(STREAM_STATUS.STOPPED, function(playingStream) {
-            remoteVideo.removeChild(displayEl);
-            setStatus(playingStream.status());
-        })
-        .on(STREAM_STATUS.FAILED, function(playingStream) {
-            remoteVideo.removeChild(displayEl);
-            setStatus(playingStream.status());
-        })
-        .play();
+function onStarted(stream) {
+    $("#playBtn").text("Stop").off('click').click(function(){
+        $(this).prop('disabled', true);
+        stream.stop();
+    }).prop('disabled', false);
 }
 
-function stopStream() {
-    _stream.stop();
+function onStopped() {
+    $("#playBtn").text("Start").off('click').click(function(){
+        if (validateForm()) {
+            $(this).prop('disabled', true);
+            $('#url').prop('disabled', true);
+            $("#streamName").prop('disabled', true);
+            start();
+        }
+    }).prop('disabled', false);
+    $('#url').prop('disabled', false);
+    $("#streamName").prop('disabled', false);
 }
 
-/////////////////////////////////////
-///////////// Display UI ////////////
-/////////////////////////////////////
+function start() {
+    var url = $('#url').val();
+    //check if we already have session
+    if (Flashphoner.getSessions().length > 0) {
+        var session = Flashphoner.getSessions()[0];
+        if (session.getServerUrl() == url) {
+            playStream(session);
+            return;
+        } else {
+            //remove session DISCONNECTED and FAILED callbacks
+            session.on(SESSION_STATUS.DISCONNECTED, function(){});
+            session.on(SESSION_STATUS.FAILED, function(){});
+            session.disconnect();
+        }
+    }
+    //create session
+    console.log("Create new session with url " + url);
+    Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function(session){
+        setStatus(session.status());
+        //session connected, start playback
+        playStream(session);
+    }).on(SESSION_STATUS.DISCONNECTED, function(){
+        setStatus(SESSION_STATUS.DISCONNECTED);
+        onStopped();
+    }).on(SESSION_STATUS.FAILED, function(){
+        setStatus(SESSION_STATUS.FAILED);
+        onStopped();
+    });
 
-// Set Connection Status
+}
+
+function playStream(session) {
+    var streamName = $('#streamName').val();
+    session.createStream({
+        name: streamName,
+        display: remoteVideo
+    }).on(STREAM_STATUS.PLAYING, function(stream) {
+        document.getElementById(stream.id()).addEventListener('resize', function(event){
+            resizeVideo(event.target);
+        });
+        setStatus(stream.status());
+        onStarted(stream);
+    }).on(STREAM_STATUS.STOPPED, function() {
+        setStatus(STREAM_STATUS.STOPPED);
+        onStopped();
+    }).on(STREAM_STATUS.FAILED, function() {
+        setStatus(STREAM_STATUS.FAILED);
+        onStopped();
+    }).play();
+}
+
+//show connection or remote stream status
 function setStatus(status) {
-    var statusTextClass;
-    var playBtnText = "Start";
-    var muteStreamName = false;
-    var muteUrl = false;
-
+    var statusField = $("#status");
+    statusField.text(status).removeClass();
     if (status == "PLAYING") {
-        statusTextClass = "text-success";
-        playBtnText = "Stop";
-        muteStreamName = true;
-        muteUrl = true;
-    }
-    if (status == "DISCONNECTED" || status == "STOPPED") {
-        statusTextClass = "text-muted";
-    }
-    if (status == "FAILED") {
-        statusTextClass = "text-danger";
-    }
-
-    $("#url").prop("disabled",muteUrl);
-    $("#streamName").prop("disabled",muteStreamName);
-    $("#status").text(status).removeClass().attr("class",statusTextClass);
-    $("#playBtn").text(playBtnText).prop("disabled",false);
-}
-
-// Check field for empty string
-function checkForEmptyField(checkField, alertDiv) {
-    if (!$(checkField).val()) {
-        $(alertDiv).addClass("has-error");
-        return false;
-    } else {
-        $(alertDiv).removeClass("has-error");
-        return true;
+        statusField.attr("class","text-success");
+    } else if (status == "DISCONNECTED" || status == "ESTABLISHED" || status == "STOPPED") {
+        statusField.attr("class","text-muted");
+    } else if (status == "FAILED") {
+        statusField.attr("class","text-danger");
     }
 }
 
-function removeSession(session) {
-    if (currentSession.id() == session.id()) {
-        currentSession = null;
+function validateForm() {
+    var valid = true;
+    $('#form :input:text').each(function(){
+        if (!$(this).val()) {
+            highlightInput($(this));
+            valid = false;
+        } else {
+            removeHighlight($(this));
+        }
+    });
+    return valid;
+
+    function highlightInput(input) {
+        input.closest('.form-group').addClass("has-error");
+    }
+    function removeHighlight(input) {
+        input.closest('.form-group').removeClass("has-error");
     }
 }
