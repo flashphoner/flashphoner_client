@@ -28,8 +28,8 @@ var createConnection = function(options) {
             video.id = id;
             display.appendChild(video);
         }
-        connection.onaddstream = function (event) {
-            remoteStream = event.stream;
+        connection.ontrack = function (event) {
+            remoteStream = event.streams[0];
             if (video) {
                 video.srcObject = remoteStream;
                 var playPromise = video.play();
