@@ -107,6 +107,8 @@ function initAPI() {
                 video.appendChild(option);
             }
         });
+    }).catch(function(error) {
+        console.warn(error.message);
     });
 }
 
