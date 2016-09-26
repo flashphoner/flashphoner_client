@@ -16,7 +16,7 @@
     <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
     <script>var _participants = 2</script>
 </head>
-<body onload="init()">
+<body onload="init_page()">
 <div class="container">
     <div class="row">
 
@@ -49,8 +49,13 @@
             </form>
         </div>
         <div class="col-sm-7">
-            <div id="participant1Display" class="fp-remoteVideo">
-                <div id="localDisplay" class="fp-localVideo"></div>
+            <div style="width: 642px; height: 482px;">
+                <div class="fp-remoteVideo">
+                    <div id="participant1Display" class="display"></div>
+                </div>
+                <div class="fp-localVideo">
+                    <div id="localDisplay" class="display"></div>
+                </div>
             </div>
             <div id="participant1Name" class="text-center text-muted">NONE</div>
             <div class="text-center" style="margin-top: 20px">

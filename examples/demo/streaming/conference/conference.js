@@ -1,117 +1,94 @@
-//Init API
-Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
-
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var ROOM_EVENT = Flashphoner.roomApi.events;
-var currentApi;
-var currentRoom;
-var localStream;
-var username;
-var participantStreams = {};
+var connection;
 
 //initialize interface
-function init() {
-    if (detectIE()) {
-        detectFlash();
+function init_page() {
+    //init api
+    try {
+        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
+    } catch(e) {
+        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
+        return;
     }
-    // Bind an event handlers
-    $("#joinBtn").click(function() {
-        $(this).prop('disabled',true);
-        var state = $(this).text();
-        if (state == "Join") {
-            connect();
-        } else {
-            leaveRoom();
-        }
-    });
-    $("#localStopBtn").click(function() {
-        $(this).prop('disabled',true);
-        var state = $(this).text();
-        if (state == "Publish") {
-            publishLocalMedia();
-        } else {
-            unpublishLocalMedia();
-        }
-    }).prop('disabled',true);
-    $("#localAudioToggle").click(function() {
-        if (localStream) {
-            if (localStream.isAudioMuted()) {
-                $(this).text("Mute A");
-                localStream.unmuteAudio();
-            } else {
-                $(this).text("Unmute A");
-                localStream.muteAudio();
-            }
-        }
-    }).prop('disabled',true);
-    $("#localVideoToggle").click(function() {
-        if (localStream) {
-            if (localStream.isVideoMuted()) {
-                $(this).text("Mute V");
-                localStream.unmuteVideo();
-            } else {
-                $(this).text("Unmute V");
-                localStream.muteVideo();
-            }
-        }
-    }).prop('disabled',true);
-    $('#sendMessageBtn').click(function(){
+    $("#url").val(setURL());
+    onLeft();
+}
+
+function onJoined(room) {
+    $("#joinBtn").text("Leave").off('click').click(function(){
+        $(this).prop('disabled', true);
+        room.leave().then(onLeft, onLeft);
+    }).prop('disabled', false);
+    $('#sendMessageBtn').off('click').click(function(){
         var message = field('message');
-        addMessage(username, message);
+        addMessage(connection.username(), message);
         $('#message').val("");
         //broadcast message
-        var participants = currentRoom.getParticipants();
+        var participants = room.getParticipants();
         for (var i = 0; i < participants.length; i++) {
             participants[i].sendMessage(message);
         }
-    }).prop('disabled',true);
-
-    $("#url").val(setURL());
+    }).prop('disabled',false);
+    $('#failedInfo').text("");
 }
 
-//connect
-function connect() {
-    if (currentApi && currentApi.status() == SESSION_STATUS.ESTABLISHED) {
-        console.warn("Already connected, session id " + currentApi.id());
-        joinRoom();
-        return;
+function onLeft() {
+    $("[id$=Name]").not(":contains('NONE')").each(function(index,value) {
+        $(value).text('NONE');
+    });
+    $("#joinBtn").text("Join").off('click').click(function(){
+        if (validateForm()) {
+            $(this).prop('disabled', true);
+            muteConnectInputs();
+            start();
+        }
+    }).prop('disabled', false);
+    $('#sendMessageBtn').prop('disabled', true);
+    $("#localStopBtn").prop('disabled', true);
+    $("#localAudioToggle").prop("disabled", true);
+    $("#localVideoToggle").prop("disabled", true);
+    unmuteConnectInputs();
+}
+
+function start() {
+    var url = $('#url').val();
+    var username = $('#login').val();
+    if (connection && connection.status() == SESSION_STATUS.ESTABLISHED) {
+        //check url and username
+        if (connection.getServerUrl() != url || connection.username() != username) {
+            connection.on(SESSION_STATUS.DISCONNECTED, function(){});
+            connection.on(SESSION_STATUS.FAILED, function(){});
+            connection.disconnect();
+        } else {
+            joinRoom();
+            return;
+        }
     }
-    var url = field('url');
-    username = field('login');
-    $('#failedInfo').text("");
-    currentApi = Flashphoner.roomApi.connect({urlServer: url, username: username}).on(SESSION_STATUS.FAILED, function(session){
-        console.warn("Session failed, id " + session.id());
-        setJoinionStatus(session.status());
+    connection = Flashphoner.roomApi.connect({urlServer: url, username: username}).on(SESSION_STATUS.FAILED, function(session){
+        setStatus('#status', session.status());
+        onLeft();
     }).on(SESSION_STATUS.DISCONNECTED, function(session) {
-        console.log("Session diconnected, id " + session.id());
-        setJoinionStatus(session.status());
+        setStatus('#status', session.status());
+        onLeft();
     }).on(SESSION_STATUS.ESTABLISHED, function(session) {
-        console.log("Session established, id" + session.id());
-        setJoinionStatus(session.status());
-        //join room
+        setStatus('#status', session.status());
         joinRoom();
     });
 }
 
 function joinRoom() {
-    $("#failedInfo").text("");
-    currentApi.join({name: getRoomName()}).on(ROOM_EVENT.STATE, function(room){
-        // Unmute buttons
-        $("#joinBtn").text("Leave");
-        unmuteButtons();
-        // Save room to global
-        currentRoom = room;
-        console.log("Current number of participants at the room: " + room.getParticipants().length);
-        if (room.getParticipants().length >= _participants) {
+    connection.join({name: getRoomName()}).on(ROOM_EVENT.STATE, function(room){
+        var participants = room.getParticipants();
+        console.log("Current number of participants in the room: " + participants.length);
+        if (participants.length >= _participants) {
             console.warn("Current room is full");
             $("#failedInfo").text("Current room is full.");
-            $("#joinBtn").text("Join");
-            room.leave();
+            room.leave().then(onLeft, onLeft);
             return false;
         }
         setInviteAddress(room.name());
-        var participants = room.getParticipants();
         if (participants.length > 0) {
             var chatState = "participants: ";
             for (var i = 0; i < participants.length; i++) {
@@ -125,7 +102,8 @@ function joinRoom() {
         } else {
             addMessage("chat", " room is empty");
         }
-        publishLocalMedia();
+        publishLocalMedia(room);
+        onJoined(room);
     }).on(ROOM_EVENT.JOINED, function(participant){
         installParticipant(participant);
         addMessage(participant.name(), "joined");
@@ -136,7 +114,7 @@ function joinRoom() {
     }).on(ROOM_EVENT.PUBLISHED, function(participant){
         playParticipantsStream(participant);
     }).on(ROOM_EVENT.FAILED, function(room, info){
-        currentApi.disconnect();
+        connection.disconnect();
         $('#failedInfo').text(info);
     }).on(ROOM_EVENT.MESSAGE, function(message){
         addMessage(message.from.name(), message.text);
@@ -160,66 +138,32 @@ function installParticipant(participant) {
         var pName = '#' + p + 'Name';
         var pDisplay = p + 'Display';
         $(pName).text(participant.name());
-        if (participant.play) {
-            // Save participant stream
-            var stream = participant.play(document.getElementById(pDisplay));
-            stream.on(STREAM_STATUS.PLAYING, function(playingStream){
-                document.getElementById(playingStream.id()).addEventListener('resize', function(event){
-                    resizeVideo(event.target);
-                });
-            });
-            participantStreams[participant.name()] = stream;
-        }
+        playParticipantsStream(participant);
     }
 }
 
 function removeParticipant(participant) {
     $("[id$=Name]").each(function(index,value) {
        if ($(value).text() == participant.name()) {
-           delete participantStreams[participant.name()];
            $(value).text('NONE');
        }
     });
 }
 
 function playParticipantsStream(participant) {
-    $("[id$=Name]").each(function(index,value) {
-        if ($(value).text() == participant.name()) {
-            var p = value.id.replace('Name','');
-            var pDisplay = p + 'Display';
-            // Save participant stream
-            var stream = participant.play(document.getElementById(pDisplay));
-            stream.on(STREAM_STATUS.PLAYING, function(playingStream){
-                document.getElementById(playingStream.id()).addEventListener('resize', function(event){
-                    resizeVideo(event.target);
+    if (participant.play) {
+        $("[id$=Name]").each(function (index, value) {
+            if ($(value).text() == participant.name()) {
+                var p = value.id.replace('Name', '');
+                var pDisplay = p + 'Display';
+                participant.play(document.getElementById(pDisplay)).on(STREAM_STATUS.PLAYING, function (playingStream) {
+                    document.getElementById(playingStream.id()).addEventListener('resize', function (event) {
+                        resizeVideo(event.target);
+                    });
                 });
-            });
-            participantStreams[participant.name()] = stream;
-        }
-    });
-}
-
-function leaveRoom() {
-    currentRoom.leave();
-    $("#joinBtn").text("Join");
-    // Stop local stream
-    if (localStream) {
-        localStream.stop();
-        localStream = null;
-        Flashphoner.releaseLocalMedia(document.getElementById("localDisplay"));
-    } else {
-        $("#joinBtn").prop('disabled',false);
+            }
+        });
     }
-    // Stop participant streams
-    for (var key in participantStreams) {
-        if (participantStreams.hasOwnProperty(key)){
-            participantStreams[key].stop();
-        }
-    }
-    $("[id$=Name]").not(":contains('NONE')").each(function(index,value) {
-        $(value).text('NONE');
-    });
-    muteButtons();
 }
 
 function getRoomName() {
@@ -230,92 +174,99 @@ function getRoomName() {
     return "room-"+createUUID(6);
 }
 
-/////////////////////////////////////
-///////////// Display UI ////////////
-/////////////////////////////////////
-
-// Set Joinion Status
-function setJoinionStatus(status) {
-    switch (status) {
-        case SESSION_STATUS.ESTABLISHED:
-            $("#login").prop('disabled',true);
-            $("#url").prop('disabled',true);
-            $('#status').text(status).removeClass().attr("class", "text-success");
-            break;
-        case SESSION_STATUS.FAILED:
-        case SESSION_STATUS.DISCONNECTED:
-            $("[id$=Name]").each(function(index,value) {
-                $(value).text('NONE');
-            });
-            $('#status').text(status).removeClass().attr("class", "text-danger");
-            $('#sendMessageBtn').prop('disabled',true).off();
-            $("#localStopBtn").prop('disabled',true).off();
-            $("#joinBtn").text("Join").prop('disabled',false);
-            $("#login").prop('disabled',false);
-            $("#url").prop('disabled',false);
-            break;
-    }
-}
-
-function setStreamStatus(status) {
-    switch (status) {
-        case STREAM_STATUS.UNPUBLISHED:
-            $("#localStopBtn").text("Publish").prop('disabled',false);
-            $('#localStatus').text(status).removeClass().attr("class", "text-success");
-            $("#localAudioToggle").prop('disabled', true);
-            $("#localVideoToggle").prop('disabled', true);
-            break;
-        case STREAM_STATUS.PUBLISHING:
-            $("#localStopBtn").text("Stop").prop('disabled',false);
-            $('#localStatus').text(status).removeClass().attr("class", "text-success");
-            $("#localAudioToggle").text("Mute A").prop('disabled', false);
-            $("#localVideoToggle").text("Mute V").prop('disabled', false);
-            break;
-        case STREAM_STATUS.FAILED:
-            $("#localStopBtn").text("Publish").prop('disabled',false);
-            $('#localStatus').text(status).removeClass().attr("class", "text-danger");
-            $("#localAudioToggle").prop('disabled', true);
-            $("#localVideoToggle").prop('disabled', true);
-            break;
-    }
-    $("#joinBtn").prop('disabled',false);
-}
-
 function setInviteAddress(name) {
     $('#inviteAddress').text(window.location.href.split("?")[0] + "?roomName="+name);
 }
 
-// Helpers
+function onMediaPublished(stream) {
+    $("#localStopBtn").text("Stop").off('click').click(function(){
+        $(this).prop('disabled', true);
+        stream.stop();
+    }).prop('disabled', false);
+    $("#localAudioToggle").text("Mute A").off('click').click(function(){
+        if (stream.isAudioMuted()) {
+            $(this).text("Mute A");
+            stream.unmuteAudio();
+        } else {
+            $(this).text("Unmute A");
+            stream.muteAudio();
+        }
+    }).prop('disabled', false);
+    $("#localVideoToggle").text("Mute V").off('click').click(function() {
+        if (stream.isVideoMuted()) {
+            $(this).text("Mute V");
+            stream.unmuteVideo();
+        } else {
+            $(this).text("Unmute V");
+            stream.muteVideo();
+        }
+    }).prop('disabled',false);
+}
 
-function unpublishLocalMedia() {
-    if (localStream) {
-        localStream.stop();
-        localStream = null;
-    }
-
+function onMediaStopped(room) {
+    $("#localStopBtn").text("Publish").off('click').click(function(){
+        $(this).prop('disabled', true);
+        publishLocalMedia(room);
+    }).prop('disabled', (connection.getRooms().length == 0));
+    $("#localAudioToggle").prop("disabled", true);
+    $("#localVideoToggle").prop("disabled", true);
 }
 
 //publish local video
-function publishLocalMedia() {
-    currentRoom.publish(document.getElementById("localDisplay")).on(STREAM_STATUS.FAILED, function (stream) {
+function publishLocalMedia(room) {
+    room.publish(document.getElementById("localDisplay")).on(STREAM_STATUS.FAILED, function (stream) {
         console.warn("Local stream failed!");
-        setStreamStatus(stream.status());
-        unpublishLocalMedia();
+        setStatus("#localStatus", stream.status());
+        onMediaStopped(room);
     }).on(STREAM_STATUS.PUBLISHING, function (stream) {
-        localStream = stream;
-        setStreamStatus(stream.status());
+        setStatus("#localStatus", stream.status());
+        onMediaPublished(stream);
     }).on(STREAM_STATUS.UNPUBLISHED, function(stream) {
-        setStreamStatus(stream.status());
-        unpublishLocalMedia();
+        setStatus("#localStatus", stream.status());
+        onMediaStopped(room);
     });
 }
 
-function unmuteButtons() {
-    $('#sendMessageBtn').prop('disabled',false);
-    $("#localStopBtn").prop('disabled',false);
+function muteConnectInputs() {
+    $(':text').each(function(){
+        $(this).prop('disabled', true);
+    });
 }
 
-function muteButtons() {
-    $('#sendMessageBtn').prop('disabled',true);
-    $("#localStopBtn").prop('disabled',true);
+function unmuteConnectInputs() {
+    $(':text').each(function(){
+        $(this).prop('disabled', false);
+    });
+}
+
+function validateForm() {
+    var valid = true;
+    $(':text').each(function(){
+        if (!$(this).val()) {
+            highlightInput($(this));
+            valid = false;
+        } else {
+            removeHighlight($(this));
+        }
+    });
+    return valid;
+
+    function highlightInput(input) {
+        input.closest('.form-group').addClass("has-error");
+    }
+    function removeHighlight(input) {
+        input.closest('.form-group').removeClass("has-error");
+    }
+}
+
+function setStatus(selector, status) {
+    var statusField = $(selector);
+    statusField.text(status).removeClass();
+    if (status == "PUBLISHING" || status == "ESTABLISHED") {
+        statusField.attr("class","text-success");
+    } else if (status == "DISCONNECTED" || status == "UNPUBLISHED") {
+        statusField.attr("class","text-muted");
+    } else if (status == "FAILED") {
+        statusField.attr("class","text-danger");
+    }
 }

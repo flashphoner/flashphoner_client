@@ -1,5 +1,6 @@
 'use strict';
 var SESSION_STATUS = require('./constants').SESSION_STATUS;
+var STREAM_STATUS = require('./constants').STREAM_STATUS;
 var Promise = require('promise-polyfill');
 var util = require('./util');
 var ROOM_REST_APP = "roomApp";
@@ -28,7 +29,7 @@ var appSession = function(options) {
      */
     var callbacks = {};
     var rooms = {};
-    var username = options.username;
+    var username_ = options.username;
     var exports;
     var roomHandlers = {};
     var session = Flashphoner.createSession({
@@ -86,6 +87,28 @@ var appSession = function(options) {
      */
     var id = function() {
         return session.id();
+    };
+
+    /**
+     * Get server address
+     *
+     * @returns {string} Server url
+     * @memberof roomApi.Session
+     * @inner
+     */
+    var getServerUrl = function() {
+        return session.getServerUrl();
+    };
+
+    /**
+     * Get session username
+     *
+     * @returns {string} username
+     * @memberof roomApi.Session
+     * @inner
+     */
+    var username = function() {
+        return username_;
     };
 
     /**
@@ -251,13 +274,34 @@ var appSession = function(options) {
         /**
          * Leave room
          *
+         * @returns {Promise<room>}
          * @memberof roomApi.Room
          * @inner
          */
         var leave = function() {
-            sendAppCommand("leave", {name: name_}).then(function(){});
-            delete roomHandlers[name_];
-            delete rooms[name_];
+            return new Promise(function(resolve, reject){
+                sendAppCommand("leave", {name: name_}).then(function(){
+                    cleanUp();
+                    resolve(room);
+                }, function(){
+                    cleanUp();
+                    reject(room);
+                });
+
+                function cleanUp() {
+                    //clear streams
+                    var streams = session.getStreams();
+                    for (var i = 0; i < streams.length; i++) {
+                        if (streams[i].name() == name_ + "-" + username_ && streams[i].status() != STREAM_STATUS.UNPUBLISHED) {
+                            streams[i].stop();
+                        } else if (streams[i].name().indexOf(name_) !== -1 && streams[i].status() != STREAM_STATUS.STOPPED) {
+                            streams[i].stop();
+                        }
+                    }
+                    delete roomHandlers[name_];
+                    delete rooms[name_];
+                }
+            });
         };
 
         /**
@@ -269,7 +313,7 @@ var appSession = function(options) {
          * @inner
          */
         var publish = function(display) {
-            var stream = session.createStream({name: (name_ + "-" + username), display: display, cacheLocalResources: true, custom: {name: name_}});
+            var stream = session.createStream({name: (name_ + "-" + username_), display: display, cacheLocalResources: true, custom: {name: name_}});
             stream.publish();
             return stream;
         };
@@ -360,6 +404,8 @@ var appSession = function(options) {
     exports =  {
         disconnect: disconnect,
         id: id,
+        getServerUrl: getServerUrl,
+        username: username,
         status: status,
         getRooms: getRooms,
         join: join,

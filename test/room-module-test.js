@@ -232,4 +232,24 @@ describe('Room api', function() {
             });
         });
     });
+    it("join, publish, leave", function(done){
+        this.timeout(20000);
+        roomApi.connect(
+            {
+                urlServer: "ws://192.168.88.234:8080",
+                username: "test"
+            }
+        ).on("ESTABLISHED", function(api){
+            //join room
+            api.join({name: "my_test_room"}).on("STATE", function(room){
+                var display = addDisplay();
+                room.publish(display).on("FAILED", function(){
+                    removeDisplay(display);
+                    api.disconnect();
+                    done();
+                });
+                room.leave();
+            });
+        });
+    });
 });

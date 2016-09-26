@@ -263,7 +263,7 @@ var createSession = function(options) {
         send("connection", {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.17",
+            clientVersion: "0.3.18",
             custom: options.custom
         });
     };
@@ -301,6 +301,14 @@ var createSession = function(options) {
             case 'OnDataEvent':
                 if (callbacks[SESSION_STATUS.APP_DATA]) {
                     callbacks[SESSION_STATUS.APP_DATA](obj);
+                }
+                break;
+            case 'fail':
+                if (obj.apiMethod && obj.apiMethod == "StreamStatusEvent") {
+                    if (streamRefreshHandlers[obj.id]) {
+                        //update stream status
+                        streamRefreshHandlers[obj.id](obj);
+                    }
                 }
                 break;
             default:
@@ -546,7 +554,7 @@ var createSession = function(options) {
                 streamRefreshHandlers[id_]({status: STREAM_STATUS.FAILED});
                 return;
             } else if (status_ == STREAM_STATUS.PENDING) {
-                console.warn("Stopping stream before server response");
+                console.warn("Stopping stream before server response " + id_);
                 setTimeout(stop, 200);
                 return;
             } else if (status_ == STREAM_STATUS.FAILED) {
