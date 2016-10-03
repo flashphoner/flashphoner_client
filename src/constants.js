@@ -54,6 +54,23 @@ define(sessionStatus, 'SEND_DATA_STATUS', 'SEND_DATA_STATUS');
 //State of newly created Session
 define(sessionStatus, 'PENDING', 'PENDING');
 
+/**
+ * Fires when {@link Session} registers as sip client.
+ *
+ * @event APP_DATA
+ * @memberof Flashphoner.constants.SESSION_STATUS
+ */
+define(sessionStatus, 'REGISTERED', 'REGISTERED');
+
+/**
+ * Fires when {@link Session} unregisters as sip client.
+ *
+ * @event APP_DATA
+ * @memberof Flashphoner.constants.SESSION_STATUS
+ */
+define(sessionStatus, 'UNREGISTERED', 'UNREGISTERED');
+
+define(sessionStatus, 'INCOMING_CALL', 'INCOMING_CALL');
 
 /**
  * @namespace Flashphoner.constants.STREAM_STATUS
@@ -114,9 +131,28 @@ define(streamStatus, 'FAILED', 'FAILED');
  */
 define(streamStatus, 'RESIZE', 'RESIZE');
 
+/**
+ * @namespace Flashphoner.constants.CALL_STATUS
+ * @see Call
+ */
+var callStatus = {};
+//State of newly created Call
+define(callStatus, 'NEW', 'NEW');
+define(callStatus, 'RING', 'RING');
+define(callStatus, 'RING_MEDIA', 'RING_MEDIA');
+define(callStatus, 'HOLD', 'HOLD');
+define(callStatus, 'ESTABLISHED', 'ESTABLISHED');
+define(callStatus, 'FINISH', 'FINISH');
+define(callStatus, 'BUSY', 'BUSY');
+define(callStatus, 'SESSION_PROGRESS', 'SESSION_PROGRESS');
+define(callStatus, 'FAILED', 'FAILED');
+define(callStatus, 'PENDING', 'PENDING');
+define(callStatus, 'TRYING', 'TRYING');
+
 var constants = {};
 define(constants, 'SESSION_STATUS', sessionStatus);
 define(constants, 'STREAM_STATUS', streamStatus);
+define(constants, 'CALL_STATUS', callStatus);
 
 //define helper
 function define(obj, name, value) {

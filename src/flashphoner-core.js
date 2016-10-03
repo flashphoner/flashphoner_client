@@ -11,6 +11,7 @@ var Promise = require('promise-polyfill');
 
 var SESSION_STATUS = constants.SESSION_STATUS;
 var STREAM_STATUS = constants.STREAM_STATUS;
+var CALL_STATUS = constants.CALL_STATUS;
 var MediaProvider = {};
 var sessions = {};
 var initialized = false;
@@ -212,6 +213,7 @@ var getSession = function(id) {
  * @param {string} options.urlServer Server address in form of [ws,wss]://host.domain:port
  * @param {string=} options.appKey REST App key
  * @param {Object=} options.custom User provided custom object that will be available in REST App code
+ * @param {Object=} options.sipOptions Sip configuration
  * @returns {Session} Created session
  * @throws {Error} Error if API is not initialized
  * @throws {TypeError} Error if options.urlServer is not specified
@@ -230,12 +232,26 @@ var createSession = function(options) {
     var sessionStatus = SESSION_STATUS.PENDING;
     var urlServer = options.urlServer;
     var appKey = options.appKey || "defaultApp";
+    //SIP config
+    var sipConfig;
+    if (options.sipOptions) {
+        sipConfig = {
+            sipLogin: options.sipOptions.login,
+            sipPassword: options.sipOptions.password,
+            sipDomain: options.sipOptions.domain,
+            sipProxy: options.sipOptions.proxy,
+            sipPort: options.sipOptions.port
+        }
+    }
     //media provider auth token received from server
     var authToken;
     //object for storing new and active streams
     var streams = {};
+    var calls = {};
     //session to stream callbacks
     var streamRefreshHandlers = {};
+    //session to call callbacks
+    var callRefreshHandlers = {};
     /**
      * Represents connection to REST App.
      * Can create and store Streams.
@@ -259,14 +275,20 @@ var createSession = function(options) {
     };
     wsConnection.onopen = function() {
         onSessionStatusChange(SESSION_STATUS.CONNECTED);
-        //connect to REST App
-        send("connection", {
+        var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.18",
+            clientVersion: "0.4.0",
             custom: options.custom
-        });
+        };
+        if (sipConfig) {
+            util.copyObjectPropsToAnotherObject(sipConfig, cConfig);
+        }
+        //connect to REST App
+        send("connection", cConfig);
     };
+    //todo remove
+    var remoteSdpCache = {};
     wsConnection.onmessage = function(event) {
         var data = JSON.parse(event.data);
         var obj = data.data[0];
@@ -284,8 +306,12 @@ var createSession = function(options) {
                 if (streamRefreshHandlers[mediaSessionId]) {
                     //pass server's sdp to stream
                     streamRefreshHandlers[mediaSessionId](null, sdp);
+                } else if (callRefreshHandlers[mediaSessionId]) {
+                    //pass server's sdp to call
+                    callRefreshHandlers[mediaSessionId](null, sdp);
                 } else {
-                    console.error("Stream not found, id " + mediaSessionId);
+                    remoteSdpCache[mediaSessionId] = sdp;
+                    console.warn("Media not found, id " + mediaSessionId);
                 }
                 break;
             case 'notifyVideoFormat':
@@ -311,8 +337,30 @@ var createSession = function(options) {
                     }
                 }
                 break;
+            case 'registered':
+                onSessionStatusChange(SESSION_STATUS.REGISTERED);
+                break;
+            case 'notifyTryingResponse':
+            case 'ring':
+            case 'talk':
+            case 'finish':
+                if (callRefreshHandlers[obj.callId]) {
+                    //update call status
+                    callRefreshHandlers[obj.callId](obj);
+                }
+                break;
+            case 'notifyIncomingCall':
+                if (callRefreshHandlers[obj.callId]) {
+                    console.error("Call already exists, id " + obj.callId);
+                }
+                if (callbacks[SESSION_STATUS.INCOMING_CALL]) {
+                    callbacks[SESSION_STATUS.INCOMING_CALL](createCall(obj));
+                } else {
+                    //todo hangup call
+                }
+                break;
             default:
-                //console.log("Unknown server message " + message);
+                //console.log("Unknown server message " + data.message);
         }
     };
 
@@ -341,6 +389,409 @@ var createSession = function(options) {
             callbacks[sessionStatus](session);
         }
     }
+
+    /**
+     * Create stream.
+     *
+     * @param {Object} options Call options
+     * @param {string} options.callee Call remote party id
+     * @param {Object} options.constraints Call constraints
+     * @param {string} options.mediaProvider MediaProvider type to use with this call
+     * @param {Boolean=} options.cacheLocalResources Display will contain local video after call release
+     * @param {HTMLElement} options.localVideoDisplay Div element local video should be displayed in
+     * @param {HTMLElement} options.remoteVideoDisplay Div element remote video should be displayed in
+     * @param {Object=} options.custom User provided custom object that will be available in REST App code
+     * @returns {Call} Call
+     * @throws {TypeError} Error if no options provided
+     * @throws {Error} Error if session state is not REGISTERED
+     * @memberof Session
+     * @inner
+     */
+    var createCall = function(options) {
+        //check session state
+        if (sessionStatus !== SESSION_STATUS.REGISTERED) {
+            console.log("Status is " + sessionStatus);
+            throw new Error('Invalid session state');
+        }
+
+        //check options
+        if (!options) {
+            throw new TypeError("options must be provided");
+        }
+        var callee = options.callee;
+
+        var id_ = options.callId || uuid.v1();
+        var mediaProvider = options.mediaProvider || getMediaProviders()[0];
+        var mediaConnection;
+        var localDisplay = options.localVideoDisplay;
+        var remoteDisplay = options.remoteVideoDisplay;
+        // Constraints
+        if (options.constraints) {
+            var constraints = checkConstraints(options.constraints);
+        }
+
+        var cacheLocalResources = options.cacheLocalResources;
+        var status_ = CALL_STATUS.NEW;
+        var callbacks = {};
+        /**
+         * Represents sip call.
+         *
+         * @namespace Call
+         * @see Session~createCall
+         */
+        var call = {};
+        callRefreshHandlers[id_] = function(callInfo, sdp) {
+            //set remote sdp
+            if (sdp && sdp !== '') {
+                mediaConnection.setRemoteSdp(sdp).then(function(){});
+                return;
+            }
+            var event = callInfo.status;
+            status_ = event;
+
+            //release call
+            if (event == CALL_STATUS.FAILED || event == CALL_STATUS.FINISH ||
+                event == CALL_STATUS.BUSY) {
+                delete calls[id_];
+                delete callRefreshHandlers[id_];
+                if (mediaConnection) {
+                    mediaConnection.close(cacheLocalResources);
+                }
+            }
+            //fire call event
+            if (callbacks[event]) {
+                callbacks[event](call);
+            }
+        };
+
+        /**
+         * Initiate outgoing call.
+         *
+         * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.NEW}
+         * @memberof Call
+         * @name call
+         * @inner
+         */
+        var call_ = function() {
+            if (status_ !== CALL_STATUS.NEW) {
+                throw new Error("Invalid call state");
+            }
+            status_ = CALL_STATUS.PENDING;
+            var hasAudio = true;
+            //get access to camera
+            MediaProvider[mediaProvider].getMediaAccess(constraints, localDisplay).then(function(){
+                if (status_ == CALL_STATUS.FAILED) {
+                    //call failed while we were waiting for media access, release media
+                    if (!cacheLocalResources) {
+                        releaseLocalMedia(localDisplay, mediaProvider);
+                    }
+                    return;
+                }
+                //create mediaProvider connection
+                MediaProvider[mediaProvider].createConnection({
+                    id: id_,
+                    localDisplay: localDisplay,
+                    remoteDisplay: remoteDisplay,
+                    authToken: authToken,
+                    mainUrl: urlServer,
+                    bidirectional: true
+                }).then(function(newConnection) {
+                    mediaConnection = newConnection;
+                    return mediaConnection.createOffer({
+                        sendAudio: true,
+                        sendVideo: true
+                    });
+                }).then(function (sdp) {
+                    send("call", {
+                        callId: id_,
+                        incoming: false,
+                        hasVideo: true,
+                        hasAudio: hasAudio,
+                        status: status_,
+                        mediaProvider: mediaProvider,
+                        sdp: sdp,
+                        caller: sipConfig.login,
+                        callee: callee,
+                        custom: options.custom
+                    });
+                });
+            }).catch(function(error){
+                console.error(error);
+                status_ = CALL_STATUS.FAILED;
+                //fire call event
+                if (callbacks[status_]) {
+                    callbacks[status_](call);
+                }
+            });
+        };
+
+        /**
+         * Hangup call.
+         *
+         * @memberof Call
+         * @inner
+         */
+        var hangup = function() {
+            if (status_ == CALL_STATUS.NEW) {
+                //trigger FAILED status
+                callRefreshHandlers[id_]({status: CALL_STATUS.FAILED});
+                return;
+            }
+            send("hangup", {
+                callId: id_
+            });
+            //free media provider
+            if (mediaConnection) {
+                mediaConnection.close(cacheLocalResources);
+            }
+        };
+
+        /**
+         * Answer incoming call.
+         *
+         * @param {HTMLElement} localVideoDisplay Div element local video should be displayed in
+         * @param {HTMLElement} remoteVideoDisplay Div element remote video should be displayed in
+         * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.NEW}
+         * @memberof Call
+         * @name call
+         * @inner
+         */
+        var answer = function(localVideoDisplay, remoteVideoDisplay) {
+            if (status_ !== CALL_STATUS.NEW) {
+                throw new Error("Invalid call state");
+            }
+            localDisplay = localVideoDisplay;
+            remoteDisplay = remoteVideoDisplay;
+            status_ = CALL_STATUS.PENDING;
+            var sdp;
+            if (!remoteSdpCache[id_]) {
+                console.error("No remote sdp available");
+                throw new Error("No remote sdp available");
+            } else {
+                sdp = remoteSdpCache[id_];
+                delete remoteSdpCache[id_];
+            }
+            var hasAudio = true;
+            //get access to camera
+            MediaProvider[mediaProvider].getMediaAccess(constraints, localDisplay).then(function(){
+                if (status_ == CALL_STATUS.FAILED) {
+                    //call failed while we were waiting for media access, release media
+                    if (!cacheLocalResources) {
+                        releaseLocalMedia(localDisplay, mediaProvider);
+                    }
+                    return;
+                }
+                //create mediaProvider connection
+                MediaProvider[mediaProvider].createConnection({
+                    id: id_,
+                    localDisplay: localDisplay,
+                    remoteDisplay: remoteDisplay,
+                    authToken: authToken,
+                    mainUrl: urlServer,
+                    bidirectional: true
+                }).then(function(newConnection) {
+                    mediaConnection = newConnection;
+                    return mediaConnection.setRemoteSdp(sdp);
+                }).then(function(){
+                    return mediaConnection.createAnswer();
+                }).then(function(sdp) {
+                    send("answer", {
+                        callId: id_,
+                        incoming: true,
+                        hasVideo: true,
+                        hasAudio: hasAudio,
+                        status: status_,
+                        mediaProvider: mediaProvider,
+                        sdp: sdp,
+                        caller: sipConfig.login,
+                        callee: callee,
+                        custom: options.custom
+                    });
+                });
+            }).catch(function(error){
+                console.error(error);
+                status_ = CALL_STATUS.FAILED;
+                //fire stream event
+                if (callbacks[status_]) {
+                    callbacks[status_](call);
+                }
+            });
+        };
+
+        /**
+         * Get call status.
+         *
+         * @returns {string} One of {@link Flashphoner.constants.CALL_STATUS}
+         * @memberof Call
+         * @inner
+         */
+        var status = function() {
+            return status_;
+        };
+
+        /**
+         * Get call id.
+         *
+         * @returns {string} Call id
+         * @memberof Call
+         * @inner
+         */
+        var id = function() {
+            return id_;
+        };
+
+        /**
+         * Media controls
+         */
+
+        /**
+         * Set volume of remote media
+         *
+         * @param {number} volume Volume between 0 and 100
+         * @memberof Call
+         * @inner
+         */
+        var setVolume = function(volume) {
+            if (mediaConnection) {
+                mediaConnection.setVolume(volume);
+            }
+        };
+
+        /**
+         * Get current volume
+         *
+         * @returns {number} Volume or -1 if audio is not available
+         * @memberof Call
+         * @inner
+         */
+        var getVolume = function() {
+            if (mediaConnection) {
+                return mediaConnection.getVolume();
+            }
+            return -1;
+        };
+
+        /**
+         * Mute outgoing audio
+         *
+         * @memberof Call
+         * @inner
+         */
+        var muteAudio = function() {
+            if (mediaConnection) {
+                mediaConnection.muteAudio();
+            }
+        };
+
+        /**
+         * Unmute outgoing audio
+         *
+         * @memberof Call
+         * @inner
+         */
+        var unmuteAudio = function() {
+            if (mediaConnection) {
+                mediaConnection.unmuteAudio();
+            }
+        };
+
+        /**
+         * Check outgoing audio mute state
+         *
+         * @returns {boolean} True if audio is muted or not available
+         * @memberof Call
+         * @inner
+         */
+        var isAudioMuted = function() {
+            if (mediaConnection) {
+                return mediaConnection.isAudioMuted();
+            }
+            return true;
+        };
+
+        /**
+         * Mute outgoing video
+         *
+         * @memberof Call
+         * @inner
+         */
+        var muteVideo = function() {
+            if (mediaConnection) {
+                mediaConnection.muteVideo();
+            }
+        };
+
+        /**
+         * Unmute outgoing video
+         *
+         * @memberof Call
+         * @inner
+         */
+        var unmuteVideo = function() {
+            if (mediaConnection) {
+                mediaConnection.unmuteVideo();
+            }
+        };
+
+        /**
+         * Check outgoing video mute state
+         *
+         * @returns {boolean} True if video is muted or not available
+         * @memberof Call
+         * @inner
+         */
+        var isVideoMuted = function() {
+            if (mediaConnection) {
+                return mediaConnection.isVideoMuted();
+            }
+            return true;
+        };
+
+        /**
+         * Call event callback.
+         *
+         * @callback Call~eventCallback
+         * @param {Call} call Call that corresponds to the event
+         */
+
+        /**
+         * Add call event callback.
+         *
+         * @param {string} event One of {@link Flashphoner.constants.CALL_STATUS} events
+         * @param {Call~eventCallback} callback Callback function
+         * @returns {Call} Call callback was attached to
+         * @throws {TypeError} Error if event is not specified
+         * @throws {Error} Error if callback is not a valid function
+         * @memberof Call
+         * @inner
+         */
+        var on = function(event, callback) {
+            if (!event) {
+                throw new TypeError("Event can't be null");
+            }
+            if (!callback || typeof callback !== 'function') {
+                throw new Error("Callback needs to be a valid function");
+            }
+            callbacks[event] = callback;
+            return call;
+        };
+
+        call.call = call_;
+        call.answer = answer;
+        call.hangup = hangup;
+        call.id = id;
+        call.status = status;
+        call.setVolume = setVolume;
+        call.getVolume = getVolume;
+        call.muteAudio = muteAudio;
+        call.unmuteAudio = unmuteAudio;
+        call.isAudioMuted = isAudioMuted;
+        call.muteVideo = muteVideo;
+        call.unmuteVideo = unmuteVideo;
+        call.isVideoMuted = isVideoMuted;
+        call.on = on;
+        return call;
+    };
 
     /**
      * Create stream.
@@ -970,6 +1421,7 @@ var createSession = function(options) {
     session.status = status;
     session.getServerUrl = getServerUrl;
     session.createStream = createStream;
+    session.createCall = createCall;
     session.getStream = getStream;
     session.getStreams = getStreams;
     session.sendData = restAppCommunicator.sendData;

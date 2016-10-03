@@ -15,5 +15,16 @@ module.exports = {
             }
         }
         return ret;
+    },
+    /**
+     * Copy src properties to dst object.
+     * Will overwrite dst prop with src prop in case of dst prop exist.
+     */
+    copyObjectPropsToAnotherObject: function(src, dst) {
+        for (var prop in src) {
+            if(src.hasOwnProperty(prop)) {
+                dst[prop] = src[prop];
+            }
+        }
     }
 };
