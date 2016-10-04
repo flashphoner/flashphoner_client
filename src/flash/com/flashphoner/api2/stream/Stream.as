@@ -33,7 +33,7 @@ public class Stream
         }
 
         public function setup(localMediaControl:LocalMediaControl, remoteMediaControl:RemoteMediaControl,
-                              hasAudio:Boolean, hasVideo:Boolean):void {
+                              hasAudio:Boolean, hasVideo:Boolean, name:String):void {
             this.hasAudio = hasAudio;
             this.hasVideo = hasVideo;
             if (localMediaControl != null) {
@@ -44,12 +44,12 @@ public class Stream
                 settings.setProfileLevel(H264Profile.BASELINE, H264Level.LEVEL_3);
                 ncStream.videoStreamSettings = settings;
                 localMediaControl.attachStream(ncStream, hasAudio, hasVideo);
-                ncStream.publish(getPublishStreamName());
+                ncStream.publish(name);
             } else {
                 this.remoteControl = remoteMediaControl;
                 //subscribe
                 remoteMediaControl.attachStream(ncStream);
-                ncStream.play(getPlayStreamName());
+                ncStream.play(name);
             }
         }
 
@@ -76,14 +76,6 @@ public class Stream
 
         private function asyncErrorHandler(event: AsyncErrorEvent):void {
             Logger.info("NetStream async error: " + event);
-        }
-
-        private function getPublishStreamName():String {
-            return "OUT_" + application.getId();
-        }
-
-        private function getPlayStreamName():String {
-            return "IN_" + application.getId();
         }
 
 	}

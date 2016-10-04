@@ -109,13 +109,15 @@ package com.flashphoner.api2 {
                 this.connection.disconnect();
             }
             Main.config.id = id;
+            this.localDisplay.percentWidth = 100;
+            this.localDisplay.percentHeight = 100;
         }
 
-        public function connect(url:String, token:String):void {
+        public function connect(url:String, token:String, login:String):void {
             this.connection = new Connection(this);
             var obj:Object = {};
             obj.token = token;
-            this.connection.connect(url, obj);
+            this.connection.connect(url, obj, login);
         }
 
         public function disconnect():void {
@@ -127,6 +129,8 @@ package com.flashphoner.api2 {
                 this.connection.setupStreams(localMediaControl, remoteMediaControl, hasAudio, hasVideo);
                 this.remoteDisplayHolder.visible = true;
                 this.localDisplay.visible = true;
+                this.localDisplay.percentWidth = 20;
+                this.localDisplay.percentHeight = 20;
             } else if (outgoing) {
                 this.connection.setupStreams(localMediaControl, null, hasAudio, hasVideo);
                 this.remoteDisplayHolder.visible = false;

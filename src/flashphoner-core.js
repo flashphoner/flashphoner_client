@@ -278,7 +278,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.4.0",
+            clientVersion: "0.4.1",
             custom: options.custom
         };
         if (sipConfig) {
@@ -494,7 +494,8 @@ var createSession = function(options) {
                     remoteDisplay: remoteDisplay,
                     authToken: authToken,
                     mainUrl: urlServer,
-                    bidirectional: true
+                    bidirectional: true,
+                    login: sipConfig.sipLogin
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
@@ -588,12 +589,13 @@ var createSession = function(options) {
                     remoteDisplay: remoteDisplay,
                     authToken: authToken,
                     mainUrl: urlServer,
-                    bidirectional: true
+                    bidirectional: true,
+                    login: sipConfig.sipLogin
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.setRemoteSdp(sdp);
                 }).then(function(){
-                    return mediaConnection.createAnswer();
+                    return mediaConnection.createAnswer({});
                 }).then(function(sdp) {
                     send("answer", {
                         callId: id_,
