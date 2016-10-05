@@ -91,6 +91,7 @@ module.exports = function(grunt) {
                             'flashphoner.js',
                             'flashphoner-no-flash.js',
                             'flashphoner-no-webrtc.js',
+                            'flashphoner-no-wsplayer.js',
                             'media-provider.swf'
                         ],
                         dest: 'release/<%= pkg.name %>-<%= pkg.version %>'
@@ -115,6 +116,7 @@ module.exports = function(grunt) {
                 'flashphoner.js',
                 'flashphoner-no-flash.js',
                 'flashphoner-no-webrtc.js',
+                'flashphoner-no-wsplayer.js',
                 'media-provider.swf',
                 'doc/'
             ],
