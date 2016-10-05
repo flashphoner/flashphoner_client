@@ -5,7 +5,11 @@ var remoteVideo;
 function init_page() {
     //init api
     try {
-        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
+        Flashphoner.init({
+            flashMediaProviderSwfLocation: '../../../../media-provider.swf',
+            receiverLocation: '../../dependencies/websocket-player/WSReceiver2.js',
+            decoderLocation: '../../dependencies/websocket-player/video-worker2.js'
+        });
     } catch(e) {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;

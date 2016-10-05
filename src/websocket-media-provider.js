@@ -123,7 +123,7 @@ module.exports = {
     available: available,
     listDevices: listDevices,
     configure: function(configuration) {
-        receiverLocation = configuration.receiverLocation;
-        decoderLocation = configuration.decoderLocation;
+        receiverLocation = configuration.receiverLocation || receiverLocation;
+        decoderLocation = configuration.decoderLocation || decoderLocation;
     }
 };

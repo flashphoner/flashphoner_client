@@ -16,32 +16,46 @@ var createConnection = function(options) {
                 {"DtlsSrtpKeyAgreement": true}
             ]
         });
-        var remoteStream;
+        //unidirectional display
         var display = options.display;
-        var localStream = getCacheInstance(display);
-        var video;
-        if (localStream) {
-            connection.addStream(localStream.srcObject);
-            localStream.id = id;
+        //bidirectional local
+        var localDisplay = options.localDisplay;
+        //bidirectional remote
+        var remoteDisplay= options.remoteDisplay;
+        var bidirectional = options.bidirectional;
+        var localVideo;
+        var remoteVideo;
+        if (bidirectional) {
+            localVideo = getCacheInstance(localDisplay);
+            remoteVideo = document.createElement('video');
+            localVideo.id = id + "-local";
+            remoteVideo.id = id + "-remote";
+            remoteDisplay.appendChild(remoteVideo);
+            connection.addStream(localVideo.srcObject);
         } else {
-            video = document.createElement('video');
-            video.id = id;
-            display.appendChild(video);
+            localVideo = getCacheInstance(display);
+            if (localVideo) {
+                localVideo.id = id;
+                connection.addStream(localVideo.srcObject);
+            } else {
+                remoteVideo = document.createElement('video');
+                remoteVideo.id = id;
+                display.appendChild(remoteVideo);
+            }
         }
+
         connection.ontrack = function (event) {
-            remoteStream = event.streams[0];
-            if (video) {
-                video.srcObject = remoteStream;
-                var playPromise = video.play();
+            if (remoteVideo) {
+                remoteVideo.srcObject = event.streams[0];
+                var playPromise = remoteVideo.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(function(e) {console.warn(e)});
                 }
             }
         };
         connection.onremovestream = function (event) {
-            remoteStream = null;
-            if (video) {
-                video.pause();
+            if (remoteVideo) {
+                remoteVideo.pause();
             }
         };
         connection.onsignalingstatechange = function (event) {
@@ -52,18 +66,18 @@ var createConnection = function(options) {
             return connection.signalingState;
         };
         var close = function (cacheCamera) {
-            if (video) {
-                removeVideoElement(video);
-                video = null;
+            if (remoteVideo) {
+                removeVideoElement(remoteVideo);
+                remoteVideo = null;
             }
-            if (localStream && !getCacheInstance(display) && cacheCamera) {
-                localStream.id = localStream.id + CACHED_INSTANCE_POSTFIX;
+            if (localVideo && !getCacheInstance((localDisplay || display)) && cacheCamera) {
+                localVideo.id = localVideo.id + CACHED_INSTANCE_POSTFIX;
                 unmuteAudio();
                 unmuteVideo();
-                localStream = null;
-            } else if (localStream) {
-                removeVideoElement(localStream);
-                localStream = null;
+                localVideo = null;
+            } else if (localVideo) {
+                removeVideoElement(localVideo);
+                localVideo = null;
             }
             if (connection.signalingState !== "closed") {
                 connection.close();
@@ -74,11 +88,11 @@ var createConnection = function(options) {
             return new Promise(function (resolve, reject) {
                 var hasAudio = true;
                 var hasVideo = true;
-                if (localStream) {
-                    if (!localStream.srcObject.getAudioTracks()[0]) {
+                if (localVideo) {
+                    if (!localVideo.srcObject.getAudioTracks()[0]) {
                         hasAudio = false;
                     }
-                    if (!localStream.srcObject.getVideoTracks()[0]) {
+                    if (!localVideo.srcObject.getVideoTracks()[0]) {
                         hasVideo = false;
                     }
                 }
@@ -94,14 +108,29 @@ var createConnection = function(options) {
                 });
             });
         };
+        var createAnswer = function (options) {
+            return new Promise(function (resolve, reject) {
+                //create offer and set local sdp
+                connection.createAnswer().then(function (answer) {
+                    connection.setLocalDescription(answer).then(function () {
+                        resolve(answer.sdp);
+                    });
+                });
+            });
+        };
         var setRemoteSdp = function (sdp) {
             return new Promise(function (resolve, reject) {
-                //todo check signalling state
-                var sdpAnswer = new RTCSessionDescription({
-                    type: 'answer',
+                var sdpType;
+                if (connection.signalingState == 'have-local-offer') {
+                    sdpType = 'answer';
+                } else {
+                    sdpType = 'offer';
+                }
+                var rtcSdp = new RTCSessionDescription({
+                    type: sdpType,
                     sdp: sdp
                 });
-                connection.setRemoteDescription(sdpAnswer).then(function () {
+                connection.setRemoteDescription(rtcSdp).then(function () {
                     resolve();
                 }).catch(function (error) {
                     reject(error);
@@ -110,45 +139,45 @@ var createConnection = function(options) {
         };
 
         var getVolume = function() {
-            if (video && video.srcObject && video.srcObject.getAudioTracks().length > 0) {
-                return video.srcObject.getAudioTracks()[0].volume * 100;
+            if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
+                return remoteVideo.srcObject.getAudioTracks()[0].volume * 100;
             }
             return -1;
         };
         var setVolume = function(volume) {
-            if (video && video.srcObject && video.srcObject.getAudioTracks().length > 0) {
-                video.srcObject.getAudioTracks()[0].volume = volume/100;
+            if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
+                remoteVideo.srcObject.getAudioTracks()[0].volume = volume/100;
             }
         };
         var muteAudio = function() {
-            if (localStream && localStream.srcObject && localStream.srcObject.getAudioTracks().length > 0) {
-                localStream.srcObject.getAudioTracks()[0].enabled = false;
+            if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
+                localVideo.srcObject.getAudioTracks()[0].enabled = false;
             }
         };
         var unmuteAudio = function() {
-            if (localStream && localStream.srcObject && localStream.srcObject.getAudioTracks().length > 0) {
-                localStream.srcObject.getAudioTracks()[0].enabled = true;
+            if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
+                localVideo.srcObject.getAudioTracks()[0].enabled = true;
             }
         };
         var isAudioMuted = function() {
-            if (localStream && localStream.srcObject && localStream.srcObject.getAudioTracks().length > 0) {
-                return !localStream.srcObject.getAudioTracks()[0].enabled;
+            if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
+                return !localVideo.srcObject.getAudioTracks()[0].enabled;
             }
             return true;
         };
         var muteVideo = function() {
-            if (localStream && localStream.srcObject && localStream.srcObject.getVideoTracks().length > 0) {
-                localStream.srcObject.getVideoTracks()[0].enabled = false;
+            if (localVideo && localVideo.srcObject && localVideo.srcObject.getVideoTracks().length > 0) {
+                localVideo.srcObject.getVideoTracks()[0].enabled = false;
             }
         };
         var unmuteVideo = function() {
-            if (localStream && localStream.srcObject && localStream.srcObject.getVideoTracks().length > 0) {
-                localStream.srcObject.getVideoTracks()[0].enabled = true;
+            if (localVideo && localVideo.srcObject && localVideo.srcObject.getVideoTracks().length > 0) {
+                localVideo.srcObject.getVideoTracks()[0].enabled = true;
             }
         };
         var isVideoMuted = function() {
-            if (localStream && localStream.srcObject && localStream.srcObject.getVideoTracks().length > 0) {
-                return !localStream.srcObject.getVideoTracks()[0].enabled;
+            if (localVideo && localVideo.srcObject && localVideo.srcObject.getVideoTracks().length > 0) {
+                return !localVideo.srcObject.getVideoTracks()[0].enabled;
             }
             return true;
         };
@@ -156,6 +185,7 @@ var createConnection = function(options) {
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
+        exports.createAnswer = createAnswer;
         exports.setRemoteSdp = setRemoteSdp;
         exports.close = close;
         exports.setVolume = setVolume;

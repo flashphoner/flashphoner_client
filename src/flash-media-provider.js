@@ -28,7 +28,7 @@ var createConnection = function(options) {
     return new Promise(function(resolve, reject) {
         var id = options.id;
         var authToken = options.authToken;
-        var display = options.display;
+        var display = options.display || options.localDisplay;
 
         var url = getConnectionUrl(options.mainUrl);
 
@@ -53,7 +53,7 @@ var createConnection = function(options) {
                     reject(new Error("Flash connection returned status " + status));
                 }
             });
-            flash.connect(url, authToken);
+            flash.connect(url, authToken, options.login);
         } else {
             loadSwf(id, display).then(function (swf) {
                 installCallback(swf, 'connectionStatus', function (status) {
@@ -66,11 +66,40 @@ var createConnection = function(options) {
                     }
                 });
                 flash = swf;
-                flash.connect(url, authToken);
+                flash.connect(url, authToken, options.login);
             }).catch(reject);
         }
 
         var createOffer = function (options) {
+            return new Promise(function (resolve, reject) {
+                var receiveAudio = options.receiveAudio == undefined ? false : options.receiveAudio;
+                var receiveVideo = options.receiveVideo == undefined ? false : options.receiveVideo;
+                var sendAudio = options.sendAudio == undefined ? false : options.sendAudio;
+                var sendVideo = options.sendVideo == undefined ? false : options.sendVideo;
+                var sdp = DEFAULT_SDP;
+                if (receiveAudio && sendAudio) {
+                    sdp = sdp.replace("AUDIO_STATE", "sendrecv");
+                } else if (receiveAudio && !sendAudio) {
+                    sdp = sdp.replace("AUDIO_STATE", "recvonly");
+                } else if (!receiveAudio && sendAudio) {
+                    sdp = sdp.replace("AUDIO_STATE", "sendonly");
+                } else {
+                    sdp = sdp.replace("AUDIO_STATE", "inactive");
+                }
+                if (receiveVideo && sendVideo) {
+                    sdp = sdp.replace("VIDEO_STATE", "sendrecv");
+                } else if (receiveVideo && !sendVideo) {
+                    sdp = sdp.replace("VIDEO_STATE", "recvonly");
+                } else if (!receiveVideo && sendVideo) {
+                    sdp = sdp.replace("VIDEO_STATE", "sendonly");
+                } else {
+                    sdp = sdp.replace("VIDEO_STATE", "inactive");
+                }
+                resolve(sdp);
+            });
+        };
+
+        var createAnswer = function (options) {
             return new Promise(function (resolve, reject) {
                 var receiveAudio = options.receiveAudio == undefined ? false : options.receiveAudio;
                 var receiveVideo = options.receiveVideo == undefined ? false : options.receiveVideo;
@@ -167,6 +196,7 @@ var createConnection = function(options) {
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
+        exports.createAnswer = createAnswer;
         exports.setRemoteSdp = setRemoteSdp;
         exports.close = close;
         exports.setVolume = setVolume;

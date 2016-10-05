@@ -12,7 +12,7 @@ describe('Room api', function() {
         this.timeout(20000);
         roomApi.connect(
             {
-                urlServer: "ws://192.168.88.234:8080",
+                urlServer: sOptions.urlServer,
                 username: "test"
             }
         ).on("ESTABLISHED", function(api){
@@ -26,7 +26,7 @@ describe('Room api', function() {
                 //create second connection
                 roomApi.connect(
                     {
-                        urlServer: "ws://192.168.88.234:8080",
+                        urlServer: sOptions.urlServer,
                         username: "test2"
                     }
                 ).on("ESTABLISHED", function(api){
@@ -45,7 +45,7 @@ describe('Room api', function() {
         this.timeout(20000);
         roomApi.connect(
             {
-                urlServer: "ws://192.168.88.234:8080",
+                urlServer: sOptions.urlServer,
                 username: "test"
             }
         ).on("ESTABLISHED", function(api){
@@ -69,7 +69,7 @@ describe('Room api', function() {
         this.timeout(20000);
         roomApi.connect(
             {
-                urlServer: "ws://192.168.88.234:8080",
+                urlServer: sOptions.urlServer,
                 username: "test"
             }
         ).on("ESTABLISHED", function(api){
@@ -80,7 +80,7 @@ describe('Room api', function() {
                     //create second connection and subscribe
                     roomApi.connect(
                         {
-                            urlServer: "ws://192.168.88.234:8080",
+                            urlServer: sOptions.urlServer,
                             username: "test2"
                         }
                     ).on("ESTABLISHED", function(api){
@@ -112,7 +112,7 @@ describe('Room api', function() {
         this.timeout(20000);
         roomApi.connect(
             {
-                urlServer: "ws://192.168.88.234:8080",
+                urlServer: sOptions.urlServer,
                 username: "test"
             }
         ).on("ESTABLISHED", function(api){
@@ -122,7 +122,7 @@ describe('Room api', function() {
                 //create second connection and publish
                 roomApi.connect(
                     {
-                        urlServer: "ws://192.168.88.234:8080",
+                        urlServer: sOptions.urlServer,
                         username: "test2"
                     }
                 ).on("ESTABLISHED", function(api){
@@ -155,7 +155,7 @@ describe('Room api', function() {
         var MESSAGE_TEXT = "MY MESSAGE TEXT";
         roomApi.connect(
             {
-                urlServer: "ws://192.168.88.234:8080",
+                urlServer: sOptions.urlServer,
                 username: "test"
             }
         ).on("ESTABLISHED", function(api){
@@ -164,7 +164,7 @@ describe('Room api', function() {
                 //create second connection
                 roomApi.connect(
                     {
-                        urlServer: "ws://192.168.88.234:8080",
+                        urlServer: sOptions.urlServer,
                         username: "test2"
                     }
                 ).on("ESTABLISHED", function(api){
@@ -188,7 +188,7 @@ describe('Room api', function() {
         this.timeout(20000);
         roomApi.connect(
             {
-                urlServer: "ws://192.168.88.234:8080",
+                urlServer: sOptions.urlServer,
                 username: "throw_join_exception"
             }
         ).on("ESTABLISHED", function(api){
@@ -206,7 +206,7 @@ describe('Room api', function() {
         this.timeout(20000);
         roomApi.connect(
             {
-                urlServer: "ws://192.168.88.234:8080",
+                urlServer: sOptions.urlServer,
                 username: "test"
             }
         ).on("ESTABLISHED", function(api){
@@ -214,7 +214,7 @@ describe('Room api', function() {
             api.join({name: "my_test_room"}).on("STATE", function(room){
                 roomApi.connect(
                     {
-                        urlServer: "ws://192.168.88.234:8080",
+                        urlServer: sOptions.urlServer,
                         username: "throw_message_exception"
                     }
                 ).on("ESTABLISHED", function(api){
@@ -236,7 +236,7 @@ describe('Room api', function() {
         this.timeout(20000);
         roomApi.connect(
             {
-                urlServer: "ws://192.168.88.234:8080",
+                urlServer: sOptions.urlServer,
                 username: "test"
             }
         ).on("ESTABLISHED", function(api){

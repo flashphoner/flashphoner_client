@@ -28,6 +28,8 @@ package com.flashphoner.api2.connection {
 		private var application:Main;
 		
 		private var isConnected:Boolean;
+
+		private var login:String;
 		
 		private var incomingStream:Stream;
 		private var outgoingStream:Stream;
@@ -42,14 +44,16 @@ package com.flashphoner.api2.connection {
 			
 		}
 		
-		public function connect(WCSUrl:String, obj:Object):void {
+		public function connect(WCSUrl:String, obj:Object, login:String):void {
 			Logger.info("Connect to " + WCSUrl);
+			this.login = login;
 			nc.addEventListener(NetStatusEvent.NET_STATUS,netStatusHandler);
 			nc.connect(WCSUrl,obj);
 		}
 		
 		public function disconnect():void {
 			Logger.info("disconnect");
+			this.login = null;
 			hasDisconnectAttempt = true;
 			//tear down streams
 			if (incomingStream != null) {
@@ -95,16 +99,30 @@ package com.flashphoner.api2.connection {
 									hasAudio:Boolean, hasVideo:Boolean):void {
 			if (remoteMediaControl) {
 				incomingStream = new Stream(application, nc);
-				incomingStream.setup(null, remoteMediaControl, hasAudio, hasVideo);
+				incomingStream.setup(null, remoteMediaControl, hasAudio, hasVideo, getPlayStreamName());
 			}
 			if (localMediaControl) {
 				outgoingStream = new Stream(application, nc);
-				outgoingStream.setup(localMediaControl, null, hasAudio, hasVideo);
+				outgoingStream.setup(localMediaControl, null, hasAudio, hasVideo, getPublishStreamName());
 			}
 		}
 		
 		public function pong():void{
 			nc.call("pong", null);		
+		}
+
+		public function getPublishStreamName():String {
+			if (this.login != null) {
+				return "OUT_" + login + "_" + application.getId();
+			}
+			return "OUT_" + application.getId();
+		}
+
+		public function getPlayStreamName():String {
+			if (this.login != null) {
+				return "IN_" + login + "_" + application.getId();
+			}
+			return "IN_" + application.getId();
 		}
 		
 	}
