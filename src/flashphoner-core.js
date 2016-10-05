@@ -4,6 +4,7 @@ var uuid = require('node-uuid');
 var constants = require("./constants");
 var util = require('./util');
 var Promise = require('promise-polyfill');
+var browser = require('webrtc-adapter').browserDetails;
 
 /**
  * @namespace Flashphoner
@@ -20,6 +21,8 @@ var initialized = false;
  *
  * @param {Object} options Global api options
  * @param {String=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
+ * @param {String=} options.receiverLocation Location of WSReceiver.js file
+ * @param {String=} options.decoderLocation Location of WSReceiver.js file
  * @param {String=} options.screenSharingExtensionId Chrome screen sharing extension id
  * @param {Object=} options.constraints Default local media constraints
  * @throws {Error} Error if none of MediaProviders available
@@ -32,7 +35,7 @@ var init = function(options) {
         }
         var webRtcProvider = require("./webrtc-media-provider");
         if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
-            MediaProvider.WebRTC = webRtcProvider;
+            //MediaProvider.WebRTC = webRtcProvider;
             var webRtcConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
                 extensionId: options.screenSharingExtensionId
@@ -41,12 +44,21 @@ var init = function(options) {
         }
         var flashProvider = require("./flash-media-provider");
         if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available()) {
-            MediaProvider.Flash = flashProvider;
+            //MediaProvider.Flash = flashProvider;
             var flashConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
                 flashMediaProviderSwfLocation: options.flashMediaProviderSwfLocation
             };
             flashProvider.configure(flashConf);
+        }
+        var websocketProvider = require("./websocket-media-provider");
+        if (websocketProvider && websocketProvider.hasOwnProperty('available') && websocketProvider.available()) {
+            MediaProvider.WSPlayer = websocketProvider;
+            var wsConf = {
+                receiverLocation: options.receiverLocation,
+                decoderLocation: options.decoderLocation
+            };
+            websocketProvider.configure(wsConf);
         }
         //check at least 1 provider available
         if (getMediaProviders().length == 0) {
@@ -259,17 +271,27 @@ var createSession = function(options) {
     };
     wsConnection.onopen = function() {
         onSessionStatusChange(SESSION_STATUS.CONNECTED);
+        var connObj = {};
+        connObj.appKey = appKey;
+        connObj.mediaProviders = Object.keys(MediaProvider);
+        connObj.clientVersion = "0.4.18";
+        connObj.custom = options.custom;
+        if (getMediaProviders()[0] == "WSPlayer") {
+            connObj.useWsTunnel = true;
+            connObj.useWsTunnelPacketization2 = true;
+            connObj.useBase64BinaryEncoding = false;
+        }
         //connect to REST App
-        send("connection", {
-            appKey: appKey,
-            mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.3.18",
-            custom: options.custom
-        });
+        send("connection", connObj);
     };
     wsConnection.onmessage = function(event) {
-        var data = JSON.parse(event.data);
-        var obj = data.data[0];
+        var data = {};
+        if (event.data instanceof Blob) {
+            data.message = "binaryData";
+        } else {
+            data = JSON.parse(event.data);
+            var obj = data.data[0];
+        }
         switch (data.message) {
             case 'ping':
                 send("pong", null);
@@ -453,7 +475,7 @@ var createSession = function(options) {
                 display: display,
                 authToken: authToken,
                 mainUrl: urlServer
-            }).then(function(newConnection) {
+            },streamRefreshHandlers[id_]).then(function(newConnection) {
                 mediaConnection = newConnection;
                 return mediaConnection.createOffer({
                     receiveAudio: true,

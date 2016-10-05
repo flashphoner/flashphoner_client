@@ -18,7 +18,7 @@ module.exports = function(grunt) {
         },
         flash: {
             options: {
-                sdk: env.FLEX_HOME,
+                sdk: 'E:/Programms/flex',
                 flashVersion: '11.1'
             },
             debug : {
@@ -60,6 +60,15 @@ module.exports = function(grunt) {
                 dest: './flashphoner-no-flash.js',
                 options: {
                     ignore: ['./src/flash-media-provider.js'],
+                    browserifyOptions: {
+                        standalone: 'Flashphoner'
+                    }
+                }
+            },flashphonerGlobalObjectNoWSPlayer: {
+                src: ['./src/flashphoner-core.js'],
+                dest: './flashphoner-no-wsplayer.js',
+                options: {
+                    ignore: ['./src/websocket-media-provider.js'],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }

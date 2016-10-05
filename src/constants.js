@@ -108,6 +108,13 @@ define(streamStatus, 'STOPPED', 'STOPPED');
 define(streamStatus, 'FAILED', 'FAILED');
 
 /**
+ * Fires if {@link Stream} playback problem
+ * @event PLAYBACK_PROBLEM
+ * @memberof Flashphoner.constants.STREAM_STATUS
+ */
+define(streamStatus, 'PLAYBACK_PROBLEM', 'PLAYBACK_PROBLEM');
+
+/**
  * Fires if {@link Stream} resize
  * @event RESIZE
  * @memberof Flashphoner.constants.STREAM_STATUS
