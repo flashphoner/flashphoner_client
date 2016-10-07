@@ -171,6 +171,10 @@ function resizeVideo(video){
     if (!video.parentNode) {
         return;
     }
+    if (video instanceof HTMLCanvasElement) {
+        video.videoWidth = video.width;
+        video.videoHeight = video.height;
+    }
     var display = video.parentNode;
     var parentSize = {
         w: display.parentNode.clientWidth,
