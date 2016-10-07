@@ -446,7 +446,7 @@ var createSession = function(options) {
      */
     var createCall = function(options) {
         //check session state
-        if (sessionStatus !== SESSION_STATUS.REGISTERED) {
+        if (sessionStatus !== SESSION_STATUS.REGISTERED && sessionStatus !== SESSION_STATUS.ESTABLISHED) {
             console.log("Status is " + sessionStatus);
             throw new Error('Invalid session state');
         }
@@ -595,7 +595,7 @@ var createSession = function(options) {
          * @inner
          */
         var answer = function(localVideoDisplay, remoteVideoDisplay) {
-            if (status_ !== CALL_STATUS.NEW) {
+            if (status_ !== CALL_STATUS.NEW && status_ !== CALL_STATUS.RING) {
                 throw new Error("Invalid call state");
             }
             localDisplay = localVideoDisplay;
