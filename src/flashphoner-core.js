@@ -22,6 +22,7 @@ var initialized = false;
  *
  * @param {Object} options Global api options
  * @param {String=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
+ * @param {string=} options.preferredMediaProvider Use preferred media provider if available
  * @param {String=} options.receiverLocation Location of WSReceiver.js file
  * @param {String=} options.decoderLocation Location of video-worker2.js file
  * @param {String=} options.screenSharingExtensionId Chrome screen sharing extension id
@@ -64,6 +65,20 @@ var init = function(options) {
         //check at least 1 provider available
         if (getMediaProviders().length == 0) {
             throw new Error('None of MediaProviders available');
+        } else if (options.preferredMediaProvider) {
+            if (MediaProvider.hasOwnProperty(options.preferredMediaProvider)) {
+                if (getMediaProviders()[0] != options.preferredMediaProvider) {
+                    // Just reorder media provider list
+                    var _MediaProvider = {};
+                    _MediaProvider[options.preferredMediaProvider] = MediaProvider[options.preferredMediaProvider];
+                    for (var p in MediaProvider) {
+                        _MediaProvider[p] = MediaProvider[p];
+                    }
+                    MediaProvider = _MediaProvider;
+                }
+            } else {
+              console.warn("Preferred media provider is not available.");
+            }
         }
         initialized = true;
     }
@@ -290,7 +305,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.0",
+            clientVersion: "0.5.1",
             custom: options.custom
         };
         if (getMediaProviders()[0] == "WSPlayer") {
@@ -524,7 +539,7 @@ var createSession = function(options) {
                         sendAudio: true,
                         sendVideo: true
                     });
-                }).then(function (sdp) {
+                }).then(function (offer) {
                     send("call", {
                         callId: id_,
                         incoming: false,
@@ -532,7 +547,7 @@ var createSession = function(options) {
                         hasAudio: hasAudio,
                         status: status_,
                         mediaProvider: mediaProvider,
-                        sdp: sdp,
+                        sdp: offer.sdp,
                         caller: sipConfig.login,
                         callee: callee,
                         custom: options.custom
@@ -934,7 +949,7 @@ var createSession = function(options) {
                     receiveAudio: true,
                     receiveVideo: true
                 });
-            }).then(function (sdp) {
+            }).then(function (offer) {
                 //request stream with offer sdp from server
                 send("playStream", {
                     mediaSessionId: id_,
@@ -945,9 +960,13 @@ var createSession = function(options) {
                     status: status_,
                     record: false,
                     mediaProvider: mediaProvider,
-                    sdp: sdp,
+                    sdp: offer.sdp,
                     custom: options.custom
                 });
+                if (offer.player) {
+                    offer.player.playFirstSound();
+                    offer.player.play(id_);
+                }
             }).catch(function(error) {
                 //todo fire stream failed status
                 throw error;
@@ -992,7 +1011,7 @@ var createSession = function(options) {
                         sendAudio: true,
                         sendVideo: true
                     });
-                }).then(function (sdp) {
+                }).then(function (offer) {
                     //publish stream with offer sdp to server
                     send("publishStream", {
                         mediaSessionId: id_,
@@ -1003,7 +1022,7 @@ var createSession = function(options) {
                         status: status_,
                         record: record_,
                         mediaProvider: mediaProvider,
-                        sdp: sdp,
+                        sdp: offer.sdp,
                         custom: options.custom
                     });
                 });

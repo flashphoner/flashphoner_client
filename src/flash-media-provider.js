@@ -95,7 +95,9 @@ var createConnection = function(options) {
                 } else {
                     sdp = sdp.replace("VIDEO_STATE", "inactive");
                 }
-                resolve(sdp);
+                var o = {};
+                o.sdp = sdp;
+                resolve(o);
             });
         };
 

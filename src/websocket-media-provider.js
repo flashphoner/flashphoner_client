@@ -1,7 +1,8 @@
 'use strict';
 
 var WSPlayer = require('./WSPlayer').WSPlayer;
-var browser = require('webrtc-adapter').browserDetails;
+var util = require('./util');
+var WSPlayer_ = new WSPlayer();
 var connections = {};
 var receiverLocation = "./WSReceiver2.js";
 var decoderLocation = "./video-worker2.js";
@@ -26,7 +27,6 @@ try {
 
 var createConnection = function(options, handlers) {
     return new Promise(function(resolve, reject) {
-        var WSPlayer_;
         var id = options.id;
         var display = options.display;
 
@@ -36,7 +36,10 @@ var createConnection = function(options, handlers) {
 
         var createOffer = function(options) {
             return new Promise(function (resolve, reject) {
-                resolve(DEFAULT_SDP);
+                var o ={};
+                o.sdp = DEFAULT_SDP;
+                o.player = WSPlayer_;
+                resolve(o);
             });
         };
         var setRemoteSdp = function(sdp) {
@@ -61,8 +64,8 @@ var createConnection = function(options, handlers) {
             return -1;
         };
 
-        try{
-            WSPlayer_ = new WSPlayer(canvas, handlers);
+
+        try {
 
             var config = {};
             config.urlWsServer = options.mainUrl;
@@ -70,13 +73,22 @@ var createConnection = function(options, handlers) {
             config.receiverPath = receiverLocation;
             config.decoderPath = decoderLocation;
             config.streamId = id;
+            config.api = handlers;
+            config.canvas = canvas;
+            config.videoWidth = 320;
+            config.videoHeight = 240;
+            config.startWithVideoOnly = false;
+            config.keepLastFrame = false;
 
-            WSPlayer_.initLogger(3);
-            WSPlayer_.init(config,audioContext);
+            var reinit = false;
+            if (WSPlayer_.initialized) {
+                reinit = true;
+            }
+            WSPlayer_.initLogger(0);
+            WSPlayer_.init(config, audioContext, reinit);
         } catch (e) {
             reject(new Error('Failed to init stream receiver ' + e));
         }
-
         var exports = {};
         exports.createOffer = createOffer;
         exports.setRemoteSdp = setRemoteSdp;
@@ -84,7 +96,7 @@ var createConnection = function(options, handlers) {
         exports.setVolume = setVolume;
         exports.getVolume = getVolume;
         connections[id] = exports;
-        resolve(exports);
+        resolve(connections[id]);
     });
 };
 
@@ -112,8 +124,7 @@ var releaseMedia = function() {
  * @returns {boolean} WSPlayer available
  */
 var available = function(){
-    //return (browser.browser == "Not a supported browser.") ? false : true;
-    return true;
+    return (util.browser() == "IE") ? false : true;
 };
 
 module.exports = {

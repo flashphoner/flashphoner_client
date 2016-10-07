@@ -103,7 +103,9 @@ var createConnection = function(options) {
                 //create offer and set local sdp
                 connection.createOffer(constraints).then(function (offer) {
                     connection.setLocalDescription(offer).then(function () {
-                        resolve(offer.sdp);
+                        var o = {};
+                        o.sdp = offer.sdp;
+                        resolve(o);
                     });
                 });
             });
