@@ -537,14 +537,16 @@ var createSession = function(options) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
                         sendAudio: true,
-                        sendVideo: true
+                        sendVideo: true,
+                        receiveAudio: true,
+                        receiveVideo: true
                     });
                 }).then(function (offer) {
                     send("call", {
                         callId: id_,
                         incoming: false,
-                        hasVideo: true,
-                        hasAudio: hasAudio,
+                        hasVideo: offer.hasVideo,
+                        hasAudio: offer.hasAudio,
                         status: status_,
                         mediaProvider: mediaProvider,
                         sdp: offer.sdp,
@@ -785,6 +787,19 @@ var createSession = function(options) {
             }
             return true;
         };
+        /**
+         * Get statistics
+         *
+         * @returns {Object}
+         * @memberof Call
+         * @inner
+         */
+        var getStats = function () {
+            if (mediaConnection) {
+                return mediaConnection.getStats();
+            }
+            return {};
+        };
 
         /**
          * Call event callback.
@@ -820,6 +835,7 @@ var createSession = function(options) {
         call.hangup = hangup;
         call.id = id;
         call.status = status;
+        call.getStats = getStats;
         call.setVolume = setVolume;
         call.getVolume = getVolume;
         call.muteAudio = muteAudio;
@@ -1017,8 +1033,8 @@ var createSession = function(options) {
                         mediaSessionId: id_,
                         name: name_,
                         published: published_,
-                        hasVideo: true,
-                        hasAudio: hasAudio,
+                        hasVideo: offer.hasVideo,
+                        hasAudio: offer.hasAudio,
                         status: status_,
                         record: record_,
                         mediaProvider: mediaProvider,

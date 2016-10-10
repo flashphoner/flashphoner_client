@@ -97,6 +97,8 @@ var createConnection = function(options) {
                 }
                 var o = {};
                 o.sdp = sdp;
+                o.hasAudio = flash.isHasAudio();
+                o.hasVideo = flash.isHasVideo();
                 resolve(o);
             });
         };

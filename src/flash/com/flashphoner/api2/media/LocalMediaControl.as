@@ -40,8 +40,10 @@ package com.flashphoner.api2.media
         private var mic:Microphone;
         private var micIndex:int = -1;
         private var currentGain:int = -1;
+		private var hasAudio:Boolean = true;
 
 		private var videoMuted:Boolean = false;
+		private var hasVideo:Boolean = true;
 
 		private var stream:NetStream;
 
@@ -103,6 +105,8 @@ package com.flashphoner.api2.media
 				this.cam.setKeyFrameInterval(KEY_INT);
 				this.cam.setQuality(BANDWIDTH,QUALITY);
 				this.cam.setMotionLevel(0,this.MOTION_LEVEL);
+			} else {
+				this.hasVideo = false;
 			}
 
 			if (constraints.hasOwnProperty("audio")) {
@@ -116,6 +120,8 @@ package com.flashphoner.api2.media
 					return false;
 				}
 				initMic(this.mic);
+			} else {
+				this.hasAudio = false;
 			}
 			return true;
 		}		
@@ -355,6 +361,14 @@ package com.flashphoner.api2.media
 
 		public function isVideoMuted():Boolean{
 			return this.videoMuted;
+		}
+
+		public function isHasAudio():Boolean{
+			return this.hasAudio;
+		}
+
+		public function isHasVideo():Boolean{
+			return this.hasVideo;
 		}
     }
 }

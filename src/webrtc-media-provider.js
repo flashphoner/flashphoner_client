@@ -105,6 +105,8 @@ var createConnection = function(options) {
                     connection.setLocalDescription(offer).then(function () {
                         var o = {};
                         o.sdp = offer.sdp;
+                        o.hasAudio = hasAudio;
+                        o.hasVideo = hasVideo;
                         resolve(o);
                     });
                 });
@@ -183,6 +185,15 @@ var createConnection = function(options) {
             }
             return true;
         };
+        // TODO make stats (http://w3c.github.io/webrtc-pc/#example)
+        var getStats = function() {
+            if (connection) {
+                var selector = connection.getSenders()[0].track;
+                connection.getStats(selector).then(function (report) {
+                    return report;
+                })
+            }
+        };
 
         var exports = {};
         exports.state = state;
@@ -198,6 +209,7 @@ var createConnection = function(options) {
         exports.muteVideo = muteVideo;
         exports.unmuteVideo = unmuteVideo;
         exports.isVideoMuted = isVideoMuted;
+        exports.getStats = getStats;
         connections[id] = exports;
         resolve(exports);
     });

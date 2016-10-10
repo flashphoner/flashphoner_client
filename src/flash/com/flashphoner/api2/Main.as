@@ -97,6 +97,8 @@ package com.flashphoner.api2 {
             ExternalInterface.addCallback("muteVideo", muteVideo);
             ExternalInterface.addCallback("unmuteVideo", unmuteVideo);
             ExternalInterface.addCallback("isVideoMuted", isVideoMuted);
+            ExternalInterface.addCallback("isHasAudio", isHasAudio);
+            ExternalInterface.addCallback("isHasVideo", isHasVideo);
             callExternalInterface("initialized", null);
         }
 
@@ -312,6 +314,14 @@ package com.flashphoner.api2 {
                 ExternalInterface.call(callback, width, height);
             }
             onResize(null);
+        }
+
+        public function isHasAudio():Boolean{
+            return this.localMediaControl.isHasAudio();
+        }
+
+        public function isHasVideo():Boolean{
+            return this.localMediaControl.isHasVideo();
         }
     }
 }
