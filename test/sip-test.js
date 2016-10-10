@@ -15,7 +15,7 @@ describe('SIP', function() {
         Flashphoner.createSession(sOptions).on(SESSION_STATUS.FAILED, function(){
             done(new Error("Failed"));
         }).on(SESSION_STATUS.REGISTERED, function(session){
-            //session.disconnect();
+            session.disconnect();
             done();
         });
     });
@@ -57,7 +57,9 @@ describe('SIP', function() {
                     removeDisplay(remoteDisplay2);
                     session2.disconnect();
                 });
-                call.answer(localDisplay2, remoteDisplay2);
+                setTimeout(function(){
+                    call.answer(localDisplay2, remoteDisplay2);
+                }, 1000);
             });
         });
     });
