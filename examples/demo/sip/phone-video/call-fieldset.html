@@ -1,0 +1,54 @@
+<legend class="scheduler-border">Connection</legend>
+<form id="formConnection" class="form-horizontal" role="form">
+    <div id="urlServerForm" class="form-group">
+        <label class="control-label col-sm-3" for="urlServer">WCS URL</label>
+
+        <div class="input-group col-sm-8">
+            <input type="text" class="form-control" id="urlServer" placeholder="WCS Server URL"/>
+        </div>
+    </div>
+    <div id="sipLoginForm" class="form-group">
+        <label class="control-label col-sm-3" for="sipLogin">SIP Login</label>
+
+        <div class="input-group col-sm-4">
+            <input type="text" class="form-control" id="sipLogin"
+                   placeholder="SIP username"/>
+        </div>
+    </div>
+    <div id="sipPasswordForm" class="form-group">
+        <label class="control-label col-sm-3" for="sipPassword">SIP Password</label>
+
+        <div class="input-group col-sm-4">
+            <input type="password" class="form-control" id="sipPassword"
+                   placeholder="SIP password"/>
+        </div>
+    </div>
+    <div id="sipDomainForm" class="form-group">
+        <label class="control-label col-sm-3" for="sipDomain">SIP Domain</label>
+
+        <div class="input-group col-sm-6">
+            <input type="text" class="form-control" id="sipDomain" placeholder="SIP domain"/>
+        </div>
+    </div>
+    <div id="sipPortForm" class="form-group">
+        <label class="control-label col-sm-3" for="sipPort">SIP Port</label>
+
+        <div class="input-group col-sm-3">
+            <input type="text" class="form-control" id="sipPort" placeholder="5060"/>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+        </div>
+        <div class="col-sm-4 fp-buttonVerticalAlign">
+            <span id="regStatus"></span>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <div class="col-sm-9" style="text-align:right">
+                    <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
