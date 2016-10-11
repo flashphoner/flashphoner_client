@@ -99,6 +99,7 @@ package com.flashphoner.api2 {
             ExternalInterface.addCallback("isVideoMuted", isVideoMuted);
             ExternalInterface.addCallback("isHasAudio", isHasAudio);
             ExternalInterface.addCallback("isHasVideo", isHasVideo);
+            ExternalInterface.addCallback("getStats", getStats);
             callExternalInterface("initialized", null);
         }
 
@@ -322,6 +323,14 @@ package com.flashphoner.api2 {
 
         public function isHasVideo():Boolean{
             return this.localMediaControl.isHasVideo();
+        }
+
+        public function getStats():Object{
+            var statistics:Object = new Object();
+            if (this.connection) {
+                statistics = this.connection.getStatistics();
+            }
+            return statistics;
         }
     }
 }

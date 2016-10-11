@@ -305,7 +305,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.1",
+            clientVersion: "0.5.2",
             custom: options.custom
         };
         if (getMediaProviders()[0] == "WSPlayer") {
@@ -434,6 +434,8 @@ var createSession = function(options) {
      * @param {string} options.callee Call remote party id
      * @param {Object} options.constraints Call constraints
      * @param {string} options.mediaProvider MediaProvider type to use with this call
+     * @param {Boolean=} options.receiveAudio Receive audio
+     * @param {Boolean=} options.receiveVideo Receive video
      * @param {Boolean=} options.cacheLocalResources Display will contain local video after call release
      * @param {HTMLElement} options.localVideoDisplay Div element local video should be displayed in
      * @param {HTMLElement} options.remoteVideoDisplay Div element remote video should be displayed in
@@ -466,6 +468,9 @@ var createSession = function(options) {
         if (options.constraints) {
             var constraints = checkConstraints(options.constraints);
         }
+        // Receive media
+        var receiveAudio = options.receiveAudio || true;
+        var receiveVideo = options.receiveVideo || true;
 
         var cacheLocalResources = options.cacheLocalResources;
         var status_ = CALL_STATUS.NEW;
@@ -538,8 +543,8 @@ var createSession = function(options) {
                     return mediaConnection.createOffer({
                         sendAudio: true,
                         sendVideo: true,
-                        receiveAudio: true,
-                        receiveVideo: true
+                        receiveAudio: receiveAudio,
+                        receiveVideo: receiveVideo
                     });
                 }).then(function (offer) {
                     send("call", {
@@ -790,7 +795,7 @@ var createSession = function(options) {
         /**
          * Get statistics
          *
-         * @returns {Object}
+         * @returns {Object} Call audio\video statistics
          * @memberof Call
          * @inner
          */
@@ -798,7 +803,6 @@ var createSession = function(options) {
             if (mediaConnection) {
                 return mediaConnection.getStats();
             }
-            return {};
         };
 
         /**
@@ -854,6 +858,8 @@ var createSession = function(options) {
      * @param {Object} options Stream options
      * @param {string} options.name Stream name
      * @param {Object} options.constraints Stream constraints
+     * @param {Boolean=} options.receiveAudio Receive audio
+     * @param {Boolean=} options.receiveVideo Receive video
      * @param {string} options.mediaProvider MediaProvider type to use with this stream
      * @param {Boolean=} options.record Enable stream recording
      * @param {Boolean=} options.cacheLocalResources Display will contain local video after stream release
@@ -889,6 +895,10 @@ var createSession = function(options) {
         if (options.constraints) {
             var constraints = checkConstraints(options.constraints);
         }
+        // Receive media
+        var receiveAudio = options.receiveAudio || true;
+        var receiveVideo = options.receiveVideo || true;
+
         var resolution = {};
 
         var published_ = false;
@@ -962,8 +972,8 @@ var createSession = function(options) {
             },streamRefreshHandlers[id_]).then(function(newConnection) {
                 mediaConnection = newConnection;
                 return mediaConnection.createOffer({
-                    receiveAudio: true,
-                    receiveVideo: true
+                    receiveAudio: receiveAudio,
+                    receiveVideo: receiveVideo
                 });
             }).then(function (offer) {
                 //request stream with offer sdp from server
@@ -1025,7 +1035,9 @@ var createSession = function(options) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
                         sendAudio: true,
-                        sendVideo: true
+                        sendVideo: true,
+                        receiveAudio: receiveAudio,
+                        receiveVideo: receiveVideo
                     });
                 }).then(function (offer) {
                     //publish stream with offer sdp to server
@@ -1282,6 +1294,18 @@ var createSession = function(options) {
             }
             return true;
         };
+        /**
+         * Get statistics
+         *
+         * @returns {Object} Stream audio\video statistics
+         * @memberof Stream
+         * @inner
+         */
+        var getStats = function () {
+            if (mediaConnection) {
+                return mediaConnection.getStats();
+            }
+        };
 
         /**
          * Stream event callback.
@@ -1330,6 +1354,7 @@ var createSession = function(options) {
         stream.muteVideo = muteVideo;
         stream.unmuteVideo = unmuteVideo;
         stream.isVideoMuted = isVideoMuted;
+        stream.getStats = getStats;
         stream.on = on;
 
         streams[id_] = stream;

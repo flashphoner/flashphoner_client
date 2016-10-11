@@ -2,6 +2,7 @@
 
 var adapter = require('webrtc-adapter');
 var uuid = require('node-uuid');
+var util = require('./util');
 var connections = {};
 var CACHED_INSTANCE_POSTFIX = "-CACHED_WEBRTC_INSTANCE";
 var extensionId;
@@ -97,8 +98,8 @@ var createConnection = function(options) {
                     }
                 }
                 var constraints = {
-                    offerToReceiveAudio: hasAudio,
-                    offerToReceiveVideo: hasVideo
+                    offerToReceiveAudio: options.receiveAudio,
+                    offerToReceiveVideo: options.receiveVideo
                 };
                 //create offer and set local sdp
                 connection.createOffer(constraints).then(function (offer) {
@@ -185,13 +186,37 @@ var createConnection = function(options) {
             }
             return true;
         };
-        // TODO make stats (http://w3c.github.io/webrtc-pc/#example)
         var getStats = function() {
             if (connection) {
-                var selector = connection.getSenders()[0].track;
-                connection.getStats(selector).then(function (report) {
-                    return report;
-                })
+                return connection.getStats(function (rawStats) {
+                    var results = rawStats.result();
+                    var result = {type: "chrome", outgoingStreams: {}, incomingStreams: {}};
+                    for (var i = 0; i < results.length; ++i) {
+                        var resultPart = util.processGoogRtcStatsReport(results[i]);
+                        if (resultPart != null) {
+                            if (resultPart.type == "googCandidatePair") {
+                                result.activeCandidate = resultPart;
+                            } else if (resultPart.type == "ssrc") {
+                                if (resultPart.transportId.indexOf("audio") > -1) {
+                                    if (resultPart.id.indexOf("send") > -1) {
+                                        result.outgoingStreams.audio = resultPart;
+                                    } else {
+                                        result.incomingStreams.audio = resultPart;
+                                    }
+
+                                } else {
+                                    if (resultPart.id.indexOf("send") > -1) {
+                                        result.outgoingStreams.video = resultPart;
+                                    } else {
+                                        result.incomingStreams.video = resultPart;
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                    return result;
+                });
             }
         };
 

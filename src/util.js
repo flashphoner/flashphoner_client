@@ -60,5 +60,38 @@ module.exports = {
         if (isChrome)
             browser = "Chrome";
         return browser;
+    },
+    processGoogRtcStatsReport: function(report) {
+        /**
+         * Report types: googComponent, googCandidatePair, googCertificate, googLibjingleSession, googTrack, ssrc
+         */
+        var gotResult = false;
+        var result = null;
+        if (report.type && report.type == "googCandidatePair") {
+            //check if this is active pair
+            if (report.stat("googActiveConnection") == "true") {
+                gotResult = true;
+            }
+        }
+
+        if (report.type && report.type == "ssrc") {
+            gotResult = true;
+        }
+
+        if (gotResult) {
+            //prepare object
+            result = {};
+            result.timestamp = report.timestamp;
+            result.id = report.id;
+            result.type = report.type;
+            if (report.names) {
+                var names = report.names();
+                for (var i = 0; i < names.length; ++i) {
+                    var attrName = names[i];
+                    result[attrName] = report.stat(attrName);
+                }
+            }
+        }
+        return result;
     }
 };

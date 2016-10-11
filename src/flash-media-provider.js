@@ -196,6 +196,32 @@ var createConnection = function(options) {
             }
             return true;
         };
+        var getStats = function() {
+            if (flash) {
+                var statistics = flash.getStats();
+                var param;
+                for (param in statistics.incoming.info) {
+                    if (param.indexOf("audio") > -1) {
+                        statistics.incoming.audio[param] = statistics.incoming.info[param];
+                    }
+                    if (param.indexOf("video") > -1) {
+                        statistics.incoming.video[param] = statistics.incoming.info[param];
+                    }
+                }
+                delete statistics.incoming.info;
+                for (param in statistics.outgoing.info) {
+                    if (param.indexOf("audio") > -1) {
+                        statistics.outgoing.audio[param] = statistics.outgoing.info[param];
+                    }
+                    if (param.indexOf("video") > -1) {
+                        statistics.outgoing.video[param] = statistics.outgoing.info[param];
+                    }
+                }
+                delete statistics.outgoing.info;
+                statistics.type = "flash";
+                return statistics;
+            }
+        };
 
         var exports = {};
         exports.state = state;
@@ -211,6 +237,7 @@ var createConnection = function(options) {
         exports.muteVideo = muteVideo;
         exports.unmuteVideo = unmuteVideo;
         exports.isVideoMuted = isVideoMuted;
+        exports.getStats = getStats;
     });
 };
 

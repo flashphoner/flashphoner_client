@@ -78,5 +78,15 @@ public class Stream
             Logger.info("NetStream async error: " + event);
         }
 
+        public function getStatistics():Object {
+            var stream:Object = new Object();
+            if (this.ncStream) {
+                stream.info = ncStream.info;
+                stream.audio = new Object();
+                stream.video = new Object();
+            }
+            return stream;
+        }
+
 	}
 }

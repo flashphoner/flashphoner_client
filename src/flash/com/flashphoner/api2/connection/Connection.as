@@ -124,6 +124,16 @@ package com.flashphoner.api2.connection {
 			}
 			return "IN_" + application.getId();
 		}
-		
+
+		public function getStatistics():Object {
+			var statistics:Object = new Object();
+			if (incomingStream) {
+				statistics.incoming = incomingStream.getStatistics();
+			}
+			if (outgoingStream) {
+				statistics.outgoing = outgoingStream.getStatistics();
+			}
+			return statistics;
+		}
 	}
 }
