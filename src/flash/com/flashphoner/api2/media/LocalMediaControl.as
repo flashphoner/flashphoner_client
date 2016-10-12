@@ -267,7 +267,7 @@ package com.flashphoner.api2.media
             }
         }
 
-        private function changeCodec(name:String):void{
+        public function changeCodec(name:String):void{
             Logger.info("changeCodec: "+name);
             if (name=="speex"){
                 mic.codec = SoundCodec.SPEEX;

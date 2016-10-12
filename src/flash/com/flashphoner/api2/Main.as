@@ -100,6 +100,7 @@ package com.flashphoner.api2 {
             ExternalInterface.addCallback("isHasAudio", isHasAudio);
             ExternalInterface.addCallback("isHasVideo", isHasVideo);
             ExternalInterface.addCallback("getStats", getStats);
+            ExternalInterface.addCallback("changeAudioCodec", changeAudioCodec);
             callExternalInterface("initialized", null);
         }
 
@@ -127,17 +128,19 @@ package com.flashphoner.api2 {
             this.connection.disconnect();
         }
 
-        public function setup(incoming:Boolean, outgoing:Boolean, hasAudio:Boolean, hasVideo:Boolean):void {
+        public function setup(incoming:Boolean, outgoing:Boolean, hasAudio:Boolean, hasVideo:Boolean, audioCodec:String):void {
             if (incoming && outgoing) {
                 this.connection.setupStreams(localMediaControl, remoteMediaControl, hasAudio, hasVideo);
                 this.remoteDisplayHolder.visible = true;
                 this.localDisplay.visible = true;
                 this.localDisplay.percentWidth = 20;
                 this.localDisplay.percentHeight = 20;
+                //localMediaControl.changeCodec(audioCodec);
             } else if (outgoing) {
                 this.connection.setupStreams(localMediaControl, null, hasAudio, hasVideo);
                 this.remoteDisplayHolder.visible = false;
                 this.localDisplay.visible = true;
+                //localMediaControl.changeCodec(audioCodec);
             } else {
                 this.connection.setupStreams(null, remoteMediaControl, hasAudio, hasVideo);
                 this.remoteDisplayHolder.visible = true;
@@ -331,6 +334,12 @@ package com.flashphoner.api2 {
                 statistics = this.connection.getStatistics();
             }
             return statistics;
+        }
+
+        public function changeAudioCodec(codec:String):void {
+            if (this.localMediaControl) {
+                localMediaControl.changeCodec(codec);
+            }
         }
     }
 }

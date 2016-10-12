@@ -305,7 +305,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.2",
+            clientVersion: "0.5.3",
             custom: options.custom
         };
         if (getMediaProviders()[0] == "WSPlayer") {
@@ -376,6 +376,14 @@ var createSession = function(options) {
                 break;
             case 'registered':
                 onSessionStatusChange(SESSION_STATUS.REGISTERED);
+                break;
+            case 'notifyAudioCodec':
+                // This case for Flash only
+                var mediaSessionId = data.data[0];
+                var codec = data.data[1];
+                if (callRefreshHandlers[mediaSessionId]) {
+                    callRefreshHandlers[mediaSessionId](null, null, codec);
+                }
                 break;
             case 'notifyTryingResponse':
             case 'ring':
@@ -482,7 +490,12 @@ var createSession = function(options) {
          * @see Session~createCall
          */
         var call = {};
-        callRefreshHandlers[id_] = function(callInfo, sdp) {
+        callRefreshHandlers[id_] = function(callInfo, sdp, codec) {
+            //set audio codec (Flash only)
+            if (codec && codec !== '') {
+                mediaConnection.changeAudioCodec(codec.name);
+                return;
+            }
             //set remote sdp
             if (sdp && sdp !== '') {
                 mediaConnection.setRemoteSdp(sdp).then(function(){});

@@ -1,6 +1,7 @@
 'use strict';
 
 var swfobject = require('swfobject');
+var SDPUtils = require('sdp');
 var Promise = require('promise-polyfill');
 var uuid = require('node-uuid');
 var connections = {};
@@ -132,10 +133,28 @@ var createConnection = function(options) {
             });
         };
 
+        var changeAudioCodec = function(codec) {
+           flash.changeAudioCodec(codec);
+        };
+
         var setRemoteSdp = function(sdp) {
             return new Promise(function(resolve, reject){
+                var sections = SDPUtils.splitSections(sdp);
+                var codecs =[];
+                sections.forEach(function(mediaSection) {
+                    var param = SDPUtils.parseRtpParameters(mediaSection);
+                    param.codecs.forEach(function(codec){
+                        if (codec.name == "PCMU") {
+                            codecs.push("pcmu");
+                        } else if (codec.name == "PCMA") {
+                            codecs.push("pcma");
+                        } else if (codec.name == "speex") {
+                            codecs.push("speex");
+                        }
+                    });
+                });
                 var state = extractMediaState(sdp);
-                flash.setup(state.incoming, state.outgoing, true, true);
+                flash.setup(state.incoming, state.outgoing, true, true, codecs[0]);
                 resolve(connections[id]);
             });
         };
@@ -228,6 +247,7 @@ var createConnection = function(options) {
         exports.createOffer = createOffer;
         exports.createAnswer = createAnswer;
         exports.setRemoteSdp = setRemoteSdp;
+        exports.changeAudioCodec = changeAudioCodec;
         exports.close = close;
         exports.setVolume = setVolume;
         exports.getVolume = getVolume;

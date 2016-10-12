@@ -123,6 +123,9 @@ var createConnection = function(options) {
                 });
             });
         };
+        var changeAudioCodec = function(codec) {
+            return false;
+        };
         var setRemoteSdp = function (sdp) {
             return new Promise(function (resolve, reject) {
                 var sdpType;
@@ -225,6 +228,7 @@ var createConnection = function(options) {
         exports.createOffer = createOffer;
         exports.createAnswer = createAnswer;
         exports.setRemoteSdp = setRemoteSdp;
+        exports.changeAudioCodec = changeAudioCodec;
         exports.close = close;
         exports.setVolume = setVolume;
         exports.getVolume = getVolume;
