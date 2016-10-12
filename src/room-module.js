@@ -316,16 +316,11 @@ var appSession = function(options) {
          * @inner
          */
         var publish = function(options) {
-            var constraints = options.constraints || {};
-            var record = options.record || false;
-            var stream = session.createStream({
-                name: (name_ + "-" + username_),
-                constraints: constraints,
-                display: options.display,
-                cacheLocalResources: true,
-                custom: {name: name_},
-                record: record
-            });
+            options.name = (name_ + "-" + username_);
+            options.cacheLocalResources = true;
+            options.custom = {name: name_};
+            console.log(options);
+            var stream = session.createStream(options);
             stream.publish();
             return stream;
         };
