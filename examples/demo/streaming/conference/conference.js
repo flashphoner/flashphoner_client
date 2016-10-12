@@ -214,7 +214,15 @@ function onMediaStopped(room) {
 
 //publish local video
 function publishLocalMedia(room) {
-    room.publish(document.getElementById("localDisplay")).on(STREAM_STATUS.FAILED, function (stream) {
+    var constraints = {
+        audio: true,
+        video: true
+    };
+    room.publish({
+        display: document.getElementById("localDisplay"),
+        constraints: constraints,
+        record: false
+    }).on(STREAM_STATUS.FAILED, function (stream) {
         console.warn("Local stream failed!");
         setStatus("#localStatus", stream.status());
         onMediaStopped(room);

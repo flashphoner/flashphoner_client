@@ -307,13 +307,25 @@ var appSession = function(options) {
         /**
          * Publish stream inside room
          *
-         * @param {HTMLElement} display Div element stream should be displayed in
+         * @param {Object} options Stream options
+         * @param {Object=} options.constraints Stream constraints
+         * @param {Boolean=} options.record Enable stream recording
+         * @param {HTMLElement} options.display Div element stream should be displayed in
          * @returns {Stream}
          * @memberof roomApi.Room
          * @inner
          */
-        var publish = function(display) {
-            var stream = session.createStream({name: (name_ + "-" + username_), display: display, cacheLocalResources: true, custom: {name: name_}});
+        var publish = function(options) {
+            var constraints = options.constraints || {};
+            var record = options.record || false;
+            var stream = session.createStream({
+                name: (name_ + "-" + username_),
+                constraints: constraints,
+                display: options.display,
+                cacheLocalResources: true,
+                custom: {name: name_},
+                record: record
+            });
             stream.publish();
             return stream;
         };

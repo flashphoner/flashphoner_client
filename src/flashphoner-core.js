@@ -892,7 +892,7 @@ var createSession = function(options) {
         var mediaConnection;
         var display = options.display;
         // Constraints
-        if (options.constraints) {
+        if (options.constraints && Object.keys(options.constraints).length != 0) {
             var constraints = checkConstraints(options.constraints);
         }
         // Receive media
