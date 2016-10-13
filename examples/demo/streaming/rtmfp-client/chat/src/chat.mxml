@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:views="rtmfptest.views.*"
+			   backgroundColor="#F2F0F0"
+			   width="811"
+			   height="1074" creationComplete="init()" xmlns:local="*">
+	<fx:Declarations>
+			
+	</fx:Declarations>
+	
+	<fx:Style>
+		.header { 
+			fontSize: 36px;
+		}
+		global
+		{
+			chrome-color: #CCCCCC;
+		}
+	</fx:Style>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.flashphoner.room_api.Participant;
+			import com.flashphoner.room_api.Room;
+			import com.flashphoner.room_api.RoomStatus;
+			import com.flashphoner.room_api.Session;
+			import com.flashphoner.room_api.SessionStatus;
+			
+			import flash.external.*;
+			
+			import mx.utils.UIDUtil;
+			
+			private var joinBtnHandler:Function;
+			private var publishBtnHandler:Function;
+			private var sendMessageBtnHandler:Function;
+			private var session:Session;
+			private var remoteDisplay:Video = new Video();
+			private var cam:Camera;
+			private var mic:Microphone;
+			private var roomName:String;
+			private var href:String;
+			
+			private function init():void{
+				Logger.info("Initialize");
+				if (ExternalInterface.available) {
+					try {
+						var href:String = ExternalInterface.call("window.location.href.toString");
+						var hostname:String = ExternalInterface.call("window.location.hostname.toString");
+						connectUrl.text = "rtmfp://" + hostname + ":1935";
+						if (href.indexOf("roomName") != -1) {
+							var val:String = href.substr(href.indexOf("roomName") + 9);
+							this.roomName = val;
+						} else {
+							this.roomName = UIDUtil.createUID().substr(0,6);
+						}
+						this.href = href;
+					} catch (error:Error) {
+						Logger.error(error.message);
+					}
+				} else {
+					Logger.info("External interface is not available!");
+				}
+				cam = Camera.getCamera();
+				localDisplay.attachCamera(cam);
+				mic = Microphone.getEnhancedMicrophone();
+				remoteDisplayHolder.addChild(remoteDisplay);
+				onLeft();
+			}
+			
+			private function onLeft():void 
+			{
+				joinBtn.label = "Join";
+				joinBtnHandler = function():void
+				{
+					//validate form
+					if (validateForm()) {
+						joinBtn.enabled = false;
+						muteConnectInputs();
+						start();
+					}
+				};
+				joinBtn.enabled = true;
+				sendMessageBtn.enabled = false;
+				publishBtn.enabled = false;
+				removeParticipant();
+				unmuteConnectInputs();
+			}
+			
+			private function onJoined(room:Room):void 
+			{
+				joinBtn.label = "Leave";
+				joinBtnHandler = function():void{
+					joinBtn.enabled = false;
+					room.leave();
+					onLeft();
+				};
+				joinBtn.enabled = true;
+				sendMessageBtnHandler = function():void
+				{
+					var message:String = messageText.text;
+					addMessage(session.getUsername(), message);
+					messageText.text = "";
+					
+					//broadcast message
+					var participants:Array = room.getParticipants();
+					for each(var participant:Participant in participants) {
+						participant.sendMessage(message, function():void{});
+					}
+				};
+				sendMessageBtn.enabled = true;
+				failedInfo.text = "";
+			}
+			
+			private function start():void
+			{
+				var url:String = connectUrl.text;
+				var username:String = login.text;
+				if (session != null && session.getStatus() == SessionStatus.ESTABLISHED) {
+					//check url and username
+					if (session.getServerUrl() != url || session.getUsername() != username) {
+						session.on(SessionStatus.DISCONNECTED, function():void{});
+						session.on(SessionStatus.FAILED, function():void{});
+						session.disconnect();
+					} else {
+						Logger.info("Reusing session with url " + session.getServerUrl());
+						joinRoom();
+						return;
+					}
+				}
+				Logger.info("Create session, url:" + url + ", login:" + username);
+				session = new Session(url, username);
+				session.on(SessionStatus.FAILED, function():void{
+					setStatus(sessionStatus, SessionStatus.FAILED);
+					onLeft();
+				}).on(SessionStatus.DISCONNECTED, function():void {
+					setStatus(sessionStatus, SessionStatus.DISCONNECTED);
+					onLeft();
+				}).on(SessionStatus.ESTABLISHED, function():void {
+					setStatus(sessionStatus, SessionStatus.ESTABLISHED);
+					joinRoom();
+				});
+				session.connect();
+			}
+			
+			private function joinRoom():void 
+			{
+				Logger.info("Join room " + this.roomName);
+				session.join(this.roomName).on(RoomStatus.STATE, function(room:Room):void{
+					var participants:Array = room.getParticipants();
+					setInviteAddress(room);
+					if (participants.length > 0) {
+						var chatState:String = "participants: ";
+						for (var i:Number = 0; i < participants.length; i++) {
+							installParticipant(participants[i]);
+							chatState += participants[i].getName();
+							if (i != participants.length - 1) {
+								chatState += ",";
+							}
+						}
+						addMessage("chat", chatState);
+					} else {
+						addMessage("chat", " room is empty");
+					}
+					publishLocalMedia(room);
+					onJoined(room);
+				}).on(RoomStatus.JOINED, function(participant:Participant):void{
+					installParticipant(participant);
+					addMessage(participant.getName(), "joined");
+				}).on(RoomStatus.LEFT, function(participant:Participant):void{
+					removeParticipant();
+					addMessage(participant.getName(), "left");
+				}).on(RoomStatus.PUBLISHED, function(participant:Participant):void{
+					playParticipantsStream(participant);
+				}).on(RoomStatus.FAILED, function(room:Room, info:Object):void{
+					failedInfo.text = info.info;
+					session.disconnect();
+				}).on(RoomStatus.MESSAGE, function(message:Object):void{
+					addMessage(message.from.getName(), message.text);
+				});
+			}
+			
+			private function installParticipant(p:Participant):void
+			{
+				participantName.text = p.getName();
+				playParticipantsStream(p);
+			}
+			
+			private function removeParticipant():void
+			{
+				participantName.text = "NONE";
+			}
+			
+			private function muteConnectInputs():void
+			{
+				login.enabled = false;
+				connectUrl.enabled = false;
+			}
+			
+			private function unmuteConnectInputs():void
+			{
+				login.enabled = true;
+				connectUrl.enabled = true;
+			}
+			
+			private function playParticipantsStream(p:Participant):void
+			{
+				var stream:NetStream = p.play();
+				if (stream != null) {
+					remoteDisplay.attachNetStream(stream);
+					stream.addEventListener(NetStatusEvent.NET_STATUS, function(event:NetStatusEvent):void{
+						Logger.info("handlePlayStreamStatus: "+event.info.code);
+						switch (event.info.code) {
+							case "NetStream.Video.DimensionChange":
+								var res:Object = downScaleToFitSize(remoteDisplay.videoWidth, remoteDisplay.videoHeight, display.width, display.height);
+								remoteDisplay.width = res.w;
+								remoteDisplay.height = res.h;
+								remoteDisplayHolder.width = res.w;
+								remoteDisplayHolder.height = res.h;
+								break;
+							case "NetStream.Play.UnpublishNotify":
+							case "NetStream.Play.Stop":
+								remoteDisplay.clear();
+								break;
+						}		
+					});
+				}
+			}
+			
+			//publish local video
+			private function publishLocalMedia(room:Room):void {
+				var stream:NetStream = room.publish(mic, cam);
+				stream.addEventListener(NetStatusEvent.NET_STATUS, function(event:NetStatusEvent):void{
+					Logger.info("handlePublishStreamStatus: "+event.info.code);
+					switch (event.info.code) {
+						case "NetStream.Publish.BadName":
+							setStatus(streamStatus, "FAILED");
+							onMediaStopped(room);
+							break;
+						case "NetStream.Unpublish.Success":
+							setStatus(streamStatus, "UNPUBLISHED");
+							onMediaStopped(room);
+							break;
+						case "NetStream.Publish.Start":
+							setStatus(streamStatus, "PUBLISHING");
+							onMediaPublished(stream);
+							break;
+					}		
+				});
+			}
+			
+			private function onMediaPublished(stream:NetStream):void
+			{
+				publishBtn.label = "Stop";
+				publishBtnHandler = function():void {
+					publishBtn.enabled = false;
+					stream.close();
+				};
+				publishBtn.enabled = true;
+			}
+			
+			private function onMediaStopped(room:Room):void
+			{
+				publishBtn.label = "Publish";
+				publishBtnHandler = function():void {
+					publishBtn.enabled = false;
+					publishLocalMedia(room);
+				};
+				publishBtn.enabled = (session.getRooms().length != 0);
+			}
+			
+			private function addMessage(login:String, message:String):void 
+			{
+				var date:Date = new Date();
+				var hours:String = (date.hours<10) ? '0'+date.hours : date.hours + "";
+				var minutes:String = (date.minutes<10) ? '0'+date.minutes : date.minutes + "";
+				var time:String = hours + ":" + minutes;
+				
+				var newMessage:String = time + " " + login + " - " + message;
+				chatArea.text += newMessage + "\n";
+			}
+			
+			private function validateForm():Boolean
+			{
+				if (login.text == null || login.text == "") {
+					return false;
+				}
+				if (connectUrl.text == null || connectUrl.text == "") {
+					return false;
+				}
+				return true;
+			}
+			
+			private function downScaleToFitSize(videoWidth:Number, videoHeight:Number, dstWidth:Number, dstHeight:Number):Object {
+				if (videoWidth > dstWidth || videoHeight > dstHeight) {
+					var ratio:Number = videoWidth / videoHeight;
+					var newWidth:Number = dstWidth;
+					var newHeight:Number = videoHeight;
+					if (videoWidth > newWidth) {
+						newHeight = Math.floor(newWidth / ratio);
+					}
+					if (newHeight > dstHeight) {
+						newWidth = Math.floor(ratio * dstHeight);
+						newHeight = dstHeight;
+					}
+					return {
+						w: newWidth,
+						h: newHeight
+					};
+				}
+				return {
+					w: videoWidth,
+					h: videoHeight
+				}
+			}
+			
+			private function setStatus(label:Label, status:String):void
+			{
+				label.text = status;
+				switch(status) {
+					case "FAILED":
+						label.setStyle("color", "#ff0000");
+						break;
+					case "PUBLISHING":
+					case "ESTABLISHED":
+						label.setStyle("color", "#10ce10");
+						break;
+					case "DISCONNECTED":
+					case "UNPUBLISHED":
+						label.setStyle("color", "#000000");
+						break;
+				}
+			}
+			
+			private function setInviteAddress(room:Room):void 
+			{
+				inviteUrl.text = this.href.split("?")[0] + "?roomName=" + room.getName();
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Label x="238" y="38" styleName="header" text="Two Way Video Chat"/>
+	
+	<!-- connect / disconnect -->
+	<s:Button id="joinBtn" x="357" y="126" width="86" label="Join" click="joinBtnHandler()"/>
+	<s:TextInput id="login" x="127" y="130" width="200" height="21"/>
+	<s:TextInput id="connectUrl" x="127" y="83" width="200"/>
+	
+	<!-- video -->
+	<mx:Canvas id="display" width="640" height="480" x="47" y="174" backgroundAlpha="0.0" borderStyle="solid">
+		<mx:UIComponent id="remoteDisplayHolder" width="100%" height="100%" horizontalCenter="0" verticalCenter="0"/>
+		<mx:VideoDisplay id="localDisplay" visible="true" x="10" y="350" width="160" height="120"/>
+	</mx:Canvas>
+	
+	<!-- chat -->
+	<s:Button id="sendMessageBtn" x="617" y="914" height="26" label="Send" click="sendMessageBtnHandler()"/>
+	<s:TextArea id="chatArea" x="47" y="775" width="640" height="82" editable="false" text=""/>
+	<s:TextInput id="messageText" x="48" y="884" width="639"/>
+	<s:Label x="42" y="139" width="89" text="Login"/>
+	<s:Label x="42" y="93" width="89" text="WCS URL"/>
+	<s:Label id="participantName" x="326" y="670" width="103" text="NONE" textAlign="center"
+			 verticalAlign="middle"/>
+	<s:Button id="publishBtn" x="343" y="690" height="30" label="Publish" click="publishBtnHandler()"/>
+	<s:TextArea id="inviteUrl" x="47" y="985" width="640" height="49" editable="false" text=""/>
+	<s:Label x="48" y="965" width="89" text="Invite"/>
+	<s:Label id="sessionStatus" x="462" y="130" width="126" height="21"/>
+	<s:Label id="streamStatus" x="330" y="727" width="103" textAlign="center" verticalAlign="middle"/>
+	<s:Label id="failedInfo" x="600" y="130" width="87" height="21" color="#ff0000"/>
+</s:Application>
