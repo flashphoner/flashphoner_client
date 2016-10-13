@@ -440,6 +440,7 @@ var createSession = function(options) {
      *
      * @param {Object} options Call options
      * @param {string} options.callee Call remote party id
+     * @param {string=} options.visibleName Call caller visible name
      * @param {Object} options.constraints Call constraints
      * @param {string} options.mediaProvider MediaProvider type to use with this call
      * @param {Boolean=} options.receiveAudio Receive audio
@@ -466,6 +467,7 @@ var createSession = function(options) {
             throw new TypeError("options must be provided");
         }
         var callee = options.callee;
+        var visibleName = options.visibleName || sipConfig.sipLogin;
 
         var id_ = options.callId || uuid.v1();
         var mediaProvider = options.mediaProvider || getMediaProviders()[0];
@@ -570,7 +572,8 @@ var createSession = function(options) {
                         sdp: offer.sdp,
                         caller: sipConfig.login,
                         callee: callee,
-                        custom: options.custom
+                        custom: options.custom,
+                        visibleName: visibleName
                     });
                 });
             }).catch(function(error){
@@ -817,7 +820,22 @@ var createSession = function(options) {
                 return mediaConnection.getStats();
             }
         };
-
+        /**
+         * Get call info
+         *
+         * @returns {Object} Call info
+         * @memberof Call
+         * @inner
+         */
+        var getInfo = function () {
+            var info ={};
+            info.id = id();
+            info.caller = sipConfig.sipLogin;
+            info.callee = callee;
+            info.visibleName = visibleName;
+            info.mediaProvider = mediaProvider;
+            return info;
+        };
         /**
          * Call event callback.
          *
@@ -861,6 +879,7 @@ var createSession = function(options) {
         call.muteVideo = muteVideo;
         call.unmuteVideo = unmuteVideo;
         call.isVideoMuted = isVideoMuted;
+        call.getInfo = getInfo;
         call.on = on;
         return call;
     };
