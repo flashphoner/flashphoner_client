@@ -49,6 +49,7 @@ function connect() {
 		password: $("#sipPassword").val(),
 		domain: $("#sipDomain").val(),
 		port: $("#sipPort").val(),
+        registerRequired: $("#sipRegisterRequired").is(':checked')
     }; 
 
     var connectionOptions = {

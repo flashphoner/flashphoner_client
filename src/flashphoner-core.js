@@ -267,7 +267,8 @@ var createSession = function(options) {
             sipPassword: options.sipOptions.password,
             sipDomain: options.sipOptions.domain,
             sipProxy: options.sipOptions.proxy,
-            sipPort: options.sipOptions.port
+            sipPort: options.sipOptions.port,
+            sipRegisterRequired: options.sipOptions.registerRequired
         }
     }
     //media provider auth token received from server
