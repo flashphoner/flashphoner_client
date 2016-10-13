@@ -51,6 +51,7 @@ package com.flashphoner.api2 {
         }
 
         private function creationHandler(e:FlexEvent):void {
+            Security.allowDomain("*");
             //save config
             Main.config = parameters;
             scopeId = parameters.id;
