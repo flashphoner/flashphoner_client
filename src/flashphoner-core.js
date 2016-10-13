@@ -467,8 +467,8 @@ var createSession = function(options) {
         if (!options) {
             throw new TypeError("options must be provided");
         }
-        var callee = options.callee;
-        var visibleName = options.visibleName || sipConfig.sipLogin;
+        var callee_ = options.callee;
+        var visibleName_ = options.visibleName || sipConfig.sipLogin;
 
         var id_ = options.callId || uuid.v1();
         var mediaProvider = options.mediaProvider || getMediaProviders()[0];
@@ -572,9 +572,9 @@ var createSession = function(options) {
                         mediaProvider: mediaProvider,
                         sdp: offer.sdp,
                         caller: sipConfig.login,
-                        callee: callee,
+                        callee: callee_,
                         custom: options.custom,
-                        visibleName: visibleName
+                        visibleName: visibleName_
                     });
                 });
             }).catch(function(error){
@@ -667,7 +667,7 @@ var createSession = function(options) {
                         mediaProvider: mediaProvider,
                         sdp: sdp,
                         caller: sipConfig.login,
-                        callee: callee,
+                        callee: callee_,
                         custom: options.custom
                     });
                 });
@@ -702,7 +702,36 @@ var createSession = function(options) {
         var id = function() {
             return id_;
         };
-
+        /**
+         * Get caller id.
+         *
+         * @returns {string} Caller id
+         * @memberof Call
+         * @inner
+         */
+        var caller = function() {
+            return sipConfig.sipLogin;
+        };
+        /**
+         * Get callee id.
+         *
+         * @returns {string} Callee id
+         * @memberof Call
+         * @inner
+         */
+        var callee = function() {
+            return callee_;
+        };
+        /**
+         * Get caller visible name.
+         *
+         * @returns {string} Caller visible name
+         * @memberof Call
+         * @inner
+         */
+        var visibleName = function() {
+            return visibleName_;
+        };
         /**
          * Media controls
          */
@@ -822,22 +851,6 @@ var createSession = function(options) {
             }
         };
         /**
-         * Get call info
-         *
-         * @returns {Object} Call info
-         * @memberof Call
-         * @inner
-         */
-        var getInfo = function () {
-            var info ={};
-            info.id = id();
-            info.caller = sipConfig.sipLogin;
-            info.callee = callee;
-            info.visibleName = visibleName;
-            info.mediaProvider = mediaProvider;
-            return info;
-        };
-        /**
          * Call event callback.
          *
          * @callback Call~eventCallback
@@ -880,7 +893,9 @@ var createSession = function(options) {
         call.muteVideo = muteVideo;
         call.unmuteVideo = unmuteVideo;
         call.isVideoMuted = isVideoMuted;
-        call.getInfo = getInfo;
+        call.caller = caller;
+        call.callee = callee;
+        call.visibleName = visibleName;
         call.on = on;
         return call;
     };
