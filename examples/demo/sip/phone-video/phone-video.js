@@ -31,6 +31,12 @@ function init_page(){
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
 
+    //hide remote video if current media provider is Flash
+    if (Flashphoner.getMediaProviders()[0] == "Flash") {
+        ddocument.getElementById('remoteVideoWrapper').style.visibility = "hidden";
+        document.getElementById('localVideoWrapper').className = 'fp-remoteVideo';
+    }
+
     // Set websocket URL
     $("#urlServer").val(setURL());
 	
