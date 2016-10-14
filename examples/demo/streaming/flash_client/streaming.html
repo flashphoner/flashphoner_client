@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../dependencies/bootstrap/css/bootstrap.css">
+    <title>Streamer and Player</title>
+
+    <script type="text/javascript" src="../../../dependencies/jquery/jquery-1.12.0.js"></script>
+
+    <script type="text/javascript" src="../../../dependencies/swf/swfobject.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="../../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        function bodyLoaded() {
+            var attributes = {};
+            var flashvars = {};
+            var pathToSWF = "streaming/bin/streaming.swf";
+            var elementId = "flash";
+            var params = {};
+            var callback = function (e) {
+                if (e.success) {
+                    var swf = document.getElementById("flash");
+                    var url = "rtmfp://" + window.location.hostname + ":" + "1935";
+                    var t = setTimeout(function () {
+                        var interval = setInterval( function() {
+                            if (swf.setURLtoFlash) {
+                                swf.setURLtoFlash(url);
+                                clearInterval(interval);
+                            } 
+                        }, 1000);
+                    }, 1000);
+                }
+            };
+            params.menu = "true";
+            params.swliveconnect = "true";
+            params.allowfullscreen = "true";
+            params.allowscriptaccess = "always";
+            params.bgcolor = "#777777";
+            swfobject.embedSWF(pathToSWF, elementId, "450", "595", "11.2.202", "expressInstall.swf", flashvars, params, attributes, callback);
+        }
+    </script>
+
+</head>
+<body onload="bodyLoaded()">
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6 text-center">
+            <div id="flash"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
