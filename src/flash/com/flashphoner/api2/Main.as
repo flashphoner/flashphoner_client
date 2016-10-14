@@ -51,6 +51,7 @@ package com.flashphoner.api2 {
         }
 
         private function creationHandler(e:FlexEvent):void {
+            Security.allowDomain("*");
             //save config
             Main.config = parameters;
             scopeId = parameters.id;
@@ -128,19 +129,17 @@ package com.flashphoner.api2 {
             this.connection.disconnect();
         }
 
-        public function setup(incoming:Boolean, outgoing:Boolean, hasAudio:Boolean, hasVideo:Boolean, audioCodec:String):void {
+        public function setup(incoming:Boolean, outgoing:Boolean, hasAudio:Boolean, hasVideo:Boolean):void {
             if (incoming && outgoing) {
                 this.connection.setupStreams(localMediaControl, remoteMediaControl, hasAudio, hasVideo);
                 this.remoteDisplayHolder.visible = true;
                 this.localDisplay.visible = true;
                 this.localDisplay.percentWidth = 20;
                 this.localDisplay.percentHeight = 20;
-                //localMediaControl.changeCodec(audioCodec);
             } else if (outgoing) {
                 this.connection.setupStreams(localMediaControl, null, hasAudio, hasVideo);
                 this.remoteDisplayHolder.visible = false;
                 this.localDisplay.visible = true;
-                //localMediaControl.changeCodec(audioCodec);
             } else {
                 this.connection.setupStreams(null, remoteMediaControl, hasAudio, hasVideo);
                 this.remoteDisplayHolder.visible = true;
