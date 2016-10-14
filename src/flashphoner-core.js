@@ -45,7 +45,7 @@ var init = function(options) {
             webRtcProvider.configure(webRtcConf);
         }
         var flashProvider = require("./flash-media-provider");
-        if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available()) {
+        if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available() && !MediaProvider.WebRTC) {
             MediaProvider.Flash = flashProvider;
             var flashConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
