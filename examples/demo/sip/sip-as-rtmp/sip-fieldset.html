@@ -1,0 +1,49 @@
+<legend class="scheduler-border">SIP Details</legend>
+<form id="formConnection" class="form-horizontal" role="form">
+    <div id="urlServerForm" class="form-group">
+        <div class="col-sm-9">
+            <input type="text" class="form-control" id="restUrl"/>
+        </div>
+    </div>
+    <div id="sipLoginForm" class="form-group">
+        <label class="control-label col-sm-3" for="sipLogin">Login</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="sipLogin" placeholder="SIP username"/>
+        </div>
+    </div>
+    <div id="sipPasswordForm" class="form-group">
+        <label class="control-label col-sm-3" for="sipPassword">Password</label>
+
+        <div class="col-sm-6">
+            <input type="password" class="form-control" id="sipPassword"
+                   placeholder="SIP password"/>
+        </div>
+    </div>
+    <div id="sipDomainForm" class="form-group">
+        <label class="control-label col-sm-3" for="sipDomain">Domain</label>
+
+        <div class="col-sm-6">
+            <input type="text" class="form-control" id="sipDomain" placeholder="SIP domain"/>
+        </div>
+    </div>
+    <div id="sipPortForm" class="form-group">
+        <label class="control-label col-sm-3" for="sipPort">Port</label>
+
+        <div class="col-sm-3">
+            <input type="text" class="form-control" id="sipPort" placeholder="5060"/>
+        </div>
+    </div>
+    <div id="appKeyForm" class="form-group">
+        <label class="control-label col-sm-3" for="appKey">App Key</label>
+
+        <div class="col-sm-3">
+            <input type="text" class="form-control" id="appKey" value="callApp"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="checkbox-inline"><input onclick="setValue(this);" id="sipRegisterRequired" type="checkbox" value="false">Register Required</label>
+        <label class="checkbox-inline"><input onclick="setValue(this);" id="hasAudio" type="checkbox" value="false">hasAudio</label>
+        <label class="checkbox-inline"><input onclick="setValue(this);" id="hasVideo" type="checkbox" value="false">hasVideo</label>
+    </div>
+</form>
