@@ -944,8 +944,8 @@ var createSession = function(options) {
             var constraints = checkConstraints(options.constraints);
         }
         // Receive media
-        var receiveAudio = options.receiveAudio || true;
-        var receiveVideo = options.receiveVideo || true;
+        var receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : true;
+        var receiveVideo = (typeof options.receiveVideo !== 'undefined') ? options.receiveVideo : true;
 
         var resolution = {};
 
