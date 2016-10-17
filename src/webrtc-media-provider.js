@@ -95,6 +95,7 @@ var createConnection = function(options) {
                     }
                     if (!localVideo.srcObject.getVideoTracks()[0]) {
                         hasVideo = false;
+                        options.receiveVideo = false;
                     }
                 }
                 var constraints = {

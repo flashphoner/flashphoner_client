@@ -453,12 +453,15 @@ var listDevices = function() {
 };
 
 function normalizeConstraints(constraints) {
-    if (constraints && constraints.video) {
+    if (constraints && typeof constraints.video !== 'undefined') {
         if (constraints.video.hasOwnProperty('frameRate')) {
             var frameRate = constraints.video.frameRate;
             if (frameRate == 0 || isNaN(frameRate)) {
                 delete constraints.video.frameRate;
             }
+        }
+        if (constraints.video === false) {
+            delete constraints.video;
         }
     }
     return constraints;
