@@ -31,17 +31,9 @@ function connect() {
         var url = $('#urlServer').val();
 	    var appKey = "clickToCallApp";
 
-	    var sipOptions = {
-	        login: "001",
-	        password: "001",
-	        domain: "46.101.138.21",
-	        port: "5060",
-	    }; 
-
 	    var connectionOptions = {
 		    urlServer: url,
-		    sipOptions: sipOptions
-		    //appKey: appKey
+		    appKey: appKey
 	    };
 
 	    //create session
