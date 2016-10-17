@@ -1,7 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS; 
 var CALL_STATUS = Flashphoner.constants.CALL_STATUS;
-var localVideo;
-var remoteVideo;
+var localDisplay;
+var remoteDisplay;
 var currentCall;
 
 $(document).ready(function () {
@@ -27,15 +27,8 @@ function init_page(){
         return;
     }
 	
-	//local and remote displays
-    localVideo = document.getElementById("localVideo");
-    remoteVideo = document.getElementById("remoteVideo");
-
-    //hide remote video if current media provider is Flash
-    if (Flashphoner.getMediaProviders()[0] == "Flash") {
-        $("#remoteVideoWrapper").hide();
-		$("#localVideoWrapper").attr('class', 'fp-remoteVideo');
-    }
+    localDisplay = document.getElementById("localDisplay");
+	remoteDisplay = document.getElementById("remoteDisplay");
 
     // Set websocket URL
     $("#urlServer").val(setURL());
@@ -56,7 +49,7 @@ function connect() {
 		password: $("#sipPassword").val(),
 		domain: $("#sipDomain").val(),
 		port: $("#sipPort").val(),
-        registerRequired: registerRequired
+		registerRequired: registerRequired
     }; 
 
     var connectionOptions = {
@@ -89,7 +82,7 @@ function connect() {
 		    setStatus("#callStatus", CALL_STATUS.RING);
         }).on(CALL_STATUS.ESTABLISHED, function(){
 		    setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
-			enableMuteToggles(true);
+			enableMuteToggle(true);
         }).on(CALL_STATUS.FINISH, function(){
 		    setStatus("#callStatus", CALL_STATUS.FINISH);
 			onHangupIncoming();
@@ -101,17 +94,26 @@ function connect() {
 
 function call() {
 	var session = Flashphoner.getSessions()[0];
+	
+	var constraints = {
+        audio: true,
+        video: false
+    };
+	
 	//prepare outgoing call 
     var outCall = session.createCall({
 		callee: $("#callee").val(),
         visibleName: $("#sipLogin").val(),
-	    localVideoDisplay: localVideo, 
-        remoteVideoDisplay: remoteVideo 
+		localVideoDisplay: localDisplay,
+		remoteVideoDisplay: remoteDisplay,
+		constraints: constraints,
+		receiveAudio: true,
+        receiveVideo: false
 	}).on(CALL_STATUS.RING, function(){
 		setStatus("#callStatus", CALL_STATUS.RING);
     }).on(CALL_STATUS.ESTABLISHED, function(){
 		setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
-		enableMuteToggles(true);
+		enableMuteToggle(true);
     }).on(CALL_STATUS.FINISH, function(){
 		setStatus("#callStatus", CALL_STATUS.FINISH);
 	    onHangupOutgoing();
@@ -149,7 +151,7 @@ function onDisconnected() {
 		}
     }).prop('disabled', false);
     disableConnectionFields("formConnection", false);
-    disableOutgoing(true);
+	disableOutgoing(true);
 }
 
 function onHangupOutgoing() {
@@ -161,7 +163,7 @@ function onHangupOutgoing() {
     }).prop('disabled', false);
     $('#callee').prop('disabled', false);
 	disableOutgoing(false);
-	enableMuteToggles(false);
+	enableMuteToggle(false);
 }
 
 function onIncomingCall(inCall) {
@@ -171,7 +173,7 @@ function onIncomingCall(inCall) {
 	
     $("#answerBtn").off('click').click(function(){
 		$(this).prop('disabled', true);
-		inCall.answer(localVideo, remoteVideo);
+		inCall.answer(localDisplay, remoteDisplay);
 		showAnswered();
     }).prop('disabled', false);
 	
@@ -184,7 +186,7 @@ function onIncomingCall(inCall) {
 
 function onHangupIncoming() {
     showOutgoing();
-	enableMuteToggles(false);
+	enableMuteToggle(false);
 }
 
 // Set connection and call status
@@ -233,7 +235,7 @@ function disableConnectionFields(formId, disable) {
     $('#' + formId + ' :text').each(function(){
        $(this).prop('disabled', disable);
     });
-	$('#' + formId + ' :password').prop('disabled', disable);
+    $('#' + formId + ' :password').prop('disabled', disable);
     $('#' + formId + ' :checkbox').prop('disabled', disable);
 }
 
@@ -279,32 +281,14 @@ function unmute() {
 	}
 }
 
-// Mute video in the call
-function muteVideo() {
-	if (currentCall) {
-        currentCall.muteVideo();
-	}
-}
-
-// Unmute video in the call
-function unmuteVideo() {
-	if (currentCall) {
-        currentCall.unmuteVideo();
-    }
-}
-
-function enableMuteToggles(enable) {
+function enableMuteToggle(enable) {
     var $muteAudioToggle = $("#muteAudioToggle");
-    var $muteVideoToggle = $("#muteVideoToggle");
 	
 	if (enable) {
 		$muteAudioToggle.removeAttr("disabled");
 		$muteAudioToggle.trigger('change');
-		$muteVideoToggle.removeAttr("disabled");
-		$muteVideoToggle.trigger('change');
 	}
 	else {
 		$muteAudioToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
-		$muteVideoToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
     }
 }

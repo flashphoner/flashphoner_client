@@ -69,3 +69,7 @@ legend.scheduler-border {
 input[type="checkbox"] {
     line-height: normal;
 }
+
+.form-horizontal .checkbox {
+    min-height: 55px;
+}
