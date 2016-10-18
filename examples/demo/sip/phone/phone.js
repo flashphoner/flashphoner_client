@@ -173,7 +173,10 @@ function onIncomingCall(inCall) {
 	
     $("#answerBtn").off('click').click(function(){
 		$(this).prop('disabled', true);
-		inCall.answer(localDisplay, remoteDisplay);
+		inCall.answer({
+            localVideoDisplay: localDisplay,
+            remoteVideoDisplay: remoteDisplay
+        });
 		showAnswered();
     }).prop('disabled', false);
 	
