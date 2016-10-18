@@ -306,7 +306,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.3",
+            clientVersion: "0.5.4",
             custom: options.custom
         };
         if (getMediaProviders()[0] == "WSPlayer") {
@@ -853,6 +853,33 @@ var createSession = function(options) {
             }
         };
         /**
+         * Place call on hold
+         *
+         * @memberof Call
+         * @inner
+         */
+        var hold = function() {
+            send("hold", {callId: id_});
+        }
+        /**
+         * Place call on hold for transfer
+         *
+         * @memberof Call
+         * @inner
+         */
+        var holdForTransfer = function() {
+            send("hold", {callId: id_, holdForTransfer: true});
+        }
+        /**
+         * Unhold the call
+         *
+         * @memberof Call
+         * @inner
+         */
+        var unhold = function() {
+            send("unhold", {callId: id_});
+        }
+        /**
          * Call event callback.
          *
          * @callback Call~eventCallback
@@ -898,6 +925,9 @@ var createSession = function(options) {
         call.caller = caller;
         call.callee = callee;
         call.visibleName = visibleName;
+        call.hold = hold;
+        call.holdForTransfer = holdForTransfer;
+        call.unhold = unhold;
         call.on = on;
         return call;
     };
