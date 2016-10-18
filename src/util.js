@@ -93,5 +93,16 @@ module.exports = {
             }
         }
         return result;
+    },
+    SDP: {
+        matchPrefix: function(blob,prefix) {
+            var parts = blob.trim().split('\n').map(function(line) {
+                return line.trim();
+            });
+            return parts.filter(function(line) {
+                return line.indexOf(prefix) === 0;
+            });
+        }
     }
+
 };

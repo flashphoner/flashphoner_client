@@ -306,7 +306,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.4",
+            clientVersion: "0.5.5",
             custom: options.custom
         };
         if (getMediaProviders()[0] == "WSPlayer") {
@@ -612,20 +612,22 @@ var createSession = function(options) {
 
         /**
          * Answer incoming call.
-         *
-         * @param {HTMLElement} localVideoDisplay Div element local video should be displayed in
-         * @param {HTMLElement} remoteVideoDisplay Div element remote video should be displayed in
+         * @param {Object} options Call options
+         * @param {HTMLElement} options.localVideoDisplay Div element local video should be displayed in
+         * @param {HTMLElement} options.remoteVideoDisplay Div element remote video should be displayed in
+         * @param {String=} options.constraints Answer call with constraints
          * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.NEW}
          * @memberof Call
          * @name call
          * @inner
          */
-        var answer = function(localVideoDisplay, remoteVideoDisplay) {
+        var answer = function(options) {
             if (status_ !== CALL_STATUS.NEW && status_ !== CALL_STATUS.RING) {
                 throw new Error("Invalid call state");
             }
-            localDisplay = localVideoDisplay;
-            remoteDisplay = remoteVideoDisplay;
+            localDisplay = options.localVideoDisplay;
+            remoteDisplay = options.remoteVideoDisplay;
+            constraints = options.constraints || getDefaultMediaConstraints();
             status_ = CALL_STATUS.PENDING;
             var sdp;
             if (!remoteSdpCache[id_]) {
@@ -634,6 +636,9 @@ var createSession = function(options) {
             } else {
                 sdp = remoteSdpCache[id_];
                 delete remoteSdpCache[id_];
+            }
+            if (util.SDP.matchPrefix(sdp,"m=video").length == 0) {
+                constraints.video = false;
             }
             var hasAudio = true;
             //get access to camera
