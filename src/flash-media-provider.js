@@ -74,8 +74,8 @@ var createConnection = function(options) {
             return new Promise(function (resolve, reject) {
                 var receiveAudio = options.receiveAudio == undefined ? false : options.receiveAudio;
                 var receiveVideo = options.receiveVideo == undefined ? false : options.receiveVideo;
-                var sendAudio = options.sendAudio == undefined ? false : options.sendAudio;
-                var sendVideo = options.sendVideo == undefined ? false : options.sendVideo;
+                var sendAudio = flash.isHasAudio();
+                var sendVideo = flash.isHasVideo();
                 var sdp = DEFAULT_SDP;
                 if (receiveAudio && sendAudio) {
                     sdp = sdp.replace("AUDIO_STATE", "sendrecv");
@@ -107,8 +107,8 @@ var createConnection = function(options) {
             return new Promise(function (resolve, reject) {
                 var receiveAudio = options.receiveAudio == undefined ? false : options.receiveAudio;
                 var receiveVideo = options.receiveVideo == undefined ? false : options.receiveVideo;
-                var sendAudio = options.sendAudio == undefined ? false : options.sendAudio;
-                var sendVideo = options.sendVideo == undefined ? false : options.sendVideo;
+                var sendAudio = flash.isHasAudio();
+                var sendVideo = flash.isHasVideo();
                 var sdp = DEFAULT_SDP;
                 if (receiveAudio && sendAudio) {
                     sdp = sdp.replace("AUDIO_STATE", "sendrecv");

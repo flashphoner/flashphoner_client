@@ -612,22 +612,22 @@ var createSession = function(options) {
 
         /**
          * Answer incoming call.
-         * @param {Object} options Call options
-         * @param {HTMLElement} options.localVideoDisplay Div element local video should be displayed in
-         * @param {HTMLElement} options.remoteVideoDisplay Div element remote video should be displayed in
-         * @param {String=} options.constraints Answer call with constraints
+         * @param {Object} answerOptions Call options
+         * @param {HTMLElement} answerOptions.localVideoDisplay Div element local video should be displayed in
+         * @param {HTMLElement} answerOptions.remoteVideoDisplay Div element remote video should be displayed in
+         * @param {String=} answerOptions.constraints Answer call with constraints
          * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.NEW}
          * @memberof Call
          * @name call
          * @inner
          */
-        var answer = function(options) {
+        var answer = function(answerOptions) {
             if (status_ !== CALL_STATUS.NEW && status_ !== CALL_STATUS.RING) {
                 throw new Error("Invalid call state");
             }
-            localDisplay = options.localVideoDisplay;
-            remoteDisplay = options.remoteVideoDisplay;
-            constraints = options.constraints || getDefaultMediaConstraints();
+            localDisplay = answerOptions.localVideoDisplay;
+            remoteDisplay = answerOptions.remoteVideoDisplay;
+            constraints = answerOptions.constraints || getDefaultMediaConstraints();
             status_ = CALL_STATUS.PENDING;
             var sdp;
             if (!remoteSdpCache[id_]) {
@@ -637,7 +637,7 @@ var createSession = function(options) {
                 sdp = remoteSdpCache[id_];
                 delete remoteSdpCache[id_];
             }
-            if (util.SDP.matchPrefix(sdp,"m=video").length == 0) {
+            if (!options.hasVideo) {
                 constraints.video = false;
             }
             var hasAudio = true;
@@ -668,7 +668,7 @@ var createSession = function(options) {
                     send("answer", {
                         callId: id_,
                         incoming: true,
-                        hasVideo: true,
+                        hasVideo: options.hasVideo,
                         hasAudio: hasAudio,
                         status: status_,
                         mediaProvider: mediaProvider,

@@ -95,8 +95,8 @@ module.exports = {
         return result;
     },
     SDP: {
-        matchPrefix: function(blob,prefix) {
-            var parts = blob.trim().split('\n').map(function(line) {
+        matchPrefix: function(sdp,prefix) {
+            var parts = sdp.trim().split('\n').map(function(line) {
                 return line.trim();
             });
             return parts.filter(function(line) {
