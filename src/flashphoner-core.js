@@ -467,8 +467,10 @@ var createSession = function(options) {
         if (!options) {
             throw new TypeError("options must be provided");
         }
+        var login = (appKey == 'clickToCallApp') ? '' : sipConfig.sipLogin;
+        var caller_ = (options.incoming) ? options.caller : login;
         var callee_ = options.callee;
-        var visibleName_ = options.visibleName || sipConfig.sipLogin;
+        var visibleName_ = options.visibleName || login;
 
         var id_ = options.callId || uuid.v1();
         var mediaProvider = options.mediaProvider || getMediaProviders()[0];
@@ -553,7 +555,7 @@ var createSession = function(options) {
                     authToken: authToken,
                     mainUrl: urlServer,
                     bidirectional: true,
-                    login: sipConfig.sipLogin
+                    login: login
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
@@ -571,7 +573,7 @@ var createSession = function(options) {
                         status: status_,
                         mediaProvider: mediaProvider,
                         sdp: offer.sdp,
-                        caller: sipConfig.login,
+                        caller: login,
                         callee: callee_,
                         custom: options.custom,
                         visibleName: visibleName_
@@ -710,7 +712,7 @@ var createSession = function(options) {
          * @inner
          */
         var caller = function() {
-            return sipConfig.sipLogin;
+            return caller_;
         };
         /**
          * Get callee id.
