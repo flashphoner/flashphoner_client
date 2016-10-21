@@ -462,6 +462,12 @@ function normalizeConstraints(constraints) {
         }
         if (constraints.video === false) {
             delete constraints.video;
+        } else if (constraints.video === true) {
+            // Set default video constraints
+            constraints.video= {
+                width: 320,
+                height: 240
+            }
         }
     }
     return constraints;
