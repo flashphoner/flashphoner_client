@@ -306,7 +306,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.5",
+            clientVersion: "0.5.6",
             custom: options.custom
         };
         if (getMediaProviders()[0] == "WSPlayer") {
@@ -885,6 +885,30 @@ var createSession = function(options) {
             send("unhold", {callId: id_});
         }
         /**
+         * Send DTMF
+         *
+         * @param {number} number Number
+         * @memberof Call
+         * @inner
+         */
+        var sendDTMF = function(number) {
+            send("sendDtmf", {
+                callId: id_,
+                type: "RFC2833",
+                dtmf: number
+            });
+        }
+        /**
+         * Transfer call
+         *
+         * @param {String} traget Transfer target
+         * @memberof Call
+         * @inner
+         */
+        var transfer = function(target) {
+            send("transfer", {callId: id_, target: target});
+        }
+        /**
          * Call event callback.
          *
          * @callback Call~eventCallback
@@ -933,6 +957,8 @@ var createSession = function(options) {
         call.hold = hold;
         call.holdForTransfer = holdForTransfer;
         call.unhold = unhold;
+        call.sendDTMF = sendDTMF;
+        call.transfer = transfer;
         call.on = on;
         return call;
     };
