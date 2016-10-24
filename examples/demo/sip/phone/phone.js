@@ -173,9 +173,15 @@ function onIncomingCall(inCall) {
 	
     $("#answerBtn").off('click').click(function(){
 		$(this).prop('disabled', true);
+        var constraints = {
+            audio: true,
+            video: false
+        };
 		inCall.answer({
             localVideoDisplay: localDisplay,
-            remoteVideoDisplay: remoteDisplay
+            remoteVideoDisplay: remoteDisplay,
+            receiveVideo: false,
+            constraints: constraints
         });
 		showAnswered();
     }).prop('disabled', false);
