@@ -150,6 +150,8 @@ function onDisconnected() {
     }).prop('disabled', false);
     disableConnectionFields("formConnection", false);
     disableOutgoing(true);
+    showOutgoing();
+    setStatus("#callStatus", "");
 }
 
 function onHangupOutgoing() {

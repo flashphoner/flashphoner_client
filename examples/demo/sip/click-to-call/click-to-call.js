@@ -78,14 +78,14 @@ function call(session) {
 	
 	outCall.call();
 	
-	$("#callBtn").text("Hangup").off('click').click(function(){
+	$("#callBtn").text("Hangup").removeClass("btn-success").addClass("btn-danger").off('click').click(function(){
         $(this).prop('disabled', true);
 	    outCall.hangup();
     }).prop('disabled', false);
 }
 
 function onHangup() {
-    $("#callBtn").text("Call").off('click').click(function(){
+    $("#callBtn").removeClass("btn-danger").addClass("btn-success").text("Call").off('click').click(function(){
 		if ($("#urlServer").val() && $("#callee").val) {
 			$(this).prop('disabled', true);
 			$('#urlServer').prop('disabled', true);
