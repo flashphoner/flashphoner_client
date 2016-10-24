@@ -306,7 +306,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.6",
+            clientVersion: "0.5.7",
             custom: options.custom
         };
         if (getMediaProviders()[0] == "WSPlayer") {
@@ -615,6 +615,8 @@ var createSession = function(options) {
          * @param {Object} answerOptions Call options
          * @param {HTMLElement} answerOptions.localVideoDisplay Div element local video should be displayed in
          * @param {HTMLElement} answerOptions.remoteVideoDisplay Div element remote video should be displayed in
+         * @param {Boolean=} answerOptions.receiveAudio Receive audio
+         * @param {Boolean=} answerOptions.receiveVideo Receive video
          * @param {String=} answerOptions.constraints Answer call with constraints
          * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.NEW}
          * @memberof Call
@@ -637,7 +639,7 @@ var createSession = function(options) {
                 sdp = remoteSdpCache[id_];
                 delete remoteSdpCache[id_];
             }
-            if (!options.hasVideo) {
+            if (util.SDP.matchPrefix(sdp,"m=video").length == 0) {
                 constraints.video = false;
             }
             var hasAudio = true;
@@ -663,12 +665,15 @@ var createSession = function(options) {
                     mediaConnection = newConnection;
                     return mediaConnection.setRemoteSdp(sdp);
                 }).then(function(){
-                    return mediaConnection.createAnswer({});
+                    return mediaConnection.createAnswer({
+                        receiveAudio: options.receiveAudio,
+                        receiveVideo: options.receiveVideo
+                    });
                 }).then(function(sdp) {
                     send("answer", {
                         callId: id_,
                         incoming: true,
-                        hasVideo: options.hasVideo,
+                        hasVideo: true,
                         hasAudio: hasAudio,
                         status: status_,
                         mediaProvider: mediaProvider,

@@ -105,7 +105,7 @@ var createConnection = function(options) {
 
         var createAnswer = function (options) {
             return new Promise(function (resolve, reject) {
-                var receiveAudio = options.receiveAudio == undefined ? false : options.receiveAudio;
+                var receiveAudio = options.receiveAudio == undefined ? true : options.receiveAudio;
                 var receiveVideo = options.receiveVideo == undefined ? false : options.receiveVideo;
                 var sendAudio = flash.isHasAudio();
                 var sendVideo = flash.isHasVideo();
@@ -139,7 +139,7 @@ var createConnection = function(options) {
         var setRemoteSdp = function(sdp) {
             return new Promise(function(resolve, reject){
                 var state = extractMediaState(sdp);
-                flash.setup(state.incoming, state.outgoing, true, true);
+                flash.setup(state.incoming, state.outgoing, flash.isHasAudio(), flash.isHasVideo());
                 resolve(connections[id]);
             });
         };
