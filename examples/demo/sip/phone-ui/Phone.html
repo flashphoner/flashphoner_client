@@ -1,0 +1,207 @@
+<html lang="ru">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport"/>
+    <title>Phone</title>
+    <link type="text/css" rel="stylesheet" href="gui/css/style.css"/>
+    <style>
+        .fp-demoH1 {
+            font-size: 36px;
+            margin-top: 20px !important;
+            margin-left: 130px;
+            font-weight: 500;
+            text-align: left;
+            color:grey;
+            font-family: Helvetica;
+        }
+    </style>
+</head>
+<body>
+
+<h1 class="fp-demoH1">Phone</h1>
+
+<!-- alert -->
+<div class="b-alert"></div>
+<div class="b-alert__error">
+    <a href="#" title="" class="b-alert__close"></a>
+    <div class="b-alert__error__message"></div>
+</div>
+
+<!-- begin of phone -->
+<div class="b-phone">
+
+<!-- begin of display -->
+<div class="b-display">
+
+    <!-- header -->
+    <div class="b-display__header">
+        <span class="b-display__header__video"></span>
+        <span class="b-display__header__volume"></span>
+        <span class="b-display__header__mike"></span>
+        <span class="b-display__header__login">Log in</span>
+        <span class="b-display__header__sip_login"></span>
+
+        <div class="b-volume">
+            <div id="volume"></div>
+            <div class="volume-percent"></div>
+        </div>
+        <div class="b-mike">
+            <div id="mike"></div>
+            <div class="mike-percent"></div>
+        </div>
+    </div>
+
+    <!-- voice call out -->
+    <div class="call__out__dial">calling to</div>
+    <div class="call__inc__dial">User 5</div>
+    <div class="voice_call__call">
+        <div class="voice_call__call__play">
+            <span class="interlocutor1"></span>
+            <span class="call_type"></span>
+            <span class="interlocutor2"></span>
+
+            <div class="b-time"><span class='b-min'>00</span>:<span class='b-sec'>00</span></div>
+        </div>
+        <div class="voice_call__call__pause">User 5</div>
+        <div class="voice_call__nav">
+            <span class="voice_call__stop open"></span>
+            <span class="voice_call__play"></span>
+            <span class="voice_call__transfer"></span>
+        </div>
+    </div>
+
+    <!-- number block -->
+    <div class="b-display__bottom__number">
+        <input type="text" class="b-numbers"/>
+
+        <div class="b-numbers__clear"></div>
+        <span>Enter your number here</span>
+    </div>
+
+</div>
+<!-- end of display -->
+
+<!-- navigation -->
+<div class="b-nav">
+    <div class="b-nav__video"><span>Video call</span></div>
+    <div class="b-nav__voice"><span>Voice call</span></div>
+    <div class="b-nav__cancel_call"><span style="padding-left: 115px;">Cancel</span></div>
+</div>
+
+<!-- navigation incomming call -->
+<div class="b-nav__inc">
+    <div class="b-nav__hangup"><span>Hangup</span></div>
+    <div class="b-nav__answer_video"><span>Answer with Video</span></div>
+    <div class="b-nav__answer"><span>Answer</span></div>
+</div>
+
+<!-- numbers -->
+<div class="b-num">
+    <table>
+        <tr>
+            <td class="code49">1</td>
+            <td class="code50">2</td>
+            <td class="code51">3</td>
+        </tr>
+        <tr>
+            <td class="code52">4</td>
+            <td class="code53">5</td>
+            <td class="code54">6</td>
+        </tr>
+        <tr>
+            <td class="code55">7</td>
+            <td class="code56">8</td>
+            <td class="code57">9</td>
+        </tr>
+        <tr>
+            <td class="code_star"><span class="b-num__star">*</span></td>
+            <td class="code58">0</td>
+            <td class="code_cell">#</td>
+        </tr>
+    </table>
+</div>
+
+<!-- login window -->
+<form class="b-login">
+    <p>
+        <label id="sipLoginLabel" for="sipLogin">login:</label>
+        <input type="text" value="" id="sipLogin"/>
+    </p>
+
+    <p>
+        <label id="sipAuthenticationNameLabel" for="sipAuthenticationName">auth. name:</label>
+        <input type="text" value="" id="sipAuthenticationName"/>
+    </p>
+
+    <p>
+        <label id="sipPasswordLabel" for="sipPassword">password:</label>
+        <input type="password" value="" id="sipPassword"/>
+    </p>
+
+    <p>
+        <label id="sipDomainLabel" for="sipDomain">domain:</label>
+        <input type="text" value="" id="sipDomain"/>
+    </p>
+
+    <p>
+        <label id="sipOutboundProxyLabel" for="sipOutboundProxy">outbound proxy:</label>
+        <input type="text" value="" id="sipOutboundProxy"/>
+    </p>
+
+    <p>
+        <label id="sipPortLabel" for="sipPort">port:</label>
+        <input type="text" value="" id="sipPort"/>
+    </p>
+
+    <div class="b-login__btn">
+        <input type="button" value="log in"/>
+        <span class="b-login__cancel">cancel</span>
+    </div>
+</form>
+
+<!-- video window -->
+<div class="b-video">
+    <a href="#" title="" class="b-video__close"></a>
+
+    <div class="b-video__video ui-widget-content" style="background-color: #000000;" id="remoteVideoWrapper">
+        <div id="remoteVideo"></div>
+    </div>
+    <div class="b-video__small" style="background-color: #000000;" id="localVideoWrapper">
+        <div id="localVideo"></div>
+    </div>
+    <span class="b-send_video">Send video</span>
+</div>
+
+<!-- transfer window -->
+<form class="b-transfer">
+    <p>
+        <label for="transfer">transfer this call to:</label>
+        <input type="text" value="" id="transfer"/>
+    </p>
+
+    <div class="b-transfer__btn">
+        <input type="button" value="ok" class="b-transfer__ok"/>
+        <input type="button" value="cancel" class="b-transfer__cancel"/>
+    </div>
+</form>
+
+</div>
+<!-- end of phone -->
+<script type="text/javascript" src="../../../../flashphoner.js"></script>
+<script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+<script type="text/javascript" src="../../dependencies/js/utils.js"></script>
+<script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+<script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+<script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
+
+<script src="gui/js/jquery.mCustomScrollbar.concat.min.js"></script>
+
+<script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
+
+<script type="text/javascript" src="Phone.js"></script>
+
+<script type="text/javascript" src="SoundControl.js"></script>
+<script type="text/javascript" src="listener/DefaultListener.js"></script>
+<script type="text/javascript" src="listener/LoadToolListener.js"></script>
+</body>
+</html>
