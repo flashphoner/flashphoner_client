@@ -133,9 +133,11 @@ package com.flashphoner.api2 {
             if (incoming && outgoing) {
                 this.connection.setupStreams(localMediaControl, remoteMediaControl, hasAudio, hasVideo);
                 this.remoteDisplayHolder.visible = true;
-                this.localDisplay.visible = true;
-                this.localDisplay.percentWidth = 20;
-                this.localDisplay.percentHeight = 20;
+                if (hasVideo) {
+                    this.localDisplay.visible = true;
+                    this.localDisplay.percentWidth = 20;
+                    this.localDisplay.percentHeight = 20;
+                }
             } else if (outgoing) {
                 this.connection.setupStreams(localMediaControl, null, hasAudio, hasVideo);
                 this.remoteDisplayHolder.visible = false;
