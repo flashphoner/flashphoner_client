@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:views="rtmfptest.views.*"
+			   backgroundColor="#FFFFFF"
+			   width="320"
+			   height="320" creationComplete="init()" xmlns:local="*">
+	<fx:Style source="player.css"/>
+	<fx:Declarations>
+		
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.external.*;
+			
+			import mx.core.UIComponent;
+			
+			private var nc:NetConnection;
+			private var cam:Camera;
+			private var mic:Microphone;
+			private var videoFarEnd:Video;
+			private var publishStream:NetStream;
+			private var subscribeStream:NetStream;
+			private var subscribeStreamObject:Object;
+			private var connectionStatus:String;
+			private var streamStatus:String;
+			private var streamName:String;
+			
+			private function init():void{
+				if (ExternalInterface.available) {
+					try {
+						ExternalInterface.addCallback("setURLtoFlash", getDataFromJS);
+					} catch (error:Error) {
+						Logger.info(error.message);
+					}
+				} else {
+					Logger.info("Error during set callback");
+				}
+				videoFarEnd = new Video();				
+				var container:UIComponent = new UIComponent();
+				container.addChild(videoFarEnd);
+				canvas.addChild(container);
+				playBtn.addEventListener(MouseEvent.CLICK, mouseClickEventListener);
+				stopBtn.addEventListener(MouseEvent.CLICK, mouseClickEventListener);
+				stopBtn.visible = false;
+				this.addChild(container);
+				
+			}
+			
+			
+			/**
+			 * **************************
+			 * 		CONNECT / DISCONNECT
+			 * **************************
+			 **/
+			private function connect():void{			
+				
+				var splittedUrl:Array = connectUrl.text.split("/");
+				streamName = splittedUrl[splittedUrl.length-1];
+				var url:String = connectUrl.text.substring(0,connectUrl.text.indexOf(splittedUrl[splittedUrl.length-1])-1);
+				Logger.info("CONNECT: "+url);
+				nc = new NetConnection();
+				nc.client = this;
+				nc.addEventListener(NetStatusEvent.NET_STATUS, handleConnectionStatus);				
+				nc.connect(url);
+			}
+			
+			//disconnect
+			private function disconnect():void{
+				Logger.info("Disconnect");
+				nc.close();				
+				nc = null;
+			}
+			
+		
+			/**
+			 * *************************
+			 * 		PLAY / STOP / PAUSE
+			 * *************************
+			 **/
+			
+			private function play():void{
+				if (nc == null) {
+					connect();
+					status.text = "";
+				} else {
+					playStream();
+				}
+			}
+			
+			private function playStream():void {
+				if (subscribeStream == null) {
+					subscribeStream = new NetStream(nc);
+				}
+				addListenerAndPlay();
+			}
+			
+			private function pause():void {
+				Logger.info("PAUSE stream");
+				subscribeStream.pause();
+			}
+			
+			private function stop():void{
+				Logger.info("STOP stream");
+				status.text = (status.text == "Started") ? "Stopped" : status.text;
+				if (subscribeStream != null) {
+					subscribeStream.close();
+					subscribeStream = null;
+				}
+			}
+		
+			private function addListenerAndPlay():void{
+				subscribeStream.videoReliable=true;
+				subscribeStream.audioReliable=false;
+				subscribeStream.useHardwareDecoder=true;				
+				subscribeStream.addEventListener(NetStatusEvent.NET_STATUS, handleSubscribeStreamStatus);
+				subscribeStream.bufferTime=0;
+				var soundTransform:SoundTransform = new SoundTransform();	
+				soundTransform.volume=0.7;
+				subscribeStream.soundTransform = soundTransform;	
+				Logger.info("PLAY stream - " + streamName);
+				subscribeStream.play(streamName);
+				videoFarEnd.attachNetStream(subscribeStream);
+				videoFarEnd.width = 320;
+				videoFarEnd.height = 240;
+			}
+			
+		
+			public function ping():void{
+				nc.call("pong", null);
+			}
+			
+						
+			/**
+			 * *******************************
+			 * 		Listeners and handlers
+			 * *******************************
+			 **/			 
+			
+			private function handleConnectionStatus(event:NetStatusEvent):void{
+				if (event.info.code != "NetConnection.Connect.Closed") {
+					parseEvent(event.info.code);
+				} 
+				if (event.info.code=="NetConnection.Connect.Success"){
+					Logger.info("Connection opened");
+					playStream();
+				} else if (event.info.code=="NetConnection.Connect.Closed"){		
+					Logger.info("Connection closed");
+					nc.removeEventListener(NetStatusEvent.NET_STATUS,handleConnectionStatus);
+					stop();
+				} else if (event.info.code=="NetConnection.Connect.Failed") {
+					Logger.info("Connection failed");
+					playBtn.visible = true;
+					stopBtn.visible = false;
+					nc = null;
+				}
+			}
+			
+			private function mouseClickEventListener(event:MouseEvent):void{
+				
+				switch(event.currentTarget.id) {
+					case "playBtn":
+						if (status.text == "StreamNotFound" || status.text == "Failed") {
+							playBtn.visible = true;
+							stopBtn.visible = false;
+						} else {
+							playBtn.visible = false;
+							stopBtn.visible = true;
+						}
+						break;
+					case "stopBtn":
+						playBtn.visible = true;
+						stopBtn.visible = false;
+						break;
+				}
+				
+			}
+			
+			private function handleSubscribeStreamStatus(event:NetStatusEvent):void{
+				Logger.info("handleSubscribeStreamStatus: "+event.info.code);
+				parseEvent(event.info.code);
+				if (status.text == "StreamNotFound" || status.text == "Failed") {
+					playBtn.visible = true;
+					stopBtn.visible = false;
+					disconnect();
+				} else if (status.text == "Start") {
+					playBtn.visible = false;
+					stopBtn.visible = true;
+				}
+			}
+			
+			private function asyncErrorHandler(event: AsyncErrorEvent):void{
+				Logger.info("asyncErrorHandler: "+event);					
+			}
+			
+			private function securityErrorHandler(event: SecurityErrorEvent):void{
+				Logger.info("securityErrorHandler: "+event);					
+			}		
+			
+			private function parseEvent(event:String):void {
+				var splittedEvent:Array = event.split(".");
+				if (splittedEvent[2] == 'Start') {
+					status.text = 'Started';
+				} else {
+					status.text = splittedEvent[2];
+				}
+			}
+			
+			/**
+			 *************************
+			 *  JavaScript callbacks
+			 ************************* 
+			 **/
+			
+			private function getDataFromJS(value:String):void {
+				if (value != null || value != "") {
+					connectUrl.text = value;
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<!-- video view -->
+	
+	<mx:Canvas id="canvas" visible="true" x="1" y="4" width="320" height="240" backgroundColor="#000000">
+	</mx:Canvas>
+	
+	<s:Button id="playBtn" x="261" y="252" width="49" height="25"
+			  click="play()" color="#000000" enabled="true" 
+			  label="Play"/>
+	<s:Button id="stopBtn" x="261" y="252" width="49" height="25" label="Stop"
+			  click="disconnect()" color="#000000" enabled="true"/>
+	<s:Label id="status" x="35" y="286" width="250" height="25" textAlign="center"
+			 verticalAlign="middle"/>
+	<s:TextInput id="connectUrl" x="10" y="252" width="243" height="26"
+				 text="rtmp://rtmp-server:1935/live/streamName"/>
+</s:Application>

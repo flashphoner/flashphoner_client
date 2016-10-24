@@ -33,7 +33,7 @@ function loadPlayer() {
     attributes.name = "player";
     attributes.styleclass="center-block";
     var flashvars = {};
-    var pathToSWF = "../../dependencies/swf/player.swf";
+    var pathToSWF = "../../dependencies/rtmp_player/player.swf";
     var elementId = "player";
     var params = {};
     params.menu = "true";
