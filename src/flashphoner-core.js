@@ -597,10 +597,21 @@ var createSession = function(options) {
          */
         var hangup = function() {
             if (status_ == CALL_STATUS.NEW) {
-                //trigger FAILED status
                 callRefreshHandlers[id_]({status: CALL_STATUS.FAILED});
                 return;
+            } else if (status_ == CALL_STATUS.PENDING) {
+                if (!cacheLocalResources) {
+                    releaseLocalMedia(localDisplay, mediaProvider);
+                }
+                callRefreshHandlers[id_]({status: CALL_STATUS.FAILED});
+                if (options.incoming) {
+                    send("hangup", {
+                        callId: id_
+                    });
+                }
+                return;
             }
+
             send("hangup", {
                 callId: id_
             });
