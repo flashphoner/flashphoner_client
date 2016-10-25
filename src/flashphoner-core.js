@@ -306,7 +306,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.7",
+            clientVersion: "0.5.8",
             custom: options.custom
         };
         if (getMediaProviders()[0] == "WSPlayer") {
@@ -976,6 +976,8 @@ var createSession = function(options) {
      * @param {Object} options.constraints Stream constraints
      * @param {Boolean=} options.receiveAudio Receive audio
      * @param {Boolean=} options.receiveVideo Receive video
+     * @param {Integer=} options.playWidth Set width to play stream with this value
+     * @param {Integer=} options.playHeight Set height to play stream with this value
      * @param {string} options.mediaProvider MediaProvider type to use with this stream
      * @param {Boolean=} options.record Enable stream recording
      * @param {Boolean=} options.cacheLocalResources Display will contain local video after stream release
@@ -1101,6 +1103,8 @@ var createSession = function(options) {
                     hasAudio: true,
                     status: status_,
                     record: false,
+                    width: options.playWidth || 0,
+                    height: options.playHeight || 0,
                     mediaProvider: mediaProvider,
                     sdp: offer.sdp,
                     custom: options.custom
