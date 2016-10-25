@@ -94,6 +94,10 @@ function connect() {
 		    setStatus("#callStatus", CALL_STATUS.FINISH);
 			onHangupIncoming();
 		    currentCall = null;
+        }).on(CALL_STATUS.FAILED, function(){
+            setStatus("#callStatus", CALL_STATUS.FAILED);
+            onHangupIncoming();
+            currentCall = null;
         });
 		onIncomingCall(call);
     });
@@ -116,6 +120,10 @@ function call() {
 		setStatus("#callStatus", CALL_STATUS.FINISH);
 	    onHangupOutgoing();
 		currentCall = null;
+    }).on(CALL_STATUS.FAILED, function(){
+        setStatus("#callStatus", CALL_STATUS.FAILED);
+        onHangupIncoming();
+        currentCall = null;
     });
 	
 	outCall.call();

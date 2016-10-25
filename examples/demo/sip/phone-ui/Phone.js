@@ -60,6 +60,10 @@ Phone.prototype.connect = function () {
             me.callStatusListener(CALL_STATUS.FINISH);
             me.currentCall = null;
             me.incomingCall = false;
+        }).on(CALL_STATUS.FAILED, function(){
+            me.callStatusListener(CALL_STATUS.FAILED);
+            me.currentCall = null;
+            me.incomingCall = false;
         });
     });
 
@@ -98,6 +102,9 @@ Phone.prototype.call = function (callee, hasVideo) {
         me.callStatusListener(CALL_STATUS.ESTABLISHED);
     }).on(CALL_STATUS.FINISH, function(){
         me.callStatusListener(CALL_STATUS.FINISH);
+        me.currentCall = null;
+    }).on(CALL_STATUS.FAILED, function(){
+        me.callStatusListener(CALL_STATUS.FAILED);
         me.currentCall = null;
     });
 

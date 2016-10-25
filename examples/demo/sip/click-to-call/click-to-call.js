@@ -74,7 +74,10 @@ function call(session) {
     }).on(CALL_STATUS.FINISH, function(){
 		setStatus("Call", CALL_STATUS.FINISH);
 	    onHangup();
-    });
+    }).on(CALL_STATUS.FAILED, function(){
+		setStatus("Call", CALL_STATUS.FAILED);
+		onHangup();
+	});
 	
 	outCall.call();
 	
