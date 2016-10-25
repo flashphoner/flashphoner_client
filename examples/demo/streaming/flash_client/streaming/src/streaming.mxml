@@ -105,7 +105,7 @@
 				var url:String = connectUrl.text;
 				nc = new NetConnection();
 				//if (url.indexOf("rtmp") == 0){
-					nc.objectEncoding = ObjectEncoding.AMF0;
+				//	nc.objectEncoding = ObjectEncoding.AMF0;
 				//}
 				nc.client = this;
 				nc.addEventListener(NetStatusEvent.NET_STATUS, handleConnectionStatus);				
@@ -134,11 +134,6 @@
 					playBtn.enabled = true;
 					publishBtn.enabled = true;
 					setConnectionStatus("CONNECTED");					
-					
-					var timer:Timer = new Timer(1000,1);
-					timer.addEventListener(TimerEvent.TIMER,function (event:TimerEvent) {disconnect();});
-					timer.start();
-					
 				} else if (event.info.code=="NetConnection.Connect.Closed" || event.info.code=="NetConnection.Connect.Failed"){					
 					nc.removeEventListener(NetStatusEvent.NET_STATUS,handleConnectionStatus);
 					unpublish();
@@ -146,10 +141,6 @@
 					Logger.info("Connection closed");
 					setConnectionStatus("DISCONNECTED");
 					reset();		
-					
-					var timer:Timer = new Timer(1000,1);
-					timer.addEventListener(TimerEvent.TIMER, function (event:TimerEvent) {connect();});
-					timer.start();
 				}
 			}
 			
@@ -169,12 +160,12 @@
 					return;
 				}
 				publishStatus.setStyle("color","#000000");
-				Logger.info("publish audio: "+publishAudio.selected+" video: "+publishVideo.selected)
+				Logger.info("publish audio: "+publishAudio.selected+" video: "+publishVideo.selected);
 				publishStream = new NetStream(nc);
 				if (publishAudio.selected){
 					initMic();
 					publishStream.attachAudio(mic);
-					Logger.info("Init audio stream")
+					Logger.info("Init audio stream");
 				}
 				if (publishVideo.selected){
 					initCam();
