@@ -31,7 +31,9 @@ module.exports = function(grunt) {
             },
             release : {
                 files : {
-                    'media-provider.swf' : 'src/flash/MediaProvider.mxml'
+                    'media-provider.swf' : 'src/flash/MediaProvider.mxml',
+                    'examples/demo/streaming/flash_client/chat/bin/chat.swf' : 'examples/demo/streaming/flash_client/chat/src/chat.mxml',
+                    'examples/demo/streaming/flash_client/streaming/bin/streaming.swf' : 'examples/demo/streaming/flash_client/streaming/src/streaming.mxml'
                 }
             }
         },
