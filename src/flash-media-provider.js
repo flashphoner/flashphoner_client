@@ -487,12 +487,17 @@ function normalizeConstraints(constraints) {
     window.CustomEvent = CustomEvent;
 })();
 
+var playFirstSound = function () {
+    return true;
+};
+
 module.exports = {
     createConnection: createConnection,
     getMediaAccess: getMediaAccess,
     releaseMedia: releaseMedia,
     available: available,
     listDevices: listDevices,
+    playFirstSound: playFirstSound,
     configure: function(configuration) {
         swfLocation = configuration.flashMediaProviderSwfLocation;
         defaultConstraints = configuration.constraints;

@@ -18,7 +18,7 @@ var DEFAULT_SDP = "v=0\r\n" +
     "a=rtpmap:0 PCMU/8000\r\n" +
     "a=recvonly\r\n";
 
-window.AudioContext = window.AudioContext || window.webkitAudioContext;
+var AudioContext = window.AudioContext || window.webkitAudioContext;
 try {
     var audioContext = new AudioContext();
 } catch(e) {
@@ -118,13 +118,25 @@ var releaseMedia = function() {
     return false;
 };
 
+var playFirstSound = function() {
+    var audioBuffer = audioContext.createBuffer(1, 441, 44100);
+    var output = audioBuffer.getChannelData(0);
+    for (var i = 0; i < output.length; i++) {
+        output[i] = Math.random() * 2 - 1;
+    }
+    var src = audioContext.createBufferSource();
+    src.buffer = audioBuffer;
+    src.connect(audioContext.destination);
+    src.start(0);
+};
+
 /**
  * Check WebSocket available
  *
  * @returns {boolean} WSPlayer available
  */
 var available = function(){
-    return (util.browser() == "IE") ? false : true;
+    return (audioContext) ? true : false;
 };
 
 module.exports = {
@@ -133,6 +145,7 @@ module.exports = {
     releaseMedia: releaseMedia,
     available: available,
     listDevices: listDevices,
+    playFirstSound: playFirstSound,
     configure: function(configuration) {
         receiverLocation = configuration.receiverLocation || receiverLocation;
         decoderLocation = configuration.decoderLocation || decoderLocation;

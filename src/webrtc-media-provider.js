@@ -436,11 +436,17 @@ function normalizeConstraints(constraints) {
     return constraints;
 }
 
+// TODO implement
+var playFirstSound = function () {
+    return true;
+};
+
 module.exports = {
     createConnection: createConnection,
     getMediaAccess: getMediaAccess,
     releaseMedia: releaseMedia,
     listDevices: listDevices,
+    playFirstSound: playFirstSound,
     available: available,
     configure: function(configuration) {
         extensionId = configuration.extensionId;

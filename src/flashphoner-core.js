@@ -95,6 +95,17 @@ var getMediaProviders = function() {
 };
 
 /**
+ * Play audio chunk
+ *
+ * @memberof Flashphoner
+ */
+
+var playFirstSound = function() {
+    var mediaProvider = getMediaProviders()[0];
+    MediaProvider[mediaProvider].playFirstSound();
+}
+
+/**
  * @typedef Flashphoner.MediaDeviceList
  * @type Object
  * @property {Flashphoner.MediaDevice[]} audio Audio devices (microphones)
@@ -1121,7 +1132,6 @@ var createSession = function(options) {
                     custom: options.custom
                 });
                 if (offer.player) {
-                    offer.player.playFirstSound();
                     offer.player.play(id_);
                 }
             }).catch(function(error) {
@@ -1657,6 +1667,7 @@ module.exports = {
     getSessions: getSessions,
     getSession: getSession,
     createSession: createSession,
+    playFirstSound: playFirstSound,
     roomApi: require('./room-module'),
     constants: constants,
     firefoxScreenSharingExtensionInstalled: false
