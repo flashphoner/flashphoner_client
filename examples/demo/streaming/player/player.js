@@ -43,6 +43,9 @@ function onStopped() {
 }
 
 function start() {
+    if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
+        Flashphoner.playFirstSound();
+    }
     var url = $('#url').val();
     //check if we already have session
     if (Flashphoner.getSessions().length > 0) {

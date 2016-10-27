@@ -15,7 +15,7 @@
     display: inline-block;
 }
 
-video, object {
+video, canvas, object {
     width: 100%;
     height: 100%;
 }
