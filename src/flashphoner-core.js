@@ -1196,6 +1196,7 @@ var createSession = function(options) {
                     });
                 });
             }).catch(function(error){
+                console.warn(error);
                 stream.info = error.message;
                 status_ = STREAM_STATUS.FAILED;
                 //fire stream event

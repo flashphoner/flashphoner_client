@@ -468,6 +468,13 @@ function normalizeConstraints(constraints) {
                 width: 320,
                 height: 240
             }
+        } else {
+            if (typeof constraints.video.width == 'object') {
+                constraints.video.width = constraints.video.width.exact || constraints.video.width.max || constraints.video.width.min;
+            }
+            if (typeof constraints.video.height == 'object') {
+                constraints.video.height = constraints.video.height.exact || constraints.video.height.max || constraints.video.height.min;
+            }
         }
     }
     return constraints;

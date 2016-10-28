@@ -35,7 +35,7 @@ package com.flashphoner.api2.media
 		private var width:int = 320;
 		private var height:int = 240;
 		private var configuration:Object;
-
+		private var resolutions:String = "1920x1080,1600x1200,1280x720,720x576,720x480,640x480,352x576,352x480,352x288,320x240,176x144,160x120,128x96,80x60";
         //audio
         private var mic:Microphone;
         private var micIndex:int = -1;
@@ -93,7 +93,7 @@ package com.flashphoner.api2.media
 				if (this.cam != null) {
 					removeLocalMedia();
 				}
-				Logger.info("Init camera " + cameraId + ":" + cameraName + ", resolution " + this.width + "x" + this.height + ", fps " + this.FPS);
+
 				this.cam = Camera.getCamera(cameraId);
 				if (this.cam == null) {
 					//failed to get camera
@@ -101,6 +101,8 @@ package com.flashphoner.api2.media
 					return false;
 				}
 				//init
+				supportedResolutions(this.cam,this.resolutions);
+				Logger.info("Init camera " + cameraId + ":" + cameraName + ", resolution " + this.width + "x" + this.height + ", fps " + this.FPS);
 				this.cam.setMode(this.width,this.height,FPS,KEEP_RATIO);
 				this.cam.setKeyFrameInterval(KEY_INT);
 				this.cam.setQuality(BANDWIDTH,QUALITY);
