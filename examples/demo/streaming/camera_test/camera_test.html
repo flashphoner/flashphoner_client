@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <title>Test camera</title>
+    <script type="text/javascript" src="../../../../flashphoner.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
+    <script type="text/javascript" src="camera_test.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
+</head>
+<body onload="init_page();">
+<div class="container">
+    <div class="row">
+        <div class="col-sm-7">
+            <h2 class="text-center">Camera resolution test</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group" id="videoInputForm">
+            <label class="col-sm-1 control-label">Camera</label>
+            <div class="col-sm-6">
+                <select class="form-control" id="videoInput">
+                </select>
+            </div>
+            <button type="button" class="btn btn-default" id="startBtn">Start</button>
+        </div>
+    </div>
+
+    <div id="resolution"></div>
+    <div id="display"></div>
+</div>
+</body>
+</html>

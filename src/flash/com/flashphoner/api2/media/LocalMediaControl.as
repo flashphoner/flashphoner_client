@@ -101,7 +101,6 @@ package com.flashphoner.api2.media
 					return false;
 				}
 				//init
-				supportedResolutions(this.cam,this.resolutions);
 				Logger.info("Init camera " + cameraId + ":" + cameraName + ", resolution " + this.width + "x" + this.height + ", fps " + this.FPS);
 				this.cam.setMode(this.width,this.height,FPS,KEEP_RATIO);
 				this.cam.setKeyFrameInterval(KEY_INT);
