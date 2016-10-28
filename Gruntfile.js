@@ -18,7 +18,7 @@ module.exports = function(grunt) {
         },
         flash: {
             options: {
-                sdk: env.FLEX_HOME,
+                sdk: 'E:/Programms/flex',
                 flashVersion: '11.1'
             },
             debug : {
@@ -29,11 +29,19 @@ module.exports = function(grunt) {
                     'test/media-provider.swf' : 'src/flash/MediaProvider.mxml'
                 }
             },
-            release : {
+            release_media_provider : {
                 files : {
-                    'media-provider.swf' : 'src/flash/MediaProvider.mxml',
-                    'examples/demo/streaming/flash_client/chat/bin/chat.swf' : 'examples/demo/streaming/flash_client/chat/src/chat.mxml',
+                    'media-provider.swf' : 'src/flash/MediaProvider.mxml'
+                }
+            },
+            release_examples_streaming : {
+                files : {
                     'examples/demo/streaming/flash_client/streaming/bin/streaming.swf' : 'examples/demo/streaming/flash_client/streaming/src/streaming.mxml'
+                }
+            },
+            release_examples_chat : {
+                files : {
+                    'examples/demo/streaming/flash_client/chat/bin/chat.swf' : 'examples/demo/streaming/flash_client/chat/src/chat.mxml'
                 }
             }
         },
@@ -66,7 +74,8 @@ module.exports = function(grunt) {
                         standalone: 'Flashphoner'
                     }
                 }
-            },flashphonerGlobalObjectNoWSPlayer: {
+            },
+            flashphonerGlobalObjectNoWSPlayer: {
                 src: ['./src/flashphoner-core.js'],
                 dest: './flashphoner-no-wsplayer.js',
                 options: {
@@ -137,8 +146,10 @@ module.exports = function(grunt) {
     grunt.registerTask('build', [
         'clean:build',
         'string-replace:version',
-        'flash:release',
+        'flash:release_media_provider',
         'browserify',
+        'flash:release_examples_streaming',
+        'flash:release_examples_chat',
         'jsdoc'
     ]);
     grunt.registerTask('release', [
