@@ -68,7 +68,9 @@ function startStreaming(session) {
     session.createStream({
         name: streamName,
         display: localVideo,
-        cacheLocalResources: true
+        cacheLocalResources: true,
+        receiveVideo: false,
+        receiveAudio: false
     }).on(STREAM_STATUS.PUBLISHING, function(publishStream){
         setStatus(STREAM_STATUS.PUBLISHING);
         //play preview
