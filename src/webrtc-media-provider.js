@@ -48,10 +48,9 @@ var createConnection = function(options) {
         connection.ontrack = function (event) {
             if (remoteVideo) {
                 remoteVideo.srcObject = event.streams[0];
-                var playPromise = remoteVideo.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(function(e) {console.warn(e)});
-                }
+                remoteVideo.onloadedmetadata = function(e) {
+                    remoteVideo.play();
+                };
             }
         };
         connection.onremovestream = function (event) {
@@ -288,10 +287,9 @@ var getMediaAccess = function(constraints, display) {
                 video.srcObject = stream;
                 //mute audio
                 video.muted = true;
-                var playPromise = video.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(function(e) {console.warn(e)});
-                }
+                video.onloadedmetadata = function(e) {
+                    video.play();
+                };
                 resolve(display);
             }, reject);
         }
