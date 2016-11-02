@@ -2,7 +2,6 @@ var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var localVideo;
 var remoteVideo;
-var browser = detectBrowser();
 var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 
 function init_page() {
@@ -15,7 +14,7 @@ function init_page() {
     }
 
     var interval;
-    if (browser == "Firefox") {
+    if (Browser.isFirefox()) {
         $("#installExtensionButton").show();
         interval = setInterval(function() {
             if (Flashphoner.firefoxScreenSharingExtensionInstalled) {
@@ -26,7 +25,7 @@ function init_page() {
             }
         }, 500);
 
-    } else if (browser == "Chrome") {
+    } else if (Browser.isChrome()) {
         interval = setInterval(function() {
             chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
                 if (response) {
@@ -172,9 +171,9 @@ function setStatus(status) {
 
 //install extension
 function installExtension() {
-    if (browser == "Chrome") {
+    if (Browser.isChrome()) {
         chrome.webstore.install();
-    } else if (browser == "Firefox") {
+    } else if (Browser.isFirefox()) {
         var params = {
             "Flashphoner Screen Sharing": { URL: "../../dependencies/screen-sharing/firefox-extension/flashphoner_screen_sharing-0.0.4-fx+an.xpi",
                 IconURL: "../../dependencies/screen-sharing/firefox-extension/icon.png",
@@ -187,7 +186,7 @@ function installExtension() {
 }
 
 function installFromMarket() {
-    if (browser == "Chrome") {
+    if (Browser.isChrome()) {
         var url = "https://chrome.google.com/webstore/detail/flashphoner-screen-sharin/nlbaajplpmleofphigmgaifhoikjmbkg";
         window.open(url, '_blank');
     }

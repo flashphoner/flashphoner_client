@@ -1,8 +1,12 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var remoteVideo;
+var resolution_for_ios_safari;
 
 function init_page() {
+    if (Browser.isiOS() && Browser.isSafari()) {
+        resolution_for_ios_safari = {playWidth:640,playHeight:480};
+    }
     //init api
     try {
         Flashphoner.init({
@@ -78,10 +82,15 @@ function start() {
 
 function playStream(session) {
     var streamName = $('#streamName').val();
-    session.createStream({
+    var options = {
         name: streamName,
         display: remoteVideo
-    }).on(STREAM_STATUS.PLAYING, function(stream) {
+    };
+    if (resolution_for_ios_safari) {
+        options.playWidth = resolution_for_ios_safari.playWidth;
+        options.playHeight = resolution_for_ios_safari.playHeight;
+    }
+    session.createStream(options).on(STREAM_STATUS.PLAYING, function(stream) {
         document.getElementById(stream.id()).addEventListener('resize', function(event){
             resizeVideo(event.target);
         });

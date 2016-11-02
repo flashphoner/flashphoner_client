@@ -108,44 +108,34 @@ $(function() {
     });
 });
 
-function detectBrowser() {
-    var browser;
-    var isAndroid = navigator.userAgent.toLowerCase().indexOf("android") > -1;
-    if (isAndroid)
-        return "Android";
-    var isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (isiOS)
-        return "iOS";
-    // Opera 8.0+
-    var isOpera = (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-    if (isOpera)
-        return "Opera";
-    // Firefox 1.0+
-    var isFirefox = typeof InstallTrigger !== 'undefined';
-    if (isFirefox)
-        return "Firefox";
-    // At least Safari 3+: "[object HTMLElementConstructor]"
-    var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
-    if (isSafari)
-        return "Safari";
-    // Internet Explorer 6-11
-    var isIE = /*@cc_on!@*/false || !!document.documentMode;
-    if (isIE)
-        return "IE";
-    // Edge 20+
-    var isEdge = !isIE && !!window.StyleMedia;
-    if (isEdge)
-        return "Edge";
-    // Chrome 1+
-    var isChrome = !!window.chrome && !!window.chrome.webstore;
-    if (isChrome)
-        return "Chrome";
-    // Blink engine detection
-    var isBlink = (isChrome || isOpera) && !!window.CSS;
-    if (isBlink)
-        return "Blink";
+// Detect browser
+var Browser = {
+    isIE: function () {
+        return /*@cc_on!@*/false || !!document.documentMode;
+    },
+    isFirefox: function () {
+        return typeof InstallTrigger !== 'undefined';
+    },
+    isChrome: function () {
+        return !!window.chrome && !!window.chrome.webstore;
+    },
+    isEdge: function () {
+        return !isIE && !!window.StyleMedia;
+    },
+    isOpera: function () {
+        return (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+    },
+    isiOS: function () {
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    },
+    isSafari: function () {
+        return Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+    },
+    isAndroid: function () {
+        return navigator.userAgent.toLowerCase().indexOf("android") > -1;
+    }
+};
 
-}
 // Generate simple uuid
 function createUUID(length) {
     var s = [];
