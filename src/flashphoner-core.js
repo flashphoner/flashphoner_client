@@ -3,8 +3,11 @@
 var uuid = require('node-uuid');
 var constants = require("./constants");
 var util = require('./util');
+var logger = require('./util').logger;
+var loggerConf = {push: false, severity: "INFO"};
 var Promise = require('promise-polyfill');
 var browser = require('webrtc-adapter').browserDetails;
+var LOG_PREFIX = "core";
 
 /**
  * @namespace Flashphoner
@@ -27,6 +30,7 @@ var initialized = false;
  * @param {String=} options.decoderLocation Location of video-worker2.js file
  * @param {String=} options.screenSharingExtensionId Chrome screen sharing extension id
  * @param {Object=} options.constraints Default local media constraints
+ * @param {Object=} options.logger Enable logging
  * @throws {Error} Error if none of MediaProviders available
  * @memberof Flashphoner
  */
@@ -35,12 +39,16 @@ var init = function(options) {
         if (!options) {
             options = {};
         }
+        loggerConf = options.logger || loggerConf;
+        // init logger
+        logger.init(loggerConf.severity, loggerConf.push);
         var webRtcProvider = require("./webrtc-media-provider");
         if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
             MediaProvider.WebRTC = webRtcProvider;
             var webRtcConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
-                extensionId: options.screenSharingExtensionId
+                extensionId: options.screenSharingExtensionId,
+                logger: logger
             };
             webRtcProvider.configure(webRtcConf);
         }
@@ -49,7 +57,8 @@ var init = function(options) {
             MediaProvider.Flash = flashProvider;
             var flashConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
-                flashMediaProviderSwfLocation: options.flashMediaProviderSwfLocation
+                flashMediaProviderSwfLocation: options.flashMediaProviderSwfLocation,
+                logger: logger
             };
             flashProvider.configure(flashConf);
         }
@@ -58,7 +67,8 @@ var init = function(options) {
             MediaProvider.WSPlayer = websocketProvider;
             var wsConf = {
                 receiverLocation: options.receiverLocation,
-                decoderLocation: options.decoderLocation
+                decoderLocation: options.decoderLocation,
+                logger: logger
             };
             websocketProvider.configure(wsConf);
         }
@@ -77,9 +87,10 @@ var init = function(options) {
                     MediaProvider = _MediaProvider;
                 }
             } else {
-              console.warn("Preferred media provider is not available.");
+              logger.warn(LOG_PREFIX, "Preferred media provider is not available.");
             }
         }
+        logger.info(LOG_PREFIX, "Initialized");
         initialized = true;
     }
 };
@@ -185,7 +196,7 @@ function checkConstraints(constraints) {
         if (constraints.video.hasOwnProperty('width')) {
             var width = constraints.video.width;
             if (width == 0 || isNaN(width)) {
-                console.warn("Width or height property has zero/NaN value, set default resolution 320x240");
+                logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
                 constraints.video.width = 320;
                 constraints.video.height = 240;
             }
@@ -193,7 +204,7 @@ function checkConstraints(constraints) {
         if (constraints.video.hasOwnProperty('height')) {
             var height = constraints.video.height;
             if (height == 0 || isNaN(height)) {
-                console.warn("Width or height property has zero/NaN value, set default resolution 320x240");
+                logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
                 constraints.video.width = 320;
                 constraints.video.height = 240;
             }
@@ -317,7 +328,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.8",
+            clientVersion: "0.5.9",
             custom: options.custom
         };
         if (getMediaProviders()[0] == "WSPlayer") {
@@ -330,6 +341,7 @@ var createSession = function(options) {
         }
         //connect to REST App
         send("connection", cConfig);
+        logger.setConnection(wsConnection);
     };
     //todo remove
     var remoteSdpCache = {};
@@ -360,7 +372,7 @@ var createSession = function(options) {
                     callRefreshHandlers[mediaSessionId](null, sdp);
                 } else {
                     remoteSdpCache[mediaSessionId] = sdp;
-                    console.warn("Media not found, id " + mediaSessionId);
+                    logger.warn(LOG_PREFIX, "Media not found, id " + mediaSessionId);
                 }
                 break;
             case 'notifyVideoFormat':
@@ -408,7 +420,7 @@ var createSession = function(options) {
                 break;
             case 'notifyIncomingCall':
                 if (callRefreshHandlers[obj.callId]) {
-                    console.error("Call already exists, id " + obj.callId);
+                    logger.error(LOG_PREFIX, "Call already exists, id " + obj.callId);
                 }
                 if (callbacks[SESSION_STATUS.INCOMING_CALL]) {
                     callbacks[SESSION_STATUS.INCOMING_CALL](createCall(obj));
@@ -417,7 +429,7 @@ var createSession = function(options) {
                 }
                 break;
             default:
-                //console.log("Unknown server message " + data.message);
+                //logger.info(LOG_PREFIX, "Unknown server message " + data.message);
         }
     };
 
@@ -470,7 +482,7 @@ var createSession = function(options) {
     var createCall = function(options) {
         //check session state
         if (sessionStatus !== SESSION_STATUS.REGISTERED && sessionStatus !== SESSION_STATUS.ESTABLISHED) {
-            console.log("Status is " + sessionStatus);
+            logger.info(LOG_PREFIX, "Status is " + sessionStatus);
             throw new Error('Invalid session state');
         }
 
@@ -591,7 +603,7 @@ var createSession = function(options) {
                     });
                 });
             }).catch(function(error){
-                console.error(error);
+                logger.error(LOG_PREFIX, error);
                 status_ = CALL_STATUS.FAILED;
                 //fire call event
                 if (callbacks[status_]) {
@@ -655,7 +667,7 @@ var createSession = function(options) {
             status_ = CALL_STATUS.PENDING;
             var sdp;
             if (!remoteSdpCache[id_]) {
-                console.error("No remote sdp available");
+                logger.error(LOG_PREFIX, "No remote sdp available");
                 throw new Error("No remote sdp available");
             } else {
                 sdp = remoteSdpCache[id_];
@@ -706,7 +718,7 @@ var createSession = function(options) {
                     });
                 });
             }).catch(function(error){
-                console.error(error);
+                logger.error(LOG_PREFIX, error);
                 status_ = CALL_STATUS.FAILED;
                 //fire stream event
                 if (callbacks[status_]) {
@@ -1196,7 +1208,7 @@ var createSession = function(options) {
                     });
                 });
             }).catch(function(error){
-                console.warn(error);
+                logger.warn(LOG_PREFIX, error);
                 stream.info = error.message;
                 status_ = STREAM_STATUS.FAILED;
                 //fire stream event
@@ -1218,11 +1230,11 @@ var createSession = function(options) {
                 streamRefreshHandlers[id_]({status: STREAM_STATUS.FAILED});
                 return;
             } else if (status_ == STREAM_STATUS.PENDING) {
-                console.warn("Stopping stream before server response " + id_);
+                logger.warn(LOG_PREFIX, "Stopping stream before server response " + id_);
                 setTimeout(stop, 200);
                 return;
             } else if (status_ == STREAM_STATUS.FAILED) {
-                console.warn("Stream status FAILED");
+                logger.warn(LOG_PREFIX, "Stream status FAILED");
                 return;
             }
             if (published_) {

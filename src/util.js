@@ -103,6 +103,89 @@ module.exports = {
                 return line.indexOf(prefix) === 0;
             });
         }
+    },
+    logger: {
+        init: function (verbosity, enablePushLogs) {
+            switch (verbosity.toUpperCase()) {
+                case "DEBUG":
+                    this.verbosity = 3;
+                    break;
+                case "INFO":
+                    this.verbosity = 2;
+                    break;
+                case "ERROR":
+                    this.verbosity = 0;
+                    break;
+                case "WARN":
+                    this.verbosity = 1;
+                    break;
+                case "TRACE":
+                    this.verbosity = 4;
+                    break;
+                default :
+                    this.verbosity = 2;
+            };
+            this.date = function() {
+                return new Date().toTimeString().split(" ")[0];
+            };
+            this.enablePushLogs = enablePushLogs;
+            var delayedLogs = [];
+            this.pushLogs = function(log) {
+                if (this.wsConnection && this.enablePushLogs) {
+                    if (delayedLogs.length) {
+                        for (var i = 0; i<delayedLogs.length; i++) {
+                            this.wsConnection.send(JSON.stringify({
+                                message: "pushLogs",
+                                data: [{logs: delayedLogs[i]}]
+                            }));
+                        }
+
+                    }
+                    delayedLogs = [];
+                    this.wsConnection.send(JSON.stringify({
+                        message: "pushLogs",
+                        data: [{logs: log}]
+                    }));
+                } else {
+                    // Save logs to send it later
+                    delayedLogs.push(log);
+                }
+            }
+        },
+        info: function (src, text) {
+            var prefix = this.date() + " INFO " + src + " - ";
+            this.pushLogs(prefix + JSON.stringify(text) + '\n');
+            if (this.verbosity >= 2)
+                console.log(prefix,text);
+        },
+        debug: function (src, text) {
+            var prefix = this.date() + " DEBUG " + src + " - ";
+            this.pushLogs(prefix + JSON.stringify(text) + '\n');
+            if (this.verbosity >= 3)
+                console.log(prefix,text);
+        },
+        trace: function (src, text) {
+            var prefix = this.date() + " TRACE " + src + " - ";
+            this.pushLogs(prefix + JSON.stringify(text) + '\n');
+            if (this.verbosity >= 4)
+                console.log(prefix,text);
+        },
+        warn: function (src, text) {
+            var prefix = this.date() + " WARN " + src + " - ";
+            this.pushLogs(prefix + JSON.stringify(text) + '\n');
+            if (this.verbosity >= 1)
+                console.warn(prefix,text);
+        },
+        error: function (src, text) {
+            var prefix = this.date() + " ERROR " + src + " - ";
+            this.pushLogs(prefix + JSON.stringify(text) + '\n');
+            if (this.verbosity >= 0)
+                console.error(prefix,text);
+        },
+        setConnection: function(connection) {
+            this.wsConnection = connection;
+
+        }
     }
 
 };

@@ -7,6 +7,8 @@ var connections = {};
 var CACHED_INSTANCE_POSTFIX = "-CACHED_WEBRTC_INSTANCE";
 var extensionId;
 var defaultConstraints;
+var logger;
+var LOG_PREFIX = "webrtc";
 
 var createConnection = function(options) {
     return new Promise(function(resolve, reject) {
@@ -278,7 +280,7 @@ var getMediaAccess = function(constraints, display) {
         }
 
         function getAccess(constraints) {
-            console.dir(constraints);
+            logger.info(LOG_PREFIX, constraints);
             navigator.getUserMedia(constraints, function(stream){
                 var video = document.createElement('video');
                 display.appendChild(video);
@@ -351,7 +353,7 @@ function getCacheInstance(display) {
     var i;
     for (i = 0; i < display.children.length; i++) {
         if (display.children[i] && display.children[i].id.indexOf(CACHED_INSTANCE_POSTFIX) != -1) {
-            console.log("FOUND WEBRTC CACHED INSTANCE, id " + display.children[i].id);
+            logger.info(LOG_PREFIX, "FOUND WEBRTC CACHED INSTANCE, id " + display.children[i].id);
             return display.children[i];
         }
     }
@@ -411,7 +413,7 @@ var listDevices = function(labels) {
                         ret.type = "camera";
                         list.video.push(ret);
                     } else {
-                        console.log("unknown device " + device.kind + " id " + device.deviceId);
+                       logger.info("unknown device " + device.kind + " id " + device.deviceId);
                     }
                 }
                 resolve(list);
@@ -449,5 +451,7 @@ module.exports = {
     configure: function(configuration) {
         extensionId = configuration.extensionId;
         defaultConstraints = configuration.constraints;
+        logger = configuration.logger;
+        logger.info(LOG_PREFIX, "Initialized");
     }
 };

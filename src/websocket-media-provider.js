@@ -19,6 +19,8 @@ var DEFAULT_SDP = "v=0\r\n" +
     "a=recvonly\r\n";
 
 var AudioContext = window.AudioContext || window.webkitAudioContext;
+var logger;
+var LOG_PREFIX = "websocket";
 try {
     var audioContext = new AudioContext();
 } catch(e) {
@@ -149,5 +151,7 @@ module.exports = {
     configure: function(configuration) {
         receiverLocation = configuration.receiverLocation || receiverLocation;
         decoderLocation = configuration.decoderLocation || decoderLocation;
+        logger = configuration.logger;
+        logger.info(LOG_PREFIX, "Initialized");
     }
 };

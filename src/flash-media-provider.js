@@ -23,6 +23,8 @@ var DEFAULT_SDP = "v=0\r\n" +
 
 var CACHED_INSTANCE_POSTFIX = "CACHED_FLASH_INSTANCE";
 var defaultConstraints;
+var logger;
+var LOG_PREFIX = "flash";
 
 var createConnection = function(options) {
     return new Promise(function(resolve, reject) {
@@ -42,7 +44,7 @@ var createConnection = function(options) {
             flash.reset(id);
             flash.id = id;
             installCallback(flash, 'addLogMessage', function(message){
-                console.log("Flash["+id+"]:" + message);
+                logger.info(LOG_PREFIX, "Flash["+id+"]:" + message);
             });
             installCallback(flash, 'connectionStatus', function(status){
                 removeCallback(flash, 'connectionStatus');
@@ -284,7 +286,7 @@ function removeCallback(id, name) {
 
 function cacheInstance(flash) {
     installCallback(flash, 'addLogMessage', function(message){
-        console.log("Flash["+flash.id+"]:" + message);
+        logger.info(LOG_PREFIX, "Flash["+flash.id+"]:" + message);
     });
     removeCallback(flash, "connectionStatus");
     flash.reset(flash.id + CACHED_INSTANCE_POSTFIX);
@@ -369,7 +371,7 @@ var loadSwf = function(id, display) {
         params.scopeId = id;
         var attributes = {};
         installCallback(id, 'addLogMessage', function(message){
-            console.log("Flash["+id+"]:" + message);
+            logger.info(LOG_PREFIX, "Flash["+id+"]:" + message);
         });
         installCallback(id, 'initialized', function(){
             resolve(swf);
@@ -396,7 +398,7 @@ function getCacheInstance(display) {
     var i;
     for (i = 0; i < display.children.length; i++) {
         if (display.children[i] && display.children[i].id.indexOf(CACHED_INSTANCE_POSTFIX) != -1) {
-            console.log("FOUND FLASH CACHED INSTANCE, id " + display.children[i].id);
+            logger.info(LOG_PREFIX, "FOUND FLASH CACHED INSTANCE, id " + display.children[i].id);
             return display.children[i];
         }
     }
@@ -508,6 +510,8 @@ module.exports = {
     configure: function(configuration) {
         swfLocation = configuration.flashMediaProviderSwfLocation;
         defaultConstraints = configuration.constraints;
+        logger = configuration.logger;
+        logger.info(LOG_PREFIX, "Initialized");
     }
 };
 
