@@ -51,7 +51,9 @@ var createConnection = function(options) {
             if (remoteVideo) {
                 remoteVideo.srcObject = event.streams[0];
                 remoteVideo.onloadedmetadata = function(e) {
-                    remoteVideo.play();
+                    if (remoteVideo) {
+                        remoteVideo.play();
+                    }
                 };
             }
         };
