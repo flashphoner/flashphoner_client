@@ -73,7 +73,9 @@ function publishStream(session) {
     session.createStream({
         name: streamName,
         display: localVideo,
-        record: true
+        record: true,
+        receiveVideo: false,
+        receiveAudio: false
     }).on(STREAM_STATUS.PUBLISHING, function(stream) {
         setStatus(stream.status());
         onStarted(stream);

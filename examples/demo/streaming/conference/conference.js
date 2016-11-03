@@ -221,7 +221,9 @@ function publishLocalMedia(room) {
     room.publish({
         display: document.getElementById("localDisplay"),
         constraints: constraints,
-        record: false
+        record: false,
+        receiveVideo: false,
+        receiveAudio: false
     }).on(STREAM_STATUS.FAILED, function (stream) {
         console.warn("Local stream failed!");
         setStatus("#localStatus", stream.status());

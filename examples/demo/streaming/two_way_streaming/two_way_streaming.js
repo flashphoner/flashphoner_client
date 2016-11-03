@@ -118,7 +118,9 @@ function publishStream() {
     session.createStream({
         name: streamName,
         display: localVideo,
-        cacheLocalResources: true
+        cacheLocalResources: true,
+        receiveVideo: false,
+        receiveAudio: false
     }).on(STREAM_STATUS.PUBLISHING, function(stream){
         setStatus("#publishStatus", STREAM_STATUS.PUBLISHING);
 		onPublishing(stream);
