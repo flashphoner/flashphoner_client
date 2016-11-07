@@ -1,12 +1,10 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var remoteVideo;
-var resolution_for_ios_safari;
+var resolution_for_wsplayer;
 
 function init_page() {
-    if (Browser.isiOS() && Browser.isSafari()) {
-        resolution_for_ios_safari = {playWidth:640,playHeight:480};
-    }
+
     //init api
     try {
         Flashphoner.init({
@@ -17,6 +15,9 @@ function init_page() {
     } catch(e) {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
+    }
+    if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
+        resolution_for_wsplayer = {playWidth:640,playHeight:480};
     }
 
     //video display
@@ -86,9 +87,9 @@ function playStream(session) {
         name: streamName,
         display: remoteVideo
     };
-    if (resolution_for_ios_safari) {
-        options.playWidth = resolution_for_ios_safari.playWidth;
-        options.playHeight = resolution_for_ios_safari.playHeight;
+    if (resolution_for_wsplayer) {
+        options.playWidth = resolution_for_wsplayer.playWidth;
+        options.playHeight = resolution_for_wsplayer.playHeight;
     }
     session.createStream(options).on(STREAM_STATUS.PLAYING, function(stream) {
         document.getElementById(stream.id()).addEventListener('resize', function(event){
