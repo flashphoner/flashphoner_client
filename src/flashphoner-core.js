@@ -329,7 +329,9 @@ var createSession = function(options) {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
             clientVersion: "0.5.9",
-            custom: options.custom
+            clientOSVersion: window.navigator.appVersion,
+            clientBrowserVersion: window.navigator.userAgent,
+            custom: options.custom,
         };
         if (getMediaProviders()[0] == "WSPlayer") {
             cConfig.useWsTunnel = true;
