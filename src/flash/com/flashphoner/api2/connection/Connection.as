@@ -97,14 +97,14 @@ package com.flashphoner.api2.connection {
 		}
 
 		public function setupStreams(localMediaControl:LocalMediaControl, remoteMediaControl:RemoteMediaControl,
-									hasAudio:Boolean, hasVideo:Boolean):void {
+									hasAudio:Boolean, hasVideo:Boolean, bufferTime:Number):void {
 			if (remoteMediaControl) {
 				incomingStream = new Stream(application, nc);
-				incomingStream.setup(null, remoteMediaControl, hasAudio, hasVideo, getPlayStreamName());
+				incomingStream.setup(null, remoteMediaControl, hasAudio, hasVideo, getPlayStreamName(), bufferTime);
 			}
 			if (localMediaControl) {
 				outgoingStream = new Stream(application, nc);
-				outgoingStream.setup(localMediaControl, null, hasAudio, hasVideo, getPublishStreamName());
+				outgoingStream.setup(localMediaControl, null, hasAudio, hasVideo, getPublishStreamName(), null);
 			}
 		}
 		

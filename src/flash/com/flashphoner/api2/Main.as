@@ -130,9 +130,9 @@ package com.flashphoner.api2 {
             this.connection.disconnect();
         }
 
-        public function setup(incoming:Boolean, outgoing:Boolean, hasAudio:Boolean, hasVideo:Boolean):void {
+        public function setup(incoming:Boolean, outgoing:Boolean, hasAudio:Boolean, hasVideo:Boolean, bufferTime:Number):void {
             if (incoming && outgoing) {
-                this.connection.setupStreams(localMediaControl, remoteMediaControl, hasAudio, hasVideo);
+                this.connection.setupStreams(localMediaControl, remoteMediaControl, hasAudio, hasVideo, bufferTime);
                 this.remoteDisplayHolder.visible = true;
                 if (hasVideo) {
                     this.localDisplay.visible = true;
@@ -140,11 +140,11 @@ package com.flashphoner.api2 {
                     this.localDisplay.percentHeight = 20;
                 }
             } else if (outgoing) {
-                this.connection.setupStreams(localMediaControl, null, hasAudio, hasVideo);
+                this.connection.setupStreams(localMediaControl, null, hasAudio, hasVideo, null);
                 this.remoteDisplayHolder.visible = false;
                 this.localDisplay.visible = true;
             } else {
-                this.connection.setupStreams(null, remoteMediaControl, hasAudio, hasVideo);
+                this.connection.setupStreams(null, remoteMediaControl, hasAudio, hasVideo, bufferTime);
                 this.remoteDisplayHolder.visible = true;
                 this.localDisplay.visible = false;
             }

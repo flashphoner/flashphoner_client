@@ -33,7 +33,7 @@ public class Stream
         }
 
         public function setup(localMediaControl:LocalMediaControl, remoteMediaControl:RemoteMediaControl,
-                              hasAudio:Boolean, hasVideo:Boolean, name:String):void {
+                              hasAudio:Boolean, hasVideo:Boolean, name:String, bufferTime:Number):void {
             this.hasAudio = hasAudio;
             this.hasVideo = hasVideo;
             if (localMediaControl != null) {
@@ -49,6 +49,9 @@ public class Stream
                 this.remoteControl = remoteMediaControl;
                 //subscribe
                 remoteMediaControl.attachStream(ncStream);
+                if (bufferTime) {
+                    ncStream.bufferTime = bufferTime;
+                }
                 ncStream.play(name);
             }
         }

@@ -31,6 +31,7 @@ var createConnection = function(options) {
         var id = options.id;
         var authToken = options.authToken;
         var display = options.display || options.localDisplay;
+        var flashBufferTime = options.flashBufferTime || 0;
 
         var url = getConnectionUrl(options.mainUrl);
 
@@ -141,7 +142,7 @@ var createConnection = function(options) {
         var setRemoteSdp = function(sdp) {
             return new Promise(function(resolve, reject){
                 var state = extractMediaState(sdp);
-                flash.setup(state.incoming, state.outgoing, flash.isHasAudio(), flash.isHasVideo());
+                flash.setup(state.incoming, state.outgoing, flash.isHasAudio(), flash.isHasVideo(), flashBufferTime);
                 resolve(connections[id]);
             });
         };

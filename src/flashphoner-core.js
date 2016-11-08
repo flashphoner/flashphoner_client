@@ -1021,6 +1021,7 @@ var createSession = function(options) {
      * @param {Boolean=} options.cacheLocalResources Display will contain local video after stream release
      * @param {HTMLElement} options.display Div element stream should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
+     * @param {Integer=} options.flashBufferTime Specifies how long to buffer messages before starting to display the stream (Flash-only)
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
      * @throws {TypeError} Error if options.name is not specified
@@ -1124,7 +1125,8 @@ var createSession = function(options) {
                 id: id_,
                 display: display,
                 authToken: authToken,
-                mainUrl: urlServer
+                mainUrl: urlServer,
+                flashBufferTime: options.flashBufferTime || 0
             },streamRefreshHandlers[id_]).then(function(newConnection) {
                 mediaConnection = newConnection;
                 return mediaConnection.createOffer({
