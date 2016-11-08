@@ -720,6 +720,8 @@ var createSession = function(options) {
             }).catch(function(error){
                 logger.error(LOG_PREFIX, error);
                 status_ = CALL_STATUS.FAILED;
+                //try to hangup current call
+                hangup();
                 //fire stream event
                 if (callbacks[status_]) {
                     callbacks[status_](call);

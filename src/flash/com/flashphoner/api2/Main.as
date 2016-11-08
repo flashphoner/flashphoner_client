@@ -7,6 +7,7 @@ package com.flashphoner.api2 {
     import com.flashphoner.api2.connection.Connection;
 
     import flash.events.MouseEvent;
+    import flash.events.StatusEvent;
     import flash.events.TimerEvent;
     import flash.events.Event;
     import flash.system.SecurityPanel;
@@ -204,6 +205,7 @@ package com.flashphoner.api2 {
                 var mic:Microphone = localMediaControl.getMicrophone();
                 if (mic != null) {
                     mic.setLoopBack(true);
+                    mic.addEventListener(StatusEvent.STATUS, this.onMicStatus);
                 }
                 timer.addEventListener(TimerEvent.TIMER, timerTick);
                 timer.start();
@@ -221,6 +223,7 @@ package com.flashphoner.api2 {
             }
             if (!localMediaControl.hasAccessToAudio()){
                 mic.setLoopBack(true);
+                mic.addEventListener(StatusEvent.STATUS, this.onMicStatus);
                 timer.addEventListener(TimerEvent.TIMER, timerTick);
                 timer.start();
                 openSettingsButton.visible = true;
@@ -236,6 +239,15 @@ package com.flashphoner.api2 {
                 return false;
             }
             return getAccessToAudio();
+        }
+
+        private function onMicStatus(event:StatusEvent):void {
+            if (event.code == "Microphone.Muted") {
+                Logger.info("Microphone access was denied.");
+                timer.stop();
+                openSettingsButton.visible = false;
+                onAccessDenied();
+            }
         }
 
         private function timerTick(event:TimerEvent):void{
@@ -256,6 +268,10 @@ package com.flashphoner.api2 {
                 localMediaControl.attachLocalMedia();
                 localDisplay.visible = true;
             }
+        }
+
+        private function onAccessDenied(){
+            callExternalInterface('accessDenied', null);
         }
 
         public function hasAccessToAudio():Boolean{

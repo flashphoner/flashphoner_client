@@ -323,6 +323,10 @@ var getMediaAccess = function(constraints, display) {
                     removeCallback(swf, "accessGranted");
                     resolve(display);
                 });
+                installCallback(swf, "accessDenied", function () {
+                    removeCallback(swf, "accessDenied");
+                    reject(new Error("Failed to get access to audio and video"));
+                });
                 if (!constraints) {
                     constraints = defaultConstraints;
                 }
@@ -334,6 +338,10 @@ var getMediaAccess = function(constraints, display) {
             installCallback(flash, "accessGranted", function () {
                 removeCallback(flash, "accessGranted");
                 resolve(display);
+            });
+            installCallback(flash, "accessDenied", function () {
+                removeCallback(flash, "accessDenied");
+                reject(new Error("Failed to get access to audio and video"));
             });
             if (!flash.getMediaAccess(normalizeConstraints(constraints))) {
                 reject(new Error("Failed to get access to audio and video"));
