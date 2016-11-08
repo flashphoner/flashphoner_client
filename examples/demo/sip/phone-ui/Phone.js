@@ -229,6 +229,9 @@ Phone.prototype.connectionStatusListener = function (status) {
     this.connectionStatus = status;
     if (status == SESSION_STATUS.DISCONNECTED ||
         status == SESSION_STATUS.FAILED) {
+        if (this.currentCall) {
+            this.callStatusListener(CALL_STATUS.FINISH);
+        }
         this.currentCall = null;
         this.holdedCall = null;
         this.session = null;
