@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="jquery-ui.css">
     <link rel="stylesheet" href="player.css">
+
     <title>Player</title>
     <script type="text/javascript" src="../../../../flashphoner.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
     <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
 
     <script type="text/javascript" src="player.js"></script>
@@ -41,6 +44,12 @@
                     <label class="col-sm-2 control-label">Stream</label>
                     <div class="col-sm-4">
                         <input type="text" class="form-control" id="streamName">
+                    </div>
+                </div>
+                <div id="volume" class="form-group">
+                    <label class="col-sm-2 control-label">Volume</label>
+                    <div class="col-sm-4" style="height: 34px !important;">
+                        <div id="volumeControl" style="margin-top: 12px"></div>
                     </div>
                 </div>
                 <div class="form-group">

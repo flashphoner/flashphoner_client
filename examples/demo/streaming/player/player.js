@@ -2,6 +2,7 @@ var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var remoteVideo;
 var resolution_for_wsplayer;
+var stream;
 
 function init_page() {
 
@@ -24,6 +25,17 @@ function init_page() {
     remoteVideo = document.getElementById("remoteVideo");
 
     $("#url").val(setURL());
+    $("#volumeControl").slider({
+        range: "min",
+        min: 0,
+        max: 100,
+        value: 50,
+        step: 10,
+        animate: true,
+        slide: function(event, ui) {
+            stream.setVolume(ui.value);
+        }
+    }).slider("disable");
     onStopped();
 }
 
@@ -32,6 +44,7 @@ function onStarted(stream) {
         $(this).prop('disabled', true);
         stream.stop();
     }).prop('disabled', false);
+    $("#volumeControl").slider("enable");
 }
 
 function onStopped() {
@@ -45,6 +58,7 @@ function onStopped() {
     }).prop('disabled', false);
     $('#url').prop('disabled', false);
     $("#streamName").prop('disabled', false);
+    $("#volumeControl").slider("disable");
 }
 
 function start() {
@@ -88,10 +102,11 @@ function playStream(session) {
         display: remoteVideo
     };
     if (resolution_for_wsplayer) {
+        console.log("set play width height");
         options.playWidth = resolution_for_wsplayer.playWidth;
         options.playHeight = resolution_for_wsplayer.playHeight;
     }
-    session.createStream(options).on(STREAM_STATUS.PLAYING, function(stream) {
+    stream = session.createStream(options).on(STREAM_STATUS.PLAYING, function(stream) {
         document.getElementById(stream.id()).addEventListener('resize', function(event){
             resizeVideo(event.target);
         });
@@ -103,7 +118,8 @@ function playStream(session) {
     }).on(STREAM_STATUS.FAILED, function() {
         setStatus(STREAM_STATUS.FAILED);
         onStopped();
-    }).play();
+    });
+    stream.play();
 }
 
 //show connection or remote stream status
