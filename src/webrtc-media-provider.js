@@ -152,13 +152,14 @@ var createConnection = function(options) {
 
         var getVolume = function() {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
-                return remoteVideo.srcObject.getAudioTracks()[0].volume * 100;
+                //return remoteVideo.srcObject.getAudioTracks()[0].volume * 100;
+                return remoteVideo.volume * 100;
             }
             return -1;
         };
         var setVolume = function(volume) {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
-                remoteVideo.srcObject.getAudioTracks()[0].volume = volume/100;
+                remoteVideo.volume = volume/100;
             }
         };
         var muteAudio = function() {
