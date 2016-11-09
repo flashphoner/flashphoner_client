@@ -328,7 +328,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.10",
+            clientVersion: "0.5.11",
             clientOSVersion: window.navigator.appVersion,
             clientBrowserVersion: window.navigator.userAgent,
             custom: options.custom,
@@ -1600,6 +1600,16 @@ var createSession = function(options) {
     };
 
     /**
+     * Submut bug report.
+     *
+     * @param {Object} reportObject Report object
+     * @memberof Session
+     * @inner
+     */
+    var submitBugReport = function(reportObject) {
+        send("submitBugReport",reportObject);
+    }
+    /**
      * Session event callback.
      *
      * @callback Session~eventCallback
@@ -1679,6 +1689,7 @@ var createSession = function(options) {
     session.getStreams = getStreams;
     session.sendData = restAppCommunicator.sendData;
     session.disconnect = disconnect;
+    session.submitBugReport = submitBugReport;
     session.on = on;
 
     //save interface to global map
