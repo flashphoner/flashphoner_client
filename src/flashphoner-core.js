@@ -328,7 +328,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.9",
+            clientVersion: "0.5.10",
             clientOSVersion: window.navigator.appVersion,
             clientBrowserVersion: window.navigator.userAgent,
             custom: options.custom,
@@ -475,6 +475,7 @@ var createSession = function(options) {
      * @param {HTMLElement} options.localVideoDisplay Div element local video should be displayed in
      * @param {HTMLElement} options.remoteVideoDisplay Div element remote video should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
+     * @param {string[]=} options.stripCodecs Array of codecs which should be stripped from SDP
      * @returns {Call} Call
      * @throws {TypeError} Error if no options provided
      * @throws {Error} Error if session state is not REGISTERED
@@ -506,6 +507,7 @@ var createSession = function(options) {
         if (options.constraints) {
             var constraints = checkConstraints(options.constraints);
         }
+        var stripCodecs = options.stripCodecs || [];
         // Receive media
         var receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : true;
         var receiveVideo = (typeof options.receiveVideo !== 'undefined') ? options.receiveVideo : true;
@@ -587,7 +589,8 @@ var createSession = function(options) {
                         sendAudio: true,
                         sendVideo: true,
                         receiveAudio: receiveAudio,
-                        receiveVideo: receiveVideo
+                        receiveVideo: receiveVideo,
+                        stripCodecs: stripCodecs
                     });
                 }).then(function (offer) {
                     send("call", {
@@ -703,7 +706,8 @@ var createSession = function(options) {
                 }).then(function(){
                     return mediaConnection.createAnswer({
                         receiveAudio: options.receiveAudio,
-                        receiveVideo: options.receiveVideo
+                        receiveVideo: options.receiveVideo,
+                        stripCodecs: stripCodecs
                     });
                 }).then(function(sdp) {
                     send("answer", {
@@ -1022,6 +1026,7 @@ var createSession = function(options) {
      * @param {HTMLElement} options.display Div element stream should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
      * @param {Integer=} options.flashBufferTime Specifies how long to buffer messages before starting to display the stream (Flash-only)
+     * @param {string[]=} options.stripCodecs Array of codecs which should be stripped from SDP
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
      * @throws {TypeError} Error if options.name is not specified
@@ -1055,6 +1060,8 @@ var createSession = function(options) {
         // Receive media
         var receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : true;
         var receiveVideo = (typeof options.receiveVideo !== 'undefined') ? options.receiveVideo : true;
+
+        var stripCodecs = options.stripCodecs || [];
 
         var resolution = {};
 
@@ -1131,7 +1138,8 @@ var createSession = function(options) {
                 mediaConnection = newConnection;
                 return mediaConnection.createOffer({
                     receiveAudio: receiveAudio,
-                    receiveVideo: receiveVideo
+                    receiveVideo: receiveVideo,
+                    stripCodecs: stripCodecs
                 });
             }).then(function (offer) {
                 //request stream with offer sdp from server
@@ -1189,14 +1197,15 @@ var createSession = function(options) {
                     id: id_,
                     display: display,
                     authToken: authToken,
-                    mainUrl: urlServer
+                    mainUrl: urlServer,
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
                         sendAudio: true,
                         sendVideo: true,
                         receiveAudio: receiveAudio,
-                        receiveVideo: receiveVideo
+                        receiveVideo: receiveVideo,
+                        stripCodecs: stripCodecs
                     });
                 }).then(function (offer) {
                     //publish stream with offer sdp to server

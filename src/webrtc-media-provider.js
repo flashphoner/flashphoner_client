@@ -109,7 +109,7 @@ var createConnection = function(options) {
                 connection.createOffer(constraints).then(function (offer) {
                     connection.setLocalDescription(offer).then(function () {
                         var o = {};
-                        o.sdp = offer.sdp;
+                        o.sdp = util.stripCodecs(offer.sdp, options.stripCodecs);
                         o.hasAudio = hasAudio;
                         o.hasVideo = hasVideo;
                         resolve(o);
@@ -122,7 +122,7 @@ var createConnection = function(options) {
                 //create offer and set local sdp
                 connection.createAnswer().then(function (answer) {
                     connection.setLocalDescription(answer).then(function () {
-                        resolve(answer.sdp);
+                        resolve(util.stripCodecs(answer.sdp, options.stripCodecs));
                     });
                 });
             });
