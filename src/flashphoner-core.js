@@ -492,7 +492,7 @@ var createSession = function(options) {
      * @param {HTMLElement} options.localVideoDisplay Div element local video should be displayed in
      * @param {HTMLElement} options.remoteVideoDisplay Div element remote video should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
-     * @param {string[]=} options.stripCodecs Array of codecs which should be stripped from SDP
+     * @param {string[]} options.stripCodecs Array of codecs which should be stripped from SDP
      * @returns {Call} Call
      * @throws {TypeError} Error if no options provided
      * @throws {Error} Error if session state is not REGISTERED
@@ -1043,7 +1043,7 @@ var createSession = function(options) {
      * @param {HTMLElement} options.display Div element stream should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
      * @param {Integer=} options.flashBufferTime Specifies how long to buffer messages before starting to display the stream (Flash-only)
-     * @param {string[]=} options.stripCodecs Array of codecs which should be stripped from SDP
+     * @param {string[]} options.stripCodecs Array of codecs which should be stripped from SDP
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
      * @throws {TypeError} Error if options.name is not specified
