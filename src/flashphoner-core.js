@@ -213,6 +213,23 @@ function checkConstraints(constraints) {
     return constraints;
 }
 
+function getConstraintsProperty(constraints, property, defaultValue) {
+    if (!constraints || !property) return defaultValue;
+    var res;
+    var properties = property.split(".");
+    for (var prop in constraints) {
+        if (prop == properties[0]) {
+            res = constraints[prop];
+            if (properties.length > 1) res = getProperty(constraints[prop], properties[1]);
+        } else if (typeof constraints[prop] === "object") {
+            for (var p in constraints[prop]) {
+                if (p == property) res = constraints[prop][p];
+            }
+        }
+    }
+    if (typeof res === "boolean") return res;
+    return res || defaultValue;
+}
 
 /**
  * Release local media
@@ -1060,6 +1077,10 @@ var createSession = function(options) {
         // Receive media
         var receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : true;
         var receiveVideo = (typeof options.receiveVideo !== 'undefined') ? options.receiveVideo : true;
+        // Bitrate
+        var bitrate = getConstraintsProperty(constraints, "video.bitrate", 0);
+        // Quality
+        var quality = getConstraintsProperty(constraints, "video.quality", 0);
 
         var stripCodecs = options.stripCodecs || [];
 
@@ -1155,7 +1176,9 @@ var createSession = function(options) {
                     height: options.playHeight || 0,
                     mediaProvider: mediaProvider,
                     sdp: offer.sdp,
-                    custom: options.custom
+                    custom: options.custom,
+                    bitrate: bitrate,
+                    quality: quality
                 });
                 if (offer.player) {
                     offer.player.play(id_);
@@ -1219,7 +1242,8 @@ var createSession = function(options) {
                         record: record_,
                         mediaProvider: mediaProvider,
                         sdp: offer.sdp,
-                        custom: options.custom
+                        custom: options.custom,
+                        bitrate: bitrate
                     });
                 });
             }).catch(function(error){

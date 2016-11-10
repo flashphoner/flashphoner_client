@@ -80,6 +80,7 @@ package com.flashphoner.api2.media
 				constraints.video = {};
 				constraints.audio = true;
 			}
+			this.BANDWIDTH = getIntConfigurationProperty(constraints.bitrate, this.BANDWIDTH);
 			if (constraints.hasOwnProperty("video") && constraints.video is Object) {
 				var videoConstraints:Object = constraints.video;
 				this.width = getIntConfigurationProperty(videoConstraints.width, this.width);
@@ -101,10 +102,10 @@ package com.flashphoner.api2.media
 					return false;
 				}
 				//init
-				Logger.info("Init camera " + cameraId + ":" + cameraName + ", resolution " + this.width + "x" + this.height + ", fps " + this.FPS);
+				Logger.info("Init camera " + cameraId + ":" + cameraName + ", resolution " + this.width + "x" + this.height + ", fps " + this.FPS + ", bandwidth " + this.BANDWIDTH);
 				this.cam.setMode(this.width,this.height,FPS,KEEP_RATIO);
 				this.cam.setKeyFrameInterval(KEY_INT);
-				this.cam.setQuality(BANDWIDTH,QUALITY);
+				this.cam.setQuality(this.BANDWIDTH,QUALITY);
 				this.cam.setMotionLevel(0,this.MOTION_LEVEL);
 				this.hasVideo = true;
 			}
