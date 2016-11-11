@@ -3,6 +3,7 @@ var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var remoteVideo;
 var resolution_for_wsplayer;
 var stream;
+var currentVolumeValue = 50;
 
 function init_page() {
 
@@ -29,11 +30,12 @@ function init_page() {
         range: "min",
         min: 0,
         max: 100,
-        value: 50,
+        value: currentVolumeValue,
         step: 10,
         animate: true,
         slide: function(event, ui) {
-            stream.setVolume(ui.value);
+            currentVolumeValue = ui.value;
+            stream.setVolume(currentVolumeValue);
         }
     }).slider("disable");
     onStopped();
@@ -45,6 +47,7 @@ function onStarted(stream) {
         stream.stop();
     }).prop('disabled', false);
     $("#volumeControl").slider("enable");
+    stream.setVolume(currentVolumeValue);
 }
 
 function onStopped() {
@@ -102,7 +105,6 @@ function playStream(session) {
         display: remoteVideo
     };
     if (resolution_for_wsplayer) {
-        console.log("set play width height");
         options.playWidth = resolution_for_wsplayer.playWidth;
         options.playHeight = resolution_for_wsplayer.playHeight;
     }
