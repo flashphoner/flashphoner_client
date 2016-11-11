@@ -117,6 +117,21 @@ var playFirstSound = function() {
 }
 
 /**
+ * Get logger
+ *
+ * @returns {Object} Logger
+ * @memberof Flashphoner
+ */
+
+var getLogger = function() {
+    if (!initialized) {
+        console.warn("Initialize API first.");
+    } else {
+        return logger;
+    }
+}
+
+/**
  * @typedef Flashphoner.MediaDeviceList
  * @type Object
  * @property {Flashphoner.MediaDevice[]} audio Audio devices (microphones)
@@ -1731,6 +1746,7 @@ module.exports = {
     getSession: getSession,
     createSession: createSession,
     playFirstSound: playFirstSound,
+    getLogger: getLogger,
     roomApi: require('./room-module'),
     constants: constants,
     firefoxScreenSharingExtensionInstalled: false
