@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="jquery-ui.css">
     <link rel="stylesheet" href="manager.css">
     <title>Media Devices</title>
     <script type="text/javascript" src="../../../../flashphoner.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
     <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
 
     <script type="text/javascript" src="manager.js"></script>
@@ -29,69 +31,236 @@
             <div class="fp-remoteVideo">
                 <div id="localVideo" class="display"></div>
             </div>
-            <form id="form" class="form-horizontal" role="form" style="margin-top: 10px; margin-left: 10px">
-                <div class="form-group" id="urlForm">
-                    <label class="col-sm-2 control-label">WCS</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" id="url">
-                        <div class="text-center">
-                            <div id="streamStatus"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group" id="videoInputForm">
-                    <label class="col-sm-2 control-label">Cam</label>
-                    <div class="col-sm-6">
-                        <select class="form-control" id="videoInput">
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group" id="audioInputForm">
-                    <label class="col-sm-2 control-label">Mic</label>
-                    <div class="col-sm-6">
-                        <select class="form-control" id="audioInput">
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group" id="fpsForm">
-                    <label class="col-sm-2 control-label">FPS</label>
-                    <div class="col-sm-4">
-                        <input type="text" class="form-control" id="fps" value="30">
-                    </div>
-                </div>
-                <div class="form-group" id="widthForm">
-                    <label class="col-sm-2 control-label">Width</label>
-                    <div class="col-sm-4">
-                        <input type="text" class="form-control" id="width" value="320">
-                    </div>
-                </div>
-                <div class="form-group" id="heightForm">
-                    <label class="col-sm-2 control-label">Height</label>
-                    <div class="col-sm-4">
-                        <input type="text" class="form-control" id="height" value="240">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-sm-2 control-label"></label>
-                    <div class="col-sm-4">
-                        <button type="button" class="btn btn-default" id="publishBtn">Start</button>
-                    </div>
-                </div>
-            </form>
-
         </div>
         <div class="col-sm-1 text-center" style="margin: 8% auto">
             <i class="fa fa-arrow-right" aria-hidden="true" style="font-size: 42px"></i>
-
         </div>
         <div class="col-sm-4">
             <div class="text-muted text-center">Preview</div>
             <div class="fp-remoteVideo">
                 <div id="remoteVideo" class="display"></div>
             </div>
-
         </div>
     </div>
+	<div class="row">
+    
+        <form id="form" class="form-horizontal" role="form" style="margin-top: 10px; margin-left: 10px">
+                
+            <div class="col-sm-6">
+        
+				<div class="col-sm-6">
+				
+                    <div class="form-group">
+                        <div class="form-group">
+                            <div class="col-sm-1">
+                                <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="sendAudio" value="true">
+                            </div>
+                            <label style="text-align: left" class="control-label col-sm-5" for="sendAudio">Send Audio</label>
+                        </div>
+                        <div class="form-group" id="audioInputForm">
+                            <label style="text-align: left" class="col-sm-3 control-label">Mic</label>
+                            <div class="col-sm-6">
+                                <select class="form-control" id="audioInput">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label style="text-align: left" class="col-sm-3 control-label">Mute</label>
+                            <div class="col-sm-6">
+                                <input id="muteAudioToggle" type="checkbox" disabled/>
+                            </div>
+                        </div>
+			        </div>
+					
+                    <div class="form-group">
+                        <div class="form-group">
+                            <div class="col-sm-1">
+                                <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="sendVideo" value="true">
+                            </div>
+                            <label style="text-align: left" class="control-label col-sm-5" for="sendAudio">Send Video</label>
+                        </div>
+                        <div class="form-group" id="videoInputForm">
+                            <label style="text-align: left" class="col-sm-3 control-label">Cam</label>
+                            <div class="col-sm-6">
+                                <select class="form-control" id="videoInput">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" id="sendSizeForm">
+                            <label style="text-align: left" class="col-sm-3 control-label">Size</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="sendWidth" value="320">
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="sendHeight" value="240">
+                            </div>
+                        </div>
+                        <div class="form-group" id="fpsForm">
+                            <label style="text-align: left" class="col-sm-3 control-label">FPS</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="fps" value="10">
+                            </div>
+                        </div>
+                        <div class="form-group" id="sendBitrateForm">
+                            <label style="text-align: left" class="col-sm-3 control-label">Bitrate</label>
+                            <div class="col-sm-6 input-group">
+                                <input style="margin-left: 15px" type="text" class="form-control" id="sendBitrate" value="30000">
+                                <span style="max-width: 65px; text-align: right;" class="input-group-addon">kbps</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label style="text-align: left" class="col-sm-3 control-label">Mute</label>
+                            <div class="col-sm-6">
+                                <input id="muteVideoToggle" type="checkbox" disabled/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+				
+				
+                <div class="col-sm-6">
+                    <div class="form-group" id="urlForm">
+                        <label class="col-sm-2 control-label">WCS</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="url">
+                            <div class="text-center">
+                                <div id="streamStatus"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label"></label>
+                        <div class="col-sm-4">
+                            <button type="button" class="btn btn-default" id="publishBtn">Start</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="col-sm-4">
+           
+                <div class="form-group">
+                    &nbsp;
+                </div>        
+                <div class="form-group">
+                    &nbsp;
+                </div>
+                        
+                <div class="form-group">
+                        <div class="col-sm-1">
+                            <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="playAudio" value="true">
+                        </div>
+                        <label style="text-align: left" class="control-label col-sm-5" for="playAudio">Play audio</label>
+                </div>
+                <div id="volume" class="form-group">
+                    <label class="col-sm-2 control-label">Volume</label>
+                    <div class="col-sm-4" style="height: 34px !important;">
+                        <div id="volumeControl" style="margin-top: 12px"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="col-sm-8">
+                        <div class="form-group">
+                            <div class="col-sm-1">
+                                <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="playVideo" value="true">
+                            </div>
+                            <label style="text-align: left" class="control-label col-sm-5" for="playAudio">Play video</label>
+                        </div>
+                        <div class="form-group" id="receiveSizeForm">
+                        
+                            <label style="text-align: left" class="col-sm-3 control-label">Size</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="receiveWidth" value="0">
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="receiveHeight" value="0">
+                            </div>
+                        </div>
+                        <div class="form-group" id="receiveBitrateForm">
+                        
+                            <label style="text-align: left" class="col-sm-3 control-label">Bitrate</label>
+                            <div class="col-sm-7 input-group">
+                                <input style="margin-left: 15px" type="text" class="form-control" id="receiveBitrate" value="30000">
+                                <span style="max-width: 65px; text-align: right" class="input-group-addon">kbps</span>
+                            </div>              
+                        </div>
+                        <div class="form-group" id="qualityForm">                        
+                            <label style="text-align: left" class="col-sm-3 control-label">Quality</label>
+                            <div class="col-sm-4">
+                                <input type="text" class="form-control" id="quality" value="10">
+                            </div>            
+                        </div>
+                    </div>
+                    
+                    <div class="col-sm-4">
+                        <div style="margin-top: 10px" class="form-group">
+                            &nbsp;
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-1">
+                                <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="receiveDefaultSize" value="true">
+                            </div>
+                            <label style="text-align: left" class="control-label col-sm-3" for="receiveDefaultSize">default</label>
+                        </div>
+                        <div class="form-group">                   
+                            <div class="col-sm-1">
+                                <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="receiveDefaultBitrate" value="true">
+                            </div>
+                            <label style="text-align: left" class="control-label col-sm-3" for="receiveDefaultBitrate">default</label>                                              
+                        </div>
+                        <div class="form-group">                     
+                            <div class="col-sm-1">
+                                <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="receiveDefaultQuality" value="true">
+                            </div>
+                            <label style="text-align: left" class="control-label col-sm-3" for="receiveDefaultQuality">default</label>                        
+                        </div>             
+                    </div>
+
+			    </div>
+
+            </div>
+
+        </form>
+
+    </div>
 </div>
+
+<!-- Plug-in bootstrap-switch here -->
+<script src="../../dependencies/bootstrap/js/switch.js"></script>
+<script>
+
+    var $muteAudioToggle = $("#muteAudioToggle");
+    $muteAudioToggle.change(function () {
+        if (this.checked) {
+            muteAudio();
+        } else {
+            unmuteAudio();
+        }
+    });
+
+    $muteAudioToggle.bootstrapSwitch({
+        on: 'on',
+        off: 'off',
+        size: 'md'
+    });
+
+    var $muteVideoToggle = $("#muteVideoToggle");
+    $muteVideoToggle.change(function () {
+        if (this.checked) {
+            muteVideo();
+        } else {
+            unmuteVideo();
+        }
+    });
+
+    $muteVideoToggle.bootstrapSwitch({
+        on: 'on',
+        off: 'off',
+        size: 'md'
+    });
+
+</script>
+
 </body>
 </html>

@@ -17,3 +17,23 @@ video, object {
     height: 100%;
 }
 
+.ui-slider {
+    height: 10px !important;
+    background: #c0c0c0;
+}
+
+.ui-slider-handle {
+    width: 16px !important;
+    height: 16px !important;
+    position:absolute;
+    -moz-border-radius: 70px;
+    -webkit-border-radius: 70px;
+    border-radius: 70px;
+}
+.ui-widget-header {
+    background: #c0c0c0;
+}
+
+.ui-slider-range-min {
+    background: black;
+}
