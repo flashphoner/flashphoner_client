@@ -235,7 +235,7 @@ function getConstraintsProperty(constraints, property, defaultValue) {
     for (var prop in constraints) {
         if (prop == properties[0]) {
             res = constraints[prop];
-            if (properties.length > 1) res = getProperty(constraints[prop], properties[1]);
+            if (properties.length > 1) res = getConstraintsProperty(constraints[prop], properties[1], defaultValue);
         } else if (typeof constraints[prop] === "object") {
             for (var p in constraints[prop]) {
                 if (p == property) res = constraints[prop][p];
