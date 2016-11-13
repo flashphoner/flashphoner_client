@@ -86,6 +86,20 @@ module.exports = function(grunt) {
                 }
             }
         },
+        uglify: {
+          options: {
+              compress: true,
+              mangle: false
+          },
+          minify: {
+              files: {
+                  './flashphoner.min.js' : ['./flashphoner.js'],
+                  './flashphoner-no-webrtc.min.js': ['./flashphoner-no-webrtc.js'],
+                  './flashphoner-no-flash.min.js': ['./flashphoner-no-flash.js'],
+                  './flashphoner-no-wsplayer.min.js': ['./flashphoner-no-wsplayer.js']
+              }
+          }
+        },
         jsdoc: {
             src: ['./src/flashphoner-core.js', './src/constants.js', './src/room-module.js'],
             options: {
@@ -103,6 +117,10 @@ module.exports = function(grunt) {
                             'flashphoner-no-flash.js',
                             'flashphoner-no-webrtc.js',
                             'flashphoner-no-wsplayer.js',
+                            'flashphoner.min.js',
+                            'flashphoner-no-flash.min.js',
+                            'flashphoner-no-webrtc.min.js',
+                            'flashphoner-no-wsplayer.min.js',
                             'media-provider.swf'
                         ],
                         dest: 'release/<%= pkg.name %>-<%= pkg.version %>'
@@ -128,6 +146,10 @@ module.exports = function(grunt) {
                 'flashphoner-no-flash.js',
                 'flashphoner-no-webrtc.js',
                 'flashphoner-no-wsplayer.js',
+                'flashphoner.min.js',
+                'flashphoner-no-flash.min.js',
+                'flashphoner-no-webrtc.min.js',
+                'flashphoner-no-wsplayer.min.js',
                 'media-provider.swf',
                 'doc/'
             ],
@@ -143,11 +165,13 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-string-replace');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.registerTask('build', [
         'clean:build',
         'string-replace:version',
         'flash:release_media_provider',
         'browserify',
+        'uglify',
         'flash:release_examples_streaming',
         'flash:release_examples_chat',
         'jsdoc'
