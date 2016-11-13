@@ -3,6 +3,9 @@ var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var localVideo;
 var remoteVideo;
 var constraints;
+var previewStream;
+var publishStream;
+var currentVolumeValue = 50;
 
 function init_page() {
     //init api
@@ -54,6 +57,20 @@ function init_page() {
         remoteVideo = document.getElementById("remoteVideo");
 
         $("#url").val(setURL() + "/" + createUUID(8));
+
+        $("#volumeControl").slider({
+            range: "min",
+            min: 0,
+            max: 100,
+            value: currentVolumeValue,
+            step: 10,
+            animate: true,
+            slide: function(event, ui) {
+                currentVolumeValue = ui.value;
+                previewStream.setVolume(currentVolumeValue);
+            }
+        }).slider("disable");
+
         //set initial button callback
         onStopped();
     }).catch(function(error) {
@@ -66,6 +83,8 @@ function onStarted(publishStream, previewStream) {
         $(this).prop('disabled', true);
         previewStream.stop();
     }).prop('disabled', false);
+    $("#volumeControl").slider("enable");
+    previewStream.setVolume(currentVolumeValue);
 }
 
 function onStopped() {
@@ -77,6 +96,8 @@ function onStopped() {
         }
     }).prop('disabled', false);
     unmuteInputs();
+    $("#volumeControl").slider("disable");
+    enableMuteToggles(false);
 }
 
 function start() {
@@ -112,21 +133,26 @@ function start() {
 function startStreaming(session) {
     var streamName = field("url").split('/')[3];
     constraints = {
-        audio: {
-            deviceId: $('#audioInput').val()
-        },
-        video: {
+        audio: $("#sendAudio").is(':checked'),
+        video: $("#sendVideo").is(':checked')
+    };
+    if (constraints.audio) {
+        constraints.audio = {deviceId: $('#audioInput').val()}
+    }
+    if (constraints.video) {
+        constraints.video = {
             deviceId: $('#videoInput').val(),
-            width: parseInt($('#width').val()),
-            height: parseInt($('#height').val()),
+            width: parseInt($('#sendWidth').val()),
+            height: parseInt($('#sendHeight').val()),
             frameRate: parseInt($('#fps').val())
         }
-    };
+    }
     Flashphoner.getMediaAccess(constraints, localVideo).then(function(){
-        session.createStream({
+        publishStream = session.createStream({
             name: streamName,
             display: localVideo,
             cacheLocalResources: true,
+            constraints: constraints,
             receiveVideo: false,
             receiveAudio: false
         }).on(STREAM_STATUS.PUBLISHING, function(publishStream){
@@ -139,8 +165,9 @@ function startStreaming(session) {
             video.removeEventListener('resize', resizeLocalVideo);
             video.addEventListener('resize', resizeLocalVideo);
             setStatus(STREAM_STATUS.PUBLISHING);
+            enableMuteToggles(true);
             //play preview
-            session.createStream({
+            previewStream = session.createStream({
                 name: streamName,
                 display: remoteVideo
             }).on(STREAM_STATUS.PLAYING, function(previewStream){
@@ -157,7 +184,8 @@ function startStreaming(session) {
                     setStatus(STREAM_STATUS.FAILED);
                     publishStream.stop();
                 }
-            }).play();
+            });
+            previewStream.play();
         }).on(STREAM_STATUS.UNPUBLISHED, function(){
             setStatus(STREAM_STATUS.UNPUBLISHED);
             //enable start button
@@ -166,7 +194,8 @@ function startStreaming(session) {
             setStatus(STREAM_STATUS.FAILED);
             //enable start button
             onStopped();
-        }).publish();
+        });
+        publishStream.publish();
     }, function(error){
         console.warn("Failed to get access to media " + error);
         onStopped();
@@ -187,14 +216,14 @@ function setStatus(status) {
 }
 
 function muteInputs() {
-    $(":input, select").each(function() {
-        $(this).prop('disabled',true);
+    $(":text, select, checkbox").each(function() {
+        $(this).attr('disabled','disabled');
     });
 }
 
 function unmuteInputs() {
-    $(":input, select").each(function() {
-        $(this).prop('disabled',false);
+    $(":text, select, checkbox").each(function() {
+        $(this).removeAttr("disabled");
     });
 }
 
@@ -213,7 +242,7 @@ function validateForm() {
             highlightInput($(this));
             valid = false;
         } else {
-            var numericFields = ['fps', 'width', 'height'];
+            var numericFields = ['fps', 'sendWidth', 'sendHeight', 'sendBitrate', 'receiveBitrate', 'quality'];
             if (numericFields.indexOf(this.id) != -1 && !(parseInt($(this).val()) > 0)) {
                 highlightInput($(this));
                 valid = false;
@@ -229,5 +258,45 @@ function validateForm() {
     }
     function removeHighlight(input) {
         input.closest('.form-group').removeClass("has-error");
+    }
+}
+
+function muteAudio() {
+	if (publishStream) {
+	    publishStream.muteAudio();
+	}
+}
+
+function unmuteAudio() {
+	if (publishStream) {
+        publishStream.unmuteAudio();
+	}
+}
+
+function muteVideo() {
+	if (publishStream) {
+        publishStream.muteVideo();
+	}
+}
+
+function unmuteVideo() {
+	if (publishStream) {
+        publishStream.unmuteVideo();
+    }
+}
+
+function enableMuteToggles(enable) {
+    var $muteAudioToggle = $("#muteAudioToggle");
+    var $muteVideoToggle = $("#muteVideoToggle");
+	
+	if (enable) {
+		$muteAudioToggle.removeAttr("disabled");
+		$muteAudioToggle.trigger('change');
+		$muteVideoToggle.removeAttr("disabled");
+		$muteVideoToggle.trigger('change');
+	}
+	else {
+		$muteAudioToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
+		$muteVideoToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
     }
 }
