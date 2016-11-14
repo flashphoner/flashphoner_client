@@ -58,24 +58,49 @@ function init_page() {
 
         $("#url").val(setURL() + "/" + createUUID(8));
 
-        $("#volumeControl").slider({
-            range: "min",
-            min: 0,
-            max: 100,
-            value: currentVolumeValue,
-            step: 10,
-            animate: true,
-            slide: function(event, ui) {
-                currentVolumeValue = ui.value;
-                previewStream.setVolume(currentVolumeValue);
-            }
-        }).slider("disable");
-
         //set initial button callback
         onStopped();
     }).catch(function(error) {
         $("#notifyFlash").text("Failed to get media devices");
     });
+    $("#receiveDefaultSize").click(function(){
+        if($(this).is(':checked')) {
+            $("#receiveWidth").prop('disabled',true);
+            $("#receiveHeight").prop('disabled',true);
+
+        } else {
+            $("#receiveWidth").prop('disabled',false);
+            $("#receiveHeight").prop('disabled',false);
+        }
+    });
+    $("#receiveDefaultBitrate").click(function(){
+        if($(this).is(':checked')) {
+            $("#receiveBitrate").prop('disabled',true);
+
+        } else {
+            $("#receiveBitrate").prop('disabled',false);
+        }
+    });
+    $("#receiveDefaultQuality").click(function(){
+        if($(this).is(':checked')) {
+            $("#quality").prop('disabled',true);
+
+        } else {
+            $("#quality").prop('disabled',false);
+        }
+    });
+    $("#volumeControl").slider({
+        range: "min",
+        min: 0,
+        max: 100,
+        value: currentVolumeValue,
+        step: 10,
+        animate: true,
+        slide: function(event, ui) {
+            currentVolumeValue = ui.value;
+            previewStream.setVolume(currentVolumeValue);
+        }
+    }).slider("disable");
 }
 
 function onStarted(publishStream, previewStream) {
@@ -83,6 +108,7 @@ function onStarted(publishStream, previewStream) {
         $(this).prop('disabled', true);
         previewStream.stop();
     }).prop('disabled', false);
+    //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
     previewStream.setVolume(currentVolumeValue);
 }
@@ -96,8 +122,10 @@ function onStopped() {
         }
     }).prop('disabled', false);
     unmuteInputs();
+    $("#publishResolution").text("");
+    $("#playResolution").text("");
     $("#volumeControl").slider("disable");
-    enableMuteToggles(false);
+    //enableMuteToggles(false);
 }
 
 function start() {
@@ -145,9 +173,9 @@ function startStreaming(session) {
             width: parseInt($('#sendWidth').val()),
             height: parseInt($('#sendHeight').val()),
             frameRate: parseInt($('#fps').val())
-        }
+        };
     }
-    Flashphoner.getMediaAccess(constraints, localVideo).then(function(){
+    Flashphoner.getMediaAccess(constraints, localVideo).then(function(element){
         publishStream = session.createStream({
             name: streamName,
             display: localVideo,
@@ -161,17 +189,39 @@ function startStreaming(session) {
             if (video.videoWidth > 0 && video.videoHeight > 0) {
                 resizeLocalVideo({target: video});
             }
+            enableMuteToggles(true);
+            if ($("#muteVideoToggle").is(":checked")) {
+                muteVideo();
+            }
             //remove resize listener in case this video was cached earlier
             video.removeEventListener('resize', resizeLocalVideo);
             video.addEventListener('resize', resizeLocalVideo);
             setStatus(STREAM_STATUS.PUBLISHING);
-            enableMuteToggles(true);
+
             //play preview
+            var constraints = {
+                audio: $("#playAudio").is(':checked'),
+                video: $("#playVideo").is(':checked')
+            };
+            if (constraints.video) {
+                constraints.video = {
+                    width: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveWidth').val()) : 0,
+                    height: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveHeight').val()) : 0,
+                    bitrate: (!$("#receiveDefaultBitrate").is(":checked")) ? $("#receiveBitrate").val() : 0,
+                    quality: (!$("#receiveDefaultQuality").is(":checked")) ? $('#quality').val() : 0
+                };
+            }
             previewStream = session.createStream({
                 name: streamName,
-                display: remoteVideo
+                display: remoteVideo,
+                receiveVideo: $("#playAudio").is(':checked'),
+                receiveAudio: $("#playVideo").is(':checked'),
+                playWidth: constraints.width,
+                playHeight: constraints.height,
+                constraints: constraints
             }).on(STREAM_STATUS.PLAYING, function(previewStream){
                 document.getElementById(previewStream.id()).addEventListener('resize', function(event){
+                    $("#playResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);
                     resizeVideo(event.target);
                 });
                 //enable stop button
@@ -216,14 +266,22 @@ function setStatus(status) {
 }
 
 function muteInputs() {
-    $(":text, select, checkbox").each(function() {
+    $(":text, select, :checkbox").each(function() {
         $(this).attr('disabled','disabled');
     });
 }
 
 function unmuteInputs() {
-    $(":text, select, checkbox").each(function() {
-        $(this).removeAttr("disabled");
+    $(":text, select, :checkbox").each(function() {
+        if (($(this).attr('id') == 'receiveWidth' || $(this).attr('id')== 'receiveHeight')) {
+            if(!$("#receiveDefaultSize").is(":checked")) $(this).removeAttr("disabled");
+        } else if ($(this).attr('id') == 'receiveBitrate'){
+            if(!$("#receiveDefaultBitrate").is(":checked")) $(this).removeAttr("disabled");
+        } else if ($(this).attr('id') == 'quality') {
+            if(!$("#receiveDefaultQuality").is(":checked")) $(this).removeAttr("disabled");
+        } else {
+            $(this).removeAttr("disabled");
+        }
     });
 }
 
@@ -232,6 +290,7 @@ function resizeLocalVideo(event) {
     if (requested.width != event.target.videoWidth || requested.height != event.target.videoHeight) {
         console.warn("Camera does not support requested resolution, actual resolution is " + event.target.videoWidth + "x" + event.target.videoHeight);
     }
+    $("#publishResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);
     resizeVideo(event.target);
 }
 

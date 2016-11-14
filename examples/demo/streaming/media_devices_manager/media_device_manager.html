@@ -20,7 +20,7 @@
 <body onload="init_page()">
 <div class="container">
     <div class="row">
-        <div class="col-sm-8">
+        <div class="col-sm-9">
             <h2 class="text-center">Media Devices</h2>
         </div>
     </div>
@@ -31,6 +31,7 @@
             <div class="fp-remoteVideo">
                 <div id="localVideo" class="display"></div>
             </div>
+            <div class="text-muted text-center" id="publishResolution"></div>
         </div>
         <div class="col-sm-1 text-center" style="margin: 8% auto">
             <i class="fa fa-arrow-right" aria-hidden="true" style="font-size: 42px"></i>
@@ -40,6 +41,7 @@
             <div class="fp-remoteVideo">
                 <div id="remoteVideo" class="display"></div>
             </div>
+            <div class="text-muted text-center" id="playResolution"></div>
         </div>
     </div>
 	<div class="row">
@@ -67,7 +69,7 @@
                         <div class="form-group">
                             <label style="text-align: left" class="col-sm-3 control-label">Mute</label>
                             <div class="col-sm-6">
-                                <input id="muteAudioToggle" type="checkbox" disabled/>
+                                <input id="muteAudioToggle" type="checkbox" />
                             </div>
                         </div>
 			        </div>
@@ -111,7 +113,7 @@
                         <div class="form-group">
                             <label style="text-align: left" class="col-sm-3 control-label">Mute</label>
                             <div class="col-sm-6">
-                                <input id="muteVideoToggle" type="checkbox" disabled/>
+                                <input id="muteVideoToggle" type="checkbox" />
                             </div>
                         </div>
                     </div>
@@ -165,30 +167,30 @@
                             <div class="col-sm-1">
                                 <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="playVideo" value="true">
                             </div>
-                            <label style="text-align: left" class="control-label col-sm-5" for="playAudio">Play video</label>
+                            <label style="text-align: left" class="control-label col-sm-5" for="playVideo">Play video</label>
                         </div>
                         <div class="form-group" id="receiveSizeForm">
                         
                             <label style="text-align: left" class="col-sm-3 control-label">Size</label>
                             <div class="col-sm-4">
-                                <input type="text" class="form-control" id="receiveWidth" value="0">
+                                <input type="text" class="form-control" id="receiveWidth" value="0" disabled>
                             </div>
                             <div class="col-sm-4">
-                                <input type="text" class="form-control" id="receiveHeight" value="0">
+                                <input type="text" class="form-control" id="receiveHeight" value="0" disabled>
                             </div>
                         </div>
                         <div class="form-group" id="receiveBitrateForm">
                         
                             <label style="text-align: left" class="col-sm-3 control-label">Bitrate</label>
                             <div class="col-sm-7 input-group">
-                                <input style="margin-left: 15px" type="text" class="form-control" id="receiveBitrate" value="30000">
+                                <input style="margin-left: 15px" type="text" class="form-control" id="receiveBitrate" value="30000" disabled>
                                 <span style="max-width: 65px; text-align: right" class="input-group-addon">kbps</span>
                             </div>              
                         </div>
                         <div class="form-group" id="qualityForm">                        
                             <label style="text-align: left" class="col-sm-3 control-label">Quality</label>
                             <div class="col-sm-4">
-                                <input type="text" class="form-control" id="quality" value="10">
+                                <input type="text" class="form-control" id="quality" value="10" disabled>
                             </div>            
                         </div>
                     </div>
@@ -232,7 +234,7 @@
 
     var $muteAudioToggle = $("#muteAudioToggle");
     $muteAudioToggle.change(function () {
-        if (this.checked) {
+        if ($(this).is(":checked")) {
             muteAudio();
         } else {
             unmuteAudio();
