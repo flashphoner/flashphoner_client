@@ -193,6 +193,9 @@ function startStreaming(session) {
             if ($("#muteVideoToggle").is(":checked")) {
                 muteVideo();
             }
+            if ($("#muteAudioToggle").is(":checked")) {
+                muteAudio();
+            }
             //remove resize listener in case this video was cached earlier
             video.removeEventListener('resize', resizeLocalVideo);
             video.addEventListener('resize', resizeLocalVideo);
