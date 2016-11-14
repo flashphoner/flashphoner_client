@@ -416,7 +416,7 @@ var listDevices = function(labels) {
                         ret.type = "camera";
                         list.video.push(ret);
                     } else {
-                       logger.info("unknown device " + device.kind + " id " + device.deviceId);
+                       logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
                     }
                 }
                 resolve(list);
@@ -427,7 +427,7 @@ var listDevices = function(labels) {
 
 function normalizeConstraints(constraints) {
     if (constraints.video) {
-        if (constraints.video.hasOwnProperty('frameRate')) {
+        if (constraints.video.hasOwnProperty('frameRate') && typeof constraints.video.frameRate !== 'object') {
             // Set default FPS value
             var frameRate = (constraints.video.frameRate == 0) ? 30 : constraints.video.frameRate;
             constraints.video.frameRate = {

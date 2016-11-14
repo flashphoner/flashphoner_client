@@ -465,7 +465,7 @@ var listDevices = function() {
 
 function normalizeConstraints(constraints) {
     if (constraints && typeof constraints.video !== 'undefined') {
-        if (constraints.video.hasOwnProperty('frameRate')) {
+        if (constraints.video.hasOwnProperty('frameRate') && constraints.video.frameRate !== 'object') {
             var frameRate = constraints.video.frameRate;
             if (frameRate == 0 || isNaN(frameRate)) {
                 delete constraints.video.frameRate;
