@@ -115,7 +115,7 @@ function call() {
 		setStatus("#callStatus", CALL_STATUS.RING);
     }).on(CALL_STATUS.ESTABLISHED, function(){
 		setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
-		enableMuteToggles(true);
+        onAnswerOutgoing();
     }).on(CALL_STATUS.FINISH, function(){
 		setStatus("#callStatus", CALL_STATUS.FINISH);
 	    onHangupOutgoing();
@@ -170,6 +170,7 @@ function onHangupOutgoing() {
 		}
     }).prop('disabled', false);
     $('#callee').prop('disabled', false);
+    $("#callFeatures").hide();
 	disableOutgoing(false);
 	enableMuteToggles(false);
 }
@@ -193,11 +194,36 @@ function onIncomingCall(inCall) {
 		$("#answerBtn").prop('disabled', true);
         inCall.hangup();
     }).prop('disabled', false);
+    $("#holdBtn").click(function(){
+        var state = $(this).text();
+        if (state == "Hold") {
+            $(this).text("Unhold");
+            inCall.hold();
+        } else {
+            $(this).text("Hold");
+            inCall.unhold();
+        }
+    });
 }
 
 function onHangupIncoming() {
     showOutgoing();
 	enableMuteToggles(false);
+}
+
+function onAnswerOutgoing() {
+    enableMuteToggle(true);
+    $("#callFeatures").show();
+    $("#holdBtn").click(function(){
+        var state = $(this).text();
+        if (state == "Hold") {
+            $(this).text("Unhold");
+            currentCall.hold();
+        } else {
+            $(this).text("Hold");
+            currentCall.unhold();
+        }
+    });
 }
 
 // Set connection and call status
@@ -228,6 +254,7 @@ function showOutgoing(){
     $("#incomingCall").hide();
     $("#incomingCallAlert").hide();
     $("#outgoingCall").show();
+    $("#callFeatures").hide();
     onHangupOutgoing();
 }
 
@@ -239,6 +266,7 @@ function disableOutgoing(disable) {
 // Display view for answered call
 function showAnswered(){
     $("#answerBtn").hide();
+    $("#callFeatures").show();
     $("#incomingCallAlert").hide().text("");
 }
 
