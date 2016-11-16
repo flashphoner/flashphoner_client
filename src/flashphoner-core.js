@@ -1094,8 +1094,8 @@ var createSession = function(options) {
             var constraints = checkConstraints(options.constraints);
         }
         // Receive media
-        var receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : false;
-        var receiveVideo = (typeof options.receiveVideo !== 'undefined') ? options.receiveVideo : false;
+        var receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : true;
+        var receiveVideo = (typeof options.receiveVideo !== 'undefined') ? options.receiveVideo : true;
         // Bitrate
         var bitrate = getConstraintsProperty(constraints, "video.bitrate", 0);
         // Quality
