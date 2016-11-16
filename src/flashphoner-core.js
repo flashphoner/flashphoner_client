@@ -443,7 +443,9 @@ var createSession = function(options) {
                     callRefreshHandlers[mediaSessionId](null, null, codec);
                 }
                 break;
+            case 'notifyTransferEvent':
             case 'notifyTryingResponse':
+            case 'hold':
             case 'ring':
             case 'talk':
             case 'finish':
@@ -689,6 +691,7 @@ var createSession = function(options) {
          * @param {Boolean=} answerOptions.receiveAudio Receive audio
          * @param {Boolean=} answerOptions.receiveVideo Receive video
          * @param {String=} answerOptions.constraints Answer call with constraints
+         * @param {string[]} answerOptions.stripCodecs Array of codecs which should be stripped from SDP
          * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.NEW}
          * @memberof Call
          * @name call
@@ -713,6 +716,7 @@ var createSession = function(options) {
             if (util.SDP.matchPrefix(sdp,"m=video").length == 0) {
                 constraints.video = false;
             }
+            var stripCodecs = answerOptions.stripCodecs || [];
             var hasAudio = true;
             //get access to camera
             MediaProvider[mediaProvider].getMediaAccess(constraints, localDisplay).then(function(){
@@ -1090,8 +1094,8 @@ var createSession = function(options) {
             var constraints = checkConstraints(options.constraints);
         }
         // Receive media
-        var receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : true;
-        var receiveVideo = (typeof options.receiveVideo !== 'undefined') ? options.receiveVideo : true;
+        var receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : false;
+        var receiveVideo = (typeof options.receiveVideo !== 'undefined') ? options.receiveVideo : false;
         // Bitrate
         var bitrate = getConstraintsProperty(constraints, "video.bitrate", 0);
         // Quality
