@@ -33,7 +33,6 @@ Phone.prototype.connect = function () {
     this.sipOptions.outboundProxy = $('#sipOutboundProxy').val();
     this.sipOptions.port = $('#sipPort').val();
     this.sipOptions.useProxy = true;
-    //This parameter will be defined from flashphoner.xml config
     this.sipOptions.registerRequired = true;
 
     var connectionOptions = {
@@ -53,16 +52,16 @@ Phone.prototype.connect = function () {
     }).on(SESSION_STATUS.INCOMING_CALL, function(call){
         me.onCallListener(call);
         call.on(CALL_STATUS.RING, function(){
-            me.callStatusListener(CALL_STATUS.RING);
+            me.callStatusListener(call);
         }).on(CALL_STATUS.ESTABLISHED, function(){
-            me.callStatusListener(CALL_STATUS.ESTABLISHED);
+            me.callStatusListener(call);
+        }).on(CALL_STATUS.HOLD, function() {
+            me.callStatusListener(call);
         }).on(CALL_STATUS.FINISH, function(){
-            me.callStatusListener(CALL_STATUS.FINISH);
-            me.currentCall = null;
+            me.callStatusListener(call);
             me.incomingCall = false;
         }).on(CALL_STATUS.FAILED, function(){
-            me.callStatusListener(CALL_STATUS.FAILED);
-            me.currentCall = null;
+            me.callStatusListener(call);
             me.incomingCall = false;
         });
     });
@@ -96,16 +95,16 @@ Phone.prototype.call = function (callee, hasVideo) {
         localVideoDisplay: this.localVideo,
         remoteVideoDisplay: this.remoteVideo,
         constraints: constraints
-    }).on(CALL_STATUS.RING, function(){
-        me.callStatusListener(CALL_STATUS.RING);
-    }).on(CALL_STATUS.ESTABLISHED, function(){
-        me.callStatusListener(CALL_STATUS.ESTABLISHED);
-    }).on(CALL_STATUS.FINISH, function(){
-        me.callStatusListener(CALL_STATUS.FINISH);
-        me.currentCall = null;
-    }).on(CALL_STATUS.FAILED, function(){
-        me.callStatusListener(CALL_STATUS.FAILED);
-        me.currentCall = null;
+    }).on(CALL_STATUS.RING, function(call){
+        me.callStatusListener(call);
+    }).on(CALL_STATUS.ESTABLISHED, function(call){
+        me.callStatusListener(call);
+    }).on(CALL_STATUS.HOLD, function(call){
+        me.callStatusListener(call);
+    }).on(CALL_STATUS.FINISH, function(call){
+        me.callStatusListener(call);
+    }).on(CALL_STATUS.FAILED, function(call){
+        me.callStatusListener(call);
     });
 
     outCall.call();
@@ -263,7 +262,7 @@ Phone.prototype.registrationStatusListener = function (status) {
 };
 
 Phone.prototype.onCallListener = function (call_) {
-    this.incomingCall = true;
+    //this.incomingCall = true;
     var call = call_;
     trace("Phone - onCallListener " + call.id() + " call.status: " + call.status());
     if (this.currentCall != null && !this.incomingCall) {
@@ -284,23 +283,23 @@ Phone.prototype.onCallListener = function (call_) {
     }
 };
 
-Phone.prototype.callStatusListener = function (status) {
-    //var sipObject = event.sipMessageRaw;
-    if (status==CALL_STATUS.FAILED){
-        //trace("Call failed: callId: "+event.id+" info: "+event.info);
+Phone.prototype.callStatusListener = function (call_) {
+    if (call_.status()==CALL_STATUS.FAILED){
         return;
     }
-    var call = this.currentCall;
-    trace("Phone - callStatusListener call id: " + call.id() + " status: " + call.status());
-    //if (this.currentCall.id() == call.id()) {
-    //    this.currentCall.status = call.status;
+    var call = call_;
+    var status = call.status();
+    trace("Phone - callStatusListener call id: " + call.id() + " status: " + status);
+    if (this.currentCall.id() == call.id()) {
         if (status == CALL_STATUS.FINISH) {
             trace("Phone - ... Call is finished...");
             SoundControl.getInstance().stopSound("RING");
             if (this.holdedCall != null) {
+                trace("Phone - ... Finish holded call...");
                 this.currentCall = this.holdedCall;
                 this.holdedCall = null;
             } else if (this.isCurrentCall(call)) {
+                trace("Phone - ... Finish current call...");
                 this.currentCall = null;
                 this.flashphonerListener.onRemoveCall();
                 SoundControl.getInstance().playSound("FINISH");
@@ -391,14 +390,14 @@ Phone.prototype.callStatusListener = function (status) {
             trace('Phone - ...Call in Progress...');
             SoundControl.getInstance().stopSound("RING");
         }
-    //} else {
-    //    if (this.holdedCall.id() == call.id()) {
-    //        if (call.status == CALL_STATUS.FINISH) {
-    //            trace("It seems we received FINISH status on holdedCall. Just do null the holdedCall.");
-    //            this.holdedCall = null;
-    //        }
-    //    }
-    //}
+    } else {
+        if (this.holdedCall.id() == call.id()) {
+            if (call.status() == CALL_STATUS.FINISH) {
+                trace("It seems we received FINISH status on holdedCall. Just do null the holdedCall.");
+                this.holdedCall = null;
+            }
+        }
+    }
 };
 
 Phone.prototype.onTransferStatusListener = function (event) {
@@ -449,54 +448,6 @@ Phone.prototype.onDataEventListener = function (event) {
 
 Phone.prototype.dataStatusEventListener = function (event) {
     trace("Phone - DataStatusEventListener; received status " + event.status);
-};
-
-Phone.prototype.errorStatusEvent = function (event) {
-    var code = event.status;
-    trace("Phone - errorStatusEvent " + code);
-    if (code == WCSError.MIC_ACCESS_PROBLEM || code == WCSError.MIC_CAM_ACCESS_PROBLEM) {
-        this.cancel();
-        this.viewMessage("ERROR - " + event.info);
-    } else {
-        this.cancel();
-        if (code == WCSError.CONNECTION_ERROR) {
-            this.viewMessage("ERROR - Can`t connect to server.");
-        } else if (code == WCSError.AUTHENTICATION_FAIL) {
-            this.viewMessage("ERROR - Register fail, please check your SIP account details.");
-            window.setTimeout("disconnect();", 3000);
-        } else if (code == WCSError.USER_NOT_AVAILABLE) {
-            this.viewMessage("ERROR - User not available.");
-        } else if (code == WCSError.LICENSE_RESTRICTION) {
-            this.viewMessage("ERROR - You trying to connect too many users, or license is expired");
-        } else if (code == WCSError.LICENSE_NOT_FOUND) {
-            this.viewMessage("ERROR - Please get a valid license or contact Flashphoner support");
-        } else if (code == WCSError.INTERNAL_SIP_ERROR) {
-            this.viewMessage("ERROR - Unknown error. Please contact support.");
-        } else if (code == WCSError.REGISTER_EXPIRE) {
-            this.viewMessage("ERROR - No response from VOIP server during 15 seconds.");
-        } else if (code == WCSError.SIP_PORTS_BUSY) {
-            this.viewMessage("ERROR - SIP ports are busy. Please open SIP ports range (30000-31000 by default).");
-            window.setTimeout("disconnect();", 3000);
-        } else if (code == WCSError.MEDIA_PORTS_BUSY) {
-            this.viewMessage("ERROR - Media ports are busy. Please open media ports range (31001-32000 by default).");
-        } else if (code == WCSError.WRONG_SIPPROVIDER_ADDRESS) {
-            this.viewMessage("ERROR - Wrong domain.");
-            window.setTimeout("disconnect();", 3000);
-        } else if (code == WCSError.CALLEE_NAME_IS_NULL) {
-            this.viewMessage("ERROR - Callee name is empty.");
-        } else if (code == WCSError.WRONG_FLASHPHONER_XML) {
-            this.viewMessage("ERROR - Flashphoner.xml has errors. Please check it.");
-        } else if (code == WCSError.PAYMENT_REQUIRED) {
-            this.viewMessage("ERROR - Payment required, please check your balance.");
-        } else if (code == WCSError.REST_AUTHORIZATION_FAIL) {
-            this.viewMessage("ERROR - Rest authorization fail.");
-            window.setTimeout("disconnect();", 3000);
-        } else if (code == WCSError.REST_FAIL) {
-            this.viewMessage("ERROR - Rest fail.");
-        }
-    }
-
-    this.flashphonerListener.onError();
 };
 
 Phone.prototype.viewMessage = function (message) {
@@ -613,14 +564,6 @@ $(document).ready(function () {
         if (phone.connectionStatus == SESSION_STATUS.ESTABLISHED || phone.connectionStatus == SESSION_STATUS.REGISTERED) {
             phone.disconnect();
         } else {
-            // TODO delete me
-            $('#sipLogin').val('3000');
-            $('#sipPassword').val('1234');
-            $('#sipAuthenticationName').val('3000');
-            $('#sipDomain').val('87.226.225.56');
-            $('#sipOutboundProxy').val('87.226.225.56');
-            $('#sipPort').val('5060');
-
             $(".b-login").toggleClass("open");
             $("#active").removeAttr("id");
             $(".b-login").hasClass("open") ? $(".b-login").attr("id", "active") : $(".b-login").removeAttr("id");
@@ -723,7 +666,7 @@ $(document).ready(function () {
                 $(".b-numbers").addClass("write").next().addClass("open");
             }
             if (phone.currentCall &&
-                (CALL_STATUS.ESTABLISHED == phone.currentCall.status || CALL_STATUS.HOLD == phone.currentCall.status)) {
+                (CALL_STATUS.ESTABLISHED == phone.currentCall.status() || CALL_STATUS.HOLD == phone.currentCall.status())) {
                 phone.sendDTMF(phone.currentCall.id(), $(this).text());
             } else {
                 if ($(".b-transfer").hasClass("open")) {
