@@ -181,7 +181,7 @@ function startStreaming(session) {
             name: streamName,
             display: localVideo,
             cacheLocalResources: true,
-            constraints: constraints,
+            constraints: constraints
         }).on(STREAM_STATUS.PUBLISHING, function(publishStream){
             var video = document.getElementById(publishStream.id());
             //resize local if resolution is available

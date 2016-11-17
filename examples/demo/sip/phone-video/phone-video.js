@@ -212,7 +212,7 @@ function onHangupIncoming() {
 }
 
 function onAnswerOutgoing() {
-    enableMuteToggle(true);
+    enableMuteToggles(true);
     $("#callFeatures").show();
     $("#holdBtn").click(function(){
         var state = $(this).text();
