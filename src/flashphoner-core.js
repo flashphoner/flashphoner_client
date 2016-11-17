@@ -558,8 +558,10 @@ var createSession = function(options) {
         var call = {};
         callRefreshHandlers[id_] = function(callInfo, sdp, codec) {
             //set audio codec (Flash only)
-            if (codec && codec !== '' && mediaProvider == MediaProvider.Flash) {
-                mediaConnection.changeAudioCodec(codec.name);
+            if (codec) {
+                if(mediaProvider == "Flash") {
+                    mediaConnection.changeAudioCodec(codec.name);
+                }
                 return;
             }
             //set remote sdp

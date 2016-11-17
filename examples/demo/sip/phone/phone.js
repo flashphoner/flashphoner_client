@@ -38,7 +38,17 @@ function init_page(){
 	
     onHangupOutgoing();
     onDisconnected();
-
+    $("#holdBtn").click(function(){
+        var state = $(this).text();
+        if (state == "Hold") {
+            $(this).text("Unhold");
+            currentCall.hold();
+        } else {
+            $(this).text("Hold");
+            currentCall.unhold();
+        }
+        $(this).prop('disabled',true);
+    });
 }
 
 function connect() {
@@ -83,7 +93,10 @@ function connect() {
 		    setStatus("#callStatus", CALL_STATUS.RING);
         }).on(CALL_STATUS.ESTABLISHED, function(){
 		    setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
+            $("#holdBtn").prop('disabled',false);
 			enableMuteToggle(true);
+        }).on(CALL_STATUS.HOLD, function() {
+            $("#holdBtn").prop('disabled',false);
         }).on(CALL_STATUS.FINISH, function(){
 		    setStatus("#callStatus", CALL_STATUS.FINISH);
 			onHangupIncoming();
@@ -118,7 +131,10 @@ function call() {
 		setStatus("#callStatus", CALL_STATUS.RING);
     }).on(CALL_STATUS.ESTABLISHED, function(){
 		setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
+        $("#holdBtn").prop('disabled',false);
         onAnswerOutgoing();
+    }).on(CALL_STATUS.HOLD, function() {
+        $("#holdBtn").prop('disabled',false);
     }).on(CALL_STATUS.FINISH, function(){
 		setStatus("#callStatus", CALL_STATUS.FINISH);
 	    onHangupOutgoing();
@@ -203,16 +219,6 @@ function onIncomingCall(inCall) {
 		$("#answerBtn").prop('disabled', true);
         inCall.hangup();
     }).prop('disabled', false);
-    $("#holdBtn").click(function(){
-        var state = $(this).text();
-        if (state == "Hold") {
-            $(this).text("Unhold");
-            inCall.hold();
-        } else {
-            $(this).text("Hold");
-            inCall.unhold();
-        }
-    });
 }
 
 function onHangupIncoming() {
@@ -223,16 +229,6 @@ function onHangupIncoming() {
 function onAnswerOutgoing() {
     enableMuteToggle(true);
     $("#callFeatures").show();
-    $("#holdBtn").click(function(){
-        var state = $(this).text();
-        if (state == "Hold") {
-            $(this).text("Unhold");
-            currentCall.hold();
-        } else {
-            $(this).text("Hold");
-            currentCall.unhold();
-        }
-    });
 }
 
 // Set connection and call status
