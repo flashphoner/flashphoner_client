@@ -558,7 +558,7 @@ var createSession = function(options) {
         var call = {};
         callRefreshHandlers[id_] = function(callInfo, sdp, codec) {
             //set audio codec (Flash only)
-            if (codec && codec !== '') {
+            if (codec && codec !== '' && mediaProvider == MediaProvider.Flash) {
                 mediaConnection.changeAudioCodec(codec.name);
                 return;
             }
@@ -1094,15 +1094,32 @@ var createSession = function(options) {
             var constraints = checkConstraints(options.constraints);
         }
         // Receive media
-        var receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : true;
-        var receiveVideo = (typeof options.receiveVideo !== 'undefined') ? options.receiveVideo : true;
+        var receiveAudio;
+        var audioProperty = getConstraintsProperty(constraints, "audio", undefined);
+        if (typeof audioProperty === 'boolean') {
+            receiveAudio = audioProperty;
+        } else if (typeof audioProperty === 'object') {
+            receiveAudio = true;
+        } else {
+            receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : true;
+        }
+        var receiveVideo;
+        var videoProperty = getConstraintsProperty(constraints, "video", undefined);
+        if (typeof videoProperty === 'boolean') {
+            receiveVideo = videoProperty;
+        } else if (typeof videoProperty === 'object') {
+            receiveVideo = true;
+        } else {
+            receiveVideo = (typeof options.receiveVideo !== 'undefined') ? options.receiveVideo : true;
+        }
         // Bitrate
         var bitrate = getConstraintsProperty(constraints, "video.bitrate", 0);
         // Quality
         var quality = getConstraintsProperty(constraints, "video.quality", 0);
-
+        // Play resolution
+        var playWidth = (typeof options.playWidth !== 'undefined') ? options.playWidth : getConstraintsProperty(constraints, "video.width", 0);
+        var playHeight = (typeof options.playHeight !== 'undefined') ? options.playHeight : getConstraintsProperty(constraints, "video.height", 0);
         var stripCodecs = options.stripCodecs || [];
-
         var resolution = {};
 
         var published_ = false;
@@ -1163,6 +1180,7 @@ var createSession = function(options) {
          * @inner
          */
         var play = function() {
+            logger.debug(LOG_PREFIX, "Play stream " + name_);
             if (status_ !== STREAM_STATUS.NEW) {
                 throw new Error("Invalid stream state");
             }
@@ -1182,6 +1200,7 @@ var createSession = function(options) {
                     stripCodecs: stripCodecs
                 });
             }).then(function (offer) {
+                logger.debug(LOG_PREFIX, "Offer SDP:\n" + offer.sdp)
                 //request stream with offer sdp from server
                 send("playStream", {
                     mediaSessionId: id_,
@@ -1191,8 +1210,8 @@ var createSession = function(options) {
                     hasAudio: true,
                     status: status_,
                     record: false,
-                    width: options.playWidth || 0,
-                    height: options.playHeight || 0,
+                    width: playWidth,
+                    height: playHeight,
                     mediaProvider: mediaProvider,
                     sdp: offer.sdp,
                     custom: options.custom,
@@ -1216,6 +1235,7 @@ var createSession = function(options) {
          * @inner
          */
         var publish = function() {
+            logger.debug(LOG_PREFIX, "Publish stream " + name_);
             if (status_ !== STREAM_STATUS.NEW) {
                 throw new Error("Invalid stream state");
             }
@@ -1243,13 +1263,10 @@ var createSession = function(options) {
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
-                        sendAudio: true,
-                        sendVideo: true,
-                        receiveAudio: receiveAudio,
-                        receiveVideo: receiveVideo,
                         stripCodecs: stripCodecs
                     });
                 }).then(function (offer) {
+                    logger.debug(LOG_PREFIX, "Offer SDP:\n" + offer.sdp)
                     //publish stream with offer sdp to server
                     send("publishStream", {
                         mediaSessionId: id_,
@@ -1283,6 +1300,7 @@ var createSession = function(options) {
          * @inner
          */
         var stop = function() {
+            logger.debug(LOG_PREFIX, "Stop stream " + name_);
             if (status_ == STREAM_STATUS.NEW) {
                 //trigger FAILED status
                 streamRefreshHandlers[id_]({status: STREAM_STATUS.FAILED});

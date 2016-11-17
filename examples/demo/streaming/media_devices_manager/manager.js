@@ -172,7 +172,8 @@ function startStreaming(session) {
             deviceId: $('#videoInput').val(),
             width: parseInt($('#sendWidth').val()),
             height: parseInt($('#sendHeight').val()),
-            frameRate: parseInt($('#fps').val())
+            frameRate: parseInt($('#fps').val()),
+            bitrate: parseInt($('#sendBitrate').val())
         };
     }
     Flashphoner.getMediaAccess(constraints, localVideo).then(function(element){
@@ -181,8 +182,6 @@ function startStreaming(session) {
             display: localVideo,
             cacheLocalResources: true,
             constraints: constraints,
-            receiveVideo: false,
-            receiveAudio: false
         }).on(STREAM_STATUS.PUBLISHING, function(publishStream){
             var video = document.getElementById(publishStream.id());
             //resize local if resolution is available
@@ -203,7 +202,7 @@ function startStreaming(session) {
 
             //play preview
             var constraints = {
-                audio: $("#playAudio").is(':checked'),
+                audio: true,
                 video: $("#playVideo").is(':checked')
             };
             if (constraints.video) {
@@ -217,10 +216,6 @@ function startStreaming(session) {
             previewStream = session.createStream({
                 name: streamName,
                 display: remoteVideo,
-                receiveVideo: $("#playAudio").is(':checked'),
-                receiveAudio: $("#playVideo").is(':checked'),
-                playWidth: constraints.width,
-                playHeight: constraints.height,
                 constraints: constraints
             }).on(STREAM_STATUS.PLAYING, function(previewStream){
                 document.getElementById(previewStream.id()).addEventListener('resize', function(event){
@@ -257,7 +252,7 @@ function startStreaming(session) {
 
 //show connection or local stream status
 function setStatus(status) {
-    var statusField = $("#status");
+    var statusField = $("#streamStatus");
     statusField.text(status).removeClass();
     if (status == "PUBLISHING") {
         statusField.attr("class","text-success");
@@ -299,6 +294,14 @@ function resizeLocalVideo(event) {
 
 function validateForm() {
     var valid = true;
+    if (!$("#sendVideo").is(':checked') && !$("#sendAudio").is(':checked')) {
+        highlightInput($("#sendVideo"));
+        highlightInput($("#sendAudio"));
+        valid = false;
+    } else {
+        removeHighlight($("#sendVideo"));
+        removeHighlight($("#sendAudio"));
+    }
     $('#form :text, select').each(function(){
         if (!$(this).val()) {
             highlightInput($(this));

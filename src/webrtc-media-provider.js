@@ -102,7 +102,7 @@ var createConnection = function(options) {
                     }
                 }
                 var constraints = {
-                    offerToReceiveAudio: options.receiveAudio,
+                    offerToReceiveAudio: true,
                     offerToReceiveVideo: options.receiveVideo
                 };
                 //create offer and set local sdp
