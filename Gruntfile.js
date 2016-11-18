@@ -18,7 +18,7 @@ module.exports = function(grunt) {
         },
         flash: {
             options: {
-                sdk: env.FLEX_HOME,
+                sdk: '',
                 flashVersion: '11.1'
             },
             debug : {
@@ -103,6 +103,8 @@ module.exports = function(grunt) {
         jsdoc: {
             src: ['./src/flashphoner-core.js', './src/constants.js', './src/room-module.js'],
             options: {
+                template: './docTemplate',
+                readme: './docTemplate/README.md',
                 destination: 'doc'
             }
         },

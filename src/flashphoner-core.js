@@ -496,7 +496,7 @@ var createSession = function(options) {
     }
 
     /**
-     * Create stream.
+     * Create call.
      *
      * @param {Object} options Call options
      * @param {string} options.callee Call remote party id
@@ -509,7 +509,7 @@ var createSession = function(options) {
      * @param {HTMLElement} options.localVideoDisplay Div element local video should be displayed in
      * @param {HTMLElement} options.remoteVideoDisplay Div element remote video should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
-     * @param {string[]} options.stripCodecs Array of codecs which should be stripped from SDP
+     * @param {Array<string>=} options.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
      * @returns {Call} Call
      * @throws {TypeError} Error if no options provided
      * @throws {Error} Error if session state is not REGISTERED
@@ -693,7 +693,7 @@ var createSession = function(options) {
          * @param {Boolean=} answerOptions.receiveAudio Receive audio
          * @param {Boolean=} answerOptions.receiveVideo Receive video
          * @param {String=} answerOptions.constraints Answer call with constraints
-         * @param {string[]} answerOptions.stripCodecs Array of codecs which should be stripped from SDP
+         * @param {Array<string>=} answerOptions.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
          * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.NEW}
          * @memberof Call
          * @name call
@@ -1053,18 +1053,24 @@ var createSession = function(options) {
      *
      * @param {Object} options Stream options
      * @param {string} options.name Stream name
-     * @param {Object} options.constraints Stream constraints
-     * @param {Boolean=} options.receiveAudio Receive audio
-     * @param {Boolean=} options.receiveVideo Receive video
-     * @param {Integer=} options.playWidth Set width to play stream with this value
-     * @param {Integer=} options.playHeight Set height to play stream with this value
-     * @param {string} options.mediaProvider MediaProvider type to use with this stream
-     * @param {Boolean=} options.record Enable stream recording
+     * @param {Object=} options.constraints Stream constraints
+     * @param {Boolean} [options.constraints.audio=true] Specifies if published stream should have audio. Played stream always should have audio: the property should not be set to false in that case.
+     * @param {Boolean|Object} [options.constraints.video=true] Specifies if published or played stream should have video, or sets video constraints
+     * @param {Integer} [options.constraints.video.width=0] Set width to publish or play stream with this value
+     * @param {Integer} [options.constraints.video.height=0] Set height to publish or play stream with this value
+     * @param {Integer} [options.constraints.video.bitrate=0] Set bitrate to publish or play stream with this value
+     * @param {Integer} [options.constraints.video.quality=0] Set quality to play stream with this value
+     * @param {Boolean=} options.receiveAudio DEPRECATED: Receive audio
+     * @param {Boolean=} options.receiveVideo DEPRECATED: Receive video
+     * @param {Integer=} options.playWidth DEPRECATED: Set width to play stream with this value
+     * @param {Integer=} options.playHeight DEPRECATED: Set height to play stream with this value
+     * @param {string=} options.mediaProvider MediaProvider type to use with this stream
+     * @param {Boolean} [options.record=false] Enable stream recording
      * @param {Boolean=} options.cacheLocalResources Display will contain local video after stream release
      * @param {HTMLElement} options.display Div element stream should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
-     * @param {Integer=} options.flashBufferTime Specifies how long to buffer messages before starting to display the stream (Flash-only)
-     * @param {string[]} options.stripCodecs Array of codecs which should be stripped from SDP
+     * @param {Integer} [options.flashBufferTime=0] Specifies how long to buffer messages before starting to display the stream (Flash-only)
+     * @param {Array<string>=} options.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
      * @throws {TypeError} Error if options.name is not specified
@@ -1663,7 +1669,7 @@ var createSession = function(options) {
     };
 
     /**
-     * Submut bug report.
+     * Submit bug report.
      *
      * @param {Object} reportObject Report object
      * @memberof Session
