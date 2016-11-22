@@ -221,7 +221,7 @@ module.exports = {
                     var mLineSplitted = sdpArray[i].split(" ");
                     var newMLine = "";
                     for (var m = 0; m < mLineSplitted.length; m++) {
-                        if (pt.indexOf(mLineSplitted[m]) == -1 || m <= 2) {
+                        if (pt.indexOf(mLineSplitted[m].trim()) == -1 || m <= 2) {
                             newMLine += mLineSplitted[m];
                             if (m < mLineSplitted.length - 1) {
                                 newMLine = newMLine + " ";
