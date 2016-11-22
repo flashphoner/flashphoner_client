@@ -356,16 +356,6 @@ Phone.prototype.callStatusListener = function (call_) {
                 $(this).removeClass("open");														// hide 'Answer' button
             }
 
-            //if (MediaProvider.Flash == call.mediaProvider && ConfigurationLoader.getInstance().reoffersEnabled) {
-            //    $(".b-send_video").addClass("open");
-            //}
-
-            //if (call.hasVideo) {
-            //    $(".b-send_video").text("Stop video");
-            //} else {
-            //    $(".b-send_video").text("Send video");
-            //}
-
             this.startTimer();
 
             $(".voice_call__transfer").removeClass("close");

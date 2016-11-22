@@ -139,10 +139,12 @@ var createConnection = function(options) {
            flash.changeAudioCodec(codec);
         };
 
-        var setRemoteSdp = function(sdp) {
+        var setRemoteSdp = function(sdp, reinit, id) {
             return new Promise(function(resolve, reject){
                 var state = extractMediaState(sdp);
-                flash.setup(state.incoming, state.outgoing, flash.isHasAudio(), flash.isHasVideo(), flashBufferTime);
+                if (reinit)
+                    flash.updateId(id);
+                flash.setup(state.incoming, state.outgoing, flash.isHasAudio(), flash.isHasVideo(), flashBufferTime, reinit);
                 resolve(connections[id]);
             });
         };

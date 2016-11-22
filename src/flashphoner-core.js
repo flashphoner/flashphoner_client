@@ -330,6 +330,7 @@ var createSession = function(options) {
     //object for storing new and active streams
     var streams = {};
     var calls = {};
+    var mediaConnections = {};
     //session to stream callbacks
     var streamRefreshHandlers = {};
     //session to call callbacks
@@ -444,6 +445,8 @@ var createSession = function(options) {
                 }
                 break;
             case 'notifyTransferEvent':
+                callRefreshHandlers[obj.callId](null, null, null, obj);
+                break;
             case 'notifyTryingResponse':
             case 'hold':
             case 'ring':
@@ -549,6 +552,7 @@ var createSession = function(options) {
         var cacheLocalResources = options.cacheLocalResources;
         var status_ = CALL_STATUS.NEW;
         var callbacks = {};
+        var hasTransferredCall = false;
         /**
          * Represents sip call.
          *
@@ -556,7 +560,25 @@ var createSession = function(options) {
          * @see Session~createCall
          */
         var call = {};
-        callRefreshHandlers[id_] = function(callInfo, sdp, codec) {
+        callRefreshHandlers[id_] = function(callInfo, sdp, codec, transfer) {
+            if (transfer) {
+                if (!mediaConnections[id_]) {
+                    mediaConnections[id_] = mediaConnection;
+                }
+                if (transfer.status == "COMPLETED") {
+                    delete mediaConnections[id_];
+                }
+                return;
+            }
+
+            //transferred call
+            if (!mediaConnection && Object.keys(mediaConnections).length != 0) {
+                for (var mc in mediaConnections) {
+                    mediaConnection = mediaConnections[mc];
+                    hasTransferredCall = true;
+                    delete mediaConnections[mc];
+                }
+            }
             //set audio codec (Flash only)
             if (codec) {
                 if(mediaProvider == "Flash") {
@@ -566,19 +588,20 @@ var createSession = function(options) {
             }
             //set remote sdp
             if (sdp && sdp !== '') {
-                mediaConnection.setRemoteSdp(sdp).then(function(){});
+                if (status_ != CALL_STATUS.TRYING)
+                    mediaConnection.setRemoteSdp(sdp, hasTransferredCall, id_).then(function(){});
                 return;
             }
             var event = callInfo.status;
             status_ = event;
-
             //release call
             if (event == CALL_STATUS.FAILED || event == CALL_STATUS.FINISH ||
                 event == CALL_STATUS.BUSY) {
                 delete calls[id_];
                 delete callRefreshHandlers[id_];
-                if (mediaConnection) {
-                    mediaConnection.close(cacheLocalResources);
+                if (Object.keys(calls).length == 0) {
+                    if (mediaConnection)
+                        mediaConnection.close(cacheLocalResources);
                 }
             }
             //fire call event
@@ -740,6 +763,7 @@ var createSession = function(options) {
                     login: sipConfig.sipLogin
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
+                    console.log(mediaConnection);
                     return mediaConnection.setRemoteSdp(sdp);
                 }).then(function(){
                     return mediaConnection.createAnswer({
@@ -1045,6 +1069,7 @@ var createSession = function(options) {
         call.sendDTMF = sendDTMF;
         call.transfer = transfer;
         call.on = on;
+        calls[id_] = call;
         return call;
     };
 

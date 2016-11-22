@@ -65,6 +65,16 @@ package com.flashphoner.api2.connection {
 			if (!isConnected)
 				nc.close();
 		}
+
+		public function reinit():void {
+			//tear down streams
+			if (incomingStream != null) {
+				incomingStream.release();
+			}
+			if (outgoingStream != null) {
+				outgoingStream.release();
+			}
+		}
 		
 		public function netStatusHandler(event : NetStatusEvent) : void
 		{		

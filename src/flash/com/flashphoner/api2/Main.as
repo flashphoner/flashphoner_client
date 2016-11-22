@@ -89,6 +89,7 @@ package com.flashphoner.api2 {
             ExternalInterface.addCallback("setup", setup);
             ExternalInterface.addCallback("reset", reset);
             ExternalInterface.addCallback("getId", getId);
+            ExternalInterface.addCallback("updateId", updateId);
             ExternalInterface.addCallback("listDevices", listDevices);
             ExternalInterface.addCallback("resize", resize);
             ExternalInterface.addCallback("setVolume", setVolume);
@@ -130,7 +131,10 @@ package com.flashphoner.api2 {
             this.connection.disconnect();
         }
 
-        public function setup(incoming:Boolean, outgoing:Boolean, hasAudio:Boolean, hasVideo:Boolean, bufferTime:Number):void {
+        public function setup(incoming:Boolean, outgoing:Boolean, hasAudio:Boolean, hasVideo:Boolean, bufferTime:Number, reinit:Boolean):void {
+            if (reinit) {
+                this.connection.reinit();
+            }
             if (incoming && outgoing) {
                 this.connection.setupStreams(localMediaControl, remoteMediaControl, hasAudio, hasVideo, bufferTime);
                 this.remoteDisplayHolder.visible = true;
@@ -152,6 +156,11 @@ package com.flashphoner.api2 {
 
         public function getId():String {
             return config.id;
+        }
+
+        public function updateId(id:String):void {
+            Logger.info("update id from " + config.id + " to " + id);
+            config.id = id;
         }
 
         public function listDevices():Object{
