@@ -202,7 +202,7 @@ function startStreaming(session) {
 
             //play preview
             var constraints = {
-                audio: true,
+                audio: $("#playAudio").is(':checked'),
                 video: $("#playVideo").is(':checked')
             };
             if (constraints.video) {
