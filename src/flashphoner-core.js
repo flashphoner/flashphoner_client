@@ -588,8 +588,7 @@ var createSession = function(options) {
             }
             //set remote sdp
             if (sdp && sdp !== '') {
-                if (status_ != CALL_STATUS.TRYING)
-                    mediaConnection.setRemoteSdp(sdp, hasTransferredCall, id_).then(function(){});
+                mediaConnection.setRemoteSdp(sdp, hasTransferredCall, id_).then(function(){});
                 return;
             }
             var event = callInfo.status;
@@ -997,13 +996,14 @@ var createSession = function(options) {
          * Send DTMF
          *
          * @param {number} number Number
+         * @param {string=} type DTMF Type (RFC2833, INFO, INFO_RELAY)
          * @memberof Call
          * @inner
          */
-        var sendDTMF = function(number) {
+        var sendDTMF = function(number, type) {
             send("sendDtmf", {
                 callId: id_,
-                type: "RFC2833",
+                type: type || "RFC2833",
                 dtmf: number
             });
         }

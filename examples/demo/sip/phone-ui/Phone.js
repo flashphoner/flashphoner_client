@@ -657,7 +657,7 @@ $(document).ready(function () {
             }
             if (phone.currentCall &&
                 (CALL_STATUS.ESTABLISHED == phone.currentCall.status() || CALL_STATUS.HOLD == phone.currentCall.status())) {
-                phone.sendDTMF(phone.currentCall.id(), $(this).text());
+                phone.sendDTMF($(this).text());
             } else {
                 if ($(".b-transfer").hasClass("open")) {
                     $("#transfer").val($("#transfer").val() + $(this).text());
