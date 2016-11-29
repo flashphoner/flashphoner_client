@@ -1133,9 +1133,9 @@ var createSession = function(options) {
             receiveAudio = audioProperty;
         } else if (typeof audioProperty === 'object') {
             receiveAudio = true;
-            let _stereo = getConstraintsProperty(audioProperty,"stereo",0);
-            let _bitrate = getConstraintsProperty(audioProperty,"bitrate",0);
-            let _fec = getConstraintsProperty(audioProperty,"fec",0);
+            var _stereo = getConstraintsProperty(audioProperty,"stereo",0);
+            var _bitrate = getConstraintsProperty(audioProperty,"bitrate",0);
+            var _fec = getConstraintsProperty(audioProperty,"fec",0);
             var _codecOptions = "";
             if (_bitrate) _codecOptions += "maxaveragebitrate=" + _bitrate + ";";
             if (_stereo) _codecOptions += "stereo=1;sprop-stereo=1;";
@@ -1179,7 +1179,7 @@ var createSession = function(options) {
         streamRefreshHandlers[id_] = function(streamInfo, sdp) {
             //set remote sdp
             if (sdp && sdp !== '') {
-                let _sdp = sdp;
+                var _sdp = sdp;
                 if (_codecOptions) _sdp = util.SDP.writeFmtp(sdp, _codecOptions, "opus");
                 mediaConnection.setRemoteSdp(_sdp).then(function(){});
                 return;
