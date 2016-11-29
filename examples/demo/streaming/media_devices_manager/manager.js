@@ -15,7 +15,11 @@ function init_page() {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
     }
-
+    if (Flashphoner.getMediaProviders()[0] == "Flash") {
+        $("#fecForm").hide();
+        $("#stereoForm").hide();
+        $("#sendAudioBitrateForm").hide();
+    }
     Flashphoner.getMediaDevices(null,true).then(function(list){
         list.audio.forEach(function(device) {
             var audio = document.getElementById("audioInput");
@@ -165,7 +169,12 @@ function startStreaming(session) {
         video: $("#sendVideo").is(':checked')
     };
     if (constraints.audio) {
-        constraints.audio = {deviceId: $('#audioInput').val()}
+        constraints.audio = {
+            deviceId: $('#audioInput').val(),
+            fec: $("#fec").is(':checked'),
+            stereo: $("#sendStereoAudio").is(':checked'),
+            bitrate: parseInt($('#sendAudioBitrate').val())
+        }
     }
     if (constraints.video) {
         constraints.video = {
@@ -173,7 +182,7 @@ function startStreaming(session) {
             width: parseInt($('#sendWidth').val()),
             height: parseInt($('#sendHeight').val()),
             frameRate: parseInt($('#fps').val()),
-            bitrate: parseInt($('#sendBitrate').val())
+            bitrate: parseInt($('#sendVideoBitrate').val())
         };
     }
     Flashphoner.getMediaAccess(constraints, localVideo).then(function(element){
@@ -307,7 +316,7 @@ function validateForm() {
             highlightInput($(this));
             valid = false;
         } else {
-            var numericFields = ['fps', 'sendWidth', 'sendHeight', 'sendBitrate', 'receiveBitrate', 'quality'];
+            var numericFields = ['fps', 'sendWidth', 'sendHeight', 'sendVideoBitrate', 'receiveBitrate', 'quality'];
             if (numericFields.indexOf(this.id) != -1 && !(parseInt($(this).val()) > 0)) {
                 highlightInput($(this));
                 valid = false;

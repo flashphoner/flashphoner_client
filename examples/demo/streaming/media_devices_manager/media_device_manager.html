@@ -51,6 +51,12 @@
             <div class="col-sm-6">
         
 				<div class="col-sm-6">
+                    <div class="form-group">
+                        &nbsp;
+                    </div>
+                    <div class="form-group">
+                        &nbsp;
+                    </div>
 				
                     <div class="form-group">
                         <div class="form-group">
@@ -60,14 +66,44 @@
                             <label style="text-align: left" class="control-label col-sm-5" for="sendAudio">Send Audio</label>
                         </div>
                         <div class="form-group" id="audioInputForm">
-                            <label style="text-align: left" class="col-sm-3 control-label">Mic</label>
+                            <label style="text-align: left" class="col-sm-4 control-label">Mic</label>
                             <div class="col-sm-6">
                                 <select class="form-control" id="audioInput">
                                 </select>
                             </div>
                         </div>
+                        <div class="form-group" id="fecForm">
+                            <label style="text-align: left" class="col-sm-4 control-label" for="fecForm">FEC
+                                <sup>
+                                    <i title="For opus codec only" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
+                                </sup>
+                            </label>
+                            <div class="col-sm-4">
+                                <input type="checkbox" class="checkbox" id="fec" value="true">
+                            </div>
+                        </div>
+                        <div class="form-group" id="stereoForm">
+                            <label style="text-align: left" class="col-sm-4 control-label" for="sendStereoAudio">Stereo<sup>
+                                    <i title="For opus codec only" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
+                                </sup>
+                            </label>
+                            <div class="col-sm-4">
+                                <input type="checkbox" class="checkbox" id="sendStereoAudio" value="true">
+                            </div>
+                        </div>
+                        <div class="form-group" id="sendAudioBitrateForm">
+                            <label style="text-align: left" class="col-sm-4 control-label">Bitrate
+                                <sup>
+                                    <i title="For opus codec only" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
+                                </sup>
+                            </label>
+                            <div class="col-sm-6 input-group">
+                                <input style="margin-left: 15px" type="text" class="form-control" id="sendAudioBitrate" value="64000">
+                                <span style="min-width: 65px; text-align: right;" class="input-group-addon">bps</span>
+                            </div>
+                        </div>
                         <div class="form-group">
-                            <label style="text-align: left" class="col-sm-3 control-label">Mute</label>
+                            <label style="text-align: left" class="col-sm-4 control-label">Mute</label>
                             <div class="col-sm-6">
                                 <input id="muteAudioToggle" type="checkbox" />
                             </div>
@@ -82,14 +118,14 @@
                             <label style="text-align: left" class="control-label col-sm-5" for="sendVideo">Send Video</label>
                         </div>
                         <div class="form-group" id="videoInputForm">
-                            <label style="text-align: left" class="col-sm-3 control-label">Cam</label>
+                            <label style="text-align: left" class="col-sm-4 control-label">Cam</label>
                             <div class="col-sm-6">
                                 <select class="form-control" id="videoInput">
                                 </select>
                             </div>
                         </div>
                         <div class="form-group" id="sendSizeForm">
-                            <label style="text-align: left" class="col-sm-3 control-label">Size</label>
+                            <label style="text-align: left" class="col-sm-4 control-label">Size</label>
                             <div class="col-sm-4">
                                 <input type="text" class="form-control" id="sendWidth" value="320">
                             </div>
@@ -98,20 +134,20 @@
                             </div>
                         </div>
                         <div class="form-group" id="fpsForm">
-                            <label style="text-align: left" class="col-sm-3 control-label">FPS</label>
+                            <label style="text-align: left" class="col-sm-4 control-label">FPS</label>
                             <div class="col-sm-4">
                                 <input type="text" class="form-control" id="fps" value="10">
                             </div>
                         </div>
                         <div class="form-group" id="sendBitrateForm">
-                            <label style="text-align: left" class="col-sm-3 control-label">Bitrate</label>
+                            <label style="text-align: left" class="col-sm-4 control-label">Bitrate</label>
                             <div class="col-sm-6 input-group">
-                                <input style="margin-left: 15px" type="text" class="form-control" id="sendBitrate" value="30000">
-                                <span style="max-width: 65px; text-align: right;" class="input-group-addon">kbps</span>
+                                <input style="margin-left: 15px" type="text" class="form-control" id="sendVideoBitrate" value="30000">
+                                <span style="min-width: 65px; text-align: right;" class="input-group-addon">bps</span>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label style="text-align: left" class="col-sm-3 control-label">Mute</label>
+                            <label style="text-align: left" class="col-sm-4 control-label">Mute</label>
                             <div class="col-sm-6">
                                 <input id="muteVideoToggle" type="checkbox" />
                             </div>
@@ -184,7 +220,7 @@
                             <label style="text-align: left" class="col-sm-3 control-label">Bitrate</label>
                             <div class="col-sm-7 input-group">
                                 <input style="margin-left: 15px" type="text" class="form-control" id="receiveBitrate" value="30000" disabled>
-                                <span style="max-width: 65px; text-align: right" class="input-group-addon">kbps</span>
+                                <span style="min-width: 65px; text-align: right" class="input-group-addon">bps</span>
                             </div>              
                         </div>
                         <div class="form-group" id="qualityForm">                        
