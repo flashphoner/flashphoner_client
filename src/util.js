@@ -102,6 +102,23 @@ module.exports = {
             return parts.filter(function(line) {
                 return line.indexOf(prefix) === 0;
             });
+        },
+        writeFmtp: function (sdp, param, codec) {
+            var sdpArray = sdp.split("\n");
+            var i;
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i].search(codec) != -1 && sdpArray[i].indexOf("a=rtpmap") == 0) {
+                    sdpArray[i] += "\r\na=fmtp:" + sdpArray[i].match(/[0-9]+/)[0] + " " + param + "\r";
+                }
+            }
+            //normalize sdp after modifications
+            var result = "";
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i] != "") {
+                    result += sdpArray[i] + "\n";
+                }
+            }
+            return result;
         }
     },
     logger: {

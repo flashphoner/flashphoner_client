@@ -140,6 +140,8 @@ var createConnection = function(options) {
         };
 
         var setRemoteSdp = function(sdp, reinit, id) {
+            logger.debug(LOG_PREFIX,"setRemoteSDP:");
+            logger.debug(LOG_PREFIX,sdp);
             return new Promise(function(resolve, reject){
                 var state = extractMediaState(sdp);
                 if (reinit)

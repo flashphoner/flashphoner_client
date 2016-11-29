@@ -131,6 +131,8 @@ var createConnection = function(options) {
             return false;
         };
         var setRemoteSdp = function (sdp) {
+            logger.debug(LOG_PREFIX,"setRemoteSDP:");
+            logger.debug(LOG_PREFIX,sdp);
             return new Promise(function (resolve, reject) {
                 var sdpType;
                 if (connection.signalingState == 'have-local-offer') {
@@ -434,6 +436,13 @@ function normalizeConstraints(constraints) {
                 min: frameRate,
                 max: frameRate
             }
+        }
+    }
+    if (constraints.audio) {
+        // The WebRTC AEC implementation doesn't work well on stereophonic sound and makes mono on output
+        if (constraints.audio.stereo) {
+            constraints.audio.echoCancellation = false;
+            constraints.audio.googEchoCancellation = false
         }
     }
     return constraints;
