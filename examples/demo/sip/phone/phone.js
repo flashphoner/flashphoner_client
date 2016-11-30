@@ -190,6 +190,7 @@ function onHangupOutgoing() {
     }).prop('disabled', false);
     $('#callee').prop('disabled', false);
     $("#callFeatures").hide();
+    $("#holdBtn").text("Hold");
 	disableOutgoing(false);
 	enableMuteToggle(false);
 }
