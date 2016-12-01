@@ -318,8 +318,10 @@ var createSession = function(options) {
     if (options.sipOptions) {
         sipConfig = {
             sipLogin: options.sipOptions.login,
+            sipAuthenticationName: options.sipOptions.authenticationName,
             sipPassword: options.sipOptions.password,
             sipDomain: options.sipOptions.domain,
+            sipOutboundProxy: options.sipOptions.outboundProxy,
             sipProxy: options.sipOptions.proxy,
             sipPort: options.sipOptions.port,
             sipRegisterRequired: options.sipOptions.registerRequired
