@@ -17,8 +17,10 @@ function init_page() {
     );
     // Set fields using cookies
     $("#sipLogin").val(getCookie("sipLogin"));
+    $("#sipAuthenticationName").val(getCookie("sipAuthenticationName"));
     $("#sipPassword").val(getCookie("sipPassword"));
     $("#sipDomain").val(getCookie("sipDomain"));
+    $("#sipOutboundProxy").val(getCookie("sipOutboundProxy"));
     $("#sipPort").val(getCookie("sipPort"));
     $("#rtmpUrl").val(getCookie("rtmpUrl"));
     $("#rtmpStream").val(getCookie("rtmpStream"));
@@ -118,9 +120,11 @@ function startCall() {
 
     var connection = {};
     connection.sipLogin = field("sipLogin");
+    connection.sipAuthenticationName = field("sipAuthenticationName");
     connection.sipPassword = field("sipPassword");
     connection.sipPort = field("sipPort");
     connection.sipDomain = field("sipDomain");
+    connection.sipOutboundProxy = field("sipOutboundProxy");
     connection.appKey = field("appKey");
     connection.sipRegisterRequired = field("sipRegisterRequired");
 

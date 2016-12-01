@@ -57,8 +57,10 @@ function connect() {
 
     var sipOptions = {
 	    login: $("#sipLogin").val(),
+        authenticationName: $("#sipAuthenticationName").val(),
 		password: $("#sipPassword").val(),
 		domain: $("#sipDomain").val(),
+        outboundProxy: $("#sipOutboundProxy").val(),
 		port: $("#sipPort").val(),
 		registerRequired: registerRequired
     }; 
