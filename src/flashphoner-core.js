@@ -668,10 +668,7 @@ var createSession = function(options) {
             }).catch(function(error){
                 logger.error(LOG_PREFIX, error);
                 status_ = CALL_STATUS.FAILED;
-                //fire call event
-                if (callbacks[status_]) {
-                    callbacks[status_](call);
-                }
+                callRefreshHandlers[id_]({status: CALL_STATUS.FAILED});
             });
         };
 
@@ -762,7 +759,6 @@ var createSession = function(options) {
                     login: sipConfig.sipLogin
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
-                    console.log(mediaConnection);
                     return mediaConnection.setRemoteSdp(sdp);
                 }).then(function(){
                     return mediaConnection.createAnswer({
@@ -771,28 +767,27 @@ var createSession = function(options) {
                         stripCodecs: stripCodecs
                     });
                 }).then(function(sdp) {
-                    send("answer", {
-                        callId: id_,
-                        incoming: true,
-                        hasVideo: true,
-                        hasAudio: hasAudio,
-                        status: status_,
-                        mediaProvider: mediaProvider,
-                        sdp: sdp,
-                        caller: sipConfig.login,
-                        callee: callee_,
-                        custom: options.custom
-                    });
+                    if (status_ != CALL_STATUS.FINISH && status_ != CALL_STATUS.FAILED) {
+                        send("answer", {
+                            callId: id_,
+                            incoming: true,
+                            hasVideo: true,
+                            hasAudio: hasAudio,
+                            status: status_,
+                            mediaProvider: mediaProvider,
+                            sdp: sdp,
+                            caller: sipConfig.login,
+                            callee: callee_,
+                            custom: options.custom
+                        });
+                    } else {
+                        hangup();
+                    }
                 });
             }).catch(function(error){
                 logger.error(LOG_PREFIX, error);
                 status_ = CALL_STATUS.FAILED;
-                //try to hangup current call
-                hangup();
-                //fire stream event
-                if (callbacks[status_]) {
-                    callbacks[status_](call);
-                }
+                callRefreshHandlers[id_]({status: CALL_STATUS.FAILED});
             });
         };
 
