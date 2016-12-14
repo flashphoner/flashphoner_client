@@ -19,7 +19,8 @@
 	<fx:Script>
 		<![CDATA[
 			import mx.core.UIComponent;
-			
+			import mx.utils.StringUtil;
+
 			private var nc:NetConnection;
 			private var cam:Camera;
 			private var mic:Microphone;
@@ -101,8 +102,8 @@
 			 * **************************
 			 **/
 			private function connect():void{
-				trace("connect");
-				var url:String = connectUrl.text;
+				var url:String = StringUtil.trim(connectUrl.text);
+				Logger.info("connect " + url);
 				nc = new NetConnection();
 				//if (url.indexOf("rtmp") == 0){
 				//	nc.objectEncoding = ObjectEncoding.AMF0;
@@ -112,7 +113,7 @@
 				var obj:Object = new Object();
 				obj.login = generateRandomString(20);
 				obj.appKey  = "flashStreamingApp";
-				nc.connect(url,obj);	
+				nc.connect(url,obj);
 			}
 			
 			

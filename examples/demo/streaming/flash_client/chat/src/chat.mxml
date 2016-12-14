@@ -31,6 +31,7 @@
 			import flash.external.*;
 			
 			import mx.utils.UIDUtil;
+			import mx.utils.StringUtil;
 			
 			private var joinBtnHandler:Function;
 			private var publishBtnHandler:Function;
@@ -115,7 +116,7 @@
 			
 			private function start():void
 			{
-				var url:String = connectUrl.text;
+				var url:String = StringUtil.trim(connectUrl.text);
 				var username:String = login.text;
 				if (session != null && session.getStatus() == SessionStatus.ESTABLISHED) {
 					//check url and username
