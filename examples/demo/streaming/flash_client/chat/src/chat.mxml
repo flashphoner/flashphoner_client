@@ -54,7 +54,7 @@
 							var val:String = href.substr(href.indexOf("roomName") + 9);
 							this.roomName = val;
 						} else {
-							this.roomName = UIDUtil.createUID().substr(0,6);
+							this.roomName = "room-" + UIDUtil.createUID().substr(0,6);
 						}
 						this.href = href;
 					} catch (error:Error) {
