@@ -16,25 +16,16 @@
         function bodyLoaded() {
             var attributes = {};
             var flashvars = {};
-            var pathToSWF = "chat/bin-debug/chat.swf";
+            var pathToSWF = "chat/bin/chat.swf";
             var elementId = "flash";
             var params = {};
-            var callback = function (e) {
-                if (e.success) {
-                    setTimeout(function () {
-                        var swf = document.getElementById("flash");
-                        var url = "rtmfp://" + window.location.hostname + ":" + "1935";
-                        swf.setURLtoFlash(url);
-                    }, 2000);
-                }
-            }
             params.menu = "true";
             params.swliveconnect = "true";
             params.allowfullscreen = "true";
             params.allowscriptaccess = "always";
             params.bgcolor = "#777777";
             swfobject.switchOffAutoHideShow();
-            swfobject.embedSWF(pathToSWF, elementId, "811", "1074", "11.2.202", "expressInstall.swf", flashvars, params, attributes, callback);
+            swfobject.embedSWF(pathToSWF, elementId, "811", "1074", "11.2.202", "expressInstall.swf", flashvars, params, attributes);
         }
     </script>
 </head>
