@@ -196,37 +196,64 @@ var createConnection = function(options) {
             }
             return true;
         };
-        var getStats = function() {
+        var getStats = function(callbackFn) {
             if (connection) {
-                return connection.getStats(function (rawStats) {
-                    var results = rawStats.result();
-                    var result = {type: "chrome", outgoingStreams: {}, incomingStreams: {}};
-                    for (var i = 0; i < results.length; ++i) {
-                        var resultPart = util.processGoogRtcStatsReport(results[i]);
-                        if (resultPart != null) {
-                            if (resultPart.type == "googCandidatePair") {
-                                result.activeCandidate = resultPart;
-                            } else if (resultPart.type == "ssrc") {
-                                if (resultPart.transportId.indexOf("audio") > -1) {
-                                    if (resultPart.id.indexOf("send") > -1) {
-                                        result.outgoingStreams.audio = resultPart;
-                                    } else {
-                                        result.incomingStreams.audio = resultPart;
-                                    }
+                if (adapter.browserDetails.browser == "chrome") {
+                    connection.getStats(null).then(function (rawStats) {
+                        var results = rawStats;
+                        var result = {type: "chrome", outgoingStreams: {}, incomingStreams: {}};
+                        for (var i = 0; i < results.length; ++i) {
+                            var resultPart = util.processRtcStatsReport(adapter.browserDetails.browser, results[i]);
+                            if (resultPart != null) {
+                                if (resultPart.type == "googCandidatePair") {
+                                    result.activeCandidate = resultPart;
+                                } else if (resultPart.type == "ssrc") {
+                                    if (resultPart.transportId.indexOf("audio") > -1) {
+                                        if (resultPart.id.indexOf("send") > -1) {
+                                            result.outgoingStreams.audio = resultPart;
+                                        } else {
+                                            result.incomingStreams.audio = resultPart;
+                                        }
 
-                                } else {
-                                    if (resultPart.id.indexOf("send") > -1) {
-                                        result.outgoingStreams.video = resultPart;
                                     } else {
-                                        result.incomingStreams.video = resultPart;
-                                    }
+                                        if (resultPart.id.indexOf("send") > -1) {
+                                            result.outgoingStreams.video = resultPart;
+                                        } else {
+                                            result.incomingStreams.video = resultPart;
+                                        }
 
+                                    }
                                 }
                             }
                         }
-                    }
-                    return result;
-                });
+                        callbackFn(result);
+                    }).catch(function(error) {callbackFn(error)});
+                } else if (adapter.browserDetails.browser == "firefox") {
+                    connection.getStats(null).then(function (rawStats) {
+                        var result = {type: "firefox", outgoingStreams: {}, incomingStreams: {}};
+                        for (var k in rawStats) {
+                            if (rawStats.hasOwnProperty(k)) {
+                                var resultPart = util.processRtcStatsReport(adapter.browserDetails.browser, rawStats[k]);
+                                if (resultPart != null) {
+                                    if (resultPart.type == "outboundrtp") {
+                                        if (resultPart.id.indexOf("audio") > -1) {
+                                            result.outgoingStreams.audio = resultPart;
+                                        } else {
+                                            result.outgoingStreams.video = resultPart;
+                                        }
+                                    } else if (resultPart.type == "inboundrtp") {
+                                        if (resultPart.id.indexOf("audio") > -1) {
+                                            result.incomingStreams.audio = resultPart;
+                                        } else {
+                                            result.incomingStreams.video = resultPart;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        callbackFn(result);
+                    }).catch(function(error) {callbackFn(error)});
+                }
             }
         };
 

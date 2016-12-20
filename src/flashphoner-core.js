@@ -951,15 +951,20 @@ var createSession = function(options) {
             return true;
         };
         /**
+         * @callback callbackFn
+         * @param {Object} result
+         */
+        /**
          * Get statistics
          *
+         * @param {callbackFn} callbackFn The callback that handles response
          * @returns {Object} Call audio\video statistics
          * @memberof Call
          * @inner
          */
-        var getStats = function () {
+        var getStats = function (callbackFn) {
             if (mediaConnection) {
-                return mediaConnection.getStats();
+                mediaConnection.getStats(callbackFn);
             }
         };
         /**
@@ -1164,6 +1169,7 @@ var createSession = function(options) {
         var recordFileName = null;
         var cacheLocalResources = options.cacheLocalResources;
         var status_ = STREAM_STATUS.NEW;
+        var info_;
         //callbacks added using stream.on()
         var callbacks = {};
         /**
@@ -1194,6 +1200,8 @@ var createSession = function(options) {
                     recordFileName = streamInfo.recordName;
                 }
             }
+            if (streamInfo.info)
+                info_ = streamInfo.info;
 
             //release stream
             if (event == STREAM_STATUS.FAILED || event == STREAM_STATUS.STOPPED ||
@@ -1440,7 +1448,7 @@ var createSession = function(options) {
          * @inner
          */
         var getInfo = function() {
-            return stream.info;
+            return info_;
         };
 
         /**
@@ -1566,13 +1574,14 @@ var createSession = function(options) {
         /**
          * Get statistics
          *
+         * @param {callbackFn} callbackFn The callback that handles response
          * @returns {Object} Stream audio\video statistics
          * @memberof Stream
          * @inner
          */
-        var getStats = function () {
+        var getStats = function (callbackFn) {
             if (mediaConnection) {
-                return mediaConnection.getStats();
+                mediaConnection.getStats(callbackFn);
             }
         };
 

@@ -61,38 +61,55 @@ module.exports = {
             browser = "Chrome";
         return browser;
     },
-    processGoogRtcStatsReport: function(report) {
-        /**
-         * Report types: googComponent, googCandidatePair, googCertificate, googLibjingleSession, googTrack, ssrc
-         */
-        var gotResult = false;
+    processRtcStatsReport: function(browser, report) {
         var result = null;
-        if (report.type && report.type == "googCandidatePair") {
-            //check if this is active pair
-            if (report.stat("googActiveConnection") == "true") {
-                gotResult = true;
-            }
-        }
-
-        if (report.type && report.type == "ssrc") {
-            gotResult = true;
-        }
-
-        if (gotResult) {
-            //prepare object
-            result = {};
-            result.timestamp = report.timestamp;
-            result.id = report.id;
-            result.type = report.type;
-            if (report.names) {
-                var names = report.names();
-                for (var i = 0; i < names.length; ++i) {
-                    var attrName = names[i];
-                    result[attrName] = report.stat(attrName);
+        if (browser == "chrome") {
+            /**
+             * Report types: googComponent, googCandidatePair, googCertificate, googLibjingleSession, googTrack, ssrc
+             */
+            var gotResult = false;
+            if (report.type && report.type == "googCandidatePair") {
+                //check if this is active pair
+                if (report.stat("googActiveConnection") == "true") {
+                    gotResult = true;
                 }
             }
-        }
-        return result;
+
+            if (report.type && report.type == "ssrc") {
+                gotResult = true;
+            }
+
+            if (gotResult) {
+                //prepare object
+                result = {};
+                result.timestamp = report.timestamp;
+                result.id = report.id;
+                result.type = report.type;
+                if (report.names) {
+                    var names = report.names();
+                    for (var i = 0; i < names.length; ++i) {
+                        var attrName = names[i];
+                        result[attrName] = report.stat(attrName);
+                    }
+                }
+            }
+            return result;
+        } else if (browser == "firefox") {
+            /**
+             * RTCStatsReport http://mxr.mozilla.org/mozilla-central/source/dom/webidl/RTCStatsReport.webidl
+             */
+
+            if (report.type && (report.type == "outboundrtp" || report.type == "inboundrtp") && report.id.indexOf("rtcp") == -1) {
+                result = {};
+                for (var k in report) {
+                    if (report.hasOwnProperty(k)) {
+                        result[k] = report[k];
+                    }
+                }
+            }
+
+            return result;
+        } else { return result };
     },
     SDP: {
         matchPrefix: function(sdp,prefix) {

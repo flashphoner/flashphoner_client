@@ -207,30 +207,34 @@ var createConnection = function(options) {
             }
             return true;
         };
-        var getStats = function() {
+        var getStats = function(callbackFn) {
             if (flash) {
                 var statistics = flash.getStats();
                 var param;
-                for (param in statistics.incoming.info) {
-                    if (param.indexOf("audio") > -1) {
-                        statistics.incoming.audio[param] = statistics.incoming.info[param];
+                if (statistics.hasOwnProperty("incoming")) {
+                    for (param in statistics.incoming.info) {
+                        if (param.indexOf("audio") > -1) {
+                            statistics.incoming.audio[param] = statistics.incoming.info[param];
+                        }
+                        if (param.indexOf("video") > -1) {
+                            statistics.incoming.video[param] = statistics.incoming.info[param];
+                        }
                     }
-                    if (param.indexOf("video") > -1) {
-                        statistics.incoming.video[param] = statistics.incoming.info[param];
-                    }
+                    delete statistics.incoming.info;
                 }
-                delete statistics.incoming.info;
-                for (param in statistics.outgoing.info) {
-                    if (param.indexOf("audio") > -1) {
-                        statistics.outgoing.audio[param] = statistics.outgoing.info[param];
+                if (statistics.hasOwnProperty("outgoing")) {
+                    for (param in statistics.outgoing.info) {
+                        if (param.indexOf("audio") > -1) {
+                            statistics.outgoing.audio[param] = statistics.outgoing.info[param];
+                        }
+                        if (param.indexOf("video") > -1) {
+                            statistics.outgoing.video[param] = statistics.outgoing.info[param];
+                        }
                     }
-                    if (param.indexOf("video") > -1) {
-                        statistics.outgoing.video[param] = statistics.outgoing.info[param];
-                    }
+                    delete statistics.outgoing.info;
                 }
-                delete statistics.outgoing.info;
                 statistics.type = "flash";
-                return statistics;
+                callbackFn(statistics);
             }
         };
 
