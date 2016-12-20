@@ -19,26 +19,12 @@
             var pathToSWF = "streaming/bin/streaming.swf";
             var elementId = "flash";
             var params = {};
-            var callback = function (e) {
-                if (e.success) {
-                    var swf = document.getElementById("flash");
-                    var url = "rtmfp://" + window.location.hostname + ":" + "1935";
-                    var t = setTimeout(function () {
-                        var interval = setInterval( function() {
-                            if (swf.setURLtoFlash) {
-                                swf.setURLtoFlash(url);
-                                clearInterval(interval);
-                            } 
-                        }, 1000);
-                    }, 1000);
-                }
-            };
             params.menu = "true";
             params.swliveconnect = "true";
             params.allowfullscreen = "true";
             params.allowscriptaccess = "always";
             params.bgcolor = "#777777";
-            swfobject.embedSWF(pathToSWF, elementId, "450", "595", "11.2.202", "expressInstall.swf", flashvars, params, attributes, callback);
+            swfobject.embedSWF(pathToSWF, elementId, "450", "595", "11.2.202", "expressInstall.swf", flashvars, params, attributes);
         }
     </script>
 
