@@ -151,12 +151,12 @@ function removeParticipant(participant) {
 }
 
 function playParticipantsStream(participant) {
-    if (participant.play) {
+    if (participant.getStreams().length > 0) {
         $("[id$=Name]").each(function (index, value) {
             if ($(value).text() == participant.name()) {
                 var p = value.id.replace('Name', '');
                 var pDisplay = p + 'Display';
-                participant.play(document.getElementById(pDisplay)).on(STREAM_STATUS.PLAYING, function (playingStream) {
+                participant.getStreams()[0].play(document.getElementById(pDisplay)).on(STREAM_STATUS.PLAYING, function (playingStream) {
                     document.getElementById(playingStream.id()).addEventListener('resize', function (event) {
                         resizeVideo(event.target);
                     });

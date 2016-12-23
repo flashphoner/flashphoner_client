@@ -164,6 +164,7 @@ var appSession = function(options) {
         var name_ = options.name;
         var participants = {};
         var callbacks = {};
+        var stateStreams = {};
         roomHandlers[name_] = function(data) {
             /**
              * Room participant
@@ -176,16 +177,19 @@ var appSession = function(options) {
                     for (var i = 0; i < data.info.length; i++) {
                         participantFromState(data.info[i]);
                     }
+                    stateStreams = {};
                 }
                 if (callbacks["STATE"]) {
                     callbacks["STATE"](room);
                 }
             } else if (data.name == "JOINED") {
                 participants[data.info] = {
+                    streams: {},
                     name: function(){
                         return data.info;
                     },
-                    sendMessage: attachSendMessage(data.info)
+                    sendMessage: attachSendMessage(data.info),
+                    getStreams: function() { return util.copyObjectToArray(this.streams);}
                 };
                 if (callbacks["JOINED"]) {
                     callbacks["JOINED"](participants[data.info]);
@@ -198,10 +202,18 @@ var appSession = function(options) {
                 }
             } else if (data.name == "PUBLISHED") {
                 participant = participants[data.info.login];
-                participant.play = attachPlay(data.info.name);
+                participant.streams[data.info.name] = {
+                    play: play(data.info.name),
+                    stop: stop(data.info.name),
+                    id: id(data.info.name)
+                };
                 if (callbacks["PUBLISHED"]) {
                     callbacks["PUBLISHED"](participant);
                 }
+            } else if (data.name == "FAILED" || data.name == "UNPUBLISHED") {
+                participant = participants[data.info.login];
+                if (participant != null)
+                    delete participant.streams[data.info.name];
             } else if (data.name == "MESSAGE") {
                 if (callbacks["MESSAGE"]) {
                     callbacks["MESSAGE"]({
@@ -215,10 +227,39 @@ var appSession = function(options) {
         //participant creation helper
         function participantFromState(state) {
             var participant = {};
+
             if (state.hasOwnProperty("login")) {
                 var login = state.login;
                 var streamName = state.name;
+                stateStreams[streamName] = {
+                    /**
+                     * Play participant stream
+                     *
+                     * @param {HTMLElement} display Div element stream should be displayed in
+                     * @returns {Stream} Local stream object
+                     * @memberof roomApi.Room.Participant.Stream
+                     * @inner
+                     */
+                    play: play(streamName),
+                    /**
+                     * Stop participant stream
+                     *
+                     * @memberof roomApi.Room.Participant.Stream
+                     * @inner
+                     */
+                    stop: stop(streamName),
+                    /**
+                     * Get participant stream id
+                     *
+                     * @returns {String} Stream id
+                     * @memberof roomApi.Room.Participant.Stream
+                     * @inner
+                     */
+                    id: id(streamName)
+                };
+
                 participant = {
+                    streams: {},
                     /**
                      * Get participant name
                      *
@@ -230,15 +271,6 @@ var appSession = function(options) {
                         return login;
                     },
                     /**
-                     * Play participant stream
-                     *
-                     * @param {HTMLElement} display Div element stream should be displayed in
-                     * @returns {Stream} Local stream object
-                     * @memberof roomApi.Room.Participant
-                     * @inner
-                     */
-                    play: attachPlay(streamName),
-                    /**
                      * Send message to participant
                      *
                      * @param {String} message Message to send
@@ -246,14 +278,36 @@ var appSession = function(options) {
                      * @memberof roomApi.Room.Participant
                      * @inner
                      */
-                    sendMessage: attachSendMessage(login)
-                }
+                    sendMessage: attachSendMessage(login),
+                    /**
+                     * Get participant streams
+                     *
+                     * @returns {Array<roomApi.Room.Participant.Stream>} Streams
+                     * @memberof roomApi.Room.Participant
+                     * @inner
+                     */
+                    getStreams: function() { return util.copyObjectToArray(this.streams);}
+                };
+                /**
+                 * Room participant
+                 *
+                 * @namespace roomApi.Room.Participant.Stream
+                 */
             } else {
                 participant = {
+                    streams: {},
                     name: function(){
                         return state;
                     },
-                    sendMessage: attachSendMessage(state)
+                    sendMessage: attachSendMessage(state),
+                    getStreams: function() {return util.copyObjectToArray(this.streams);}
+                }
+            }
+            if (Object.keys(stateStreams).length !=0 ) {
+                for (var k in stateStreams) {
+                    if (stateStreams.hasOwnProperty(k)) {
+                        participant.streams[k] = stateStreams[k];
+                    }
                 }
             }
             participants[participant.name()] = participant;
@@ -308,18 +362,19 @@ var appSession = function(options) {
          * Publish stream inside room
          *
          * @param {Object} options Stream options
+         * @param {string=} options.name Stream name
          * @param {Object=} options.constraints Stream constraints
          * @param {Boolean=} options.record Enable stream recording
+         * @param {Boolean=} options.cacheLocalResources Display will contain local video after stream release
          * @param {HTMLElement} options.display Div element stream should be displayed in
          * @returns {Stream}
          * @memberof roomApi.Room
          * @inner
          */
         var publish = function(options) {
-            options.name = (name_ + "-" + username_);
-            options.cacheLocalResources = true;
+            options.name = (options.name) ? (name_ + "-" + username_ + "-" + options.name) : (name_ + "-" + username_);
+            options.cacheLocalResources = (typeof options.cacheLocalResources === "boolean") ? options.cacheLocalResources : true;
             options.custom = {name: name_};
-            console.log(options);
             var stream = session.createStream(options);
             stream.publish();
             return stream;
@@ -359,11 +414,32 @@ var appSession = function(options) {
         };
 
         //participant helpers
-        function attachPlay(streamName) {
+        function play(streamName) {
             return function(display){
                 var stream = session.createStream({name: streamName, display: display, custom: {name: name_}});
                 stream.play();
                 return stream;
+            }
+        }
+
+        function stop(streamName) {
+            return function() {
+                var streams = session.getStreams();
+                for (var i = 0; i < streams.length; i++) {
+                    if (streams[i].name() == streamName && streams[i].status() != STREAM_STATUS.UNPUBLISHED) {
+                        streams[i].stop();
+                    }
+                }
+            }
+        }
+
+        function id(streamName) {
+            return function() {
+                var streams = session.getStreams();
+                for (var i = 0; i < streams.length; i++) {
+                    if (streams[i].name() == streamName)
+                        return streams[i].id();
+                }
             }
         }
 
