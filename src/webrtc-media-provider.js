@@ -464,6 +464,22 @@ function normalizeConstraints(constraints) {
                 max: frameRate
             }
         }
+        if (constraints.video.hasOwnProperty('width')) {
+            var width = constraints.video.width;
+            if (isNaN(width) || width == 0) {
+                logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
+                constraints.video.width = 320;
+                constraints.video.height = 240;
+            }
+        }
+        if (constraints.video.hasOwnProperty('height')) {
+            var height = constraints.video.height;
+            if (isNaN(height) || height == 0) {
+                logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
+                constraints.video.width = 320;
+                constraints.video.height = 240;
+            }
+        }
     }
     if (constraints.audio) {
         // The WebRTC AEC implementation doesn't work well on stereophonic sound and makes mono on output

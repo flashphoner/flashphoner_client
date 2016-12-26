@@ -488,11 +488,27 @@ function normalizeConstraints(constraints) {
                 height: 240
             }
         } else {
-            if (typeof constraints.video.width == 'object') {
-                constraints.video.width = constraints.video.width.exact || constraints.video.width.max || constraints.video.width.min;
+            if (constraints.video.hasOwnProperty('width')) {
+                var width = constraints.video.width;
+                if (isNaN(width) || width == 0) {
+                    logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
+                    constraints.video.width = 320;
+                    constraints.video.height = 240;
+                }
+                if (typeof width == 'object') {
+                    constraints.video.width = constraints.video.width.exact || constraints.video.width.max || constraints.video.width.min;
+                }
             }
-            if (typeof constraints.video.height == 'object') {
-                constraints.video.height = constraints.video.height.exact || constraints.video.height.max || constraints.video.height.min;
+            if (constraints.video.hasOwnProperty('height')) {
+                var height = constraints.video.height;
+                if (isNaN(height) || height == 0) {
+                    logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
+                    constraints.video.width = 320;
+                    constraints.video.height = 240;
+                }
+                if (typeof height == 'object') {
+                    constraints.video.height = constraints.video.height.exact || constraints.video.height.max || constraints.video.height.min;
+                }
             }
         }
     }

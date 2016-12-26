@@ -206,28 +206,6 @@ var getDefaultMediaConstraints = function() {
     };
 };
 
-function checkConstraints(constraints) {
-    if (constraints.video) {
-        if (constraints.video.hasOwnProperty('width')) {
-            var width = constraints.video.width;
-            if (width == 0 || isNaN(width)) {
-                logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
-                constraints.video.width = 320;
-                constraints.video.height = 240;
-            }
-        }
-        if (constraints.video.hasOwnProperty('height')) {
-            var height = constraints.video.height;
-            if (height == 0 || isNaN(height)) {
-                logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
-                constraints.video.width = 320;
-                constraints.video.height = 240;
-            }
-        }
-    }
-    return constraints;
-}
-
 function getConstraintsProperty(constraints, property, defaultValue) {
     if (!constraints || !property) return defaultValue;
     var res;
@@ -544,7 +522,7 @@ var createSession = function(options) {
         var remoteDisplay = options.remoteVideoDisplay;
         // Constraints
         if (options.constraints) {
-            var constraints = checkConstraints(options.constraints);
+            var constraints = options.constraints;
         }
         var stripCodecs = options.stripCodecs || [];
         // Receive media
@@ -1126,7 +1104,7 @@ var createSession = function(options) {
         var display = options.display;
         // Constraints
         if (options.constraints && Object.keys(options.constraints).length != 0) {
-            var constraints = checkConstraints(options.constraints);
+            var constraints = options.constraints;
         }
         // Receive media
         var receiveAudio;
@@ -1158,6 +1136,7 @@ var createSession = function(options) {
         var bitrate = getConstraintsProperty(constraints, "video.bitrate", 0);
         // Quality
         var quality = getConstraintsProperty(constraints, "video.quality", 0);
+        if (quality > 100) quality = 100;
         // Play resolution
         var playWidth = (typeof options.playWidth !== 'undefined') ? options.playWidth : getConstraintsProperty(constraints, "video.width", 0);
         var playHeight = (typeof options.playHeight !== 'undefined') ? options.playHeight : getConstraintsProperty(constraints, "video.height", 0);
