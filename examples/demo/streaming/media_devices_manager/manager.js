@@ -170,20 +170,25 @@ function startStreaming(session) {
     };
     if (constraints.audio) {
         constraints.audio = {
-            deviceId: $('#audioInput').val(),
-            fec: $("#fec").is(':checked'),
-            stereo: $("#sendStereoAudio").is(':checked'),
-            bitrate: parseInt($('#sendAudioBitrate').val())
-        }
+            deviceId: $('#audioInput').val()
+        };
+        if ($("#fec").is(':checked'))
+            constraints.audio.fec = $("#fec").is(':checked');
+        if ($("#sendStereoAudio").is(':checked'))
+            constraints.audio.stereo = $("#sendStereoAudio").is(':checked');
+        if (parseInt($('#sendAudioBitrate').val()) > 0)
+            constraints.audio.bitrate = parseInt($('#sendAudioBitrate').val());
     }
     if (constraints.video) {
         constraints.video = {
             deviceId: $('#videoInput').val(),
             width: parseInt($('#sendWidth').val()),
-            height: parseInt($('#sendHeight').val()),
-            frameRate: parseInt($('#fps').val()),
-            bitrate: parseInt($('#sendVideoBitrate').val())
+            height: parseInt($('#sendHeight').val())
         };
+        if (parseInt($('#sendVideoBitrate').val()) > 0)
+            constraints.video.bitrate = parseInt($('#sendVideoBitrate').val());
+        if (parseInt($('#fps').val()) > 0)
+            constraints.video.frameRate = parseInt($('#fps').val());
     }
     Flashphoner.getMediaAccess(constraints, localVideo).then(function(element){
         publishStream = session.createStream({
@@ -311,13 +316,21 @@ function validateForm() {
         removeHighlight($("#sendVideo"));
         removeHighlight($("#sendAudio"));
     }
+    if (!$("#playVideo").is(':checked') && !$("#playAudio").is(':checked')) {
+        highlightInput($("#playVideo"));
+        highlightInput($("#playAudio"));
+        valid = false;
+    } else {
+        removeHighlight($("#playVideo"));
+        removeHighlight($("#playAudio"));
+    }
     $('#form :text, select').each(function(){
         if (!$(this).val()) {
             highlightInput($(this));
             valid = false;
         } else {
             var numericFields = ['fps', 'sendWidth', 'sendHeight', 'sendVideoBitrate', 'receiveBitrate', 'quality'];
-            if (numericFields.indexOf(this.id) != -1 && !(parseInt($(this).val()) > 0)) {
+            if (numericFields.indexOf(this.id) != -1 && !(parseInt($(this).val()) >= 0)) {
                 highlightInput($(this));
                 valid = false;
             } else {
