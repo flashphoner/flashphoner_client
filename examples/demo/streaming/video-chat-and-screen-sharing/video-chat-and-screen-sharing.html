@@ -11,13 +11,13 @@
     <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
     <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
 
-    <script type="text/javascript" src="video-chat-screen-sharing.js"></script>
+    <script type="text/javascript" src="video-chat-and-screen-sharing.js"></script>
     <!-- Bootstrap JS -->
     <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
     <script>var _participants = 2</script>
 </head>
 <body onload="init_page()">
-<div class="container">
+<div class="container-fluid">
     <div class="row" id="extension">
         <div class="col-sm-5 text-center">
             <span class="text-muted" style="padding: 0 10px">Extension required</span>
@@ -57,7 +57,9 @@
                 </div>
             </form>
         </div>
-        <div class="col-sm-7">
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
             <div style="width: 642px; height: 482px;">
                 <div class="fp-remoteVideo">
                     <div id="participant1Display" class="display"></div>
@@ -70,53 +72,56 @@
             <div class="text-center" style="margin-top: 20px">
                 <div id="participant1Status"></div>
             </div>
+            <button id="localAudioToggle" type="button" class="btn btn-default">Mute A</button>
+            <button id="localVideoToggle" type="button" class="btn btn-default">Mute V</button>
+            <button id="localStopBtn" type="button" class="btn btn-default">Publish</button>
+            <label id="localStatus"></label>
+            <div class="form-group" style="margin-top: 20px">
+                <div id="chat" style="overflow-y: scroll; height: 100px;" class="text-left form-control"></div>
+            </div>
+            <div class="form-group">
+                <textarea id="message" class="form-control" rows="1" style="resize: none;"></textarea>
+            </div>
+            <div class="pull-right">
+                <button id="sendMessageBtn" type="button" class="btn btn-default">Send</button>
+            </div>
+            <div class="form-group" style="margin-top: 60px">
+                <span class="text-muted text-left">Invite</span>
+                <div id="inviteAddress" class="text-muted text-center" style="border: 1px solid">Not connected</div>
+            </div>
         </div>
 
-        <div class="col-sm-3">
+        <div class="col-sm-6">
             <div class="fp-remoteVideo">
                 <div id="sharedDisplay" class="display"></div>
             </div>
             <div class="fp-previewVideo">
                 <div id="preview" class="display"></div>
             </div>
-
-            <button id="shareBtn" type="button" class="btn btn-default" style="margin-top: 490px; margin-left: 300px">Share</button>
+            <div class="col-sm-12 text-center" style="margin-top: 77%">
+                <div class="col-sm-4">
+                    <div class="form-group" id="fpsForm">
+                        <span class="text-muted">FPS</span>
+                        <input type="text" class="form-control" id="fps" value="30"/>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group" id="widthForm">
+                        <span class="text-muted">Width</span>
+                        <input type="text" class="form-control" id="width" value="640"/>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group" id="heightForm">
+                        <span class="text-muted">Height</span>
+                        <input type="text" class="form-control" id="height" value="480"/>
+                    </div>
+                </div>
+            </div>
+            <button id="shareBtn" type="button" class="btn btn-default" style="margin-left: 45%">Share</button>
             <label id="shareStatus"></label>
         </div>
 
-        <div class="col-sm-7">
-            <div class="col-sm-6">
-                <button id="localAudioToggle" type="button" class="btn btn-default">Mute A</button>
-                <button id="localVideoToggle" type="button" class="btn btn-default">Mute V</button>
-            </div>
-        </div>
-        <div class="col-sm-7">
-            <div class="col-sm-6" style="margin: 5px auto auto auto;">
-                <button id="localStopBtn" type="button" class="btn btn-default">Publish</button>
-                <label id="localStatus"></label>
-            </div>
-
-        </div>
-        <div class="col-sm-7" style="margin-top: 20px">
-            <div class="form-group">
-                <div id="chat" style="overflow-y: scroll; height: 100px;" class="text-left form-control"></div>
-            </div>
-        </div>
-        <div class="col-sm-7">
-            <div class="form-group">
-                <textarea id="message" class="form-control" rows="1" style="resize: none;"></textarea>
-            </div>
-        </div>
-        <div class="col-sm-7">
-            <div class="pull-right">
-                <button id="sendMessageBtn" type="button" class="btn btn-default">Send</button>
-            </div>
-        </div>
-
-        <div class="col-sm-7" style="margin-top: 20px">
-            <span class="text-muted text-left">Invite</span>
-            <div id="inviteAddress" class="text-muted text-center" style="border: 1px solid">Not connected</div>
-        </div>
     </div>
 </div>
 </body>

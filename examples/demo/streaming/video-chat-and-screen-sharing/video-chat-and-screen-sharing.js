@@ -68,9 +68,9 @@ function startSharing(room) {
     $("#shareBtn").prop('disabled',true);
     var constraints = {
         video: {
-            width: 640,
-            height: 480,
-            frameRate: 30,
+            width: parseInt($('#width').val()),
+            height: parseInt($('#height').val()),
+            frameRate: parseInt($('#fps').val()),
             type: "screen"
         }
     };
@@ -341,7 +341,7 @@ function publishLocalMedia(room) {
 }
 
 function muteConnectInputs() {
-    $(':text').each(function(){
+    $(':text').not("[id='width'],[id='height'],[id='fps']").each(function(){
         $(this).prop('disabled', true);
     });
 }
