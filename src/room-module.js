@@ -205,7 +205,8 @@ var appSession = function(options) {
                 participant.streams[data.info.name] = {
                     play: play(data.info.name),
                     stop: stop(data.info.name),
-                    id: id(data.info.name)
+                    id: id(data.info.name),
+                    streamName: function() {return data.info.name}
                 };
                 if (callbacks["PUBLISHED"]) {
                     callbacks["PUBLISHED"](participant);
@@ -255,7 +256,15 @@ var appSession = function(options) {
                      * @memberof roomApi.Room.Participant.Stream
                      * @inner
                      */
-                    id: id(streamName)
+                    id: id(streamName),
+                    /**
+                     * Get participant stream name
+                     *
+                     * @returns {String} Stream name
+                     * @memberof roomApi.Room.Participant.Stream
+                     * @inner
+                     */
+                    streamName: function(){return streamName}
                 };
 
                 participant = {
