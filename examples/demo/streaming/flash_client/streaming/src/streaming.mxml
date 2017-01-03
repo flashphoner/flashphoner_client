@@ -33,7 +33,9 @@
 				
 				if (ExternalInterface.available) {
 					try {
-						ExternalInterface.addCallback("setURLtoFlash", getDataFromJS);
+						var href:String = ExternalInterface.call("window.location.href.toString");
+						var hostname:String = ExternalInterface.call("window.location.hostname.toString");
+						connectUrl.text = "rtmfp://" + hostname + ":1935";
 					} catch (error:Error) {
 						Logger.info(error.message);
 					}
@@ -369,7 +371,7 @@
 	<s:Button id="connectBtn" x="325" y="93" width="90" label="Login" click="connect()"/>
 	<s:TextInput id="publishStreamName" x="99" y="143" width="199" text="StreamName"/>
 	<s:Button id="disconnectBtn" x="325" y="93" label="Logout" click="disconnect()" width="90" enabled="true"/>
-	<s:TextInput id="connectUrl" x="99" y="93" width="200" text="rtmp://192.168.1.59:1935"/>
+	<s:TextInput id="connectUrl" x="99" y="93" width="200"/>
 	
 	<!-- publish / unpublish -->
 	<s:Button id="publishBtn" x="326" y="143" label="Start" width="90" height="21" click="publish()" enabled="true"/>
