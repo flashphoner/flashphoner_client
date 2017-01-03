@@ -1,12 +1,12 @@
 
-self.port.emit("isDomainEnabled", unsafeWindow.location + "");
+self.port.emit("isDomainEnabled", window.wrappedJSObject.location + "");
 
 self.port.on("domainCheckResult", function(result) {
-    if (unsafeWindow.Flashphoner) {
-        if (typeof unsafeWindow.Flashphoner.getInstance !== "undefined") {
-            unsafeWindow.Flashphoner.getInstance().firefoxScreenSharingExtensionInstalled = result;
+    if (window.wrappedJSObject.Flashphoner) {
+        if (typeof window.wrappedJSObject.Flashphoner.getInstance !== "undefined") {
+            window.wrappedJSObject.Flashphoner.getInstance().firefoxScreenSharingExtensionInstalled = result;
         } else {
-            unsafeWindow.Flashphoner.firefoxScreenSharingExtensionInstalled = result;
+            window.wrappedJSObject.Flashphoner.firefoxScreenSharingExtensionInstalled = result;
         }
     }
 });

@@ -2,8 +2,8 @@
   "title": "Flashphoner Screen Sharing",
   "name": "flashphoner-screen-sharing-extension",
   "id": "@flashphoner-screen-sharing-extension",
-  "version": "0.0.4",
-  "description": "Enable screen sharing for flashphoner.com",
+  "version": "0.0.8",
+  "description": "This extension is designed to enable screen capture for Screen Sharing Web client example provided with Flashphoner WCS server.",
   "main": "index.js",
   "author": "Flashphoner",
   "engines": {
@@ -11,5 +11,8 @@
     "fennec": ">=38.0a1"
   },
   "homepage": "http://flashphoner.com",
-  "license": "MIT"
+  "license": "MIT",
+  "permissions": {
+    "multiprocess": true
+  }
 }
