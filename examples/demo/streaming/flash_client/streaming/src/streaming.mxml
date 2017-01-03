@@ -218,6 +218,7 @@
 					playStatus.setStyle("color","#ff0000");
 					return;
 				}
+				playBtn.enabled = false;
 				playStatus.setStyle("color","#000000");
 				Logger.info("play");
 				subscribeStream = new NetStream(nc);
@@ -226,6 +227,7 @@
 			
 			private function stop():void{
 				if (subscribeStream != null) {
+					stopBtn.enabled = false;
 					subscribeStream.close();
 					subscribeStream = null;
 				}
@@ -307,21 +309,25 @@
 					case "NetStream.Play.Start": 
 						setPlayStatus("PLAYING");
 						playBtn.visible = false;
+						stopBtn.enabled = true;
 						stopBtn.visible = true;
 						break;
 					case "NetStream.Play.UnpublishNotify":
 					case "NetStream.Play.Stop":
 						setPlayStatus("STOPPED");
+						playBtn.enabled = true;
 						playBtn.visible = true;
 						stopBtn.visible = false;
 						break;
 					case "NetStream.Play.StreamNotFound":
 						setPlayStatus("STREAM NOT FOUND");
+						playBtn.enabled = true;
 						playBtn.visible = true;
 						stopBtn.visible = false;
 						break;
 					case "NetStream.Play.Failed":
 						setPlayStatus("STREAM FAILED");
+						playBtn.enabled = true;
 						playBtn.visible = true;
 						stopBtn.visible = false;
 						break;
