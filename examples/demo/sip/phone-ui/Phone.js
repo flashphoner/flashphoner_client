@@ -176,9 +176,13 @@ Phone.prototype.answer = function () {
 };
 
 Phone.prototype.hangup = function () {
-    trace("Phone - hangup " + this.currentCall.id());
+    trace("Phone - hangup " + this.currentCall.id() + " status " + this.currentCall.status());
     this.hideFlashAccess();
-    this.currentCall.hangup();
+    if (this.currentCall.status() == CALL_STATUS.PENDING) {
+        this.callStatusListener(this.currentCall);
+    } else {
+        this.currentCall.hangup();
+    }
     this.flashphonerListener.onHangup();
 };
 
@@ -284,14 +288,18 @@ Phone.prototype.onCallListener = function (call_) {
 };
 
 Phone.prototype.callStatusListener = function (call_) {
-    if (call_.status()==CALL_STATUS.FAILED){
-        return;
-    }
     var call = call_;
     var status = call.status();
     trace("Phone - callStatusListener call id: " + call.id() + " status: " + status);
     if (this.currentCall.id() == call.id()) {
-        if (status == CALL_STATUS.FINISH) {
+        if (status == CALL_STATUS.FAILED) {
+            trace("Phone - ... Call is failed...");
+            $(".call__out__dial").text("calling to");					// return to initial view of outgoing call (view without number or login name)
+            $("body").removeAttr("class");								// remove all classes from the body
+            $(".b-mike, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // close set of blocks which are hidden by default
+            $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// open a set of blocks which might be hidden, but the blocks are visible by default
+            $(".b-alert").text("").removeClass("video_alert");	// initial view of video alert
+        } else if (status == CALL_STATUS.FINISH || status == CALL_STATUS.PENDING) {
             trace("Phone - ... Call is finished...");
             SoundControl.getInstance().stopSound("RING");
             if (this.holdedCall != null) {
