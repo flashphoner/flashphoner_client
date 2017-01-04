@@ -38,21 +38,6 @@ function removeMyDomainOnUnInstall() {
 }
 
 var urls = require("sdk/url");
-function isDomainEnabled(tabUrl) {
-  var url = urls.URL(tabUrl);
-  var host = url.host;
-  if (url.port) {
-    host = host.replace(":"+url.port, "");
-  }
-  var ret = false;
-  prefService.get(configToReferListOfAllowedDomains).split(',').forEach(function(domain) {
-    var base = new RegExp("^"+domain.replace(/\*/g, "[^ ]*").replace(/\./g, "\\."));
-    if (base.test(host)) {
-      ret = true;
-    }
-  });
-  return ret;
-}
 
 var {when: unload} = require("sdk/system/unload");
 
@@ -66,14 +51,8 @@ var data = require("sdk/self").data;
 var pageMod = require("sdk/page-mod");
 
 pageMod.PageMod({
-  include: "*",
+  include: "*.flashphoner.com",
   contentScriptFile: data.url("content-script.js"),
   contentScriptWhen: "end",
-  attachTo: ["existing", "top", "frame"],
-  onAttach: function(worker) {
-    worker.port.on("isDomainEnabled", function(url) {
-      var ret = isDomainEnabled(url);
-      worker.port.emit("domainCheckResult", ret);
-    });
-  }
+  attachTo: ["existing", "top", "frame"]
 });
