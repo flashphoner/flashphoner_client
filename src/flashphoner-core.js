@@ -1076,6 +1076,7 @@ var createSession = function(options) {
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
      * @param {Integer} [options.flashBufferTime=0] Specifies how long to buffer messages before starting to display the stream (Flash-only)
      * @param {Array<string>=} options.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
+     * @param {string=} options.rtmpUrl Rtmp url stream should be forwarded to
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
      * @throws {TypeError} Error if options.name is not specified
@@ -1148,6 +1149,7 @@ var createSession = function(options) {
         var recordFileName = null;
         var cacheLocalResources = options.cacheLocalResources;
         var status_ = STREAM_STATUS.NEW;
+        var rtmpUrl = options.rtmpUrl;
         var info_;
         //callbacks added using stream.on()
         var callbacks = {};
@@ -1285,14 +1287,14 @@ var createSession = function(options) {
                     id: id_,
                     display: display,
                     authToken: authToken,
-                    mainUrl: urlServer,
+                    mainUrl: urlServer
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
                         stripCodecs: stripCodecs
                     });
                 }).then(function (offer) {
-                    logger.debug(LOG_PREFIX, "Offer SDP:\n" + offer.sdp)
+                    logger.debug(LOG_PREFIX, "Offer SDP:\n" + offer.sdp);
                     //publish stream with offer sdp to server
                     send("publishStream", {
                         mediaSessionId: id_,
@@ -1305,7 +1307,8 @@ var createSession = function(options) {
                         mediaProvider: mediaProvider,
                         sdp: offer.sdp,
                         custom: options.custom,
-                        bitrate: bitrate
+                        bitrate: bitrate,
+                        rtmpUrl: rtmpUrl
                     });
                 });
             }).catch(function(error){
