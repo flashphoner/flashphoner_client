@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="webrtc_as_rtmp_republishing.css">
+    <title>WebRTC as RTMP re-publishing</title>
+    <!-- Bootstrap JS -->
+    <script type="text/javascript" src="../../../../flashphoner.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
+    <script type="text/javascript" src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
+    <script type="text/javascript" src="webrtc_as_rtmp_republishing.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <h2 class="text-center">WebRTC as RTMP re-publishing</h2>
+        </div>
+        <div class="row row-space">
+            <div class="col-sm-6">
+                <div class="text-center text-muted">Local</div>
+                <div class="fp-Video">
+                    <div id="localVideo" class="display"></div>
+                </div>
+                <div id="streamerForm" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                    <input class="form-control" type="text" id="url">
+                    <div class="input-group-btn">
+                        <button id="publishBtn" type="button" class="btn btn-default">Start</button>
+                    </div>
+                </div>
+                <div class="text-center" style="margin-top: 20px">
+                    <div id="status"></div>
+                </div>
+            </div>
+
+            <div class="col-sm-6 text-center">
+                <fieldset class="scheduler-border">
+                    <legend class="scheduler-border">RTMP Target Details</legend>
+                    <form id="formRTMP" class="form-horizontal" role="form">
+                        <div id="rtmpUrlForm" class="form-group">
+                            <label class="control-label col-sm-3" for="rtmpUrl">RTMP URL</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="rtmpUrl" value="rtmp://localhost:1935/live"/>
+                            </div>
+                        </div>
+                        <div id="rtmpStreamForm" class="form-group">
+                            <label class="control-label col-sm-3" for="streamName">Stream</label>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="streamName" value="stream1"/>
+                            </div>
+                        </div>
+                    </form>
+                </fieldset>
+                <h3>RTMP Player</h3>
+                <div class="text-center">
+                    <div id="player"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
