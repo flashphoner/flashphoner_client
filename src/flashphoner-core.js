@@ -273,6 +273,7 @@ var getSession = function(id) {
  * @param {string=} options.appKey REST App key
  * @param {Object=} options.custom User provided custom object that will be available in REST App code
  * @param {Object=} options.sipOptions Sip configuration
+ * @param {Object=} options.mediaOptions Media connection configuration
  * @returns {Session} Created session
  * @throws {Error} Error if API is not initialized
  * @throws {TypeError} Error if options.urlServer is not specified
@@ -291,6 +292,7 @@ var createSession = function(options) {
     var sessionStatus = SESSION_STATUS.PENDING;
     var urlServer = options.urlServer;
     var appKey = options.appKey || "defaultApp";
+    var mediaOptions = options.mediaOptions;
     //SIP config
     var sipConfig;
     if (options.sipOptions) {
@@ -620,7 +622,8 @@ var createSession = function(options) {
                     authToken: authToken,
                     mainUrl: urlServer,
                     bidirectional: true,
-                    login: login
+                    login: login,
+                    connectionConfig: mediaOptions
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
@@ -736,7 +739,8 @@ var createSession = function(options) {
                     authToken: authToken,
                     mainUrl: urlServer,
                     bidirectional: true,
-                    login: sipConfig.sipLogin
+                    login: sipConfig.sipLogin,
+                    connectionConfig: mediaOptions
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.setRemoteSdp(sdp);
@@ -1217,7 +1221,8 @@ var createSession = function(options) {
                 display: display,
                 authToken: authToken,
                 mainUrl: urlServer,
-                flashBufferTime: options.flashBufferTime || 0
+                flashBufferTime: options.flashBufferTime || 0,
+                connectionConfig: mediaOptions
             },streamRefreshHandlers[id_]).then(function(newConnection) {
                 mediaConnection = newConnection;
                 return mediaConnection.createOffer({
@@ -1286,6 +1291,7 @@ var createSession = function(options) {
                     display: display,
                     authToken: authToken,
                     mainUrl: urlServer,
+                    connectionConfig: mediaOptions
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
