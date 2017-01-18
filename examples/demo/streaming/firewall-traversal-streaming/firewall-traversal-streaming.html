@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="firewall-traversal-streaming.css">
+    <title>Two-way Streaming</title>
+    <script type="text/javascript" src="../../../../flashphoner.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
+
+    <script type="text/javascript" src="firewall-traversal-streaming.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
+</head>
+<body onload="init_page()">
+<div class="container">
+    <div class="row">
+
+        <h2 id="notifyFlash" class="text-danger"></h2>
+
+        <div class="col-sm-9 text-center">
+
+            <h2 class="text-center">Firewall Traversal Streaming</h2>
+
+            <div class="col-sm-6">
+                <div class="text-center text-muted">Local</div>
+                <div class="fp-Video">
+                    <div id="localVideo" class="display"></div>
+                </div>
+                <div id="streamerForm" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                    <input class="form-control" type="text" id="publishStream" placeholder="Stream Name"
+                           value="streamName1">
+
+                    <div class="input-group-btn">
+                        <button id="publishBtn" type="button" class="btn btn-default">Publish</button>
+                    </div>
+                </div>
+                <div class="text-center" style="margin-top: 20px">
+                    <div id="publishStatus"></div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="text-center text-muted">Player</div>
+                <div class="fp-Video">
+                    <div id="remoteVideo" class="display"></div>
+                </div>
+                <div id="playerForm" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                    <input class="form-control" type="text" id="playStream" placeholder="Stream Name"
+                           value="streamName1">
+
+                    <div class="input-group-btn">
+                        <button id="playBtn" type="button" class="btn btn-default">Play</button>
+                    </div>
+                </div>
+                <div class="text-center" style="margin-top: 20px">
+                    <div id="playStatus"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row row-space">
+        <div class="col-sm-5 col-sm-offset-2">
+            <div id="connectionForm" class="input-group">
+                <div class="form-group">
+                    <label style="text-align: left" class="col-sm-6 control-label">WCS Server</label>
+
+                    <div class="col-sm-6">
+                        <input class="form-control" id="urlServer" type="text">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="text-align: left" class="col-sm-6 control-label">Turn Server</label>
+
+                    <div class="col-sm-6">
+                        <input class="form-control" id="urlTurnServer" type="text">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="text-align: left" class="col-sm-6 control-label">Username of turn server</label>
+
+                    <div class="col-sm-6">
+                        <input class="form-control" id="usernameTurnServer" type="text" value="username1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="text-align: left" class="col-sm-6 control-label">Credential of turn server</label>
+
+                    <div class="col-sm-6">
+                        <input class="form-control" id="credentialTurnServer" type="text" value="password1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="input-group-btn">
+                        <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center">
+                <div id="connectStatus"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 70px;">
+        <div class="col-sm-4" style="margin-left: 10px;">
+            <a href="https://play.google.com/store/apps/details?id=com.flashphoner.wcsexample.two_way_streaming"><img
+                    src="../../dependencies/img/google_play.jpg" title="Google Play" alt="Google Play"></a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
