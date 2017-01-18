@@ -285,6 +285,16 @@
 			private function handleStreamStatus(event:NetStatusEvent):void{
 				Logger.info("handleStreamStatus: "+event.info.code);
 				switch (event.info.code) {
+					case "NetStream.Publish.Failed":
+						Logger.info("Publish failed");
+						if (publishStream!=null){
+							publishStream.close();
+							publishStream.removeEventListener(NetStatusEvent.NET_STATUS, handleStreamStatus);
+							publishStream=null;
+						}
+						videoFarEnd.clear();
+						setPublishStatus("PUBLISH STREAM FAILED");
+						break;
 					case "NetStream.Publish.BadName":
 						Logger.info("Bad streamName. Please publish stream with other name");
 						break;
