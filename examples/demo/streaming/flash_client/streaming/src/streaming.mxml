@@ -285,7 +285,7 @@
 			private function handleStreamStatus(event:NetStatusEvent):void{
 				Logger.info("handleStreamStatus: "+event.info.code);
 				switch (event.info.code) {
-					case "NetStream.Publish.Failed":
+					case "NetStream.Failed":
 						Logger.info("Publish failed");
 						if (publishStream!=null){
 							publishStream.close();
