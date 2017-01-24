@@ -24,6 +24,7 @@ var initialized = false;
  * Static initializer.
  *
  * @param {Object} options Global api options
+ * @param {Function=} options.webRTCPluginReadyCallback Callback of initialized WebRTC Plugin
  * @param {String=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
  * @param {string=} options.preferredMediaProvider Use preferred media provider if available
  * @param {String=} options.receiverLocation Location of WSReceiver.js file
@@ -51,7 +52,35 @@ var init = function(options) {
                 logger: logger
             };
             webRtcProvider.configure(webRtcConf);
+        } else {
+            webRtcProvider = require("./temasys-media-provider");
+            if (webRtcProvider) {
+                var adapterjs = require('adapterjs');
+                adapterjs.webRTCReady(function (isUsingPlugin) {
+                    if (isUsingPlugin || webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
+                        MediaProvider.WebRTC = webRtcProvider;
+                        var webRtcConf = {
+                            constraints: options.constraints || getDefaultMediaConstraints(),
+                            extensionId: options.screenSharingExtensionId,
+                            logger: logger
+                        };
+                        webRtcProvider.configure(webRtcConf);
+
+                        // Just reorder media provider list
+                        var _MediaProvider = {};
+                        _MediaProvider.WebRTC = MediaProvider.WebRTC;
+                        for (var p in MediaProvider) {
+                            _MediaProvider[p] = MediaProvider[p];
+                        }
+                        MediaProvider = _MediaProvider;
+                    }
+                    if (options.webRTCPluginReadyCallback) {
+                        options.webRTCPluginReadyCallback(isUsingPlugin);
+                    }
+                });
+            }
         }
+
         var flashProvider = require("./flash-media-provider");
         if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available() && !MediaProvider.WebRTC) {
             MediaProvider.Flash = flashProvider;

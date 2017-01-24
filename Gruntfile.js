@@ -50,6 +50,7 @@ module.exports = function(grunt) {
                 src: ['./src/flashphoner-core.js'],
                 dest: './flashphoner.js',
                 options: {
+                    ignore: ['./src/temasys-media-provider.js'],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
@@ -59,7 +60,7 @@ module.exports = function(grunt) {
                 src: ['./src/flashphoner-core.js'],
                 dest: './flashphoner-no-webrtc.js',
                 options: {
-                    ignore: ['./src/webrtc-media-provider.js'],
+                    ignore: ['./src/temasys-media-provider.js', './src/webrtc-media-provider.js'],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
@@ -69,7 +70,7 @@ module.exports = function(grunt) {
                 src: ['./src/flashphoner-core.js'],
                 dest: './flashphoner-no-flash.js',
                 options: {
-                    ignore: ['./src/flash-media-provider.js'],
+                    ignore: ['./src/temasys-media-provider.js', './src/flash-media-provider.js'],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
@@ -79,7 +80,17 @@ module.exports = function(grunt) {
                 src: ['./src/flashphoner-core.js'],
                 dest: './flashphoner-no-wsplayer.js',
                 options: {
-                    ignore: ['./src/websocket-media-provider.js'],
+                    ignore: ['./src/temasys-media-provider.js', './src/websocket-media-provider.js'],
+                    browserifyOptions: {
+                        standalone: 'Flashphoner'
+                    }
+                }
+            },
+            flashphonerGlobalObjectTemasys: {
+                src: ['./src/flashphoner-core.js'],
+                dest: './flashphoner-temasys-flash-websocket.js',
+                options: {
+                    ignore: ['./src/webrtc-media-provider.js'],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
@@ -96,7 +107,8 @@ module.exports = function(grunt) {
                   './flashphoner.min.js' : ['./flashphoner.js'],
                   './flashphoner-no-webrtc.min.js': ['./flashphoner-no-webrtc.js'],
                   './flashphoner-no-flash.min.js': ['./flashphoner-no-flash.js'],
-                  './flashphoner-no-wsplayer.min.js': ['./flashphoner-no-wsplayer.js']
+                  './flashphoner-no-wsplayer.min.js': ['./flashphoner-no-wsplayer.js'],
+                  './flashphoner-temasys-flash-websocket.min.js':['./flashphoner-temasys-flash-websocket.js']
               }
           }
         },
@@ -119,10 +131,12 @@ module.exports = function(grunt) {
                             'flashphoner-no-flash.js',
                             'flashphoner-no-webrtc.js',
                             'flashphoner-no-wsplayer.js',
+                            'flashphoner-temasys-flash-websocket.js',
                             'flashphoner.min.js',
                             'flashphoner-no-flash.min.js',
                             'flashphoner-no-webrtc.min.js',
                             'flashphoner-no-wsplayer.min.js',
+                            'flashphoner-temasys-flash-websocket.min.js',
                             'media-provider.swf'
                         ],
                         dest: 'release/<%= pkg.name %>-<%= pkg.version %>'
@@ -177,6 +191,7 @@ module.exports = function(grunt) {
         'flash:release_examples_streaming',
         'flash:release_examples_chat',
         'jsdoc'
+
     ]);
     grunt.registerTask('release', [
         'clean:release',
