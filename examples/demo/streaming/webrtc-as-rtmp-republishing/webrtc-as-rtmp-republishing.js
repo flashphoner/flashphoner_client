@@ -129,7 +129,8 @@ function sendDataToPlayer() {
         .replace("localhost", window.location.hostname)
         .replace("127.0.0.1", window.location.hostname);
 
-    var url = host + "/" + field("streamName");
+    var rtmpStreamPrefix = "rtmp_";
+    var url = host + "/" + rtmpStreamPrefix + field("streamName");
     player.setURLtoFlash(url);
 }
 

@@ -21,7 +21,7 @@ function init_page() {
     remoteVideo = document.getElementById("remoteVideo");
 
     $("#urlServer").val(setURL());
-    $("#urlTurnServer").val("turn:" + window.location.hostname + ":" + 3478 + "?transport=tcp");
+    $("#urlTurnServer").val("turn:turn.flashphoner.com:443?transport=tcp");
     onDisconnected();
     onUnpublished();
     onStopped();
