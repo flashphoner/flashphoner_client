@@ -22,6 +22,9 @@ function init_page() {
 
     $("#urlServer").val(setURL());
     $("#urlTurnServer").val("turn:turn.flashphoner.com:443?transport=tcp");
+    var streamName = createUUID(4);
+    $("#publishStream").val(streamName);
+    $("#playStream").val(streamName);
     onDisconnected();
     onUnpublished();
     onStopped();

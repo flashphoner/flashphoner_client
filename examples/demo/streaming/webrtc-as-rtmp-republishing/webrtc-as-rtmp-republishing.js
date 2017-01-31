@@ -17,6 +17,7 @@ function init_page() {
         return;
     }
     localVideo = document.getElementById("localVideo");
+    $("#streamName").val(createUUID(4));
     onStopped();
 }
 

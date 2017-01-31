@@ -54,6 +54,9 @@
 				stopBtn.visible = false;
 				unpublishBtn.visible = false;
 				disconnectBtn.visible = false;
+				var streamName:String = generateRandomString(4);
+				publishStreamName.text = "Stream-"+streamName;
+				playStreamName.text = "Stream-"+streamName;
 				
 			}
 			

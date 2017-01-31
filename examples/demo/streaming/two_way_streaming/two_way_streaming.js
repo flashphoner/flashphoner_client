@@ -21,6 +21,9 @@ function init_page() {
     remoteVideo = document.getElementById("remoteVideo");
 
     $("#urlServer").val(setURL());
+    var streamName = createUUID(4);
+    $("#publishStream").val(streamName);
+    $("#playStream").val(streamName);
     onDisconnected();
     onUnpublished();
 	onStopped();
