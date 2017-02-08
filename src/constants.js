@@ -139,6 +139,14 @@ define(streamStatus, 'PLAYBACK_PROBLEM', 'PLAYBACK_PROBLEM');
 define(streamStatus, 'RESIZE', 'RESIZE');
 
 /**
+ * Fires when {@link Stream} snapshot becomes available
+ * Snapshot is base64 encoded png available through {@link Stream.getInfo}
+ * @event SNAPSHOT_COMPLETE
+ * @memberof Flashphoner.constants.STREAM_STATUS
+ */
+define(streamStatus, 'SNAPSHOT_COMPLETE', 'SNAPSHOT_COMPLETE');
+
+/**
  * @namespace Flashphoner.constants.CALL_STATUS
  * @see Call
  */

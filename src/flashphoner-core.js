@@ -1205,6 +1205,8 @@ var createSession = function(options) {
             if (event == STREAM_STATUS.RESIZE) {
                 resolution.width = streamInfo.playerVideoWidth;
                 resolution.height = streamInfo.playerVideoHeight;
+            } else if (event == STREAM_STATUS.SNAPSHOT_COMPLETE) {
+
             } else {
                 status_ = event;
             }
@@ -1402,6 +1404,23 @@ var createSession = function(options) {
             if (mediaConnection) {
                 mediaConnection.close(cacheLocalResources);
             }
+        };
+
+        /**
+         * Request remote stream snapshot.
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.NEW}
+         * @memberof Stream
+         * @inner
+         */
+        var snapshot = function() {
+            logger.debug(LOG_PREFIX, "Request snapshot, stream " + name_);
+            if (status_ !== STREAM_STATUS.NEW) {
+                throw new Error("Invalid stream state");
+            }
+            send("snapshot", {
+                name: name_,
+                mediaSessionId: id_
+            });
         };
 
         /**
@@ -1650,6 +1669,7 @@ var createSession = function(options) {
         stream.unmuteVideo = unmuteVideo;
         stream.isVideoMuted = isVideoMuted;
         stream.getStats = getStats;
+        stream.snapshot = snapshot;
         stream.on = on;
 
         streams[id_] = stream;
