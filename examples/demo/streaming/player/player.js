@@ -5,6 +5,9 @@ var resolution_for_wsplayer;
 var stream;
 var currentVolumeValue = 50;
 
+var autoplay = getUrlParam("autoplay") || false;
+var resolution = getUrlParam("resolution");
+
 function init_page() {
 
     //init api
@@ -21,6 +24,8 @@ function init_page() {
     if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
         resolution_for_wsplayer = {playWidth:640,playHeight:480};
     }
+
+    $("#streamName").val(getUrlParam("streamName"));
 
     //video display
     remoteVideo = document.getElementById("remoteVideo");
@@ -39,6 +44,8 @@ function init_page() {
         }
     }).slider("disable");
     onStopped();
+    if (autoplay)
+        $("#playBtn").click();
 }
 
 function onStarted(stream) {
@@ -107,6 +114,9 @@ function playStream(session) {
     if (resolution_for_wsplayer) {
         options.playWidth = resolution_for_wsplayer.playWidth;
         options.playHeight = resolution_for_wsplayer.playHeight;
+    } else if (resolution) {
+        options.playWidth = resolution.split("x")[0];
+        options.playHeight = resolution.split("x")[1];
     }
     stream = session.createStream(options).on(STREAM_STATUS.PLAYING, function(stream) {
         document.getElementById(stream.id()).addEventListener('resize', function(event){

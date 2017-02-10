@@ -3,6 +3,7 @@
     width: 322px;
     height: 242px;
     margin: 0 auto;
+    display: block;
 
 }
 .fp-remoteVideo>image {
