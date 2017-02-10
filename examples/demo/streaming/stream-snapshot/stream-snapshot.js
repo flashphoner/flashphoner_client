@@ -48,7 +48,7 @@ function onPublishing(stream) {
         stream.stop();
     }).prop('disabled', false);
 
-    $("#snapshotBtn").click(function(){
+    $("#snapshotBtn").off('click').click(function(){
         $(this).prop('disabled', true);
         snapshot(stream.name());
     }).prop('disabled', false);
