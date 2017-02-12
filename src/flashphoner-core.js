@@ -54,10 +54,10 @@ var init = function(options) {
             webRtcProvider.configure(webRtcConf);
         } else {
             webRtcProvider = require("./temasys-media-provider");
-            if (webRtcProvider) {
+            if (webRtcProvider && webRtcProvider.hasOwnProperty('available')) {
                 var adapterjs = require('adapterjs');
                 adapterjs.webRTCReady(function (isUsingPlugin) {
-                    if (isUsingPlugin || webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
+                    if (isUsingPlugin || webRtcProvider.available()) {
                         MediaProvider.WebRTC = webRtcProvider;
                         var webRtcConf = {
                             constraints: options.constraints || getDefaultMediaConstraints(),

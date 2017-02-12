@@ -8,12 +8,14 @@
     "promise-polyfill": "^6.0.1",
     "swfobject": "^2.2.1",
     "webrtc-adapter": "^2.0.2",
-    "adapterjs": "0.13.4"
+    "adapterjs": "0.13.4",
+    "es6-promise": "4.0.5"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "grunt": "^1.0.1",
     "grunt-browserify": "^5.0.0",
+    "grunt-contrib": "^0.11.0",
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-uglify": "^2.0.0",
