@@ -132,9 +132,11 @@ var createConnection = function (options) {
                         o.hasAudio = hasAudio;
                         o.hasVideo = hasVideo;
                         resolve(o);
-                    }, function(){});
-                }, function(qwe) {
-                    console.log(qwe);
+                    }, function(error) {
+                        console.log(error);
+                    });
+                }, function(error) {
+                    console.log(error);
                 }, constraints);
             });
         };
@@ -144,8 +146,12 @@ var createConnection = function (options) {
                 connection.createAnswer(function (answer) {
                     connection.setLocalDescription(answer, function () {
                         resolve(util.stripCodecs(answer.sdp, options.stripCodecs));
-                    }, function(){});
-                });
+                    }, function(error) {
+                        console.log(error);
+                    });
+                }, function(error) {
+                    console.log(error);
+                }, {});
             });
         };
         var changeAudioCodec = function (codec) {
