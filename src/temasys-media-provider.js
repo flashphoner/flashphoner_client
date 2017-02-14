@@ -10,6 +10,7 @@ var extensionId;
 var defaultConstraints;
 var logger;
 var LOG_PREFIX = "webrtc";
+var Promise = require('es6-promise').Promise;
 
 var createConnection = function (options) {
     return new Promise(function (resolve, reject) {
@@ -131,9 +132,11 @@ var createConnection = function (options) {
                         o.hasAudio = hasAudio;
                         o.hasVideo = hasVideo;
                         resolve(o);
-                    }, null);
-                }, function(qwe) {
-                    console.log(qwe);
+                    }, function(error) {
+                        console.log(error);
+                    });
+                }, function(error) {
+                    console.log(error);
                 }, constraints);
             });
         };
@@ -143,8 +146,12 @@ var createConnection = function (options) {
                 connection.createAnswer(function (answer) {
                     connection.setLocalDescription(answer, function () {
                         resolve(util.stripCodecs(answer.sdp, options.stripCodecs));
-                    }, null);
-                });
+                    }, function(error) {
+                        console.log(error);
+                    });
+                }, function(error) {
+                    console.log(error);
+                }, {});
             });
         };
         var changeAudioCodec = function (codec) {

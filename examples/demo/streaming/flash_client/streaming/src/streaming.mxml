@@ -300,6 +300,7 @@
 						break;
 					case "NetStream.Publish.BadName":
 						Logger.info("Bad streamName. Please publish stream with other name");
+						setPublishStatus("PUBLISH STREAM FAILED");
 						break;
 					case "NetStream.Unpublish.Success":
 						publishStream.removeEventListener(NetStatusEvent.NET_STATUS, handleStreamStatus);
