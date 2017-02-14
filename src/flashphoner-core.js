@@ -1431,9 +1431,10 @@ var createSession = function(options) {
         };
 
         /**
-         * Mix stream with source
-         * @param {string} source
-         * @throws {Error} Error if web audio api is not available
+         * Mix stream with source file
+         * @param {string} source File which must be mixed
+         * @returns {Promise}
+         * @throws {Error} Error if web audio api is not available or file already mixed
          * @memberof Stream
          * @inner
          */
@@ -1442,7 +1443,11 @@ var createSession = function(options) {
                 logger.warn(LOG_PREFIX, "This media provider doesn't support mixing");
                 return false;
             }
-            mediaConnection.startMix(source);
+            if (!source) {
+                logger.warn(LOG_PREFIX, "Filename must be provided");
+                return false;
+            }
+            return mediaConnection.startMix(source);
         }
         /**
          * Mix stream with source

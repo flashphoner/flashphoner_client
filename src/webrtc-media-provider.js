@@ -161,27 +161,29 @@ var createConnection = function(options) {
         };
 
         var startMix = function(source) {
-            if (!audioContext)
-                throw new Error("AudioContext not available");
-            if (mixedStream) {
-                logger.warn(LOG_PREFIX, "Stream already mixed");
-                return;
-            }
-            gainNode = audioContext.createGain();
-            gainNode.gain.value = 0.5;
-            var request = new XMLHttpRequest();
-            request.open('GET', source, true);
-            request.responseType = 'arraybuffer';
-            request.onload = function() {
-                audioContext.decodeAudioData(request.response, function(buffer) {
-                    mixedStream = audioContext.createBufferSource();
-                    mixedStream.buffer = buffer;
-                    mixedStream.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
-                    mixedStream.start(0);
-                })
-            };
-            request.send();
+            return new Promise(function(resolve, reject) {
+                if (!audioContext)
+                    reject(new Error("AudioContext not available"));
+                if (mixedStream)
+                    reject(new Error("Stream already mixed"));
+
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = 0.5;
+                var request = new XMLHttpRequest();
+                request.open('GET', source, true);
+                request.responseType = 'arraybuffer';
+                request.onload = function() {
+                    audioContext.decodeAudioData(request.response, function(buffer) {
+                        mixedStream = audioContext.createBufferSource();
+                        mixedStream.buffer = buffer;
+                        mixedStream.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        mixedStream.start(0);
+                        resolve();
+                    })
+                };
+                request.send();
+            });
         };
 
         var stopMix = function() {
