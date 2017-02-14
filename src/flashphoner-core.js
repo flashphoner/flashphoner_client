@@ -43,12 +43,18 @@ var init = function(options) {
         loggerConf = options.logger || loggerConf;
         // init logger
         logger.init(loggerConf.severity, loggerConf.push);
+        try {
+            var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch(e) {
+            console.warn("Failed to create audio context");
+        }
         var webRtcProvider = require("./webrtc-media-provider");
         if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
             MediaProvider.WebRTC = webRtcProvider;
             var webRtcConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
                 extensionId: options.screenSharingExtensionId,
+                audioContext: audioContext,
                 logger: logger
             };
             webRtcProvider.configure(webRtcConf);
@@ -97,6 +103,7 @@ var init = function(options) {
             var wsConf = {
                 receiverLocation: options.receiverLocation,
                 decoderLocation: options.decoderLocation,
+                audioContext: audioContext,
                 logger: logger
             };
             websocketProvider.configure(wsConf);
@@ -1424,6 +1431,28 @@ var createSession = function(options) {
         };
 
         /**
+         * Mix stream with source
+         * @param {string} source
+         * @throws {Error} Error if web audio api is not available
+         * @memberof Stream
+         * @inner
+         */
+        var startMix = function(source) {
+            if (getMediaProviders()[0] != "WebRTC") {
+                logger.warn(LOG_PREFIX, "This media provider doesn't support mixing");
+                return false;
+            }
+            mediaConnection.startMix(source);
+        }
+        /**
+         * Mix stream with source
+         * @param {string} source
+         */
+        var stopMix = function() {
+            mediaConnection.stopMix();
+        }
+
+        /**
          * Get stream status.
          *
          * @returns {string} One of {@link Flashphoner.constants.STREAM_STATUS}
@@ -1670,6 +1699,8 @@ var createSession = function(options) {
         stream.isVideoMuted = isVideoMuted;
         stream.getStats = getStats;
         stream.snapshot = snapshot;
+        stream.startMix = startMix;
+        stream.stopMix = stopMix;
         stream.on = on;
 
         streams[id_] = stream;
