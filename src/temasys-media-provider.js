@@ -182,13 +182,21 @@ var createConnection = function (options) {
         var getVolume = function () {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
                 //return remoteVideo.srcObject.getAudioTracks()[0].volume * 100;
-                return remoteVideo.volume * 100;
+                if (remoteVideo.tagName == "OBJECT" || remoteVideo.tagName == "object") {
+                    console.log("Volume change does not support for Temasys");
+                } else {
+                    return remoteVideo.volume * 100;
+                }
             }
             return -1;
         };
         var setVolume = function (volume) {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
-                remoteVideo.volume = volume / 100;
+                if (remoteVideo.tagName == "OBJECT" || remoteVideo.tagName == "object") {
+                    console.log("Volume change does not support for Temasys");
+                } else {
+                    remoteVideo.volume = volume / 100;
+                }
             }
         };
         var muteAudio = function () {

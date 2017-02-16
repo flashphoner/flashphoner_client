@@ -24,7 +24,7 @@ var initialized = false;
  * Static initializer.
  *
  * @param {Object} options Global api options
- * @param {Function=} options.webRTCPluginReadyCallback Callback of initialized WebRTC Plugin
+ * @param {Function=} options.mediaProvidersReadyCallback Callback of initialized WebRTC Plugin
  * @param {String=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
  * @param {string=} options.preferredMediaProvider Use preferred media provider if available
  * @param {String=} options.receiverLocation Location of WSReceiver.js file
@@ -43,6 +43,7 @@ var init = function(options) {
         loggerConf = options.logger || loggerConf;
         // init logger
         logger.init(loggerConf.severity, loggerConf.push);
+        var waitingTemasys = false;
         var webRtcProvider = require("./webrtc-media-provider");
         if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
             MediaProvider.WebRTC = webRtcProvider;
@@ -55,6 +56,7 @@ var init = function(options) {
         } else {
             webRtcProvider = require("./temasys-media-provider");
             if (webRtcProvider && webRtcProvider.hasOwnProperty('available')) {
+                waitingTemasys = true;
                 var adapterjs = require('adapterjs');
                 adapterjs.webRTCReady(function (isUsingPlugin) {
                     if (isUsingPlugin || webRtcProvider.available()) {
@@ -74,8 +76,8 @@ var init = function(options) {
                         }
                         MediaProvider = _MediaProvider;
                     }
-                    if (options.webRTCPluginReadyCallback) {
-                        options.webRTCPluginReadyCallback(isUsingPlugin);
+                    if (options.mediaProvidersReadyCallback) {
+                        options.mediaProvidersReadyCallback(Object.keys(MediaProvider));
                     }
                 });
             }
@@ -118,6 +120,9 @@ var init = function(options) {
             } else {
               logger.warn(LOG_PREFIX, "Preferred media provider is not available.");
             }
+        }
+        if (!waitingTemasys && options.mediaProvidersReadyCallback) {
+            options.mediaProvidersReadyCallback(Object.keys(MediaProvider));
         }
         logger.info(LOG_PREFIX, "Initialized");
         initialized = true;
