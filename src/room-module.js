@@ -316,6 +316,7 @@ var appSession = function(options) {
                 for (var k in stateStreams) {
                     if (stateStreams.hasOwnProperty(k)) {
                         participant.streams[k] = stateStreams[k];
+                        delete stateStreams[k];
                     }
                 }
             }

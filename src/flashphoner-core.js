@@ -44,12 +44,18 @@ var init = function(options) {
         // init logger
         logger.init(loggerConf.severity, loggerConf.push);
         var waitingTemasys = false;
+        try {
+            var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch(e) {
+            console.warn("Failed to create audio context");
+        }
         var webRtcProvider = require("./webrtc-media-provider");
         if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
             MediaProvider.WebRTC = webRtcProvider;
             var webRtcConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
                 extensionId: options.screenSharingExtensionId,
+                audioContext: audioContext,
                 logger: logger
             };
             webRtcProvider.configure(webRtcConf);
@@ -99,6 +105,7 @@ var init = function(options) {
             var wsConf = {
                 receiverLocation: options.receiverLocation,
                 decoderLocation: options.decoderLocation,
+                audioContext: audioContext,
                 logger: logger
             };
             websocketProvider.configure(wsConf);
@@ -377,7 +384,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.15",
+            clientVersion: "0.5.16",
             clientOSVersion: window.navigator.appVersion,
             clientBrowserVersion: window.navigator.userAgent,
             custom: options.custom,
@@ -1429,6 +1436,33 @@ var createSession = function(options) {
         };
 
         /**
+         * Mix stream with source file
+         * @param {string} source File which must be mixed
+         * @returns {Promise}
+         * @throws {Error} Error if web audio api is not available or file already mixed
+         * @memberof Stream
+         * @inner
+         */
+        var startMix = function(source) {
+            if (getMediaProviders()[0] != "WebRTC") {
+                logger.warn(LOG_PREFIX, "This media provider doesn't support mixing");
+                return false;
+            }
+            if (!source) {
+                logger.warn(LOG_PREFIX, "Filename must be provided");
+                return false;
+            }
+            return mediaConnection.startMix(source);
+        }
+        /**
+         * Mix stream with source
+         * @param {string} source
+         */
+        var stopMix = function() {
+            mediaConnection.stopMix();
+        }
+
+        /**
          * Get stream status.
          *
          * @returns {string} One of {@link Flashphoner.constants.STREAM_STATUS}
@@ -1675,6 +1709,8 @@ var createSession = function(options) {
         stream.isVideoMuted = isVideoMuted;
         stream.getStats = getStats;
         stream.snapshot = snapshot;
+        stream.startMix = startMix;
+        stream.stopMix = stopMix;
         stream.on = on;
 
         streams[id_] = stream;

@@ -18,14 +18,9 @@ var DEFAULT_SDP = "v=0\r\n" +
     "a=rtpmap:0 PCMU/8000\r\n" +
     "a=recvonly\r\n";
 
-var AudioContext = window.AudioContext || window.webkitAudioContext;
 var logger;
 var LOG_PREFIX = "websocket";
-try {
-    var audioContext = new AudioContext();
-} catch(e) {
-    console.warn("Failed to create audio context");
-}
+var audioContext;
 
 var createConnection = function(options, handlers) {
     return new Promise(function(resolve, reject) {
@@ -149,6 +144,7 @@ module.exports = {
     listDevices: listDevices,
     playFirstSound: playFirstSound,
     configure: function(configuration) {
+        audioContext = configuration.audioContext;
         receiverLocation = configuration.receiverLocation || receiverLocation;
         decoderLocation = configuration.decoderLocation || decoderLocation;
         logger = configuration.logger;

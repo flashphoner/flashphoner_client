@@ -9,6 +9,7 @@ var extensionId;
 var defaultConstraints;
 var logger;
 var LOG_PREFIX = "webrtc";
+var audioContext;
 
 var createConnection = function(options) {
     return new Promise(function(resolve, reject) {
@@ -28,6 +29,9 @@ var createConnection = function(options) {
         var bidirectional = options.bidirectional;
         var localVideo;
         var remoteVideo;
+        //mixer
+        var mixedStream;
+        var gainNode;
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
             remoteVideo = document.createElement('video');
@@ -63,6 +67,10 @@ var createConnection = function(options) {
             }
         };
         connection.onsignalingstatechange = function (event) {
+            if (connection.signalingState == "closed" && mixedStream) {
+                console.log("Close audio context");
+                stopMix();
+            }
         };
         connection.oniceconnectionstatechange = function (event) {
         };
@@ -150,6 +158,42 @@ var createConnection = function(options) {
                     reject(error);
                 });
             });
+        };
+
+        var startMix = function(source) {
+            return new Promise(function(resolve, reject) {
+                if (!audioContext)
+                    reject(new Error("AudioContext not available"));
+                if (mixedStream)
+                    reject(new Error("Stream already mixed"));
+
+                gainNode = audioContext.createGain();
+                gainNode.gain.value = 0.5;
+                var request = new XMLHttpRequest();
+                request.open('GET', source, true);
+                request.responseType = 'arraybuffer';
+                request.onload = function() {
+                    audioContext.decodeAudioData(request.response, function(buffer) {
+                        mixedStream = audioContext.createBufferSource();
+                        mixedStream.buffer = buffer;
+                        mixedStream.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        mixedStream.start(0);
+                        resolve();
+                    })
+                };
+                request.send();
+            });
+        };
+
+        var stopMix = function() {
+            if (mixedStream) {
+                mixedStream.stop(0);
+                gainNode.disconnect(0);
+                mixedStream.disconnect(0);
+                gainNode = null;
+                mixedStream = null;
+            }
         };
 
         var getVolume = function() {
@@ -273,6 +317,8 @@ var createConnection = function(options) {
         exports.unmuteVideo = unmuteVideo;
         exports.isVideoMuted = isVideoMuted;
         exports.getStats = getStats;
+        exports.startMix = startMix;
+        exports.stopMix = stopMix;
         connections[id] = exports;
         resolve(exports);
     });
@@ -506,6 +552,7 @@ module.exports = {
     configure: function(configuration) {
         extensionId = configuration.extensionId;
         defaultConstraints = configuration.constraints;
+        audioContext = configuration.audioContext;
         logger = configuration.logger;
         logger.info(LOG_PREFIX, "Initialized");
     }
