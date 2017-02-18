@@ -21,7 +21,14 @@ function loadCallControls(){
 function init_page(){
 	//init api
     try {
-        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
+        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf',
+            mediaProvidersReadyCallback: function(mediaProviders) {
+                //hide remote video if current media provider is Flash
+                if (mediaProviders[0] == "Flash") {
+                    $("#remoteVideoWrapper").hide();
+                    $("#localVideoWrapper").attr('class', 'fp-remoteVideo');
+                }
+            }});
     } catch(e) {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
@@ -30,12 +37,6 @@ function init_page(){
 	//local and remote displays
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
-
-    //hide remote video if current media provider is Flash
-    if (Flashphoner.getMediaProviders()[0] == "Flash") {
-        $("#remoteVideoWrapper").hide();
-		$("#localVideoWrapper").attr('class', 'fp-remoteVideo');
-    }
 
     // Set websocket URL
     $("#urlServer").val(setURL());

@@ -533,16 +533,19 @@ Phone.prototype.applyCalleeLetterCase = function (callee) {
 $(document).ready(function () {
 
     try {
-        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
+        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf',
+            mediaProvidersReadyCallback: function(mediaProviders) {
+                //hide remote video if current media provider is Flash
+                if (mediaProviders[0] == "Flash") {
+                    $("#remoteVideoWrapper").removeClass().hide();
+                    $("#localVideoWrapper").attr('class', 'b-video__video ui-widget-content');
+                }
+            }});
     } catch(e) {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
     }
-    //hide remote video if current media provider is Flash
-    if (Flashphoner.getMediaProviders()[0] == "Flash") {
-        $("#remoteVideoWrapper").removeClass().hide();
-        $("#localVideoWrapper").attr('class', 'b-video__video ui-widget-content');
-    }
+
     var phone = new Phone();
 
     phone.init();
