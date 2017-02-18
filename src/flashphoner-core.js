@@ -98,7 +98,7 @@ var init = function(options) {
             flashProvider.configure(flashConf);
         }
         var websocketProvider = require("./websocket-media-provider");
-        if (websocketProvider && websocketProvider.hasOwnProperty('available') && websocketProvider.available()) {
+        if (websocketProvider && websocketProvider.hasOwnProperty('available') && websocketProvider.available(audioContext)) {
             MediaProvider.WSPlayer = websocketProvider;
             var wsConf = {
                 receiverLocation: options.receiverLocation,

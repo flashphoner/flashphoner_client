@@ -132,7 +132,7 @@ var playFirstSound = function() {
  *
  * @returns {boolean} WSPlayer available
  */
-var available = function(){
+var available = function(audioContext){
     return (audioContext) ? true : false;
 };
 
