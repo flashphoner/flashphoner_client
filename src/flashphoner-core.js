@@ -490,6 +490,12 @@ var createSession = function(options) {
                     //todo hangup call
                 }
                 break;
+            case 'notifySessionDebugEvent':
+                logger.info(LOG_PREFIX, "Session debug status " + obj.status);
+                if (callbacks[SESSION_STATUS.DEBUG]) {
+                    callbacks[SESSION_STATUS.DEBUG](obj);
+                }
+                break;
             default:
                 //logger.info(LOG_PREFIX, "Unknown server message " + data.message);
         }
@@ -1436,33 +1442,6 @@ var createSession = function(options) {
         };
 
         /**
-         * Mix stream with source file
-         * @param {string} source File which must be mixed
-         * @returns {Promise}
-         * @throws {Error} Error if web audio api is not available or file already mixed
-         * @memberof Stream
-         * @inner
-         */
-        var startMix = function(source) {
-            if (getMediaProviders()[0] != "WebRTC") {
-                logger.warn(LOG_PREFIX, "This media provider doesn't support mixing");
-                return false;
-            }
-            if (!source) {
-                logger.warn(LOG_PREFIX, "Filename must be provided");
-                return false;
-            }
-            return mediaConnection.startMix(source);
-        }
-        /**
-         * Mix stream with source
-         * @param {string} source
-         */
-        var stopMix = function() {
-            mediaConnection.stopMix();
-        }
-
-        /**
          * Get stream status.
          *
          * @returns {string} One of {@link Flashphoner.constants.STREAM_STATUS}
@@ -1709,8 +1688,6 @@ var createSession = function(options) {
         stream.isVideoMuted = isVideoMuted;
         stream.getStats = getStats;
         stream.snapshot = snapshot;
-        stream.startMix = startMix;
-        stream.stopMix = stopMix;
         stream.on = on;
 
         streams[id_] = stream;
@@ -1796,6 +1773,30 @@ var createSession = function(options) {
     var submitBugReport = function(reportObject) {
         send("submitBugReport",reportObject);
     }
+
+    /**
+     * Start session debug
+     * @memberof Session
+     * @inner
+     */
+
+    var startDebug = function() {
+        logger.setPushLogs(true);
+        logger.setLevel("DEBUG");
+        send("sessionDebug", {command: "start"});
+    }
+
+    /**
+     * Stop session debug
+     * @memberof Session
+     * @inner
+     */
+
+    var stopDebug = function() {
+        logger.setLevel("INFO");
+        send("sessionDebug", {command: "stop"});
+    }
+
     /**
      * Session event callback.
      *
@@ -1877,6 +1878,8 @@ var createSession = function(options) {
     session.sendData = restAppCommunicator.sendData;
     session.disconnect = disconnect;
     session.submitBugReport = submitBugReport;
+    session.startDebug = startDebug;
+    session.stopDebug = stopDebug;
     session.on = on;
 
     //save interface to global map

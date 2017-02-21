@@ -219,6 +219,30 @@ module.exports = {
         setConnection: function(connection) {
             this.wsConnection = connection;
 
+        },
+        setPushLogs: function(pushLogs) {
+            this.enablePushLogs = pushLogs;
+        },
+        setLevel: function(level) {
+            switch (level.toUpperCase()) {
+                case "DEBUG":
+                    this.verbosity = 3;
+                    break;
+                case "INFO":
+                    this.verbosity = 2;
+                    break;
+                case "ERROR":
+                    this.verbosity = 0;
+                    break;
+                case "WARN":
+                    this.verbosity = 1;
+                    break;
+                case "TRACE":
+                    this.verbosity = 4;
+                    break;
+                default :
+                    this.verbosity = 2;
+            };
         }
     },
     stripCodecs: function(sdp, codecs) {

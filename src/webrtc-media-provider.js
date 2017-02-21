@@ -160,42 +160,6 @@ var createConnection = function(options) {
             });
         };
 
-        var startMix = function(source) {
-            return new Promise(function(resolve, reject) {
-                if (!audioContext)
-                    reject(new Error("AudioContext not available"));
-                if (mixedStream)
-                    reject(new Error("Stream already mixed"));
-
-                gainNode = audioContext.createGain();
-                gainNode.gain.value = 0.5;
-                var request = new XMLHttpRequest();
-                request.open('GET', source, true);
-                request.responseType = 'arraybuffer';
-                request.onload = function() {
-                    audioContext.decodeAudioData(request.response, function(buffer) {
-                        mixedStream = audioContext.createBufferSource();
-                        mixedStream.buffer = buffer;
-                        mixedStream.connect(gainNode);
-                        gainNode.connect(audioContext.destination);
-                        mixedStream.start(0);
-                        resolve();
-                    })
-                };
-                request.send();
-            });
-        };
-
-        var stopMix = function() {
-            if (mixedStream) {
-                mixedStream.stop(0);
-                gainNode.disconnect(0);
-                mixedStream.disconnect(0);
-                gainNode = null;
-                mixedStream = null;
-            }
-        };
-
         var getVolume = function() {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
                 //return remoteVideo.srcObject.getAudioTracks()[0].volume * 100;
@@ -317,8 +281,6 @@ var createConnection = function(options) {
         exports.unmuteVideo = unmuteVideo;
         exports.isVideoMuted = isVideoMuted;
         exports.getStats = getStats;
-        exports.startMix = startMix;
-        exports.stopMix = stopMix;
         connections[id] = exports;
         resolve(exports);
     });
