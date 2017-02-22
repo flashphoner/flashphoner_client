@@ -36,6 +36,13 @@ define(sessionStatus, 'DISCONNECTED', 'DISCONNECTED');
 define(sessionStatus, 'FAILED', 'FAILED');
 
 /**
+ * Fires wneh {@link Session} receives debug event
+ * @event DEBUG
+ * @memberof Flashphoner.constants.SESSION_STATUS
+ */
+define(sessionStatus, 'DEBUG', 'DEBUG');
+
+/**
  * Fires when {@link Session} receives custom REST App message.
  *
  * @event APP_DATA
