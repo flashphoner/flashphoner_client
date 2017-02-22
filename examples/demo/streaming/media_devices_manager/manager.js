@@ -10,15 +10,22 @@ var currentVolumeValue = 50;
 function init_page() {
     //init api
     try {
-        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
+        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf',
+            mediaProvidersReadyCallback: function(mediaProviders) {
+                //hide remote video if current media provider is Flash
+                if (mediaProviders[0] == "Flash") {
+                    $("#fecForm").hide();
+                    $("#stereoForm").hide();
+                    $("#sendAudioBitrateForm").hide();
+                }
+                if (Flashphoner.isUsingTemasys()){
+                    $("#audioInputForm").hide();
+                    $("#videoInputForm").hide();
+                }
+            }})
     } catch(e) {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
-    }
-    if (Flashphoner.getMediaProviders()[0] == "Flash") {
-        $("#fecForm").hide();
-        $("#stereoForm").hide();
-        $("#sendAudioBitrateForm").hide();
     }
     Flashphoner.getMediaDevices(null,true).then(function(list){
         list.audio.forEach(function(device) {

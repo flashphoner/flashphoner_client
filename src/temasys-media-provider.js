@@ -1,7 +1,6 @@
 'use strict';
 
 var webrtcAdapter = require('webrtc-adapter');
-var adapterjs = require('adapterjs');
 var uuid = require('node-uuid');
 var util = require('./util');
 var connections = {};
@@ -498,6 +497,7 @@ var listDevices = function (labels) {
 
 function normalizeConstraints(constraints) {
     if (constraints.video) {
+        delete constraints.video.deviceId;
         if (constraints.video.hasOwnProperty('frameRate') && typeof constraints.video.frameRate !== 'object') {
             // Set default FPS value
             var frameRate = (constraints.video.frameRate == 0) ? 30 : constraints.video.frameRate;
@@ -524,6 +524,7 @@ function normalizeConstraints(constraints) {
         }
     }
     if (constraints.audio) {
+        delete constraints.audio.deviceId;
         // The WebRTC AEC implementation doesn't work well on stereophonic sound and makes mono on output
         if (constraints.audio.stereo) {
             constraints.audio.echoCancellation = false;

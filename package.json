@@ -8,7 +8,7 @@
     "promise-polyfill": "^6.0.1",
     "swfobject": "^2.2.1",
     "webrtc-adapter": "^2.0.2",
-    "adapterjs": "0.13.4",
+    "adapterjs": "0.14.0",
     "es6-promise": "4.0.5"
   },
   "devDependencies": {
@@ -17,6 +17,7 @@
     "grunt-browserify": "^5.0.0",
     "grunt-contrib": "^0.11.0",
     "grunt-contrib-clean": "^1.0.0",
+    "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-flash-compiler": "^0.2.1",

@@ -50,7 +50,7 @@ module.exports = function(grunt) {
                 src: ['./src/flashphoner-core.js'],
                 dest: './flashphoner.js',
                 options: {
-                    ignore: ['./src/temasys-media-provider.js'],
+                    ignore: ['./src/temasys-media-provider.js', 'adapterjs'],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
@@ -60,7 +60,7 @@ module.exports = function(grunt) {
                 src: ['./src/flashphoner-core.js'],
                 dest: './flashphoner-no-webrtc.js',
                 options: {
-                    ignore: ['./src/temasys-media-provider.js', './src/webrtc-media-provider.js'],
+                    ignore: ['./src/temasys-media-provider.js', 'adapterjs', './src/webrtc-media-provider.js'],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
                 src: ['./src/flashphoner-core.js'],
                 dest: './flashphoner-no-flash.js',
                 options: {
-                    ignore: ['./src/temasys-media-provider.js', './src/flash-media-provider.js'],
+                    ignore: ['./src/temasys-media-provider.js', 'adapterjs', './src/flash-media-provider.js'],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
@@ -80,7 +80,7 @@ module.exports = function(grunt) {
                 src: ['./src/flashphoner-core.js'],
                 dest: './flashphoner-no-wsplayer.js',
                 options: {
-                    ignore: ['./src/temasys-media-provider.js', './src/websocket-media-provider.js'],
+                    ignore: ['./src/temasys-media-provider.js', 'adapterjs', './src/websocket-media-provider.js'],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
@@ -88,13 +88,20 @@ module.exports = function(grunt) {
             },
             flashphonerGlobalObjectTemasys: {
                 src: ['./src/flashphoner-core.js'],
-                dest: './flashphoner-temasys-flash-websocket.js',
+                dest: './flashphoner-temasys-flash-websocket-without-adapterjs.js',
                 options: {
-                    ignore: ['./src/webrtc-media-provider.js'],
+                    ignore: ['adapterjs','./src/webrtc-media-provider.js'],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
                 }
+            }
+        },
+        //used for resolve https://github.com/Temasys/AdapterJS/issues/238
+        concat: {
+            AdapterJS: {
+                src: ['./node_modules/adapterjs/publish/adapter.debug.js', './flashphoner-temasys-flash-websocket-without-adapterjs.js'],
+                dest: './flashphoner-temasys-flash-websocket.js'
             }
         },
         uglify: {
@@ -162,10 +169,13 @@ module.exports = function(grunt) {
                 'flashphoner-no-flash.js',
                 'flashphoner-no-webrtc.js',
                 'flashphoner-no-wsplayer.js',
+                'flashphoner-temasys-flash-websocket-without-adapterjs.js',
+                'flashphoner-temasys-flash-websocket.js',
                 'flashphoner.min.js',
                 'flashphoner-no-flash.min.js',
                 'flashphoner-no-webrtc.min.js',
                 'flashphoner-no-wsplayer.min.js',
+                'flashphoner-temasys-flash-websocket.min.js',
                 'media-provider.swf',
                 'doc/'
             ],
@@ -177,6 +187,7 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-flash-compiler');
     grunt.loadNpmTasks('grunt-browserify');
+    grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-jsdoc');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-string-replace');
@@ -187,6 +198,7 @@ module.exports = function(grunt) {
         'string-replace:version',
         'flash:release_media_provider',
         'browserify',
+        'concat',
         'uglify',
         'flash:release_examples_streaming',
         'flash:release_examples_chat',

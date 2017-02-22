@@ -8,6 +8,7 @@ var loggerConf = {push: false, severity: "INFO"};
 var Promise = require('promise-polyfill');
 var browser = require('webrtc-adapter').browserDetails;
 var LOG_PREFIX = "core";
+var isUsingTemasysPlugin = false;
 
 /**
  * @namespace Flashphoner
@@ -61,10 +62,10 @@ var init = function(options) {
             webRtcProvider.configure(webRtcConf);
         } else {
             webRtcProvider = require("./temasys-media-provider");
-            if (webRtcProvider && webRtcProvider.hasOwnProperty('available')) {
+            if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && AdapterJS) {
                 waitingTemasys = true;
-                var adapterjs = require('adapterjs');
-                adapterjs.webRTCReady(function (isUsingPlugin) {
+                AdapterJS.webRTCReady(function (isUsingPlugin) {
+                    isUsingTemasysPlugin = isUsingPlugin;
                     if (isUsingPlugin || webRtcProvider.available()) {
                         MediaProvider.WebRTC = webRtcProvider;
                         var webRtcConf = {
@@ -1884,8 +1885,13 @@ var createSession = function(options) {
     return session;
 };
 
+var isUsingTemasys = function(){
+    return isUsingTemasysPlugin;
+};
+
 module.exports = {
     init: init,
+    isUsingTemasys: isUsingTemasys,
     getMediaProviders: getMediaProviders,
     getMediaDevices: getMediaDevices,
     getMediaAccess: getMediaAccess,
