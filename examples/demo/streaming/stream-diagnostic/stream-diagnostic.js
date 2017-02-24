@@ -55,7 +55,6 @@ function start() {
         log("Create new session with url " + url);
         $('#url').prop('disabled', true);
         session = Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function(session){
-            session.startDebug();
             //session connected, start streaming
             startStreaming(session);
         }).on(SESSION_STATUS.DISCONNECTED, function(){
@@ -79,6 +78,7 @@ function start() {
 
 function startStreaming(session) {
     var streamName = field("url").split('/')[3];
+    session.startDebug();
     session.createStream({
         name: streamName,
         display: localVideo,
