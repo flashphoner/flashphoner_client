@@ -700,6 +700,7 @@ var createSession = function(options) {
                 logger.error(LOG_PREFIX, error);
                 status_ = CALL_STATUS.FAILED;
                 callRefreshHandlers[id_]({status: CALL_STATUS.FAILED});
+                hangup();
             });
         };
 

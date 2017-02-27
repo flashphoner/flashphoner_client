@@ -10,25 +10,27 @@ var currentVolumeValue = 50;
 function init_page() {
     //init api
     try {
-        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf',
-            mediaProvidersReadyCallback: function(mediaProviders) {
+        Flashphoner.init({
+            flashMediaProviderSwfLocation: '../../../../media-provider.swf',
+            mediaProvidersReadyCallback: function (mediaProviders) {
                 //hide remote video if current media provider is Flash
                 if (mediaProviders[0] == "Flash") {
                     $("#fecForm").hide();
                     $("#stereoForm").hide();
                     $("#sendAudioBitrateForm").hide();
                 }
-                if (Flashphoner.isUsingTemasys()){
+                if (Flashphoner.isUsingTemasys()) {
                     $("#audioInputForm").hide();
                     $("#videoInputForm").hide();
                 }
-            }})
-    } catch(e) {
+            }
+        })
+    } catch (e) {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
     }
-    Flashphoner.getMediaDevices(null,true).then(function(list){
-        list.audio.forEach(function(device) {
+    Flashphoner.getMediaDevices(null, true).then(function (list) {
+        list.audio.forEach(function (device) {
             var audio = document.getElementById("audioInput");
             var i;
             var deviceInList = false;
@@ -45,7 +47,7 @@ function init_page() {
                 audio.appendChild(option);
             }
         });
-        list.video.forEach(function(device) {
+        list.video.forEach(function (device) {
             console.log(device);
             var video = document.getElementById("videoInput");
             var i;
@@ -71,33 +73,33 @@ function init_page() {
 
         //set initial button callback
         onStopped();
-    }).catch(function(error) {
+    }).catch(function (error) {
         $("#notifyFlash").text("Failed to get media devices");
     });
-    $("#receiveDefaultSize").click(function(){
-        if($(this).is(':checked')) {
-            $("#receiveWidth").prop('disabled',true);
-            $("#receiveHeight").prop('disabled',true);
+    $("#receiveDefaultSize").click(function () {
+        if ($(this).is(':checked')) {
+            $("#receiveWidth").prop('disabled', true);
+            $("#receiveHeight").prop('disabled', true);
 
         } else {
-            $("#receiveWidth").prop('disabled',false);
-            $("#receiveHeight").prop('disabled',false);
+            $("#receiveWidth").prop('disabled', false);
+            $("#receiveHeight").prop('disabled', false);
         }
     });
-    $("#receiveDefaultBitrate").click(function(){
-        if($(this).is(':checked')) {
-            $("#receiveBitrate").prop('disabled',true);
+    $("#receiveDefaultBitrate").click(function () {
+        if ($(this).is(':checked')) {
+            $("#receiveBitrate").prop('disabled', true);
 
         } else {
-            $("#receiveBitrate").prop('disabled',false);
+            $("#receiveBitrate").prop('disabled', false);
         }
     });
-    $("#receiveDefaultQuality").click(function(){
-        if($(this).is(':checked')) {
-            $("#quality").prop('disabled',true);
+    $("#receiveDefaultQuality").click(function () {
+        if ($(this).is(':checked')) {
+            $("#quality").prop('disabled', true);
 
         } else {
-            $("#quality").prop('disabled',false);
+            $("#quality").prop('disabled', false);
         }
     });
     $("#volumeControl").slider({
@@ -107,7 +109,7 @@ function init_page() {
         value: currentVolumeValue,
         step: 10,
         animate: true,
-        slide: function(event, ui) {
+        slide: function (event, ui) {
             currentVolumeValue = ui.value;
             previewStream.setVolume(currentVolumeValue);
         }
@@ -115,7 +117,7 @@ function init_page() {
 }
 
 function onStarted(publishStream, previewStream) {
-    $("#publishBtn").text("Stop").off('click').click(function(){
+    $("#publishBtn").text("Stop").off('click').click(function () {
         $(this).prop('disabled', true);
         previewStream.stop();
     }).prop('disabled', false);
@@ -125,7 +127,7 @@ function onStarted(publishStream, previewStream) {
 }
 
 function onStopped() {
-    $("#publishBtn").text("Start").off('click').click(function(){
+    $("#publishBtn").text("Start").off('click').click(function () {
         if (validateForm()) {
             muteInputs();
             $(this).prop('disabled', true);
@@ -150,20 +152,22 @@ function start() {
             return;
         } else {
             //remove session DISCONNECTED and FAILED callbacks
-            session.on(SESSION_STATUS.DISCONNECTED, function(){});
-            session.on(SESSION_STATUS.FAILED, function(){});
+            session.on(SESSION_STATUS.DISCONNECTED, function () {
+            });
+            session.on(SESSION_STATUS.FAILED, function () {
+            });
             session.disconnect();
         }
     }
 
     console.log("Create new session with url " + url);
-    Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function(session){
+    Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function (session) {
         //session connected, start streaming
         startStreaming(session);
-    }).on(SESSION_STATUS.DISCONNECTED, function(){
+    }).on(SESSION_STATUS.DISCONNECTED, function () {
         setStatus(SESSION_STATUS.DISCONNECTED);
         onStopped();
-    }).on(SESSION_STATUS.FAILED, function(){
+    }).on(SESSION_STATUS.FAILED, function () {
         setStatus(SESSION_STATUS.FAILED);
         onStopped();
     });
@@ -197,78 +201,73 @@ function startStreaming(session) {
         if (parseInt($('#fps').val()) > 0)
             constraints.video.frameRate = parseInt($('#fps').val());
     }
-    Flashphoner.getMediaAccess(constraints, localVideo).then(function(element){
-        publishStream = session.createStream({
-            name: streamName,
-            display: localVideo,
-            cacheLocalResources: true,
-            constraints: constraints
-        }).on(STREAM_STATUS.PUBLISHING, function(publishStream){
-            var video = document.getElementById(publishStream.id());
-            //resize local if resolution is available
-            if (video.videoWidth > 0 && video.videoHeight > 0) {
-                resizeLocalVideo({target: video});
-            }
-            enableMuteToggles(true);
-            if ($("#muteVideoToggle").is(":checked")) {
-                muteVideo();
-            }
-            if ($("#muteAudioToggle").is(":checked")) {
-                muteAudio();
-            }
-            //remove resize listener in case this video was cached earlier
-            video.removeEventListener('resize', resizeLocalVideo);
-            video.addEventListener('resize', resizeLocalVideo);
-            setStatus(STREAM_STATUS.PUBLISHING);
+    publishStream = session.createStream({
+        name: streamName,
+        display: localVideo,
+        cacheLocalResources: true,
+        constraints: constraints
+    }).on(STREAM_STATUS.PUBLISHING, function (publishStream) {
+        var video = document.getElementById(publishStream.id());
+        //resize local if resolution is available
+        if (video.videoWidth > 0 && video.videoHeight > 0) {
+            resizeLocalVideo({target: video});
+        }
+        enableMuteToggles(true);
+        if ($("#muteVideoToggle").is(":checked")) {
+            muteVideo();
+        }
+        if ($("#muteAudioToggle").is(":checked")) {
+            muteAudio();
+        }
+        //remove resize listener in case this video was cached earlier
+        video.removeEventListener('resize', resizeLocalVideo);
+        video.addEventListener('resize', resizeLocalVideo);
+        setStatus(STREAM_STATUS.PUBLISHING);
 
-            //play preview
-            var constraints = {
-                audio: $("#playAudio").is(':checked'),
-                video: $("#playVideo").is(':checked')
+        //play preview
+        var constraints = {
+            audio: $("#playAudio").is(':checked'),
+            video: $("#playVideo").is(':checked')
+        };
+        if (constraints.video) {
+            constraints.video = {
+                width: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveWidth').val()) : 0,
+                height: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveHeight').val()) : 0,
+                bitrate: (!$("#receiveDefaultBitrate").is(":checked")) ? $("#receiveBitrate").val() : 0,
+                quality: (!$("#receiveDefaultQuality").is(":checked")) ? $('#quality').val() : 0
             };
-            if (constraints.video) {
-                constraints.video = {
-                    width: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveWidth').val()) : 0,
-                    height: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveHeight').val()) : 0,
-                    bitrate: (!$("#receiveDefaultBitrate").is(":checked")) ? $("#receiveBitrate").val() : 0,
-                    quality: (!$("#receiveDefaultQuality").is(":checked")) ? $('#quality').val() : 0
-                };
-            }
-            previewStream = session.createStream({
-                name: streamName,
-                display: remoteVideo,
-                constraints: constraints
-            }).on(STREAM_STATUS.PLAYING, function(previewStream){
-                document.getElementById(previewStream.id()).addEventListener('resize', function(event){
-                    $("#playResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);
-                    resizeVideo(event.target);
-                });
-                //enable stop button
-                onStarted(publishStream, previewStream);
-            }).on(STREAM_STATUS.STOPPED, function(){
-                publishStream.stop();
-            }).on(STREAM_STATUS.FAILED, function(){
-                //preview failed, stop publishStream
-                if (publishStream.status() == STREAM_STATUS.PUBLISHING) {
-                    setStatus(STREAM_STATUS.FAILED);
-                    publishStream.stop();
-                }
+        }
+        previewStream = session.createStream({
+            name: streamName,
+            display: remoteVideo,
+            constraints: constraints
+        }).on(STREAM_STATUS.PLAYING, function (previewStream) {
+            document.getElementById(previewStream.id()).addEventListener('resize', function (event) {
+                $("#playResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);
+                resizeVideo(event.target);
             });
-            previewStream.play();
-        }).on(STREAM_STATUS.UNPUBLISHED, function(){
-            setStatus(STREAM_STATUS.UNPUBLISHED);
-            //enable start button
-            onStopped();
-        }).on(STREAM_STATUS.FAILED, function(){
-            setStatus(STREAM_STATUS.FAILED);
-            //enable start button
-            onStopped();
+            //enable stop button
+            onStarted(publishStream, previewStream);
+        }).on(STREAM_STATUS.STOPPED, function () {
+            publishStream.stop();
+        }).on(STREAM_STATUS.FAILED, function () {
+            //preview failed, stop publishStream
+            if (publishStream.status() == STREAM_STATUS.PUBLISHING) {
+                setStatus(STREAM_STATUS.FAILED);
+                publishStream.stop();
+            }
         });
-        publishStream.publish();
-    }, function(error){
-        console.warn("Failed to get access to media " + error);
+        previewStream.play();
+    }).on(STREAM_STATUS.UNPUBLISHED, function () {
+        setStatus(STREAM_STATUS.UNPUBLISHED);
+        //enable start button
+        onStopped();
+    }).on(STREAM_STATUS.FAILED, function () {
+        setStatus(STREAM_STATUS.FAILED);
+        //enable start button
         onStopped();
     });
+    publishStream.publish();
 }
 
 //show connection or local stream status
@@ -276,28 +275,28 @@ function setStatus(status) {
     var statusField = $("#streamStatus");
     statusField.text(status).removeClass();
     if (status == "PUBLISHING") {
-        statusField.attr("class","text-success");
+        statusField.attr("class", "text-success");
     } else if (status == "DISCONNECTED" || status == "UNPUBLISHED") {
-        statusField.attr("class","text-muted");
+        statusField.attr("class", "text-muted");
     } else if (status == "FAILED") {
-        statusField.attr("class","text-danger");
+        statusField.attr("class", "text-danger");
     }
 }
 
 function muteInputs() {
-    $(":text, select, :checkbox").each(function() {
-        $(this).attr('disabled','disabled');
+    $(":text, select, :checkbox").each(function () {
+        $(this).attr('disabled', 'disabled');
     });
 }
 
 function unmuteInputs() {
-    $(":text, select, :checkbox").each(function() {
-        if (($(this).attr('id') == 'receiveWidth' || $(this).attr('id')== 'receiveHeight')) {
-            if(!$("#receiveDefaultSize").is(":checked")) $(this).removeAttr("disabled");
-        } else if ($(this).attr('id') == 'receiveBitrate'){
-            if(!$("#receiveDefaultBitrate").is(":checked")) $(this).removeAttr("disabled");
+    $(":text, select, :checkbox").each(function () {
+        if (($(this).attr('id') == 'receiveWidth' || $(this).attr('id') == 'receiveHeight')) {
+            if (!$("#receiveDefaultSize").is(":checked")) $(this).removeAttr("disabled");
+        } else if ($(this).attr('id') == 'receiveBitrate') {
+            if (!$("#receiveDefaultBitrate").is(":checked")) $(this).removeAttr("disabled");
         } else if ($(this).attr('id') == 'quality') {
-            if(!$("#receiveDefaultQuality").is(":checked")) $(this).removeAttr("disabled");
+            if (!$("#receiveDefaultQuality").is(":checked")) $(this).removeAttr("disabled");
         } else {
             $(this).removeAttr("disabled");
         }
@@ -331,7 +330,7 @@ function validateForm() {
         removeHighlight($("#playVideo"));
         removeHighlight($("#playAudio"));
     }
-    $('#form :text, select').each(function(){
+    $('#form :text, select').each(function () {
         if (!$(this).val()) {
             highlightInput($(this));
             valid = false;
@@ -350,31 +349,32 @@ function validateForm() {
     function highlightInput(input) {
         input.closest('.form-group').addClass("has-error");
     }
+
     function removeHighlight(input) {
         input.closest('.form-group').removeClass("has-error");
     }
 }
 
 function muteAudio() {
-	if (publishStream) {
-	    publishStream.muteAudio();
-	}
+    if (publishStream) {
+        publishStream.muteAudio();
+    }
 }
 
 function unmuteAudio() {
-	if (publishStream) {
+    if (publishStream) {
         publishStream.unmuteAudio();
-	}
+    }
 }
 
 function muteVideo() {
-	if (publishStream) {
+    if (publishStream) {
         publishStream.muteVideo();
-	}
+    }
 }
 
 function unmuteVideo() {
-	if (publishStream) {
+    if (publishStream) {
         publishStream.unmuteVideo();
     }
 }
@@ -382,15 +382,15 @@ function unmuteVideo() {
 function enableMuteToggles(enable) {
     var $muteAudioToggle = $("#muteAudioToggle");
     var $muteVideoToggle = $("#muteVideoToggle");
-	
-	if (enable) {
-		$muteAudioToggle.removeAttr("disabled");
-		$muteAudioToggle.trigger('change');
-		$muteVideoToggle.removeAttr("disabled");
-		$muteVideoToggle.trigger('change');
-	}
-	else {
-		$muteAudioToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
-		$muteVideoToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
+
+    if (enable) {
+        $muteAudioToggle.removeAttr("disabled");
+        $muteAudioToggle.trigger('change');
+        $muteVideoToggle.removeAttr("disabled");
+        $muteVideoToggle.trigger('change');
+    }
+    else {
+        $muteAudioToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
+        $muteVideoToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
     }
 }

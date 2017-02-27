@@ -50,7 +50,6 @@ Phone.prototype.connect = function () {
     }).on(SESSION_STATUS.FAILED, function(){
         me.connectionStatusListener(SESSION_STATUS.FAILED);
     }).on(SESSION_STATUS.INCOMING_CALL, function(call){
-        me.onCallListener(call);
         call.on(CALL_STATUS.RING, function(){
             me.callStatusListener(call);
         }).on(CALL_STATUS.ESTABLISHED, function(){
@@ -64,6 +63,7 @@ Phone.prototype.connect = function () {
             me.callStatusListener(call);
             me.incomingCall = false;
         });
+        me.onCallListener(call);
     });
 
         trace("Phone - connecting");
@@ -266,14 +266,14 @@ Phone.prototype.registrationStatusListener = function (status) {
 };
 
 Phone.prototype.onCallListener = function (call_) {
-    //this.incomingCall = true;
     var call = call_;
     trace("Phone - onCallListener " + call.id() + " call.status: " + call.status());
-    if (this.currentCall != null && !this.incomingCall) {
+    if (this.currentCall != null) {
         this.holdedCall = this.currentCall;
         this.currentCall = call;
         trace("Phone - It seems like a hold: holdedCall: " + this.holdedCall.id() + " currentCall: " + this.currentCall.id());
     } else {
+        this.incomingCall = true;
         this.currentCall = call;
         if (this.incomingCall == true) {
             this.flashphonerListener.onIncomingCall(call.id());
@@ -299,6 +299,8 @@ Phone.prototype.callStatusListener = function (call_) {
             $(".b-mike, .call__out__dial, .call__inc__dial, .voice_call__call, .voice_call__play, .voice_call__call__pause, .b-transfer, .b-video, .b-video__video, .b-nav__inc, .b-alert").removeClass("open"); // close set of blocks which are hidden by default
             $(".b-display__bottom__number>span, .voice_call__call__play, .voice_call__transfer, .b-nav").removeClass("close");	// open a set of blocks which might be hidden, but the blocks are visible by default
             $(".b-alert").text("").removeClass("video_alert");	// initial view of video alert
+            this.currentCall = null;
+
         } else if (status == CALL_STATUS.FINISH || status == CALL_STATUS.PENDING) {
             trace("Phone - ... Call is finished...");
             SoundControl.getInstance().stopSound("RING");

@@ -497,7 +497,9 @@ var listDevices = function (labels) {
 
 function normalizeConstraints(constraints) {
     if (constraints.video) {
-        delete constraints.video.deviceId;
+        if (Flashphoner.isUsingTemasys()) {
+            delete constraints.video.deviceId;
+        }
         if (constraints.video.hasOwnProperty('frameRate') && typeof constraints.video.frameRate !== 'object') {
             // Set default FPS value
             var frameRate = (constraints.video.frameRate == 0) ? 30 : constraints.video.frameRate;
@@ -524,7 +526,9 @@ function normalizeConstraints(constraints) {
         }
     }
     if (constraints.audio) {
-        delete constraints.audio.deviceId;
+        if (Flashphoner.isUsingTemasys()) {
+            delete constraints.audio.deviceId;
+        }
         // The WebRTC AEC implementation doesn't work well on stereophonic sound and makes mono on output
         if (constraints.audio.stereo) {
             constraints.audio.echoCancellation = false;
