@@ -61,7 +61,6 @@ function onUnpublished() {
         start();
     }).prop('disabled', false);
     $("#snapshotBtn").prop('disabled', true);
-    $('#url').prop('disabled', false);
 }
 
 function start() {
