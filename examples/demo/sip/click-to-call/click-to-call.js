@@ -38,8 +38,8 @@ function connect() {
 
 	    //create session
 	    console.log("Create new session with url " + url);
-	    Flashphoner.createSession(connectionOptions).on(SESSION_STATUS.REGISTERED, function(session){
-		    setStatus("Session", SESSION_STATUS.REGISTERED);
+	    Flashphoner.createSession(connectionOptions).on(SESSION_STATUS.ESTABLISHED, function(session){
+		    setStatus("Session", SESSION_STATUS.ESTABLISHED);
 			//session connected, place call
 		    call(session);
 	    }).on(SESSION_STATUS.DISCONNECTED, function(){
