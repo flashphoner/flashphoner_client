@@ -15,11 +15,11 @@ var createConnection = function(options) {
     return new Promise(function(resolve, reject) {
         var id = options.id;
         var connectionConfig = options.connectionConfig || {"iceServers": []};
-        var connection = new RTCPeerConnection(connectionConfig, {
-            "optional": [
-                {"DtlsSrtpKeyAgreement": true}
-            ]
-        });
+        var connectionConstraints = options.connectionConstraints || {};
+        if (!connectionConstraints.hasOwnProperty("optional")) {
+            connectionConstraints.optional = [{"DtlsSrtpKeyAgreement": true}];
+        }
+        var connection = new RTCPeerConnection(connectionConfig, connectionConstraints);
         //unidirectional display
         var display = options.display;
         //bidirectional local

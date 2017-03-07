@@ -18,6 +18,7 @@ function init_page() {
                     $("#fecForm").hide();
                     $("#stereoForm").hide();
                     $("#sendAudioBitrateForm").hide();
+                    $("#cpuOveruseDetectionForm").hide();
                 }
                 if (Flashphoner.isUsingTemasys()) {
                     $("#audioInputForm").hide();
@@ -201,11 +202,20 @@ function startStreaming(session) {
         if (parseInt($('#fps').val()) > 0)
             constraints.video.frameRate = parseInt($('#fps').val());
     }
+    var mediaConnectionConstraints;
+    if (!$("#cpuOveruseDetection").is(':checked')) {
+        mediaConnectionConstraints = {
+            "mandatory": {
+                googCpuOveruseDetection: false
+            }
+        }
+    }
     publishStream = session.createStream({
         name: streamName,
         display: localVideo,
         cacheLocalResources: true,
-        constraints: constraints
+        constraints: constraints,
+        mediaConnectionConstraints: mediaConnectionConstraints
     }).on(STREAM_STATUS.PUBLISHING, function (publishStream) {
         var video = document.getElementById(publishStream.id());
         //resize local if resolution is available

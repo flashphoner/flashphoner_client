@@ -385,7 +385,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.16",
+            clientVersion: "0.5.17",
             clientOSVersion: window.navigator.appVersion,
             clientBrowserVersion: window.navigator.userAgent,
             custom: options.custom,
@@ -1130,6 +1130,7 @@ var createSession = function(options) {
      * @param {Integer} [options.flashBufferTime=0] Specifies how long to buffer messages before starting to display the stream (Flash-only)
      * @param {Array<string>=} options.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
      * @param {string=} options.rtmpUrl Rtmp url stream should be forwarded to
+     * @param {Object=} options.mediaConnectionConstraints Stream specific constraints for underlying RTCPeerConnection
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
      * @throws {TypeError} Error if options.name is not specified
@@ -1160,6 +1161,7 @@ var createSession = function(options) {
         if (options.constraints && Object.keys(options.constraints).length != 0) {
             var constraints = options.constraints;
         }
+        var mediaConnectionConstraints = options.mediaConnectionConstraints;
         // Receive media
         var receiveAudio;
         var audioProperty = getConstraintsProperty(constraints, "audio", undefined);
@@ -1275,7 +1277,8 @@ var createSession = function(options) {
                 authToken: authToken,
                 mainUrl: urlServer,
                 flashBufferTime: options.flashBufferTime || 0,
-                connectionConfig: mediaOptions
+                connectionConfig: mediaOptions,
+                connectionConstraints: mediaConnectionConstraints
             },streamRefreshHandlers[id_]).then(function(newConnection) {
                 mediaConnection = newConnection;
                 return mediaConnection.createOffer({
@@ -1344,7 +1347,8 @@ var createSession = function(options) {
                     display: display,
                     authToken: authToken,
                     mainUrl: urlServer,
-                    connectionConfig: mediaOptions
+                    connectionConfig: mediaOptions,
+                    connectionConstraints: mediaConnectionConstraints
                 }).then(function(newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
