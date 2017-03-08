@@ -385,7 +385,7 @@ var createSession = function(options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.17",
+            clientVersion: "0.5.18",
             clientOSVersion: window.navigator.appVersion,
             clientBrowserVersion: window.navigator.userAgent,
             custom: options.custom,
@@ -1206,6 +1206,8 @@ var createSession = function(options) {
         var status_ = STREAM_STATUS.NEW;
         var rtmpUrl = options.rtmpUrl;
         var info_;
+        var remoteBitrate = -1;
+        var networkBandwidth = -1;
         //callbacks added using stream.on()
         var callbacks = {};
         /**
@@ -1229,6 +1231,10 @@ var createSession = function(options) {
                 resolution.height = streamInfo.playerVideoHeight;
             } else if (event == STREAM_STATUS.SNAPSHOT_COMPLETE) {
 
+            } else if (event == STREAM_STATUS.NOT_ENOUGH_BANDWIDTH) {
+                var info = streamInfo.info.split("/");
+                remoteBitrate = info[0];
+                networkBandwidth = info[1];
             } else {
                 status_ = event;
             }
@@ -1646,6 +1652,28 @@ var createSession = function(options) {
         };
 
         /**
+         * Get remote bitrate reported by server, works only for subscribe Stream
+         *
+         * @returns {number} Remote bitrate in bps or -1
+         * @memberof Stream
+         * @inner
+         */
+        var getRemoteBitrate = function() {
+            return remoteBitrate;
+        };
+
+        /**
+         * Get network bandwidth reported by server, works only for subscribe Stream
+         *
+         * @returns {number} Network bandwidth in bps or -1
+         * @memberof Stream
+         * @inner
+         */
+        var getNetworkBandwidth = function() {
+            return networkBandwidth;
+        };
+
+        /**
          * Stream event callback.
          *
          * @callback Stream~eventCallback
@@ -1694,6 +1722,8 @@ var createSession = function(options) {
         stream.isVideoMuted = isVideoMuted;
         stream.getStats = getStats;
         stream.snapshot = snapshot;
+        stream.getNetworkBandwidth = getNetworkBandwidth;
+        stream.getRemoteBitrate = getRemoteBitrate;
         stream.on = on;
 
         streams[id_] = stream;

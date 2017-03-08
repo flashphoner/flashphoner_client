@@ -132,6 +132,8 @@ function playStream(session) {
     }).on(STREAM_STATUS.FAILED, function() {
         setStatus(STREAM_STATUS.FAILED);
         onStopped();
+    }).on(STREAM_STATUS.NOT_ENOUGH_BANDWIDTH, function(stream){
+        console.log("Not enough bandwidth, consider using lower video resolution or bitrate. Bandwidth " + (Math.round(stream.getNetworkBandwidth() / 1000)) + " bitrate " + (Math.round(stream.getRemoteBitrate() / 1000)));
     });
     stream.play();
 }

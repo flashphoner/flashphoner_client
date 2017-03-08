@@ -154,6 +154,13 @@ define(streamStatus, 'RESIZE', 'RESIZE');
 define(streamStatus, 'SNAPSHOT_COMPLETE', 'SNAPSHOT_COMPLETE');
 
 /**
+ * Fires on subscribe {@link Stream} if bitrate is higher than available network bandwidth
+ * @event NOT_ENOUGH_BANDWIDTH
+ * @memberof Flashphoner.constants.NOT_ENOUGH_BANDWIDTH
+ */
+define(streamStatus, 'NOT_ENOUGH_BANDWIDTH', 'NOT_ENOUGH_BANDWIDTH');
+
+/**
  * @namespace Flashphoner.constants.CALL_STATUS
  * @see Call
  */
