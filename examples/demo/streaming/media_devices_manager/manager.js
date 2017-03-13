@@ -6,6 +6,13 @@ var constraints;
 var previewStream;
 var publishStream;
 var currentVolumeValue = 50;
+var intervalID;
+
+try {
+    var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+} catch(e) {
+    console.warn("Failed to create audio context");
+}
 
 function init_page() {
     //init api
@@ -125,6 +132,16 @@ function onStarted(publishStream, previewStream) {
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
     previewStream.setVolume(currentVolumeValue);
+    //intervalID = setInterval(function() {
+    //    previewStream.getStats(function(stat) {
+    //        if (stat.incomingStreams.audio && stat.incomingStreams.audio.audioOutputLevel > 100) {
+    //            $("#talking").css('background-color', 'green');
+    //        } else {
+    //            $("#talking").css('background-color', 'red');
+    //        }
+    //    });
+    //},250);
+
 }
 
 function onStopped() {
@@ -139,6 +156,7 @@ function onStopped() {
     $("#publishResolution").text("");
     $("#playResolution").text("");
     $("#volumeControl").slider("disable");
+    clearInterval(intervalID);
     //enableMuteToggles(false);
 }
 
@@ -258,6 +276,10 @@ function startStreaming(session) {
             });
             //enable stop button
             onStarted(publishStream, previewStream);
+            //wait for incoming stream
+            setTimeout(function(){
+                detectSpeech(previewStream);
+            },3000);
         }).on(STREAM_STATUS.STOPPED, function () {
             publishStream.stop();
         }).on(STREAM_STATUS.FAILED, function () {
@@ -402,5 +424,53 @@ function enableMuteToggles(enable) {
     else {
         $muteAudioToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $muteVideoToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
+    }
+}
+
+// This code is just show how to detect speech activity
+// Get player stream and connect it to script processor
+// All magic is done by handleAudio function
+
+function detectSpeech(stream, level, latency) {
+    var mediaStream = document.getElementById(stream.id()).srcObject;
+    var source = audioContext.createMediaStreamSource(mediaStream);
+    var processor = audioContext.createScriptProcessor(512);
+    processor.onaudioprocess = handleAudio;
+    processor.connect(audioContext.destination);
+    processor.clipping = false;
+    processor.lastClip = 0;
+    // threshold
+    processor.threshold = level || 0.10;
+    processor.latency = latency || 750;
+
+    processor.isSpeech =
+        function() {
+            if (!this.clipping) return false;
+            if ((this.lastClip + this.latency) < window.performance.now()) this.clipping = false;
+            return this.clipping;
+        };
+
+    source.connect(processor);
+
+    // Check speech every 500 ms
+    intervalID = setInterval(function() {
+        if (processor.isSpeech()) {
+            $("#talking").css('background-color', 'green');
+        } else {
+            $("#talking").css('background-color', 'red');
+        }
+    }, 500);
+}
+
+function handleAudio(event) {
+    var buf = event.inputBuffer.getChannelData(0);
+    var bufLength = buf.length;
+    var x;
+    for (var i=0; i<bufLength; i++) {
+        x = buf[i];
+        if (Math.abs(x)>=this.threshold) {
+            this.clipping = true;
+            this.lastClip = window.performance.now();
+        }
     }
 }

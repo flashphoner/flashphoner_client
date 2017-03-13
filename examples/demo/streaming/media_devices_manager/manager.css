@@ -38,3 +38,15 @@ video, object {
 .ui-slider-range-min {
     background: black;
 }
+
+.talking {
+    width: 30px;
+    height: 30px;
+    border-radius: 100%;
+    border-color: black;
+    border-style: solid;
+    border-width: 1px;
+    /*background-color: #008800;*/
+    /*padding-left: 0px;*/
+    margin-left: 5px;
+}
