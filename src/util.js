@@ -70,7 +70,7 @@ module.exports = {
             var gotResult = false;
             if (report.type && report.type == "googCandidatePair") {
                 //check if this is active pair
-                if (report.stat("googActiveConnection") == "true") {
+                if (report.googActiveConnection == "true") {
                     gotResult = true;
                 }
             }
@@ -80,16 +80,9 @@ module.exports = {
             }
 
             if (gotResult) {
-                //prepare object
-                result = {};
-                result.timestamp = report.timestamp;
-                result.id = report.id;
-                result.type = report.type;
-                if (report.names) {
-                    var names = report.names();
-                    for (var i = 0; i < names.length; ++i) {
-                        var attrName = names[i];
-                        result[attrName] = report.stat(attrName);
+                for (var k in report) {
+                    if (report.hasOwnProperty(k)) {
+                        result[k] = report[k];
                     }
                 }
             }

@@ -210,8 +210,17 @@ var createConnection = function(options) {
                     connection.getStats(null).then(function (rawStats) {
                         var results = rawStats;
                         var result = {type: "chrome", outgoingStreams: {}, incomingStreams: {}};
-                        for (var i = 0; i < results.length; ++i) {
-                            var resultPart = util.processRtcStatsReport(adapter.browserDetails.browser, results[i]);
+                        if (rawStats instanceof Map) {
+                            rawStats.forEach(function(v,k,m) {
+                                handleResult(v);
+                            });
+                        } else {
+                            for (var i = 0; i < results.length; ++i) {
+                                handleResult(results[i]);
+                            }
+                        }
+                        function handleResult(res) {
+                            var resultPart = util.processRtcStatsReport(adapter.browserDetails.browser, res);
                             if (resultPart != null) {
                                 if (resultPart.type == "googCandidatePair") {
                                     result.activeCandidate = resultPart;
