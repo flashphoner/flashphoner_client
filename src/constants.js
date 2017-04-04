@@ -28,6 +28,13 @@ define(sessionStatus, 'ESTABLISHED', 'ESTABLISHED');
 define(sessionStatus, 'DISCONNECTED', 'DISCONNECTED');
 
 /**
+ * Fires if {@link Session} call of rest method error.
+ * @event WARN
+ * @memberof Flashphoner.constants.SESSION_STATUS
+ */
+define(sessionStatus, 'WARN', 'WARN');
+
+/**
  * Fires if {@link Session} connection failed.
  * Some of the reasons can be network connection failed, REST App failed
  * @event FAILED
