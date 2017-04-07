@@ -312,6 +312,7 @@ var getSession = function(id) {
  *
  * @param {Object} options Session options
  * @param {string} options.urlServer Server address in form of [ws,wss]://host.domain:port
+ * @param {string=} options.flashProto Flash protocol [rtmp,rtmfp]
  * @param {string=} options.appKey REST App key
  * @param {Object=} options.custom User provided custom object that will be available in REST App code
  * @param {Object=} options.sipOptions Sip configuration
@@ -333,6 +334,7 @@ var createSession = function(options) {
     var id_ = uuid.v1();
     var sessionStatus = SESSION_STATUS.PENDING;
     var urlServer = options.urlServer;
+    var flashProto = options.flashProto || "rtmp";
     var appKey = options.appKey || "defaultApp";
     var mediaOptions = options.mediaOptions;
     //SIP config
@@ -669,6 +671,7 @@ var createSession = function(options) {
                     remoteDisplay: remoteDisplay,
                     authToken: authToken,
                     mainUrl: urlServer,
+                    flashProto: flashProto,
                     bidirectional: true,
                     login: login,
                     connectionConfig: mediaOptions
@@ -787,6 +790,7 @@ var createSession = function(options) {
                     remoteDisplay: remoteDisplay,
                     authToken: authToken,
                     mainUrl: urlServer,
+                    flashProto: flashProto,
                     bidirectional: true,
                     login: sipConfig.sipLogin,
                     connectionConfig: mediaOptions
@@ -1123,6 +1127,7 @@ var createSession = function(options) {
      * @param {Integer=} options.playWidth DEPRECATED: Set width to play stream with this value
      * @param {Integer=} options.playHeight DEPRECATED: Set height to play stream with this value
      * @param {string=} options.mediaProvider MediaProvider type to use with this stream
+     * @param {string=} options.flashProto Flash protocol [rtmp,rtmfp]
      * @param {Boolean} [options.record=false] Enable stream recording
      * @param {Boolean=} options.cacheLocalResources Display will contain local video after stream release
      * @param {HTMLElement} options.display Div element stream should be displayed in
@@ -1282,6 +1287,7 @@ var createSession = function(options) {
                 display: display,
                 authToken: authToken,
                 mainUrl: urlServer,
+                flashProto: flashProto,
                 flashBufferTime: options.flashBufferTime || 0,
                 connectionConfig: mediaOptions,
                 connectionConstraints: mediaConnectionConstraints
@@ -1353,6 +1359,7 @@ var createSession = function(options) {
                     display: display,
                     authToken: authToken,
                     mainUrl: urlServer,
+                    flashProto: flashProto,
                     connectionConfig: mediaOptions,
                     connectionConstraints: mediaConnectionConstraints
                 }).then(function(newConnection) {

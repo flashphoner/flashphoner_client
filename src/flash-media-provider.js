@@ -33,7 +33,7 @@ var createConnection = function(options) {
         var display = options.display || options.localDisplay;
         var flashBufferTime = options.flashBufferTime || 0;
 
-        var url = getConnectionUrl(options.mainUrl);
+        var url = getConnectionUrl(options.mainUrl, options.flashProto);
 
         //todo state from flash instance
         var state = function () {
@@ -439,10 +439,10 @@ function extractMediaState(sdp) {
 }
 
 //connection ip
-function getConnectionUrl(mainUrl) {
+function getConnectionUrl(mainUrl, proto) {
     var a = document.createElement('a');
     a.href = mainUrl;
-    return "rtmfp://"+ a.hostname+":1935/";
+    return proto +"://"+ a.hostname+":1935/";
 }
 
 /**

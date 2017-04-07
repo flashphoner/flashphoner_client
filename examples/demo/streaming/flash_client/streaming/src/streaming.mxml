@@ -35,7 +35,7 @@
 					try {
 						var href:String = ExternalInterface.call("window.location.href.toString");
 						var hostname:String = ExternalInterface.call("window.location.hostname.toString");
-						connectUrl.text = "rtmfp://" + hostname + ":1935";
+						connectUrl.text = "rtmp://" + hostname + ":1935";
 					} catch (error:Error) {
 						Logger.info(error.message);
 					}
@@ -245,7 +245,7 @@
 				subscribeStream.audioReliable=false;
 				subscribeStream.useHardwareDecoder=true;				
 				subscribeStream.addEventListener(NetStatusEvent.NET_STATUS, handleSubscribeStreamStatus);
-				subscribeStream.bufferTime=0;
+				subscribeStream.bufferTime=5.0;
 				var soundTransform:SoundTransform = new SoundTransform();	
 				soundTransform.volume=0.7;
 				subscribeStream.soundTransform = soundTransform;	

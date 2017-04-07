@@ -49,7 +49,7 @@
 					try {
 						var href:String = ExternalInterface.call("window.location.href.toString");
 						var hostname:String = ExternalInterface.call("window.location.hostname.toString");
-						connectUrl.text = "rtmfp://" + hostname + ":1935";
+						connectUrl.text = "rtmp://" + hostname + ":1935";
 						if (href.indexOf("roomName") != -1) {
 							var val:String = href.substr(href.indexOf("roomName") + 9);
 							this.roomName = val;
