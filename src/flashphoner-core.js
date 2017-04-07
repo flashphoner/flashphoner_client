@@ -458,6 +458,9 @@ var createSession = function(options) {
                         streamRefreshHandlers[obj.id](obj);
                     }
                 }
+                if (callbacks[SESSION_STATUS.WARN]) {
+                    callbacks[SESSION_STATUS.WARN](obj);
+                }
                 break;
             case 'registered':
                 onSessionStatusChange(SESSION_STATUS.REGISTERED);
