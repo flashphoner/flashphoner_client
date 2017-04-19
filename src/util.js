@@ -62,7 +62,7 @@ module.exports = {
         return browser;
     },
     processRtcStatsReport: function(browser, report) {
-        var result = null;
+        var result = {};
         if (browser == "chrome") {
             /**
              * Report types: googComponent, googCandidatePair, googCertificate, googLibjingleSession, googTrack, ssrc
