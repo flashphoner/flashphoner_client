@@ -1454,7 +1454,7 @@ var createSession = function(options) {
          */
         var snapshot = function() {
             logger.debug(LOG_PREFIX, "Request snapshot, stream " + name_);
-            if (status_ !== STREAM_STATUS.NEW) {
+            if (status_ !== STREAM_STATUS.NEW && status_ !== STREAM_STATUS.PLAYING) {
                 throw new Error("Invalid stream state");
             }
             send("snapshot", {
