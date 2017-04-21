@@ -322,14 +322,21 @@ var getMediaAccess = function(constraints, display) {
                     delete constraints.video.height;
                     delete constraints.video.width;
                 }
-                getAccess(constraints);
+                getAccess(constraints, true);
             }, reject);
         } else {
             getAccess(constraints);
         }
 
-        function getAccess(constraints) {
+        function getAccess(constraints, screenShare) {
             logger.info(LOG_PREFIX, constraints);
+            var requestMicStream = false;
+            if (screenShare) {
+                if (constraints.audio && adapter.browserDetails.browser == "chrome") {
+                    requestMicStream = true;
+                    delete constraints.audio;
+                }
+            }
             navigator.getUserMedia(constraints, function(stream){
                 var video = document.createElement('video');
                 display.appendChild(video);
@@ -341,7 +348,17 @@ var getMediaAccess = function(constraints, display) {
                 video.onloadedmetadata = function(e) {
                     video.play();
                 };
-                resolve(display);
+                // This hack for chrome only, firefox supports screen-sharing + audio natively
+                if (requestMicStream && adapter.browserDetails.browser == "chrome") {
+                    logger.info(LOG_PREFIX, "Request for audio stream");
+                    navigator.getUserMedia({audio: true}, function(stream) {
+                        logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
+                        video.srcObject.addTrack(stream.getAudioTracks()[0]);
+                        resolve(display);
+                    });
+                } else {
+                    resolve(display);
+                }
             }, reject);
         }
     });
