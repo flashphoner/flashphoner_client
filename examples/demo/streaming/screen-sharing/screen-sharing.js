@@ -109,7 +109,7 @@ function startStreaming(session) {
             frameRate: parseInt($('#fps').val()),
             type: "screen"
         },
-        audio: $("#mic").prop('checked')
+        audio: $("#useMic").prop('checked')
     };
     session.createStream({
         name: streamName,
