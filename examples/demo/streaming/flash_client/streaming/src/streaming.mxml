@@ -245,7 +245,7 @@
 				subscribeStream.audioReliable=false;
 				subscribeStream.useHardwareDecoder=true;				
 				subscribeStream.addEventListener(NetStatusEvent.NET_STATUS, handleSubscribeStreamStatus);
-				subscribeStream.bufferTime=5.0;
+				subscribeStream.bufferTime=0.0;
 				var soundTransform:SoundTransform = new SoundTransform();	
 				soundTransform.volume=0.7;
 				subscribeStream.soundTransform = soundTransform;	
