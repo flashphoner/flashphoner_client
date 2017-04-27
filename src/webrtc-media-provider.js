@@ -440,14 +440,13 @@ var listDevices = function(labels) {
         if (labels) {
             var display = document.createElement("div");
             getMediaAccess({audio: true, video: {}}, display).then(function(){
-                releaseMedia(display);
-                populateList();
+                populateList(display);
             }, reject);
         } else {
             populateList();
         }
 
-        function populateList() {
+        function populateList(display) {
             navigator.mediaDevices.enumerateDevices().then(function (devices) {
                 for (var i = 0; i < devices.length; i++) {
                     var device = devices[i];
@@ -462,8 +461,11 @@ var listDevices = function(labels) {
                         ret.type = "camera";
                         list.video.push(ret);
                     } else {
-                       logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
+                        logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
                     }
+                }
+                if (display) {
+                    releaseMedia(display);
                 }
                 resolve(list);
             }, reject);
