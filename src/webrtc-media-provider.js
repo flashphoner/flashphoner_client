@@ -11,8 +11,8 @@ var logger;
 var LOG_PREFIX = "webrtc";
 var audioContext;
 
-var createConnection = function(options) {
-    return new Promise(function(resolve, reject) {
+var createConnection = function (options) {
+    return new Promise(function (resolve, reject) {
         var id = options.id;
         var connectionConfig = options.connectionConfig || {"iceServers": []};
         var connectionConstraints = options.connectionConstraints || {};
@@ -25,7 +25,7 @@ var createConnection = function(options) {
         //bidirectional local
         var localDisplay = options.localDisplay;
         //bidirectional remote
-        var remoteDisplay= options.remoteDisplay;
+        var remoteDisplay = options.remoteDisplay;
         var bidirectional = options.bidirectional;
         var localVideo;
         var remoteVideo;
@@ -54,7 +54,7 @@ var createConnection = function(options) {
         connection.ontrack = function (event) {
             if (remoteVideo) {
                 remoteVideo.srcObject = event.streams[0];
-                remoteVideo.onloadedmetadata = function(e) {
+                remoteVideo.onloadedmetadata = function (e) {
                     if (remoteVideo) {
                         remoteVideo.play();
                     }
@@ -135,12 +135,12 @@ var createConnection = function(options) {
                 });
             });
         };
-        var changeAudioCodec = function(codec) {
+        var changeAudioCodec = function (codec) {
             return false;
         };
         var setRemoteSdp = function (sdp) {
-            logger.debug(LOG_PREFIX,"setRemoteSDP:");
-            logger.debug(LOG_PREFIX,sdp);
+            logger.debug(LOG_PREFIX, "setRemoteSDP:");
+            logger.debug(LOG_PREFIX, sdp);
             return new Promise(function (resolve, reject) {
                 var sdpType;
                 if (connection.signalingState == 'have-local-offer') {
@@ -153,65 +153,90 @@ var createConnection = function(options) {
                     sdp: sdp
                 });
                 connection.setRemoteDescription(rtcSdp).then(function () {
+                    var sdpArray = sdp.split("\n");
+                    var video = false;
+                    for (var i = 0; i < sdpArray.length; i++) {
+                        if (sdpArray[i].indexOf("m=video") == 0) {
+                            video = true;
+                        }
+                        if (sdpArray[i].indexOf("a=candidate") == 0) {
+                            if (video) {
+                                var candidate = new RTCIceCandidate({
+                                    candidate: sdpArray[i],
+                                    sdpMid: "video",
+                                    sdpMLineIndex: 1
+                                });
+                                connection.addIceCandidate(candidate);
+                            } else {
+                                var candidate = new RTCIceCandidate({
+                                    candidate: sdpArray[i],
+                                    sdpMid: "audio",
+                                    sdpMLineIndex: 0
+                                });
+                                connection.addIceCandidate(candidate);
+                            }
+                        }
+                    }
                     resolve();
+                    connection.addIceCandidate(null);
                 }).catch(function (error) {
                     reject(error);
                 });
             });
         };
 
-        var getVolume = function() {
+        var getVolume = function () {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
                 //return remoteVideo.srcObject.getAudioTracks()[0].volume * 100;
                 return remoteVideo.volume * 100;
             }
             return -1;
         };
-        var setVolume = function(volume) {
+        var setVolume = function (volume) {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
-                remoteVideo.volume = volume/100;
+                remoteVideo.volume = volume / 100;
             }
         };
-        var muteAudio = function() {
+        var muteAudio = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
                 localVideo.srcObject.getAudioTracks()[0].enabled = false;
             }
         };
-        var unmuteAudio = function() {
+        var unmuteAudio = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
                 localVideo.srcObject.getAudioTracks()[0].enabled = true;
             }
         };
-        var isAudioMuted = function() {
+        var isAudioMuted = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
                 return !localVideo.srcObject.getAudioTracks()[0].enabled;
             }
             return true;
         };
-        var muteVideo = function() {
+        var muteVideo = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getVideoTracks().length > 0) {
                 localVideo.srcObject.getVideoTracks()[0].enabled = false;
             }
         };
-        var unmuteVideo = function() {
+        var unmuteVideo = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getVideoTracks().length > 0) {
                 localVideo.srcObject.getVideoTracks()[0].enabled = true;
             }
         };
-        var isVideoMuted = function() {
+        var isVideoMuted = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getVideoTracks().length > 0) {
                 return !localVideo.srcObject.getVideoTracks()[0].enabled;
             }
             return true;
         };
-        var getStats = function(callbackFn) {
+        var getStats = function (callbackFn) {
             if (connection) {
                 if (adapter.browserDetails.browser == "chrome") {
                     connection.getStats(null).then(function (rawStats) {
                         var results = rawStats;
                         var result = {type: "chrome", outgoingStreams: {}, incomingStreams: {}};
                         if (rawStats instanceof Map) {
-                            rawStats.forEach(function(v,k,m) {
+                            rawStats.forEach(function (v, k, m) {
                                 handleResult(v);
                             });
                         } else {
@@ -243,8 +268,11 @@ var createConnection = function(options) {
                                 }
                             }
                         }
+
                         callbackFn(result);
-                    }).catch(function(error) {callbackFn(error)});
+                    }).catch(function (error) {
+                        callbackFn(error)
+                    });
                 } else if (adapter.browserDetails.browser == "firefox") {
                     connection.getStats(null).then(function (rawStats) {
                         var result = {type: "firefox", outgoingStreams: {}, incomingStreams: {}};
@@ -269,7 +297,9 @@ var createConnection = function(options) {
                             }
                         }
                         callbackFn(result);
-                    }).catch(function(error) {callbackFn(error)});
+                    }).catch(function (error) {
+                        callbackFn(error)
+                    });
                 }
             }
         };
@@ -295,8 +325,8 @@ var createConnection = function(options) {
     });
 };
 
-var getMediaAccess = function(constraints, display) {
-    return new Promise(function(resolve, reject) {
+var getMediaAccess = function (constraints, display) {
+    return new Promise(function (resolve, reject) {
         if (!constraints) {
             constraints = defaultConstraints;
             if (getCacheInstance(display)) {
@@ -310,14 +340,14 @@ var getMediaAccess = function(constraints, display) {
         //check if this is screen sharing
         if (constraints.video && constraints.video.type && constraints.video.type == "screen") {
             delete constraints.video.type;
-            getScreenDeviceId(constraints).then(function(screenSharingConstraints){
+            getScreenDeviceId(constraints).then(function (screenSharingConstraints) {
                 //copy constraints
                 for (var prop in screenSharingConstraints) {
                     if (screenSharingConstraints.hasOwnProperty(prop)) {
                         constraints.video[prop] = screenSharingConstraints[prop];
                     }
                 }
-                if (adapter.browserDetails.browser == "chrome" ) {
+                if (adapter.browserDetails.browser == "chrome") {
                     delete constraints.video.frameRate;
                     delete constraints.video.height;
                     delete constraints.video.width;
@@ -337,7 +367,7 @@ var getMediaAccess = function(constraints, display) {
                     delete constraints.audio;
                 }
             }
-            navigator.getUserMedia(constraints, function(stream){
+            navigator.getUserMedia(constraints, function (stream) {
                 var video = document.createElement('video');
                 display.appendChild(video);
                 video.id = uuid.v1() + CACHED_INSTANCE_POSTFIX;
@@ -345,13 +375,13 @@ var getMediaAccess = function(constraints, display) {
                 video.srcObject = stream;
                 //mute audio
                 video.muted = true;
-                video.onloadedmetadata = function(e) {
+                video.onloadedmetadata = function (e) {
                     video.play();
                 };
                 // This hack for chrome only, firefox supports screen-sharing + audio natively
                 if (requestMicStream && adapter.browserDetails.browser == "chrome") {
                     logger.info(LOG_PREFIX, "Request for audio stream");
-                    navigator.getUserMedia({audio: true}, function(stream) {
+                    navigator.getUserMedia({audio: true}, function (stream) {
                         logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
                         video.srcObject.addTrack(stream.getAudioTracks()[0]);
                         resolve(display);
@@ -364,8 +394,8 @@ var getMediaAccess = function(constraints, display) {
     });
 };
 
-var getScreenDeviceId = function(constraints) {
-    return new Promise(function(resolve, reject){
+var getScreenDeviceId = function (constraints) {
+    return new Promise(function (resolve, reject) {
         var o = {};
         if (window.chrome) {
             chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
@@ -406,7 +436,7 @@ var getScreenDeviceId = function(constraints) {
     });
 };
 
-var releaseMedia = function(display) {
+var releaseMedia = function (display) {
     var video = getCacheInstance(display);
     if (video) {
         removeVideoElement(video);
@@ -444,19 +474,19 @@ function removeVideoElement(video) {
  *
  * @returns {boolean} webrtc available
  */
-var available = function(){
-    return (adapter.browserDetails.browser != "edge") ? navigator.getUserMedia && RTCPeerConnection : false;
+var available = function () {
+    return navigator.getUserMedia && RTCPeerConnection;
 };
 
-var listDevices = function(labels) {
-    return new Promise(function(resolve, reject) {
+var listDevices = function (labels) {
+    return new Promise(function (resolve, reject) {
         var list = {
             audio: [],
             video: []
         };
         if (labels) {
             var display = document.createElement("div");
-            getMediaAccess({audio: true, video: {}}, display).then(function(){
+            getMediaAccess({audio: true, video: {}}, display).then(function () {
                 populateList(display);
             }, reject);
         } else {
@@ -539,7 +569,7 @@ module.exports = {
     listDevices: listDevices,
     playFirstSound: playFirstSound,
     available: available,
-    configure: function(configuration) {
+    configure: function (configuration) {
         extensionId = configuration.extensionId;
         defaultConstraints = configuration.constraints;
         audioContext = configuration.audioContext;
