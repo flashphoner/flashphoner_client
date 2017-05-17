@@ -122,7 +122,15 @@ function playStream(session) {
     }
     stream = session.createStream(options).on(STREAM_STATUS.PLAYING, function(stream) {
         document.getElementById(stream.id()).addEventListener('resize', function(event){
-            resizeVideo(event.target);
+            var streamResolution = stream.videoResolution();
+            if (Object.keys(streamResolution).length === 0) {
+                resizeVideo(event.target);
+            } else {
+                // Change aspect ratio to prevent video stretching
+                var ratio = streamResolution.width / streamResolution.height;
+                var newHeight = Math.floor(options.playWidth / ratio);
+                resizeVideo(event.target, options.playWidth, newHeight);
+            }
         });
         setStatus(stream.status());
         onStarted(stream);

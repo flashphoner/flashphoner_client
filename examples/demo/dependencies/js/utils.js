@@ -157,7 +157,7 @@ function createUUID(length) {
  * Div structure: div WxH -> div wrapper (display) -> video
  * @param video HTML element from resize event target
  */
-function resizeVideo(video){
+function resizeVideo(video, width, height){
     if (!video.parentNode) {
         return;
     }
@@ -170,7 +170,12 @@ function resizeVideo(video){
         w: display.parentNode.clientWidth,
         h: display.parentNode.clientHeight
     };
-    var newSize = downScaleToFitSize(video.videoWidth, video.videoHeight, parentSize.w, parentSize.h);
+    var newSize;
+    if (width && height) {
+        newSize = downScaleToFitSize(width, height, parentSize.w, parentSize.h);
+    } else {
+        newSize = downScaleToFitSize(video.videoWidth, video.videoHeight, parentSize.w, parentSize.h);
+    }
     display.style.width = newSize.w + "px";
     display.style.height = newSize.h + "px";
 
