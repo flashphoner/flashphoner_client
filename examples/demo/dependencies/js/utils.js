@@ -48,11 +48,19 @@ function getUrlParam(name) {
 }
 
 function getHLSUrl() {
-    var proto = "http://";
-    var url;
-    var port = 8082;
 
-    url = proto + window.location.hostname + ":" + port;
+    var proto;
+    var port;
+
+    if (window.location.protocol == "http:") {
+        proto = "http://";
+        port = "8082";
+    } else {
+        proto = "https://";
+        port = "8445";
+    }
+
+    var url = proto + window.location.hostname + ":" + port;
     return url;
 }
 
