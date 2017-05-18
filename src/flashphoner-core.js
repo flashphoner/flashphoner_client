@@ -1322,7 +1322,8 @@ var createSession = function(options) {
                     sdp: offer.sdp,
                     custom: options.custom,
                     bitrate: bitrate,
-                    quality: quality
+                    quality: quality,
+                    constraints: constraints
                 });
                 if (offer.player) {
                     offer.player.play(id_);
@@ -1390,7 +1391,8 @@ var createSession = function(options) {
                         sdp: offer.sdp,
                         custom: options.custom,
                         bitrate: bitrate,
-                        rtmpUrl: rtmpUrl
+                        rtmpUrl: rtmpUrl,
+                        constraints: constraints
                     });
                 });
             }).catch(function(error){
