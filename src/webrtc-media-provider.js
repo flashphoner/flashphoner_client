@@ -153,32 +153,32 @@ var createConnection = function (options) {
                     sdp: sdp
                 });
                 connection.setRemoteDescription(rtcSdp).then(function () {
-                    var sdpArray = sdp.split("\n");
-                    var video = false;
-                    for (var i = 0; i < sdpArray.length; i++) {
-                        if (sdpArray[i].indexOf("m=video") == 0) {
-                            video = true;
-                        }
-                        if (sdpArray[i].indexOf("a=candidate") == 0) {
-                            if (video) {
-                                var candidate = new RTCIceCandidate({
-                                    candidate: sdpArray[i],
-                                    sdpMid: "video",
-                                    sdpMLineIndex: 1
-                                });
-                                connection.addIceCandidate(candidate);
-                            } else {
-                                var candidate = new RTCIceCandidate({
-                                    candidate: sdpArray[i],
-                                    sdpMid: "audio",
-                                    sdpMLineIndex: 0
-                                });
-                                connection.addIceCandidate(candidate);
-                            }
-                        }
-                    }
+                    //use in edge for ice
+                    //var sdpArray = sdp.split("\n");
+                    //var video = false;
+                    //for (var i = 0; i < sdpArray.length; i++) {
+                    //    if (sdpArray[i].indexOf("m=video") == 0) {
+                    //        video = true;
+                    //    }
+                    //    if (sdpArray[i].indexOf("a=candidate") == 0) {
+                    //        if (video) {
+                    //            var candidate = new RTCIceCandidate({
+                    //                candidate: sdpArray[i],
+                    //                sdpMid: "video",
+                    //                sdpMLineIndex: 1
+                    //            });
+                    //            connection.addIceCandidate(candidate);
+                    //        } else {
+                    //            var candidate = new RTCIceCandidate({
+                    //                candidate: sdpArray[i],
+                    //                sdpMid: "audio",
+                    //                sdpMLineIndex: 0
+                    //            });
+                    //            connection.addIceCandidate(candidate);
+                    //        }
+                    //    }
+                    //}
                     resolve();
-                    connection.addIceCandidate(null);
                 }).catch(function (error) {
                     reject(error);
                 });
@@ -475,7 +475,8 @@ function removeVideoElement(video) {
  * @returns {boolean} webrtc available
  */
 var available = function () {
-    return navigator.getUserMedia && RTCPeerConnection;
+    return (adapter.browserDetails.browser != "edge") ? navigator.getUserMedia && RTCPeerConnection : false;
+    //return navigator.getUserMedia && RTCPeerConnection;
 };
 
 var listDevices = function (labels) {
