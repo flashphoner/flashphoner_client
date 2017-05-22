@@ -60,7 +60,17 @@ var createConnection = function(options, handlers) {
             }
             return -1;
         };
-
+        var fullScreen = function() {
+            if (canvas) {
+                if (canvas.requestFullscreen) {
+                    canvas.requestFullscreen();
+                } else if (canvas.mozRequestFullScreen) {
+                    canvas.mozRequestFullScreen();
+                } else if (canvas.webkitRequestFullscreen) {
+                    canvas.webkitRequestFullscreen();
+                }
+            }
+        }
 
         try {
 
@@ -92,6 +102,7 @@ var createConnection = function(options, handlers) {
         exports.close = close;
         exports.setVolume = setVolume;
         exports.getVolume = getVolume;
+        exports.fullScreen = fullScreen;
         connections[id] = exports;
         resolve(connections[id]);
     });

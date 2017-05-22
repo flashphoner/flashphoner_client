@@ -1142,6 +1142,7 @@ var createSession = function(options) {
      * @param {Array<string>=} options.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
      * @param {string=} options.rtmpUrl Rtmp url stream should be forwarded to
      * @param {Object=} options.mediaConnectionConstraints Stream specific constraints for underlying RTCPeerConnection
+     * @param {Boolean=} options.flashShowFullScreenButton Show full screen button in flash
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
      * @throws {TypeError} Error if options.name is not specified
@@ -1296,6 +1297,7 @@ var createSession = function(options) {
                 flashProto: flashProto,
                 flashPort: flashPort,
                 flashBufferTime: options.flashBufferTime || 0,
+                flashShowFullScreenButton: options.flashShowFullScreenButton || false,
                 connectionConfig: mediaOptions,
                 connectionConstraints: mediaConnectionConstraints
             },streamRefreshHandlers[id_]).then(function(newConnection) {
@@ -1691,6 +1693,20 @@ var createSession = function(options) {
         };
 
         /**
+         * Request full screen for player stream
+         * @memberof Stream
+         * @inner
+         */
+        var fullScreen = function() {
+            if (published()) {
+                logger.warn(LOG_PREFIX, "Full screen is allowed only for played streams");
+            } else {
+                if (mediaConnection)
+                    mediaConnection.fullScreen();
+            }
+        }
+
+        /**
          * Stream event callback.
          *
          * @callback Stream~eventCallback
@@ -1741,6 +1757,7 @@ var createSession = function(options) {
         stream.snapshot = snapshot;
         stream.getNetworkBandwidth = getNetworkBandwidth;
         stream.getRemoteBitrate = getRemoteBitrate;
+        stream.fullScreen = fullScreen;
         stream.on = on;
 
         streams[id_] = stream;

@@ -30,11 +30,16 @@ package com.flashphoner.api2 {
 
     public class Main extends Application {
 
+        [Embed(source='skin/fullscreen-icon.png')]
+        [Bindable]
+        public var iconFullScreen:Class;
+
         private var canvas:Canvas;
         private var remoteDisplay:Video;
         private var remoteDisplayHolder:UIComponent;
         private var localDisplay:VideoDisplay;
         private var openSettingsButton:Button;
+        private var fullScreenButton:Button;
 
         private static var config:Object;
         private var localMediaControl:LocalMediaControl;
@@ -78,6 +83,12 @@ package com.flashphoner.api2 {
             this.openSettingsButton.addEventListener(MouseEvent.CLICK, onOpenSettings);
             this.openSettingsButton.visible = false;
             this.canvas.addChild(this.openSettingsButton);
+            this.fullScreenButton = new Button();
+            this.fullScreenButton.width = 24;
+            this.fullScreenButton.setStyle("icon", iconFullScreen);
+            this.fullScreenButton.visible = parameters.showFullScreenButton == "true";
+            this.fullScreenButton.addEventListener(MouseEvent.CLICK, fullScreenHandler);
+            this.canvas.addChild(this.fullScreenButton);
             addElement(this.canvas);
             //create media controls
             this.localMediaControl = new LocalMediaControl(this, localDisplay);
@@ -104,6 +115,7 @@ package com.flashphoner.api2 {
             ExternalInterface.addCallback("isHasVideo", isHasVideo);
             ExternalInterface.addCallback("getStats", getStats);
             ExternalInterface.addCallback("changeAudioCodec", changeAudioCodec);
+            ExternalInterface.addCallback("fullScreen", fullScreen);
             callExternalInterface("initialized", null);
         }
 
@@ -332,6 +344,8 @@ package com.flashphoner.api2 {
         private function onResize(event:Event):void{
             Logger.info("Stage size " + this.stage.width + "x" + this.stage.height);
             if (this.remoteDisplayHolder.visible) {
+                this.fullScreenButton.y = stage.stageHeight - this.fullScreenButton.height;
+                this.fullScreenButton.x = stage.stageWidth - this.fullScreenButton.width;
                 this.remoteDisplay.width = this.remoteDisplayHolder.width;
                 this.remoteDisplay.height = this.remoteDisplayHolder.height;
             }
@@ -366,6 +380,14 @@ package com.flashphoner.api2 {
             if (this.localMediaControl) {
                 localMediaControl.changeCodec(codec);
             }
+        }
+
+        public function fullScreen() {
+            Logger.error("Full screen mode should be enabled manually by clicking on icon");
+        }
+
+        private function fullScreenHandler(event:MouseEvent):void {
+            stage.displayState = StageDisplayState.FULL_SCREEN;
         }
     }
 }

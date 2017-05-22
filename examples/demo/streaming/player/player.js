@@ -45,6 +45,9 @@ function init_page() {
             stream.setVolume(currentVolumeValue);
         }
     }).slider("disable");
+    if (Flashphoner.getMediaProviders()[0] == "Flash") {
+        $("#fullScreen").hide();
+    }
     onStopped();
     if (autoplay)
         $("#playBtn").click();
@@ -54,6 +57,9 @@ function onStarted(stream) {
     $("#playBtn").text("Stop").off('click').click(function(){
         $(this).prop('disabled', true);
         stream.stop();
+    }).prop('disabled', false);
+    $("#fullScreenBtn").off('click').click(function(){
+       stream.fullScreen();
     }).prop('disabled', false);
     $("#volumeControl").slider("enable");
     stream.setVolume(currentVolumeValue);
@@ -71,6 +77,7 @@ function onStopped() {
     $('#url').prop('disabled', false);
     $("#streamName").prop('disabled', false);
     $("#volumeControl").slider("disable");
+    $("#fullScreenBtn").prop('disabled', true);
 }
 
 function start() {
@@ -111,7 +118,8 @@ function playStream(session) {
     var streamName = $('#streamName').val();
     var options = {
         name: streamName,
-        display: remoteVideo
+        display: remoteVideo,
+        flashShowFullScreenButton: true
     };
     if (resolution_for_wsplayer) {
         options.playWidth = resolution_for_wsplayer.playWidth;

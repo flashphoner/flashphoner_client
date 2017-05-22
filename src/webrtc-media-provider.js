@@ -304,6 +304,19 @@ var createConnection = function (options) {
             }
         };
 
+        var fullScreen = function() {
+            var video = document.getElementById(id);
+            if (video) {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.mozRequestFullScreen) {
+                    video.mozRequestFullScreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                }
+            }
+        }
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -320,6 +333,7 @@ var createConnection = function (options) {
         exports.unmuteVideo = unmuteVideo;
         exports.isVideoMuted = isVideoMuted;
         exports.getStats = getStats;
+        exports.fullScreen = fullScreen;
         connections[id] = exports;
         resolve(exports);
     });

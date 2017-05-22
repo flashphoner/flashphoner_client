@@ -58,7 +58,7 @@ var createConnection = function(options) {
             });
             flash.connect(url, authToken, options.login);
         } else {
-            loadSwf(id, display).then(function (swf) {
+            loadSwf(id, display, options.flashShowFullScreenButton || "false").then(function (swf) {
                 installCallback(swf, 'connectionStatus', function (status) {
                     removeCallback(swf, 'connectionStatus');
                     if (status === "Success") {
@@ -238,6 +238,12 @@ var createConnection = function(options) {
             }
         };
 
+        var fullScreen = function() {
+            if (flash) {
+                flash.fullScreen();
+            }
+        };
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -254,6 +260,7 @@ var createConnection = function(options) {
         exports.unmuteVideo = unmuteVideo;
         exports.isVideoMuted = isVideoMuted;
         exports.getStats = getStats;
+        exports.fullScreen = fullScreen;
     });
 };
 
@@ -370,23 +377,26 @@ var releaseMedia = function(display) {
 };
 
 //swf helpers
-var loadSwf = function(id, display) {
+//TODO wrap params to object
+var loadSwf = function(id, display, showFullScreenButton) {
     return new Promise(function(resolve, reject){
         var swf;
         var divWrapper = document.createElement('div');
         divWrapper.id = id;
         display.appendChild(divWrapper);
         var flashvars = {
-            id: id
+            id: id,
+            showFullScreenButton: showFullScreenButton || "false"
         };
         var params = {};
         params.menu = "true";
         params.swliveconnect = "true";
-        params.allowfullscreen = "true";
+        params.allowFullScreen = "true";
         params.allowscriptaccess = "always";
         params.wmode = "opaque";
         params.scopeId = id;
         var attributes = {};
+        attributes.allowfullscreen = "true";
         installCallback(id, 'addLogMessage', function(message){
             logger.info(LOG_PREFIX, "Flash["+id+"]:" + message);
         });
