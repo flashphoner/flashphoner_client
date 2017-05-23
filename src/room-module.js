@@ -356,7 +356,7 @@ var appSession = function(options) {
                     //clear streams
                     var streams = session.getStreams();
                     for (var i = 0; i < streams.length; i++) {
-                        if (streams[i].name() == name_ + "-" + username_ && streams[i].status() != STREAM_STATUS.UNPUBLISHED) {
+                        if (streams[i].name().indexOf(name_ + "-" + username_) !== -1 && streams[i].status() != STREAM_STATUS.UNPUBLISHED) {
                             streams[i].stop();
                         } else if (streams[i].name().indexOf(name_) !== -1 && streams[i].status() != STREAM_STATUS.STOPPED) {
                             streams[i].stop();
@@ -382,7 +382,7 @@ var appSession = function(options) {
          * @inner
          */
         var publish = function(options) {
-            options.name = (options.name) ? (name_ + "-" + username_ + "-" + options.name) : (name_ + "-" + username_);
+            options.name = (options.name) ? (name_ + "-" + username_ + "-" + createUUID(4) + "-" + options.name) : (name_ + "-" + username_ + createUUID(4));
             options.cacheLocalResources = (typeof options.cacheLocalResources === "boolean") ? options.cacheLocalResources : true;
             options.custom = {name: name_};
             var stream = session.createStream(options);
