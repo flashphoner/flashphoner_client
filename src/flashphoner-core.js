@@ -43,7 +43,7 @@ var init = function(options) {
         }
         loggerConf = options.logger || loggerConf;
         // init logger
-        logger.init(loggerConf.severity, loggerConf.push);
+        logger.init(loggerConf.severity || "INFO", loggerConf.push || false);
         var waitingTemasys = false;
         try {
             var audioContext = new (window.AudioContext || window.webkitAudioContext)();
