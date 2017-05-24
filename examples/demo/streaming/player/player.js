@@ -78,6 +78,7 @@ function onStopped() {
     $("#streamName").prop('disabled', false);
     $("#volumeControl").slider("disable");
     $("#fullScreenBtn").prop('disabled', true);
+    $("#preloader").hide();
 }
 
 function start() {
@@ -129,7 +130,9 @@ function playStream(session) {
         options.playHeight = resolution.split("x")[1];
     }
     stream = session.createStream(options).on(STREAM_STATUS.PLAYING, function(stream) {
+        $("#preloader").show();
         document.getElementById(stream.id()).addEventListener('resize', function(event){
+            $("#preloader").hide();
             var streamResolution = stream.videoResolution();
             if (Object.keys(streamResolution).length === 0) {
                 resizeVideo(event.target);
