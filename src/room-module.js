@@ -3,6 +3,7 @@ var SESSION_STATUS = require('./constants').SESSION_STATUS;
 var STREAM_STATUS = require('./constants').STREAM_STATUS;
 var Promise = require('promise-polyfill');
 var util = require('./util');
+var uuid = require('node-uuid');
 var ROOM_REST_APP = "roomApp";
 
 /**
@@ -382,7 +383,7 @@ var appSession = function(options) {
          * @inner
          */
         var publish = function(options) {
-            options.name = (options.name) ? (name_ + "-" + username_ + "-" + createUUID(4) + "-" + options.name) : (name_ + "-" + username_ + createUUID(4));
+            options.name = (options.name) ? (name_ + "-" + username_ + "-" + uuid.v1().substr(0,4) + "-" + options.name) : (name_ + "-" + username_ + "-" + uuid.v1().substr(0,4));
             options.cacheLocalResources = (typeof options.cacheLocalResources === "boolean") ? options.cacheLocalResources : true;
             options.custom = {name: name_};
             var stream = session.createStream(options);
