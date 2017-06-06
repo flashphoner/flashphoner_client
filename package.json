@@ -8,7 +8,7 @@
     "promise-polyfill": "^6.0.1",
     "swfobject": "^2.2.1",
     "webrtc-adapter": "^3.4.0",
-    "adapterjs": "0.14.1",
+    "adapterjs": "0.14.3",
     "es6-promise": "4.0.5"
   },
   "devDependencies": {

@@ -19,6 +19,7 @@ var createConnection = function (options) {
         if (!connectionConstraints.hasOwnProperty("optional")) {
             connectionConstraints.optional = [{"DtlsSrtpKeyAgreement": true}];
         }
+        connectionConfig.bundlePolicy = "balanced";
         var connection = new RTCPeerConnection(connectionConfig, connectionConstraints);
         //unidirectional display
         var display = options.display;
@@ -154,29 +155,45 @@ var createConnection = function (options) {
                 });
                 connection.setRemoteDescription(rtcSdp).then(function () {
                     //use in edge for ice
-                    //var sdpArray = sdp.split("\n");
-                    //var video = false;
-                    //for (var i = 0; i < sdpArray.length; i++) {
-                    //    if (sdpArray[i].indexOf("m=video") == 0) {
-                    //        video = true;
-                    //    }
-                    //    if (sdpArray[i].indexOf("a=candidate") == 0) {
-                    //        if (video) {
-                    //            var candidate = new RTCIceCandidate({
-                    //                candidate: sdpArray[i],
-                    //                sdpMid: "video",
-                    //                sdpMLineIndex: 1
-                    //            });
-                    //            connection.addIceCandidate(candidate);
-                    //        } else {
-                    //            var candidate = new RTCIceCandidate({
-                    //                candidate: sdpArray[i],
-                    //                sdpMid: "audio",
-                    //                sdpMLineIndex: 0
-                    //            });
-                    //            connection.addIceCandidate(candidate);
-                    //        }
-                    //    }
+                    // if (adapter.browserDetails.browser == "edge") {
+                    //     var sdpArray = sdp.split("\n");
+                    //     var i,i1 = 1;
+                    //     for (i = 0; i < sdpArray.length; i++) {
+                    //         if (sdpArray[i].indexOf("m=video") == 0) {
+                    //             break;
+                    //         }
+                    //         if (sdpArray[i].indexOf("a=candidate:1 1") == 0 || sdpArray[i].indexOf("a=candidate:2 1") == 0) {
+                    //             var rtcIceCandidate = new RTCIceCandidate({
+                    //                 candidate: sdpArray[i],
+                    //                 sdpMid: "audio",
+                    //                 sdpMLineIndex: 0
+                    //             });
+                    //             //window.setTimeout(function () {
+                    //                 connection.addIceCandidate(rtcIceCandidate);
+                    //             //}, 500 * i1);
+                    //             //i1++;
+                    //         }
+                    //     }
+                    //     var video = false;
+                    //     for (i = 0; i < sdpArray.length; i++) {
+                    //         if (sdpArray[i].indexOf("m=video") == 0) {
+                    //             video = true;
+                    //         }
+                    //         if (video && (sdpArray[i].indexOf("a=candidate:1 1") == 0 || sdpArray[i].indexOf("a=candidate:2 1") == 0)) {
+                    //             var rtcIceCandidate2 = new RTCIceCandidate({
+                    //                 candidate: sdpArray[i],
+                    //                 sdpMid: "video",
+                    //                 sdpMLineIndex: 1
+                    //             });
+                    //             //window.setTimeout(function () {
+                    //                 connection.addIceCandidate(rtcIceCandidate2);
+                    //             //}, 500 * i1);
+                    //             //i1++;
+                    //         }
+                    //     }
+                    //     //window.setTimeout(function () {
+                    //         connection.addIceCandidate(null);
+                    //     //}, 500 * i1);
                     //}
                     resolve();
                 }).catch(function (error) {
@@ -304,7 +321,7 @@ var createConnection = function (options) {
             }
         };
 
-        var fullScreen = function() {
+        var fullScreen = function () {
             var video = document.getElementById(id);
             if (video) {
                 if (video.requestFullscreen) {
