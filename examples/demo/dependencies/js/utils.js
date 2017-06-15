@@ -64,6 +64,22 @@ function getHLSUrl() {
     return url;
 }
 
+function getAdminUrl() {
+
+    var proto;
+    var port;
+    if (window.location.protocol == "http:") {
+        proto = "http://";
+        port = "9091";
+    } else {
+        proto = "https://";
+        port = "8888";
+    }
+
+    var url = proto + window.location.hostname + ":" + port;
+    return url;
+}
+
 // Detect IE
 function detectIE() {
     var ua = window.navigator.userAgent;
