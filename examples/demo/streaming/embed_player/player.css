@@ -181,7 +181,7 @@ video, canvas, object {
     height: 100%;
 }
 
-.player .fullscreen a {
+.player .fullscreen .fullscreenBtn {
     width: 25px;
     height: 20px;
     cursor: pointer;

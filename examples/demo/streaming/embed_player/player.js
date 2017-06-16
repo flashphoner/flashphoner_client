@@ -321,9 +321,16 @@ function validateForm() {
             });
 
             // Requests fullscreen based on browser.
-            $('.fullscreen').click(function() {
+            $('.fullscreenBtn').click(function () {
                 if (stream) {
                     stream.fullScreen();
+                }
+            });
+
+            $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(e) {
+                if (stream) {
+                    currentVolumeValue = stream.getVolume();
+                    volanim();
                 }
             });
         });
