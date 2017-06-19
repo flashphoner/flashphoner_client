@@ -9,9 +9,17 @@ var autoplay = getUrlParam("autoplay") || false;
 var resolution = getUrlParam("resolution");
 var mediaProviders = getUrlParam("mediaProviders") || "";
 var streamName = getUrlParam("streamName") || "streamName";
+var skin = getUrlParam("skin") || "dark";
 var urlServer = getUrlParam("urlServer") || setURL();
 
 function init_page() {
+    if (skin === "dark") {
+        $('.player, .player .volume-holder, .player .volume-icon-hover').switchClass("skin-light", "skin-dark");
+        $('.pause-button span,.player .fullscreen .fullscreenBtn, .player .volume-icon span, .player .volume-bar-holder').switchClass("skin-light-button", "skin-dark-button");
+    } else if (skin === "light") {
+        $('.player, .player .volume-holder, .player .volume-icon-hover').switchClass("skin-dark", "skin-light");
+        $('.pause-button span, .player .fullscreen .fullscreenBtn, .player .volume-icon span, .player .volume-bar-holder').switchClass("skin-dark-button", "skin-light-button");
+    }
     //video display
     remoteVideo = document.getElementById("remoteVideo");
 
