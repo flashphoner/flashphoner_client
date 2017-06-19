@@ -27,7 +27,8 @@ var initialized = false;
  * @param {Object} options Global api options
  * @param {Function=} options.mediaProvidersReadyCallback Callback of initialized WebRTC Plugin
  * @param {String=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
- * @param {string=} options.preferredMediaProvider Use preferred media provider if available
+ * @param {string=} options.preferredMediaProvider DEPRECATED: Use preferred media provider if available
+ * @param {Array=} options.preferredMediaProviders Use preferred media providers order
  * @param {String=} options.receiverLocation Location of WSReceiver.js file
  * @param {String=} options.decoderLocation Location of video-worker2.js file
  * @param {String=} options.screenSharingExtensionId Chrome screen sharing extension id
@@ -36,7 +37,7 @@ var initialized = false;
  * @throws {Error} Error if none of MediaProviders available
  * @memberof Flashphoner
  */
-var init = function(options) {
+var init = function (options) {
     if (!initialized) {
         if (!options) {
             options = {};
@@ -47,7 +48,7 @@ var init = function(options) {
         var waitingTemasys = false;
         try {
             var audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        } catch(e) {
+        } catch (e) {
             console.warn("Failed to create audio context");
         }
         var webRtcProvider = require("./webrtc-media-provider");
@@ -91,7 +92,8 @@ var init = function(options) {
         }
 
         var flashProvider = require("./flash-media-provider");
-        if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available() && !MediaProvider.WebRTC) {
+        if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available() &&
+            (!MediaProvider.WebRTC || (options.preferredMediaProviders && options.preferredMediaProviders.indexOf("Flash") >=0)) ) {
             MediaProvider.Flash = flashProvider;
             var flashConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
@@ -130,8 +132,25 @@ var init = function(options) {
                     MediaProvider = _MediaProvider;
                 }
             } else {
-              logger.warn(LOG_PREFIX, "Preferred media provider is not available.");
+                logger.warn(LOG_PREFIX, "Preferred media provider is not available.");
             }
+        }
+        if (options.preferredMediaProviders && options.preferredMediaProviders.length > 0) {
+            var newMediaProvider = {};
+            for (var i in options.preferredMediaProviders) {
+                if (options.preferredMediaProviders.hasOwnProperty(i)) {
+                    var pMP = options.preferredMediaProviders[i];
+                    if (MediaProvider.hasOwnProperty(pMP)) {
+                        newMediaProvider[pMP] = MediaProvider[pMP];
+                    }
+                }
+            }
+            if (jQuery.isEmptyObject(newMediaProvider)) {
+                throw new Error("None of preferred MediaProviders available");
+            } else {
+                MediaProvider = newMediaProvider;
+            }
+
         }
         if (!waitingTemasys && options.mediaProvidersReadyCallback) {
             options.mediaProvidersReadyCallback(Object.keys(MediaProvider));
@@ -147,7 +166,7 @@ var init = function(options) {
  * @returns {Array} Available MediaProviders
  * @memberof Flashphoner
  */
-var getMediaProviders = function() {
+var getMediaProviders = function () {
     return Object.keys(MediaProvider);
 };
 
@@ -157,7 +176,7 @@ var getMediaProviders = function() {
  * @memberof Flashphoner
  */
 
-var playFirstSound = function() {
+var playFirstSound = function () {
     var mediaProvider = getMediaProviders()[0];
     MediaProvider[mediaProvider].playFirstSound();
 }
@@ -169,7 +188,7 @@ var playFirstSound = function() {
  * @memberof Flashphoner
  */
 
-var getLogger = function() {
+var getLogger = function () {
     if (!initialized) {
         console.warn("Initialize API first.");
     } else {
@@ -202,7 +221,7 @@ var getLogger = function() {
  * @throws {Error} Error if API is not initialized
  * @memberof Flashphoner
  */
-var getMediaDevices = function(mediaProvider, labels) {
+var getMediaDevices = function (mediaProvider, labels) {
     if (!initialized) {
         throw new Error("Flashphoner API is not initialized");
     }
@@ -231,7 +250,7 @@ var getMediaDevices = function(mediaProvider, labels) {
  * @memberof Flashphoner
  */
 
-var getMediaAccess = function(constraints, display, mediaProvider) {
+var getMediaAccess = function (constraints, display, mediaProvider) {
     if (!initialized) {
         throw new Error("Flashphoner API is not initialized");
     }
@@ -242,7 +261,7 @@ var getMediaAccess = function(constraints, display, mediaProvider) {
 };
 
 //default constraints helper
-var getDefaultMediaConstraints = function() {
+var getDefaultMediaConstraints = function () {
     return {
         audio: true,
         video: {
@@ -280,7 +299,7 @@ function getConstraintsProperty(constraints, property, defaultValue) {
  * @memberof Flashphoner
  */
 
-var releaseLocalMedia = function(display, mediaProvider) {
+var releaseLocalMedia = function (display, mediaProvider) {
     if (!initialized) {
         throw new Error("Flashphoner API is not initialized");
     }
@@ -296,7 +315,7 @@ var releaseLocalMedia = function(display, mediaProvider) {
  * @returns {Session[]} Array containing active sessions
  * @memberof Flashphoner
  */
-var getSessions = function() {
+var getSessions = function () {
     return util.copyObjectToArray(sessions);
 };
 
@@ -307,7 +326,7 @@ var getSessions = function() {
  * @returns {Session} Session
  * @memberof Flashphoner
  */
-var getSession = function(id) {
+var getSession = function (id) {
     return sessions[id];
 };
 
@@ -327,7 +346,7 @@ var getSession = function(id) {
  * @throws {TypeError} Error if options.urlServer is not specified
  * @memberof Flashphoner
  */
-var createSession = function(options) {
+var createSession = function (options) {
     if (!initialized) {
         throw new Error("Flashphoner API is not initialized");
     }
@@ -380,15 +399,15 @@ var createSession = function(options) {
 
     //connect session to server
     var wsConnection = new WebSocket(urlServer);
-    wsConnection.onerror = function() {
+    wsConnection.onerror = function () {
         onSessionStatusChange(SESSION_STATUS.FAILED);
     };
-    wsConnection.onclose = function() {
+    wsConnection.onclose = function () {
         if (sessionStatus !== SESSION_STATUS.FAILED) {
             onSessionStatusChange(SESSION_STATUS.DISCONNECTED);
         }
     };
-    wsConnection.onopen = function() {
+    wsConnection.onopen = function () {
         onSessionStatusChange(SESSION_STATUS.CONNECTED);
         var cConfig = {
             appKey: appKey,
@@ -412,7 +431,7 @@ var createSession = function(options) {
     };
     //todo remove
     var remoteSdpCache = {};
-    wsConnection.onmessage = function(event) {
+    wsConnection.onmessage = function (event) {
         var data = {};
         if (event.data instanceof Blob) {
             data.message = "binaryData";
@@ -509,7 +528,7 @@ var createSession = function(options) {
                 }
                 break;
             default:
-                //logger.info(LOG_PREFIX, "Unknown server message " + data.message);
+            //logger.info(LOG_PREFIX, "Unknown server message " + data.message);
         }
     };
 
@@ -560,7 +579,7 @@ var createSession = function(options) {
      * @memberof Session
      * @inner
      */
-    var createCall = function(options) {
+    var createCall = function (options) {
         //check session state
         if (sessionStatus !== SESSION_STATUS.REGISTERED && sessionStatus !== SESSION_STATUS.ESTABLISHED) {
             logger.info(LOG_PREFIX, "Status is " + sessionStatus);
@@ -601,7 +620,7 @@ var createSession = function(options) {
          * @see Session~createCall
          */
         var call = {};
-        callRefreshHandlers[id_] = function(callInfo, sdp, codec, transfer) {
+        callRefreshHandlers[id_] = function (callInfo, sdp, codec, transfer) {
             if (transfer) {
                 if (!mediaConnections[id_]) {
                     mediaConnections[id_] = mediaConnection;
@@ -622,14 +641,15 @@ var createSession = function(options) {
             }
             //set audio codec (Flash only)
             if (codec) {
-                if(mediaProvider == "Flash") {
+                if (mediaProvider == "Flash") {
                     mediaConnection.changeAudioCodec(codec.name);
                 }
                 return;
             }
             //set remote sdp
             if (sdp && sdp !== '') {
-                mediaConnection.setRemoteSdp(sdp, hasTransferredCall, id_).then(function(){});
+                mediaConnection.setRemoteSdp(sdp, hasTransferredCall, id_).then(function () {
+                });
                 return;
             }
             var event = callInfo.status;
@@ -658,14 +678,14 @@ var createSession = function(options) {
          * @name call
          * @inner
          */
-        var call_ = function() {
+        var call_ = function () {
             if (status_ !== CALL_STATUS.NEW) {
                 throw new Error("Invalid call state");
             }
             status_ = CALL_STATUS.PENDING;
             var hasAudio = true;
             //get access to camera
-            MediaProvider[mediaProvider].getMediaAccess(constraints, localDisplay).then(function(){
+            MediaProvider[mediaProvider].getMediaAccess(constraints, localDisplay).then(function () {
                 if (status_ == CALL_STATUS.FAILED) {
                     //call failed while we were waiting for media access, release media
                     if (!cacheLocalResources) {
@@ -685,7 +705,7 @@ var createSession = function(options) {
                     bidirectional: true,
                     login: login,
                     connectionConfig: mediaOptions
-                }).then(function(newConnection) {
+                }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
                         sendAudio: true,
@@ -709,7 +729,7 @@ var createSession = function(options) {
                         visibleName: visibleName_
                     });
                 });
-            }).catch(function(error){
+            }).catch(function (error) {
                 logger.error(LOG_PREFIX, error);
                 status_ = CALL_STATUS.FAILED;
                 callRefreshHandlers[id_]({status: CALL_STATUS.FAILED});
@@ -723,7 +743,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var hangup = function() {
+        var hangup = function () {
             if (status_ == CALL_STATUS.NEW) {
                 callRefreshHandlers[id_]({status: CALL_STATUS.FAILED});
                 return;
@@ -763,7 +783,7 @@ var createSession = function(options) {
          * @name call
          * @inner
          */
-        var answer = function(answerOptions) {
+        var answer = function (answerOptions) {
             if (status_ !== CALL_STATUS.NEW && status_ !== CALL_STATUS.RING) {
                 throw new Error("Invalid call state");
             }
@@ -779,13 +799,13 @@ var createSession = function(options) {
                 sdp = remoteSdpCache[id_];
                 delete remoteSdpCache[id_];
             }
-            if (util.SDP.matchPrefix(sdp,"m=video").length == 0) {
+            if (util.SDP.matchPrefix(sdp, "m=video").length == 0) {
                 constraints.video = false;
             }
             var stripCodecs = answerOptions.stripCodecs || [];
             var hasAudio = true;
             //get access to camera
-            MediaProvider[mediaProvider].getMediaAccess(constraints, localDisplay).then(function(){
+            MediaProvider[mediaProvider].getMediaAccess(constraints, localDisplay).then(function () {
                 if (status_ == CALL_STATUS.FAILED) {
                     //call failed while we were waiting for media access, release media
                     if (!cacheLocalResources) {
@@ -805,16 +825,16 @@ var createSession = function(options) {
                     bidirectional: true,
                     login: sipConfig.sipLogin,
                     connectionConfig: mediaOptions
-                }).then(function(newConnection) {
+                }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.setRemoteSdp(sdp);
-                }).then(function(){
+                }).then(function () {
                     return mediaConnection.createAnswer({
                         receiveAudio: options.receiveAudio,
                         receiveVideo: options.receiveVideo,
                         stripCodecs: stripCodecs
                     });
-                }).then(function(sdp) {
+                }).then(function (sdp) {
                     if (status_ != CALL_STATUS.FINISH && status_ != CALL_STATUS.FAILED) {
                         send("answer", {
                             callId: id_,
@@ -832,7 +852,7 @@ var createSession = function(options) {
                         hangup();
                     }
                 });
-            }).catch(function(error){
+            }).catch(function (error) {
                 logger.error(LOG_PREFIX, error);
                 status_ = CALL_STATUS.FAILED;
                 callRefreshHandlers[id_]({status: CALL_STATUS.FAILED});
@@ -846,7 +866,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var status = function() {
+        var status = function () {
             return status_;
         };
 
@@ -857,7 +877,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var id = function() {
+        var id = function () {
             return id_;
         };
         /**
@@ -867,7 +887,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var caller = function() {
+        var caller = function () {
             return caller_;
         };
         /**
@@ -877,7 +897,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var callee = function() {
+        var callee = function () {
             return callee_;
         };
         /**
@@ -887,7 +907,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var visibleName = function() {
+        var visibleName = function () {
             return visibleName_;
         };
         /**
@@ -901,7 +921,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var setVolume = function(volume) {
+        var setVolume = function (volume) {
             if (mediaConnection) {
                 mediaConnection.setVolume(volume);
             }
@@ -914,7 +934,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var getVolume = function() {
+        var getVolume = function () {
             if (mediaConnection) {
                 return mediaConnection.getVolume();
             }
@@ -927,7 +947,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var muteAudio = function() {
+        var muteAudio = function () {
             if (mediaConnection) {
                 mediaConnection.muteAudio();
             }
@@ -939,7 +959,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var unmuteAudio = function() {
+        var unmuteAudio = function () {
             if (mediaConnection) {
                 mediaConnection.unmuteAudio();
             }
@@ -952,7 +972,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var isAudioMuted = function() {
+        var isAudioMuted = function () {
             if (mediaConnection) {
                 return mediaConnection.isAudioMuted();
             }
@@ -965,7 +985,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var muteVideo = function() {
+        var muteVideo = function () {
             if (mediaConnection) {
                 mediaConnection.muteVideo();
             }
@@ -977,7 +997,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var unmuteVideo = function() {
+        var unmuteVideo = function () {
             if (mediaConnection) {
                 mediaConnection.unmuteVideo();
             }
@@ -990,7 +1010,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var isVideoMuted = function() {
+        var isVideoMuted = function () {
             if (mediaConnection) {
                 return mediaConnection.isVideoMuted();
             }
@@ -1019,7 +1039,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var hold = function() {
+        var hold = function () {
             send("hold", {callId: id_});
         }
         /**
@@ -1028,7 +1048,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var holdForTransfer = function() {
+        var holdForTransfer = function () {
             send("hold", {callId: id_, holdForTransfer: true});
         }
         /**
@@ -1037,7 +1057,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var unhold = function() {
+        var unhold = function () {
             send("unhold", {callId: id_});
         }
         /**
@@ -1048,7 +1068,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var sendDTMF = function(number, type) {
+        var sendDTMF = function (number, type) {
             send("sendDtmf", {
                 callId: id_,
                 type: type || "RFC2833",
@@ -1062,7 +1082,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var transfer = function(target) {
+        var transfer = function (target) {
             send("transfer", {callId: id_, target: target});
         }
         /**
@@ -1083,7 +1103,7 @@ var createSession = function(options) {
          * @memberof Call
          * @inner
          */
-        var on = function(event, callback) {
+        var on = function (event, callback) {
             if (!event) {
                 throw new TypeError("Event can't be null");
             }
@@ -1154,7 +1174,7 @@ var createSession = function(options) {
      * @memberof Session
      * @inner
      */
-    var createStream = function(options) {
+    var createStream = function (options) {
         //check session state
         if (sessionStatus !== SESSION_STATUS.ESTABLISHED) {
             throw new Error('Invalid session state');
@@ -1185,9 +1205,9 @@ var createSession = function(options) {
             receiveAudio = audioProperty;
         } else if (typeof audioProperty === 'object') {
             receiveAudio = true;
-            var _stereo = getConstraintsProperty(audioProperty,"stereo",0);
-            var _bitrate = getConstraintsProperty(audioProperty,"bitrate",0);
-            var _fec = getConstraintsProperty(audioProperty,"fec",0);
+            var _stereo = getConstraintsProperty(audioProperty, "stereo", 0);
+            var _bitrate = getConstraintsProperty(audioProperty, "bitrate", 0);
+            var _fec = getConstraintsProperty(audioProperty, "fec", 0);
             var _codecOptions = "";
             if (_bitrate) _codecOptions += "maxaveragebitrate=" + _bitrate + ";";
             if (_stereo) _codecOptions += "stereo=1;sprop-stereo=1;";
@@ -1233,12 +1253,13 @@ var createSession = function(options) {
          * @see Session~createStream
          */
         var stream = {};
-        streamRefreshHandlers[id_] = function(streamInfo, sdp) {
+        streamRefreshHandlers[id_] = function (streamInfo, sdp) {
             //set remote sdp
             if (sdp && sdp !== '') {
                 var _sdp = sdp;
                 if (_codecOptions) _sdp = util.SDP.writeFmtp(sdp, _codecOptions, "opus");
-                mediaConnection.setRemoteSdp(_sdp).then(function(){});
+                mediaConnection.setRemoteSdp(_sdp).then(function () {
+                });
                 return;
             }
             var event = streamInfo.status;
@@ -1286,7 +1307,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var play = function() {
+        var play = function () {
             logger.debug(LOG_PREFIX, "Play stream " + name_);
             if (status_ !== STREAM_STATUS.NEW) {
                 throw new Error("Invalid stream state");
@@ -1304,7 +1325,7 @@ var createSession = function(options) {
                 flashShowFullScreenButton: options.flashShowFullScreenButton || false,
                 connectionConfig: mediaOptions,
                 connectionConstraints: mediaConnectionConstraints
-            },streamRefreshHandlers[id_]).then(function(newConnection) {
+            }, streamRefreshHandlers[id_]).then(function (newConnection) {
                 mediaConnection = newConnection;
                 return mediaConnection.createOffer({
                     receiveAudio: receiveAudio,
@@ -1334,7 +1355,7 @@ var createSession = function(options) {
                 if (offer.player) {
                     offer.player.play(id_);
                 }
-            }).catch(function(error) {
+            }).catch(function (error) {
                 //todo fire stream failed status
                 throw error;
             });
@@ -1347,7 +1368,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var publish = function() {
+        var publish = function () {
             logger.debug(LOG_PREFIX, "Publish stream " + name_);
             if (status_ !== STREAM_STATUS.NEW) {
                 throw new Error("Invalid stream state");
@@ -1359,7 +1380,7 @@ var createSession = function(options) {
                 hasAudio = false;
             }
             //get access to camera
-            MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function(){
+            MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function () {
                 if (status_ == STREAM_STATUS.FAILED) {
                     //stream failed while we were waiting for media access, release media
                     if (!cacheLocalResources) {
@@ -1377,7 +1398,7 @@ var createSession = function(options) {
                     flashPort: flashPort,
                     connectionConfig: mediaOptions,
                     connectionConstraints: mediaConnectionConstraints
-                }).then(function(newConnection) {
+                }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
                         stripCodecs: stripCodecs
@@ -1401,7 +1422,7 @@ var createSession = function(options) {
                         constraints: constraints
                     });
                 });
-            }).catch(function(error){
+            }).catch(function (error) {
                 logger.warn(LOG_PREFIX, error);
                 stream.info = error.message;
                 status_ = STREAM_STATUS.FAILED;
@@ -1418,7 +1439,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var stop = function() {
+        var stop = function () {
             logger.debug(LOG_PREFIX, "Stop stream " + name_);
             if (status_ == STREAM_STATUS.NEW) {
                 //trigger FAILED status
@@ -1465,7 +1486,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var snapshot = function() {
+        var snapshot = function () {
             logger.debug(LOG_PREFIX, "Request snapshot, stream " + name_);
             if (status_ !== STREAM_STATUS.NEW && status_ !== STREAM_STATUS.PLAYING && status_ !== STREAM_STATUS.PUBLISHING) {
                 throw new Error("Invalid stream state");
@@ -1483,7 +1504,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var status = function() {
+        var status = function () {
             return status_;
         };
 
@@ -1494,7 +1515,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var id = function() {
+        var id = function () {
             return id_;
         };
 
@@ -1505,7 +1526,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var name = function() {
+        var name = function () {
             return name_;
         };
 
@@ -1516,7 +1537,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var published = function() {
+        var published = function () {
             return published_;
         };
 
@@ -1526,7 +1547,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var getRecordInfo = function() {
+        var getRecordInfo = function () {
             return recordFileName;
         };
 
@@ -1536,7 +1557,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var getInfo = function() {
+        var getInfo = function () {
             return info_;
         };
 
@@ -1546,12 +1567,12 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var videoResolution = function() {
-          if (!published_) {
-              return resolution;
-          } else {
-              throw new Error("This function available only on playing stream");
-          }
+        var videoResolution = function () {
+            if (!published_) {
+                return resolution;
+            } else {
+                throw new Error("This function available only on playing stream");
+            }
         };
 
         /**
@@ -1565,7 +1586,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var setVolume = function(volume) {
+        var setVolume = function (volume) {
             if (mediaConnection) {
                 mediaConnection.setVolume(volume);
             }
@@ -1578,7 +1599,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var getVolume = function() {
+        var getVolume = function () {
             if (mediaConnection) {
                 return mediaConnection.getVolume();
             }
@@ -1591,7 +1612,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var muteAudio = function() {
+        var muteAudio = function () {
             if (mediaConnection) {
                 mediaConnection.muteAudio();
             }
@@ -1603,7 +1624,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var unmuteAudio = function() {
+        var unmuteAudio = function () {
             if (mediaConnection) {
                 mediaConnection.unmuteAudio();
             }
@@ -1616,7 +1637,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var isAudioMuted = function() {
+        var isAudioMuted = function () {
             if (mediaConnection) {
                 return mediaConnection.isAudioMuted();
             }
@@ -1629,7 +1650,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var muteVideo = function() {
+        var muteVideo = function () {
             if (mediaConnection) {
                 mediaConnection.muteVideo();
             }
@@ -1641,7 +1662,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var unmuteVideo = function() {
+        var unmuteVideo = function () {
             if (mediaConnection) {
                 mediaConnection.unmuteVideo();
             }
@@ -1654,7 +1675,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var isVideoMuted = function() {
+        var isVideoMuted = function () {
             if (mediaConnection) {
                 return mediaConnection.isVideoMuted();
             }
@@ -1681,7 +1702,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var getRemoteBitrate = function() {
+        var getRemoteBitrate = function () {
             return remoteBitrate;
         };
 
@@ -1692,7 +1713,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var getNetworkBandwidth = function() {
+        var getNetworkBandwidth = function () {
             return networkBandwidth;
         };
 
@@ -1701,7 +1722,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var fullScreen = function() {
+        var fullScreen = function () {
             if (published()) {
                 logger.warn(LOG_PREFIX, "Full screen is allowed only for played streams");
             } else {
@@ -1728,7 +1749,7 @@ var createSession = function(options) {
          * @memberof Stream
          * @inner
          */
-        var on = function(event, callback) {
+        var on = function (event, callback) {
             if (!event) {
                 throw new TypeError("Event can't be null");
             }
@@ -1775,7 +1796,7 @@ var createSession = function(options) {
      * @memberof Session
      * @inner
      */
-    var disconnect = function() {
+    var disconnect = function () {
         if (wsConnection) {
             wsConnection.close();
         }
@@ -1788,7 +1809,7 @@ var createSession = function(options) {
      * @memberof Session
      * @inner
      */
-    var id = function() {
+    var id = function () {
         return id_;
     };
 
@@ -1799,7 +1820,7 @@ var createSession = function(options) {
      * @memberof Session
      * @inner
      */
-    var getServerUrl = function() {
+    var getServerUrl = function () {
         return urlServer;
     };
 
@@ -1810,7 +1831,7 @@ var createSession = function(options) {
      * @memberof Session
      * @inner
      */
-    var status = function() {
+    var status = function () {
         return sessionStatus;
     };
 
@@ -1822,7 +1843,7 @@ var createSession = function(options) {
      * @memberof Session
      * @inner
      */
-    var getStream = function(streamId) {
+    var getStream = function (streamId) {
         return streams[streamId];
     };
 
@@ -1833,7 +1854,7 @@ var createSession = function(options) {
      * @memberof Session
      * @inner
      */
-    var getStreams = function() {
+    var getStreams = function () {
         return util.copyObjectToArray(streams);
     };
 
@@ -1844,8 +1865,8 @@ var createSession = function(options) {
      * @memberof Session
      * @inner
      */
-    var submitBugReport = function(reportObject) {
-        send("submitBugReport",reportObject);
+    var submitBugReport = function (reportObject) {
+        send("submitBugReport", reportObject);
     }
 
     /**
@@ -1854,7 +1875,7 @@ var createSession = function(options) {
      * @inner
      */
 
-    var startDebug = function() {
+    var startDebug = function () {
         logger.setPushLogs(true);
         logger.setLevel("DEBUG");
         send("sessionDebug", {command: "start"});
@@ -1866,7 +1887,7 @@ var createSession = function(options) {
      * @inner
      */
 
-    var stopDebug = function() {
+    var stopDebug = function () {
         logger.setLevel("INFO");
         send("sessionDebug", {command: "stop"});
     }
@@ -1889,7 +1910,7 @@ var createSession = function(options) {
      * @memberof Session
      * @inner
      */
-    var on = function(event, callback) {
+    var on = function (event, callback) {
         if (!event) {
             throw new Error("Event can't be null", "TypeError");
         }
@@ -1900,7 +1921,7 @@ var createSession = function(options) {
         return session;
     };
 
-    var restAppCommunicator = function() {
+    var restAppCommunicator = function () {
         var pending = {};
         var exports = {};
         /**
@@ -1913,24 +1934,24 @@ var createSession = function(options) {
          * @method
          * @inner
          */
-        exports.sendData = function(data) {
-            return new Promise(function(resolve, reject){
+        exports.sendData = function (data) {
+            return new Promise(function (resolve, reject) {
                 var obj = {
                     operationId: uuid.v1(),
                     payload: data
                 };
                 pending[obj.operationId] = {
-                    FAILED: function(info){
+                    FAILED: function (info) {
                         reject(info);
                     },
-                    ACCEPTED: function(info){
+                    ACCEPTED: function (info) {
                         resolve(info);
                     }
                 };
                 send("sendData", obj);
             });
         };
-        exports.resolveData = function(data) {
+        exports.resolveData = function (data) {
             if (pending[data.operationId]) {
                 var handler = pending[data.operationId];
                 delete pending[data.operationId];
@@ -1961,7 +1982,7 @@ var createSession = function(options) {
     return session;
 };
 
-var isUsingTemasys = function(){
+var isUsingTemasys = function () {
     return isUsingTemasysPlugin;
 };
 

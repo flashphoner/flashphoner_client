@@ -7,30 +7,11 @@ var currentVolumeValue = 50, storedVolume;
 var stopped = true;
 var autoplay = getUrlParam("autoplay") || false;
 var resolution = getUrlParam("resolution");
-var mediaProvider = getUrlParam("mediaProvider") || null;
+var mediaProviders = getUrlParam("mediaProviders") || "";
 var streamName = getUrlParam("streamName") || "streamName";
 var urlServer = getUrlParam("urlServer") || setURL();
 
 function init_page() {
-    //init api
-    try {
-        Flashphoner.init({
-            flashMediaProviderSwfLocation: '../../../../media-provider.swf',
-            receiverLocation: '../../dependencies/websocket-player/WSReceiver2.js',
-            decoderLocation: '../../dependencies/websocket-player/video-worker2.js',
-            preferredMediaProvider: mediaProvider
-        });
-    } catch (e) {
-        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
-        return;
-    }
-    if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
-        resolution_for_wsplayer = {playWidth: 640, playHeight: 480};
-    }
-    if (Flashphoner.getMediaProviders()[0] === "Flash") {
-        $(".fullscreen").hide();
-    }
-
     //video display
     remoteVideo = document.getElementById("remoteVideo");
 
@@ -40,6 +21,25 @@ function init_page() {
     });
 
     onStopped();
+
+    //init api
+    try {
+        Flashphoner.init({
+            flashMediaProviderSwfLocation: '../../../../media-provider.swf',
+            receiverLocation: '../../dependencies/websocket-player/WSReceiver2.js',
+            decoderLocation: '../../dependencies/websocket-player/video-worker2.js',
+            preferredMediaProviders: mediaProviders && mediaProviders !== "" ? mediaProviders.split(','): []
+        });
+    } catch (e) {
+        $("#error_output").text(e.message);
+        return;
+    }
+    if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
+        resolution_for_wsplayer = {playWidth: 640, playHeight: 480};
+    }
+    if (Flashphoner.getMediaProviders()[0] === "Flash") {
+        $(".fullscreen").hide();
+    }
     if (autoplay) {
         $(".play-pause").click();
     }
@@ -133,14 +133,14 @@ function playStream(session) {
 
 //show connection or remote stream status
 function setStatus(status) {
-    var statusField = $("#status");
-    statusField.text(status).removeClass();
+    var statusField = $(".status");
+    statusField.text(status).removeClass("text-success").removeClass("text-muted").removeClass("text-danger");
     if (status == "PLAYING") {
-        statusField.attr("class", "text-success");
+        statusField.addClass("text-success");
     } else if (status == "DISCONNECTED" || status == "ESTABLISHED" || status == "STOPPED") {
-        statusField.attr("class", "text-muted");
+        statusField.addClass("text-muted");
     } else if (status == "FAILED") {
-        statusField.attr("class", "text-danger");
+        statusField.addClass("text-danger");
     }
 }
 

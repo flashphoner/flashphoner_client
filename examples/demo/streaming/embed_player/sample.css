@@ -1,0 +1,14 @@
+#sortable {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+#sortable li {
+    color: #000000;
+}
+
+#sortable li span {
+    position: absolute;
+}
