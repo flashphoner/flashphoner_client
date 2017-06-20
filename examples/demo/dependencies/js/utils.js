@@ -10,12 +10,12 @@ function notEmpty(obj) {
 }
 
 //Trace
-function trace(str){
+function trace(str) {
     console.log(str);
 }
 
 //Get field
-function field(name){
+function field(name) {
     var field = document.getElementById(name).value;
     return field;
 }
@@ -114,7 +114,7 @@ function detectFlash() {
     }
 }
 
-$(function() {
+$(function () {
     function reposition() {
         var modal = $(this),
             dialog = modal.find('.modal-dialog');
@@ -124,10 +124,11 @@ $(function() {
         // or four works better for larger screens.
         dialog.css("margin-top", Math.max(0, ($(window).height() - dialog.height()) / 2));
     }
+
     // Reposition when a modal is shown
     $('.modal').on('show.bs.modal', reposition);
     // Reposition when the window is resized
-    $(window).on('resize', function() {
+    $(window).on('resize', function () {
         $('.modal:visible').each(reposition);
     });
 });
@@ -181,7 +182,7 @@ function createUUID(length) {
  * Div structure: div WxH -> div wrapper (display) -> video
  * @param video HTML element from resize event target
  */
-function resizeVideo(video, width, height){
+function resizeVideo(video, width, height) {
     if (!video.parentNode) {
         return;
     }
@@ -205,33 +206,27 @@ function resizeVideo(video, width, height){
 
     //vertical align
     var margin = 0;
-    if (parentSize.h - newSize.h > 1) {
-        margin = Math.floor((parentSize.h - newSize.h) / 2);
-    }
+    // if (parentSize.h - newSize.h > 1) {
+    //     margin = Math.floor((parentSize.h - newSize.h) / 2);
+    // }
     display.style.margin = margin + "px auto";
     console.log("Resize from " + video.videoWidth + "x" + video.videoHeight + " to " + display.offsetWidth + "x" + display.offsetHeight);
 }
 
 
 function downScaleToFitSize(videoWidth, videoHeight, dstWidth, dstHeight) {
-    if (videoWidth > dstWidth || videoHeight > dstHeight) {
-        var ratio = videoWidth / videoHeight;
-        var newWidth = dstWidth;
-        var newHeight = videoHeight;
-        if (videoWidth > newWidth) {
-            newHeight = Math.floor(newWidth / ratio);
-        }
-        if (newHeight > dstHeight) {
-            newWidth = Math.floor(ratio * dstHeight);
-            newHeight = dstHeight;
-        }
-        return {
-            w: newWidth,
-            h: newHeight
-        };
+    var newWidth, newHeight;
+    var videoRatio = videoWidth / videoHeight;
+    var dstRatio = dstWidth / dstHeight;
+    if (dstRatio > videoRatio) {
+        newHeight = dstHeight;
+        newWidth = Math.floor(videoRatio * dstHeight);
+    } else {
+        newWidth = dstWidth;
+        newHeight = Math.floor(dstWidth / videoRatio);
     }
     return {
-        w: videoWidth,
-        h: videoHeight
-    }
+        w: newWidth,
+        h: newHeight
+    };
 }

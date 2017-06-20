@@ -113,18 +113,18 @@ function playStream(session) {
         if (stream.getInfo() === "FIRST_FRAME_RENDERED") {
             $("#preloader").hide();
         }
-        // document.getElementById(stream.id()).addEventListener('resize', function(event){
-        //     $("#preloader").hide();
-        //     var streamResolution = stream.videoResolution();
-        //     if (Object.keys(streamResolution).length === 0) {
-        //         resizeVideo(event.target);
-        //     } else {
-        //         // Change aspect ratio to prevent video stretching
-        //         var ratio = streamResolution.width / streamResolution.height;
-        //         var newHeight = Math.floor(options.playWidth / ratio);
-        //         resizeVideo(event.target, options.playWidth, newHeight);
-        //     }
-        // });
+        document.getElementById(stream.id()).addEventListener('resize', function(event){
+            $("#preloader").hide();
+            var streamResolution = stream.videoResolution();
+            if (Object.keys(streamResolution).length === 0) {
+                resizeVideo(event.target);
+            } else {
+                // Change aspect ratio to prevent video stretching
+                var ratio = streamResolution.width / streamResolution.height;
+                var newHeight = Math.floor(options.playWidth / ratio);
+                resizeVideo(event.target, options.playWidth, newHeight);
+            }
+        });
         setStatus(stream.status());
         onStarted(stream);
     }).on(STREAM_STATUS.STOPPED, function () {
@@ -206,15 +206,17 @@ function validateForm() {
 
             $that.find('.play-pause').bind('click', function () {
                 // If playing, etc, change classes to show pause or play button
-                if (stopped) {
-                    start();
-                    $(this).addClass('pause').removeClass('play').prop('disabled', true);
-                } else {
-                    if (stream) {
-                        stream.stop();
+                if (!$(this).prop('disabled')) {
+                    if (stopped) {
+                        start();
+                        $(this).addClass('pause').removeClass('play').prop('disabled', true);
+                    } else {
+                        if (stream) {
+                            stream.stop();
+                        }
+                        $(this).addClass('play').removeClass('pause').prop('disabled', true);
+                        $("#preloader").hide();
                     }
-                    $(this).addClass('play').removeClass('pause').prop('disabled', true);
-                    $("#preloader").hide();
                 }
             });
 
@@ -337,7 +339,11 @@ function validateForm() {
 
             $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(e) {
                 if (stream) {
-                    currentVolumeValue = stream.getVolume();
+                    if ($("#"+stream.id()).prop("muted")) {
+                        currentVolumeValue = 0;
+                    } else {
+                        currentVolumeValue = stream.getVolume();
+                    }
                     volanim();
                 }
             });
