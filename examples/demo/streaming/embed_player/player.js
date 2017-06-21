@@ -43,6 +43,9 @@ function init_page() {
         return;
     }
     if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
+        if (Browser.isiOS()) {
+            $(".fullscreen").hide();
+        }
         resolution_for_wsplayer = {playWidth: 640, playHeight: 480};
     }
     if (Flashphoner.getMediaProviders()[0] === "Flash") {
@@ -198,6 +201,7 @@ function validateForm() {
             var $mclicking = false,
                 $vclicking = false,
                 $volhover = false,
+                $clearTimeout;
                 y = 0;
 
             $that.bind('selectstart', function () {
@@ -218,6 +222,16 @@ function validateForm() {
                         $("#preloader").hide();
                     }
                 }
+            });
+
+            $that.bind('click', function () {
+                if ($clearTimeout) {
+                    clearTimeout($clearTimeout);
+                }
+                $that.find('.player').stop(true, false).animate({'opacity': '1'}, 0.5);
+                $clearTimeout = setTimeout(function() {
+                    $that.find('.player').stop(true, false).animate({'opacity': '0'}, 0.5);
+                }, 5000);
             });
 
 

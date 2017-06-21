@@ -16,12 +16,12 @@
     <script src="sample.js"></script>
 </head>
 <body onload="init_page()">
-<div style="width: 1000px">
+<div class="container">
     <div class="row">
 
         <div class="col-sm-12 text-center">
 
-            <div class="col-sm-6 text-center">
+            <div class="col-sm-6 text-center" style="min-width: 480px;">
                 <h2 class="text-center col-sm-12">Player</h2>
 
                 <div class="fp-remoteVideo" style="width:480px; height:270px; margin: 0 auto;">
@@ -31,9 +31,9 @@
                 </div>
 
             </div>
-            <div class="col-sm-6 text-center" style="width: 500px">
-                <h2 class="text-center col-sm-12" style="margin-bottom: 20px">Embedding</h2>
-                <form id="form" class="form-horizontal" role="form" style="margin-top: 10px">
+            <div class="col-sm-6 text-center">
+                <form id="form" class="form-horizontal" role="form" style="margin: 0 auto;">
+                    <h2 class="text-center col-sm-12" style="margin-bottom: 20px">Embedding</h2>
                     <div id="connForm" class="form-group">
                         <label for="url" class="col-sm-3 control-label">Server</label>
                         <div class="col-sm-9">
