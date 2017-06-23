@@ -252,6 +252,9 @@ function validateForm() {
                 $that.find('.volume-bar').css({'height': (currentVolumeValue) + '%'});
                 if (stream) {
                     stream.setVolume(currentVolumeValue);
+                    if (currentVolumeValue > 0) {
+                        $("#"+stream.id()).prop("muted", false);
+                    }
                 }
                 for (var i = 0; i < 1; i += 0.1) {
                     var fi = parseInt(Math.floor(i * 10)) / 10;
