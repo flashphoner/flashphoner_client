@@ -31,8 +31,6 @@ function init_page() {
             soundOff();
         }
     });
-    $("#rtmpUrl").val("rtmp://wcs5-eu.flashphoner.com:1935/live");
-    $("#rtmpStream").val("testTestTest");
     // Set fields using cookies
     $("#sipLogin").val(getCookie("sipLogin"));
     $("#sipAuthenticationName").val(getCookie("sipAuthenticationName"));
