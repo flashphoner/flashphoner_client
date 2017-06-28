@@ -16,7 +16,6 @@ function init_page() {
         }
     );
     $("#mute").click(function() {
-        $(this).prop('disabled', true);
         if ($(this).is(':checked')) {
             mute();
         } else {
@@ -241,35 +240,45 @@ function startCall() {
 }
 
 function mute() {
-    var RESTObj = {};
-    RESTObj.mediaSessionId = rtmpMediaSessionId;
-    var url = field("restUrl") + "/push/mute";
-    $("#muteBtn").prop('disabled', true);
-    sendREST(url, JSON.stringify(RESTObj), muteSuccessHandler, muteErrorHandler);
+    if (rtmpStreamStarted) {
+        $("#mute").prop('disabled', true);
+        var RESTObj = {};
+        RESTObj.mediaSessionId = rtmpMediaSessionId;
+        var url = field("restUrl") + "/push/mute";
+        sendREST(url, JSON.stringify(RESTObj), muteSuccessHandler, muteErrorHandler);
+    }
 }
 
 function unmute() {
-    var RESTObj = {};
-    RESTObj.mediaSessionId = rtmpMediaSessionId;
-    var url = field("restUrl") + "/push/unmute";
-    $("#muteBtn").prop('disabled', true);
-    sendREST(url, JSON.stringify(RESTObj), muteSuccessHandler, muteErrorHandler);
+    if (rtmpStreamStarted) {
+        $("#mute").prop('disabled', true);
+        var RESTObj = {};
+        RESTObj.mediaSessionId = rtmpMediaSessionId;
+        var url = field("restUrl") + "/push/unmute";
+        sendREST(url, JSON.stringify(RESTObj), muteSuccessHandler, muteErrorHandler);
+    }
 }
 
 function soundOn() {
-    var RESTObj = {};
-    RESTObj.mediaSessionId = rtmpMediaSessionId;
-    RESTObj.soundFile = "sample.wav";
-    RESTObj.loop = false;
-    var url = field("restUrl") + "/push/sound_on";
-    sendREST(url, JSON.stringify(RESTObj), injectSoundSuccessHandler, injectSoundErrorHandler);
+    if (rtmpStreamStarted) {
+        $("#music").prop('disabled', true);
+        var RESTObj = {};
+        RESTObj.mediaSessionId = rtmpMediaSessionId;
+        RESTObj.soundFile = "sample.wav";
+        RESTObj.loop = false;
+        var url = field("restUrl") + "/push/sound_on";
+        sendREST(url, JSON.stringify(RESTObj), injectSoundSuccessHandler, injectSoundErrorHandler);
+    }
 }
 
 function soundOff() {
-    var RESTObj = {};
-    RESTObj.mediaSessionId = rtmpMediaSessionId;
-    var url = field("restUrl") + "/push/sound_off";
-    sendREST(url, JSON.stringify(RESTObj), injectSoundSuccessHandler, injectSoundErrorHandler);
+    if (rtmpStreamStarted) {
+        $("#music").prop('disabled', true);
+        var RESTObj = {};
+        RESTObj.mediaSessionId = rtmpMediaSessionId;
+        var url = field("restUrl") + "/push/sound_off";
+        sendREST(url, JSON.stringify(RESTObj), injectSoundSuccessHandler, injectSoundErrorHandler);
+    }
 }
 
 
@@ -326,8 +335,16 @@ function startRtmpStream() {
         rtmpStreamStarted = true;
         var url = field("restUrl") + "/push/startup";
         var RESTObj = {};
+        var options = {};
+        if ($("#mute").is(':checked')) {
+            options.action = "mute";
+        } else if ($("#music").is(':checked')) {
+            options.action = "sound_on";
+            options.soundFile = "sample.wav";
+        }
         RESTObj.streamName = field("rtmpStream");
         RESTObj.rtmpUrl = field("rtmpUrl");
+        RESTObj.options = options;
         sendREST(url, JSON.stringify(RESTObj), startupRtmpSuccessHandler, startupRtmpErrorHandler);
     }
 }
