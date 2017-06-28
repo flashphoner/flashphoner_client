@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -85,16 +85,12 @@
             <div>
                 <div class="row">
                     <div class="col-lg-6 col-sm-offset-3 text-center">
-
                         <div id="callDiv" class="input-group row-space">
                             <input id="callee" type="text" class="form-control" placeholder="callee"/>
                             <span class="input-group-btn">
                                 <button id="callBtn" class="btn btn-success" style="width: 100px">Call</button>
                             </span>
                         </div>
-
-
-
                     </div>
                 </div>
                 <div class="row">
@@ -135,11 +131,31 @@
                         </div>
                     </div>
                 </form>
+
             </fieldset>
-            <button id="muteBtn" class="btn btn-default">Mute</button>
-            <button id="injectSndBtn" class="btn btn-default">Sound play</button>
+            <div class="row">
+                <button id="startRtmp" class="btn btn-default">Start</button>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <h4>Mute</h4>
+                    <label class="switch">
+                        <input id="mute" type="checkbox">
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+                <div class="col-sm-2">
+                    <h4>Music</h4>
+                    <label class="switch">
+                        <input id="music" type="checkbox">
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+            </div>
             <div id="restStatus"></div>
-            <h3>RTMP Player</h3>
+            <div class="row">
+                <h3>RTMP Player</h3>
+            </div>
             <div class="text-center">
                 <div id="player"></div>
             </div>

@@ -15,22 +15,31 @@ function init_page() {
             }
         }
     );
-    $("#muteBtn").click(function() {
-       var state = $(this).text();
-       if (state == "Mute") {
-           mute();
-       } else {
-           unmute();
-       }
+    $("#mute").click(function() {
+        $(this).prop('disabled', true);
+        if ($(this).is(':checked')) {
+            mute();
+        } else {
+            unmute();
+        }
     });
-    $("#injectSndBtn").click(function() {
-        var state = $(this).text();
-        if (state == "Sound play") {
+    $("#music").click(function() {
+        $(this).prop('disabled', true);
+        if ($(this).is(':checked')) {
             soundOn();
         } else {
             soundOff();
         }
     });
+    $("#startRtmp").click(function() {
+        $(this).prop('disabled', true);
+        var state = $(this).text();
+        if (state == "Start") {
+            startRtmpStream();
+        } else {
+            stopRtmpStream();
+        }
+    }).prop('disabled', true);
     // Set fields using cookies
     $("#sipLogin").val(getCookie("sipLogin"));
     $("#sipAuthenticationName").val(getCookie("sipAuthenticationName"));
@@ -96,7 +105,6 @@ function handleAjaxSuccess(data, textStatus, jqXHR) {
     if (jqXHR.responseText) {
         if (isJSON(jqXHR.responseText)) {
             var response = JSON.parse(jqXHR.responseText);
-            console.log(response);
             if (response[0].status) {
                 $("#callStatus").text(response[0].status);
                 $("#callBtn").text("Hangup").removeClass("btn-success").addClass("btn-danger").prop('disabled', false);
@@ -120,35 +128,42 @@ function startupRtmpSuccessHandler(data, textStatus, jqXHR) {
             if (response.mediaSessionId) {
                 rtmpMediaSessionId = response.mediaSessionId;
             }
+            $("#startRtmp").text("Stop").prop('disabled', false);
         }
     }
 }
 
 function startupRtmpErrorHandler(jqXHR, textStatus, errorThrown) {
     console.log("Error: ", jqXHR);
+    $("#startRtmp").prop('disabled', false);
+}
+
+function stopRtmpSuccessHandler(data, textStatus, jqXHR) {
+    $("#startRtmp").text("Start").prop('disabled', false);
+}
+
+function stopRtmpErrorHandler(jqXHR, textStatus, errorThrown) {
+    console.log("Error: ", jqXHR);
+    $("#startRtmp").prop('disabled', false);
 }
 
 function injectSoundSuccessHandler(data, textStatus, jqXHR) {
-    var state = ($("#injectSndBtn").text() == "Sound play") ? "Sound stop" : "Sound play";
-    $("#injectSndBtn").text(state).prop('disabled', false);
-    console.log(jqXHR);
+    $("#music").prop('disabled', false);
 }
 
 function injectSoundErrorHandler(jqXHR, textStatus, errorThrown) {
-    $("#injectSndBtn").text("Sound play").prop('disabled', false);
+    $("#music").prop('disabled', false);
     console.log("Error on inject sound ", jqXHR.responseText);
     $("#restStatus").show().text("Error on inject sound");
 }
 
 function muteSuccessHandler(data, textStatus, jqXHR) {
-    var state = ($("#muteBtn").text() == "Mute") ? "Unmute" : "Mute";
-    $("#muteBtn").text(state).prop('disabled', false);
-    console.log(state + " " + jqXHR);
+    $("#mute").prop('disabled', false);
 }
 
 function muteErrorHandler(jqXHR, textStatus, errorThrown) {
     console.log("Error on mute ", jqXHR.responseText);
-    $("#muteBtn").text("Mute").prop('disabled', false);
+    $("#mute").prop('disabled', false);
     $("#restStatus").show().text("Error on mute/unmute");
 }
 
@@ -199,7 +214,7 @@ function startCall() {
     }
 
     var RESTCall = {};
-    RESTCall.push = field("rtmpStream");
+    RESTCall.toStream = field("rtmpStream");
     RESTCall.hasAudio = field("hasAudio");
     RESTCall.hasVideo = field("hasVideo");
     RESTCall.callId = callId;
@@ -211,7 +226,6 @@ function startCall() {
     RESTCall.sipOutboundProxy = field("sipOutboundProxy");
     RESTCall.appKey = field("appKey");
     RESTCall.sipRegisterRequired = field("sipRegisterRequired");
-    //RESTCall.rtmpUrl = field("rtmpUrl");
 
     for (var key in RESTCall) {
         setCookie(key, RESTCall[key]);
@@ -318,6 +332,16 @@ function startRtmpStream() {
     }
 }
 
+function stopRtmpStream() {
+    if (rtmpStreamStarted) {
+        rtmpStreamStarted = false;
+        var url = field("restUrl") + "/push/terminate";
+        var RESTObj = {};
+        RESTObj.mediaSessionId = rtmpMediaSessionId;
+        sendREST(url, JSON.stringify(RESTObj), stopRtmpSuccessHandler, stopRtmpErrorHandler);
+    }
+}
+
 function startCheckStatus() {
     intervalID = setInterval(getStatus,3000);
 }
@@ -400,7 +424,6 @@ function setCookie(c_name, value) {
     exdate.setDate(exdate.getDate() + 100);
     var c_value = encodeURI(value) + "; expires=" + exdate.toUTCString();
     document.cookie = c_name + "=" + c_value;
-    //console.log(document.cookie);
     return value;
 }
 
@@ -421,11 +444,13 @@ function setCallStatus(status) {
 
     if (status == "ESTABLISHED") {
         $("#callStatus").removeClass().attr("class","text-success");
-        startRtmpStream();
+        resetButtonsState(false);
     }
 
     if (status == "FINISHED") {
         $("#callStatus").removeClass().attr("class","text-muted");
+        resetButtonsState(true);
+        resetButtonsText();
         rtmpStreamStarted = false;
     }
 
@@ -465,12 +490,12 @@ function checkForEmptyField(checkField, alertDiv) {
 }
 
 function resetButtonsState(state) {
-    $("#muteBtn").prop('disabled', state);
-    $("#injectSndBtn").prop('disabled', state);
+    $("#startRtmp").prop('disabled', state);
     $("#dtmfBtn").prop('disabled', state);
 }
 
 function resetButtonsText() {
-    $("#muteBtn").text("Mute");
-    $("#injectSndBtn").text("Sound play");
+    $("#mute").prop('checked', false);
+    $("#sound").prop('checked', false);
+    $("#startRtmp").text("Start");
 }
