@@ -15,10 +15,19 @@ var DEFAULT_SDP = "v=0\r\n" +
     "a=rtpmap:112 H264/90000\r\n" +
     "a=fmtp:112 packetization-mode=1; profile-level-id=420020\r\n" +
     "a=VIDEO_STATE\r\n" +
-    "m=audio 0 RTP/AVP 8 0 100\r\n" +
+    "m=audio 0 RTP/AVP 8 0 100 102 103 104 105 106 107 108 109 110\r\n" +
     "a=rtpmap:0 PCMU/8000\r\n" +
     "a=rtpmap:8 PCMA/8000\r\n" +
     "a=rtpmap:100 SPEEX/16000\r\n" +
+    "a=rtpmap:102 mpeg4-generic/48000/1\r\n" +
+    "a=rtpmap:103 mpeg4-generic/8000/1\r\n" +
+    "a=rtpmap:104 mpeg4-generic/11025/1\r\n" +
+    "a=rtpmap:105 mpeg4-generic/12000/1\r\n" +
+    "a=rtpmap:106 mpeg4-generic/16000/1\r\n" +
+    "a=rtpmap:107 mpeg4-generic/22050/1\r\n" +
+    "a=rtpmap:108 mpeg4-generic/24000/1\r\n" +
+    "a=rtpmap:109 mpeg4-generic/32000/1\r\n" +
+    "a=rtpmap:110 mpeg4-generic/44100/1\r\n" +
     "a=AUDIO_STATE\r\n";
 
 var CACHED_INSTANCE_POSTFIX = "CACHED_FLASH_INSTANCE";
