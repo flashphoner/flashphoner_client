@@ -23,7 +23,6 @@ function init_page() {
         }
     });
     $("#music").click(function() {
-        $(this).prop('disabled', true);
         if ($(this).is(':checked')) {
             soundOn();
         } else {
@@ -95,7 +94,7 @@ function handleAjaxError(jqXHR, textStatus, errorThrown) {
     $("#callStatus").text("FINISHED");
     $("#callBtn").text("Call").removeClass("btn-danger").addClass("btn-success").prop('disabled',false);
     resetButtonsState(true);
-    resetButtonsText();
+    resetElementsState();
     setCallStatus("FINISHED");
     stopCheckStatus();
 }
@@ -128,22 +127,27 @@ function startupRtmpSuccessHandler(data, textStatus, jqXHR) {
                 rtmpMediaSessionId = response.mediaSessionId;
             }
             $("#startRtmp").text("Stop").prop('disabled', false);
+            $("#rtmpUrl").prop('disabled', true);
         }
     }
 }
 
 function startupRtmpErrorHandler(jqXHR, textStatus, errorThrown) {
     console.log("Error: ", jqXHR);
+    rtmpStreamStarted = false;
     $("#startRtmp").prop('disabled', false);
+    $("#rtmpUrl").prop('disabled', false);
 }
 
 function stopRtmpSuccessHandler(data, textStatus, jqXHR) {
     $("#startRtmp").text("Start").prop('disabled', false);
+    $("#rtmpUrl").prop('disabled', false);
 }
 
 function stopRtmpErrorHandler(jqXHR, textStatus, errorThrown) {
     console.log("Error: ", jqXHR);
-    $("#startRtmp").prop('disabled', false);
+    $("#startRtmp").text("Start").prop('disabled', false);
+    $("#rtmpUrl").prop('disabled', false);
 }
 
 function injectSoundSuccessHandler(data, textStatus, jqXHR) {
@@ -462,12 +466,13 @@ function setCallStatus(status) {
     if (status == "ESTABLISHED") {
         $("#callStatus").removeClass().attr("class","text-success");
         resetButtonsState(false);
+        $("#rtmpStream").prop('disabled', true);
     }
 
     if (status == "FINISHED") {
         $("#callStatus").removeClass().attr("class","text-muted");
         resetButtonsState(true);
-        resetButtonsText();
+        resetElementsState();
         rtmpStreamStarted = false;
     }
 
@@ -511,8 +516,10 @@ function resetButtonsState(state) {
     $("#dtmfBtn").prop('disabled', state);
 }
 
-function resetButtonsText() {
+function resetElementsState() {
     $("#mute").prop('checked', false);
     $("#sound").prop('checked', false);
     $("#startRtmp").text("Start");
+    $("#rtmpStream").prop('disabled', false);
+    $("#rtmpUrl").prop('disabled', false);
 }
