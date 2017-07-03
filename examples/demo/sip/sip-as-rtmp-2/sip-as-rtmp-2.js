@@ -84,12 +84,12 @@ function sendREST(url, data, successHandler, errorHandler) {
         type: 'POST',
         contentType: 'application/json',
         data: data,
-        success: successHandler,
-        error: errorHandler
+        success: (successHandler === undefined) ? handleAjaxSuccess : successHandler,
+        error: (errorHandler === undefined) ? handleAjaxError : errorHandler
     });
 }
 // Handlers
-function callStartupErrorHandler(jqXHR, textStatus, errorThrown) {
+function handleAjaxError(jqXHR, textStatus, errorThrown) {
     console.log("Error: ", jqXHR);
     $("#callStatus").text("FINISHED");
     $("#callBtn").text("Call").removeClass("btn-danger").addClass("btn-success").prop('disabled',false);
@@ -99,7 +99,7 @@ function callStartupErrorHandler(jqXHR, textStatus, errorThrown) {
     stopCheckStatus();
 }
 
-function callStartupSuccessHandler(data, textStatus, jqXHR) {
+function handleAjaxSuccess(data, textStatus, jqXHR) {
     if (jqXHR.responseText) {
         if (isJSON(jqXHR.responseText)) {
             var response = JSON.parse(jqXHR.responseText);
@@ -238,7 +238,7 @@ function startCall() {
 
     var data = JSON.stringify(RESTCall);
 
-    sendREST(url, data, callStartupSuccessHandler, callStartupErrorHandler);
+    sendREST(url, data);
     startCheckStatus();
     sendDataToPlayer();
 }
@@ -331,7 +331,7 @@ function hangup() {
     var url = field("restUrl") + "/call/terminate";
     var currentCallId = { callId: callId };
     var data = JSON.stringify(currentCallId);
-    sendREST(url, data, callStartupSuccessHandler, callStartupErrorHandler);
+    sendREST(url, data);
 }
 
 function startRtmpStream() {
