@@ -16,6 +16,9 @@ function init_page() {
         }
     );
     $("#mute").click(function() {
+        if (!rtmpStreamStarted) {
+            $("#music").prop('checked', false);
+        }
         if ($(this).is(':checked')) {
             mute();
         } else {
@@ -23,6 +26,9 @@ function init_page() {
         }
     });
     $("#music").click(function() {
+        if (!rtmpStreamStarted) {
+            $("#mute").prop('checked', false);
+        }
         if ($(this).is(':checked')) {
             soundOn();
         } else {
@@ -240,7 +246,7 @@ function startCall() {
 
     sendREST(url, data);
     startCheckStatus();
-    sendDataToPlayer();
+
 }
 
 function mute() {
@@ -350,6 +356,7 @@ function startRtmpStream() {
         RESTObj.rtmpUrl = field("rtmpUrl");
         RESTObj.options = options;
         sendREST(url, JSON.stringify(RESTObj), startupRtmpSuccessHandler, startupRtmpErrorHandler);
+        sendDataToPlayer();
     }
 }
 
