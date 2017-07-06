@@ -148,12 +148,16 @@ function startupRtmpErrorHandler(jqXHR, textStatus, errorThrown) {
 function stopRtmpSuccessHandler(data, textStatus, jqXHR) {
     $("#startRtmp").text("Start").prop('disabled', false);
     $("#rtmpUrl").prop('disabled', false);
+    $("#mute").prop('checked', false);
+    $("#music").prop('checked', false);
 }
 
 function stopRtmpErrorHandler(jqXHR, textStatus, errorThrown) {
     console.log("Error: ", jqXHR);
     $("#startRtmp").text("Start").prop('disabled', false);
     $("#rtmpUrl").prop('disabled', false);
+    $("#mute").prop('checked', false);
+    $("#music").prop('checked', false);
 }
 
 function injectSoundSuccessHandler(data, textStatus, jqXHR) {
