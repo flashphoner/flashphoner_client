@@ -74,7 +74,8 @@ function loadPlayer() {
     swfobject.embedSWF(pathToSWF, elementId, "350", "400", "11.2.202", "expressInstall.swf", flashvars, params, attributes);
 }
 
-var intervalID;
+var callStatusIntervalID;
+var transponderStatusIntervalID;
 var callId;
 var rtmpStreamStarted = false;
 var rtmpMediaSessionId;
@@ -94,7 +95,7 @@ function sendREST(url, data, successHandler, errorHandler) {
         error: (errorHandler === undefined) ? handleAjaxError : errorHandler
     });
 }
-// Handlers
+//////////////////////// Handlers ////////////////////////
 function handleAjaxError(jqXHR, textStatus, errorThrown) {
     console.log("Error: ", jqXHR);
     $("#callStatus").text("FINISHED");
@@ -102,7 +103,7 @@ function handleAjaxError(jqXHR, textStatus, errorThrown) {
     resetButtonsState(true);
     resetElementsState();
     setCallStatus("FINISHED");
-    stopCheckStatus();
+    stopCheckCallStatus();
 }
 
 function handleAjaxSuccess(data, textStatus, jqXHR) {
@@ -143,6 +144,7 @@ function startupRtmpErrorHandler(jqXHR, textStatus, errorThrown) {
     rtmpStreamStarted = false;
     $("#startRtmp").prop('disabled', false);
     $("#rtmpUrl").prop('disabled', false);
+    stopCheckTransponderStatus();
 }
 
 function stopRtmpSuccessHandler(data, textStatus, jqXHR) {
@@ -150,6 +152,20 @@ function stopRtmpSuccessHandler(data, textStatus, jqXHR) {
     $("#rtmpUrl").prop('disabled', false);
     $("#mute").prop('checked', false);
     $("#music").prop('checked', false);
+}
+
+function transponderStatusSuccessHandler(data, textStatus, jqXHR) {
+
+}
+
+function transponderStatusErrorHandler(jqXHR, textStatus, errorThrown) {
+    console.log("Error: ", jqXHR);
+    rtmpStreamStarted = false;
+    $("#startRtmp").text("Start").prop('disabled', false);
+    $("#rtmpUrl").prop('disabled', false);
+    $("#mute").prop('checked', false);
+    $("#music").prop('checked', false);
+    stopCheckTransponderStatus();
 }
 
 function stopRtmpErrorHandler(jqXHR, textStatus, errorThrown) {
@@ -179,6 +195,7 @@ function muteErrorHandler(jqXHR, textStatus, errorThrown) {
     $("#mute").prop('disabled', false);
     $("#restStatus").show().text("Error on mute/unmute");
 }
+//////////////////////////////////////////////////////////
 
 function isJSON(str) {
     try {
@@ -249,7 +266,7 @@ function startCall() {
     var data = JSON.stringify(RESTCall);
 
     sendREST(url, data);
-    startCheckStatus();
+    startCheckCallStatus();
 
 }
 
@@ -308,6 +325,16 @@ function sendDataToPlayer() {
     player.setURLtoFlash(url);
 }
 
+//Get transponder status
+function getTransponderStatus() {
+    var url = field("restUrl") + "/push/find";
+    var RESTObj = {};
+    // By default transponder's stream name will contain prefix "rtmp_"
+    RESTObj.streamName = "rtmp_" + field("rtmpStream");
+    RESTObj.rtmpUrl = field("rtmpUrl");
+    sendREST(url, JSON.stringify(RESTObj), transponderStatusSuccessHandler, transponderStatusErrorHandler);
+}
+
 //Get call status by callId in GetCallStatusOrHangupForm
 function getStatus() {
     var url = field("restUrl") + "/call/find";
@@ -361,6 +388,7 @@ function startRtmpStream() {
         RESTObj.options = options;
         sendREST(url, JSON.stringify(RESTObj), startupRtmpSuccessHandler, startupRtmpErrorHandler);
         sendDataToPlayer();
+        startCheckTransponderStatus();
     }
 }
 
@@ -374,14 +402,26 @@ function stopRtmpStream() {
     }
 }
 
-function startCheckStatus() {
-    intervalID = setInterval(getStatus,3000);
+////////////// Checkers /////////////////
+
+function startCheckCallStatus() {
+    callStatusIntervalID = setInterval(getStatus,3000);
 }
 
-function stopCheckStatus() {
-    if (intervalID != null)
-        clearInterval(intervalID);
+function stopCheckCallStatus() {
+    if (callStatusIntervalID != null)
+        clearInterval(callStatusIntervalID);
 }
+
+function startCheckTransponderStatus() {
+    transponderStatusIntervalID = setInterval(getTransponderStatus, 3000);
+}
+
+function stopCheckTransponderStatus() {
+    if (transponderStatusIntervalID != null)
+        clearInterval(transponderStatusIntervalID);
+}
+/////////////////////////////////////////
 
 $.fn.serializeObject = function()
 {
