@@ -9,22 +9,14 @@ var autoplay = getUrlParam("autoplay") || false;
 var resolution = getUrlParam("resolution");
 var mediaProviders = getUrlParam("mediaProviders") || "";
 var streamName = getUrlParam("streamName") || "streamName";
-var skin = getUrlParam("skin") || "dark";
 var urlServer = getUrlParam("urlServer") || setURL();
 
 function init_page() {
-    if (skin === "dark") {
-        $('.player, .player .volume-holder, .player .volume-icon-hover').switchClass("skin-light", "skin-dark");
-        $('.pause-button span,.player .fullscreen .fullscreenBtn, .player .volume-icon span, .player .volume-bar-holder').switchClass("skin-light-button", "skin-dark-button");
-    } else if (skin === "light") {
-        $('.player, .player .volume-holder, .player .volume-icon-hover').switchClass("skin-dark", "skin-light");
-        $('.pause-button span, .player .fullscreen .fullscreenBtn, .player .volume-icon span, .player .volume-bar-holder').switchClass("skin-dark-button", "skin-light-button");
-    }
     //video display
     remoteVideo = document.getElementById("remoteVideo");
 
     $('#remoteVideo').videoPlayer({
-        'playerWidth': 0.95,
+        'playerWidth': 1,
         'videoClass': 'video'
     });
 
@@ -58,6 +50,7 @@ function init_page() {
 
 function onStarted(stream) {
     stopped = false;
+    $('#play').css('display', 'none');
     $(".play-pause").prop('disabled', false);
     $(".fullscreen").prop('disabled', false);
     stream.setVolume(currentVolumeValue);
@@ -65,6 +58,22 @@ function onStarted(stream) {
 
 function onStopped() {
     stopped = true;
+    $('#play').css('display', 'block');
+    $('#play').on('click', function() {
+        if (!$('.play-pause').prop('disabled')) {
+            if (stopped) {
+                start();
+                $('.play-pause').addClass('pause').removeClass('play').prop('disabled', true);
+                $('#play').css('display', 'none');
+            } else {
+                if (stream) {
+                    stream.stop();
+                }
+                $('.play-pause').addClass('play').removeClass('pause').prop('disabled', true);
+                $("#preloader").hide();
+            };
+        };
+    });
     $(".play-pause").addClass('play').removeClass('pause').prop('disabled', false);
     $(".fullscreen").prop('disabled', true);
     $("#preloader").hide();
@@ -84,7 +93,8 @@ function start() {
     }
     //create session
     console.log("Create new session with url " + urlServer);
-    Flashphoner.createSession({urlServer: urlServer}).on(SESSION_STATUS.ESTABLISHED, function (session) {
+    var mediaOptions = {"iceServers": [{'url': 'turn:turn.flashphoner.com:443?transport=tcp', 'username': 'flashphoner', 'credential': 'coM77EMrV7Cwhyan'}]};
+    Flashphoner.createSession({urlServer: urlServer, mediaOptions: mediaOptions}).on(SESSION_STATUS.ESTABLISHED, function (session) {
         setStatus(session.status());
         //session connected, start playback
         playStream(session);
@@ -145,13 +155,16 @@ function playStream(session) {
 //show connection or remote stream status
 function setStatus(status) {
     var statusField = $(".status");
-    statusField.text(status).removeClass("text-success").removeClass("text-muted").removeClass("text-danger");
-    if (status == "PLAYING") {
-        statusField.addClass("text-success");
-    } else if (status == "DISCONNECTED" || status == "ESTABLISHED" || status == "STOPPED") {
+    statusField.removeClass("text-success").removeClass("text-muted").removeClass("text-danger");
+    if (status == "PLAYING" || status == "ESTABLISHED" || status == "STOPPED") {
+        //don't display status word because we have this indication on UI
+        statusField.text("");
+    } else if (status == "DISCONNECTED") {
+        statusField.text(status);
         statusField.addClass("text-muted");
     } else if (status == "FAILED") {
-        statusField.addClass("text-danger");
+        statusField.text(status);
+        statusField.addClass("text-muted");
     }
 }
 
@@ -199,10 +212,10 @@ function validateForm() {
             });
 
             var $mclicking = false,
-                $vclicking = false,
-                $volhover = false,
-                $clearTimeout;
-                y = 0;
+            $vclicking = false,
+            $volhover = false,
+            $clearTimeout;
+            y = 0;
 
             $that.bind('selectstart', function () {
                 return false;
@@ -214,6 +227,7 @@ function validateForm() {
                     if (stopped) {
                         start();
                         $(this).addClass('pause').removeClass('play').prop('disabled', true);
+                        $('#play').css('display', 'none');
                     } else {
                         if (stream) {
                             stream.stop();
@@ -225,6 +239,7 @@ function validateForm() {
             });
 
             $that.bind('click', function () {
+                if ( !stopped ) {
                 if ($clearTimeout) {
                     clearTimeout($clearTimeout);
                 }
@@ -232,6 +247,7 @@ function validateForm() {
                 $clearTimeout = setTimeout(function() {
                     $that.find('.player').stop(true, false).animate({'opacity': '0'}, 0.5);
                 }, 5000);
+                };
             });
 
 
@@ -252,9 +268,6 @@ function validateForm() {
                 $that.find('.volume-bar').css({'height': (currentVolumeValue) + '%'});
                 if (stream) {
                     stream.setVolume(currentVolumeValue);
-                    if (currentVolumeValue > 0) {
-                        $("#"+stream.id()).prop("muted", false);
-                    }
                 }
                 for (var i = 0; i < 1; i += 0.1) {
                     var fi = parseInt(Math.floor(i * 10)) / 10;
@@ -291,12 +304,13 @@ function validateForm() {
                 $volhover = false;
             });
             $('body, html').bind('mousemove', function (e) {
-                $that.hover(function () {
-                    $that.find('.player').stop(true, false).animate({'opacity': '1'}, 0.5);
-                }, function () {
-                    $that.find('.player').stop(true, false).animate({'opacity': '0'}, 0.5);
-                });
-
+            				if ( !stopped ) {
+                				$that.hover(function () {
+                    				$that.find('.player').stop(true, false).animate({'opacity': '1'}, 0.5);
+                				}, function () {
+                    				$that.find('.player').stop(true, false).animate({'opacity': '0'}, 0.5);
+                				});
+																};
                 if ($vclicking) {
                     y = $that.find('.volume-bar-holder').height() - (e.pageY - $that.find('.volume-bar-holder').offset().top);
                     var volMove = 0;
@@ -349,10 +363,106 @@ function validateForm() {
 
             // Requests fullscreen based on browser.
             $('.fullscreenBtn').click(function () {
-                if (stream) {
+                if ( stream ) {
                     stream.fullScreen();
-                }
+                };
             });
+            var elem = document.querySelector('#volume-range');
+            var init = $( "#slider" ).slider({
+              value: 50,
+              orientation: "horizontal",
+              range: "min",
+              slide: function( event, ui ) {
+                valueRange()
+              },
+              stop: function( event, ui ) {
+                valueRange()
+              }
+            });
+            valueRange();
+            function valueRange() {
+               if (stream) {
+                   currentVolumeValue = $( "#slider" ).slider( "value" );
+                   stream.setVolume(currentVolumeValue);
+               }
+
+              //chnage volume control icon
+              currentVolumeValue = $( "#slider" ).slider( "value" );
+              //volume in range 0-50
+               if ( currentVolumeValue > 0 && currentVolumeValue <= 50 ) {
+                   $('.volume').html('<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><defs><clipPath><path d="m 14.35,-0.14 -5.86,5.86 20.73,20.78 5.86,-5.91 z"></path><path d="M 7.07,6.87 -1.11,15.33 19.61,36.11 27.80,27.60 z"></path><path d="M 9.09,5.20 6.47,7.88 26.82,28.77 29.66,25.99 z" transform="translate(0, 0)"></path></clipPath><clipPath><path d="m -11.45,-15.55 -4.44,4.51 20.45,20.94 4.55,-4.66 z" transform="translate(0, 0)"></path></clipPath></defs><path style="fill: #fff;" clip-path="url(#ytp-svg-volume-animation-mask)" d="M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,19.77 21.5,18 C21.5,16.26 20.48,14.74 19,14 Z" fill="#fff" id="ytp-svg-12"></path></svg>');
+               };
+
+               //volume greater than 50
+               if ( currentVolumeValue > 50 ) {
+                   $('.volume').html('<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"<defs><clipPath><path d="m 14.35,-0.14 -5.86,5.86 20.73,20.78 5.86,-5.91 z"></path><path d="M 7.07,6.87 -1.11,15.33 19.61,36.11 27.80,27.60 z"></path><path d="M 9.09,5.20 6.47,7.88 26.82,28.77 29.66,25.99 z" transform="translate(0, 0)"></path></clipPath><clipPath><path d="m -11.45,-15.55 -4.44,4.51 20.45,20.94 4.55,-4.66 z" transform="translate(0, 0)"></path></clipPath></defs><path style="fill: #fff;" clip-path="url(#ytp-svg-volume-animation-mask)" d="M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,19.77 21.5,18 C21.5,16.26 20.48,14.74 19,14 ZM19,11.29 C21.89,12.15 24,14.83 24,18 C24,21.17 21.89,23.85 19,24.71 L19,26.77 C23.01,25.86 26,22.28 26,18 C26,13.72 23.01,10.14 19,9.23 L19,11.29 Z" fill="#fff" id="ytp-svg-12"></path></svg>');
+               };
+
+               //volume zero
+               if ( currentVolumeValue == 0 ) {
+                   $('.volume').html('<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><defs><clipPath><path d="m 14.35,-0.14 -5.86,5.86 20.73,20.78 5.86,-5.91 z"></path><path d="M 7.07,6.87 -1.11,15.33 19.61,36.11 27.80,27.60 z"></path><path d="M 9.09,5.20 6.47,7.88 26.82,28.77 29.66,25.99 z" transform="translate(0, 0)"></path></clipPath><clipPath><path d="m -11.45,-15.55 -4.44,4.51 20.45,20.94 4.55,-4.66 z" transform="translate(0, 0)"></path></clipPath></defs><path style="fill: #fff;" clip-path="url(#ytp-svg-volume-animation-mask)" d="M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,19.77 21.5,18 C21.5,16.26 20.48,14.74 19,14 ZM19,11.29 C21.89,12.15 24,14.83 24,18 C24,21.17 21.89,23.85 19,24.71 L19,26.77 C23.01,25.86 26,22.28 26,18 C26,13.72 23.01,10.14 19,9.23 L19,11.29 Z" fill="#fff" id="ytp-svg-12"></path><path clip-path="url(#ytp-svg-volume-animation-slash-mask)" d="M 9.25,9 7.98,10.27 24.71,27 l 1.27,-1.27 Z" fill="#fff" style="fill:#fff;"></path></svg>');
+               };
+            }
+
+
+            //mute unmute volume on click
+            var prevVol, prevLeft, prevHtml;
+            $('.volume').on('click', function () {
+                if ($('.volume').hasClass('volume-none') && currentVolumeValue === 0) {
+                    $('#slider').slider( "value", prevVol )
+                    $('.volume').html(prevHtml);
+                    currentVolumeValue = prevVol;
+                    if (stream) {
+                        stream.setVolume(currentVolumeValue);
+                    }
+                    $('.volume').removeClass('volume-none');
+                } else {
+                    prevVol = $('#volume-range').val();
+                    prevHtml = $('.volume').html();
+                    $('.volume').html('<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><defs><clipPath><path d="m 14.35,-0.14 -5.86,5.86 20.73,20.78 5.86,-5.91 z"></path><path d="M 7.07,6.87 -1.11,15.33 19.61,36.11 27.80,27.60 z"></path><path d="M 9.09,5.20 6.47,7.88 26.82,28.77 29.66,25.99 z" transform="translate(0, 0)"></path></clipPath><clipPath><path d="m -11.45,-15.55 -4.44,4.51 20.45,20.94 4.55,-4.66 z" transform="translate(0, 0)"></path></clipPath></defs><path style="fill: #fff;" clip-path="url(#ytp-svg-volume-animation-mask)" d="M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,19.77 21.5,18 C21.5,16.26 20.48,14.74 19,14 ZM19,11.29 C21.89,12.15 24,14.83 24,18 C24,21.17 21.89,23.85 19,24.71 L19,26.77 C23.01,25.86 26,22.28 26,18 C26,13.72 23.01,10.14 19,9.23 L19,11.29 Z" fill="#fff" id="ytp-svg-12"></path><path clip-path="url(https://www.youtube.com/watch?v=FA044r-szpM#ytp-svg-volume-animation-slash-mask)" d="M 9.25,9 7.98,10.27 24.71,27 l 1.27,-1.27 Z" fill="#fff" style="fill:#fff;"></path></svg>');
+                    $('#volume-range').val(0);
+                    $('#slider').slider( "value", 0);
+                    if (stream) {
+                        stream.setVolume(currentVolumeValue);
+                    };
+                    $('.volume').addClass('volume-none');
+                };
+            });
+
+
+            //show slider wile changing volume
+            $('.volume-range-block').focusin( function () {
+                $(this).addClass('open-width').addClass('open');
+            });
+            $('.volume-range-block').focusout( function () {
+                $(this).removeClass('open-width').removeClass('open');
+            });
+
+
+            isMobile = {
+                    Android: function() {
+                        return navigator.userAgent.match(/Android/i);
+                    },
+                    BlackBerry: function() {
+                        return navigator.userAgent.match(/BlackBerry/i);
+                    },
+                    iOS: function() {
+                        return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+                    },
+                    Opera: function() {
+                        return navigator.userAgent.match(/Opera Mini/i);
+                    },
+                    Windows: function() {
+                        return navigator.userAgent.match(/IEMobile/i);
+                    },
+                    any: function() {
+                        return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+                    }
+                };
+                if (isMobile.any()) {
+                  $('.volume-range-block').addClass('open-width-full')
+                }
+            var prevFull;
 
             $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(e) {
                 if (stream) {
@@ -362,8 +472,37 @@ function validateForm() {
                         currentVolumeValue = stream.getVolume();
                     }
                     volanim();
-                }
-            });
+
+                    $('.player').toggleClass('fullscreenon');  //Add class for all controls in full screen mode
+                    $('.volume-range-block').toggleClass('fullscreen-vol'); //Add class to volume control for full screen mode
+
+                    if ( $('.player').hasClass('fullscreenon') ) {
+                        prevFull = $('.fullscreenBtn').html();
+
+                                    //change full screen button to full screen exit button
+                                    $('.fullscreenBtn').html('<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><g class="ytp-fullscreen-button-corner-2"><path style="fill: #fff;" d="m 14,14 -4,0 0,2 6,0 0,-6 -2,0 0,4 0,0 z"></path></g><g><path style="fill: #fff;" d="m 22,14 0,-4 -2,0 0,6 6,0 0,-2 -4,0 0,0 z"></path></g><g><path style="fill: #fff;" d="m 20,26 2,0 0,-4 4,0 0,-2 -6,0 0,6 0,0 z"></path></g><g><path style="fill: #fff;" d="m 10,22 4,0 0,4 2,0 0,-6 -6,0 0,2 0,0 z"></path></g></svg>');
+
+                                    //activate controls on mouse moving
+                                    $that.bind('mousemove', function () {
+                                        if ($clearTimeout) {
+                                            clearTimeout($clearTimeout);
+                                        }
+                                        $that.find('.player').stop(true, false).animate({'opacity': '1'}, 0.1);
+                                        $clearTimeout = setTimeout(function() {
+                                            $that.find('.player').stop(true, false).animate({'opacity': '0'}, 0.5);
+                                        }, 15000);
+                                    });
+                                } else {
+
+                                                $('.fullscreenBtn').html(prevFull);
+                                                $('.fullscreenBtn').click(function () {
+                                                    if ( stream ) {
+                                                        stream.fullScreen();
+                                                    };
+                                                });
+                                            };
+                                        };
+                                    });
         });
-    }
+}
 })(jQuery);

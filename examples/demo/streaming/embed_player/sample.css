@@ -1,14 +1,126 @@
 #sortable {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    width: 100%;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
 }
 
 #sortable li {
-    color: #000000;
+	color: #000000;
+	padding-left: 20px;
+  position: relative;;
+}
+#sortable li label {
+  display: block;
+  height: 22px;
+  position: relative;;
+  z-index: 100;
+  line-height: 22px;
+}
+#sortable li label input {
+  vertical-align: middle;
+  margin: 0;
+}
+#sortable li .ui-icon {
+  position: absolute;;
+  height: 100%;
+  width: 20px;
+  top: 0;
+  left: 0;
+  background: transparent;
+  cursor: move;
+
+}
+#sortable li .ui-icon:after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  position: absolute;;
+  top: 50%;
+  left: 50%;
+  margin: -8px 0 0 -8px;
+  background-image: url(images/ui-icons_ef8c08_256x240.png);
+  background-position: -128px -48px;
+}
+#sortable li span {
+	position: absolute;
+	left: 15px;
 }
 
-#sortable li span {
-    position: absolute;
+
+
+
+
+/********* New styles **********/
+
+.main-header {
+	margin-top: 50px;
+	margin-bottom: 35px;
+}
+
+.ui-sortable {
+	width: 40% !important;
+	float: left;
+	padding: 0;
+	text-align: left;
+	list-style-type: none;
+}
+
+.ui-sortable li.ui-sortable-li {
+	font-weight: normal !important;
+}
+
+.fwn {
+	font-weight: normal !important;
+	padding-left: 3%;
+}
+
+.test-now-button{
+	padding: 30px 0 0 0;
+}
+
+.text-area-bg{
+	background: #f6f6f6;
+}
+
+.control-label{
+	padding-left: 15px;
+	padding-bottom: 10px;
+  position: relative;
+}
+
+#connForm, #playForm {
+	position: relative;
+}
+
+#connForm i, #playForm i {
+	position: relative;
+	z-index: 999999;
+	font-size: 20px;
+	margin-top: 5px;
+	color: #000000;
+	cursor: pointer;
+}
+
+.fp-remoteVideo {
+  height: 270px;
+}
+
+/***** Media Queries *****/
+
+@media (max-width: 1199px) {
+	.fp-remoteVideo{
+		margin: 0 auto;
+	}
+}
+
+@media (max-width: 991px) {
+	.fp-remoteVideo{
+		margin-bottom: 110px;
+	}
+}
+.light-style-bg {
+        background: #eee !important;
+}
+.dark-style-bg  {
+        background: black!important;
 }
