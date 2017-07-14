@@ -409,7 +409,8 @@ function validateForm() {
             var prevVol, prevLeft, prevHtml;
             $('.volume').on('click', function () {
                 if ($('.volume').hasClass('volume-none') && currentVolumeValue === 0) {
-                    $('#slider').slider( "value", prevVol )
+                    $('#slider').slider( "value", prevVol );
+                    $('#volume-range').val(prevVol);
                     $('.volume').html(prevHtml);
                     currentVolumeValue = prevVol;
                     if (stream) {

@@ -43,7 +43,7 @@ function init_page() {
         $("#codeTextArea").text("<iframe id='fp_embed_player' src='" + url + "' " +
             "marginwidth='0' marginheight='0' frameborder='0' width='100%' height='100%' scrolling='no' allowfullscreen='allowfullscreen'></iframe>")
     };
-    $('#url,#streamName').keyup(function () {
+    $('#url,#streamName').on('input',function () {
         constructCode();
     });
     $('#WebRTC,#Flash,#MSE,#WSPlayer').change(function() {
