@@ -62,12 +62,27 @@ var createConnection = function(options, handlers) {
         };
         var fullScreen = function() {
             if (canvas) {
-                if (canvas.requestFullscreen) {
-                    canvas.requestFullscreen();
-                } else if (canvas.mozRequestFullScreen) {
-                    canvas.mozRequestFullScreen();
-                } else if (canvas.webkitRequestFullscreen) {
-                    canvas.webkitRequestFullscreen();
+                if (!document.fullscreenElement && !document.mozFullScreenElement &&
+                    !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                    if (canvas.requestFullscreen) {
+                        canvas.requestFullscreen();
+                    } else if (canvas.msRequestFullscreen) {
+                        canvas.msRequestFullscreen();
+                    } else if (canvas.mozRequestFullScreen) {
+                        canvas.mozRequestFullScreen();
+                    } else if (canvas.webkitRequestFullscreen) {
+                        canvas.webkitRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
                 }
             }
         }
