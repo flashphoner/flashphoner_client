@@ -84,9 +84,9 @@ package com.flashphoner.api2 {
             this.openSettingsButton.visible = false;
             this.canvas.addChild(this.openSettingsButton);
             this.fullScreenButton = new Button();
-            this.fullScreenButton.width = 24;
+            this.fullScreenButton.width = 32;
             this.fullScreenButton.setStyle("icon", iconFullScreen);
-            this.fullScreenButton.visible = parameters.showFullScreenButton == "true";
+            this.fullScreenButton.visible = false;
             this.fullScreenButton.addEventListener(MouseEvent.CLICK, fullScreenHandler);
             this.canvas.addChild(this.fullScreenButton);
             addElement(this.canvas);
@@ -346,6 +346,7 @@ package com.flashphoner.api2 {
             if (this.remoteDisplayHolder.visible) {
                 this.fullScreenButton.y = stage.stageHeight - this.fullScreenButton.height;
                 this.fullScreenButton.x = stage.stageWidth - this.fullScreenButton.width;
+                this.fullScreenButton.visible = parameters.showFullScreenButton == "true";
                 this.remoteDisplay.width = this.remoteDisplayHolder.width;
                 this.remoteDisplay.height = this.remoteDisplayHolder.height;
             }
@@ -387,7 +388,11 @@ package com.flashphoner.api2 {
         }
 
         private function fullScreenHandler(event:MouseEvent):void {
-            stage.displayState = StageDisplayState.FULL_SCREEN;
+            if (stage.displayState == StageDisplayState.NORMAL) {
+                stage.displayState = StageDisplayState.FULL_SCREEN;
+            } else {
+                stage.displayState = StageDisplayState.NORMAL;
+            }
         }
     }
 }

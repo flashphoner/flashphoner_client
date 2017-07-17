@@ -42,6 +42,7 @@ function init_page() {
     }
     if (Flashphoner.getMediaProviders()[0] === "Flash") {
         $(".fullscreen").hide();
+        $(".player").css('width','75%');
     }
     if (autoplay) {
         $(".play-pause").click();
