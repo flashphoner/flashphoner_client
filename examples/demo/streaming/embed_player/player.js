@@ -205,8 +205,6 @@ function validateForm() {
             var $this = $(this);
             var $settings = settings;
             var $that = $this.parent('.' + $settings.videoClass);
-            $videoWidth = $this.width();
-            $that.width($videoWidth + 'px');
             $that.find('.player').css({
                 'width': ($settings.playerWidth * 100) + '%',
                 'left': ((100 - $settings.playerWidth * 100) / 2) + '%'
