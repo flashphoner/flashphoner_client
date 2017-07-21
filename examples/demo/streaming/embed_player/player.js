@@ -409,7 +409,7 @@ function validateForm() {
             //mute unmute volume on click
             var prevVol, prevLeft, prevHtml;
             $('.volume').on('click', function () {
-                if ($('.volume').hasClass('volume-none') && currentVolumeValue === 0) {
+                if ($('.volume').hasClass('volume-none')) {
                     $('#slider').slider( "value", prevVol );
                     $('#volume-range').val(prevVol);
                     $('.volume').html(prevHtml);
@@ -425,7 +425,7 @@ function validateForm() {
                     $('#volume-range').val(0);
                     $('#slider').slider( "value", 0);
                     if (stream) {
-                        stream.setVolume(currentVolumeValue);
+                        stream.setVolume(0);
                     };
                     $('.volume').addClass('volume-none');
                 };
@@ -485,7 +485,7 @@ function validateForm() {
                                     $('.fullscreenBtn').html('<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><g class="ytp-fullscreen-button-corner-2"><path style="fill: #fff;" d="m 14,14 -4,0 0,2 6,0 0,-6 -2,0 0,4 0,0 z"></path></g><g><path style="fill: #fff;" d="m 22,14 0,-4 -2,0 0,6 6,0 0,-2 -4,0 0,0 z"></path></g><g><path style="fill: #fff;" d="m 20,26 2,0 0,-4 4,0 0,-2 -6,0 0,6 0,0 z"></path></g><g><path style="fill: #fff;" d="m 10,22 4,0 0,4 2,0 0,-6 -6,0 0,2 0,0 z"></path></g></svg>');
 
                                     //activate controls on mouse moving
-                                    $that.bind('mousemove', function () {
+                                    $that.bind('mousemove touchmove', function () {
                                         if ($clearTimeout) {
                                             clearTimeout($clearTimeout);
                                         }
