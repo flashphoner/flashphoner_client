@@ -123,12 +123,10 @@ function playStream(session) {
         options.playHeight = resolution.split("x")[1];
     }
     stream = session.createStream(options).on(STREAM_STATUS.PLAYING, function (stream) {
-        // For WSPlayer
-        if (stream.getInfo() === "FIRST_FRAME_RENDERED") {
+        document.getElementById(stream.id()).addEventListener('playing', function(event){
             $("#preloader").hide();
-        }
+        });
         document.getElementById(stream.id()).addEventListener('resize', function(event){
-            $("#preloader").hide();
             var streamResolution = stream.videoResolution();
             if (Object.keys(streamResolution).length === 0) {
                 resizeVideo(event.target);
