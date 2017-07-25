@@ -40,3 +40,14 @@ video, canvas, object {
 .ui-slider-range-min {
     background: black;
 }
+
+/* Prevent stretched picture in full screen mode */
+canvas:-webkit-full-screen {
+    width: initial;
+    height: initial;
+}
+
+canvas:-moz-full-screen {
+    width: initial;
+    height: initial;
+}

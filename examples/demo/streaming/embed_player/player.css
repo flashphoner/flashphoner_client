@@ -463,3 +463,14 @@ video::-webkit-media-controls-enclosure {
     -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
+
+/* Prevent stretched picture in full screen mode */
+canvas:-webkit-full-screen {
+    width: initial;
+    height: initial;
+}
+
+canvas:-moz-full-screen {
+    width: initial;
+    height: initial;
+}
