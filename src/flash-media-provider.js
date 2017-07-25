@@ -419,6 +419,10 @@ var loadSwf = function(id, display, showFullScreenButton) {
                 var event = new CustomEvent("resize");
                 swf.dispatchEvent(event);
             }, 10);
+            setTimeout(function(){
+                var event = new CustomEvent("playing");
+                swf.dispatchEvent(event);
+            }, 10);
         });
         //todo switch from id to element (divWrapper)
         swfobject.embedSWF(swfLocation, id, "100%", "100%", "11.2.0", "expressInstall.swf", flashvars, params, attributes, function (ret) {
