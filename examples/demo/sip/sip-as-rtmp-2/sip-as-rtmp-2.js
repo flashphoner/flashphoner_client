@@ -347,7 +347,7 @@ function getStatus() {
 
 //Send DTMF based on SendDTMFForm
 function sendDTMF(value) {
-    var url = field("restUrl") + "/sendDTMF";
+    var url = field("restUrl") + "/call/send_dtmf";
     var data = {};
     data.callId = callId;
     data.dtmf = value;
