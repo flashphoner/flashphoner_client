@@ -412,7 +412,7 @@ var createSession = function (options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.20",
+            clientVersion: "0.5.21",
             clientOSVersion: window.navigator.appVersion,
             clientBrowserVersion: window.navigator.userAgent,
             custom: options.custom,
