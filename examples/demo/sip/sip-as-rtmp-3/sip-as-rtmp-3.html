@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="sip-as-rtmp-3.css">
+    <title>SIP as RTMP</title>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.websocket.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery.json.js"></script>
+    <script type="text/javascript" src="sip-as-rtmp-3.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
+    <script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <h1 class="text-center">SIP as RTMP Broadcasting</h1>
+        <div class="col-sm-6 text-center">
+            <fieldset class="scheduler-border">
+                <legend class="scheduler-border">SIP Details</legend>
+                <form id="formConnection" class="form-horizontal" role="form">
+                    <div id="restUrlForm" class="form-group">
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="restUrl"/>
+                        </div>
+                    </div>
+                    <div id="sipLoginForm" class="form-group">
+                        <label class="control-label col-sm-3" for="sipLogin">Login</label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="sipLogin" placeholder="SIP username"/>
+                        </div>
+                    </div>
+                    <div id="sipAuthenticationNameForm" class="form-group">
+                        <label class="control-label col-sm-3" for="sipAuthenticationNameForm">SIP Auth Name</label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="sipAuthenticationName" placeholder="SIP auth name"/>
+                        </div>
+                    </div>
+                    <div id="sipPasswordForm" class="form-group">
+                        <label class="control-label col-sm-3" for="sipPassword">Password</label>
+
+                        <div class="col-sm-6">
+                            <input type="password" class="form-control" id="sipPassword" placeholder="SIP password"/>
+                        </div>
+                    </div>
+                    <div id="sipDomainForm" class="form-group">
+                        <label class="control-label col-sm-3" for="sipDomain">Domain</label>
+
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="sipDomain" placeholder="SIP domain"/>
+                        </div>
+                    </div>
+                    <div id="sipOutboundProxyForm" class="form-group">
+                        <label class="control-label col-sm-3" for="sipOutboundProxyForm">SIP Outbound Proxy</label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="sipOutboundProxy" placeholder="SIP outbound proxy"/>
+                        </div>
+                    </div>
+                    <div id="sipPortForm" class="form-group">
+                        <label class="control-label col-sm-3" for="sipPort">Port</label>
+
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="sipPort" placeholder="5060"/>
+                        </div>
+                    </div>
+                    <div id="appKeyForm" class="form-group">
+                        <label class="control-label col-sm-3" for="appKey">App Key</label>
+
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="appKey" value="defaultApp"/>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-inline"><input onclick="setValue(this);" id="sipRegisterRequired" type="checkbox" value="false">Register Required</label>
+                        <label class="checkbox-inline"><input onclick="setValue(this);" id="hasAudio" type="checkbox" value="false">hasAudio</label>
+                        <label class="checkbox-inline"><input onclick="setValue(this);" id="hasVideo" type="checkbox" value="false">hasVideo</label>
+                    </div>
+                </form>
+            </fieldset>
+            <div>
+                <div class="row">
+                    <div class="col-lg-6 col-sm-offset-3 text-center">
+
+                        <div id="callDiv" class="input-group row-space">
+                            <input id="callee" type="text" class="form-control" placeholder="callee"/>
+                            <span class="input-group-btn">
+                                <button id="callBtn" class="btn btn-success" style="width: 100px">Call</button>
+                            </span>
+                        </div>
+
+
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-sm-offset-3 text-center">
+
+                        <div class="input-group row-space" style="margin-top: 20px">
+                            <input id="dtmf" type="text" class="form-control" placeholder="12345#">
+                            <span class="input-group-btn">
+                                <button id="dtmfBtn" class="btn btn-default" onclick="sendDTMF($('#dtmf').val())" style="width: 100px;">Send DTMF</button>
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-12" style="margin-top: 20px">
+                        <span id="callTrace" class="bg-warning"></span>
+                        <div id="callStatus" style="margin-top: 20px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 text-center" style="margin-top: 0px">
+            <fieldset class="scheduler-border">
+                <legend class="scheduler-border">RTMP Target Details</legend>
+                <form id="formRTMP" class="form-horizontal" role="form">
+                    <div id="rtmpUrlForm" class="form-group">
+                        <label class="control-label col-sm-3" for="rtmpUrl">RTMP URL</label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="rtmpUrl" placeholder="rtmp://localhost:1935/live"/>
+                        </div>
+                    </div>
+                    <div id="rtmpStreamForm" class="form-group">
+                        <label class="control-label col-sm-3" for="rtmpStream">Stream</label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="rtmpStream" placeholder="stream1"/>
+                        </div>
+                    </div>
+                </form>
+            </fieldset>
+            <h3>RTMP Player</h3>
+            <div class="text-center">
+                <div id="player"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
