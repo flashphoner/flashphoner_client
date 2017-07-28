@@ -60,6 +60,12 @@
 				
                     <div class="form-group">
                         <div class="form-group">
+                            <label class="col-sm-2 control-label"></label>
+                            <div class="col-sm-4">
+                                <button type="button" class="btn btn-default" id="testBtn">Test</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <div class="col-sm-1">
                                 <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="sendAudio" value="true">
                             </div>
@@ -67,9 +73,10 @@
                         </div>
                         <div class="form-group" id="audioInputForm">
                             <label style="text-align: left" class="col-sm-4 control-label">Mic</label>
-                            <div class="col-sm-6">
+                            <div class="col-sm-6 input-group">
                                 <select class="form-control" id="audioInput">
                                 </select>
+                                <span id="micLevel" style="min-width: 40px; text-align: center; color: green;" class="input-group-addon">0</span>
                             </div>
                         </div>
                         <div class="form-group" id="fecForm">

@@ -122,6 +122,11 @@ function init_page() {
             previewStream.setVolume(currentVolumeValue);
         }
     }).slider("disable");
+
+    $("#testBtn").text("Test").off('click').click(function () {
+        $(this).prop('disabled', true);
+        startTest();
+    }).prop('disabled', false);
 }
 
 function onStarted(publishStream, previewStream) {
@@ -160,6 +165,53 @@ function onStopped() {
     //enableMuteToggles(false);
 }
 
+function startTest() {
+    Flashphoner.getMediaAccess(getConstaints(), localVideo).then(function() {
+        $("#testBtn").text("Release").off('click').click(function () {
+            $(this).prop('disabled', true);
+            stopTest();
+        }).prop('disabled', false);
+
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (Flashphoner.getMediaProviders()[0] == "WebRTC" && window.AudioContext) {
+            for (i = 0; i < localVideo.children.length; i++) {
+                if (localVideo.children[i] && localVideo.children[i].id.indexOf("-CACHED_WEBRTC_INSTANCE") != -1) {
+                    var stream = localVideo.children[i].srcObject;
+
+                    var audioContext = new AudioContext();
+                    var microphone = audioContext.createMediaStreamSource(stream);
+                    var javascriptNode = audioContext.createScriptProcessor(1024, 1, 1);
+
+                    microphone.connect(javascriptNode);
+                    javascriptNode.connect(audioContext.destination);
+                    javascriptNode.onaudioprocess = function(event){
+                        var inpt_L = event.inputBuffer.getChannelData(0);
+                        var sum_L = 0.0;
+                        for(var i = 0; i < inpt_L.length; ++i) {
+                            sum_L += inpt_L[i] * inpt_L[i];
+                        }
+                        $("#micLevel").text(Math.floor(Math.sqrt(sum_L / inpt_L.length) * 100));
+                    }
+                }
+            }
+        }
+    }).catch(function (error) {
+        $("#testBtn").prop('disabled', false);
+    });
+}
+
+
+function stopTest() {
+    if (Flashphoner.releaseLocalMedia(localVideo)) {
+        $("#testBtn").text("Test").off('click').click(function () {
+            $(this).prop('disabled', true);
+            startTest();
+        }).prop('disabled', false);
+    } else {
+        $("#testBtn").prop('disabled', false);
+    }
+}
+
 function start() {
     //check if we already have session
     var url = $('#url').val();
@@ -192,8 +244,7 @@ function start() {
     });
 }
 
-function startStreaming(session) {
-    var streamName = field("url").split('/')[3];
+function getConstaints() {
     constraints = {
         audio: $("#sendAudio").is(':checked'),
         video: $("#sendVideo").is(':checked')
@@ -220,6 +271,12 @@ function startStreaming(session) {
         if (parseInt($('#fps').val()) > 0)
             constraints.video.frameRate = parseInt($('#fps').val());
     }
+    return constraints;
+}
+function startStreaming(session) {
+    var streamName = field("url").split('/')[3];
+    var constraints = getConstaints();
+
     var mediaConnectionConstraints;
     if (!$("#cpuOveruseDetection").is(':checked')) {
         mediaConnectionConstraints = {
