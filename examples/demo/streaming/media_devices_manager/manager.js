@@ -164,9 +164,9 @@ function onStopped() {
     clearInterval(intervalID);
     //enableMuteToggles(false);
 }
-
+var micLevelInterval;
 function startTest() {
-    Flashphoner.getMediaAccess(getConstaints(), localVideo).then(function() {
+    Flashphoner.getMediaAccess(getConstaints(), localVideo).then(function(disp) {
         $("#testBtn").text("Release").off('click').click(function () {
             $(this).prop('disabled', true);
             stopTest();
@@ -194,6 +194,10 @@ function startTest() {
                     }
                 }
             }
+        } else if (Flashphoner.getMediaProviders()[0] == "Flash") {
+            micLevelInterval = setInterval(function(){
+                $("#micLevel").text(disp.children[0].getMicrophoneLevel());
+            }, 500);
         }
     }).catch(function (error) {
         $("#testBtn").prop('disabled', false);
@@ -203,6 +207,7 @@ function startTest() {
 
 function stopTest() {
     if (Flashphoner.releaseLocalMedia(localVideo)) {
+        clearInterval(micLevelInterval);
         $("#testBtn").text("Test").off('click').click(function () {
             $(this).prop('disabled', true);
             startTest();

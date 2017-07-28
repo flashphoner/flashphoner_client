@@ -8,6 +8,7 @@ package com.flashphoner.api2 {
 
     import flash.events.MouseEvent;
     import flash.events.StatusEvent;
+    import flash.events.SampleDataEvent;
     import flash.events.TimerEvent;
     import flash.events.Event;
     import flash.system.SecurityPanel;
@@ -48,6 +49,8 @@ package com.flashphoner.api2 {
         private var connection:Connection;
 
         private var timer:Timer = new Timer(1000,0);
+
+        private var micLevel:int = -1;
 
         private static var scopeId:String;
 
@@ -116,6 +119,7 @@ package com.flashphoner.api2 {
             ExternalInterface.addCallback("getStats", getStats);
             ExternalInterface.addCallback("changeAudioCodec", changeAudioCodec);
             ExternalInterface.addCallback("fullScreen", fullScreen);
+            ExternalInterface.addCallback("getMicrophoneLevel", getMicrophoneLevel);
             callExternalInterface("initialized", null);
         }
 
@@ -227,6 +231,7 @@ package com.flashphoner.api2 {
                 if (mic != null) {
                     mic.setLoopBack(true);
                     mic.addEventListener(StatusEvent.STATUS, this.onMicStatus);
+                    mic.addEventListener(SampleDataEvent.SAMPLE_DATA, this.onSampleData);
                 }
                 timer.addEventListener(TimerEvent.TIMER, timerTick);
                 timer.start();
@@ -269,6 +274,14 @@ package com.flashphoner.api2 {
                 openSettingsButton.visible = false;
                 onAccessDenied();
             }
+        }
+
+        private function onSampleData(event:SampleDataEvent):void {
+            var mic:Microphone = localMediaControl.getMicrophone();
+            if (mic != null) {
+                micLevel = mic.activityLevel;
+            }
+
         }
 
         private function timerTick(event:TimerEvent):void{
@@ -393,6 +406,10 @@ package com.flashphoner.api2 {
             } else {
                 stage.displayState = StageDisplayState.NORMAL;
             }
+        }
+
+        public function getMicrophoneLevel() {
+            return micLevel;
         }
     }
 }
