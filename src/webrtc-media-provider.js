@@ -118,8 +118,8 @@ var createConnection = function (options) {
                     }
                 }
                 var constraints = {
-                    offerToReceiveAudio: options.receiveAudio,
-                    offerToReceiveVideo: options.receiveVideo
+                    offerToReceiveAudio: options.receiveAudio ? 1 : 0,
+                    offerToReceiveVideo: options.receiveVideo ? 1 : 0
                 };
                 //create offer and set local sdp
                 connection.createOffer(constraints).then(function (offer) {
