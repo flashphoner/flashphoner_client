@@ -83,7 +83,7 @@ function onStopped() {
 function start() {
     $("#preloader").show();
 
-    if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
+    if (Flashphoner.getMediaProviders()[0] == "WSPlayer" || (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] == "WebRTC")) {
         Flashphoner.playFirstSound();
     }
     //check if we already have session

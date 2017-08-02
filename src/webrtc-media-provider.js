@@ -109,6 +109,13 @@ var createConnection = function (options) {
                         hasVideo = false;
                         options.receiveVideo = false;
                     }
+                } else if (adapter.browserDetails.browser == "safari") {
+                    if (options.receiveAudio) {
+                        connection.addTransceiver('audio');
+                    }
+                    if (options.receiveVideo) {
+                        connection.addTransceiver('video');
+                    }
                 }
                 var constraints = {
                     offerToReceiveAudio: options.receiveAudio,
@@ -596,9 +603,28 @@ function normalizeConstraints(constraints) {
     return constraints;
 }
 
-// TODO implement
 var playFirstSound = function () {
-    return true;
+    if (audioContext) {
+        var buffer = audioContext.createBuffer(1, 441, 44100);
+        var output = buffer.getChannelData(0);
+        for (var i = 0; i < output.length; i++) {
+            output[i] = 0;
+        }
+        var source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        // Connect to output (speakers)
+        source.connect(audioContext.destination);
+        // Play sound
+        if (source.start) {
+            source.start(0);
+        } else if (source.play) {
+            source.play(0);
+        } else if (source.noteOn) {
+            source.noteOn(0);
+        }
+        return true;
+    }
+    return false;
 };
 
 module.exports = {

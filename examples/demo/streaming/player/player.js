@@ -82,7 +82,7 @@ function onStopped() {
 }
 
 function start() {
-    if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
+    if (Flashphoner.getMediaProviders()[0] == "WSPlayer" || (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] == "WebRTC")) {
         Flashphoner.playFirstSound();
     }
     var url = $('#url').val();

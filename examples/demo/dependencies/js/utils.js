@@ -158,6 +158,9 @@ var Browser = {
     },
     isAndroid: function () {
         return navigator.userAgent.toLowerCase().indexOf("android") > -1;
+    },
+    isSafariWebRTC: function () {
+        return navigator.mediaDevices && navigator.userAgent.match(/AppleWebKit\/(\d+)\./);
     }
 };
 
