@@ -162,9 +162,12 @@ function onStopped() {
     $("#playResolution").text("");
     $("#volumeControl").slider("disable");
     clearInterval(intervalID);
+    $("#testBtn").prop('disabled', false);
     //enableMuteToggles(false);
 }
 var micLevelInterval;
+var testStarted;
+var audioContextForTest;
 function startTest() {
     Flashphoner.getMediaAccess(getConstaints(), localVideo).then(function(disp) {
         $("#testBtn").text("Release").off('click').click(function () {
@@ -177,13 +180,11 @@ function startTest() {
             for (i = 0; i < localVideo.children.length; i++) {
                 if (localVideo.children[i] && localVideo.children[i].id.indexOf("-CACHED_WEBRTC_INSTANCE") != -1) {
                     var stream = localVideo.children[i].srcObject;
-
-                    var audioContext = new AudioContext();
-                    var microphone = audioContext.createMediaStreamSource(stream);
-                    var javascriptNode = audioContext.createScriptProcessor(1024, 1, 1);
-
+                    audioContextForTest = new AudioContext();
+                    var microphone = audioContextForTest.createMediaStreamSource(stream);
+                    var javascriptNode = audioContextForTest.createScriptProcessor(1024, 1, 1);
                     microphone.connect(javascriptNode);
-                    javascriptNode.connect(audioContext.destination);
+                    javascriptNode.connect(audioContextForTest.destination);
                     javascriptNode.onaudioprocess = function(event){
                         var inpt_L = event.inputBuffer.getChannelData(0);
                         var sum_L = 0.0;
@@ -199,15 +200,17 @@ function startTest() {
                 $("#micLevel").text(disp.children[0].getMicrophoneLevel());
             }, 500);
         }
+        testStarted = true;
     }).catch(function (error) {
         $("#testBtn").prop('disabled', false);
+        testStarted = false;
     });
 }
 
 
 function stopTest() {
+    releaseResourcesForTesting();
     if (Flashphoner.releaseLocalMedia(localVideo)) {
-        clearInterval(micLevelInterval);
         $("#testBtn").text("Test").off('click').click(function () {
             $(this).prop('disabled', true);
             startTest();
@@ -217,7 +220,18 @@ function stopTest() {
     }
 }
 
+function releaseResourcesForTesting() {
+    testStarted = false;
+    clearInterval(micLevelInterval);
+    if (audioContextForTest) {
+        audioContextForTest.close();
+        audioContextForTest = null;
+    }
+}
+
 function start() {
+    if (testStarted)
+        stopTest();
     //check if we already have session
     var url = $('#url').val();
     //check if we already have session
@@ -297,6 +311,7 @@ function startStreaming(session) {
         constraints: constraints,
         mediaConnectionConstraints: mediaConnectionConstraints
     }).on(STREAM_STATUS.PUBLISHING, function (publishStream) {
+        $("#testBtn").prop('disabled', true);
         var video = document.getElementById(publishStream.id());
         //resize local if resolution is available
         if (video.videoWidth > 0 && video.videoHeight > 0) {
@@ -339,9 +354,11 @@ function startStreaming(session) {
             //enable stop button
             onStarted(publishStream, previewStream);
             //wait for incoming stream
-            setTimeout(function(){
-                detectSpeech(previewStream);
-            },3000);
+            if (Flashphoner.getMediaProviders()[0] == "WebRTC") {
+                setTimeout(function () {
+                    detectSpeech(previewStream);
+                }, 3000);
+            }
         }).on(STREAM_STATUS.STOPPED, function () {
             publishStream.stop();
         }).on(STREAM_STATUS.FAILED, function () {
