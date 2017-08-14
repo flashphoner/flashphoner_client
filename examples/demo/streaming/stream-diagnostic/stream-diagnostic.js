@@ -99,12 +99,12 @@ function startStreaming(session) {
         }).on(STREAM_STATUS.STOPPED, function(){
             log("Stream " + streamName + " " + STREAM_STATUS.STOPPED);
             publishStream.stop();
-        }).on(STREAM_STATUS.FAILED, function(){
+        }).on(STREAM_STATUS.FAILED, function(stream){
             log("Stream " + streamName + " " + STREAM_STATUS.FAILED);
             //preview failed, stop publishStream
             if (publishStream.status() == STREAM_STATUS.PUBLISHING) {
                 log("Stream " + streamName + " " + STREAM_STATUS.FAILED);
-                setStatus(STREAM_STATUS.FAILED);
+                setStatus(STREAM_STATUS.FAILED, stream);
                 publishStream.stop();
             }
         }).play();
@@ -113,24 +113,29 @@ function startStreaming(session) {
         log("Stream " + streamName + " " + STREAM_STATUS.UNPUBLISHED);
         //enable start button
         onStopped();
-    }).on(STREAM_STATUS.FAILED, function(){
+    }).on(STREAM_STATUS.FAILED, function(stream){
         log("Stream " + streamName + " " + STREAM_STATUS.FAILED);
-        setStatus(STREAM_STATUS.FAILED);
+        setStatus(STREAM_STATUS.FAILED, stream);
         //enable start button
         onStopped();
     }).publish();
 }
 
 //show connection or local stream status
-function setStatus(status) {
+function setStatus(status, stream) {
     var statusField = $("#status");
+    var infoField = $("#info");
     statusField.text(status).removeClass();
     if (status == "PUBLISHING") {
         statusField.attr("class","text-success");
+        infoField.text("");
     } else if (status == "DISCONNECTED" || status == "UNPUBLISHED") {
         statusField.attr("class","text-muted");
     } else if (status == "FAILED") {
         statusField.attr("class","text-danger");
+        if (stream){
+            infoField.text(stream.getInfo()).attr("class","text-muted");
+        }
     }
 }
 

@@ -150,8 +150,8 @@ function playStream(session) {
     }).on(STREAM_STATUS.STOPPED, function() {
         setStatus(STREAM_STATUS.STOPPED);
         onStopped();
-    }).on(STREAM_STATUS.FAILED, function() {
-        setStatus(STREAM_STATUS.FAILED);
+    }).on(STREAM_STATUS.FAILED, function(stream) {
+        setStatus(STREAM_STATUS.FAILED, stream);
         onStopped();
     }).on(STREAM_STATUS.NOT_ENOUGH_BANDWIDTH, function(stream){
         console.log("Not enough bandwidth, consider using lower video resolution or bitrate. Bandwidth " + (Math.round(stream.getNetworkBandwidth() / 1000)) + " bitrate " + (Math.round(stream.getRemoteBitrate() / 1000)));
@@ -160,15 +160,20 @@ function playStream(session) {
 }
 
 //show connection or remote stream status
-function setStatus(status) {
+function setStatus(status, stream) {
     var statusField = $("#status");
+    var infoField = $("#info");
     statusField.text(status).removeClass();
     if (status == "PLAYING") {
         statusField.attr("class","text-success");
+        infoField.text("");
     } else if (status == "DISCONNECTED" || status == "ESTABLISHED" || status == "STOPPED") {
         statusField.attr("class","text-muted");
     } else if (status == "FAILED") {
         statusField.attr("class","text-danger");
+        if (stream) {
+            infoField.text(stream.getInfo()).attr("class","text-muted");
+        }
     }
 }
 

@@ -84,22 +84,27 @@ function publishStream(session) {
         showDownloadLink(stream.getRecordInfo());
         onStopped();
     }).on(STREAM_STATUS.FAILED, function(stream) {
-        setStatus(stream.status());
+        setStatus(stream.status(), stream.getInfo());
         showDownloadLink(stream.getRecordInfo());
         onStopped();
     }).publish();
 }
 
 //show connection or local stream status
-function setStatus(status) {
+function setStatus(status, info) {
     var statusField = $("#status");
+    var infoField = $("#info");
     statusField.text(status).removeClass();
     if (status == "PUBLISHING") {
         statusField.attr("class","text-success");
+        infoField.text("");
     } else if (status == "DISCONNECTED" || status == "ESTABLISHED" || status == "UNPUBLISHED") {
         statusField.attr("class","text-muted");
     } else if (status == "FAILED") {
         statusField.attr("class","text-danger");
+        if (info) {
+            infoField.text(info).attr("class", "text-muted");
+        }
     }
 }
 

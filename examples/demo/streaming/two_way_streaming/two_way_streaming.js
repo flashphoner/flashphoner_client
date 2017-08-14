@@ -72,6 +72,7 @@ function onPublishing(stream) {
         $(this).prop('disabled', true);
 		stream.stop();
     }).prop('disabled', false);
+    $("#publishInfo").text("");
 }
 
 function onUnpublished() {
@@ -96,6 +97,7 @@ function onPlaying(stream) {
         $(this).prop('disabled', true);
         stream.stop();
     }).prop('disabled', false);
+    $("#playInfo").text("");
 }
 
 function onStopped() {
@@ -151,14 +153,14 @@ function playStream() {
     }).on(STREAM_STATUS.STOPPED, function() {
         setStatus("#playStatus", STREAM_STATUS.STOPPED);
         onStopped();
-    }).on(STREAM_STATUS.FAILED, function() {
-        setStatus("#playStatus", STREAM_STATUS.FAILED);
+    }).on(STREAM_STATUS.FAILED, function(stream) {
+        setStatus("#playStatus", STREAM_STATUS.FAILED, stream);
         onStopped();
     }).play();
 }
 
 //show connection, or local, or remote stream status
-function setStatus(selector, status) {
+function setStatus(selector, status, stream) {
     var statusField = $(selector);
     statusField.text(status).removeClass();
     if (status == "PLAYING" || status == "ESTABLISHED" || status == "PUBLISHING") {
@@ -166,6 +168,13 @@ function setStatus(selector, status) {
     } else if (status == "DISCONNECTED" || status == "UNPUBLISHED" || status == "STOPPED") {
         statusField.attr("class","text-muted");
     } else if (status == "FAILED") {
+        if (stream) {
+            if (stream.published()){
+                $("#publishInfo").text(stream.getInfo()).attr("class","text-muted");
+            } else {
+                $("#playInfo").text(stream.getInfo()).attr("class","text-muted");
+            }
+        }
         statusField.attr("class","text-danger");
     }
 }

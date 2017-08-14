@@ -102,23 +102,28 @@ function startStreaming(session) {
         setStatus(STREAM_STATUS.UNPUBLISHED);
         //enable start button
         onUnpublished();
-    }).on(STREAM_STATUS.FAILED, function(){
-        setStatus(STREAM_STATUS.FAILED);
+    }).on(STREAM_STATUS.FAILED, function(stream){
+        setStatus(STREAM_STATUS.FAILED, stream);
         //enable start button
         onUnpublished();
     }).publish();
 }
 
 //show connection or local stream status
-function setStatus(status) {
+function setStatus(status, stream) {
     var statusField = $("#status");
+    var infoField = $("#info");
     statusField.text(status).removeClass();
     if (status == "PUBLISHING") {
         statusField.attr("class","text-success");
+        infoField.text("");
     } else if (status == "DISCONNECTED" || status == "UNPUBLISHED") {
         statusField.attr("class","text-muted");
     } else if (status == "FAILED") {
         statusField.attr("class","text-danger");
+        if (stream) {
+            infoField.text(stream.getInfo()).attr("class","text-muted");
+        }
     }
 }
 
