@@ -520,8 +520,8 @@ function removeVideoElement(video) {
  * @returns {boolean} webrtc available
  */
 var available = function () {
-    return (adapter.browserDetails.browser != "edge") ? navigator.getUserMedia && RTCPeerConnection : false;
-    //return navigator.getUserMedia && RTCPeerConnection;
+    //return (adapter.browserDetails.browser != "edge") ? navigator.getUserMedia && RTCPeerConnection : false;
+    return navigator.getUserMedia && RTCPeerConnection;
 };
 
 var listDevices = function (labels) {
