@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+        <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
+        <link rel="stylesheet" href="console.css">
+        <title>Console</title>
+        <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+        <script type="text/javascript" src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="../../../../flashphoner-rest-api.js"></script>
+        <script type="text/javascript" src="console.js"></script>
+    </head>
+    <body>
+        <div class="container" id="main">
+            <div class="row vdivide" id="controls">
+                <div class="col-sm-4">
+                    <div id="addNodeForm" class="input-group">
+                        <input class="form-control" type="text" id="nodeIp" value="" placeholder="Node ip/domain name">
+                        <span class="input-group-btn">
+                            <button id="addNodeFormSubmit" type="button" class="btn btn-primary">Add node</button>
+                        </span>
+                    </div>
+                    <ul class="list-group mt-1" id="nodes"></ul>
+                </div>
+                <div class="col-sm-8">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>CPU</th>
+                                <th>MEM</th>
+                                <th>TH</th>
+                                <th>CONN</th>
+                                <th>IN</th>
+                                <th>OUT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="generalInfoTable"></tbody>
+                    </table>
+                </div>
+            </div>
+            <hr>
+            <div id="nodeControls" class="row vdivide hidden">
+                <div class="col-sm-2">
+                    <button id="pullStreamModalBtn" data-toggle='modal' data-target='#pullModal' type="button" class="btn btn-default btn-success btn-block">Pull stream</button>
+                    <button id="pullRtspStreamModalBtn" data-toggle='modal' data-target='#pullRtspModal' type="button" class="btn btn-default btn-success btn-block">Pull RTSP stream</button>
+                    <hr>
+                    <button id="pullStreamBatchModalBtn" data-toggle='modal' data-target='#pullStreamBatchModal' type="button" class="btn btn-default btn-success btn-block">Pull streams</button>
+                </div>
+                <div class="col-sm-9">
+                    <form class="form-inline" action="">
+                        <label for="streamsTableInfoType">Show</label>
+                        <select class="custom-select" id="streamsTableInfoType">
+                            <option value="all" selected>All</option>
+                            <option value="pulled">Pulled</option>
+                            <option value="rtsp">RTSP</option>
+                        </select>
+                        <button id="streamsTableInfoTypeBtn" type="button" class="btn btn-primary">Apply</button>
+                    </form>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>NAME</th>
+                            <th>TECH</th>
+                            <th>STATUS</th>
+                            <th>TYPE</th>
+                            <th>AUDIO</th>
+                            <th>VIDEO</th>
+                            <th>ACT</th>
+                        </tr>
+                        </thead>
+                        <tbody id="streamsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="pullModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Pull stream</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="pullForm">
+                                <div class="form-group">
+                                    <label for="pullUrl"><span class="glyphicon glyphicon-globe"></span> WCS address</label>
+                                    <input type="text" class="form-control" id="pullUrl" placeholder="ws://my_wcs:8080">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pullLocalName"><span class="glyphicon glyphicon-play-circle"></span> Local stream name</label>
+                                    <input type="text" class="form-control" id="pullLocalName" placeholder="my_local_stream">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pullRemoteName"><span class="glyphicon glyphicon-play-circle"></span> Remote stream name</label>
+                                    <input type="text" class="form-control" id="pullRemoteName" placeholder="my_remote_stream">
+                                </div>
+                                <button id="pullStream" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span>Pull</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="pushModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Push stream</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="pushForm">
+                                <div class="form-group">
+                                    <label for="pushUrl"><span class="glyphicon glyphicon-globe"></span> Rtmp address</label>
+                                    <input type="text" class="form-control" id="pushUrl" placeholder="rtmp://remote_server:1935">
+                                </div>
+                                <a class="hidden"></a>
+                                <button id="pushStream" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Push</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="pullRtspModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Pull RTSP stream</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="pullRtspForm">
+                                <div class="form-group">
+                                    <label for="pullRtspUrl"><span class="glyphicon glyphicon-globe"></span> Rtsp url</label>
+                                    <input type="text" class="form-control" id="pullRtspUrl" placeholder="rtsp://my_server:554/my_stream">
+                                </div>
+                                <button id="pullRtspStream" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Pull</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="pullStreamBatchModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Pull Streams</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="pullStreamBatchForm">
+                                <div class="form-group">
+                                    <label for="pullStreamBatchNodes"><span class="glyphicon glyphicon-globe"></span> Choose node</label>
+                                    <select class="custom-select" id="pullStreamBatchNodes">
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pullBatchLocalName"><span class="glyphicon glyphicon-play-circle"></span> Local stream name</label>
+                                    <input type="text" class="form-control" id="pullBatchLocalName" placeholder="my_local_stream">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pullBatchRemoteName"><span class="glyphicon glyphicon-play-circle"></span> Remote stream name</label>
+                                    <input type="text" class="form-control" id="pullBatchRemoteName" placeholder="my_remote_stream">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pullBatchQty"><span class="glyphicon glyphicon-plus"></span> Qty</label>
+                                    <input type="text" class="form-control" id="pullBatchQty" placeholder="1">
+                                </div>
+                                <button id="pullBatchStream" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Pull</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

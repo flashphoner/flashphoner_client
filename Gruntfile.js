@@ -95,6 +95,15 @@ module.exports = function(grunt) {
                         standalone: 'Flashphoner'
                     }
                 }
+            },
+            flashphonerGlobalObjectRestApi: {
+                src: ['./src/rest-module.js'],
+                dest: './flashphoner-rest-api.js',
+                options: {
+                    browserifyOptions: {
+                        standalone: 'FlashphonerRestApi'
+                    }
+                }
             }
         },
         //used for resolve https://github.com/Temasys/AdapterJS/issues/238
