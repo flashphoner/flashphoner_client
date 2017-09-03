@@ -153,6 +153,7 @@ module.exports = function(grunt) {
                             'flashphoner-no-webrtc.min.js',
                             'flashphoner-no-wsplayer.min.js',
                             'flashphoner-temasys-flash-websocket.min.js',
+                            'flashphoner-rest-api.js',
                             'media-provider.swf'
                         ],
                         dest: 'release/<%= pkg.name %>-<%= pkg.version %>'
@@ -185,6 +186,7 @@ module.exports = function(grunt) {
                 'flashphoner-no-webrtc.min.js',
                 'flashphoner-no-wsplayer.min.js',
                 'flashphoner-temasys-flash-websocket.min.js',
+                'flashphoner-rest-api.js',
                 'media-provider.swf',
                 'doc/'
             ],
