@@ -38,7 +38,8 @@ var appSession = function(options) {
         mediaOptions: options.mediaOptions,
         appKey: ROOM_REST_APP,
         custom: {
-            login: options.username
+            login: options.username,
+            token: options.token
         }
     }).on(SESSION_STATUS.ESTABLISHED, function(session){
         if (callbacks[session.status()]) {
