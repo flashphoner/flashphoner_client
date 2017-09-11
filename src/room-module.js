@@ -36,7 +36,7 @@ var appSession = function(options) {
     var session = Flashphoner.createSession({
         urlServer: options.urlServer,
         mediaOptions: options.mediaOptions,
-        appKey: ROOM_REST_APP,
+        appKey: (options.appKey && options.appKey.length!=0) ? options.appKey: ROOM_REST_APP,
         custom: {
             login: options.username,
             token: options.token
