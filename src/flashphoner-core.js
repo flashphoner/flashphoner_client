@@ -335,6 +335,7 @@ var getSession = function (id) {
  *
  * @param {Object} options Session options
  * @param {string} options.urlServer Server address in form of [ws,wss]://host.domain:port
+ * @param {string=} options.lbUrl Load-balancer address
  * @param {string=} options.flashProto Flash protocol [rtmp,rtmfp]
  * @param {Integer=} options.flashPort Flash server port [1935]
  * @param {string=} options.appKey REST App key
@@ -358,6 +359,7 @@ var createSession = function (options) {
     var id_ = uuid.v1();
     var sessionStatus = SESSION_STATUS.PENDING;
     var urlServer = options.urlServer;
+    var lbUrl = options.lbUrl;
     var flashProto = options.flashProto || "rtmfp";
     var flashPort = options.flashPort || 1935;
     var appKey = options.appKey || "defaultApp";
@@ -397,140 +399,180 @@ var createSession = function (options) {
     //callbacks added using session.on()
     var callbacks = {};
 
-    //connect session to server
-    var wsConnection = new WebSocket(urlServer);
-    wsConnection.onerror = function () {
-        onSessionStatusChange(SESSION_STATUS.FAILED);
-    };
-    wsConnection.onclose = function () {
-        if (sessionStatus !== SESSION_STATUS.FAILED) {
-            onSessionStatusChange(SESSION_STATUS.DISCONNECTED);
-        }
-    };
-    wsConnection.onopen = function () {
-        onSessionStatusChange(SESSION_STATUS.CONNECTED);
-        var cConfig = {
-            appKey: appKey,
-            mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.23",
-            clientOSVersion: window.navigator.appVersion,
-            clientBrowserVersion: window.navigator.userAgent,
-            custom: options.custom,
-        };
-        if (getMediaProviders()[0] == "WSPlayer") {
-            cConfig.useWsTunnel = true;
-            cConfig.useWsTunnelPacketization2 = true;
-            cConfig.useBase64BinaryEncoding = false;
-        }
-        if (sipConfig) {
-            util.copyObjectPropsToAnotherObject(sipConfig, cConfig);
-        }
-        //connect to REST App
-        send("connection", cConfig);
-        logger.setConnection(wsConnection);
-    };
+    var wsConnection;
+
+    if (lbUrl) {
+        requestURL(lbUrl);
+    } else {
+        createWS(urlServer)
+    }
+
     //todo remove
     var remoteSdpCache = {};
-    wsConnection.onmessage = function (event) {
-        var data = {};
-        if (event.data instanceof Blob) {
-            data.message = "binaryData";
-        } else {
-            data = JSON.parse(event.data);
-            var obj = data.data[0];
+
+    //Request URL from load-balancer
+    function requestURL(url) {
+        var request = new XMLHttpRequest();
+        request.open('GET', url, true);
+        request.timeout = 5000;
+        request.ontimeout = function() {
+            logger.warn(LOG_PREFIX, "Timeout during geting url from balancer!");
+            createWS(urlServer);
         }
-        switch (data.message) {
-            case 'ping':
-                send("pong", null);
-                break;
-            case 'getUserData':
-                authToken = obj.authToken;
-                onSessionStatusChange(SESSION_STATUS.ESTABLISHED);
-                break;
-            case 'setRemoteSDP':
-                var mediaSessionId = data.data[0];
-                var sdp = data.data[1];
-                if (streamRefreshHandlers[mediaSessionId]) {
-                    //pass server's sdp to stream
-                    streamRefreshHandlers[mediaSessionId](null, sdp);
-                } else if (callRefreshHandlers[mediaSessionId]) {
-                    //pass server's sdp to call
-                    callRefreshHandlers[mediaSessionId](null, sdp);
+        request.error = function() {
+            logger.warn(LOG_PREFIX, "Error during geting url from balancer!")
+            createWS(urlServer);
+        }
+        request.onload = function(e) {
+            if (request.status == 200 && request.readyState == 4) {
+                var result = JSON.parse(request.responseText);
+                if (urlServer.indexOf("wss://") !== -1) {
+                    urlServer = "wss://" + result.server + ":" + result.wss;
                 } else {
-                    remoteSdpCache[mediaSessionId] = sdp;
-                    logger.warn(LOG_PREFIX, "Media not found, id " + mediaSessionId);
+                    urlServer = "ws://" + result.server + ":" + result.ws;
                 }
-                break;
-            case 'notifyVideoFormat':
-            case 'notifyStreamStatusEvent':
-                if (streamRefreshHandlers[obj.mediaSessionId]) {
-                    //update stream status
-                    streamRefreshHandlers[obj.mediaSessionId](obj);
-                }
-                break;
-            case 'DataStatusEvent':
-                restAppCommunicator.resolveData(obj);
-                break;
-            case 'OnDataEvent':
-                if (callbacks[SESSION_STATUS.APP_DATA]) {
-                    callbacks[SESSION_STATUS.APP_DATA](obj);
-                }
-                break;
-            case 'fail':
-                if (obj.apiMethod && obj.apiMethod == "StreamStatusEvent") {
-                    if (streamRefreshHandlers[obj.id]) {
-                        //update stream status
-                        streamRefreshHandlers[obj.id](obj);
+                flashPort = result.flash;
+                logger.debug(LOG_PREFIX, "Got url from load balancer " + result.server);
+                createWS(urlServer);
+            }
+        }
+        request.send();
+    }
+
+    //connect session to server
+    function createWS(url) {
+        wsConnection = new WebSocket(url);
+        wsConnection.onerror = function () {
+            onSessionStatusChange(SESSION_STATUS.FAILED);
+        };
+        wsConnection.onclose = function () {
+            if (sessionStatus !== SESSION_STATUS.FAILED) {
+                onSessionStatusChange(SESSION_STATUS.DISCONNECTED);
+            }
+        };
+        wsConnection.onopen = function () {
+            onSessionStatusChange(SESSION_STATUS.CONNECTED);
+            var cConfig = {
+                appKey: appKey,
+                mediaProviders: Object.keys(MediaProvider),
+                clientVersion: "0.5.25",
+                clientOSVersion: window.navigator.appVersion,
+                clientBrowserVersion: window.navigator.userAgent,
+                custom: options.custom,
+            };
+            if (getMediaProviders()[0] == "WSPlayer") {
+                cConfig.useWsTunnel = true;
+                cConfig.useWsTunnelPacketization2 = true;
+                cConfig.useBase64BinaryEncoding = false;
+            }
+            if (sipConfig) {
+                util.copyObjectPropsToAnotherObject(sipConfig, cConfig);
+            }
+            //connect to REST App
+            send("connection", cConfig);
+            logger.setConnection(wsConnection);
+        };
+        wsConnection.onmessage = function (event) {
+            var data = {};
+            if (event.data instanceof Blob) {
+                data.message = "binaryData";
+            } else {
+                data = JSON.parse(event.data);
+                var obj = data.data[0];
+            }
+            switch (data.message) {
+                case 'ping':
+                    send("pong", null);
+                    break;
+                case 'getUserData':
+                    authToken = obj.authToken;
+                    onSessionStatusChange(SESSION_STATUS.ESTABLISHED);
+                    break;
+                case 'setRemoteSDP':
+                    var mediaSessionId = data.data[0];
+                    var sdp = data.data[1];
+                    if (streamRefreshHandlers[mediaSessionId]) {
+                        //pass server's sdp to stream
+                        streamRefreshHandlers[mediaSessionId](null, sdp);
+                    } else if (callRefreshHandlers[mediaSessionId]) {
+                        //pass server's sdp to call
+                        callRefreshHandlers[mediaSessionId](null, sdp);
+                    } else {
+                        remoteSdpCache[mediaSessionId] = sdp;
+                        logger.warn(LOG_PREFIX, "Media not found, id " + mediaSessionId);
                     }
-                }
-                if (callbacks[SESSION_STATUS.WARN]) {
-                    callbacks[SESSION_STATUS.WARN](obj);
-                }
-                break;
-            case 'registered':
-                onSessionStatusChange(SESSION_STATUS.REGISTERED);
-                break;
-            case 'notifyAudioCodec':
-                // This case for Flash only
-                var mediaSessionId = data.data[0];
-                var codec = data.data[1];
-                if (callRefreshHandlers[mediaSessionId]) {
-                    callRefreshHandlers[mediaSessionId](null, null, codec);
-                }
-                break;
-            case 'notifyTransferEvent':
-                callRefreshHandlers[obj.callId](null, null, null, obj);
-                break;
-            case 'notifyTryingResponse':
-            case 'hold':
-            case 'ring':
-            case 'talk':
-            case 'finish':
-                if (callRefreshHandlers[obj.callId]) {
-                    //update call status
-                    callRefreshHandlers[obj.callId](obj);
-                }
-                break;
-            case 'notifyIncomingCall':
-                if (callRefreshHandlers[obj.callId]) {
-                    logger.error(LOG_PREFIX, "Call already exists, id " + obj.callId);
-                }
-                if (callbacks[SESSION_STATUS.INCOMING_CALL]) {
-                    callbacks[SESSION_STATUS.INCOMING_CALL](createCall(obj));
-                } else {
-                    //todo hangup call
-                }
-                break;
-            case 'notifySessionDebugEvent':
-                logger.info(LOG_PREFIX, "Session debug status " + obj.status);
-                if (callbacks[SESSION_STATUS.DEBUG]) {
-                    callbacks[SESSION_STATUS.DEBUG](obj);
-                }
-                break;
-            default:
-            //logger.info(LOG_PREFIX, "Unknown server message " + data.message);
-        }
-    };
+                    break;
+                case 'notifyVideoFormat':
+                case 'notifyStreamStatusEvent':
+                    if (streamRefreshHandlers[obj.mediaSessionId]) {
+                        //update stream status
+                        streamRefreshHandlers[obj.mediaSessionId](obj);
+                    }
+                    break;
+                case 'DataStatusEvent':
+                    restAppCommunicator.resolveData(obj);
+                    break;
+                case 'OnDataEvent':
+                    if (callbacks[SESSION_STATUS.APP_DATA]) {
+                        callbacks[SESSION_STATUS.APP_DATA](obj);
+                    }
+                    break;
+                case 'fail':
+                    if (obj.apiMethod && obj.apiMethod == "StreamStatusEvent") {
+                        if (streamRefreshHandlers[obj.id]) {
+                            //update stream status
+                            streamRefreshHandlers[obj.id](obj);
+                        }
+                    }
+                    if (callbacks[SESSION_STATUS.WARN]) {
+                        callbacks[SESSION_STATUS.WARN](obj);
+                    }
+                    break;
+                case 'registered':
+                    onSessionStatusChange(SESSION_STATUS.REGISTERED);
+                    break;
+                case 'notifyAudioCodec':
+                    // This case for Flash only
+                    var mediaSessionId = data.data[0];
+                    var codec = data.data[1];
+                    if (callRefreshHandlers[mediaSessionId]) {
+                        callRefreshHandlers[mediaSessionId](null, null, codec);
+                    }
+                    break;
+                case 'notifyTransferEvent':
+                    callRefreshHandlers[obj.callId](null, null, null, obj);
+                    break;
+                case 'notifyTryingResponse':
+                case 'hold':
+                case 'ring':
+                case 'talk':
+                case 'finish':
+                    if (callRefreshHandlers[obj.callId]) {
+                        //update call status
+                        callRefreshHandlers[obj.callId](obj);
+                    }
+                    break;
+                case 'notifyIncomingCall':
+                    if (callRefreshHandlers[obj.callId]) {
+                        logger.error(LOG_PREFIX, "Call already exists, id " + obj.callId);
+                    }
+                    if (callbacks[SESSION_STATUS.INCOMING_CALL]) {
+                        callbacks[SESSION_STATUS.INCOMING_CALL](createCall(obj));
+                    } else {
+                        //todo hangup call
+                    }
+                    break;
+                case 'notifySessionDebugEvent':
+                    logger.info(LOG_PREFIX, "Session debug status " + obj.status);
+                    if (callbacks[SESSION_STATUS.DEBUG]) {
+                        callbacks[SESSION_STATUS.DEBUG](obj);
+                    }
+                    break;
+                default:
+                //logger.info(LOG_PREFIX, "Unknown server message " + data.message);
+            }
+        };
+    }
 
     //WebSocket send helper
     function send(message, data) {
