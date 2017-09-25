@@ -5,6 +5,7 @@ var uuid = require('node-uuid');
 var util = require('./util');
 var connections = {};
 var CACHED_INSTANCE_POSTFIX = "-CACHED_WEBRTC_INSTANCE";
+var REMOTE_CACHED_VIDEO = "-REMOTE_CACHED_VIDEO";
 var extensionId;
 var defaultConstraints;
 var logger;
@@ -35,20 +36,29 @@ var createConnection = function (options) {
         var gainNode;
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
-            remoteVideo = document.createElement('video');
             localVideo.id = id + "-local";
-            remoteVideo.id = id + "-remote";
-            remoteDisplay.appendChild(remoteVideo);
             connection.addStream(localVideo.srcObject);
+
+            remoteVideo = getCacheInstance(remoteDisplay);
+            if (!remoteVideo) {
+                remoteVideo = document.createElement('video');
+                remoteDisplay.appendChild(remoteVideo);
+            }
+            remoteVideo.id = id + "-remote";
         } else {
-            localVideo = getCacheInstance(display);
-            if (localVideo) {
+            var cachedVideo = getCacheInstance(display);
+            if (!cachedVideo || cachedVideo.id.indexOf(REMOTE_CACHED_VIDEO) !== -1) {
+                if (cachedVideo) {
+                    remoteVideo = cachedVideo;
+                } else {
+                    remoteVideo = document.createElement('video');
+                    display.appendChild(remoteVideo);
+                }
+                remoteVideo.id = id;
+            } else {
+                localVideo = cachedVideo;
                 localVideo.id = id;
                 connection.addStream(localVideo.srcObject);
-            } else {
-                remoteVideo = document.createElement('video');
-                remoteVideo.id = id;
-                display.appendChild(remoteVideo);
             }
         }
 
@@ -493,7 +503,7 @@ var releaseMedia = function (display) {
 function getCacheInstance(display) {
     var i;
     for (i = 0; i < display.children.length; i++) {
-        if (display.children[i] && display.children[i].id.indexOf(CACHED_INSTANCE_POSTFIX) != -1) {
+        if (display.children[i] && (display.children[i].id.indexOf(CACHED_INSTANCE_POSTFIX) != -1 || display.children[i].id.indexOf(REMOTE_CACHED_VIDEO) != -1)) {
             logger.info(LOG_PREFIX, "FOUND WEBRTC CACHED INSTANCE, id " + display.children[i].id);
             return display.children[i];
         }
@@ -627,12 +637,27 @@ var playFirstSound = function () {
     return false;
 };
 
+var playFirstVideo = function(display, src) {
+    if (!getCacheInstance(display)) {
+        var video = document.createElement('video');
+        display.appendChild(video);
+        video.id = uuid.v1() + REMOTE_CACHED_VIDEO;
+        if (src) {
+            video.src = src;
+        } else {
+            video.src = "../../dependencies/media/preloader.mp4";
+        }
+        video.play();
+    }
+};
+
 module.exports = {
     createConnection: createConnection,
     getMediaAccess: getMediaAccess,
     releaseMedia: releaseMedia,
     listDevices: listDevices,
     playFirstSound: playFirstSound,
+    playFirstVideo: playFirstVideo,
     available: available,
     configure: function (configuration) {
         extensionId = configuration.extensionId;

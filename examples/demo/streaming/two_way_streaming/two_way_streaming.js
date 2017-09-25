@@ -31,6 +31,7 @@ function init_page() {
 
 function connect() {
     var url = $('#urlServer').val();
+
     //create session
     console.log("Create new session with url " + url);
     Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function(session){
@@ -141,6 +142,13 @@ function publishStream() {
 function playStream() {
     var session = Flashphoner.getSessions()[0];
     var streamName = $('#playStream').val();
+
+    if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
+        Flashphoner.playFirstSound();
+    } else if ((Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") || Flashphoner.getMediaProviders()[0] === "MSE") {
+        Flashphoner.playFirstVideo(remoteVideo);
+    }
+
     session.createStream({
         name: streamName,
         display: remoteVideo

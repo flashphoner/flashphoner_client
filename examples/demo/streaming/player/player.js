@@ -82,9 +82,12 @@ function onStopped() {
 }
 
 function start() {
-    if (Flashphoner.getMediaProviders()[0] == "WSPlayer" || (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] == "WebRTC")) {
+    if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
         Flashphoner.playFirstSound();
+    } else if ((Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") || Flashphoner.getMediaProviders()[0] === "MSE") {
+        Flashphoner.playFirstVideo(remoteVideo);
     }
+    
     var url = $('#url').val();
     //check if we already have session
     if (Flashphoner.getSessions().length > 0) {
@@ -131,10 +134,11 @@ function playStream(session) {
     }
     stream = session.createStream(options).on(STREAM_STATUS.PLAYING, function(stream) {
         $("#preloader").show();
-        document.getElementById(stream.id()).addEventListener('playing', function(event){
+        var video = document.getElementById(stream.id());
+        video.addEventListener('playing', function(event){
             $("#preloader").hide();
         });
-        document.getElementById(stream.id()).addEventListener('resize', function(event){
+        video.addEventListener('resize', function(event){
             var streamResolution = stream.videoResolution();
             if (Object.keys(streamResolution).length === 0) {
                 resizeVideo(event.target);

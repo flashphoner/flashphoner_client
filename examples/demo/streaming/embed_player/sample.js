@@ -29,7 +29,7 @@ function init_page() {
             "urlServer=" + $("#url").val() + "&" +
             "streamName=" + $("#streamName").val() + "&" +
             "mediaProviders=" + getMediaProviders() + "&" +
-            "autoplay=true")
+            "autoplay=false");
     });
     $("#clipboardBtn").click(function () {
         window.copyToClipboard($("#codeTextArea").text());

@@ -556,6 +556,10 @@ var playFirstSound = function () {
     return true;
 };
 
+var playFirstVideo = function () {
+    return true;
+};
+
 module.exports = {
     createConnection: createConnection,
     getMediaAccess: getMediaAccess,
@@ -563,6 +567,7 @@ module.exports = {
     available: available,
     listDevices: listDevices,
     playFirstSound: playFirstSound,
+    playFirstVideo: playFirstVideo,
     configure: function(configuration) {
         swfLocation = configuration.flashMediaProviderSwfLocation;
         defaultConstraints = configuration.constraints;

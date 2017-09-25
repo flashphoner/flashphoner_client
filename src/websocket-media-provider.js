@@ -153,6 +153,10 @@ var playFirstSound = function() {
     src.start(0);
 };
 
+var playFirstVideo = function() {
+    return true;
+};
+
 /**
  * Check WebSocket available
  *
@@ -169,6 +173,7 @@ module.exports = {
     available: available,
     listDevices: listDevices,
     playFirstSound: playFirstSound,
+    playFirstVideo: playFirstVideo,
     configure: function(configuration) {
         audioContext = configuration.audioContext;
         receiverLocation = configuration.receiverLocation || receiverLocation;

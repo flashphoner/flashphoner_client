@@ -179,7 +179,17 @@ var getMediaProviders = function () {
 var playFirstSound = function () {
     var mediaProvider = getMediaProviders()[0];
     MediaProvider[mediaProvider].playFirstSound();
-}
+};
+
+/**
+ * Play video chunk
+ *
+ * @memberof Flashphoner
+ */
+var playFirstVideo = function (display, src) {
+    var mediaProvider = getMediaProviders()[0];
+    MediaProvider[mediaProvider].playFirstVideo(display, src);
+};
 
 /**
  * Get logger
@@ -412,7 +422,7 @@ var createSession = function (options) {
         var cConfig = {
             appKey: appKey,
             mediaProviders: Object.keys(MediaProvider),
-            clientVersion: "0.5.23",
+            clientVersion: "0.5.24",
             clientOSVersion: window.navigator.appVersion,
             clientBrowserVersion: window.navigator.userAgent,
             custom: options.custom,
@@ -1997,6 +2007,7 @@ module.exports = {
     getSession: getSession,
     createSession: createSession,
     playFirstSound: playFirstSound,
+    playFirstVideo: playFirstVideo,
     getLogger: getLogger,
     roomApi: require('./room-module'),
     constants: constants,

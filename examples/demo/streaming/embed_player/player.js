@@ -5,7 +5,7 @@ var resolution_for_wsplayer;
 var stream;
 var currentVolumeValue = 50, storedVolume;
 var stopped = true;
-var autoplay = getUrlParam("autoplay") || false;
+var autoplay = eval(getUrlParam("autoplay")) || false;
 var resolution = getUrlParam("resolution");
 var mediaProviders = getUrlParam("mediaProviders") || "";
 var streamName = getUrlParam("streamName") || "streamName";
@@ -44,7 +44,7 @@ function init_page() {
         $(".fullscreen").hide();
         $(".player").css('width','75%');
     }
-    if (autoplay) {
+    if (autoplay ) {
         $(".play-pause").click();
     }
 }
@@ -83,9 +83,12 @@ function onStopped() {
 function start() {
     $("#preloader").show();
 
-    if (Flashphoner.getMediaProviders()[0] == "WSPlayer" || (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] == "WebRTC")) {
+    if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
         Flashphoner.playFirstSound();
+    } else if ((Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] == "WebRTC") || Flashphoner.getMediaProviders()[0] == "MSE") {
+        Flashphoner.playFirstVideo(remoteVideo);
     }
+
     //check if we already have session
     if (Flashphoner.getSessions().length > 0) {
         var session = Flashphoner.getSessions()[0];

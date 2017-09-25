@@ -154,13 +154,13 @@ var Browser = {
         return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     },
     isSafari: function () {
-        return Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+        return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     },
     isAndroid: function () {
         return navigator.userAgent.toLowerCase().indexOf("android") > -1;
     },
     isSafariWebRTC: function () {
-        return navigator.mediaDevices && navigator.userAgent.match(/AppleWebKit\/(\d+)\./);
+        return navigator.mediaDevices && Browser.isSafari();
     }
 };
 

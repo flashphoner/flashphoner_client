@@ -543,12 +543,18 @@ var playFirstSound = function () {
     return true;
 };
 
+var playFirstVideo = function () {
+    return true;
+};
+
+
 module.exports = {
     createConnection: createConnection,
     getMediaAccess: getMediaAccess,
     releaseMedia: releaseMedia,
     listDevices: listDevices,
     playFirstSound: playFirstSound,
+    playFirstVideo: playFirstVideo,
     available: available,
     configure: function (configuration) {
         extensionId = configuration.extensionId;
