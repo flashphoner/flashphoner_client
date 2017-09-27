@@ -37,6 +37,14 @@ function init_page() {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
     }
+    //local and remote displays
+    localVideo = document.getElementById("localVideo");
+    remoteVideo = document.getElementById("remoteVideo");
+    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+        Flashphoner.playFirstVideo(localVideo, true);
+        Flashphoner.playFirstVideo(remoteVideo, false);
+    }
+
     Flashphoner.getMediaDevices(null, true).then(function (list) {
         list.audio.forEach(function (device) {
             var audio = document.getElementById("audioInput");
@@ -73,9 +81,6 @@ function init_page() {
                 video.appendChild(option);
             }
         });
-        //local and remote displays
-        localVideo = document.getElementById("localVideo");
-        remoteVideo = document.getElementById("remoteVideo");
 
         $("#url").val(setURL() + "/" + createUUID(8));
 
@@ -285,6 +290,10 @@ function getConstaints() {
             width: parseInt($('#sendWidth').val()),
             height: parseInt($('#sendHeight').val())
         };
+        if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+            constraints.video.width = {min:parseInt($('#sendWidth').val()), max:640};
+            constraints.video.height = {min:parseInt($('#sendHeight').val()), max:480};
+        }
         if (parseInt($('#sendVideoBitrate').val()) > 0)
             constraints.video.bitrate = parseInt($('#sendVideoBitrate').val());
         if (parseInt($('#fps').val()) > 0)

@@ -4,7 +4,7 @@ var adapter = require('webrtc-adapter');
 var uuid = require('node-uuid');
 var util = require('./util');
 var connections = {};
-var CACHED_INSTANCE_POSTFIX = "-CACHED_WEBRTC_INSTANCE";
+var LOCAL_CACHED_VIDEO = "-LOCAL_CACHED_VIDEO";
 var REMOTE_CACHED_VIDEO = "-REMOTE_CACHED_VIDEO";
 var extensionId;
 var defaultConstraints;
@@ -94,7 +94,7 @@ var createConnection = function (options) {
                 remoteVideo = null;
             }
             if (localVideo && !getCacheInstance((localDisplay || display)) && cacheCamera) {
-                localVideo.id = localVideo.id + CACHED_INSTANCE_POSTFIX;
+                localVideo.id = localVideo.id + LOCAL_CACHED_VIDEO;
                 unmuteAudio();
                 unmuteVideo();
                 localVideo = null;
@@ -384,7 +384,8 @@ var getMediaAccess = function (constraints, display) {
     return new Promise(function (resolve, reject) {
         if (!constraints) {
             constraints = defaultConstraints;
-            if (getCacheInstance(display)) {
+            var cacheInstance = getCacheInstance(display);
+            if (cacheInstance && cacheInstance.srcObject) {
                 resolve(display);
                 return;
             }
@@ -423,9 +424,12 @@ var getMediaAccess = function (constraints, display) {
                 }
             }
             navigator.getUserMedia(constraints, function (stream) {
-                var video = document.createElement('video');
-                display.appendChild(video);
-                video.id = uuid.v1() + CACHED_INSTANCE_POSTFIX;
+                var video = getCacheInstance(display);
+                if (!video) {
+                    video = document.createElement('video');
+                    display.appendChild(video);
+                }
+                video.id = uuid.v1() + LOCAL_CACHED_VIDEO;
                 //show local camera
                 video.srcObject = stream;
                 //mute audio
@@ -503,7 +507,7 @@ var releaseMedia = function (display) {
 function getCacheInstance(display) {
     var i;
     for (i = 0; i < display.children.length; i++) {
-        if (display.children[i] && (display.children[i].id.indexOf(CACHED_INSTANCE_POSTFIX) != -1 || display.children[i].id.indexOf(REMOTE_CACHED_VIDEO) != -1)) {
+        if (display.children[i] && (display.children[i].id.indexOf(LOCAL_CACHED_VIDEO) != -1 || display.children[i].id.indexOf(REMOTE_CACHED_VIDEO) != -1)) {
             logger.info(LOG_PREFIX, "FOUND WEBRTC CACHED INSTANCE, id " + display.children[i].id);
             return display.children[i];
         }
@@ -519,10 +523,9 @@ function removeVideoElement(video) {
         for (var i = 0; i < tracks.length; i++) {
             tracks[i].stop();
         }
+        video.srcObject = undefined;
     }
-    if (video.parentNode) {
-        video.parentNode.removeChild(video);
-    }
+
 }
 /**
  * Check WebRTC available
@@ -586,15 +589,15 @@ function normalizeConstraints(constraints) {
                 max: frameRate
             }
         }
-        if (constraints.video.hasOwnProperty('width')) {
+        if (constraints.video.hasOwnProperty('width') && typeof constraints.video.width !== 'object') {
             var width = constraints.video.width;
-            if (isNaN(width) || width == 0) {
+            if ((isNaN(width) || width == 0)) {
                 logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
                 constraints.video.width = 320;
                 constraints.video.height = 240;
             }
         }
-        if (constraints.video.hasOwnProperty('height')) {
+        if (constraints.video.hasOwnProperty('height') && typeof constraints.video.height !== 'object') {
             var height = constraints.video.height;
             if (isNaN(height) || height == 0) {
                 logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
@@ -637,11 +640,13 @@ var playFirstSound = function () {
     return false;
 };
 
-var playFirstVideo = function(display, src) {
+var playFirstVideo = function(display, isLocal, src) {
     if (!getCacheInstance(display)) {
         var video = document.createElement('video');
+        video.setAttribute("playsinline", "");
+        video.setAttribute("webkit-playsinline", "");
         display.appendChild(video);
-        video.id = uuid.v1() + REMOTE_CACHED_VIDEO;
+        video.id = uuid.v1() + (isLocal ? LOCAL_CACHED_VIDEO : REMOTE_CACHED_VIDEO);
         if (src) {
             video.src = src;
         } else {

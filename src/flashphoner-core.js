@@ -186,9 +186,9 @@ var playFirstSound = function () {
  *
  * @memberof Flashphoner
  */
-var playFirstVideo = function (display, src) {
+var playFirstVideo = function (display, isLocal, src) {
     var mediaProvider = getMediaProviders()[0];
-    MediaProvider[mediaProvider].playFirstVideo(display, src);
+    MediaProvider[mediaProvider].playFirstVideo(display, isLocal, src);
 };
 
 /**
@@ -275,8 +275,8 @@ var getDefaultMediaConstraints = function () {
     return {
         audio: true,
         video: {
-            width: 320,
-            height: 240
+            width: {min:320, max:640},
+            height: {min:240, max:480}
         }
     };
 };

@@ -11,7 +11,7 @@ function init_page() {
     //init api
     try {
         Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
-    } catch(e) {
+    } catch (e) {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
     }
@@ -26,7 +26,7 @@ function init_page() {
     $("#playStream").val(streamName);
     onDisconnected();
     onUnpublished();
-	onStopped();
+    onStopped();
 }
 
 function connect() {
@@ -34,29 +34,29 @@ function connect() {
 
     //create session
     console.log("Create new session with url " + url);
-    Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function(session){
+    Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function (session) {
         setStatus("#connectStatus", session.status());
         onConnected(session);
-    }).on(SESSION_STATUS.DISCONNECTED, function(){
+    }).on(SESSION_STATUS.DISCONNECTED, function () {
         setStatus("#connectStatus", SESSION_STATUS.DISCONNECTED);
         onDisconnected();
-    }).on(SESSION_STATUS.FAILED, function(){
+    }).on(SESSION_STATUS.FAILED, function () {
         setStatus("#connectStatus", SESSION_STATUS.FAILED);
         onDisconnected();
     });
 }
 
 function onConnected(session) {
-    $("#connectBtn").text("Disconnect").off('click').click(function(){
+    $("#connectBtn").text("Disconnect").off('click').click(function () {
         $(this).prop('disabled', true);
         session.disconnect();
     }).prop('disabled', false);
     onUnpublished();
-	onStopped();
+    onStopped();
 }
 
 function onDisconnected() {
-    $("#connectBtn").text("Connect").off('click').click(function(){
+    $("#connectBtn").text("Connect").off('click').click(function () {
         if (validateForm("connectionForm")) {
             $('#urlServer').prop('disabled', true);
             $(this).prop('disabled', true);
@@ -65,19 +65,19 @@ function onDisconnected() {
     }).prop('disabled', false);
     $('#urlServer').prop('disabled', false);
     onUnpublished();
-	onStopped();
+    onStopped();
 }
 
 function onPublishing(stream) {
-    $("#publishBtn").text("Stop").off('click').click(function(){
+    $("#publishBtn").text("Stop").off('click').click(function () {
         $(this).prop('disabled', true);
-		stream.stop();
+        stream.stop();
     }).prop('disabled', false);
     $("#publishInfo").text("");
 }
 
 function onUnpublished() {
-    $("#publishBtn").text("Publish").off('click').click(function(){
+    $("#publishBtn").text("Publish").off('click').click(function () {
         if (validateForm("streamerForm")) {
             $('#publishStream').prop('disabled', true);
             $(this).prop('disabled', true);
@@ -94,7 +94,7 @@ function onUnpublished() {
 }
 
 function onPlaying(stream) {
-    $("#playBtn").text("Stop").off('click').click(function(){
+    $("#playBtn").text("Stop").off('click').click(function () {
         $(this).prop('disabled', true);
         stream.stop();
     }).prop('disabled', false);
@@ -102,14 +102,14 @@ function onPlaying(stream) {
 }
 
 function onStopped() {
-    $("#playBtn").text("Play").off('click').click(function(){
+    $("#playBtn").text("Play").off('click').click(function () {
         if (validateForm("playerForm")) {
             $('#playStream').prop('disabled', true);
             $(this).prop('disabled', true);
             playStream();
         }
     });
-	if (Flashphoner.getSessions()[0] && Flashphoner.getSessions()[0].status() == SESSION_STATUS.ESTABLISHED) {
+    if (Flashphoner.getSessions()[0] && Flashphoner.getSessions()[0].status() == SESSION_STATUS.ESTABLISHED) {
         $("#playBtn").prop('disabled', false);
         $('#playStream').prop('disabled', false);
     } else {
@@ -121,19 +121,24 @@ function onStopped() {
 function publishStream() {
     var session = Flashphoner.getSessions()[0];
     var streamName = $('#publishStream').val();
+
+    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+        Flashphoner.playFirstVideo(localVideo, true);
+    }
+
     session.createStream({
         name: streamName,
         display: localVideo,
         cacheLocalResources: true,
         receiveVideo: false,
         receiveAudio: false
-    }).on(STREAM_STATUS.PUBLISHING, function(stream){
+    }).on(STREAM_STATUS.PUBLISHING, function (stream) {
         setStatus("#publishStatus", STREAM_STATUS.PUBLISHING);
-		onPublishing(stream);
-    }).on(STREAM_STATUS.UNPUBLISHED, function(){
+        onPublishing(stream);
+    }).on(STREAM_STATUS.UNPUBLISHED, function () {
         setStatus("#publishStatus", STREAM_STATUS.UNPUBLISHED);
         onUnpublished();
-    }).on(STREAM_STATUS.FAILED, function(){
+    }).on(STREAM_STATUS.FAILED, function () {
         setStatus("#publishStatus", STREAM_STATUS.FAILED);
         onUnpublished();
     }).publish();
@@ -152,16 +157,16 @@ function playStream() {
     session.createStream({
         name: streamName,
         display: remoteVideo
-    }).on(STREAM_STATUS.PLAYING, function(stream) {
-        document.getElementById(stream.id()).addEventListener('resize', function(event){
+    }).on(STREAM_STATUS.PLAYING, function (stream) {
+        document.getElementById(stream.id()).addEventListener('resize', function (event) {
             resizeVideo(event.target);
         });
         setStatus("#playStatus", stream.status());
         onPlaying(stream);
-    }).on(STREAM_STATUS.STOPPED, function() {
+    }).on(STREAM_STATUS.STOPPED, function () {
         setStatus("#playStatus", STREAM_STATUS.STOPPED);
         onStopped();
-    }).on(STREAM_STATUS.FAILED, function(stream) {
+    }).on(STREAM_STATUS.FAILED, function (stream) {
         setStatus("#playStatus", STREAM_STATUS.FAILED, stream);
         onStopped();
     }).play();
@@ -172,24 +177,24 @@ function setStatus(selector, status, stream) {
     var statusField = $(selector);
     statusField.text(status).removeClass();
     if (status == "PLAYING" || status == "ESTABLISHED" || status == "PUBLISHING") {
-        statusField.attr("class","text-success");
+        statusField.attr("class", "text-success");
     } else if (status == "DISCONNECTED" || status == "UNPUBLISHED" || status == "STOPPED") {
-        statusField.attr("class","text-muted");
+        statusField.attr("class", "text-muted");
     } else if (status == "FAILED") {
         if (stream) {
-            if (stream.published()){
-                $("#publishInfo").text(stream.getInfo()).attr("class","text-muted");
+            if (stream.published()) {
+                $("#publishInfo").text(stream.getInfo()).attr("class", "text-muted");
             } else {
-                $("#playInfo").text(stream.getInfo()).attr("class","text-muted");
+                $("#playInfo").text(stream.getInfo()).attr("class", "text-muted");
             }
         }
-        statusField.attr("class","text-danger");
+        statusField.attr("class", "text-danger");
     }
 }
 
 function validateForm(formId) {
     var valid = true;
-    $('#' + formId + ' :text').each(function(){
+    $('#' + formId + ' :text').each(function () {
         if (!$(this).val()) {
             highlightInput($(this));
             valid = false;
@@ -202,6 +207,7 @@ function validateForm(formId) {
     function highlightInput(input) {
         input.closest('.input-group').addClass("has-error");
     }
+
     function removeHighlight(input) {
         input.closest('.input-group').removeClass("has-error");
     }
