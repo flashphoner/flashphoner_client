@@ -27,7 +27,7 @@ function init_page() {
     $("#testBtn").click(function () {
         $("#fp_embed_player").attr('src', "player.html?" +
             "urlServer=" + $("#url").val() + "&" +
-            "streamName=" + $("#streamName").val() + "&" +
+            "streamName=" + $("#streamName").val().replace(/&/g,encodeURIComponent("&")) + "&" +
             "mediaProviders=" + getMediaProviders() + "&" +
             "autoplay=false");
     });
@@ -38,7 +38,7 @@ function init_page() {
     var constructCode = function () {
         var url = getAdminUrl() + "/embed_player?" +
         "urlServer=" + $("#url").val() + "&" +
-        "streamName=" + $("#streamName").val() + "&" +
+        "streamName=" + $("#streamName").val().replace(/&/g,encodeURIComponent("&")) + "&" +
         "mediaProviders=" + getMediaProviders();
         $("#codeTextArea").text("<iframe id='fp_embed_player' src='" + url + "' " +
             "marginwidth='0' marginheight='0' frameborder='0' width='100%' height='100%' scrolling='no' allowfullscreen='allowfullscreen'></iframe>")
