@@ -40,10 +40,6 @@ function init_page() {
     //local and remote displays
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        Flashphoner.playFirstVideo(localVideo, true);
-        Flashphoner.playFirstVideo(remoteVideo, false);
-    }
 
     Flashphoner.getMediaDevices(null, true).then(function (list) {
         list.audio.forEach(function (device) {
@@ -174,6 +170,10 @@ var micLevelInterval;
 var testStarted;
 var audioContextForTest;
 function startTest() {
+    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+        Flashphoner.playFirstVideo(localVideo, true);
+        Flashphoner.playFirstVideo(remoteVideo, false);
+    }
     Flashphoner.getMediaAccess(getConstaints(), localVideo).then(function(disp) {
         $("#testBtn").text("Release").off('click').click(function () {
             $(this).prop('disabled', true);
@@ -237,6 +237,10 @@ function releaseResourcesForTesting() {
 function start() {
     if (testStarted)
         stopTest();
+    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+        Flashphoner.playFirstVideo(localVideo, true);
+        Flashphoner.playFirstVideo(remoteVideo, false);
+    }
     //check if we already have session
     var url = $('#url').val();
     //check if we already have session

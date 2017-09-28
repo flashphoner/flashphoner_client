@@ -52,6 +52,10 @@ function init_page(){
 }
 
 function connect() {
+    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+        Flashphoner.playFirstVideo(localDisplay, true);
+        Flashphoner.playFirstVideo(remoteDisplay, false);
+    }
 	var url = $('#urlServer').val();
     var registerRequired = $("#sipRegisterRequired").is(':checked');
 

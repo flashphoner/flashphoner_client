@@ -18,6 +18,10 @@ Phone.prototype.init = function () {
 };
 
 Phone.prototype.connect = function () {
+    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+        Flashphoner.playFirstVideo(localVideo, true);
+        Flashphoner.playFirstVideo(remoteVideo, false);
+    }
     var me = this;
     if ($("#outbound_proxy").val() == "") {
         $("#outbound_proxy").val($("#domain").val());
