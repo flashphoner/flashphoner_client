@@ -91,6 +91,7 @@ var createConnection = function (options) {
         var close = function (cacheCamera) {
             if (remoteVideo) {
                 removeVideoElement(remoteVideo);
+                remoteVideo.id = remoteVideo.id + REMOTE_CACHED_VIDEO;
                 remoteVideo = null;
             }
             if (localVideo && !getCacheInstance((localDisplay || display)) && cacheCamera) {
@@ -100,6 +101,7 @@ var createConnection = function (options) {
                 localVideo = null;
             } else if (localVideo) {
                 removeVideoElement(localVideo);
+                localVideo.id = localVideo.id + LOCAL_CACHED_VIDEO;
                 localVideo = null;
             }
             if (connection.signalingState !== "closed") {

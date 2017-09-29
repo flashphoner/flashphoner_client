@@ -2,77 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e5faa371-8c28-47e4-a1e8-926c37427e94" name="Default" comment="">
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap-theme.css" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap-theme.css.map" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap-theme.min.css" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap.css" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap.css.map" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\css\bootstrap.min.css" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\HELP-US-OUT.txt" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\css\font-awesome.css" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\css\font-awesome.min.css" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\FontAwesome.otf" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\fontawesome-webfont.eot" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\fontawesome-webfont.svg" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\fontawesome-webfont.ttf" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\fontawesome-webfont.woff" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\fonts\fontawesome-webfont.woff2" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\animated.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\bordered-pulled.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\core.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\fixed-width.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\font-awesome.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\icons.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\larger.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\list.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\mixins.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\path.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\rotated-flipped.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\screen-reader.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\stacked.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\less\variables.less" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_animated.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_bordered-pulled.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_core.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_fixed-width.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_icons.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_larger.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_list.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_mixins.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_path.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_rotated-flipped.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_screen-reader.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_stacked.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\_variables.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\font-awesome\scss\font-awesome.scss" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\FontAwesome.otf" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\fontawesome-webfont.eot" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\fontawesome-webfont.svg" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\fontawesome-webfont.ttf" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\fontawesome-webfont.woff" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\fontawesome-webfont.woff2" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\glyphicons-halflings-regular.eot" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\glyphicons-halflings-regular.svg" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\glyphicons-halflings-regular.ttf" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\glyphicons-halflings-regular.woff" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\fonts\glyphicons-halflings-regular.woff2" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\icons\font-awesome.min.css" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\js\bootstrap.js" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\js\bootstrap.min.js" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\js\npm.js" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\bootstrap\js\switch.js" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\jquery\jquery-1.12.0.js" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\jquery\jquery-ui.js" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\jquery\jquery.js" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\jquery\jquery.json.js" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\jquery\jquery.websocket.js" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\dependencies\js\utils.js" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\streaming\streamer\streamer.css" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\streaming\streamer\streamer.html" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\demo\streaming\streamer\streamer.js" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\min\echo.html" afterPath="" />
-      <change type="DELETED" beforePath="C:\Data\projects\wcs\client\wcs_api-2.0\example\min\streaming.html" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Gruntfile.js" afterPath="$PROJECT_DIR$/Gruntfile.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/demo/streaming/2players/2players.js" afterPath="$PROJECT_DIR$/examples/demo/streaming/2players/2players.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/demo/streaming/camera_test/camera_test.js" afterPath="$PROJECT_DIR$/examples/demo/streaming/camera_test/camera_test.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/demo/streaming/conference/conference.js" afterPath="$PROJECT_DIR$/examples/demo/streaming/conference/conference.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/demo/streaming/firewall-traversal-streaming/firewall-traversal-streaming.js" afterPath="$PROJECT_DIR$/examples/demo/streaming/firewall-traversal-streaming/firewall-traversal-streaming.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/demo/streaming/stream-diagnostic/stream-diagnostic.js" afterPath="$PROJECT_DIR$/examples/demo/streaming/stream-diagnostic/stream-diagnostic.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/demo/streaming/stream-snapshot/stream-snapshot.js" afterPath="$PROJECT_DIR$/examples/demo/streaming/stream-snapshot/stream-snapshot.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/demo/streaming/stream_recording/recording.js" afterPath="$PROJECT_DIR$/examples/demo/streaming/stream_recording/recording.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/demo/streaming/streamer/streamer.js" afterPath="$PROJECT_DIR$/examples/demo/streaming/streamer/streamer.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/examples/demo/streaming/webrtc-as-rtmp-republishing/webrtc-as-rtmp-republishing.js" afterPath="$PROJECT_DIR$/examples/demo/streaming/webrtc-as-rtmp-republishing/webrtc-as-rtmp-republishing.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/flashphoner-core.js" afterPath="$PROJECT_DIR$/src/flashphoner-core.js" />
     </list>
     <ignored path="wcs_api-2.0.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -83,30 +24,152 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
   </component>
-  <component name="DaemonCodeAnalyzer">
-    <disable_hints />
-  </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
     <favorites_list name="wcs_api-2.0" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="package.json" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/package.json">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="recording.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/demo/streaming/stream_recording/recording.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="867">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <state relative-caret-position="142">
+              <caret line="42" column="5" lean-forward="false" selection-start-line="42" selection-start-column="5" selection-end-line="42" selection-end-column="5" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="streamer.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/demo/streaming/streamer/streamer.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="144">
+              <caret line="44" column="46" lean-forward="false" selection-start-line="44" selection-start-column="46" selection-end-line="44" selection-end-column="46" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="2players.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/examples/demo/streaming/2players/2players.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="64">
+              <caret line="62" column="39" lean-forward="false" selection-start-line="62" selection-start-column="39" selection-end-line="62" selection-end-column="39" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="two_way_streaming.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/demo/streaming/two_way_streaming/two_way_streaming.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="103">
+              <caret line="124" column="0" lean-forward="false" selection-start-line="124" selection-start-column="0" selection-end-line="126" selection-end-column="5" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="video-chat.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/demo/streaming/video-chat/video-chat.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="webrtc-as-rtmp-republishing.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/demo/streaming/webrtc-as-rtmp-republishing/webrtc-as-rtmp-republishing.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="630">
+              <caret line="49" column="5" lean-forward="false" selection-start-line="49" selection-start-column="5" selection-end-line="49" selection-end-column="5" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="hls-player.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/demo/streaming/hls-player/hls-player.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="player.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/demo/streaming/player/player.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="265">
+              <caret line="88" column="5" lean-forward="false" selection-start-line="88" selection-start-column="5" selection-end-line="88" selection-end-column="5" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="stream-diagnostic.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/demo/streaming/stream-diagnostic/stream-diagnostic.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="114">
+              <caret line="48" column="0" lean-forward="false" selection-start-line="48" selection-start-column="0" selection-end-line="50" selection-end-column="5" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="stream-snapshot.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/examples/demo/streaming/stream-snapshot/stream-snapshot.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-438">
+              <caret line="68" column="5" lean-forward="false" selection-start-line="68" selection-start-column="5" selection-end-line="68" selection-end-column="5" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>defaultConstraints</find>
+      <find>constraints</find>
+      <find>320</find>
+      <find>play</find>
+      <find>play(</find>
+      <find>createElement('video')</find>
+      <find>REMOTE_CACHED_VIDEO</find>
+      <find>addStream</find>
+      <find>getCacheInstance</find>
+      <find>getDefault</find>
+      <find>playFirst</find>
+      <find>object</find>
+      <find>isSafariWebRTC</find>
+      <find>getDea</find>
+      <find>localVideo</find>
+      <find>stopTest</find>
+      <find>releaseMe</find>
+      <find>releaseMed</find>
+      <find>resizeLocalVideo</find>
+      <find>remote</find>
+      <find>getD</find>
+      <find>safar</find>
+      <find>MediaS</find>
+      <find>getDefa</find>
+      <find>adapter</find>
+      <find>browser</find>
+      <find>browserDetails</find>
+      <find>participant1Display</find>
+    </findStrings>
+    <dirStrings>
+      <dir>$PROJECT_DIR$</dir>
+      <dir>$PROJECT_DIR$/examples/demo/dependencies</dir>
+      <dir>$PROJECT_DIR$/src</dir>
+    </dirStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -116,30 +179,90 @@
       <list>
         <option value="$PROJECT_DIR$/example/min/echo.html" />
         <option value="$PROJECT_DIR$/example/min/streaming.html" />
+        <option value="$PROJECT_DIR$/Gruntfile.js" />
+        <option value="$PROJECT_DIR$/examples/demo/streaming/two_way_streaming/two_way_streaming.js" />
+        <option value="$PROJECT_DIR$/src/webrtc-media-provider.js" />
+        <option value="$PROJECT_DIR$/examples/demo/streaming/media_devices_manager/manager.js" />
+        <option value="$PROJECT_DIR$/examples/demo/sip/phone/phone.js" />
+        <option value="$PROJECT_DIR$/examples/demo/sip/phone-video/phone-video.js" />
+        <option value="$PROJECT_DIR$/examples/demo/sip/phone-ui/Phone.js" />
+        <option value="$PROJECT_DIR$/src/flashphoner-core.js" />
+        <option value="$PROJECT_DIR$/examples/demo/streaming/camera_test/camera_test.js" />
+        <option value="$PROJECT_DIR$/examples/demo/streaming/2players/2players.js" />
+        <option value="$PROJECT_DIR$/examples/demo/streaming/conference/conference.js" />
+        <option value="$PROJECT_DIR$/examples/demo/streaming/firewall-traversal-streaming/firewall-traversal-streaming.js" />
+        <option value="$PROJECT_DIR$/examples/demo/streaming/stream-diagnostic/stream-diagnostic.js" />
+        <option value="$PROJECT_DIR$/examples/demo/streaming/stream-snapshot/stream-snapshot.js" />
+        <option value="$PROJECT_DIR$/examples/demo/streaming/stream_recording/recording.js" />
+        <option value="$PROJECT_DIR$/examples/demo/streaming/webrtc-as-rtmp-republishing/webrtc-as-rtmp-republishing.js" />
+        <option value="$PROJECT_DIR$/examples/demo/streaming/streamer/streamer.js" />
       </list>
     </option>
   </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER">
+    <gruntfile path="$PROJECT_DIR$/Gruntfile.js">
+      <alias-task name="build" info="Alias for &quot;clean:build&quot;, &quot;string-replace:version&quot;, &quot;browserify&quot;, &quot;concat&quot;, &quot;uglify&quot;, &quot;jsdoc&quot; tasks." file-path="$PROJECT_DIR$/Gruntfile.js">
+        <dependency value="clean:build" />
+        <dependency value="string-replace:version" />
+        <dependency value="browserify" />
+        <dependency value="concat" />
+        <dependency value="uglify" />
+        <dependency value="jsdoc" />
+      </alias-task>
+      <alias-task name="release" info="Alias for &quot;clean:release&quot;, &quot;build&quot;, &quot;copy&quot; tasks." file-path="$PROJECT_DIR$/Gruntfile.js">
+        <dependency value="clean:release" />
+        <dependency value="build" />
+        <dependency value="copy" />
+      </alias-task>
+      <core-task name="flash" info="Compile Flash SWF files" file-path="$PROJECT_DIR$/node_modules/grunt-flash-compiler/tasks/flash-compiler.js" multi="true">
+        <target value="debug" />
+        <target value="release_media_provider" />
+        <target value="release_examples_streaming" />
+        <target value="release_examples_chat" />
+      </core-task>
+      <core-task name="browserify" info="Grunt task for browserify." file-path="$PROJECT_DIR$/node_modules/grunt-browserify/tasks/browserify.js" multi="true">
+        <target value="flashphonerGlobalObject" />
+        <target value="flashphonerGlobalObjectNoWebRTC" />
+        <target value="flashphonerGlobalObjectNoFlash" />
+        <target value="flashphonerGlobalObjectNoWSPlayer" />
+        <target value="flashphonerGlobalObjectTemasys" />
+        <target value="flashphonerGlobalObjectRestApi" />
+      </core-task>
+      <core-task name="concat" info="Concatenate files." file-path="$PROJECT_DIR$/node_modules/grunt-contrib-concat/tasks/concat.js" multi="true">
+        <target value="AdapterJS" />
+      </core-task>
+      <core-task name="jsdoc" info="Generates source documentation using jsdoc" file-path="$PROJECT_DIR$/node_modules/grunt-jsdoc/tasks/jsdoc-plugin.js" multi="true">
+        <target value="src" />
+      </core-task>
+      <core-task name="copy" info="Copy files." file-path="$PROJECT_DIR$/node_modules/grunt-contrib-copy/tasks/copy.js" multi="true">
+        <target value="main" />
+      </core-task>
+      <core-task name="string-replace" info="String Replace Task." file-path="$PROJECT_DIR$/node_modules/grunt-string-replace/tasks/string-replace.js" multi="true">
+        <target value="version" />
+      </core-task>
+      <core-task name="clean" info="Clean files and folders." file-path="$PROJECT_DIR$/node_modules/grunt-contrib-clean/tasks/clean.js" multi="true">
+        <target value="build" />
+        <target value="release" />
+      </core-task>
+      <core-task name="uglify" info="Minify files with UglifyJS." file-path="$PROJECT_DIR$/node_modules/grunt-contrib-uglify/tasks/uglify.js" multi="true">
+        <target value="minify" />
+      </core-task>
+    </gruntfile>
+  </component>
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
   <component name="JsGruntFileManager">
     <initial>false</initial>
   </component>
   <component name="JsGulpfileManager">
     <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="2079" />
-    <option name="y" value="145" />
-    <option name="width" value="1936" />
-    <option name="height" value="1056" />
+  <component name="NodeModulesDirectoryManager">
+    <handled-path value="$PROJECT_DIR$/node_modules" />
   </component>
-  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
-    <OptionsSetting value="true" id="Add" />
-    <OptionsSetting value="true" id="Remove" />
-    <OptionsSetting value="true" id="Checkout" />
-    <OptionsSetting value="true" id="Update" />
-    <OptionsSetting value="true" id="Status" />
-    <OptionsSetting value="true" id="Edit" />
-    <ConfirmationsSetting value="0" id="Add" />
-    <ConfirmationsSetting value="0" id="Remove" />
+  <component name="ProjectFrameBounds" fullScreen="true">
+    <option name="width" value="1440" />
+    <option name="height" value="900" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -152,110 +275,110 @@
       <autoscrollToSource />
       <autoscrollFromSource />
       <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wcs_api-2.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wcs_api-2.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wcs_api-2.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wcs_api-2.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wcs_api-2.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wcs_api-2.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wcs_api-2.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wcs_api-2.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wcs_api-2.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="examples" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="min" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wcs_api-2.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="wcs_api-2.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="examples" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="demo" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
+          <expand>
+            <path>
+              <item name="wcs_api-2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flashphoner_client" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wcs_api-2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flashphoner_client" type="462c0819:PsiDirectoryNode" />
+              <item name="examples" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wcs_api-2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flashphoner_client" type="462c0819:PsiDirectoryNode" />
+              <item name="examples" type="462c0819:PsiDirectoryNode" />
+              <item name="demo" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wcs_api-2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flashphoner_client" type="462c0819:PsiDirectoryNode" />
+              <item name="examples" type="462c0819:PsiDirectoryNode" />
+              <item name="demo" type="462c0819:PsiDirectoryNode" />
+              <item name="sip" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wcs_api-2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flashphoner_client" type="462c0819:PsiDirectoryNode" />
+              <item name="examples" type="462c0819:PsiDirectoryNode" />
+              <item name="demo" type="462c0819:PsiDirectoryNode" />
+              <item name="streaming" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wcs_api-2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flashphoner_client" type="462c0819:PsiDirectoryNode" />
+              <item name="examples" type="462c0819:PsiDirectoryNode" />
+              <item name="demo" type="462c0819:PsiDirectoryNode" />
+              <item name="streaming" type="462c0819:PsiDirectoryNode" />
+              <item name="2players" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="wcs_api-2.0" type="b2602c69:ProjectViewProjectNode" />
+              <item name="flashphoner_client" type="462c0819:PsiDirectoryNode" />
+              <item name="examples" type="462c0819:PsiDirectoryNode" />
+              <item name="demo" type="462c0819:PsiDirectoryNode" />
+              <item name="streaming" type="462c0819:PsiDirectoryNode" />
+              <item name="streamer" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="HbShouldOpenHtmlAsHb" value="" />
     <property name="FullScreen" value="false" />
+    <property name="nodejs_interpreter_path" value="/usr/local/bin/node" />
+    <property name="js.buildTools.grunt.grunt-cli.package" value="/usr/local/lib/node_modules/grunt-cli" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Data\projects\wcs\client\wcs_api-2.0\example\min" />
     </key>
   </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
   <component name="RunManager">
-    <configuration default="true" type="DartUnitRunConfigurationType" factoryName="DartUnit">
-      <method />
+    <configuration default="true" type="js.build_tools.grunt" factoryName="Grunt.js">
+      <node-interpreter value="project" />
+      <envs />
+    </configuration>
+    <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
     </configuration>
     <configuration default="true" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application">
+      <method />
+    </configuration>
+    <configuration default="true" type="DartUnitRunConfigurationType" factoryName="DartUnit">
       <method />
     </configuration>
     <configuration default="true" type="JSTestDriver:ConfigurationType" factoryName="JsTestDriver">
@@ -281,12 +404,23 @@
       <option name="filePath" />
       <method />
     </configuration>
-    <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
-      <method />
+    <configuration name="release" type="js.build_tools.grunt" factoryName="Grunt.js" temporary="true">
+      <node-interpreter value="project" />
+      <gruntfile value="$PROJECT_DIR$/Gruntfile.js" />
+      <tasks>
+        <task value="release" />
+      </tasks>
+      <envs />
     </configuration>
-    <list size="0" />
+    <recent_temporary>
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="Grunt.js.release" />
+      </list>
+    </recent_temporary>
   </component>
-  <component name="ShelveChangesManager" show_recycled="false" />
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -295,34 +429,100 @@
       <changelist id="e5faa371-8c28-47e4-a1e8-926c37427e94" name="Default" comment="" />
       <created>1471002432212</created>
       <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
       <updated>1471002432212</updated>
+      <workItem from="1506331323776" duration="4934000" />
+      <workItem from="1506445379384" duration="1393000" />
+      <workItem from="1506482797636" duration="1831000" />
+      <workItem from="1506492669765" duration="3472000" />
+      <workItem from="1506505930119" duration="2099000" />
+      <workItem from="1506577849211" duration="1325000" />
+      <workItem from="1506580327099" duration="1029000" />
+      <workItem from="1506606334879" duration="2136000" />
     </task>
+    <task id="LOCAL-00001" summary="Fixed view local video in ios safari">
+      <created>1506505672592</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1506505672593</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Fixed view local and remote video in ios safari for sip calls">
+      <created>1506579993178</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1506579993178</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="18841000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
   <component name="ToolWindowManager">
-    <frame x="2079" y="145" width="1936" height="1056" extended-state="0" />
+    <frame x="0" y="0" width="1440" height="900" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Grunt" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29105005" sideWeight="0.4388489" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32889965" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Grunt " active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29105005" sideWeight="0.5611511" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3293011" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32769045" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32769045" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32889965" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29105005" sideWeight="0.5611511" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Grunt" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="Vcs.Log.UiProperties">
     <option name="RECENTLY_FILTERED_USER_GROUPS">
@@ -336,19 +536,380 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="VcsManagerConfiguration">
-    <option name="myTodoPanelSettings">
-      <TodoPanelSettings />
-    </option>
+    <MESSAGE value="Fixed view local video in ios safari" />
+    <MESSAGE value="Fixed view local and remote video in ios safari for sip calls" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed view local and remote video in ios safari for sip calls" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/examples/demo/sip/phone/phone.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/package.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="893">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/sip/phone/phone.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/flash/MediaProvider.mxml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/flash/com/flashphoner/api2/Main.as">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/flash/com/flashphoner/api2/connection/Connection.as">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1515">
+          <caret line="116" column="90" lean-forward="false" selection-start-line="116" selection-start-column="90" selection-end-line="116" selection-end-column="90" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/flash/com/flashphoner/api2/stream/Stream.as">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/flash/com/flashphoner/api2/connection/ConnectionCallback.as">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/embed_player/copy-to-clipboard@latest">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/websocket-media-provider.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2355">
+          <caret line="157" column="2" lean-forward="false" selection-start-line="157" selection-start-column="2" selection-end-line="157" selection-end-column="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/temasys-media-provider.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1107">
+          <caret line="556" column="34" lean-forward="false" selection-start-line="556" selection-start-column="34" selection-end-line="556" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/flash-media-provider.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="372">
+          <caret line="125" column="33" lean-forward="false" selection-start-line="125" selection-start-column="33" selection-end-line="125" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/embed_player/sample.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/media-source-media-provider.js" />
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/embed_player/player.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="27" column="24" lean-forward="false" selection-start-line="27" selection-start-column="24" selection-end-line="27" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/player/player.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/embed_player/sample.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="340">
+          <caret line="31" column="30" lean-forward="false" selection-start-line="31" selection-start-column="30" selection-end-line="31" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/embed_player/sample.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="13" column="78" lean-forward="false" selection-start-line="13" selection-start-column="40" selection-end-line="13" selection-end-column="78" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/embed_player/player.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="222">
+          <caret line="85" column="0" lean-forward="false" selection-start-line="85" selection-start-column="0" selection-end-line="89" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/release/flashphoner-api-0.5.24/examples/demo/dependencies/js/utils.js" />
+    <entry file="file://$PROJECT_DIR$/src/util.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="690">
+          <caret line="46" column="100" lean-forward="false" selection-start-line="46" selection-start-column="23" selection-end-line="46" selection-end-column="100" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Gruntfile.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3225">
+          <caret line="215" column="15" lean-forward="false" selection-start-line="215" selection-start-column="15" selection-end-line="215" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/media-source-media-provider.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/dependencies/js/utils.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2775">
+          <caret line="187" column="9" lean-forward="false" selection-start-line="187" selection-start-column="9" selection-end-line="187" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/media_devices_manager/manager.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="241" column="18" lean-forward="true" selection-start-line="241" selection-start-column="18" selection-end-line="241" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/sip/phone/phone.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="433">
+          <caret line="54" column="0" lean-forward="false" selection-start-line="54" selection-start-column="0" selection-end-line="57" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/sip/phone-video/phone-video.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="528">
+          <caret line="64" column="46" lean-forward="false" selection-start-line="64" selection-start-column="46" selection-end-line="64" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/sip/phone-ui/Phone.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="256">
+          <caret line="24" column="18" lean-forward="true" selection-start-line="24" selection-start-column="18" selection-end-line="24" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/sip/sip-as-rtmp/sip-as-rtmp.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/sip/sip-as-rtmp/sip-as-rtmp.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1853">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/stream_recording/recording.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/webrtc-media-provider.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="464" column="34" lean-forward="false" selection-start-line="464" selection-start-column="28" selection-end-line="464" selection-end-column="34" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/flashphoner-core.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="274" column="22" lean-forward="false" selection-start-line="274" selection-start-column="8" selection-end-line="274" selection-end-column="22" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/camera_test/camera_test.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/camera_test/camera_test.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="422">
+          <caret line="126" column="47" lean-forward="false" selection-start-line="126" selection-start-column="47" selection-end-line="126" selection-end-column="47" />
+          <folding>
+            <marker date="1506665864987" expanded="true" signature="3857:3869" ph="..." />
+            <marker date="1506665864987" expanded="true" signature="4071:4081" ph="..." />
+            <marker date="1506665864987" expanded="true" signature="4381:4391" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/conference/conference.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="260">
+          <caret line="58" column="48" lean-forward="false" selection-start-line="58" selection-start-column="29" selection-end-line="58" selection-end-column="48" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/console/console.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1731">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/conference/conference.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-192">
+          <caret line="68" column="0" lean-forward="false" selection-start-line="68" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/firewall-traversal-streaming/firewall-traversal-streaming.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="484">
+          <caret line="155" column="46" lean-forward="false" selection-start-line="155" selection-start-column="46" selection-end-line="155" selection-end-column="46" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/hls-player/hls-player.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/player/player.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="265">
+          <caret line="88" column="5" lean-forward="false" selection-start-line="88" selection-start-column="5" selection-end-line="88" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/stream-diagnostic/stream-diagnostic.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="114">
+          <caret line="48" column="0" lean-forward="false" selection-start-line="48" selection-start-column="0" selection-end-line="50" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/stream-snapshot/stream-snapshot.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-438">
+          <caret line="68" column="5" lean-forward="false" selection-start-line="68" selection-start-column="5" selection-end-line="68" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/stream_recording/recording.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="142">
+          <caret line="42" column="5" lean-forward="false" selection-start-line="42" selection-start-column="5" selection-end-line="42" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/two_way_streaming/two_way_streaming.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="103">
+          <caret line="124" column="0" lean-forward="false" selection-start-line="124" selection-start-column="0" selection-end-line="126" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/video-chat/video-chat.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/webrtc-as-rtmp-republishing/webrtc-as-rtmp-republishing.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="630">
+          <caret line="49" column="5" lean-forward="false" selection-start-line="49" selection-start-column="5" selection-end-line="49" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/streamer/streamer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="144">
+          <caret line="44" column="46" lean-forward="false" selection-start-line="44" selection-start-column="46" selection-end-line="44" selection-end-column="46" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/demo/streaming/2players/2players.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="64">
+          <caret line="62" column="39" lean-forward="false" selection-start-line="62" selection-start-column="39" selection-end-line="62" selection-end-column="39" />
           <folding />
         </state>
       </provider>

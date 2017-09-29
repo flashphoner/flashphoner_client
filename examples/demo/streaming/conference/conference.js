@@ -66,6 +66,11 @@ function start() {
             return;
         }
     }
+    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+        Flashphoner.playFirstVideo(document.getElementById("participant1Display"), false);
+        Flashphoner.playFirstVideo(document.getElementById("participant2Display"), false);
+    }
+
     connection = Flashphoner.roomApi.connect({urlServer: url, username: username}).on(SESSION_STATUS.FAILED, function(session){
         setStatus('#status', session.status());
         onLeft();
@@ -218,8 +223,12 @@ function publishLocalMedia(room) {
         audio: true,
         video: true
     };
+    var display = document.getElementById("localDisplay");
+    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+        Flashphoner.playFirstVideo(display, true);
+    }
     room.publish({
-        display: document.getElementById("localDisplay"),
+        display: display,
         constraints: constraints,
         record: false,
         receiveVideo: false,

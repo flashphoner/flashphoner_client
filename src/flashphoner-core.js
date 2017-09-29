@@ -6,7 +6,7 @@ var util = require('./util');
 var logger = require('./util').logger;
 var loggerConf = {push: false, severity: "INFO"};
 var Promise = require('promise-polyfill');
-var browser = require('webrtc-adapter').browserDetails;
+var browserDetails = require('webrtc-adapter').browserDetails;
 var LOG_PREFIX = "core";
 var isUsingTemasysPlugin = false;
 
@@ -93,7 +93,7 @@ var init = function (options) {
 
         var flashProvider = require("./flash-media-provider");
         if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available() &&
-            (!MediaProvider.WebRTC || (options.preferredMediaProviders && options.preferredMediaProviders.indexOf("Flash") >=0)) ) {
+            (!MediaProvider.WebRTC || (options.preferredMediaProviders && options.preferredMediaProviders.indexOf("Flash") >= 0))) {
             MediaProvider.Flash = flashProvider;
             var flashConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
@@ -272,13 +272,24 @@ var getMediaAccess = function (constraints, display, mediaProvider) {
 
 //default constraints helper
 var getDefaultMediaConstraints = function () {
-    return {
-        audio: true,
-        video: {
-            width: {min:320, max:640},
-            height: {min:240, max:480}
+    if (browserDetails.browser == "safari") {
+        return {
+            audio: true,
+            video: {
+                width: {min: 320, max: 640},
+                height: {min: 240, max: 480}
+            }
+        };
+    }
+    else {
+        return {
+            audio: true,
+            video: {
+                width: 320,
+                height: 240
+            }
         }
-    };
+    }
 };
 
 function getConstraintsProperty(constraints, property, defaultValue) {
@@ -425,15 +436,15 @@ var createSession = function (options) {
         var request = new XMLHttpRequest();
         request.open('GET', url, true);
         request.timeout = 5000;
-        request.ontimeout = function() {
+        request.ontimeout = function () {
             logger.warn(LOG_PREFIX, "Timeout during geting url from balancer!");
             createWS(urlServer);
         }
-        request.error = function() {
+        request.error = function () {
             logger.warn(LOG_PREFIX, "Error during geting url from balancer!")
             createWS(urlServer);
         }
-        request.onload = function(e) {
+        request.onload = function (e) {
             if (request.status == 200 && request.readyState == 4) {
                 var result = JSON.parse(request.responseText);
                 if (urlServer.indexOf("wss://") !== -1) {
