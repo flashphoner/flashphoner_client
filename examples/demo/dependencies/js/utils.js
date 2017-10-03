@@ -209,9 +209,9 @@ function resizeVideo(video, width, height) {
 
     //vertical align
     var margin = 0;
-    // if (parentSize.h - newSize.h > 1) {
-    //     margin = Math.floor((parentSize.h - newSize.h) / 2);
-    // }
+    if (parentSize.h - newSize.h > 1) {
+        margin = Math.floor((parentSize.h - newSize.h) / 2);
+    }
     display.style.margin = margin + "px auto";
     console.log("Resize from " + video.videoWidth + "x" + video.videoHeight + " to " + display.offsetWidth + "x" + display.offsetHeight);
 }
