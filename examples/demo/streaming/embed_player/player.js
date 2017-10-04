@@ -44,6 +44,10 @@ function init_page() {
         $(".fullscreen").hide();
         $(".player").css('width','75%');
     }
+    if ((Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] == "WebRTC")) {
+        $('.volume').hide();
+        $('.volume-range-block').hide();
+    }
     if (autoplay ) {
         $(".play-pause").click();
     }

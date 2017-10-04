@@ -345,6 +345,8 @@ var createConnection = function (options) {
                         video.mozRequestFullScreen();
                     } else if (video.webkitRequestFullscreen) {
                         video.webkitRequestFullscreen();
+                    } else if (video.webkitEnterFullscreen) {
+                        video.webkitEnterFullscreen();
                     }
                 } else {
                     if (document.exitFullscreen) {
