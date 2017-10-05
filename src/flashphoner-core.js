@@ -29,7 +29,6 @@ var initialized = false;
  * @param {String=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
  * @param {string=} options.preferredMediaProvider DEPRECATED: Use preferred media provider if available
  * @param {Array=} options.preferredMediaProviders Use preferred media providers order
- * @param {string=} options.useWebRTCForMobileSafari Use WebRTC media provider for mobile browser Safari
  * @param {String=} options.receiverLocation Location of WSReceiver.js file
  * @param {String=} options.decoderLocation Location of video-worker2.js file
  * @param {String=} options.screenSharingExtensionId Chrome screen sharing extension id
@@ -53,8 +52,7 @@ var init = function (options) {
             console.warn("Failed to create audio context");
         }
         var webRtcProvider = require("./webrtc-media-provider");
-        if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available() &&
-            ((util.Browser.isiOS() && util.Browser.isSafari()) ? options.useWebRTCForMobileSafari : true)) {
+        if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
             MediaProvider.WebRTC = webRtcProvider;
             var webRtcConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
@@ -1223,6 +1221,7 @@ var createSession = function (options) {
      * @param {Integer=} options.playWidth DEPRECATED: Set width to play stream with this value
      * @param {Integer=} options.playHeight DEPRECATED: Set height to play stream with this value
      * @param {string=} options.mediaProvider MediaProvider type to use with this stream
+     * @param {string=} options.useWebRTCForMobileSafari Use WebRTC media provider for mobile browser Safari
      * @param {Boolean} [options.record=false] Enable stream recording
      * @param {Boolean=} options.cacheLocalResources Display will contain local video after stream release
      * @param {HTMLElement} options.display Div element stream should be displayed in
@@ -1253,6 +1252,7 @@ var createSession = function (options) {
             throw new TypeError("options.name must be provided");
         }
 
+        var useWebRTCForMobileSafari = options.useWebRTCForMobileSafari;
         var id_ = uuid.v1();
         var name_ = options.name;
         var mediaProvider = options.mediaProvider || getMediaProviders()[0];
@@ -1378,6 +1378,15 @@ var createSession = function (options) {
                 throw new Error("Invalid stream state");
             }
             status_ = STREAM_STATUS.PENDING;
+
+            if (util.Browser.isiOS() && util.Browser.isSafari() && !useWebRTCForMobileSafari && mediaProvider === "WebRTC") {
+                if (getMediaProviders()[0] === "WebRTC") {
+                    mediaProvider = getMediaProviders()[1];
+                } else {
+                    mediaProvider = getMediaProviders()[0];
+                }
+                logger.info("WebRTC does not work on Mobile Safari 11");
+            }
             //create mediaProvider connection
             MediaProvider[mediaProvider].createConnection({
                 id: id_,
