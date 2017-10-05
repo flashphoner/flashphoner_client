@@ -29,6 +29,7 @@ var initialized = false;
  * @param {String=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
  * @param {string=} options.preferredMediaProvider DEPRECATED: Use preferred media provider if available
  * @param {Array=} options.preferredMediaProviders Use preferred media providers order
+ * @param {string=} options.useWebRTCForMobileSafari Use WebRTC media provider for mobile browser Safari
  * @param {String=} options.receiverLocation Location of WSReceiver.js file
  * @param {String=} options.decoderLocation Location of video-worker2.js file
  * @param {String=} options.screenSharingExtensionId Chrome screen sharing extension id
@@ -52,7 +53,8 @@ var init = function (options) {
             console.warn("Failed to create audio context");
         }
         var webRtcProvider = require("./webrtc-media-provider");
-        if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
+        if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available() &&
+            ((util.Browser.isiOS() && util.Browser.isSafari()) ? options.useWebRTCForMobileSafari : true)) {
             MediaProvider.WebRTC = webRtcProvider;
             var webRtcConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
@@ -172,13 +174,13 @@ var getMediaProviders = function () {
 
 /**
  * Play audio chunk
- *
+ * @param {boolean} noise Use noise in playing
  * @memberof Flashphoner
  */
 
-var playFirstSound = function () {
+var playFirstSound = function(noise) {
     var mediaProvider = getMediaProviders()[0];
-    MediaProvider[mediaProvider].playFirstSound();
+    MediaProvider[mediaProvider].playFirstSound(noise);
 };
 
 /**

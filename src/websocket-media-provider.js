@@ -141,11 +141,15 @@ var releaseMedia = function() {
     return false;
 };
 
-var playFirstSound = function() {
+var playFirstSound = function(noise) {
     var audioBuffer = audioContext.createBuffer(1, 441, 44100);
     var output = audioBuffer.getChannelData(0);
     for (var i = 0; i < output.length; i++) {
-        output[i] = Math.random() * 2 - 1;
+        if (noise) {
+            output[i] = Math.random() * 2 - 1;
+        } else {
+            output[i] = 0;
+        }
     }
     var src = audioContext.createBufferSource();
     src.buffer = audioBuffer;
