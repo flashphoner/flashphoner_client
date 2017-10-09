@@ -66,9 +66,9 @@ function start() {
             return;
         }
     }
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        Flashphoner.playFirstVideo(document.getElementById("participant1Display"), false);
-        Flashphoner.playFirstVideo(document.getElementById("participant2Display"), false);
+    if (Browser.isSafariWebRTC()) {
+        Flashphoner.playFirstVideo("WebRTC", document.getElementById("participant1Display"), false);
+        Flashphoner.playFirstVideo("WebRTC", document.getElementById("participant2Display"), false);
     }
 
     connection = Flashphoner.roomApi.connect({urlServer: url, username: username}).on(SESSION_STATUS.FAILED, function(session){
@@ -224,8 +224,8 @@ function publishLocalMedia(room) {
         video: true
     };
     var display = document.getElementById("localDisplay");
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        Flashphoner.playFirstVideo(display, true);
+    if (Browser.isSafariWebRTC()) {
+        Flashphoner.playFirstVideo("WebRTC", display, true);
     }
     room.publish({
         display: display,

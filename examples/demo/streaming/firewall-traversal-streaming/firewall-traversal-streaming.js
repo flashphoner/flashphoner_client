@@ -128,8 +128,8 @@ function onStopped() {
 }
 
 function publishStream() {
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        Flashphoner.playFirstVideo(localVideo, true);
+    if (Browser.isSafariWebRTC()) {
+        Flashphoner.playFirstVideo("WebRTC", localVideo, true);
     }
     var session = Flashphoner.getSessions()[0];
     var streamName = $('#publishStream').val();
@@ -152,8 +152,8 @@ function publishStream() {
 }
 
 function playStream() {
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        Flashphoner.playFirstVideo(remoteVideo, false);
+    if (Browser.isSafariWebRTC()) {
+        Flashphoner.playFirstVideo("WebRTC", remoteVideo, false);
     }
     var session = Flashphoner.getSessions()[0];
     var streamName = $('#playStream').val();

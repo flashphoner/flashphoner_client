@@ -59,8 +59,10 @@ function playStream(index) {
     var streamName = $('#streamName' + index).val();
     var display = document.getElementById("player" + index);
 
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        Flashphoner.playFirstVideo(display, false);
+    if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
+        Flashphoner.playFirstSound();
+    } else if (Browser.isSafariWebRTC()) {
+        Flashphoner.playFirstVideo("WebRTC", display, false);
     }
 
     session.createStream({

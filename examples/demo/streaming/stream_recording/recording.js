@@ -38,8 +38,8 @@ function onStopped() {
 }
 
 function start() {
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        Flashphoner.playFirstVideo(localVideo, true);
+    if (Browser.isSafariWebRTC()) {
+        Flashphoner.playFirstVideo("WebRTC", localVideo, true);
     }
     var url = $('#url').val();
     //check if we already have session

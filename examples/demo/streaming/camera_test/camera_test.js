@@ -123,8 +123,8 @@ function startTest() {
     display.style.height = resolutions[i].height+"px";
     resolutionDiv.innerHTML += resolutions[i].standard + " " + resolutions[i].width + "x" + resolutions[i].height;
 
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        Flashphoner.playFirstVideo(display, true);
+    if (Browser.isSafariWebRTC()) {
+        Flashphoner.playFirstVideo("WebRTC", display, true);
     }
 
     var constraints = {

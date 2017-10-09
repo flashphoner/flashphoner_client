@@ -45,8 +45,8 @@ function onStopped() {
 }
 
 function start() {
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        Flashphoner.playFirstVideo(localVideo, true);
+    if (Browser.isSafariWebRTC()) {
+        Flashphoner.playFirstVideo("WebRTC", localVideo, true);
     }
     //check if we already have session
     if (Flashphoner.getSessions().length > 0) {

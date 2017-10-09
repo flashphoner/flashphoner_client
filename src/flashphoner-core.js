@@ -191,8 +191,7 @@ var playFirstSound = function(noise) {
  *
  * @memberof Flashphoner
  */
-var playFirstVideo = function (display, isLocal, src) {
-    var mediaProvider = getMediaProviders()[0];
+var playFirstVideo = function (mediaProvder, display, isLocal, src) {
     MediaProvider[mediaProvider].playFirstVideo(display, isLocal, src);
 };
 
