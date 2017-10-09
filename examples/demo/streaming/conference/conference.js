@@ -67,8 +67,8 @@ function start() {
         }
     }
     if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo("WebRTC", document.getElementById("participant1Display"), false);
-        Flashphoner.playFirstVideo("WebRTC", document.getElementById("participant2Display"), false);
+        Flashphoner.playFirstVideo(document.getElementById("participant1Display"), false);
+        Flashphoner.playFirstVideo(document.getElementById("participant2Display"), false);
     }
 
     connection = Flashphoner.roomApi.connect({urlServer: url, username: username}).on(SESSION_STATUS.FAILED, function(session){
@@ -225,7 +225,7 @@ function publishLocalMedia(room) {
     };
     var display = document.getElementById("localDisplay");
     if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo("WebRTC", display, true);
+        Flashphoner.playFirstVideo(display, true);
     }
     room.publish({
         display: display,

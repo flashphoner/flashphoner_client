@@ -171,8 +171,8 @@ var testStarted;
 var audioContextForTest;
 function startTest() {
     if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo("WebRTC", localVideo, true);
-        Flashphoner.playFirstVideo("WebRTC", remoteVideo, false);
+        Flashphoner.playFirstVideo(localVideo, true);
+        Flashphoner.playFirstVideo(remoteVideo, false);
     }
     Flashphoner.getMediaAccess(getConstaints(), localVideo).then(function(disp) {
         $("#testBtn").text("Release").off('click').click(function () {
@@ -238,8 +238,8 @@ function start() {
     if (testStarted)
         stopTest();
     if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo("WebRTC", localVideo, true);
-        Flashphoner.playFirstVideo("WebRTC", remoteVideo, false);
+        Flashphoner.playFirstVideo(localVideo, true);
+        Flashphoner.playFirstVideo(remoteVideo, false);
     }
     //check if we already have session
     var url = $('#url').val();

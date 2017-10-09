@@ -129,7 +129,7 @@ function onStopped() {
 
 function publishStream() {
     if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo("WebRTC", localVideo, true);
+        Flashphoner.playFirstVideo(localVideo, true);
     }
     var session = Flashphoner.getSessions()[0];
     var streamName = $('#publishStream').val();
@@ -153,7 +153,7 @@ function publishStream() {
 
 function playStream() {
     if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo("WebRTC", remoteVideo, false);
+        Flashphoner.playFirstVideo(remoteVideo, false);
     }
     var session = Flashphoner.getSessions()[0];
     var streamName = $('#playStream').val();

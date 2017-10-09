@@ -39,7 +39,7 @@ function onStopped() {
 
 function start() {
     if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo("WebRTC", localVideo, true);
+        Flashphoner.playFirstVideo(localVideo, true);
     }
     var url = $('#url').val();
     //check if we already have session

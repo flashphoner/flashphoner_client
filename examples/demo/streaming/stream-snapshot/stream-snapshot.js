@@ -65,7 +65,7 @@ function onUnpublished() {
 
 function start() {
     if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo("WebRTC", localVideo, true);
+        Flashphoner.playFirstVideo(localVideo, true);
     }
     //check if we already have session
     if (Flashphoner.getSessions().length > 0) {

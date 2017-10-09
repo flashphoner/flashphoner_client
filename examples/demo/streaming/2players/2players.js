@@ -62,7 +62,7 @@ function playStream(index) {
     if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
         Flashphoner.playFirstSound();
     } else if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo("WebRTC", display, false);
+        Flashphoner.playFirstVideo(display, false);
     }
 
     session.createStream({

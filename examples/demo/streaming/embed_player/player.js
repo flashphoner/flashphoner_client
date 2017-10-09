@@ -89,8 +89,8 @@ function start() {
 
     if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
         Flashphoner.playFirstSound();
-    } else if (Browser.isSafariWebRTC()|| Flashphoner.getMediaProviders()[0] == "MSE") {
-        Flashphoner.playFirstVideo("WebRTC", remoteVideo);
+    } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] == "MSE") {
+        Flashphoner.playFirstVideo(remoteVideo);
     }
 
     //check if we already have session

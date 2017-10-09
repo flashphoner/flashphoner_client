@@ -191,8 +191,10 @@ var playFirstSound = function(noise) {
  *
  * @memberof Flashphoner
  */
-var playFirstVideo = function (mediaProvider, display, isLocal, src) {
-    MediaProvider[mediaProvider].playFirstVideo(display, isLocal, src);
+var playFirstVideo = function (display, isLocal, src) {
+    for (var mp in MediaProvider) {
+        MediaProvider[mp].playFirstVideo(display, isLocal, src);
+    }
 };
 
 /**
