@@ -45,6 +45,11 @@ var createConnection = function (options) {
                 remoteDisplay.appendChild(remoteVideo);
             }
             remoteVideo.id = id + "-remote";
+            /**
+             * Workaround for Android 6, 7, Chrome 61.
+             * https://bugs.chromium.org/p/chromium/issues/detail?id=769622
+             */
+            remoteVideo.style="border-radius: 1px";
         } else {
             var cachedVideo = getCacheInstance(display);
             if (!cachedVideo || cachedVideo.id.indexOf(REMOTE_CACHED_VIDEO) !== -1) {
@@ -55,6 +60,11 @@ var createConnection = function (options) {
                     display.appendChild(remoteVideo);
                 }
                 remoteVideo.id = id;
+                /**
+                 * Workaround for Android 6, 7, Chrome 61.
+                 * https://bugs.chromium.org/p/chromium/issues/detail?id=769622
+                 */
+                remoteVideo.style="border-radius: 1px";
             } else {
                 localVideo = cachedVideo;
                 localVideo.id = id;
