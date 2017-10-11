@@ -66,7 +66,7 @@ function start() {
             return;
         }
     }
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+    if (Browser.isSafariWebRTC()) {
         Flashphoner.playFirstVideo(document.getElementById("participant1Display"), false);
         Flashphoner.playFirstVideo(document.getElementById("participant2Display"), false);
     }
@@ -224,7 +224,7 @@ function publishLocalMedia(room) {
         video: true
     };
     var display = document.getElementById("localDisplay");
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+    if (Browser.isSafariWebRTC()) {
         Flashphoner.playFirstVideo(display, true);
     }
     room.publish({

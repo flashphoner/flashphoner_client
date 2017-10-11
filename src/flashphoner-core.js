@@ -29,6 +29,7 @@ var initialized = false;
  * @param {String=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
  * @param {string=} options.preferredMediaProvider DEPRECATED: Use preferred media provider if available
  * @param {Array=} options.preferredMediaProviders Use preferred media providers order
+ * @param {string=} options.useWebRTCForMobileSafari Use WebRTC media provider for mobile browser Safari
  * @param {String=} options.receiverLocation Location of WSReceiver.js file
  * @param {String=} options.decoderLocation Location of video-worker2.js file
  * @param {String=} options.screenSharingExtensionId Chrome screen sharing extension id
@@ -117,6 +118,7 @@ var init = function (options) {
             };
             websocketProvider.configure(wsConf);
         }
+
         //check at least 1 provider available
         if (getMediaProviders().length == 0) {
             throw new Error('None of MediaProviders available');
@@ -134,6 +136,9 @@ var init = function (options) {
             } else {
                 logger.warn(LOG_PREFIX, "Preferred media provider is not available.");
             }
+        }
+        if (!options.preferredMediaProviders && Browser.isSafari() && Browser.isiOS() && !options.useWebRTCForMobileSafari){
+            options.preferredMediaProviders = ["WSPlayer", "WebRTC"];
         }
         if (options.preferredMediaProviders && options.preferredMediaProviders.length > 0) {
             var newMediaProvider = {};
@@ -172,13 +177,13 @@ var getMediaProviders = function () {
 
 /**
  * Play audio chunk
- *
+ * @param {boolean} noise Use noise in playing
  * @memberof Flashphoner
  */
 
-var playFirstSound = function () {
+var playFirstSound = function(noise) {
     var mediaProvider = getMediaProviders()[0];
-    MediaProvider[mediaProvider].playFirstSound();
+    MediaProvider[mediaProvider].playFirstSound(noise);
 };
 
 /**
@@ -187,8 +192,9 @@ var playFirstSound = function () {
  * @memberof Flashphoner
  */
 var playFirstVideo = function (display, isLocal, src) {
-    var mediaProvider = getMediaProviders()[0];
-    MediaProvider[mediaProvider].playFirstVideo(display, isLocal, src);
+    for (var mp in MediaProvider) {
+        MediaProvider[mp].playFirstVideo(display, isLocal, src);
+    }
 };
 
 /**
@@ -1437,6 +1443,9 @@ var createSession = function (options) {
                 throw new Error("Invalid stream state");
             }
             status_ = STREAM_STATUS.PENDING;
+            if (util.Browser.isiOS() && util.Browser.isSafari() && MediaProvider.WebRTC) {
+                mediaProvider = "WebRTC";
+            }
             published_ = true;
             var hasAudio = true;
             if (constraints && constraints.video && constraints.video.type && constraints.video.type == "screen") {

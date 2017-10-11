@@ -89,7 +89,7 @@ function start() {
 
     if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
         Flashphoner.playFirstSound();
-    } else if ((Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] == "WebRTC") || Flashphoner.getMediaProviders()[0] == "MSE") {
+    } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] == "MSE") {
         Flashphoner.playFirstVideo(remoteVideo);
     }
 

@@ -38,7 +38,7 @@ function onStopped() {
 }
 
 function start() {
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+    if (Browser.isSafariWebRTC()) {
         Flashphoner.playFirstVideo(localVideo, true);
     }
     var url = $('#url').val();

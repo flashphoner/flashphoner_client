@@ -170,7 +170,7 @@ var micLevelInterval;
 var testStarted;
 var audioContextForTest;
 function startTest() {
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+    if (Browser.isSafariWebRTC()) {
         Flashphoner.playFirstVideo(localVideo, true);
         Flashphoner.playFirstVideo(remoteVideo, false);
     }
@@ -237,7 +237,7 @@ function releaseResourcesForTesting() {
 function start() {
     if (testStarted)
         stopTest();
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+    if (Browser.isSafariWebRTC()) {
         Flashphoner.playFirstVideo(localVideo, true);
         Flashphoner.playFirstVideo(remoteVideo, false);
     }
