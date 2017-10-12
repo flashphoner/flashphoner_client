@@ -146,7 +146,7 @@ var init = function (options) {
                     }
                 }
             }
-            if (jQuery.isEmptyObject(newMediaProvider)) {
+            if (util.isEmptyObject(newMediaProvider)) {
                 throw new Error("None of preferred MediaProviders available");
             } else {
                 MediaProvider = newMediaProvider;

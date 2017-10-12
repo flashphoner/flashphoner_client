@@ -1,6 +1,14 @@
 'use strict';
 
 module.exports = {
+
+    isEmptyObject: function( obj ) {
+        for ( var name in obj ) {
+            return false;
+        }
+        return true;
+    },
+
     /**
      * Copy values of object own properties to array.
      *
