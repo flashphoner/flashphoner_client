@@ -29,7 +29,6 @@ var initialized = false;
  * @param {String=} options.flashMediaProviderSwfLocation Location of media-provider.swf file
  * @param {string=} options.preferredMediaProvider DEPRECATED: Use preferred media provider if available
  * @param {Array=} options.preferredMediaProviders Use preferred media providers order
- * @param {string=} options.useWebRTCForMobileSafari Use WebRTC media provider for mobile browser Safari
  * @param {String=} options.receiverLocation Location of WSReceiver.js file
  * @param {String=} options.decoderLocation Location of video-worker2.js file
  * @param {String=} options.screenSharingExtensionId Chrome screen sharing extension id
@@ -136,9 +135,6 @@ var init = function (options) {
             } else {
                 logger.warn(LOG_PREFIX, "Preferred media provider is not available.");
             }
-        }
-        if (!options.preferredMediaProviders && Browser.isSafari() && Browser.isiOS() && !options.useWebRTCForMobileSafari){
-            options.preferredMediaProviders = ["WSPlayer", "WebRTC"];
         }
         if (options.preferredMediaProviders && options.preferredMediaProviders.length > 0) {
             var newMediaProvider = {};
@@ -1443,9 +1439,6 @@ var createSession = function (options) {
                 throw new Error("Invalid stream state");
             }
             status_ = STREAM_STATUS.PENDING;
-            if (util.Browser.isiOS() && util.Browser.isSafari() && MediaProvider.WebRTC) {
-                mediaProvider = "WebRTC";
-            }
             published_ = true;
             var hasAudio = true;
             if (constraints && constraints.video && constraints.video.type && constraints.video.type == "screen") {
