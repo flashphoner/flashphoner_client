@@ -537,7 +537,7 @@ function removeVideoElement(video) {
         for (var i = 0; i < tracks.length; i++) {
             tracks[i].stop();
         }
-        video.srcObject = undefined;
+        video.srcObject = null;
     }
 
 }
