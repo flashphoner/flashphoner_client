@@ -10,7 +10,7 @@ var intervalID;
 
 try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
-} catch(e) {
+} catch (e) {
     console.warn("Failed to create audio context");
 }
 
@@ -78,10 +78,19 @@ function init_page() {
             }
         });
 
+
+
         $("#url").val(setURL() + "/" + createUUID(8));
 
         //set initial button callback
         onStopped();
+
+        if (list.audio.length === 0) {
+            $("#sendAudio").prop('checked', false).prop('disabled', true);
+        }
+        if (list.video.length === 0) {
+            $("#sendVideo").prop('checked', false).prop('disabled', true);
+        }
     }).catch(function (error) {
         $("#notifyFlash").text("Failed to get media devices");
     });
@@ -166,15 +175,17 @@ function onStopped() {
     $("#testBtn").prop('disabled', false);
     //enableMuteToggles(false);
 }
+
 var micLevelInterval;
 var testStarted;
 var audioContextForTest;
+
 function startTest() {
     if (Browser.isSafariWebRTC()) {
         Flashphoner.playFirstVideo(localVideo, true);
         Flashphoner.playFirstVideo(remoteVideo, false);
     }
-    Flashphoner.getMediaAccess(getConstaints(), localVideo).then(function(disp) {
+    Flashphoner.getMediaAccess(getConstaints(), localVideo).then(function (disp) {
         $("#testBtn").text("Release").off('click').click(function () {
             $(this).prop('disabled', true);
             stopTest();
@@ -190,10 +201,10 @@ function startTest() {
                     var javascriptNode = audioContextForTest.createScriptProcessor(1024, 1, 1);
                     microphone.connect(javascriptNode);
                     javascriptNode.connect(audioContextForTest.destination);
-                    javascriptNode.onaudioprocess = function(event){
+                    javascriptNode.onaudioprocess = function (event) {
                         var inpt_L = event.inputBuffer.getChannelData(0);
                         var sum_L = 0.0;
-                        for(var i = 0; i < inpt_L.length; ++i) {
+                        for (var i = 0; i < inpt_L.length; ++i) {
                             sum_L += inpt_L[i] * inpt_L[i];
                         }
                         $("#micLevel").text(Math.floor(Math.sqrt(sum_L / inpt_L.length) * 100));
@@ -201,7 +212,7 @@ function startTest() {
                 }
             }
         } else if (Flashphoner.getMediaProviders()[0] == "Flash") {
-            micLevelInterval = setInterval(function(){
+            micLevelInterval = setInterval(function () {
                 $("#micLevel").text(disp.children[0].getMicrophoneLevel());
             }, 500);
         }
@@ -295,8 +306,8 @@ function getConstaints() {
             height: parseInt($('#sendHeight').val())
         };
         if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-            constraints.video.width = {min:parseInt($('#sendWidth').val()), max:640};
-            constraints.video.height = {min:parseInt($('#sendHeight').val()), max:480};
+            constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
+            constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
         }
         if (parseInt($('#sendVideoBitrate').val()) > 0)
             constraints.video.bitrate = parseInt($('#sendVideoBitrate').val());
@@ -305,6 +316,7 @@ function getConstaints() {
     }
     return constraints;
 }
+
 function startStreaming(session) {
     var streamName = field("url").split('/')[3];
     var constraints = getConstaints();
@@ -415,7 +427,11 @@ function muteInputs() {
 
 function unmuteInputs() {
     $(":text, select, :checkbox").each(function () {
-        if (($(this).attr('id') == 'receiveWidth' || $(this).attr('id') == 'receiveHeight')) {
+        if ($(this).attr('id') == 'sendAudio' && $("#audioInput option").length === 0) {
+            return;
+        } else if ($(this).attr('id') == 'sendVideo' && $("#videoInput option").length === 0) {
+            return;
+        } else if (($(this).attr('id') == 'receiveWidth' || $(this).attr('id') == 'receiveHeight')) {
             if (!$("#receiveDefaultSize").is(":checked")) $(this).removeAttr("disabled");
         } else if ($(this).attr('id') == 'receiveBitrate') {
             if (!$("#receiveDefaultBitrate").is(":checked")) $(this).removeAttr("disabled");
@@ -454,20 +470,31 @@ function validateForm() {
         removeHighlight($("#playVideo"));
         removeHighlight($("#playAudio"));
     }
-    $('#form :text, select').each(function () {
-        if (!$(this).val()) {
-            highlightInput($(this));
-            valid = false;
-        } else {
-            var numericFields = ['fps', 'sendWidth', 'sendHeight', 'sendVideoBitrate', 'receiveBitrate', 'quality'];
-            if (numericFields.indexOf(this.id) != -1 && !(parseInt($(this).val()) >= 0)) {
+
+    var validateInputs = function (selector) {
+        $('#form ' + selector + ' :text, ' + selector + ' select').each(function () {
+            if (!$(this).val()) {
                 highlightInput($(this));
                 valid = false;
             } else {
-                removeHighlight($(this));
+                var numericFields = ['fps', 'sendWidth', 'sendHeight', 'sendVideoBitrate', 'receiveBitrate', 'quality'];
+                if (numericFields.indexOf(this.id) != -1 && !(parseInt($(this).val()) >= 0)) {
+                    highlightInput($(this));
+                    valid = false;
+                } else {
+                    removeHighlight($(this));
+                }
             }
-        }
-    });
+        });
+    };
+
+    if ($("#sendAudio").is(':checked')) {
+        validateInputs("#sendAudioGroup");
+    }
+    if ($("#sendVideo").is(':checked')) {
+        validateInputs("#sendVideoGroup");
+    }
+    validateInputs("#playGroup");
     return valid;
 
     function highlightInput(input) {
@@ -536,7 +563,7 @@ function detectSpeech(stream, level, latency) {
     processor.latency = latency || 750;
 
     processor.isSpeech =
-        function() {
+        function () {
             if (!this.clipping) return false;
             if ((this.lastClip + this.latency) < window.performance.now()) this.clipping = false;
             return this.clipping;
@@ -545,7 +572,7 @@ function detectSpeech(stream, level, latency) {
     source.connect(processor);
 
     // Check speech every 500 ms
-    intervalID = setInterval(function() {
+    intervalID = setInterval(function () {
         if (processor.isSpeech()) {
             $("#talking").css('background-color', 'green');
         } else {
@@ -558,9 +585,9 @@ function handleAudio(event) {
     var buf = event.inputBuffer.getChannelData(0);
     var bufLength = buf.length;
     var x;
-    for (var i=0; i<bufLength; i++) {
+    for (var i = 0; i < bufLength; i++) {
         x = buf[i];
-        if (Math.abs(x)>=this.threshold) {
+        if (Math.abs(x) >= this.threshold) {
             this.clipping = true;
             this.lastClip = window.performance.now();
         }

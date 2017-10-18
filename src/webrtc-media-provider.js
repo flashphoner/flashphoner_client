@@ -49,7 +49,7 @@ var createConnection = function (options) {
              * Workaround for Android 6, 7, Chrome 61.
              * https://bugs.chromium.org/p/chromium/issues/detail?id=769622
              */
-            remoteVideo.style="border-radius: 1px";
+            remoteVideo.style = "border-radius: 1px";
         } else {
             var cachedVideo = getCacheInstance(display);
             if (!cachedVideo || cachedVideo.id.indexOf(REMOTE_CACHED_VIDEO) !== -1) {
@@ -64,7 +64,7 @@ var createConnection = function (options) {
                  * Workaround for Android 6, 7, Chrome 61.
                  * https://bugs.chromium.org/p/chromium/issues/detail?id=769622
                  */
-                remoteVideo.style="border-radius: 1px";
+                remoteVideo.style = "border-radius: 1px";
             } else {
                 localVideo = cachedVideo;
                 localVideo.id = id;
@@ -184,37 +184,37 @@ var createConnection = function (options) {
                 });
                 connection.setRemoteDescription(rtcSdp).then(function () {
                     //use in edge for ice
-                     if (adapter.browserDetails.browser == "edge") {
-                         var sdpArray = sdp.split("\n");
-                         var i;
-                         for (i = 0; i < sdpArray.length; i++) {
-                             if (sdpArray[i].indexOf("m=video") == 0) {
-                                 break;
-                             }
-                             if (sdpArray[i].indexOf("a=candidate:1 1") == 0 || sdpArray[i].indexOf("a=candidate:2 1") == 0) {
-                                 var rtcIceCandidate = new RTCIceCandidate({
-                                     candidate: sdpArray[i],
-                                     sdpMid: "audio",
-                                     sdpMLineIndex: 0
-                                 });
-                                 connection.addIceCandidate(rtcIceCandidate);
-                             }
-                         }
-                         var video = false;
-                         for (i = 0; i < sdpArray.length; i++) {
-                             if (sdpArray[i].indexOf("m=video") == 0) {
-                                 video = true;
-                             }
-                             if (video && (sdpArray[i].indexOf("a=candidate:1 1") == 0 || sdpArray[i].indexOf("a=candidate:2 1") == 0)) {
-                                 var rtcIceCandidate2 = new RTCIceCandidate({
-                                     candidate: sdpArray[i],
-                                     sdpMid: "video",
-                                     sdpMLineIndex: 1
-                                 });
-                                 connection.addIceCandidate(rtcIceCandidate2);
-                             }
-                         }
-                         connection.addIceCandidate(null);
+                    if (adapter.browserDetails.browser == "edge") {
+                        var sdpArray = sdp.split("\n");
+                        var i;
+                        for (i = 0; i < sdpArray.length; i++) {
+                            if (sdpArray[i].indexOf("m=video") == 0) {
+                                break;
+                            }
+                            if (sdpArray[i].indexOf("a=candidate:1 1") == 0 || sdpArray[i].indexOf("a=candidate:2 1") == 0) {
+                                var rtcIceCandidate = new RTCIceCandidate({
+                                    candidate: sdpArray[i],
+                                    sdpMid: "audio",
+                                    sdpMLineIndex: 0
+                                });
+                                connection.addIceCandidate(rtcIceCandidate);
+                            }
+                        }
+                        var video = false;
+                        for (i = 0; i < sdpArray.length; i++) {
+                            if (sdpArray[i].indexOf("m=video") == 0) {
+                                video = true;
+                            }
+                            if (video && (sdpArray[i].indexOf("a=candidate:1 1") == 0 || sdpArray[i].indexOf("a=candidate:2 1") == 0)) {
+                                var rtcIceCandidate2 = new RTCIceCandidate({
+                                    candidate: sdpArray[i],
+                                    sdpMid: "video",
+                                    sdpMLineIndex: 1
+                                });
+                                connection.addIceCandidate(rtcIceCandidate2);
+                            }
+                        }
+                        connection.addIceCandidate(null);
                     }
                     resolve();
                 }).catch(function (error) {
@@ -282,6 +282,7 @@ var createConnection = function (options) {
                                 handleResult(results[i]);
                             }
                         }
+
                         function handleResult(res) {
                             var resultPart = util.processRtcStatsReport(adapter.browserDetails.browser, res);
                             if (resultPart != null) {
@@ -541,6 +542,7 @@ function removeVideoElement(video) {
     }
 
 }
+
 /**
  * Check WebRTC available
  *
@@ -552,44 +554,59 @@ var available = function () {
 };
 
 var listDevices = function (labels) {
-    return new Promise(function (resolve, reject) {
+    var getConstraints = function (devices) {
+        var constraints = {};
+        for (var i = 0; i < devices.length; i++) {
+            var device = devices[i];
+            if (device.kind == "audioinput") {
+                constraints.audio = true;
+            } else if (device.kind == "videoinput") {
+                constraints.video = true;
+            } else {
+                logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
+            }
+        }
+        return constraints;
+    };
+
+    var getList = function (devices) {
         var list = {
             audio: [],
             video: []
         };
-        if (labels) {
-            var display = document.createElement("div");
-            getMediaAccess({audio: true, video: {}}, display).then(function () {
-                populateList(display);
-            }, reject);
-        } else {
-            populateList();
+        for (var i = 0; i < devices.length; i++) {
+            var device = devices[i];
+            var ret = {
+                id: device.deviceId,
+                label: device.label
+            };
+            if (device.kind == "audioinput") {
+                ret.type = "mic";
+                list.audio.push(ret);
+            } else if (device.kind == "videoinput") {
+                ret.type = "camera";
+                list.video.push(ret);
+            } else {
+                logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
+            }
         }
+        return list;
+    };
 
-        function populateList(display) {
-            navigator.mediaDevices.enumerateDevices().then(function (devices) {
-                for (var i = 0; i < devices.length; i++) {
-                    var device = devices[i];
-                    var ret = {
-                        id: device.deviceId,
-                        label: device.label
-                    };
-                    if (device.kind == "audioinput") {
-                        ret.type = "mic";
-                        list.audio.push(ret);
-                    } else if (device.kind == "videoinput") {
-                        ret.type = "camera";
-                        list.video.push(ret);
-                    } else {
-                        logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
-                    }
-                }
-                if (display) {
-                    releaseMedia(display);
-                }
-                resolve(list);
-            }, reject);
-        }
+    return new Promise(function (resolve, reject) {
+        navigator.mediaDevices.enumerateDevices().then(function (devices) {
+            if (labels) {
+                var display = document.createElement("div");
+                getMediaAccess(getConstraints(devices), display).then(function () {
+                    navigator.mediaDevices.enumerateDevices().then(function (devicesWithLabales) {
+                        resolve(getList(devicesWithLabales));
+                        releaseMedia(display);
+                    }, reject);
+                }, reject);
+            } else {
+                resolve(getList(devices));
+            }
+        }, reject);
     });
 };
 
@@ -654,7 +671,7 @@ var playFirstSound = function () {
     return false;
 };
 
-var playFirstVideo = function(display, isLocal, src) {
+var playFirstVideo = function (display, isLocal, src) {
     if (!getCacheInstance(display)) {
         var video = document.createElement('video');
         video.setAttribute("playsinline", "");
