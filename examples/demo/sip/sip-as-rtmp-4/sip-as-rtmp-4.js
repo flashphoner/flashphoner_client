@@ -154,27 +154,31 @@ function startMixerBtn(ctx) {
         $("#mixerStream").parent().removeClass('has-error');
     }
     var $that = $(ctx);
-    var callback = function(status) {
-        if (status == STREAM_STATUS.PENDING) {
-            startCheckMixerStatus();
-            mixerStarted = true;
-            $("#formAudioMixing input:checkbox").each(function(){
-                $(this).attr('disabled', false);
-            });
-            $that.text('Stop mixer').removeClass('btn-success').addClass('btn-danger');
-        } else {
-            mixerStarted = false;
-            stopCheckMixerStatus();
-            $("#formAudioMixing input:checkbox").each(function(){
-                $(this).attr('disabled', true);
-            });
-            $that.text('Start mixer').removeClass('btn-danger').addClass('btn-success');
-        }
+    var onStopped = function() {
+        mixerStarted = false;
+        stopCheckMixerStatus();
+        $("#formAudioMixing input:checkbox").each(function(){
+            $(this).attr('disabled', true);
+        });
+        $that.text('Start mixer').removeClass('btn-danger').addClass('btn-success');
+        $(".mixerStatus").text('');
+    };
+    var onStarted = function() {
+        startCheckMixerStatus(onStopped);
+        mixerStarted = true;
+        $("#formAudioMixing input:checkbox").each(function(){
+            $(this).attr('disabled', false);
+        });
+        $that.text('Stop mixer').removeClass('btn-success').addClass('btn-danger');
     };
     if (!mixerStarted) {
-        startMixer(mixerStream, callback);
+        startMixer(mixerStream).then(
+            onStarted, onStopped
+        );
     } else {
-        stopMixer(mixerStream, callback);
+        stopMixer(mixerStream).then(
+            onStopped, onStopped
+        );
     }
 }
 
@@ -248,29 +252,19 @@ var terminateRtmp = function(uri, fn) {
     })
 };
 
-var startMixer = function(streamName, fn) {
+var startMixer = function(streamName) {
     console.log("Start mixer " + streamName);
-    send(field("restUrl") + "/mixer/startup", {
+    return send(field("restUrl") + "/mixer/startup", {
         uri: "mixer://" + streamName,
         localStreamName: streamName
-    }).then(
-        fn(STREAM_STATUS.PENDING)
-    ).catch(function(e){
-        console.error(e);
-        fn(STREAM_STATUS.FAILED);
     });
 };
 
 var stopMixer = function(streamName, fn) {
     console.log("Stop mixer " + streamName);
-    send(field("restUrl") + "/mixer/terminate", {
+    return send(field("restUrl") + "/mixer/terminate", {
         uri: "mixer://" + streamName,
         localStreamName: streamName
-    }).then(
-        fn(STREAM_STATUS.STOPPED)
-    ).catch(function(e){
-        console.error(e);
-        fn(STREAM_STATUS.FAILED);
     });
 };
 
@@ -435,6 +429,7 @@ function startCheckCallStatus() {
 function stopCheckCallStatus() {
     if (callStatusIntervalID != null)
         clearInterval(callStatusIntervalID);
+    callStatusIntervalID = null;
 }
 
 function startCheckTransponderStatus() {
@@ -444,6 +439,7 @@ function startCheckTransponderStatus() {
 function stopCheckTransponderStatus() {
     if (transponderStatusIntervalID != null)
         clearInterval(transponderStatusIntervalID);
+    transponderStatusIntervalID = null;
 }
 
 function startCheckRtmpPullStatus() {
@@ -455,18 +451,22 @@ function startCheckRtmpPullStatus() {
 function stopCheckRtmpPullStatus() {
     if (rtmpPullStatusIntervalID != null) {
         clearInterval(rtmpPullStatusIntervalID);
+        rtmpPullStatusIntervalID = null;
     }
 }
 
-function startCheckMixerStatus() {
+function startCheckMixerStatus(callback) {
     if (!mixerStatusIntervalID) {
-        mixerStatusIntervalID = setInterval(getMixerStatus, 5000);
+        console.log("start mixer status");
+        mixerStatusIntervalID = setInterval(function(){getMixerStatus(callback)}, 5000);
     }
 }
 
 function stopCheckMixerStatus() {
     if (mixerStatusIntervalID != null) {
+        console.log("stop mixer status");
         clearInterval(mixerStatusIntervalID);
+        mixerStatusIntervalID = null;
     }
 }
 
@@ -868,21 +868,24 @@ function getRtmpPullStatus() {
     });
 }
 
-function getMixerStatus() {
+function getMixerStatus(callback) {
+    console.log("poll mixer status");
     send(field("restUrl") + "/mixer/find_all").then(function(data){
         if (data.length == 0) {
-            stopCheckMixerStatus();
-            return false;
+            callback();
+            return;
         }
         for (var i = 0; i < data.length; i++) {
             var stream = data[i];
             if ($("#mixerStream").val() == stream['localStreamName']) {
                 $(".mixerStatus").text(stream['status']);
+                return;
             }
-            $("#mixerStream").val();
         }
+        //not found
+        callback();
     }).catch(function(e){
-        stopCheckMixerStatus();
+        callback();
         console.error(e);
     })
 }
