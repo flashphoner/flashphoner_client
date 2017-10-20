@@ -137,7 +137,7 @@ function musicBtn(ctx) {
 
 function startRtmpBtn(ctx) {
     $(ctx).prop('disabled', true);
-    var state = $(this).text();
+    var state = $(ctx).text();
     if (state == "Start") {
         startRtmpStream();
     } else {
