@@ -4,9 +4,13 @@ $(document).ready(function () {
 
 var STREAM_STATUS = {
     PENDING: "PENDING",
+    CONNECTED: "CONNECTED",
+    PROCESSED_REMOTE: "PROCESSED_REMOTE",
     STOPPED: "STOPPED",
     FAILED: "FAILED"
 };
+
+var REST_POLLING_INTERVAL = 5000;
 
 var streams = {};
 var callStatusIntervalID;
@@ -79,21 +83,30 @@ function pullRtmpBtn(ctx) {
     var callback = function(status) {
         if (!streams.hasOwnProperty(url)) {
             streams[url] = {};
+            var onStopped = function() {
+                $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).text(STREAM_STATUS.STOPPED);
+                $input.attr('disabled', false);
+                $that.text('Pull').removeClass('btn-danger').addClass('btn-success');
+                delete streams[url];
+            };
+            streams[url]['onStopped'] = onStopped;
         }
         streams[url]['status'] = status;
         $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).text(status);
         if (status == STREAM_STATUS.PENDING) {
             $("." + $input.attr('id')).val(url);
+            $input.attr('disabled', true);
             $that.text('Terminate').prop('disabled', false).removeClass('btn-success').addClass('btn-danger');
             startCheckRtmpPullStatus();
         } else {
+            $input.attr('disabled', false);
             $("." + $input.attr('id')).val('');
             $that.text('Pull').prop('disabled', false).removeClass('btn-danger').addClass('btn-success');
         }
     };
 
     if (streams.hasOwnProperty(url)) {
-        if (streams[url]['status'] == STREAM_STATUS.PENDING || streams[url]['status'] == 'CONNECTED') {
+        if (streams[url]['status'] == STREAM_STATUS.PENDING || streams[url]['status'] == STREAM_STATUS.PROCESSED_REMOTE) {
             terminateRtmp(url, callback);
         } else {
             pullRtmp(url, callback);
@@ -423,7 +436,7 @@ function stopRtmpStream() {
 ////////////// Checkers /////////////////
 
 function startCheckCallStatus() {
-    callStatusIntervalID = setInterval(getStatus,3000);
+    callStatusIntervalID = setInterval(getStatus, REST_POLLING_INTERVAL);
 }
 
 function stopCheckCallStatus() {
@@ -433,7 +446,7 @@ function stopCheckCallStatus() {
 }
 
 function startCheckTransponderStatus() {
-    transponderStatusIntervalID = setInterval(getTransponderStatus, 3000);
+    transponderStatusIntervalID = setInterval(getTransponderStatus, REST_POLLING_INTERVAL);
 }
 
 function stopCheckTransponderStatus() {
@@ -444,7 +457,7 @@ function stopCheckTransponderStatus() {
 
 function startCheckRtmpPullStatus() {
     if (!rtmpPullStatusIntervalID) {
-        rtmpPullStatusIntervalID = setInterval(getRtmpPullStatus, 5000);
+        rtmpPullStatusIntervalID = setInterval(getRtmpPullStatus, REST_POLLING_INTERVAL);
     }
 }
 
@@ -452,13 +465,19 @@ function stopCheckRtmpPullStatus() {
     if (rtmpPullStatusIntervalID != null) {
         clearInterval(rtmpPullStatusIntervalID);
         rtmpPullStatusIntervalID = null;
+        for (var prop in streams) {
+            if (streams.hasOwnProperty(prop)) {
+                streams[prop]['onStopped']();
+                delete streams[prop];
+            }
+        }
     }
 }
 
 function startCheckMixerStatus(callback) {
     if (!mixerStatusIntervalID) {
         console.log("start mixer status");
-        mixerStatusIntervalID = setInterval(function(){getMixerStatus(callback)}, 5000);
+        mixerStatusIntervalID = setInterval(function(){getMixerStatus(callback)}, REST_POLLING_INTERVAL);
     }
 }
 
@@ -851,8 +870,10 @@ function getRtmpPullStatus() {
             stopCheckRtmpPullStatus();
             return false;
         }
+        var _streams = [];
         for (var i = 0; i < data.length; i++) {
             var stream = data[i];
+            _streams.push(data[i]['uri']);
             if (streams.hasOwnProperty(stream['uri'])) {
                 streams[stream['uri']]['status'] = stream['status'];
                 $("input[type=text]").filter(function() {
@@ -862,6 +883,15 @@ function getRtmpPullStatus() {
                 });
             }
         }
+        for (var prop in streams) {
+            if (streams.hasOwnProperty(prop)) {
+                if (!_streams.includes(prop)) {
+                    console.log(prop + " probably failed or stopped");
+                    streams[prop]['onStopped']();
+                }
+            }
+        }
+
     }).catch(function(e) {
         stopCheckRtmpPullStatus();
         console.error(e);
@@ -869,7 +899,6 @@ function getRtmpPullStatus() {
 }
 
 function getMixerStatus(callback) {
-    console.log("poll mixer status");
     send(field("restUrl") + "/mixer/find_all").then(function(data){
         if (data.length == 0) {
             callback();
