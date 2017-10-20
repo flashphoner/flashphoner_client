@@ -106,7 +106,7 @@ function pullRtmpBtn(ctx) {
     };
 
     if (streams.hasOwnProperty(url)) {
-        if (streams[url]['status'] == STREAM_STATUS.PENDING || streams[url]['status'] == STREAM_STATUS.CONNECTED) {
+        if (streams[url]['status'] == STREAM_STATUS.PENDING || streams[url]['status'] == STREAM_STATUS.PROCESSED_REMOTE) {
             terminateRtmp(url, callback);
         } else {
             pullRtmp(url, callback);
