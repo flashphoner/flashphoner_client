@@ -185,35 +185,35 @@ var createConnection = function (options) {
                 connection.setRemoteDescription(rtcSdp).then(function () {
                     //use in edge for ice
                     if (adapter.browserDetails.browser == "edge") {
-                        var sdpArray = sdp.split("\n");
-                        var i;
-                        for (i = 0; i < sdpArray.length; i++) {
-                            if (sdpArray[i].indexOf("m=video") == 0) {
-                                break;
-                            }
-                            if (sdpArray[i].indexOf("a=candidate:1 1") == 0 || sdpArray[i].indexOf("a=candidate:2 1") == 0) {
-                                var rtcIceCandidate = new RTCIceCandidate({
-                                    candidate: sdpArray[i],
-                                    sdpMid: "audio",
-                                    sdpMLineIndex: 0
-                                });
-                                connection.addIceCandidate(rtcIceCandidate);
-                            }
-                        }
-                        var video = false;
-                        for (i = 0; i < sdpArray.length; i++) {
-                            if (sdpArray[i].indexOf("m=video") == 0) {
-                                video = true;
-                            }
-                            if (video && (sdpArray[i].indexOf("a=candidate:1 1") == 0 || sdpArray[i].indexOf("a=candidate:2 1") == 0)) {
-                                var rtcIceCandidate2 = new RTCIceCandidate({
-                                    candidate: sdpArray[i],
-                                    sdpMid: "video",
-                                    sdpMLineIndex: 1
-                                });
-                                connection.addIceCandidate(rtcIceCandidate2);
-                            }
-                        }
+                        // var sdpArray = sdp.split("\n");
+                        // var i;
+                        // for (i = 0; i < sdpArray.length; i++) {
+                        //     if (sdpArray[i].indexOf("m=video") == 0) {
+                        //         break;
+                        //     }
+                        //     if (sdpArray[i].indexOf("a=candidate:1 1") == 0 || sdpArray[i].indexOf("a=candidate:2 1") == 0) {
+                        //         var rtcIceCandidate = new RTCIceCandidate({
+                        //             candidate: sdpArray[i],
+                        //             sdpMid: "audio",
+                        //             sdpMLineIndex: 0
+                        //         });
+                        //         connection.addIceCandidate(rtcIceCandidate);
+                        //     }
+                        // }
+                        // var video = false;
+                        // for (i = 0; i < sdpArray.length; i++) {
+                        //     if (sdpArray[i].indexOf("m=video") == 0) {
+                        //         video = true;
+                        //     }
+                        //     if (video && (sdpArray[i].indexOf("a=candidate:1 1") == 0 || sdpArray[i].indexOf("a=candidate:2 1") == 0)) {
+                        //         var rtcIceCandidate2 = new RTCIceCandidate({
+                        //             candidate: sdpArray[i],
+                        //             sdpMid: "video",
+                        //             sdpMLineIndex: 1
+                        //         });
+                        //         connection.addIceCandidate(rtcIceCandidate2);
+                        //     }
+                        // }
                         connection.addIceCandidate(null);
                     }
                     resolve();
