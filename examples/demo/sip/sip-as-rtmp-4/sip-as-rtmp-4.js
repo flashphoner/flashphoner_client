@@ -150,7 +150,7 @@ function musicBtn(ctx) {
 
 function startRtmpBtn(ctx) {
     $(ctx).prop('disabled', true);
-    var state = $(this).text();
+    var state = $(ctx).text();
     if (state == "Start") {
         startRtmpStream();
     } else {
@@ -171,10 +171,17 @@ function startMixerBtn(ctx) {
         mixerStarted = false;
         stopCheckMixerStatus();
         $("#formAudioMixing input:checkbox").each(function(){
-            $(this).attr('disabled', true);
+            $(this).prop('checked', false).attr('disabled', true);
         });
         $that.text('Start mixer').removeClass('btn-danger').addClass('btn-success');
+        $that.parents().closest('.input-group').children('input').attr('disabled', false);
         $(".mixerStatus").text('');
+        $("#formSIPStreamInject :input").each(function() {
+            $(this).prop('disabled',false);
+            if ($(this).is(':button')) {
+                $(this).removeClass("btn-danger").addClass("btn-success");
+            }
+        });
     };
     var onStarted = function() {
         startCheckMixerStatus(onStopped);
@@ -183,12 +190,14 @@ function startMixerBtn(ctx) {
             $(this).attr('disabled', false);
         });
         $that.text('Stop mixer').removeClass('btn-success').addClass('btn-danger');
+        $that.parents().closest('.input-group').children('input').attr('disabled', true);
     };
     if (!mixerStarted) {
         startMixer(mixerStream).then(
             onStarted, onStopped
         );
     } else {
+        mixerStarted = false;
         stopMixer(mixerStream).then(
             onStopped, onStopped
         );
@@ -234,8 +243,10 @@ function injectStreamBtn(ctx) {
         streamName: streamName
     }).then(function(){
         $that.text('Stop').removeClass('btn-success').addClass('btn-danger');
+        $that.parents().closest('.input-group').children('input').attr('disabled', true);
     }).catch(function() {
         $that.text('Start').removeClass('btn-danger').addClass('btn-success');
+        $that.parents().closest('.input-group').children('input').attr('disabled', false);
     });
 }
 
@@ -417,6 +428,7 @@ function startRtmpStream() {
         RESTObj.streamName = field("rtmpStream");
         RESTObj.rtmpUrl = field("rtmpUrl");
         RESTObj.options = options;
+        console.log("Start rtmp");
         sendREST(url, JSON.stringify(RESTObj), startupRtmpSuccessHandler, startupRtmpErrorHandler);
         sendDataToPlayer();
         startCheckTransponderStatus();
@@ -735,6 +747,12 @@ function handleAjaxError(jqXHR, textStatus, errorThrown) {
     console.log("Error: ", jqXHR);
     $("#callStatus").text("FINISHED");
     $("#callBtn").text("Call").removeClass("btn-danger").addClass("btn-success").prop('disabled',false);
+    $("#formSIPStreamInject :input").each(function() {
+        $(this).prop('disabled',false);
+        if ($(this).is(':button')) {
+            $(this).removeClass("btn-danger").addClass("btn-success").text('Start');
+        }
+    });
     resetButtonsState(true);
     resetElementsState();
     setCallStatus("FINISHED");
@@ -876,6 +894,7 @@ function getRtmpPullStatus() {
             _streams.push(data[i]['uri']);
             if (streams.hasOwnProperty(stream['uri'])) {
                 streams[stream['uri']]['status'] = stream['status'];
+
                 $("input[type=text]").filter(function() {
                    if ($(this).val().indexOf(stream['uri']) != -1) {
                        $(this).parents().closest('.row .row-space').children('.'+$(this).attr('id')).text(stream['status']);
