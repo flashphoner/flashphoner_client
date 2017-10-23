@@ -8,6 +8,10 @@ body {
     margin: 0;
 }
 
+video:-webkit-full-screen {
+    border-radius: 1px;
+}
+
 .display, video, canvas, object {
     width: 100%;
     height: 100%;

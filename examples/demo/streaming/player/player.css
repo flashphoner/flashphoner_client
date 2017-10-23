@@ -20,6 +20,10 @@ video, canvas, object {
     height: 100%;
 }
 
+video:-webkit-full-screen {
+    border-radius: 1px;
+}
+
 .ui-slider {
     height: 10px !important;
     background: #c0c0c0;
