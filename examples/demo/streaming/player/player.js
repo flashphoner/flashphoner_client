@@ -132,23 +132,27 @@ function playStream(session) {
         options.playWidth = resolution.split("x")[0];
         options.playHeight = resolution.split("x")[1];
     }
-    stream = session.createStream(options).on(STREAM_STATUS.PLAYING, function(stream) {
-        $("#preloader").show();
+    stream = session.createStream(options).on(STREAM_STATUS.PENDING, function(stream) {
         var video = document.getElementById(stream.id());
-        video.addEventListener('playing', function(event){
-            $("#preloader").hide();
-        });
-        video.addEventListener('resize', function(event){
-            var streamResolution = stream.videoResolution();
-            if (Object.keys(streamResolution).length === 0) {
-                resizeVideo(event.target);
-            } else {
-                // Change aspect ratio to prevent video stretching
-                var ratio = streamResolution.width / streamResolution.height;
-                var newHeight = Math.floor(options.playWidth / ratio);
-                resizeVideo(event.target, options.playWidth, newHeight);
-            }
-        });
+        if (!video.hasListeners) {
+            video.hasListeners = true;
+            video.addEventListener('playing', function () {
+                $("#preloader").hide();
+            });
+            video.addEventListener('resize', function (event) {
+                var streamResolution = stream.videoResolution();
+                if (Object.keys(streamResolution).length === 0) {
+                    resizeVideo(event.target);
+                } else {
+                    // Change aspect ratio to prevent video stretching
+                    var ratio = streamResolution.width / streamResolution.height;
+                    var newHeight = Math.floor(options.playWidth / ratio);
+                    resizeVideo(event.target, options.playWidth, newHeight);
+                }
+            });
+        }
+    }).on(STREAM_STATUS.PLAYING, function(stream) {
+        $("#preloader").show();
         setStatus(stream.status());
         onStarted(stream);
     }).on(STREAM_STATUS.STOPPED, function() {

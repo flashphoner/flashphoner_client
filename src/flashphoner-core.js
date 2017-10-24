@@ -1392,13 +1392,18 @@ var createSession = function (options) {
                 connectionConstraints: mediaConnectionConstraints
             }, streamRefreshHandlers[id_]).then(function (newConnection) {
                 mediaConnection = newConnection;
+                try {
+                    streamRefreshHandlers[id_]({status: status_});
+                } catch(e) {
+                    console.warn(e);
+                }
                 return mediaConnection.createOffer({
                     receiveAudio: receiveAudio,
                     receiveVideo: receiveVideo,
                     stripCodecs: stripCodecs
                 });
             }).then(function (offer) {
-                logger.debug(LOG_PREFIX, "Offer SDP:\n" + offer.sdp)
+                logger.debug(LOG_PREFIX, "Offer SDP:\n" + offer.sdp);
                 //request stream with offer sdp from server
                 send("playStream", {
                     mediaSessionId: id_,

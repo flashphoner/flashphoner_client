@@ -31,9 +31,6 @@ var createConnection = function (options) {
         var bidirectional = options.bidirectional;
         var localVideo;
         var remoteVideo;
-        //mixer
-        var mixedStream;
-        var gainNode;
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
             localVideo.id = id + "-local";
@@ -88,10 +85,6 @@ var createConnection = function (options) {
             }
         };
         connection.onsignalingstatechange = function (event) {
-            if (connection.signalingState == "closed" && mixedStream) {
-                console.log("Close audio context");
-                stopMix();
-            }
         };
         connection.oniceconnectionstatechange = function (event) {
         };

@@ -68,10 +68,15 @@ function playStream(index) {
     session.createStream({
         name: streamName,
         display: display
+    }).on(STREAM_STATUS.PENDING, function(stream) {
+        var video = document.getElementById(stream.id());
+        if (!video.hasListeners) {
+            video.hasListeners = true;
+            video.addEventListener('resize', function (event) {
+                resizeVideo(event.target);
+            });
+        }
     }).on(STREAM_STATUS.PLAYING, function(stream) {
-        document.getElementById(stream.id()).addEventListener('resize', function(event){
-            resizeVideo(event.target);
-        });
         setStatus("#status" + index, stream.status());
         onPlaying(index, stream);
     }).on(STREAM_STATUS.STOPPED, function() {
