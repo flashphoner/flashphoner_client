@@ -1,3 +1,7 @@
+video:-webkit-full-screen {
+    border-radius: 1px;
+}
+
 .fp-remoteVideo {
     border: 1px double black;
     width: 322px;
