@@ -543,7 +543,7 @@ function removeVideoElement(video) {
  */
 var available = function () {
     //return (adapter.browserDetails.browser != "edge") ? navigator.getUserMedia && RTCPeerConnection : false;
-    return navigator.getUserMedia && RTCPeerConnection;
+    return ('getUserMedia' in navigator && 'RTCPeerConnection' in window);
 };
 
 var listDevices = function (labels) {
