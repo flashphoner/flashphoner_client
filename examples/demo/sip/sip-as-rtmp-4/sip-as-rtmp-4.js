@@ -84,7 +84,7 @@ function pullRtmpBtn(ctx) {
         if (!streams.hasOwnProperty(url)) {
             streams[url] = {};
             var onStopped = function() {
-                $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).text(STREAM_STATUS.STOPPED);
+                $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).text((streams[url]['status'] != STREAM_STATUS.PROCESSED_REMOTE) ? STREAM_STATUS.FAILED : STREAM_STATUS.STOPPED);
                 $input.attr('disabled', false);
                 $that.text('Pull').removeClass('btn-danger').addClass('btn-success');
                 delete streams[url];
