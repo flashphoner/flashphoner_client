@@ -79,20 +79,24 @@ function pullRtmpBtn(ctx) {
 
     var url = $input.val();
     var $that = $(ctx);
-    $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).text('');
+    $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).first().text('');
     var callback = function(status) {
         if (!streams.hasOwnProperty(url)) {
             streams[url] = {};
             var onStopped = function() {
-                $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).text((streams[url]['status'] != STREAM_STATUS.PROCESSED_REMOTE) ? STREAM_STATUS.FAILED : STREAM_STATUS.STOPPED);
+                $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).first().text(
+                    ((streams[url]['status'] != STREAM_STATUS.PROCESSED_REMOTE) || (streams[url]['status'] != STREAM_STATUS.STOPPED)) ? STREAM_STATUS.FAILED : STREAM_STATUS.STOPPED
+                );
                 $input.attr('disabled', false);
                 $that.text('Pull').removeClass('btn-danger').addClass('btn-success');
+                $("." + $input.attr('id')).prop('checked', false);
                 delete streams[url];
             };
             streams[url]['onStopped'] = onStopped;
         }
         streams[url]['status'] = status;
-        $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).text(status);
+        streams[url]['el'] = $input;
+        $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).first().text(status);
         if (status == STREAM_STATUS.PENDING) {
             $("." + $input.attr('id')).val(url);
             $input.attr('disabled', true);
@@ -106,10 +110,16 @@ function pullRtmpBtn(ctx) {
     };
 
     if (streams.hasOwnProperty(url)) {
-        if (streams[url]['status'] == STREAM_STATUS.PENDING || streams[url]['status'] == STREAM_STATUS.PROCESSED_REMOTE) {
-            terminateRtmp(url, callback);
+        if ($(streams[url]['el']).attr('id') === $input.attr('id')) {
+            if (streams[url]['status'] == STREAM_STATUS.PENDING || streams[url]['status'] == STREAM_STATUS.PROCESSED_REMOTE) {
+                terminateRtmp(url, callback);
+            } else {
+                pullRtmp(url, callback);
+            }
         } else {
-            pullRtmp(url, callback);
+            console.warn("Stream is already pulled");
+            $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).first().text('Already pulled!');
+            return false;
         }
     } else {
         pullRtmp(url, callback);
@@ -209,6 +219,10 @@ function audioMixSwitch(ctx) {
 
     var mixerStream = $("#mixerStream").val();
     var stream = $(ctx).val();
+    if (stream == 'on') {
+        $(ctx).attr('checked', false);
+        return false;
+    }
     console.log("mixer " + mixerStream + " ; stream " + stream);
     if ($(ctx).is(':checked')) {
         // Add stream to mixer
@@ -242,10 +256,10 @@ function injectStreamBtn(ctx) {
         callId: $("#sipCallId").val(),
         streamName: streamName
     }).then(function(){
-        $that.text('Stop').removeClass('btn-success').addClass('btn-danger');
+        $that.removeClass('btn-success').addClass('btn-danger');
         $that.parents().closest('.input-group').children('input').attr('disabled', true);
     }).catch(function() {
-        $that.text('Start').removeClass('btn-danger').addClass('btn-success');
+        $that.removeClass('btn-danger').addClass('btn-success');
         $that.parents().closest('.input-group').children('input').attr('disabled', false);
     });
 }
@@ -304,6 +318,7 @@ function startCall() {
         }
     });
     if(!checkForEmptyField('#callee','#callDiv')) {emptyField = true;}
+    if(!checkForEmptyField('#rtmpStream','#rtmpStreamForm')) {emptyField = true;}
     if (emptyField) {
         $("#callBtn").prop('disabled',false);
         return false;
@@ -894,12 +909,8 @@ function getRtmpPullStatus() {
             _streams.push(data[i]['uri']);
             if (streams.hasOwnProperty(stream['uri'])) {
                 streams[stream['uri']]['status'] = stream['status'];
-
-                $("input[type=text]").filter(function() {
-                   if ($(this).val().indexOf(stream['uri']) != -1) {
-                       $(this).parents().closest('.row .row-space').children('.'+$(this).attr('id')).text(stream['status']);
-                   }
-                });
+                var $input = streams[stream['uri']]['el'];
+                    $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).first().text(stream['status']);
             }
         }
         for (var prop in streams) {
