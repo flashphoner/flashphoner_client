@@ -85,7 +85,7 @@ function pullRtmpBtn(ctx) {
             streams[url] = {};
             var onStopped = function() {
                 $input.parents().closest('.row .row-space').children('.' + $input.attr('id')).first().text(
-                    ((streams[url]['status'] != STREAM_STATUS.PROCESSED_REMOTE) || (streams[url]['status'] != STREAM_STATUS.STOPPED)) ? STREAM_STATUS.FAILED : STREAM_STATUS.STOPPED
+                    ((streams[url]['status'] != STREAM_STATUS.PROCESSED_REMOTE) && (streams[url]['status'] != STREAM_STATUS.STOPPED)) ? STREAM_STATUS.FAILED : STREAM_STATUS.STOPPED
                 );
                 $input.attr('disabled', false);
                 $that.text('Pull').removeClass('btn-danger').addClass('btn-success');
@@ -222,6 +222,11 @@ function audioMixSwitch(ctx) {
     if (stream == 'on') {
         $(ctx).attr('checked', false);
         return false;
+    } else if (streams.hasOwnProperty(stream)) {
+        if (streams[stream]['status'] != STREAM_STATUS.PROCESSED_REMOTE) {
+            $(ctx).attr('checked', false);
+            return false;
+        }
     }
     console.log("mixer " + mixerStream + " ; stream " + stream);
     if ($(ctx).is(':checked')) {
@@ -762,12 +767,6 @@ function handleAjaxError(jqXHR, textStatus, errorThrown) {
     console.log("Error: ", jqXHR);
     $("#callStatus").text("FINISHED");
     $("#callBtn").text("Call").removeClass("btn-danger").addClass("btn-success").prop('disabled',false);
-    $("#formSIPStreamInject :input").each(function() {
-        $(this).prop('disabled',false);
-        if ($(this).is(':button')) {
-            $(this).removeClass("btn-danger").addClass("btn-success").text('Start');
-        }
-    });
     resetButtonsState(true);
     resetElementsState();
     setCallStatus("FINISHED");
