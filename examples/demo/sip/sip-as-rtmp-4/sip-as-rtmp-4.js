@@ -475,6 +475,12 @@ function stopCheckCallStatus() {
     if (callStatusIntervalID != null)
         clearInterval(callStatusIntervalID);
     callStatusIntervalID = null;
+    $("#formSIPStreamInject :input").each(function() {
+        $(this).prop('disabled', false);
+        if ($(this).is(':button')) {
+            $(this).removeClass("btn-danger").addClass("btn-success");
+        }
+    });
 }
 
 function startCheckTransponderStatus() {
