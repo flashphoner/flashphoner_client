@@ -51,14 +51,14 @@ function init_page(){
     });
 }
 
-function connect() {
+function connect(authToken) {
     if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
         Flashphoner.playFirstVideo(localDisplay, true);
         Flashphoner.playFirstVideo(remoteDisplay, false);
     }
 	var url = $('#urlServer').val();
-    var registerRequired = $("#sipRegisterRequired").is(':checked');
 
+    var registerRequired = $("#sipRegisterRequired").is(':checked');
     var sipOptions = {
 	    login: $("#sipLogin").val(),
         authenticationName: $("#sipAuthenticationName").val(),
@@ -67,17 +67,27 @@ function connect() {
         outboundProxy: $("#sipOutboundProxy").val(),
 		port: $("#sipPort").val(),
 		registerRequired: registerRequired
-    }; 
-
-    var connectionOptions = {
-        urlServer: url,
-        sipOptions: sipOptions
     };
+
+    if (authToken) {
+        connectionOptions = {
+            urlServer: url,
+            authToken: authToken,
+            keepAlive: true
+        };
+    } else {
+        connectionOptions = {
+            urlServer: url,
+            sipOptions: sipOptions,
+            keepAlive: true
+        };
+    }
 
     //create session
     console.log("Create new session with url " + url);
-    Flashphoner.createSession(connectionOptions).on(SESSION_STATUS.ESTABLISHED, function(session){
+    Flashphoner.createSession(connectionOptions).on(SESSION_STATUS.ESTABLISHED, function(session, connection){
         setStatus("#regStatus", SESSION_STATUS.ESTABLISHED);
+        $("#authToken").val(connection.authToken);
         onConnected(session);
 		if (!registerRequired) {
             disableOutgoing(false);
@@ -161,7 +171,7 @@ function call() {
 }
 
 function onConnected(session) {
-    $("#connectBtn").text("Disconnect").off('click').click(function(){
+    $("#connectBtn, #connectTokenBtn").text("Disconnect").off('click').click(function(){
         $(this).prop('disabled', true);
 		if (currentCall) {
 			showOutgoing();
@@ -181,6 +191,16 @@ function onDisconnected() {
 			connect();
 		}
     }).prop('disabled', false);
+
+    $("#connectTokenBtn").text("Connect with token").off('click').click(function(){
+        if ($("#authToken").val()) {
+            disableConnectionFields("formTokenConnection", true);
+            $(this).prop('disabled', true);
+            connect($("#authToken").val());
+        }
+    }).prop('disabled', false);
+
+
     disableConnectionFields("formConnection", false);
 	disableOutgoing(true);
     showOutgoing();

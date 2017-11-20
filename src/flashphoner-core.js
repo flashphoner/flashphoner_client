@@ -358,6 +358,8 @@ var getSession = function (id) {
  *
  * @param {Object} options Session options
  * @param {string} options.urlServer Server address in form of [ws,wss]://host.domain:port
+ * @param {string} options.authToken Token for auth on server with keepalived client
+ * @param {Boolean=} options.keepAlive Keep alive client on server after disconnect
  * @param {string=} options.lbUrl Load-balancer address
  * @param {string=} options.flashProto Flash protocol [rtmp,rtmfp]
  * @param {Integer=} options.flashPort Flash server port [1935]
@@ -387,6 +389,9 @@ var createSession = function (options) {
     var flashPort = options.flashPort || 1935;
     var appKey = options.appKey || "defaultApp";
     var mediaOptions = options.mediaOptions;
+    var keepAlive = options.keepAlive;
+
+    var cConfig;
     //SIP config
     var sipConfig;
     if (options.sipOptions) {
@@ -402,7 +407,7 @@ var createSession = function (options) {
         }
     }
     //media provider auth token received from server
-    var authToken;
+    var authToken = options.authToken;
     //object for storing new and active streams
     var streams = {};
     var calls = {};
@@ -475,13 +480,15 @@ var createSession = function (options) {
         };
         wsConnection.onopen = function () {
             onSessionStatusChange(SESSION_STATUS.CONNECTED);
-            var cConfig = {
+            cConfig = {
                 appKey: appKey,
                 mediaProviders: Object.keys(MediaProvider),
+                keepAlive: keepAlive,
+                authToken:authToken,
                 clientVersion: "0.5.25",
                 clientOSVersion: window.navigator.appVersion,
                 clientBrowserVersion: window.navigator.userAgent,
-                custom: options.custom,
+                custom: options.custom
             };
             if (getMediaProviders()[0] == "WSPlayer") {
                 cConfig.useWsTunnel = true;
@@ -509,7 +516,8 @@ var createSession = function (options) {
                     break;
                 case 'getUserData':
                     authToken = obj.authToken;
-                    onSessionStatusChange(SESSION_STATUS.ESTABLISHED);
+                    cConfig = obj;
+                    onSessionStatusChange(SESSION_STATUS.ESTABLISHED, obj);
                     break;
                 case 'setRemoteSDP':
                     var mediaSessionId = data.data[0];
@@ -606,7 +614,7 @@ var createSession = function (options) {
     }
 
     //Session status update helper
-    function onSessionStatusChange(newStatus) {
+    function onSessionStatusChange(newStatus, obj) {
         sessionStatus = newStatus;
         if (sessionStatus == SESSION_STATUS.DISCONNECTED || sessionStatus == SESSION_STATUS.FAILED) {
             //remove streams
@@ -619,7 +627,7 @@ var createSession = function (options) {
             delete sessions[id_];
         }
         if (callbacks[sessionStatus]) {
-            callbacks[sessionStatus](session);
+            callbacks[sessionStatus](session, obj);
         }
     }
 
@@ -655,7 +663,7 @@ var createSession = function (options) {
         if (!options) {
             throw new TypeError("options must be provided");
         }
-        var login = (appKey == 'clickToCallApp') ? '' : sipConfig.sipLogin;
+        var login = (appKey == 'clickToCallApp') ? '' : cConfig.sipLogin;
         var caller_ = (options.incoming) ? options.caller : login;
         var callee_ = options.callee;
         var visibleName_ = options.visibleName || login;
@@ -888,7 +896,7 @@ var createSession = function (options) {
                     flashProto: flashProto,
                     flashPort: flashPort,
                     bidirectional: true,
-                    login: sipConfig.sipLogin,
+                    login: cConfig.sipLogin,
                     connectionConfig: mediaOptions
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
@@ -909,7 +917,7 @@ var createSession = function (options) {
                             status: status_,
                             mediaProvider: mediaProvider,
                             sdp: sdp,
-                            caller: sipConfig.login,
+                            caller: cConfig.login,
                             callee: callee_,
                             custom: options.custom
                         });
