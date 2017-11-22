@@ -12,7 +12,8 @@ var NODE_STATE = {
 var NODE_DETAILS_TYPE = {
     ALL: "all",
     PULLED: "pulled",
-    RTSP: "rtsp"
+    RTSP: "rtsp",
+    API: "api"
 };
 
 var nodes = {};
@@ -42,18 +43,37 @@ $(function() {
         var type = $("#streamsTableInfoType").val();
         node.setDetailsType(type);
     });
-    $('#pullStreamBatchModal').on('show.bs.modal', function(e) {
-        $("#pullStreamBatchNodes").empty();
+    var populateNodes = function(storage) {
+        storage.empty();
         var html = "";
         for (var id in nodes) {
             html += "<option value='" + nodes[id].ip + "'>" + nodes[id].ip + "</option>";
         }
-        $("#pullStreamBatchNodes").append(html);
+        storage.append(html);
+    };
+    $('#pullStreamBatchModal').on('show.bs.modal', function(e) {
+        populateNodes($("#pullStreamBatchNodes"));
     });
     $("#pullBatchStream").on("click", function(e){
         pullStreamBatch();
     });
-
+    $('#registerBatchModal').on('show.bs.modal', function(e) {
+        populateNodes($("#registerBatchNodes"));
+    });
+    $("#registerBatch").on("click", function(e){
+        registerBatch();
+    });
+    $("#unregisterBatch").on("click", function(e){
+        unregisterBatch();
+    });
+    $("#callBatch").on("click", function(e){
+        callBatch();
+    });
+    $("#hangupBatch").on("click", function(e){
+        hangupBatch();
+    });
+    addNode("148.251.83.58");
+    addNode("176.9.89.46");
 });
 
 function createNode(id, ip) {
@@ -103,6 +123,14 @@ function createNode(id, ip) {
                     }, function (e) {
                         //no streams or node is dead
                         updateDetails(NODE_DETAILS_TYPE.RTSP, []);
+                    });
+                    break;
+                case NODE_DETAILS_TYPE.API:
+                    api.api.findAll().then(function (agents) {
+                        updateDetails(NODE_DETAILS_TYPE.API, apiDetailsToStreamDetails(agents));
+                    }, function (e) {
+                        //no streams or node is dead
+                        updateDetails(NODE_DETAILS_TYPE.API, []);
                     });
                     break;
             }
@@ -299,10 +327,113 @@ function pullStreamBatch() {
     var localName = $("#pullBatchLocalName").val();
     var remoteName = $("#pullBatchRemoteName").val();
     var qty = parseInt($("#pullBatchQty").val());
-    for (;qty > 0; qty--) {
-        node.pull.pull(remote, localName+qty, remoteName).catch(function(e){});
-    }
+    var interval = setInterval(function(){
+        if (qty > 0) {
+            node.pull.pull(remote, localName+qty, remoteName).catch(function(e){});
+            qty--;
+        } else {
+            clearInterval(interval);
+        }
+    }, 200);
     $("#pullStreamBatchModal").modal('hide');
+}
+
+function registerBatch() {
+    var node = getActiveNode();
+    var testedNode = $("#registerBatchNodes").val();
+    var registrar = $("#registerRegistrarAddress").val();
+    var start = $("#registerBatchStart").val();
+    var end = $("#registerBatchEnd").val();
+    var rate = $("#registerBatchRate").val();
+    var password = "Abcd1111";
+    var i = start;
+    var register = function(login){
+        doRego(node, testedNode, login, registrar, password).then(function(){
+        }, function(){
+            console.log("Failed to initiate sip register " + login + " " + end);
+        });
+    };
+    var throttle = rateLimit(rate, 1000, register);
+    for (; i < end; i++) {
+        throttle(i);
+    }
+    $("#registerBatchModal").modal('hide');
+}
+
+function unregisterBatch() {
+    var node = getActiveNode();
+    var start = $("#unregisterBatchStart").val();
+    var end = $("#unregisterBatchEnd").val();
+    var rate = $("#unregisterBatchRate").val();
+    var i = start;
+    var terminate = function(login){
+        node.api.terminate({sipLogin: login}).then(function(){
+        }, function(){
+            console.log("Failed to terminate sip agent " + i + " " + end);
+        });
+    };
+    var throttle = rateLimit(rate, 1000, terminate);
+    for (; i < end; i++) {
+        throttle(i);
+    }
+    $("#unregisterBatchModal").modal('hide');
+}
+
+function callBatch() {
+    var node = getActiveNode();
+    var ext = $("#callExtension").val();
+    var start = $("#callBatchStart").val();
+    var end = $("#callBatchEnd").val();
+    var rate = $("#callBatchRate").val();
+    var i = start;
+    var call = function(login){
+        doCall(node, login, ext).then(function(){
+        }, function(){
+            console.log("Failed to call through sip agent " + i + " " + end);
+        });
+    };
+    var throttle = rateLimit(rate, 1000, call);
+    for (; i < end; i++) {
+        throttle(i);
+    }
+    $("#callBatchModal").modal('hide');
+}
+
+function hangupBatch() {
+    var node = getActiveNode();
+    var start = $("#hangupBatchStart").val();
+    var end = $("#hangupBatchEnd").val();
+    var rate = $("#hangupBatchRate").val();
+    var i = start;
+    node.api.findAll().then(function (sipState) {
+        var hangup = function(login){
+            //lookup agents' state
+            var state = null;
+            for (var c = 0; c < sipState.length; c++) {
+                //console.log("look for " + login);
+                if (sipState[c].connection.sipLogin == login+"") {
+                    //console.log("found state " + login);
+                    state = sipState[c];
+                    break;
+                }
+            }
+            if (state != null && state.calls.length > 0) {
+                var call = state.calls[0];
+                call.wcsCallAgentId = "" + state.connection.sipLogin;
+                node.api.hangup(call).then(function(){
+                }, function(){
+                    console.log("Failed to hangup sip agent " + login + " " + end);
+                });
+            }
+        };
+        var throttle = rateLimit(rate, 1000, hangup);
+        for (; i < end; i++) {
+            throttle(i);
+        }
+        $("#hangupBatchModal").modal('hide');
+    }, function (e) {
+        $("#hangupBatchModal").modal('hide');
+    });
 }
 
 function getActiveNode() {
@@ -347,8 +478,110 @@ function rtspDetailsToStreamDetails(details) {
     return ret;
 }
 
+function apiDetailsToStreamDetails(details) {
+    var ret = [];
+    details.forEach(function(agent){
+        var entry = {
+            mediaSessionId: "",
+            name: agent.id,
+            mediaProvider: "WebRTC",
+            status: "ACTIVE",
+            published: false,
+            audioCodec: "--",
+            videoCodec: "--"
+        };
+        var call = agent.calls[0];
+        if (call) {
+            entry.mediaSessionId = call.callId;
+            entry.status = "CALLING";
+        }
+        ret.push(entry);
+    });
+    return ret;
+}
+
 var createTd = function(text) {
     return $("<td>").append(text);
 };
+
+function doRego(node, testedNode, login, domain, password) {
+    var connection = {
+        appKey: "defaultApp",
+        clientBrowserVersion: "",
+        clientVersion: "",
+        mediaProviders: ["WebRTC"],
+        sipAuthenticationName: login,
+        sipLogin: login,
+        sipDomain: domain,
+        sipOutboundProxy: domain,
+        sipPassword: password,
+        sipPort: "5060",
+        sipRegisterRequired: true,
+        urlServer: "ws://"+testedNode+":8080/"
+    };
+    return node.api.createSession(connection);
+}
+
+function doCall(node, login, ext) {
+    var call = {
+        "wcsCallAgentId": login+"",
+        "callId":createUUID(32),
+        "incoming":false,
+        "hasVideo":false,
+        "hasAudio":true,
+        "status":"PENDING",
+        "mediaProvider":"WebRTC",
+        "caller":login,
+        "callee":ext,
+        "visibleName":login
+    };
+    return node.api.call(call);
+}
+
+/**
+ * https://github.com/wankdanker/node-function-rate-limit/blob/master/index.js
+ */
+function rateLimit(limitCount, limitInterval, fn) {
+    var fifo = [];
+
+    // count starts at limit
+    // each call of `fn` decrements the count
+    // it is incremented after limitInterval
+    var count = limitCount;
+
+    function call_next(args) {
+        setTimeout(function() {
+            if (fifo.length > 0) {
+                call_next();
+            }
+            else {
+                count = count + 1;
+            }
+        }, limitInterval);
+
+        var call_args = fifo.shift();
+
+        // if there is no next item in the queue
+        // and we were called with args, trigger function immediately
+        if (!call_args && args) {
+            fn.apply(args[0], args[1]);
+            return;
+        }
+
+        fn.apply(call_args[0], call_args[1]);
+    }
+
+    return function rate_limited_function() {
+        var ctx = this;
+        var args = Array.prototype.slice.call(arguments);
+        if (count <= 0) {
+            fifo.push([ctx, args]);
+            return;
+        }
+
+        count = count - 1;
+        call_next([ctx, args]);
+    };
+}
 
 

@@ -5,6 +5,7 @@ var STREAM_PATH = "/rest-api/stream";
 var CONNECTION_PATH = "/rest-api/connection";
 var PUSH_PATH = "/rest-api/push";
 var RTSP_PATH = "/rest-api/rtsp";
+var API_PATH = "/rest-api/api";
 
 var instance = function (url, coreUrl) {
     var pullApi = function() {
@@ -204,13 +205,39 @@ var instance = function (url, coreUrl) {
             terminate: terminate
         };
     };
+    var api = function() {
+        var api = url + API_PATH;
+        var createSession = function(connection) {
+            return send(api + "/create-session", connection);
+        };
+        var findAll = function () {
+            return send(api + "/find_all");
+        };
+        var terminate = function (connection) {
+            return send(api + "/terminate", connection);
+        };
+        var call = function (call) {
+            return send(api + "/call", call);
+        };
+        var hangup = function (call) {
+            return send(api + "/hangup", call);
+        };
+        return {
+            createSession: createSession,
+            findAll: findAll,
+            terminate: terminate,
+            call: call,
+            hangup: hangup
+        }
+    };
     return {
         pull: pullApi(),
         stream: stream(),
         connection: connection(),
         push: push(),
         rtsp: rtsp(),
-        stat: stat()
+        stat: stat(),
+        api: api()
     };
 };
 /** XHR WRAPPER **/

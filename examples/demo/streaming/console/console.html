@@ -9,6 +9,7 @@
         <title>Console</title>
         <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
         <script type="text/javascript" src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
         <script type="text/javascript" src="../../../../flashphoner-rest-api.js"></script>
         <script type="text/javascript" src="console.js"></script>
     </head>
@@ -48,6 +49,10 @@
                     <button id="pullRtspStreamModalBtn" data-toggle='modal' data-target='#pullRtspModal' type="button" class="btn btn-default btn-success btn-block">Pull RTSP stream</button>
                     <hr>
                     <button id="pullStreamBatchModalBtn" data-toggle='modal' data-target='#pullStreamBatchModal' type="button" class="btn btn-default btn-success btn-block">Pull streams</button>
+                    <button id="registerBatchModalBtn" data-toggle='modal' data-target='#registerBatchModal' type="button" class="btn btn-default btn-success btn-block">Register</button>
+                    <button id="unregisterBatchModalBtn" data-toggle='modal' data-target='#unregisterBatchModal' type="button" class="btn btn-default btn-success btn-block">Unregister</button>
+                    <button id="callBatchModalBtn" data-toggle='modal' data-target='#callBatchModal' type="button" class="btn btn-default btn-success btn-block">Call</button>
+                    <button id="hangupBatchModalBtn" data-toggle='modal' data-target='#hangupBatchModal' type="button" class="btn btn-default btn-success btn-block">Hangup</button>
                 </div>
                 <div class="col-sm-9">
                     <form class="form-inline" action="">
@@ -56,6 +61,7 @@
                             <option value="all" selected>All</option>
                             <option value="pulled">Pulled</option>
                             <option value="rtsp">RTSP</option>
+                            <option value="api">API</option>
                         </select>
                         <button id="streamsTableInfoTypeBtn" type="button" class="btn btn-primary">Apply</button>
                     </form>
@@ -178,6 +184,139 @@
                                     <input type="text" class="form-control" id="pullBatchQty" placeholder="1">
                                 </div>
                                 <button id="pullBatchStream" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Pull</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="registerBatchModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Register SIP</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="registerBatchForm">
+                                <div class="form-group">
+                                    <label for="registerBatchNodes"><span class="glyphicon glyphicon-globe"></span> Choose node</label>
+                                    <select class="custom-select" id="registerBatchNodes">
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerRegistrarAddress"><span class="glyphicon glyphicon-play-circle"></span> SIP proxy</label>
+                                    <input type="text" class="form-control" id="registerRegistrarAddress" placeholder="sip server">
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerBatchStart"><span class="glyphicon glyphicon-menu-down"></span> Start</label>
+                                    <input type="text" class="form-control" id="registerBatchStart" placeholder="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerBatchEnd"><span class="glyphicon glyphicon-menu-up"></span> End</label>
+                                    <input type="text" class="form-control" id="registerBatchEnd" placeholder="1001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerBatchRate"><span class="glyphicon glyphicon-flash"></span> Rate</label>
+                                    <input type="text" class="form-control" id="registerBatchRate" placeholder="1">
+                                </div>
+                                <button id="registerBatch" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Register</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="unregisterBatchModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Unregister SIP</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="unregisterBatchForm">
+                                <div class="form-group">
+                                    <label for="unregisterBatchStart"><span class="glyphicon glyphicon-menu-down"></span> Start</label>
+                                    <input type="text" class="form-control" id="unregisterBatchStart" placeholder="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="unregisterBatchEnd"><span class="glyphicon glyphicon-menu-up"></span> End</label>
+                                    <input type="text" class="form-control" id="unregisterBatchEnd" placeholder="1001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="unregisterBatchRate"><span class="glyphicon glyphicon-flash"></span> Rate</label>
+                                    <input type="text" class="form-control" id="unregisterBatchRate" placeholder="1">
+                                </div>
+                                <button id="unregisterBatch" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Unregister</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="callBatchModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Call</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="callBatchForm">
+                                <div class="form-group">
+                                    <label for="callExtension"><span class="glyphicon glyphicon-play-circle"></span> Ext</label>
+                                    <input type="text" class="form-control" id="callExtension" placeholder="0000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="callBatchStart"><span class="glyphicon glyphicon-menu-down"></span> Start</label>
+                                    <input type="text" class="form-control" id="callBatchStart" placeholder="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="callBatchEnd"><span class="glyphicon glyphicon-menu-up"></span> End</label>
+                                    <input type="text" class="form-control" id="callBatchEnd" placeholder="1001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="callBatchRate"><span class="glyphicon glyphicon-flash"></span> Rate</label>
+                                    <input type="text" class="form-control" id="callBatchRate" placeholder="1">
+                                </div>
+                                <button id="callBatch" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Call</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="hangupBatchModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Hangup</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="hangupBatchForm">
+                                <div class="form-group">
+                                    <label for="hangupBatchStart"><span class="glyphicon glyphicon-menu-down"></span> Start</label>
+                                    <input type="text" class="form-control" id="hangupBatchStart" placeholder="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="hangupBatchEnd"><span class="glyphicon glyphicon-menu-up"></span> End</label>
+                                    <input type="text" class="form-control" id="hangupBatchEnd" placeholder="1001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="hangupBatchRate"><span class="glyphicon glyphicon-flash"></span> Rate</label>
+                                    <input type="text" class="form-control" id="hangupBatchRate" placeholder="1">
+                                </div>
+                                <button id="hangupBatch" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Hangup</button>
                             </form>
                         </div>
                         <div class="modal-footer">
