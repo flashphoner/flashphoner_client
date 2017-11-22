@@ -72,8 +72,6 @@ $(function() {
     $("#hangupBatch").on("click", function(e){
         hangupBatch();
     });
-    addNode("148.251.83.58");
-    addNode("176.9.89.46");
 });
 
 function createNode(id, ip) {
