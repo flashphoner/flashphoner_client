@@ -194,7 +194,7 @@ function startTest() {
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         if (Flashphoner.getMediaProviders()[0] == "WebRTC" && window.AudioContext) {
             for (i = 0; i < localVideo.children.length; i++) {
-                if (localVideo.children[i] && localVideo.children[i].id.indexOf("-CACHED_WEBRTC_INSTANCE") != -1) {
+                if (localVideo.children[i] && localVideo.children[i].id.indexOf("-LOCAL_CACHED_VIDEO") != -1) {
                     var stream = localVideo.children[i].srcObject;
                     audioContextForTest = new AudioContext();
                     var microphone = audioContextForTest.createMediaStreamSource(stream);
