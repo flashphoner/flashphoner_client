@@ -69,8 +69,17 @@ $(function() {
     $("#callBatch").on("click", function(e){
         callBatch();
     });
+    $("#callStressBatch").on("click", function(e){
+        callStressTest();
+    });
     $("#hangupBatch").on("click", function(e){
         hangupBatch();
+    });
+    $('#registerStressBatchModal').on('show.bs.modal', function(e) {
+        populateNodes($("#registerStressBatchNodes"));
+    });
+    $("#registerStressBatch").on("click", function(e){
+        regoStressTest();
     });
 });
 
@@ -272,7 +281,11 @@ function updateNodeDetails(id, type, streams) {
                 case NODE_DETAILS_TYPE.RTSP:
                     nodes[id].rtsp.terminate(stream.name).catch(function(e){});
                     break;
-
+                case NODE_DETAILS_TYPE.API:
+                    nodes[id].api.terminate({sipLogin: stream.name}).then(function(){
+                    }, function(){
+                        console.log("Failed to terminate sip agent " + stream.name);
+                    });
             }
             $tr.remove();
         });
@@ -535,6 +548,194 @@ function doCall(node, login, ext) {
     };
     return node.api.call(call);
 }
+
+/**
+ * PREDEFINED TESTS
+ */
+
+function regoStressTest() {
+    var node = getActiveNode();
+    var testedNode = $("#registerStressBatchNodes").val();
+    var registrar = $("#registerStressRegistrarAddress").val();
+    var start = parseInt($("#registerStressBatchStart").val());
+    var end = parseInt($("#registerStressBatchEnd").val());
+    var rate = parseInt($("#registerStressBatchRate").val());
+    var password = "Abcd1111";
+    var i = start;
+    var register = function(login){
+        doRego(node, testedNode, login, registrar, password).then(function(){
+        }, function(){
+            console.log("Failed to initiate sip register " + login + " " + end);
+        });
+    };
+    var terminate = function(login){
+        node.api.terminate({sipLogin: login}).then(function(){
+        }, function(){
+            console.log("Failed to terminate sip agent " + i + " " + end);
+        });
+    };
+    var rThrottle = rateLimit(rate, 1000, register);
+    var pendingRegistrations = [];
+    var pendingTerminations = [];
+    //init
+    var initialInit = i + rate*2;
+    for (; i < initialInit; i++) {
+        pendingRegistrations.push(i);
+        rThrottle(i);
+    }
+    var pollState = function() {
+        node.api.findAll().then(function (sipState) {
+            var c;
+            //update state
+            var active = [];
+            for (c = 0; c < sipState.length; c++) {
+                active[c] = parseInt(sipState[c].id);
+                var pendingIndex = pendingRegistrations.indexOf(parseInt(sipState[c].id));
+                if (pendingIndex > -1) {
+                    //console.log("Remove from pending " + sipState[c].id);
+                    pendingRegistrations.splice(pendingIndex, 1);
+                }
+            }
+            for (c = 0; c < pendingTerminations.length; c++) {
+                if (active.includes(pendingTerminations[c])) {
+                    continue;
+                }
+                pendingTerminations.splice(pendingTerminations.indexOf(pendingTerminations[c]), 1);
+            }
+            //terminate
+            var t = 0;
+            for (c = 0; t <= rate && c < sipState.length; c++) {
+                if (!pendingTerminations.includes(parseInt(sipState[c].id))) {
+                    terminate(sipState[c].id);
+                    t++;
+                    pendingTerminations.push(parseInt(sipState[c].id));
+                }
+                //console.log("Skip termination of " + sipState[c].id);
+            }
+            //console.log("Requested termination of " + t + " registrations");
+            for (c = 0; c <= rate && c <= t; c++) {
+                i++;
+                if (i >= end) {
+                    i = start;
+                }
+                if (active.includes(i)) {
+                    //console.log("Skip registration of " + i);
+                    continue;
+                }
+                if (pendingRegistrations.includes(i)) {
+                    //console.log("Skip registration of " + i);
+                    continue;
+                }
+                pendingRegistrations.push(i);
+                register(i);
+            }
+        });
+    };
+    var interval = setInterval(pollState, 1000);
+    console.log("Stress register started");
+    //$("#registerStressBatchModal").modal('hide');
+}
+
+function callStressTest() {
+    var node = getActiveNode();
+    var ext = $("#callStressExtension").val();
+    var start = parseInt($("#callStressBatchStart").val());
+    var end = parseInt($("#callStressBatchEnd").val());
+    var rate = parseInt($("#callStressBatchRate").val());
+    var i = start;
+    var call = function(login){
+        doCall(node, login, ext).then(function(){
+        }, function(){
+            console.log("Failed to call through sip agent " + i + " " + end);
+        });
+    };
+    var hangup = function(login, state){
+        if (state != null && state.calls.length > 0) {
+            var call = state.calls[0];
+            call.wcsCallAgentId = "" + state.connection.sipLogin;
+            node.api.hangup(call).then(function(){
+            }, function(){
+                console.log("Failed to hangup sip agent " + login);
+            });
+        }
+    };
+    var throttle = rateLimit(rate, 1000, call);
+
+    var pendingCalls = [];
+    var pendingTerminations = [];
+    //init
+    var initialInit = i + rate*2;
+    for (; i < initialInit; i++) {
+        pendingCalls.push(i);
+        throttle(i);
+    }
+    var pollState = function() {
+        node.api.findAll().then(function (sipState) {
+            var c;
+            //update state
+            var active = [];
+            for (c = 0; c < sipState.length; c++) {
+                active[c] = parseInt(sipState[c].id);
+                var pendingIndex = pendingCalls.indexOf(parseInt(sipState[c].id));
+                if (pendingIndex > -1 && sipState[c].calls.length > 0) {
+                    //console.log("Remove call from pending " + sipState[c].id);
+                    pendingCalls.splice(pendingIndex, 1);
+                }
+                var tIndex = pendingTerminations.indexOf(parseInt(sipState[c].id));
+                if (tIndex > -1 && sipState[c].calls.length == 0) {
+                    //console.log("Remove call from pending terminations " + sipState[c].id);
+                    pendingTerminations.splice(pendingIndex, 1);
+                }
+            }
+            for (c = 0; c < pendingTerminations.length; c++) {
+                if (active.includes(pendingTerminations[c])) {
+                    continue;
+                }
+                pendingTerminations.splice(pendingTerminations.indexOf(pendingTerminations[c]), 1);
+            }
+            //terminate
+            var t = 0;
+            for (c = 0; t <= rate && c < sipState.length; c++) {
+                if (!pendingTerminations.includes(parseInt(sipState[c].id)) && sipState[c].calls.length > 0) {
+                    hangup(sipState[c].id, sipState[c]);
+                    t++;
+                    pendingTerminations.push(parseInt(sipState[c].id));
+                } else {
+                    //console.log("Skip termination of " + sipState[c].id);
+                }
+            }
+            //console.log("Requested termination of " + t + " calls");
+            for (c = 0; c <= rate && c <= t; c++) {
+                i++;
+                if (i >= end) {
+                    i = start;
+                }
+                if (!active.includes(i)) {
+                    //console.log("Skip call of " + i);
+                    continue;
+                }
+                if (pendingCalls.includes(i)) {
+                    //console.log("Skip call of " + i);
+                    continue;
+                }
+                //lookup agents' state
+                for (var s = 0; s < sipState.length; s++) {
+                    //console.log("look for " + login);
+                    if (sipState[s].connection.sipLogin == i+"" && sipState[s].calls.length == 0) {
+                        //console.log("found state " + login);
+                        pendingCalls.push(i);
+                        call(i);
+                        break;
+                    }
+                }
+            }
+        });
+    };
+    var interval = setInterval(pollState, 1000);
+    console.log("Stress calls started");
+    //$("#callStressBatchModal").modal('hide');
+}
+
 
 /**
  * https://github.com/wankdanker/node-function-rate-limit/blob/master/index.js

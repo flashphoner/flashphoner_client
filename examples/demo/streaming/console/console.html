@@ -53,6 +53,9 @@
                     <button id="unregisterBatchModalBtn" data-toggle='modal' data-target='#unregisterBatchModal' type="button" class="btn btn-default btn-success btn-block">Unregister</button>
                     <button id="callBatchModalBtn" data-toggle='modal' data-target='#callBatchModal' type="button" class="btn btn-default btn-success btn-block">Call</button>
                     <button id="hangupBatchModalBtn" data-toggle='modal' data-target='#hangupBatchModal' type="button" class="btn btn-default btn-success btn-block">Hangup</button>
+                    <hr>
+                    <button id="registerStressBatchModalBtn" data-toggle='modal' data-target='#registerStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Register</button>
+                    <button id="callStressBatchModalBtn" data-toggle='modal' data-target='#callStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Call</button>
                 </div>
                 <div class="col-sm-9">
                     <form class="form-inline" action="">
@@ -295,6 +298,40 @@
                     </div>
                 </div>
             </div>
+            <div id="callStressBatchModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Stress Call</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="callStressBatchForm">
+                                <div class="form-group">
+                                    <label for="callStressExtension"><span class="glyphicon glyphicon-play-circle"></span> Ext</label>
+                                    <input type="text" class="form-control" id="callStressExtension" placeholder="0000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="callStressBatchStart"><span class="glyphicon glyphicon-menu-down"></span> Start</label>
+                                    <input type="text" class="form-control" id="callStressBatchStart" placeholder="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="callStressBatchEnd"><span class="glyphicon glyphicon-menu-up"></span> End</label>
+                                    <input type="text" class="form-control" id="callStressBatchEnd" placeholder="1001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="callStressBatchRate"><span class="glyphicon glyphicon-flash"></span> Rate</label>
+                                    <input type="text" class="form-control" id="callStressBatchRate" placeholder="1">
+                                </div>
+                                <button id="callStressBatch" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Stress Call</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div id="hangupBatchModal" class="modal fade" role="dialog">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -317,6 +354,45 @@
                                     <input type="text" class="form-control" id="hangupBatchRate" placeholder="1">
                                 </div>
                                 <button id="hangupBatch" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Hangup</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="registerStressBatchModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Register SIP Stress</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="registerStressBatchForm">
+                                <div class="form-group">
+                                    <label for="registerStressBatchNodes"><span class="glyphicon glyphicon-globe"></span> Choose node</label>
+                                    <select class="custom-select" id="registerStressBatchNodes">
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerStressRegistrarAddress"><span class="glyphicon glyphicon-play-circle"></span> SIP proxy</label>
+                                    <input type="text" class="form-control" id="registerStressRegistrarAddress" placeholder="sip server">
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerStressBatchStart"><span class="glyphicon glyphicon-menu-down"></span> Start</label>
+                                    <input type="text" class="form-control" id="registerStressBatchStart" placeholder="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerStressBatchEnd"><span class="glyphicon glyphicon-menu-up"></span> End</label>
+                                    <input type="text" class="form-control" id="registerStressBatchEnd" placeholder="1001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerStressBatchRate"><span class="glyphicon glyphicon-flash"></span> Rate</label>
+                                    <input type="text" class="form-control" id="registerStressBatchRate" placeholder="1">
+                                </div>
+                                <button id="registerStressBatch" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Start</button>
                             </form>
                         </div>
                         <div class="modal-footer">
