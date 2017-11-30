@@ -2,6 +2,8 @@
 var REFRESH_NODE_STATE_INTERVAL = 5000;
 var REFRESH_NODE_STATE_FAILED_INTERVAL = 10000;
 var REFRESH_NODE_DETAILS = 2000;
+var STRESS_TEST_INTERVAL = 1000;
+var STRESS_TEST_FAILED_INTERVAL = STRESS_TEST_INTERVAL * 2;
 var NODE_STATE = {
     NEW: "new",
     ALIVE: "alive",
@@ -13,7 +15,8 @@ var NODE_DETAILS_TYPE = {
     ALL: "all",
     PULLED: "pulled",
     RTSP: "rtsp",
-    API: "api"
+    API: "api",
+    TESTS: "tests"
 };
 
 var nodes = {};
@@ -87,6 +90,7 @@ function createNode(id, ip) {
     var api = FlashphonerRestApi.instance("http://"+ip+":9091", "http://"+ip+":8081");
     api.id = id;
     api.ip = ip;
+    api.tests = [];
     var state = NODE_STATE.NEW;
     var pollState = function(){
         api.stat.poll().then(function(stat){
@@ -99,9 +103,24 @@ function createNode(id, ip) {
     };
     pollState();
     var detailsType = NODE_DETAILS_TYPE.ALL;
+    var processDetailsType = function() {
+        if (state == NODE_STATE.ACTIVE) {
+            if (detailsType == NODE_DETAILS_TYPE.TESTS) {
+                $("#streamsTable").addClass("hidden");
+                $("#testsTable").removeClass("hidden");
+            } else {
+                $("#testsTable").addClass("hidden");
+                $("#streamsTable").removeClass("hidden");
+            }
+        }
+    };
     var updateDetails = function(type, data) {
         if (state == NODE_STATE.ACTIVE && detailsType == type) {
-            updateNodeDetails(api.id, type, data);
+            if (NODE_DETAILS_TYPE.TESTS == type) {
+                updateNodeTestsDetails(api.id);
+            } else {
+                updateNodeDetails(api.id, type, data);
+            }
             setTimeout(pollDetails, REFRESH_NODE_DETAILS);
         }
     };
@@ -140,11 +159,15 @@ function createNode(id, ip) {
                         updateDetails(NODE_DETAILS_TYPE.API, []);
                     });
                     break;
+                case NODE_DETAILS_TYPE.TESTS:
+                    updateDetails(NODE_DETAILS_TYPE.TESTS, []);
+                    break;
             }
         }
     };
     api.setDetailsType = function(type) {
         detailsType = type;
+        processDetailsType();
     };
     api.setState = function(newState, data){
         switch (newState) {
@@ -159,6 +182,7 @@ function createNode(id, ip) {
                     state = newState;
                     $("#" + api.id).addClass("active");
                     $("#nodeControls.hidden").removeClass("hidden");
+                    processDetailsType();
                     pollDetails();
                 }
                 break;
@@ -245,7 +269,7 @@ function updateNodeState(id, state) {
 
 function updateNodeDetails(id, type, streams) {
     //clear
-    $("#streamsTable").empty();
+    $("#streamsTableBody").empty();
     streams.forEach(function(stream){
         var $tr = $("<tr>");
         var $th = $("<th>", {scope: "row"}).append(stream.mediaSessionId);
@@ -290,7 +314,33 @@ function updateNodeDetails(id, type, streams) {
             $tr.remove();
         });
         $tr.append($th).append($name).append($provider).append($status).append($type).append($aCodec).append($vCodec).append($actTd);
-        $("#streamsTable").append($tr);
+        $("#streamsTableBody").append($tr);
+    });
+}
+
+function updateNodeTestsDetails(id) {
+    $("#testsTableBody").empty();
+    nodes[id].tests.forEach(function(test, i){
+        var $tr = $("<tr>");
+        var $th = $("<th>", {scope: "row"}).append(i);
+        var $name = createTd(test.name);
+        var $start = createTd(test.start);
+        var $end = createTd(test.end);
+        var $rate = createTd(test.rate);
+        var $initialized = createTd(test.initialized);
+        var $terminated = createTd(test.terminated);
+        var $pending = createTd(test.pending);
+        var $termButton = $("<button>", {
+            type: "button",
+            class: "btn btn-default btn-danger btn-block"
+        }).append("TERMINATE");
+        var $actTd = createTd($termButton);
+        $termButton.on("click", function(){
+            test.terminate(i);
+            $tr.remove();
+        });
+        $tr.append($th).append($name).append($start).append($end).append($rate).append($initialized).append($terminated).append($pending).append($actTd);
+        $("#testsTableBody").append($tr);
     });
 }
 
@@ -562,6 +612,15 @@ function regoStressTest() {
     var rate = parseInt($("#registerStressBatchRate").val());
     var password = "Abcd1111";
     var i = start;
+    var rep = {
+        name: "REGO",
+        start: start,
+        end: end,
+        rate: rate,
+        initialized: 0,
+        terminated: 0,
+        pending: 0
+    };
     var register = function(login){
         doRego(node, testedNode, login, registrar, password).then(function(){
         }, function(){
@@ -583,7 +642,14 @@ function regoStressTest() {
         pendingRegistrations.push(i);
         rThrottle(i);
     }
+    var running = true;
+    var schedule = function(t) {
+        setTimeout(pollState, t);
+    };
     var pollState = function() {
+        if (!running) {
+            return;
+        }
         node.api.findAll().then(function (sipState) {
             var c;
             //update state
@@ -594,6 +660,7 @@ function regoStressTest() {
                 if (pendingIndex > -1) {
                     //console.log("Remove from pending " + sipState[c].id);
                     pendingRegistrations.splice(pendingIndex, 1);
+                    rep.initialized++;
                 }
             }
             for (c = 0; c < pendingTerminations.length; c++) {
@@ -601,6 +668,7 @@ function regoStressTest() {
                     continue;
                 }
                 pendingTerminations.splice(pendingTerminations.indexOf(pendingTerminations[c]), 1);
+                rep.terminated++;
             }
             //terminate
             var t = 0;
@@ -629,11 +697,20 @@ function regoStressTest() {
                 pendingRegistrations.push(i);
                 register(i);
             }
+            rep.pending = (pendingRegistrations.length + pendingTerminations.length);
+            schedule(STRESS_TEST_INTERVAL);
+        }, function(e) {
+            schedule(STRESS_TEST_FAILED_INTERVAL);
         });
     };
-    var interval = setInterval(pollState, 1000);
+    rep.terminate = function(id){
+        running = false;
+        node.tests.splice(id, 1);
+    };
+    node.tests.push(rep);
+    pollState();
     console.log("Stress register started");
-    //$("#registerStressBatchModal").modal('hide');
+    $("#registerStressBatchModal").modal('hide');
 }
 
 function callStressTest() {
@@ -642,6 +719,19 @@ function callStressTest() {
     var start = parseInt($("#callStressBatchStart").val());
     var end = parseInt($("#callStressBatchEnd").val());
     var rate = parseInt($("#callStressBatchRate").val());
+    var rep = {
+        name: "CALL",
+        start: start,
+        end: end,
+        rate: rate,
+        initialized: 0,
+        terminated: 0,
+        pending: 0
+    };
+    var running = true;
+    var schedule = function(t) {
+        setTimeout(pollState, t);
+    };
     var i = start;
     var call = function(login){
         doCall(node, login, ext).then(function(){
@@ -670,6 +760,9 @@ function callStressTest() {
         throttle(i);
     }
     var pollState = function() {
+        if (!running) {
+            return;
+        }
         node.api.findAll().then(function (sipState) {
             var c;
             //update state
@@ -680,11 +773,13 @@ function callStressTest() {
                 if (pendingIndex > -1 && sipState[c].calls.length > 0) {
                     //console.log("Remove call from pending " + sipState[c].id);
                     pendingCalls.splice(pendingIndex, 1);
+                    rep.initialized++;
                 }
                 var tIndex = pendingTerminations.indexOf(parseInt(sipState[c].id));
                 if (tIndex > -1 && sipState[c].calls.length == 0) {
                     //console.log("Remove call from pending terminations " + sipState[c].id);
                     pendingTerminations.splice(pendingIndex, 1);
+                    rep.terminated++;
                 }
             }
             for (c = 0; c < pendingTerminations.length; c++) {
@@ -692,6 +787,7 @@ function callStressTest() {
                     continue;
                 }
                 pendingTerminations.splice(pendingTerminations.indexOf(pendingTerminations[c]), 1);
+                rep.terminated++;
             }
             //terminate
             var t = 0;
@@ -729,11 +825,20 @@ function callStressTest() {
                     }
                 }
             }
+            rep.pending = pendingTerminations.length + pendingCalls.length;
+            schedule(STRESS_TEST_INTERVAL);
+        }, function(){
+            schedule(STRESS_TEST_FAILED_INTERVAL);
         });
     };
-    var interval = setInterval(pollState, 1000);
+    rep.terminate = function(id){
+        running = false;
+        node.tests.splice(id, 1);
+    };
+    node.tests.push(rep);
+    pollState();
     console.log("Stress calls started");
-    //$("#callStressBatchModal").modal('hide');
+    $("#callStressBatchModal").modal('hide');
 }
 
 

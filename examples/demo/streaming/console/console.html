@@ -65,10 +65,27 @@
                             <option value="pulled">Pulled</option>
                             <option value="rtsp">RTSP</option>
                             <option value="api">API</option>
+                            <option value="tests">TESTS</option>
                         </select>
                         <button id="streamsTableInfoTypeBtn" type="button" class="btn btn-primary">Apply</button>
                     </form>
-                    <table class="table">
+                    <table class="table" id="testsTable">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>NAME</th>
+                            <th>START</th>
+                            <th>END</th>
+                            <th>RATE</th>
+                            <th>INITIALIZED</th>
+                            <th>TERMINATED</th>
+                            <th>PENDING</th>
+                            <th>ACT</th>
+                        </tr>
+                        </thead>
+                        <tbody id="testsTableBody"></tbody>
+                    </table>
+                    <table class="table" id="streamsTable">
                         <thead>
                         <tr>
                             <th>#</th>
@@ -81,7 +98,7 @@
                             <th>ACT</th>
                         </tr>
                         </thead>
-                        <tbody id="streamsTable"></tbody>
+                        <tbody id="streamsTableBody"></tbody>
                     </table>
                 </div>
             </div>
