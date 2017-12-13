@@ -224,7 +224,7 @@ function onHangupOutgoing() {
 function onIncomingCall(inCall) {
 	currentCall = inCall;
 	
-	showIncoming(inCall.visibleName());
+	showIncoming(inCall.caller());
 	
     $("#answerBtn").off('click').click(function(){
 		$(this).prop('disabled', true);
