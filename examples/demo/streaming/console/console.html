@@ -56,6 +56,7 @@
                     <hr>
                     <button id="registerStressBatchModalBtn" data-toggle='modal' data-target='#registerStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Register</button>
                     <button id="callStressBatchModalBtn" data-toggle='modal' data-target='#callStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Call</button>
+                    <button id="streamStressBatchModalBtn" data-toggle='modal' data-target='#streamStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Stream</button>
                 </div>
                 <div class="col-sm-9">
                     <form class="form-inline" action="">
@@ -410,6 +411,45 @@
                                     <input type="text" class="form-control" id="registerStressBatchRate" placeholder="1">
                                 </div>
                                 <button id="registerStressBatch" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Start</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="streamStressBatchModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Stream Stress</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="streamStressBatchForm">
+                                <div class="form-group">
+                                    <label for="streamStressBatchNodes"><span class="glyphicon glyphicon-globe"></span> Choose node</label>
+                                    <select class="custom-select" id="streamStressBatchNodes">
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="streamStressBatchName"><span class="glyphicon glyphicon-play-circle"></span> Remote stream</label>
+                                    <input type="text" class="form-control" id="streamStressBatchName" placeholder="Remote stream">
+                                </div>
+                                <div class="form-group">
+                                    <label for="streamStressBatchStart"><span class="glyphicon glyphicon-menu-down"></span> Start</label>
+                                    <input type="text" class="form-control" id="streamStressBatchStart" placeholder="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="streamStressBatchEnd"><span class="glyphicon glyphicon-menu-up"></span> End</label>
+                                    <input type="text" class="form-control" id="streamStressBatchEnd" placeholder="1001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="streamStressBatchRate"><span class="glyphicon glyphicon-flash"></span> Rate</label>
+                                    <input type="text" class="form-control" id="streamStressBatchRate" placeholder="1">
+                                </div>
+                                <button id="streamStressBatch" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Start</button>
                             </form>
                         </div>
                         <div class="modal-footer">

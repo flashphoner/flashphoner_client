@@ -84,6 +84,13 @@ $(function() {
     $("#registerStressBatch").on("click", function(e){
         regoStressTest();
     });
+    $('#streamStressBatchModal').on('show.bs.modal', function(e) {
+        populateNodes($("#streamStressBatchNodes"));
+    });
+    $("#streamStressBatch").on("click", function(e){
+        streamStressTest();
+    });
+
 });
 
 function createNode(id, ip) {
@@ -314,7 +321,11 @@ function updateNodeDetails(id, type, streams) {
             $tr.remove();
         });
         $tr.append($th).append($name).append($provider).append($status).append($type).append($aCodec).append($vCodec).append($actTd);
-        $("#streamsTableBody").append($tr);
+        if (stream.status == "NEW") {
+            $("#streamsTableBody").prepend($tr);
+        } else {
+            $("#streamsTableBody").append($tr);
+        }
     });
 }
 
@@ -841,6 +852,122 @@ function callStressTest() {
     $("#callStressBatchModal").modal('hide');
 }
 
+function streamStressTest() {
+    var node = getActiveNode();
+    var remote = "ws://" + $("#streamStressBatchNodes").val() + ":8080";
+    var name = $("#streamStressBatchName").val();
+    var start = parseInt($("#streamStressBatchStart").val());
+    var end = parseInt($("#streamStressBatchEnd").val());
+    var rate = parseInt($("#streamStressBatchRate").val());
+    var rep = {
+        name: "STREAM",
+        start: start,
+        end: end,
+        rate: rate,
+        initialized: 0,
+        terminated: 0,
+        pending: 0
+    };
+    var running = true;
+    var schedule = function(t) {
+        setTimeout(pollState, t);
+    };
+    var i = start;
+    var play = function(localName){
+        node.pull.pull(remote, localName, name).then(function(){
+        }, function(){
+            console.log("Failed to play stream " + name + " as " + localName);
+        });
+    };
+    var stop = function(localName){
+        node.pull.terminate(localName).then(function(){
+        }, function(){
+            console.log("Failed to stop stream " + localName);
+        });
+    };
+    var throttle = rateLimit(rate, 1000, play);
+    var pendingPlays = [];
+    var pendingStops = [];
+    //init
+    var initialInit = i + rate*2;
+    for (; i < initialInit; i++) {
+        pendingPlays.push(name+i);
+        throttle(name+i);
+    }
+    var pollState = function() {
+        if (!running) {
+            return;
+        }
+        node.pull.findAll().then(function (pullState) {
+            var c;
+            //update state
+            var active = [];
+            for (c = 0; c < pullState.length; c++) {
+                active[c] = pullState[c].localStreamName;
+                var pendingIndex = pendingPlays.indexOf(pullState[c].localStreamName);
+                if (pendingIndex > -1) {
+                    console.log("Remove stream from pending plays " + pullState[c].localStreamName);
+                    pendingPlays.splice(pendingIndex, 1);
+                    rep.initialized++;
+                }
+                var tIndex = pendingStops.indexOf(pullState[c].localStreamName);
+                if (tIndex > -1) {
+                    console.log("Remove stream from pending stops " + pullState[c].localStreamName);
+                    pendingStops.splice(pendingIndex, 1);
+                    rep.terminated++;
+                }
+            }
+            for (c = 0; c < pendingStops.length; c++) {
+                if (active.includes(pendingStops[c])) {
+                    continue;
+                }
+                pendingStops.splice(pendingStops.indexOf(pendingStops[c]), 1);
+                rep.terminated++;
+            }
+            //terminate
+            var t = 0;
+            for (c = 0; t <= rate && c < pullState.length; c++) {
+                if (!pendingStops.includes(pullState[c].localStreamName)) {
+                    stop(pullState[c].localStreamName);
+                    t++;
+                    pendingStops.push(pullState[c].localStreamName);
+                } else {
+                    console.log("Skip termination of " + pullState[c].localStreamName);
+                }
+            }
+            console.log("Requested termination of " + t + " streams");
+            for (c = 0; c <= rate && c <= t; c++) {
+                i++;
+                if (i >= end) {
+                    i = start;
+                }
+                var localName = name+i;
+                if (pendingPlays.includes(localName)) {
+                    console.log("Skip stream of " + localName);
+                    continue;
+                }
+                if (pendingStops.includes(localName)) {
+                    console.log("Skip stream of " + localName);
+                    continue;
+                }
+                pendingPlays.push(localName);
+                play(localName);
+            }
+            rep.pending = pendingStops.length + pendingPlays.length;
+            schedule(STRESS_TEST_INTERVAL);
+        }, function(){
+            schedule(STRESS_TEST_FAILED_INTERVAL);
+        });
+    };
+    rep.terminate = function(id){
+        running = false;
+        node.tests.splice(id, 1);
+    };
+    node.tests.push(rep);
+    pollState();
+    console.log("Stress streams started");
+    $("#streamStressBatchModal").modal('hide');
+}
 
 /**
  * https://github.com/wankdanker/node-function-rate-limit/blob/master/index.js
