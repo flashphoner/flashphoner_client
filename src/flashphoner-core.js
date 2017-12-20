@@ -485,7 +485,7 @@ var createSession = function (options) {
                 mediaProviders: Object.keys(MediaProvider),
                 keepAlive: keepAlive,
                 authToken:authToken,
-                clientVersion: "0.5.25",
+                clientVersion: "0.5.26",
                 clientOSVersion: window.navigator.appVersion,
                 clientBrowserVersion: window.navigator.userAgent,
                 custom: options.custom
@@ -597,6 +597,14 @@ var createSession = function (options) {
                     logger.info(LOG_PREFIX, "Session debug status " + obj.status);
                     if (callbacks[SESSION_STATUS.DEBUG]) {
                         callbacks[SESSION_STATUS.DEBUG](obj);
+                    }
+                    break;
+                case 'availableStream':
+                    var availableStream = {};
+                    availableStream.mediaSessionId = obj.id;
+                    availableStream.available = obj.status;
+                    if (streamRefreshHandlers[availableStream.mediaSessionId]) {
+                        streamRefreshHandlers[availableStream.mediaSessionId](availableStream);
                     }
                     break;
                 default:
@@ -1248,6 +1256,9 @@ var createSession = function (options) {
      * @inner
      */
     var createStream = function (options) {
+
+        //Array to transmit promises from stream.available() to streamRefreshHandlers
+        var availableCallbacks = [];
         //check session state
         if (sessionStatus !== SESSION_STATUS.ESTABLISHED) {
             throw new Error('Invalid session state');
@@ -1335,6 +1346,19 @@ var createSession = function (options) {
                 });
                 return;
             }
+
+            if (streamInfo.available!=undefined) {
+                for (var i = 0; i < availableCallbacks.length; i++) {
+                    if (streamInfo.available=="true"){
+                        availableCallbacks[i].resolve(stream);
+                    }else{
+                        availableCallbacks[i].reject(stream);
+                    }
+                }
+                availableCallbacks=[];
+                return;
+            }
+            
             var event = streamInfo.status;
             if (event == STREAM_STATUS.RESIZE) {
                 resolution.width = streamInfo.playerVideoWidth;
@@ -1838,6 +1862,26 @@ var createSession = function (options) {
             return stream;
         };
 
+        /**
+         * Сhecks the availability of stream on the server
+         *
+         * @returns {Promise} Resolves if is stream available, otherwise rejects
+         * @memberof Stream
+         * @inner
+         */
+        var available = function(){
+            return new Promise(function(resolve, reject){
+                send("availableStream", {
+                    mediaSessionId: id_,
+                    name: name_
+                });
+                var promise = {};
+                promise.resolve = resolve;
+                promise.reject = reject;
+                availableCallbacks.push(promise);
+            });
+        };
+
         stream.play = play;
         stream.publish = publish;
         stream.stop = stop;
@@ -1862,6 +1906,7 @@ var createSession = function (options) {
         stream.getRemoteBitrate = getRemoteBitrate;
         stream.fullScreen = fullScreen;
         stream.on = on;
+        stream.available = available;
 
         streams[id_] = stream;
         return stream;
