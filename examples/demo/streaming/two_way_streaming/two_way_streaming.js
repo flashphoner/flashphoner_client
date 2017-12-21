@@ -201,7 +201,7 @@ function availableStream(){
 function setStatus(selector, status, stream) {
     var statusField = $(selector);
     statusField.text(status).removeClass();
-    if (status == "PLAYING" || status == "ESTABLISHED" || status == "PUBLISHING" || status == "AVAILABLE") {   //?
+    if (status == "PLAYING" || status == "ESTABLISHED" || status == "PUBLISHING") {
         statusField.attr("class", "text-success");
     } else if (status == "DISCONNECTED" || status == "UNPUBLISHED" || status == "STOPPED") {
         statusField.attr("class", "text-muted");
