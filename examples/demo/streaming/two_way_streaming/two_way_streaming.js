@@ -109,12 +109,19 @@ function onStopped() {
             playStream();
         }
     });
+    $("#availableBtn").off('click').click(function () {
+        if (validateForm("playerForm")) {
+            availableStream();
+        }
+    });
     if (Flashphoner.getSessions()[0] && Flashphoner.getSessions()[0].status() == SESSION_STATUS.ESTABLISHED) {
         $("#playBtn").prop('disabled', false);
         $('#playStream').prop('disabled', false);
+        $('#availableBtn').prop('disabled', false);
     } else {
         $("#playBtn").prop('disabled', true);
         $('#playStream').prop('disabled', true);
+        $('#availableBtn').prop('disabled', true);
     }
 }
 
@@ -177,11 +184,24 @@ function playStream() {
     }).play();
 }
 
+function availableStream(){
+    var session = Flashphoner.getSessions()[0];
+    var streamName = $('#playStream').val();
+    session.createStream({
+        name: streamName,
+        display: remoteVideo
+    }).available().then(function(stream){
+        $("#availableStatus").text("AVAILABLE").attr("class", "text-success");
+    }, function(stream){
+        $("#availableStatus").text("UNAVAILABLE").attr("class", "text-danger");
+    });
+}
+
 //show connection, or local, or remote stream status
 function setStatus(selector, status, stream) {
     var statusField = $(selector);
     statusField.text(status).removeClass();
-    if (status == "PLAYING" || status == "ESTABLISHED" || status == "PUBLISHING") {
+    if (status == "PLAYING" || status == "ESTABLISHED" || status == "PUBLISHING" || status == "AVAILABLE") {   //?
         statusField.attr("class", "text-success");
     } else if (status == "DISCONNECTED" || status == "UNPUBLISHED" || status == "STOPPED") {
         statusField.attr("class", "text-muted");
