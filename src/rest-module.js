@@ -17,9 +17,17 @@ var instance = function (url, coreUrl) {
                 remoteStreamName: remoteName
             });
         };
-        var terminate = function (localName) {
+        var push = function (remoteUri, localName, remoteName) {
+            return send(api + "/push", {
+                uri: remoteUri,
+                localStreamName: localName,
+                remoteStreamName: remoteName
+            });
+        };
+        var terminate = function (localName, remoteName) {
             return send(api + "/terminate", {
-                localStreamName: localName
+                localStreamName: localName,
+                remoteStreamName: remoteName
             });
         };
         var findAll = function () {
@@ -27,6 +35,7 @@ var instance = function (url, coreUrl) {
         };
         return {
             pull: pull,
+            push: push,
             terminate: terminate,
             findAll: findAll
         };

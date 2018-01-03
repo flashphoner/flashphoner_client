@@ -88,9 +88,17 @@ $(function() {
         populateNodes($("#streamStressBatchNodes"));
     });
     $("#streamStressBatch").on("click", function(e){
-        streamStressTest();
+        streamPlayStressTest();
     });
 
+    $('#streamPublishStressBatchModal').on('show.bs.modal', function(e) {
+        populateNodes($("#streamPublishStressBatchNodes"));
+    });
+    $("#streamPublishStressBatch").on("click", function(e){
+        streamPublishStressTest();
+    });
+
+    $("#generalInfoTable").sortable();
 });
 
 function createNode(id, ip) {
@@ -263,6 +271,7 @@ function updateNodeState(id, state) {
                     "<td id='"+id+"-state-out'>"+(streamsOut)+"</td>" +
                     "</tr>";
             $("#generalInfoTable").append(html);
+            $("#generalInfoTable").sortable("refresh");
         } else {
             $("#"+id+"-state-cpu").text(state.system.system_java_cpu_usage);
             $("#"+id+"-state-mem").text(mem);
@@ -852,15 +861,16 @@ function callStressTest() {
     $("#callStressBatchModal").modal('hide');
 }
 
-function streamStressTest() {
+function streamPlayStressTest() {
     var node = getActiveNode();
     var remote = "ws://" + $("#streamStressBatchNodes").val() + ":8080";
     var name = $("#streamStressBatchName").val();
     var start = parseInt($("#streamStressBatchStart").val());
     var end = parseInt($("#streamStressBatchEnd").val());
     var rate = parseInt($("#streamStressBatchRate").val());
+    var init = parseInt($("#streamStressBatchInit").val());
     var rep = {
-        name: "STREAM",
+        name: "STREAM-PLAY",
         start: start,
         end: end,
         rate: rate,
@@ -889,7 +899,7 @@ function streamStressTest() {
     var pendingPlays = [];
     var pendingStops = [];
     //init
-    var initialInit = i + rate*2;
+    var initialInit = i + init < i + rate*2 ? i + rate*2 : i + init;
     for (; i < initialInit; i++) {
         pendingPlays.push(name+i);
         throttle(name+i);
@@ -967,6 +977,124 @@ function streamStressTest() {
     pollState();
     console.log("Stress streams started");
     $("#streamStressBatchModal").modal('hide');
+}
+
+function streamPublishStressTest() {
+    var node = getActiveNode();
+    var remote = "ws://" + $("#streamPublishStressBatchNodes").val() + ":8080";
+    var name = $("#streamPublishStressBatchName").val();
+    var start = parseInt($("#streamPublishStressBatchStart").val());
+    var end = parseInt($("#streamPublishStressBatchEnd").val());
+    var rate = parseInt($("#streamPublishStressBatchRate").val());
+    var init = parseInt($("#streamPublishStressBatchInit").val());
+    var rep = {
+        name: "STREAM-PUBLISH",
+        start: start,
+        end: end,
+        rate: rate,
+        initialized: 0,
+        terminated: 0,
+        pending: 0
+    };
+    var running = true;
+    var schedule = function(t) {
+        setTimeout(pollState, t);
+    };
+    var i = start;
+    var publish = function(remoteName){
+        node.pull.push(remote, name, remoteName).then(function(){
+        }, function(){
+            console.log("Failed to publish stream " + name + " as " + remoteName);
+        });
+    };
+    var stop = function(remoteName){
+        node.pull.terminate(name, remoteName).then(function(){
+        }, function(){
+            console.log("Failed to stop stream " + remoteName);
+        });
+    };
+    var throttle = rateLimit(rate, 1000, publish);
+    var pendingPublish = [];
+    var pendingStops = [];
+    //init
+    var initialInit = i + init < i + rate*2 ? i + rate*2 : i + init;
+    for (; i < initialInit; i++) {
+        pendingPublish.push(name+i);
+        throttle(name+i);
+    }
+    var pollState = function() {
+        if (!running) {
+            return;
+        }
+        node.pull.findAll().then(function (pullState) {
+            var c;
+            //update state
+            var active = [];
+            for (c = 0; c < pullState.length; c++) {
+                active[c] = pullState[c].remoteStreamName;
+                var pendingIndex = pendingPublish.indexOf(pullState[c].remoteStreamName);
+                if (pendingIndex > -1) {
+                    console.log("Remove stream from pending publish " + pullState[c].remoteStreamName);
+                    pendingPublish.splice(pendingIndex, 1);
+                    rep.initialized++;
+                }
+                var tIndex = pendingStops.indexOf(pullState[c].remoteStreamName);
+                if (tIndex > -1) {
+                    console.log("Remove stream from pending stops " + pullState[c].remoteStreamName);
+                    pendingStops.splice(pendingIndex, 1);
+                    rep.terminated++;
+                }
+            }
+            for (c = 0; c < pendingStops.length; c++) {
+                if (active.includes(pendingStops[c])) {
+                    continue;
+                }
+                pendingStops.splice(pendingStops.indexOf(pendingStops[c]), 1);
+                rep.terminated++;
+            }
+            //terminate
+            var t = 0;
+            for (c = 0; t <= rate && c < pullState.length; c++) {
+                if (!pendingStops.includes(pullState[c].remoteStreamName)) {
+                    stop(pullState[c].remoteStreamName);
+                    t++;
+                    pendingStops.push(pullState[c].remoteStreamName);
+                } else {
+                    console.log("Skip termination of " + pullState[c].remoteStreamName);
+                }
+            }
+            console.log("Requested termination of " + t + " streams");
+            for (c = 0; c <= rate && c <= t; c++) {
+                i++;
+                if (i >= end) {
+                    i = start;
+                }
+                var remoteName = name+i;
+                if (pendingPublish.includes(remoteName)) {
+                    console.log("Skip stream of " + remoteName);
+                    continue;
+                }
+                if (pendingStops.includes(remoteName)) {
+                    console.log("Skip stream of " + remoteName);
+                    continue;
+                }
+                pendingPublish.push(remoteName);
+                publish(remoteName);
+            }
+            rep.pending = pendingStops.length + pendingPublish.length;
+            schedule(STRESS_TEST_INTERVAL);
+        }, function(){
+            schedule(STRESS_TEST_FAILED_INTERVAL);
+        });
+    };
+    rep.terminate = function(id){
+        running = false;
+        node.tests.splice(id, 1);
+    };
+    node.tests.push(rep);
+    pollState();
+    console.log("Stress streams started");
+    $("#streamPublishStressBatchModal").modal('hide');
 }
 
 /**

@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="console.css">
         <title>Console</title>
         <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+        <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
         <script type="text/javascript" src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
         <script type="text/javascript" src="../../../../flashphoner-rest-api.js"></script>
@@ -56,7 +57,8 @@
                     <hr>
                     <button id="registerStressBatchModalBtn" data-toggle='modal' data-target='#registerStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Register</button>
                     <button id="callStressBatchModalBtn" data-toggle='modal' data-target='#callStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Call</button>
-                    <button id="streamStressBatchModalBtn" data-toggle='modal' data-target='#streamStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Stream</button>
+                    <button id="streamStressBatchModalBtn" data-toggle='modal' data-target='#streamStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Play Stream</button>
+                    <button id="streamPublishStressBatchModalBtn" data-toggle='modal' data-target='#streamPublishStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Publish Stream</button>
                 </div>
                 <div class="col-sm-9">
                     <form class="form-inline" action="">
@@ -449,7 +451,54 @@
                                     <label for="streamStressBatchRate"><span class="glyphicon glyphicon-flash"></span> Rate</label>
                                     <input type="text" class="form-control" id="streamStressBatchRate" placeholder="1">
                                 </div>
+                                <div class="form-group">
+                                    <label for="streamStressBatchInit"><span class="glyphicon glyphicon-flash"></span> Init streams</label>
+                                    <input type="text" class="form-control" id="streamStressBatchInit" placeholder="1">
+                                </div>
                                 <button id="streamStressBatch" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Start</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="streamPublishStressBatchModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Stream Stress</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="streamPublishStressBatchForm">
+                                <div class="form-group">
+                                    <label for="streamPublishStressBatchNodes"><span class="glyphicon glyphicon-globe"></span> Choose node</label>
+                                    <select class="custom-select" id="streamPublishStressBatchNodes">
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="streamPublishStressBatchName"><span class="glyphicon glyphicon-play-circle"></span> Local stream</label>
+                                    <input type="text" class="form-control" id="streamPublishStressBatchName" placeholder="Local stream">
+                                </div>
+                                <div class="form-group">
+                                    <label for="streamPublishStressBatchStart"><span class="glyphicon glyphicon-menu-down"></span> Start</label>
+                                    <input type="text" class="form-control" id="streamPublishStressBatchStart" placeholder="1000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="streamPublishStressBatchEnd"><span class="glyphicon glyphicon-menu-up"></span> End</label>
+                                    <input type="text" class="form-control" id="streamPublishStressBatchEnd" placeholder="1001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="streamPublishStressBatchRate"><span class="glyphicon glyphicon-flash"></span> Rate</label>
+                                    <input type="text" class="form-control" id="streamPublishStressBatchRate" placeholder="1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="streamPublishStressBatchInit"><span class="glyphicon glyphicon-flash"></span> Init streams</label>
+                                    <input type="text" class="form-control" id="streamPublishStressBatchInit" placeholder="1">
+                                </div>
+                                <button id="streamPublishStressBatch" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Start</button>
                             </form>
                         </div>
                         <div class="modal-footer">
