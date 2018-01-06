@@ -48,9 +48,12 @@ $(function() {
     });
     var populateNodes = function(storage) {
         storage.empty();
+        var node = getActiveNode();
         var html = "";
         for (var id in nodes) {
-            html += "<option value='" + nodes[id].ip + "'>" + nodes[id].ip + "</option>";
+            if (id != node.id) {
+                html += "<option value='" + nodes[id].ip + "'>" + nodes[id].ip + "</option>";
+            }
         }
         storage.append(html);
     };
@@ -403,6 +406,10 @@ function pullRTSPStream() {
 //pullBatchStream
 
 function pullStreamBatch() {
+    if (!$("#pullStreamBatchNodes").val()) {
+        $('#warningModal').modal();
+        return false;
+    }
     var node = getActiveNode();
     var remote = "ws://"+$("#pullStreamBatchNodes").val()+":8080/";
     var localName = $("#pullBatchLocalName").val();
@@ -420,6 +427,10 @@ function pullStreamBatch() {
 }
 
 function registerBatch() {
+    if (!$("#registerBatchNodes").val()) {
+        $('#warningModal').modal();
+        return false;
+    }
     var node = getActiveNode();
     var testedNode = $("#registerBatchNodes").val();
     var registrar = $("#registerRegistrarAddress").val();
@@ -624,6 +635,10 @@ function doCall(node, login, ext) {
  */
 
 function regoStressTest() {
+    if (!$("#registerStressBatchNodes").val()) {
+        $('#warningModal').modal();
+        return false;
+    }
     var node = getActiveNode();
     var testedNode = $("#registerStressBatchNodes").val();
     var registrar = $("#registerStressRegistrarAddress").val();
@@ -863,6 +878,10 @@ function callStressTest() {
 
 function streamPlayStressTest() {
     var node = getActiveNode();
+    if (!$("#streamStressBatchNodes").val()) {
+        $('#warningModal').modal();
+        return false;
+    }
     var remote = "ws://" + $("#streamStressBatchNodes").val() + ":8080";
     var name = $("#streamStressBatchName").val();
     var start = parseInt($("#streamStressBatchStart").val());
@@ -980,6 +999,10 @@ function streamPlayStressTest() {
 }
 
 function streamPublishStressTest() {
+    if (!$("#streamPublishStressBatchNodes").val()) {
+        $('#warningModal').modal();
+        return false;
+    }
     var node = getActiveNode();
     var remote = "ws://" + $("#streamPublishStressBatchNodes").val() + ":8080";
     var name = $("#streamPublishStressBatchName").val();
