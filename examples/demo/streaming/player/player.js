@@ -8,6 +8,7 @@ var currentVolumeValue = 50;
 var autoplay = getUrlParam("autoplay") || false;
 var resolution = getUrlParam("resolution");
 var mediaProvider = getUrlParam("mediaProvider") || null;
+var mseCutByIFrameOnly = getUrlParam("mseCutByIFrameOnly");
 
 function init_page() {
 
@@ -125,6 +126,11 @@ function playStream(session) {
         display: remoteVideo,
         flashShowFullScreenButton: true
     };
+    if (Flashphoner.getMediaProviders()[0] === "MSE" && mseCutByIFrameOnly) {
+        options.mediaConnectionConstraints = {
+            cutByIFrameOnly: mseCutByIFrameOnly
+        }
+    }
     if (resolution_for_wsplayer) {
         options.playWidth = resolution_for_wsplayer.playWidth;
         options.playHeight = resolution_for_wsplayer.playHeight;
