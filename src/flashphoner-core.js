@@ -1,6 +1,6 @@
 'use strict';
 
-var uuid = require('node-uuid');
+var uuid_v1 = require('uuid/v1');
 var constants = require("./constants");
 var util = require('./util');
 var logger = require('./util').logger;
@@ -381,7 +381,7 @@ var createSession = function (options) {
         throw new TypeError("options.urlServer must be provided");
     }
 
-    var id_ = uuid.v1();
+    var id_ = uuid_v1();
     var sessionStatus = SESSION_STATUS.PENDING;
     var urlServer = options.urlServer;
     var lbUrl = options.lbUrl;
@@ -676,7 +676,7 @@ var createSession = function (options) {
         var callee_ = options.callee;
         var visibleName_ = options.visibleName || login;
 
-        var id_ = options.callId || uuid.v1();
+        var id_ = options.callId || uuid_v1();
         var mediaProvider = options.mediaProvider || getMediaProviders()[0];
         var mediaConnection;
         var localDisplay = options.localVideoDisplay;
@@ -1272,7 +1272,7 @@ var createSession = function (options) {
             throw new TypeError("options.name must be provided");
         }
 
-        var id_ = uuid.v1();
+        var id_ = uuid_v1();
         var name_ = options.name;
         var mediaProvider = options.mediaProvider || getMediaProviders()[0];
         var mediaConnection;
@@ -2060,7 +2060,7 @@ var createSession = function (options) {
         exports.sendData = function (data) {
             return new Promise(function (resolve, reject) {
                 var obj = {
-                    operationId: uuid.v1(),
+                    operationId: uuid_v1(),
                     payload: data
                 };
                 pending[obj.operationId] = {

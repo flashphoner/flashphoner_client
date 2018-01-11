@@ -2,7 +2,7 @@
 
 var swfobject = require('swfobject');
 var Promise = require('promise-polyfill');
-var uuid = require('node-uuid');
+var uuid_v1 = require('uuid/v1');
 var connections = {};
 var flashScope;
 var swfLocation = "media-provider.swf";
@@ -341,7 +341,7 @@ var getMediaAccess = function(constraints, display) {
     return new Promise(function(resolve, reject) {
         var flash = getCacheInstance(display);
         if (!flash) {
-            var id = uuid.v1() + CACHED_INSTANCE_POSTFIX;
+            var id = uuid_v1() + CACHED_INSTANCE_POSTFIX;
             loadSwf(id, display).then(function (swf) {
                 //todo return camera and mic id
                 installCallback(swf, "accessGranted", function () {
@@ -481,7 +481,7 @@ var listDevices = function() {
     return new Promise(function(resolve, reject) {
         var display = document.createElement('div');
         display.setAttribute("style","width:1px;height:1px");
-        var id = uuid.v1();
+        var id = uuid_v1();
         //attach display to document, otherwise swf won't be loaded
         document.body.appendChild(display);
         loadSwf(id, display).then(function(swf){

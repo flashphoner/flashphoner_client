@@ -1,7 +1,7 @@
 'use strict';
 
 var webrtcAdapter = require('webrtc-adapter');
-var uuid = require('node-uuid');
+var uuid = require('uuid/v1');
 var util = require('./util');
 var connections = {};
 var CACHED_INSTANCE_POSTFIX = "-CACHED_WEBRTC_INSTANCE";
@@ -354,7 +354,7 @@ var getMediaAccess = function (constraints, display) {
             navigator.getUserMedia(constraints, function (stream) {
                 var video = document.createElement('video');
                 display.appendChild(video);
-                video.id = uuid.v1() + CACHED_INSTANCE_POSTFIX;
+                video.id = uuid_v1() + CACHED_INSTANCE_POSTFIX;
                 //mute audio
                 video.muted = true;
                 video.onloadedmetadata = function (e) {

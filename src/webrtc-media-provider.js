@@ -1,7 +1,7 @@
 'use strict';
 
 var adapter = require('webrtc-adapter');
-var uuid = require('node-uuid');
+var uuid_v1 = require('uuid/v1');
 var util = require('./util');
 var connections = {};
 var LOCAL_CACHED_VIDEO = "-LOCAL_CACHED_VIDEO";
@@ -437,7 +437,7 @@ var getMediaAccess = function (constraints, display) {
                     video = document.createElement('video');
                     display.appendChild(video);
                 }
-                video.id = uuid.v1() + LOCAL_CACHED_VIDEO;
+                video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
                 //show local camera
                 video.srcObject = stream;
                 //mute audio
@@ -670,7 +670,7 @@ var playFirstVideo = function (display, isLocal, src) {
         video.setAttribute("playsinline", "");
         video.setAttribute("webkit-playsinline", "");
         display.appendChild(video);
-        video.id = uuid.v1() + (isLocal ? LOCAL_CACHED_VIDEO : REMOTE_CACHED_VIDEO);
+        video.id = uuid_v1() + (isLocal ? LOCAL_CACHED_VIDEO : REMOTE_CACHED_VIDEO);
         if (src) {
             video.src = src;
         } else {
