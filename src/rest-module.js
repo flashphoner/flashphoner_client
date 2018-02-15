@@ -6,6 +6,7 @@ var CONNECTION_PATH = "/rest-api/connection";
 var PUSH_PATH = "/rest-api/push";
 var RTSP_PATH = "/rest-api/rtsp";
 var API_PATH = "/rest-api/api";
+var CDN_PATH = "/rest-api/cdn"
 
 var instance = function (url, coreUrl) {
     var pullApi = function() {
@@ -214,6 +215,15 @@ var instance = function (url, coreUrl) {
             terminate: terminate
         };
     };
+    var cdn = function() {
+        var api = url + CDN_PATH;
+        var showRoutes = function() {
+            return send(api + "/show_routes");
+        };
+        return {
+            showRoutes: showRoutes
+        };
+    };
     var api = function() {
         var api = url + API_PATH;
         var createSession = function(connection) {
@@ -246,7 +256,8 @@ var instance = function (url, coreUrl) {
         push: push(),
         rtsp: rtsp(),
         stat: stat(),
-        api: api()
+        api: api(),
+        cdn: cdn()
     };
 };
 /** XHR WRAPPER **/

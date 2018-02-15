@@ -19,6 +19,13 @@ var NODE_DETAILS_TYPE = {
     TESTS: "tests"
 };
 
+var STRESS_TESTS = {
+    REGISTER: { running: false},
+    CALL: { running: false},
+    PLAY_STREAM: { running: false},
+    PUBLISH_STREAM: { running: false}
+};
+
 var nodes = {};
 
 $(function() {
@@ -88,6 +95,11 @@ $(function() {
         regoStressTest();
     });
     $('#streamStressBatchModal').on('show.bs.modal', function(e) {
+        if (STRESS_TESTS.PLAY_STREAM.running) {
+            $("#streamStressBatch").text('Stop').removeClass('btn-success').addClass('btn-danger');
+        } else {
+            $("#streamStressBatch").text('Start').removeClass('btn-danger').addClass('btn-success');
+        }
         populateNodes($("#streamStressBatchNodes"));
     });
     $("#streamStressBatch").on("click", function(e){
@@ -102,6 +114,19 @@ $(function() {
     });
 
     $("#generalInfoTable").sortable();
+    addNode('172.16.1.50');
+    addNode('172.16.1.51');
+    addNode('172.16.1.52');
+    addNode('172.16.1.54');
+    $("#streamStressMode").change(function() {
+        if ($(this).val() == 'random') {
+            $("#normal").addClass('hidden');
+            $("#random").removeClass('hidden');
+        } else {
+            $("#normal").removeClass('hidden');
+            $("#random").addClass('hidden');
+        }
+    });
 });
 
 function createNode(id, ip) {
@@ -535,6 +560,10 @@ function getActiveNode() {
     }
 }
 
+function getNode(ip) {
+    return nodes[ip.replace(/\./g, "")];
+}
+
 /** UTIL **/
 function pullDetailsToStreamDetails(details) {
     var ret = [];
@@ -882,6 +911,13 @@ function streamPlayStressTest() {
         $('#warningModal').modal();
         return false;
     }
+    var mode = $( "#streamStressMode option:selected" ).val();
+
+    if (mode == "random") {
+        streamPlayStressTestRandom();
+        return;
+    }
+
     var remote = "ws://" + $("#streamStressBatchNodes").val() + ":8080";
     var name = $("#streamStressBatchName").val();
     var start = parseInt($("#streamStressBatchStart").val());
@@ -995,6 +1031,7 @@ function streamPlayStressTest() {
     node.tests.push(rep);
     pollState();
     console.log("Stress streams started");
+    STRESS_TESTS.PLAY_STREAM.running = true;
     $("#streamStressBatchModal").modal('hide');
 }
 
@@ -1118,6 +1155,197 @@ function streamPublishStressTest() {
     pollState();
     console.log("Stress streams started");
     $("#streamPublishStressBatchModal").modal('hide');
+}
+
+function streamPlayStressTestRandom() {
+    var node = getActiveNode();
+    var streams = {};
+    var remoteNode = getNode($("#streamStressBatchNodes").val());
+    var remote = "ws://" + $("#streamStressBatchNodes").val() + ":8080";
+    var start = 0;
+    var end = parseInt($("#streamStressMaxStreams").val());
+    var rate = parseInt($("#streamStressBatchRate").val());
+    var fakeStreamPercents = parseInt($("#fakeRequests").val());
+    var cdn = $("#useCDN").is(':checked');
+    var init = 1;
+    var streamTTL = parseInt($( "#streamTTL option:selected" ).val()) * 60 * 1000; // ms
+    var REMOTE_NODE_POLL_INTERVAL = 5000;
+    var rep = {
+        name: "STREAM-PLAY",
+        start: start,
+        end: end,
+        rate: rate,
+        initialized: 0,
+        terminated: 0,
+        pending: 0
+    };
+    var schedule = function(fn, t) {
+        setTimeout(fn, t);
+    };
+    var play = function(localName, remoteName){
+        console.log("play " + localName + " -> " + remoteName + " ; pending streams " + pendingPlays.length);
+        node.pull.pull(remote, localName, remoteName).then(function(){
+            streams[localName] = {
+                "remoteName": remoteName,
+                "startTime": performance.now(),
+                "endTime": 0
+            }
+        }, function(){
+            console.log("Failed to play stream " + remoteName + " as " + localName);
+        });
+    };
+    var stop = function(localName){
+        node.pull.terminate(localName).then(function(){
+        }, function(){
+            console.log("Failed to stop stream " + localName);
+        });
+        delete streams[localName];
+    };
+    if (STRESS_TESTS.PLAY_STREAM.running) {
+        for (var stream in streams) {
+            if (streams.hasOwnProperty(stream)) {
+                stop(stream);
+            }
+        }
+        STRESS_TESTS.PLAY_STREAM.running = false;
+        console.log("Stress streams stopped");
+        $("#streamStressBatchModal").modal('hide');
+        return;
+    }
+
+    var throttle = rateLimit(rate, 1000, play);
+    var remoteStreams = [];
+    var i = 0;
+    var pollRemoteStreams = function() {
+        if (cdn) {
+            remoteNode.cdn.showRoutes().then(function(routes) {
+                remoteStreams = Object.values(routes);
+            }, function() {
+                console.log("Failed to get routes");
+            })
+        }
+        remoteNode.stream.findAll().then(function (streams) {
+            var c;
+            for (c = 0; c < streams.length; c++) {
+                remoteStreams[c] = streams[c].name;
+            }
+        }, function(e) {
+            console.log("Failed to get streams");
+        });
+        if (remoteStreams.length != 0 && !STRESS_TESTS.PLAY_STREAM.running) {
+            STRESS_TESTS.PLAY_STREAM.running = true;
+            prepareStreams();
+        }
+    };
+    schedule(pollRemoteStreams, REMOTE_NODE_POLL_INTERVAL);
+    var pendingPlays = [];
+    var pendingStops = [];
+    var prepareStreams = function() {
+        //init
+        var initialInit = i + init < i + rate * 2 ? i + rate * 2 : i + init;
+        for (; i < initialInit; i++) {
+            var remoteName = remoteStreams[Math.floor(Math.random() * remoteStreams.length)];
+            var localName = remoteName + "-" + i;
+            pendingPlays.push(localName);
+            throttle(localName, remoteName);
+        }
+        pollState();
+    };
+    var pollState = function() {
+        if (!STRESS_TESTS.PLAY_STREAM.running) {
+            return;
+        }
+        node.pull.findAll().then(function (pullState) {
+            var c;
+            //update state
+            var active = [];
+            for (c = 0; c < pullState.length; c++) {
+                active[c] = pullState[c].localStreamName;
+                var pendingIndex = pendingPlays.indexOf(pullState[c].localStreamName);
+                if (pendingIndex > -1) {
+                    console.log("Remove stream from pending plays " + pullState[c].localStreamName);
+                    pendingPlays.splice(pendingIndex, 1);
+                    rep.initialized++;
+                }
+                var tIndex = pendingStops.indexOf(pullState[c].localStreamName);
+                if (tIndex > -1) {
+                    console.log("Remove stream from pending stops " + pullState[c].localStreamName);
+                    pendingStops.splice(tIndex, 1);
+                    rep.terminated++;
+                }
+            }
+            for (c = 0; c < pendingStops.length; c++) {
+                if (active.includes(pendingStops[c])) {
+                    continue;
+                }
+                pendingStops.splice(pendingStops.indexOf(pendingStops[c]), 1);
+                rep.terminated++;
+            }
+            //terminate
+            var t = 0;
+            for (c = 0; t <= rate && c < pullState.length; c++) {
+                if (!pendingStops.includes(pullState[c].localStreamName)) {
+                    if (streams.hasOwnProperty(pullState[c].localStreamName)) {
+                        var nowTime = performance.now();
+                        var startTime = streams[pullState[c].localStreamName]['startTime'];
+                        if ((nowTime - startTime) >= streamTTL) {
+                            console.log("Terminate stream " + pullState[c].localStreamName + " ; stream time " + (nowTime - startTime)/1000);
+                            stop(pullState[c].localStreamName);
+                            t++;
+                            pendingStops.push(pullState[c].localStreamName);
+                        }
+                    }
+                } else {
+                    console.log("Skip termination of " + pullState[c].localStreamName + " ; stream time " + Math.round(performance.now - streams[pullState[c].localStreamName]['startTime']));
+                }
+            }
+            console.log("Requested termination of " + t + " streams");
+            for (c = 0; c <= rate && c <= t; c++) {
+                if (pendingStops.length > end) {
+                    continue;
+                }
+
+                i++;
+                if (i >= end) {
+                    i = start;
+                }
+
+                var remoteName = remoteStreams[Math.floor(Math.random() * remoteStreams.length)];
+                var isFake = false;
+                if (Object.keys(streams).length % fakeStreamPercents === 0) {
+                    remoteName = Math.random().toString(36).substring(2);
+                    console.log("Generate fake stream name " + remoteName + " ; pendingStops " + pendingStops.length);
+                    isFake = true;
+                }
+                var localName = remoteName + "-" + i;
+                if (pendingPlays.includes(localName)) {
+                    console.log("Skip stream of " + localName);
+                    continue;
+                }
+                if (pendingStops.includes(localName)) {
+                    console.log("Skip stream of " + localName);
+                    continue;
+                }
+                if (!isFake) {
+                    pendingPlays.push(localName);
+                }
+                play(localName, remoteName);
+            }
+            rep.pending = pendingStops.length + pendingPlays.length;
+            schedule(pollState, STRESS_TEST_INTERVAL);
+        }, function(){
+            schedule(pollState, STRESS_TEST_FAILED_INTERVAL);
+        });
+    };
+    rep.terminate = function(id){
+        STRESS_TESTS.PLAY_STREAM.running = false;
+        node.tests.splice(id, 1);
+    };
+    node.tests.push(rep);
+
+    pollRemoteStreams();
+    console.log("Stress streams started");
+    $("#streamStressBatchModal").modal('hide');
 }
 
 /**
