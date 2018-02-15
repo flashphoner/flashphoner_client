@@ -114,10 +114,6 @@ $(function() {
     });
 
     $("#generalInfoTable").sortable();
-    addNode('172.16.1.50');
-    addNode('172.16.1.51');
-    addNode('172.16.1.52');
-    addNode('172.16.1.54');
     $("#streamStressMode").change(function() {
         if ($(this).val() == 'random') {
             $("#normal").addClass('hidden');
