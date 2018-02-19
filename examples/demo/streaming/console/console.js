@@ -1297,7 +1297,7 @@ function streamPlayStressTestRandom() {
             }
             console.log("Requested termination of " + t + " streams");
             for (c = 0; c <= rate && c <= t; c++) {
-                if (pendingStops.length > end) {
+                if (Object.keys(streams).length >= end) {
                     continue;
                 }
 
@@ -1307,12 +1307,6 @@ function streamPlayStressTestRandom() {
                 }
 
                 var remoteName = remoteStreams[Math.floor(Math.random() * remoteStreams.length)];
-                var isFake = false;
-                if (Object.keys(streams).length % fakeStreamPercents === 0) {
-                    remoteName = Math.random().toString(36).substring(2);
-                    console.log("Generate fake stream name " + remoteName + " ; pendingStops " + pendingStops.length);
-                    isFake = true;
-                }
                 var localName = remoteName + "-" + i;
                 if (pendingPlays.includes(localName)) {
                     console.log("Skip stream of " + localName);
@@ -1322,10 +1316,15 @@ function streamPlayStressTestRandom() {
                     console.log("Skip stream of " + localName);
                     continue;
                 }
-                if (!isFake) {
-                    pendingPlays.push(localName);
-                }
+                pendingPlays.push(localName);
                 play(localName, remoteName);
+
+                if (Object.keys(streams).length % fakeStreamPercents === 0) {
+                    remoteName = Math.random().toString(36).substring(2);
+                    localName = remoteName + "-" + i;
+                    console.log("Generate fake stream name " + remoteName);
+                    play(localName, remoteName);
+                }
             }
             rep.pending = pendingStops.length + pendingPlays.length;
             schedule(pollState, STRESS_TEST_INTERVAL);
