@@ -490,11 +490,6 @@ var createSession = function (options) {
                 clientBrowserVersion: window.navigator.userAgent,
                 custom: options.custom
             };
-            if (getMediaProviders()[0] == "WSPlayer") {
-                cConfig.useWsTunnel = true;
-                cConfig.useWsTunnelPacketization2 = true;
-                cConfig.useBase64BinaryEncoding = false;
-            }
             if (sipConfig) {
                 util.copyObjectPropsToAnotherObject(sipConfig, cConfig);
             }
