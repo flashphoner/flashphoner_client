@@ -180,9 +180,9 @@ function installExtension() {
         chrome.webstore.install();
     } else if (Browser.isFirefox()) {
         var params = {
-            "Flashphoner Screen Sharing": { URL: "../../dependencies/screen-sharing/firefox-extension/flashphoner_screen_sharing-0.0.9-an+fx.xpi",
+            "Flashphoner Screen Sharing": { URL: "../../dependencies/screen-sharing/firefox-extension/flashphoner_screen_sharing-0.0.10-fx.xpi",
                 IconURL: "../../dependencies/screen-sharing/firefox-extension/icon.png",
-                Hash: "sha1:96699c6536de455cdc5c7705f5b24fae28931605",
+                Hash: "sha1:d05783a5d8af8807aa427520f2e81a3fd23c2a14",
                 toString: function () { return this.URL; }
             }
         };

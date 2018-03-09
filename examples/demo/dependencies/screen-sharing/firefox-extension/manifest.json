@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "flashphoner-screen-sharing-extension",
+  "author": "Flashphoner",
+  "version": "0.0.10",
+  "homepage_url": "https://flashphoner.com",
+  "description": "This extension is designed to enable screen capture for Screen Sharing Web client example provided with Flashphoner WCS server.",
+  
+  "icons": {
+    "48": "icon.png"
+  },
+
+  "applications": {
+    "gecko": {
+      "id": "@flashphoner-screen-sharing-extension",
+      "strict_min_version": "45.0"
+    }
+  },
+
+  "content_scripts": [
+  {
+    "matches": ["*://*.flashphoner.com/*", "*://localhost/*", "*://127.0.0.1/*"],
+    "js": ["content-script.js"]
+  }
+]
+
+}
