@@ -383,3 +383,34 @@ function setStatus(selector, status) {
         statusField.attr("class","text-danger");
     }
 }
+
+//install extension
+function installExtension() {
+    if (Browser.isChrome()) {
+        chrome.webstore.install();
+    } else if (Browser.isFirefox()) {
+        var params = {
+            "Flashphoner Screen Sharing": { URL: "../../dependencies/screen-sharing/firefox-extension/flashphoner_screen_sharing-0.0.10-fx.xpi",
+                IconURL: "../../dependencies/screen-sharing/firefox-extension/icon.png",
+                Hash: "sha1:d05783a5d8af8807aa427520f2e81a3fd23c2a14",
+                toString: function () { return this.URL; }
+            }
+        };
+        InstallTrigger.install(params);
+    }
+}
+
+function installFromMarket() {
+    if (Browser.isChrome()) {
+        var url = "https://chrome.google.com/webstore/detail/flashphoner-screen-sharin/nlbaajplpmleofphigmgaifhoikjmbkg";
+        window.open(url, '_blank');
+    }
+}
+
+function inIframe () {
+    try {
+        return window.self !== window.top;
+    } catch (e) {
+        return true;
+    }
+}
