@@ -26,6 +26,7 @@ function init_page() {
         }, 500);
 
     } else if (Browser.isChrome()) {
+        $('#mediaSource').hide();
         interval = setInterval(function() {
             chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
                 if (response) {
@@ -37,7 +38,6 @@ function init_page() {
                 }
             });
         }, 500);
-
     } else {
         $("#notify").modal('show');
         return false;
@@ -56,6 +56,7 @@ function onStarted(publishStream, previewStream) {
         $(this).prop('disabled', true);
         previewStream.stop();
     }).prop('disabled', false);
+    $('#mediaSource').prop('disabled', true);
 }
 
 function onStopped() {
@@ -66,6 +67,7 @@ function onStopped() {
             start();
         }
     }).prop('disabled', false);
+    $('#mediaSource').prop('disabled', false);
     unmuteInputs();
 }
 
@@ -113,7 +115,7 @@ function startStreaming(session) {
     if (Browser.isChrome()) {
         constraints.video.type = "screen";
     } else if (Browser.isFirefox()){
-        constraints.video.mediaSource = "screen";
+        constraints.video.mediaSource = $('#mediaSource').val();
     }
     session.createStream({
         name: streamName,
