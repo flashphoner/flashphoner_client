@@ -424,10 +424,10 @@ var getMediaAccess = function (constraints, display) {
 
         function getAccess(constraints, screenShare) {
             logger.info(LOG_PREFIX, constraints);
-            var requestMicStream = false;
+            var requestAudioConstraints = null;
             if (screenShare) {
                 if (constraints.audio && adapter.browserDetails.browser == "chrome") {
-                    requestMicStream = true;
+                    requestAudioConstraints = constraints.audio;
                     delete constraints.audio;
                 }
             }
@@ -446,9 +446,9 @@ var getMediaAccess = function (constraints, display) {
                     video.play();
                 };
                 // This hack for chrome only, firefox supports screen-sharing + audio natively
-                if (requestMicStream && adapter.browserDetails.browser == "chrome") {
+                if (requestAudioConstraints && adapter.browserDetails.browser == "chrome") {
                     logger.info(LOG_PREFIX, "Request for audio stream");
-                    navigator.getUserMedia({audio: true}, function (stream) {
+                    navigator.getUserMedia({audio: requestAudioConstraints}, function (stream) {
                         logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
                         video.srcObject.addTrack(stream.getAudioTracks()[0]);
                         resolve(display);
