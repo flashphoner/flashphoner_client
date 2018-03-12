@@ -107,10 +107,14 @@ function startStreaming(session) {
             width: parseInt($('#width').val()),
             height: parseInt($('#height').val()),
             frameRate: parseInt($('#fps').val()),
-            type: "screen"
         },
         audio: $("#useMic").prop('checked')
     };
+    if (Browser.isChrome()) {
+        constraints.video.type = "screen";
+    } else if (Browser.isFirefox()){
+        constraints.video.mediaSource = "screen";
+    }
     session.createStream({
         name: streamName,
         display: localVideo,

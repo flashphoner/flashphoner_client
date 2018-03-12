@@ -71,9 +71,14 @@ function startSharing(room) {
             width: parseInt($('#width').val()),
             height: parseInt($('#height').val()),
             frameRate: parseInt($('#fps').val()),
-            type: "screen"
-        }
+        },
+        audio: $("#useMic").prop('checked')
     };
+    if (Browser.isChrome()) {
+        constraints.video.type = "screen";
+    } else if (Browser.isFirefox()){
+        constraints.video.mediaSource = "screen";
+    }
     room.publish({
         display: document.getElementById("preview"),
         constraints: constraints,
