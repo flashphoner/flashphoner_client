@@ -613,7 +613,7 @@ function normalizeConstraints(constraints) {
                 max: frameRate
             }
         }
-        if (constraints.video.hasOwnProperty('width') && typeof constraints.video.width !== 'object') {
+        if (!constraints.video.hasOwnProperty('width') || typeof constraints.video.width !== 'object') {
             var width = constraints.video.width;
             if ((isNaN(width) || width == 0)) {
                 logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
@@ -621,7 +621,7 @@ function normalizeConstraints(constraints) {
                 constraints.video.height = 240;
             }
         }
-        if (constraints.video.hasOwnProperty('height') && typeof constraints.video.height !== 'object') {
+        if (!constraints.video.hasOwnProperty('height') || typeof constraints.video.height !== 'object') {
             var height = constraints.video.height;
             if (isNaN(height) || height == 0) {
                 logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");

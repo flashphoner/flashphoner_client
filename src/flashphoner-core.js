@@ -485,7 +485,7 @@ var createSession = function (options) {
                 mediaProviders: Object.keys(MediaProvider),
                 keepAlive: keepAlive,
                 authToken:authToken,
-                clientVersion: "0.5.27",
+                clientVersion: "0.5.28",
                 clientOSVersion: window.navigator.appVersion,
                 clientBrowserVersion: window.navigator.userAgent,
                 custom: options.custom
@@ -1227,7 +1227,9 @@ var createSession = function (options) {
      * @param {Boolean|Object} [options.constraints.video=true] Specifies if published or played stream should have video, or sets video constraints
      * @param {Integer} [options.constraints.video.width=0] Set width to publish or play stream with this value
      * @param {Integer} [options.constraints.video.height=0] Set height to publish or play stream with this value
-     * @param {Integer} [options.constraints.video.bitrate=0] Set bitrate to publish or play stream with this value
+     * @param {Integer} [options.constraints.video.bitrate=0] DEPRECATED FOR PUBLISH: Set bitrate to publish or play stream with this value
+     * @param {Integer} [options.constraints.video.minBitrate=0] Set minimal bitrate to publish stream with this value
+     * @param {Integer} [options.constraints.video.maxBitrate=0] Set maximal bitrate to publish stream with this value
      * @param {Integer} [options.constraints.video.quality=0] Set quality to play stream with this value
      * @param {Boolean=} options.receiveAudio DEPRECATED: Receive audio
      * @param {Boolean=} options.receiveVideo DEPRECATED: Receive video
@@ -1305,6 +1307,9 @@ var createSession = function (options) {
         }
         // Bitrate
         var bitrate = getConstraintsProperty(constraints, "video.bitrate", 0);
+        var minBitrate = getConstraintsProperty(constraints, "video.minBitrate", 0);
+        var maxBitrate = getConstraintsProperty(constraints, "video.maxBitrate", 0);
+
         // Quality
         var quality = getConstraintsProperty(constraints, "video.quality", 0);
         if (quality > 100) quality = 100;
@@ -1446,6 +1451,8 @@ var createSession = function (options) {
                     sdp: offer.sdp,
                     custom: options.custom,
                     bitrate: bitrate,
+                    minBitrate: minBitrate,
+                    maxBitrate: maxBitrate,
                     quality: quality,
                     constraints: constraints
                 });
@@ -1515,6 +1522,8 @@ var createSession = function (options) {
                         sdp: offer.sdp,
                         custom: options.custom,
                         bitrate: bitrate,
+                        minBitrate: minBitrate,
+                        maxBitrate: maxBitrate,
                         rtmpUrl: rtmpUrl,
                         constraints: constraints
                     });
