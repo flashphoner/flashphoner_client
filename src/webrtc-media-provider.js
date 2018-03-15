@@ -613,18 +613,17 @@ function normalizeConstraints(constraints) {
                 max: frameRate
             }
         }
+        if (constraints.video === true) {
+            constraints.video = {};
+        }
         if (typeof constraints.video === 'object') {
             var width = constraints.video.width;
-            if ((isNaN(width) || width == 0)) {
-                logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
+            if ((isNaN(width) || width === 0)) {
                 constraints.video.width = 320;
                 constraints.video.height = 240;
             }
-        }
-        if (typeof constraints.video === 'object') {
             var height = constraints.video.height;
-            if (isNaN(height) || height == 0) {
-                logger.warn(LOG_PREFIX, "Width or height property has zero/NaN value, set default resolution 320x240");
+            if (isNaN(height) || height === 0) {
                 constraints.video.width = 320;
                 constraints.video.height = 240;
             }
