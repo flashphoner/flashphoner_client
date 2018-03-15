@@ -41,9 +41,11 @@
         <div class="col-sm-5 text-center">
             <span class="text-muted" style="padding: 0 10px">Extension required</span>
             <button class="btn btn-toolbar" type="button" id="installExtensionButton"
-                    onclick="installExtension()" style="display: none;">Install Now</button>
+                    onclick="installExtension()" style="display: none;">Install Now
+            </button>
             <button class="btn btn-toolbar" type="button" id="installFromMarket"
-                    onclick="installFromMarket();return false;" style="display: none;">Install Now</button>
+                    onclick="installFromMarket();return false;" style="display: none;">Install Now
+            </button>
         </div>
     </div>
     <div id="row">
@@ -51,28 +53,22 @@
         <div class="col-sm-12 text-center">
             <div class="col-sm-6">
                 <div class="col-sm-12 text-center">
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
                         <div class="form-group" id="fpsForm">
                             <span class="text-muted">FPS</span>
                             <input type="text" class="form-control" id="fps" value="30"/>
                         </div>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
                         <div class="form-group" id="widthForm">
                             <span class="text-muted">Width</span>
                             <input type="text" class="form-control" id="width" value="640"/>
                         </div>
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
                         <div class="form-group" id="heightForm">
                             <span class="text-muted">Height</span>
                             <input type="text" class="form-control" id="height" value="480"/>
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="form-group" id="mic">
-                            <span class="text-muted">Mic</span>
-                            <input type="checkbox" class="checkbox" style="margin: 10px auto" id="useMic"/>
                         </div>
                     </div>
                     <div class="col-sm-3">
@@ -85,7 +81,22 @@
                         </div>
                     </div>
                 </div>
-                <div class="fp-localVideo" style="margin-top: 90px">
+                <div class="col-sm-12 text-center">
+                    <div class="col-sm-6">
+                        <div class="form-group" id="mic">
+                            <span class="text-muted">Use Mic?</span>
+                            <input type="checkbox" class="checkbox" style="margin: 10px auto" id="useMic"/>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <span class="text-muted">Mic</span>
+                            <select class="form-control" id="audioInput">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="fp-localVideo" style="margin-top: 140px">
                     <div id="localVideo" class="display"></div>
                 </div>
                 <div class="text-center text-muted">My Screen</div>

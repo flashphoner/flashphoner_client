@@ -42,6 +42,26 @@ function init_page() {
         $("#notify").modal('show');
         return false;
     }
+
+    Flashphoner.getMediaDevices(null, true).then(function (list) {
+        list.audio.forEach(function (device) {
+            var audio = document.getElementById("audioInput");
+            var i;
+            var deviceInList = false;
+            for (i = 0; i < audio.options.length; i++) {
+                if (audio.options[i].value == device.id) {
+                    deviceInList = true;
+                    break;
+                }
+            }
+            if (!deviceInList) {
+                var option = document.createElement("option");
+                option.text = device.label || device.id;
+                option.value = device.id;
+                audio.appendChild(option);
+            }
+        });
+    });
 }
 
 function onExtensionAvailable() {
@@ -108,10 +128,14 @@ function startStreaming(session) {
         video: {
             width: parseInt($('#width').val()),
             height: parseInt($('#height').val()),
-            frameRate: parseInt($('#fps').val()),
-        },
-        audio: $("#useMic").prop('checked')
+            frameRate: parseInt($('#fps').val())
+        }
     };
+    if ($("#useMic").prop('checked')) {
+        constraints.audio = {
+            deviceId: $('#audioInput').val()
+        };
+    }
     if (Browser.isChrome()) {
         constraints.video.type = "screen";
     } else if (Browser.isFirefox()){
