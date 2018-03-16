@@ -485,7 +485,7 @@ var createSession = function (options) {
                 mediaProviders: Object.keys(MediaProvider),
                 keepAlive: keepAlive,
                 authToken:authToken,
-                clientVersion: "0.5.29",
+                clientVersion: "0.5.30",
                 clientOSVersion: window.navigator.appVersion,
                 clientBrowserVersion: window.navigator.userAgent,
                 custom: options.custom

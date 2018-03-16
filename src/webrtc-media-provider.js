@@ -618,17 +618,19 @@ function normalizeConstraints(constraints) {
         }
         if (typeof constraints.video === 'object') {
             var width = constraints.video.width;
-            if ((isNaN(width) || width === 0)) {
-                constraints.video.width = 320;
-                constraints.video.height = 240;
-            }
             var height = constraints.video.height;
-            if (isNaN(height) || height === 0) {
+            if (adapter.browserDetails.browser == "safari") {
+                if (!width || !height || typeof width !== 'object' || typeof height !== 'object') {
+                    constraints.video.width = {min: 320, max: 640};
+                    constraints.video.height = {min: 240, max: 480};
+                }
+            } else if (isNaN(width) || width === 0 || isNaN(height) || height === 0) {
                 constraints.video.width = 320;
                 constraints.video.height = 240;
             }
         }
     }
+
     if (constraints.audio) {
         // The WebRTC AEC implementation doesn't work well on stereophonic sound and makes mono on output
         if (constraints.audio.stereo) {
