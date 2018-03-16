@@ -485,7 +485,7 @@ var getScreenDeviceId = function (constraints) {
             });
         } else {
             //firefox case
-            o.mediaSource = "window";
+            o.mediaSource = constraints.video.mediaSource;
             o.width = {
                 min: constraints.video.width,
                 max: constraints.video.width

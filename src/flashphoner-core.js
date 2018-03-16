@@ -255,6 +255,7 @@ var getMediaDevices = function (mediaProvider, labels) {
  * @param {number} constraints.video.height Video height
  * @param {number} constraints.video.frameRate Video fps
  * @param {String} constraints.video.type Video device type: camera, screen
+ * @param {String} constraints.video.mediaSource Video source type for FF: screen, window
  * @param {HTMLElement} display Div element local media should be displayed in
  * @param {String} mediaProvider Media provider type
  * @returns {Promise.<HTMLElement>} Promise with display on fulfill
