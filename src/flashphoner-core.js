@@ -2128,5 +2128,9 @@ module.exports = {
     getLogger: getLogger,
     roomApi: require('./room-module'),
     constants: constants,
-    firefoxScreenSharingExtensionInstalled: false
+    /**
+     * The Screensharing whitelist is no longer needed to share your screen or windows starting Firefox 52
+     * https://wiki.mozilla.org/Screensharing
+     */
+    firefoxScreenSharingExtensionInstalled: true
 };
