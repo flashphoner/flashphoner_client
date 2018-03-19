@@ -137,7 +137,7 @@ function startStreaming(session) {
         };
     }
     constraints.video.type = "screen";
-    } else if (Browser.isFirefox()){
+    if (Browser.isFirefox()){
         constraints.video.mediaSource = $('#mediaSource').val();
     }
     session.createStream({

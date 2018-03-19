@@ -75,7 +75,7 @@ function startSharing(room) {
         audio: $("#useMic").prop('checked')
     };
     constraints.video.type = "screen";
-    } else if (Browser.isFirefox()){
+    if (Browser.isFirefox()){
         constraints.video.mediaSource = "screen";
     }
     room.publish({
