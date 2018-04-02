@@ -367,8 +367,7 @@ function startStreaming(session) {
             constraints.video = {
                 width: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveWidth').val()) : 0,
                 height: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveHeight').val()) : 0,
-                minBitrate: (!$("#receiveDefaultBitrate").is(":checked")) ? parseInt($("#receiveMinBitrate").val()) : 0,
-                maxBitrate: (!$("#receiveDefaultBitrate").is(":checked")) ? parseInt($("#receiveMaxBitrate").val()) : 0,
+                bitrate: (!$("#receiveDefaultBitrate").is(":checked")) ? $("#receiveBitrate").val() : 0,
                 quality: (!$("#receiveDefaultQuality").is(":checked")) ? $('#quality').val() : 0
             };
         }
@@ -484,7 +483,7 @@ function validateForm() {
                 highlightInput($(this));
                 valid = false;
             } else {
-                var numericFields = ['fps', 'sendWidth', 'sendHeight', 'sendVideoMinBitrate', 'sendVideoMaxBitrate', 'receiveMinBitrate', 'receiveMaxBitrate', 'quality'];
+                var numericFields = ['fps', 'sendWidth', 'sendHeight', 'sendVideoMinBitrate', 'sendVideoMaxBitrate', 'receiveBitrate', 'quality'];
                 if (numericFields.indexOf(this.id) != -1 && !(parseInt($(this).val()) >= 0)) {
                     highlightInput($(this));
                     valid = false;
