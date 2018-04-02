@@ -106,10 +106,12 @@ function init_page() {
     });
     $("#receiveDefaultBitrate").click(function () {
         if ($(this).is(':checked')) {
-            $("#receiveBitrate").prop('disabled', true);
+            $("#receiveMinBitrate").prop('disabled', true);
+            $("#receiveMaxBitrate").prop('disabled', true);
 
         } else {
-            $("#receiveBitrate").prop('disabled', false);
+            $("#receiveMinBitrate").prop('disabled', false);
+            $("#receiveMaxBitrate").prop('disabled', false);
         }
     });
     $("#receiveDefaultQuality").click(function () {
@@ -309,8 +311,10 @@ function getConstaints() {
             constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
             constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
         }
-        if (parseInt($('#sendVideoBitrate').val()) > 0)
-            constraints.video.bitrate = parseInt($('#sendVideoBitrate').val());
+        if (parseInt($('#sendVideoMinBitrate').val()) > 0)
+            constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
+        if (parseInt($('#sendVideoMaxBitrate').val()) > 0)
+            constraints.video.maxBitrate = parseInt($('#sendVideoMaxBitrate').val());
         if (parseInt($('#fps').val()) > 0)
             constraints.video.frameRate = parseInt($('#fps').val());
     }
@@ -363,7 +367,8 @@ function startStreaming(session) {
             constraints.video = {
                 width: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveWidth').val()) : 0,
                 height: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveHeight').val()) : 0,
-                bitrate: (!$("#receiveDefaultBitrate").is(":checked")) ? $("#receiveBitrate").val() : 0,
+                minBitrate: (!$("#receiveDefaultBitrate").is(":checked")) ? parseInt($("#receiveMinBitrate").val()) : 0,
+                maxBitrate: (!$("#receiveDefaultBitrate").is(":checked")) ? parseInt($("#receiveMaxBitrate").val()) : 0,
                 quality: (!$("#receiveDefaultQuality").is(":checked")) ? $('#quality').val() : 0
             };
         }
@@ -433,7 +438,9 @@ function unmuteInputs() {
             return;
         } else if (($(this).attr('id') == 'receiveWidth' || $(this).attr('id') == 'receiveHeight')) {
             if (!$("#receiveDefaultSize").is(":checked")) $(this).removeAttr("disabled");
-        } else if ($(this).attr('id') == 'receiveBitrate') {
+        } else if ($(this).attr('id') == 'receiveMinBitrate') {
+            if (!$("#receiveDefaultBitrate").is(":checked")) $(this).removeAttr("disabled");
+        } else if ($(this).attr('id') == 'receiveMaxBitrate') {
             if (!$("#receiveDefaultBitrate").is(":checked")) $(this).removeAttr("disabled");
         } else if ($(this).attr('id') == 'quality') {
             if (!$("#receiveDefaultQuality").is(":checked")) $(this).removeAttr("disabled");
@@ -477,7 +484,7 @@ function validateForm() {
                 highlightInput($(this));
                 valid = false;
             } else {
-                var numericFields = ['fps', 'sendWidth', 'sendHeight', 'sendVideoBitrate', 'receiveBitrate', 'quality'];
+                var numericFields = ['fps', 'sendWidth', 'sendHeight', 'sendVideoMinBitrate', 'sendVideoMaxBitrate', 'receiveMinBitrate', 'receiveMaxBitrate', 'quality'];
                 if (numericFields.indexOf(this.id) != -1 && !(parseInt($(this).val()) >= 0)) {
                     highlightInput($(this));
                     valid = false;

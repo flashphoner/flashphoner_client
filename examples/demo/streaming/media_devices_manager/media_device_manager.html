@@ -148,9 +148,13 @@
                         </div>
                         <div class="form-group" id="sendBitrateForm">
                             <label style="text-align: left" class="col-sm-4 control-label">Bitrate</label>
-                            <div class="col-sm-6 input-group">
-                                <input style="margin-left: 15px" type="text" class="form-control" id="sendVideoBitrate" value="0">
-                                <span style="min-width: 65px; text-align: right;" class="input-group-addon">bps</span>
+                            <div class="col-sm-4">
+                                <span>min</span>
+                                <input type="text" class="form-control" id="sendVideoMinBitrate" value="0">
+                            </div>
+                            <div class="col-sm-4">
+                                <span>max</span>
+                                <input type="text" class="form-control" id="sendVideoMaxBitrate" value="0">
                             </div>
                         </div>
                         <div class="form-group" id="cpuOveruseDetectionForm">
@@ -227,7 +231,6 @@
                             <label style="text-align: left" class="control-label col-sm-5" for="playVideo">Play video</label>
                         </div>
                         <div class="form-group" id="receiveSizeForm">
-                        
                             <label style="text-align: left" class="col-sm-3 control-label">Size</label>
                             <div class="col-sm-4">
                                 <input type="text" class="form-control" id="receiveWidth" value="0" disabled>
@@ -237,11 +240,14 @@
                             </div>
                         </div>
                         <div class="form-group" id="receiveBitrateForm">
-                        
                             <label style="text-align: left" class="col-sm-3 control-label">Bitrate</label>
-                            <div class="col-sm-7 input-group">
-                                <input style="margin-left: 15px" type="text" class="form-control" id="receiveBitrate" value="0" disabled>
-                                <span style="min-width: 65px; text-align: right" class="input-group-addon">bps</span>
+                            <div class="col-sm-4">
+                            	<span>min</span>
+                                <input type="text" class="form-control" id="receiveMinBitrate" value="0" disabled>
+                            </div>
+                            <div class="col-sm-4">
+                            	<span>max</span>
+                                <input type="text" class="form-control" id="receiveMaxBitrate" value="0" disabled>
                             </div>              
                         </div>
                         <div class="form-group" id="qualityForm">                        
