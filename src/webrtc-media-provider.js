@@ -49,7 +49,7 @@ var createConnection = function (options) {
             remoteVideo.style = "border-radius: 1px";
         } else {
             var cachedVideo = getCacheInstance(display);
-            if (!cachedVideo || cachedVideo.id.indexOf(REMOTE_CACHED_VIDEO) !== -1) {
+            if (!cachedVideo || cachedVideo.id.indexOf(REMOTE_CACHED_VIDEO) !== -1 || !cachedVideo.srcObject) {
                 if (cachedVideo) {
                     remoteVideo = cachedVideo;
                 } else {

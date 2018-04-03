@@ -42,7 +42,7 @@ function onStopped() {
 function start() {
     if (Browser.isSafariWebRTC()) {
         Flashphoner.playFirstVideo(localVideo, true);
-        Flashphoner.playFirstVideo(remoteVideo, true);
+        Flashphoner.playFirstVideo(remoteVideo, false);
     }
     //check if we already have session
     if (Flashphoner.getSessions().length > 0) {
