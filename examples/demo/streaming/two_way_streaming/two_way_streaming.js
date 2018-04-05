@@ -73,6 +73,9 @@ function onPublishing(stream) {
         $(this).prop('disabled', true);
         stream.stop();
     }).prop('disabled', false);
+	$("#switchBtn").text("Switch").off('click').click(function () {
+        stream.switchCam(localVideo);
+    }).prop('disabled',false);
     $("#publishInfo").text("");
 }
 
@@ -84,6 +87,7 @@ function onUnpublished() {
             publishStream();
         }
     });
+	$("#switchBtn").text("Switch").off('click').prop('disabled',true);
     if (Flashphoner.getSessions()[0] && Flashphoner.getSessions()[0].status() == SESSION_STATUS.ESTABLISHED) {
         $("#publishBtn").prop('disabled', false);
         $('#publishStream').prop('disabled', false);

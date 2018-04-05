@@ -11,9 +11,22 @@ var defaultConstraints;
 var logger;
 var LOG_PREFIX = "webrtc";
 var audioContext;
+var videoCams = [];
+var switchCount = 0;
 
 var createConnection = function (options) {
-    return new Promise(function (resolve, reject) {
+		return new Promise(function (resolve, reject) {
+			navigator.mediaDevices.enumerateDevices().then(function (devices) {
+			devices.forEach(function (value) {
+				if(value.kind==='videoinput') {
+					navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:value.deviceId}}})
+						.then(function (stream) { videoCams.push(stream) })
+						.catch(function (reason) { console.log(reason) });
+				}
+			})
+		}, function (reason) {
+        console.log(reason)
+		});
         var id = options.id;
         var connectionConfig = options.connectionConfig || {"iceServers": []};
         var connectionConstraints = options.connectionConstraints || {};
@@ -366,6 +379,20 @@ var createConnection = function (options) {
             }
         }
 
+	
+        var switchCam = function (localVideo) {
+            switchCount++;
+            if(switchCount===videoCams.length) {
+                switchCount=0;
+            }
+            connection.getSenders()[1].replaceTrack(videoCams[switchCount].getVideoTracks()[0]);
+            localVideo.innerHTML = '';
+            var video = document.createElement('video');
+            localVideo.appendChild(video);
+            video.srcObject = videoCams[switchCount];
+
+        };
+		
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -383,6 +410,7 @@ var createConnection = function (options) {
         exports.isVideoMuted = isVideoMuted;
         exports.getStats = getStats;
         exports.fullScreen = fullScreen;
+		exports.switchCam = switchCam;
         connections[id] = exports;
         resolve(exports);
     });

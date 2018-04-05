@@ -1540,6 +1540,11 @@ var createSession = function (options) {
             });
         };
 
+		
+		var switchCam = function(localVideo) {
+            mediaConnection.switchCam(localVideo);
+        };
+		
         /**
          * Stop stream.
          *
@@ -1912,6 +1917,7 @@ var createSession = function (options) {
         stream.fullScreen = fullScreen;
         stream.on = on;
         stream.available = available;
+		stream.switchCam = switchCam;
 
         streams[id_] = stream;
         return stream;
