@@ -185,10 +185,450 @@ define(callStatus, 'FAILED', 'FAILED');
 define(callStatus, 'PENDING', 'PENDING');
 define(callStatus, 'TRYING', 'TRYING');
 
+/**
+* @namespace Flashphoner.constants.STREAM_STATUS_INFO
+* @see Stream
+*/
+var streamStatusInfo = {};
+
+/**
+ * Failed by error during ICE establishment
+ * @event FAILED_BY_ICE_ERROR
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_BY_ICE_ERROR', 'Failed by ICE error');
+
+/**
+ * Timeout has been reached during ICE establishment
+ * @event FAILED_BY_ICETIMEOUT
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_BY_ICETIMEOUT', 'Failed by ICE timeout');
+
+/**
+ * ICE refresh failed on session
+ * @event FAILED_BY_KEEP_ALIVE
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_BY_KEEP_ALIVE', 'Failed by ICE keep alive');
+
+/**
+ * DTLS wrong fingerprint
+ * @event FAILED_BY_DTLS_FINGERPRINT_ERROR
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_BY_DTLS_FINGERPRINT_ERROR', 'Failed by DTLS fingerprint error');
+
+/**
+ * DTLS error
+ * @event FAILED_BY_DTLS_ERROR
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_BY_DTLS_ERROR', 'Failed by DTLS error');
+
+/**
+ * FF writer was failed on HLS streaming
+ * @event FAILED_BY_HLSWRITER_ERROR
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_BY_HLSWRITER_ERROR', 'Failed by HLS writer error');
+
+/**
+ * FF writer was failed on RTMP streaming
+ * @event FAILED_BY_RTMP_WRITER_ERROR
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_BY_RTMP_WRITER_ERROR', 'Failed by RTMP writer error');
+
+/**
+ * RTP session failed by RTP activity timer
+ * @event FAILED_BY_RTP_ACTIVITY
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_BY_RTP_ACTIVITY', 'Failed by RTP activity');
+
+/**
+ * Related session was disconnected
+ * @event STOPPED_BY_SESSION_DISCONNECT
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'STOPPED_BY_SESSION_DISCONNECT', 'Stopped by session disconnect');
+
+/**
+ * Stream was stopped by rest terminate request
+ * @event STOPPED_BYREST_/TERMINATE
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'STOPPED_BYREST_/TERMINATE', 'Stopped by rest /terminate');
+
+/**
+ * Related publisher stopped its stream or lost connection
+ * @event STOPPED_BY_PUBLISHER_STOP
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'STOPPED_BY_PUBLISHER_STOP', 'Stopped by publisher stop');
+
+/**
+ * Stopped by user with stream.stop() or stream.unpublish()
+ * @event STOPPED_BY_USER
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'STOPPED_BY_USER', 'Stopped by user');
+
+/**
+ * Error occurred on the stream
+ * @event FAILED_BY_ERROR
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_BY_ERROR', 'Failed by error');
+
+/**
+ * Failed to add stream to proxy on session established
+ * @event FAILED_BY_ADD_STREAM_TO_PROXY
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_BY_ADD_STREAM_TO_PROXY', 'Failed to add stream to proxy');
+
+/**
+ * Stopped shapshot distributor
+ * @event DISTRIBUTOR_STOPPED
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'DISTRIBUTOR_STOPPED', 'Distributor stopped');
+
+/**
+ * Publish stream is not ready
+ * @event PUBLISH_STREAM_IS_NOT_READY
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'PUBLISH_STREAM_IS_NOT_READY', 'Publish stream is not ready');
+
+/**
+ * Not found stream by name
+ * @event STREAM_NOT_FOUND
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'STREAM_NOT_FOUND', 'Stream not found');
+
+/**
+ * This name is used on publish stream
+ * @event STREAM_NAME_IS_ALREADY_IN_USE
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'STREAM_NAME_IS_ALREADY_IN_USE', 'Stream name is already in use');
+
+/**
+ * MediaSessionId is null or empty
+ * @event MEDIASESSIONID_IS_NULL
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'MEDIASESSIONID_IS_NULL', 'MediaSessionId is null');
+
+/**
+ * Published or subscribed sessions used this MediaSessionId
+ * @event MEDIASESSIONID_IS_ALREADY_IN_USE
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'MEDIASESSIONID_IS_ALREADY_IN_USE', 'MediaSessionId is already in use');
+
+/**
+ * Session is not initialized or terminated on play ordinary stream
+ * @event SESSION_NOT_READY
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'SESSION_NOT_READY', 'Session not ready');
+
+/**
+ * Actual session does not exist
+ * @event SESSION_DOES_NOT_EXIST
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'SESSION_DOES_NOT_EXIST', 'Session does not exist');
+
+/**
+ * RTSP has wrong format on play stream
+ * @event RTSP_HAS_WRONG_FORMAT
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'RTSP_HAS_WRONG_FORMAT', 'Rtsp has wrong format');
+
+/**
+ * File has wrong format on play vod
+ * @event FILE_HAS_WRONG_FORMAT
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FILE_HAS_WRONG_FORMAT', 'File has wrong format');
+
+/**
+ * Failed to connect to rtsp stream
+ * @event FAILED_TO_CONNECT_TO_RTSP_STREAM
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_TO_CONNECT_TO_RTSP_STREAM', 'Failed to connect to rtsp stream');
+
+/**
+ * Rtsp stream not found where agent received response 404-"Not Found"
+ * @event RTSP_STREAM_NOT_FOUND
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'RTSP_STREAM_NOT_FOUND', 'Rtsp stream not found');
+
+/**
+ * On shutdown RTSP agent
+ * @event RTSPAGENT_SHUTDOWN
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'RTSPAGENT_SHUTDOWN', 'RtspAgent shutdown');
+
+/**
+ * Stream failed
+ * @event STREAM_FAILED
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'STREAM_FAILED', 'Stream failed');
+
+/**
+ * No common codecs on setup track
+ * @event NO_COMMON_CODECS
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'NO_COMMON_CODECS', 'No common codecs');
+
+/**
+ * Bad referenced rtsp link
+ * @event BAD_URI
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'BAD_URI', 'Bad URI');
+
+/**
+ * Got exception while streaming file
+ * @event GOT_EXCEPTION_WHILE_STREAMING_FILE
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'GOT_EXCEPTION_WHILE_STREAMING_FILE', 'Got exception while streaming file');
+
+/**
+ * Requested stream shutdown
+ * @event REQUESTED_STREAM_SHUTDOWN
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'REQUESTED_STREAM_SHUTDOWN', 'Requested stream shutdown');
+
+/**
+ * Failed to read file
+ * @event FAILED_TO_READ_FILE
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_TO_READ_FILE', 'Failed to read file');
+
+/**
+ * File does not exist
+ * @event FILE_NOT_FOUND
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FILE_NOT_FOUND', 'File not found');
+
+/**
+ * Failed to connect to origin stream on agent init
+ * @event FAILED_TO_CONNECT_TO_OROGIN_STREAM
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_TO_CONNECT_TO_OROGIN_STREAM', 'Failed to connect to origin stream');
+
+/**
+ * CDN stream not found
+ * @event CDN_STREAM_NOT_FOUND
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'CDN_STREAM_NOT_FOUND', 'CDN stream not found');
+
+/**
+ * Failed to get agent storage
+ * @event FAILED_TO_GET_AGENT_STORAGE
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'FAILED_TO_GET_AGENT_STORAGE', 'Failed to get agent storage');
+
+/**
+ * Shutdown agent servicing origin stream
+ * @event AGENT_SERVICING_ORIGIN_STREAM_IS_SHUTTING_DOWN
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'AGENT_SERVICING_ORIGIN_STREAM_IS_SHUTTING_DOWN', 'Agent servicing origin stream is shutting down');
+
+/**
+ * Terminated by keep-alive on walk through subscribers
+ * @event TERMINATED_BY_KEEP_ALIVE
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'TERMINATED_BY_KEEP_ALIVE', 'Terminated by keep-alive');
+
+/**
+* @namespace Flashphoner.constants.CALL_STATUS_INFO
+* @see Call
+*/
+var callStatusInfo = {};
+
+/**
+ * Normal call hangup
+ * @event NORMAL_CALL_CLEARING
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'NORMAL_CALL_CLEARING', 'Normal call clearing');
+
+/**
+ * Error occurred on session creation
+ * @event FAILED_BY_SESSION_CREATION
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'FAILED_BY_SESSION_CREATION', 'Failed by session creation');
+
+/**
+ * Failed by error during ICE establishment
+ * @event FAILED_BY_ICE_ERROR
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'FAILED_BY_ICE_ERROR', 'Failed by ICE error');
+
+/**
+ * RTP session failed by RTP activity timer
+ * @event FAILED_BY_RTP_ACTIVITY
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'FAILED_BY_RTP_ACTIVITY', 'Failed by RTP activity');
+
+/**
+ * Failed by error during ICE establishment
+ * @event FAILED_BY_ICE_ERROR
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'FAILED_BY_ICE_ERROR', 'Failed by ICE error');
+
+/**
+ * FF writer was failed on RTMP
+ * @event FAILED_BY_RTMP_WRITER_ERROR
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'FAILED_BY_RTMP_WRITER_ERROR', 'Failed by RTMP writer error');
+
+/**
+ * DTLS wrong fingerprint
+ * @event FAILED_BY_DTLS_FINGERPRINT_ERROR
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'FAILED_BY_DTLS_FINGERPRINT_ERROR', 'Failed by DTLS fingerprint error');
+
+/**
+ * DTLS error
+ * @event FAILED_BY_DTLS_ERROR
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'FAILED_BY_DTLS_ERROR', 'Failed by DTLS error');
+
+/**
+ * Error occurred during call
+ * @event FAILED_BY_ERROR
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'FAILED_BY_ERROR', 'Failed by error');
+
+/**
+ * Call failed by request timeout
+ * @event FAILED_BY_REQUEST_TIMEOUT
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'FAILED_BY_REQUEST_TIMEOUT', 'Failed by request timeout');
+
+/**
+* @namespace Flashphoner.constants.ERROR_INFO
+*/
+var errorInfo = {};
+
+/**
+ * Error if none of MediaProviders available
+ * @event NONE_OF_MEDIAPROVIDERS_AVAILABLE
+ * @memberof Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'NONE_OF_MEDIAPROVIDERS_AVAILABLE', 'None of MediaProviders available');
+
+/**
+ * Error if none of preferred MediaProviders available
+ * @event NONE_OF_PREFERRED_MEDIAPROVIDERS_AVAILABLE
+ * @memberof Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'NONE_OF_PREFERRED_MEDIAPROVIDERS_AVAILABLE', 'None of preferred MediaProviders available');
+
+/**
+ * Error if API is not initialized
+ * @event FLASHPHONER_API_IS_NO_INITIALIZED
+ * @memberof Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'FLASHPHONER_API_IS_NO_INITIALIZED', 'Flashphoner API is not initialized');
+
+/**
+ * Error if options.urlServer is not specified
+ * @event OPTIONS.URLSERVER_MUST_BE_PROVIDED
+ * @memberof Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'OPTIONS.URLSERVER_MUST_BE_PROVIDED', 'options.urlServer must be provided');
+
+/**
+ * Error if session state is not REGISTERED
+ * @event INVALID_SESSION_STATE
+ * @memberof Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'INVALID_SESSION_STATE', 'Invalid session state');
+
+/**
+ * Error if no options provided
+ * @event OPTIONS_MUST_BE_PROVIDED
+ * @memberof Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'OPTIONS_MUST_BE_PROVIDED', 'options must be provided');
+
+/**
+ * Error if call status is not {@link Flashphoner.constants.CALL_STATUS.NEW}
+ * @event INVALID_CALL_STATE
+ * @memberof Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'INVALID_CALL_STATE', 'Invalid call state');
+
+/**
+ * Error if event is not specified
+ * @event EVENT_CANT_BE_NULL
+ * @memberof Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'EVENT_CANT_BE_NULL', 'Event can\'t be null');
+
+/**
+ * Error if callback is not a valid function
+ * @event CALLBACK_NEEDS_TO_BE_A_VALID_FUNCTION
+ * @memberof Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'CALLBACK_NEEDS_TO_BE_A_VALID_FUNCTION', 'Callback needs to be a valid function');
+
+/**
+ * Error if session state is not ESTABLISHED
+ * @event INVALID_SESSION_STATE
+ * @memberof Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'INVALID_SESSION_STATE', 'Invalid session state');
+
+/**
+ * Error if options.name is not specified
+ * @event OPTIONS.NAME_MUST_BE_PROVIDED
+ * @memberof Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'OPTIONS.NAME_MUST_BE_PROVIDED', 'options.name must be provided');
+
 var constants = {};
 define(constants, 'SESSION_STATUS', sessionStatus);
 define(constants, 'STREAM_STATUS', streamStatus);
 define(constants, 'CALL_STATUS', callStatus);
+define(constants, 'STREAM_STATUS_INFO', streamStatusInfo);
+define(constants, 'CALL_STATUS_INFO', callStatusInfo);
+define(constants, 'ERROR_INFO', errorInfo);
 
 //define helper
 function define(obj, name, value) {
