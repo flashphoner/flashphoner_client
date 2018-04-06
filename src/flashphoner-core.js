@@ -1542,6 +1542,7 @@ var createSession = function (options) {
 
         /**
          * Switch camera in real-time.
+         * Works only with WebRTC
          *
          * @memberOf Stream
          * @inner
@@ -1558,7 +1559,6 @@ var createSession = function (options) {
 		
         /**
          * Stop stream.
-         * Works only with WebRTC
          *
          * @memberof Stream
          * @inner
