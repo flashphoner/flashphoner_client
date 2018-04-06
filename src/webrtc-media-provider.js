@@ -11,22 +11,10 @@ var defaultConstraints;
 var logger;
 var LOG_PREFIX = "webrtc";
 var audioContext;
-var videoCams = [];
-var switchCount = 0;
 
 var createConnection = function (options) {
 		return new Promise(function (resolve, reject) {
-			navigator.mediaDevices.enumerateDevices().then(function (devices) {
-			devices.forEach(function (value) {
-				if(value.kind==='videoinput') {
-					navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:value.deviceId}}})
-						.then(function (stream) { videoCams.push(stream) })
-						.catch(function (reason) { console.log(reason) });
-				}
-			})
-		}, function (reason) {
-        console.log(reason)
-		});
+
         var id = options.id;
         var connectionConfig = options.connectionConfig || {"iceServers": []};
         var connectionConstraints = options.connectionConstraints || {};
@@ -44,6 +32,9 @@ var createConnection = function (options) {
         var bidirectional = options.bidirectional;
         var localVideo;
         var remoteVideo;
+        var videoCams = [];
+        var currentCam;
+        var switchCount = 0;
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
             localVideo.id = id + "-local";
@@ -81,6 +72,23 @@ var createConnection = function (options) {
                 connection.addStream(localVideo.srcObject);
             }
         }
+            if(localVideo) {
+                if (localVideo.srcObject.getVideoTracks()[0]) {
+                    listDevices(false).then(function (devices) {
+                        devices.video.forEach(function (device) {
+                            videoCams.push(device.id);
+
+                            //navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: device.id}}})
+                            //    .then(function (stream) {
+                            //        videoCams.push(stream)
+                            //    })
+                            //    .catch(function (reason) {
+                            //        logger.error(LOG_PREFIX, reason)
+                            //    });
+                        })
+                    });
+                }
+            }
 
         connection.ontrack = function (event) {
             if (remoteVideo) {
@@ -381,16 +389,28 @@ var createConnection = function (options) {
 
 	
         var switchCam = function (localVideo) {
-            switchCount++;
-            if(switchCount===videoCams.length) {
-                switchCount=0;
+            var sender = connection.getSenders()[1];
+            switchCount = (switchCount + 1) % videoCams.length;
+            if(videoCams.length>1 && sender) {
+                connection.getLocalStreams().forEach(function (stream) {
+                    stream.getVideoTracks().forEach(function (track) {
+                        track.stop();
+                    })
+                });
+                navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: videoCams[switchCount]}}}).then(function (stream) {
+                    if(currentCam) {
+                        currentCam.getTracks().forEach(function (track) { track.stop(); });
+                    }
+                    currentCam = stream;
+                    sender.replaceTrack(currentCam.getVideoTracks()[0]);
+                    var video = localVideo.firstElementChild;
+                    if(video) {
+                        video.srcObject = currentCam;
+                    }
+                }).catch(function (reason) {
+                    logger.error(LOG_PREFIX, reason)
+                });
             }
-            connection.getSenders()[1].replaceTrack(videoCams[switchCount].getVideoTracks()[0]);
-            localVideo.innerHTML = '';
-            var video = document.createElement('video');
-            localVideo.appendChild(video);
-            video.srcObject = videoCams[switchCount];
-
         };
 		
         var exports = {};

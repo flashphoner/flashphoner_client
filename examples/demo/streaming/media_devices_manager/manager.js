@@ -146,6 +146,9 @@ function onStarted(publishStream, previewStream) {
         $(this).prop('disabled', true);
         previewStream.stop();
     }).prop('disabled', false);
+    $("#switchBtn").text("Switch").off('click').click(function () {
+        publishStream.switchCam(localVideo);
+    }).prop('disabled', false);
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
     previewStream.setVolume(currentVolumeValue);
@@ -169,6 +172,7 @@ function onStopped() {
             start();
         }
     }).prop('disabled', false);
+    $("#switchBtn").text("Switch").off('click').prop('disabled',true);
     unmuteInputs();
     $("#publishResolution").text("");
     $("#playResolution").text("");

@@ -486,7 +486,7 @@ var createSession = function (options) {
                 mediaProviders: Object.keys(MediaProvider),
                 keepAlive: keepAlive,
                 authToken:authToken,
-                clientVersion: "0.5.30",
+                clientVersion: "0.5.28",
                 clientOSVersion: window.navigator.appVersion,
                 clientBrowserVersion: window.navigator.userAgent,
                 custom: options.custom
@@ -1540,13 +1540,25 @@ var createSession = function (options) {
             });
         };
 
-		
+        /**
+         * Switch camera in real-time.
+         *
+         * @memberOf Stream
+         * @inner
+         * @throws {Error} Error if stream status is {@link Flashphoner.constants.STREAM_STATUS.NEW}
+         */
 		var switchCam = function(localVideo) {
-            mediaConnection.switchCam(localVideo);
+		    if(sessionStatus === SESSION_STATUS.NEW){
+		        throw new Error('Invalid stream state');
+            }
+		    if(mediaProvider && mediaProvider.toString() === 'WebRTC') {
+                mediaConnection.switchCam(localVideo);
+            }
         };
 		
         /**
          * Stop stream.
+         * Works only with WebRTC
          *
          * @memberof Stream
          * @inner
