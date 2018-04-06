@@ -200,10 +200,10 @@ define(streamStatusInfo, 'FAILED_BY_ICE_ERROR', 'Failed by ICE error');
 
 /**
  * Timeout has been reached during ICE establishment
- * @event FAILED_BY_ICETIMEOUT
+ * @event FAILED_BY_ICE_TIMEOUT
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
-define(streamStatusInfo, 'FAILED_BY_ICETIMEOUT', 'Failed by ICE timeout');
+define(streamStatusInfo, 'FAILED_BY_ICE_TIMEOUT', 'Failed by ICE timeout');
 
 /**
  * ICE refresh failed on session
@@ -228,10 +228,10 @@ define(streamStatusInfo, 'FAILED_BY_DTLS_ERROR', 'Failed by DTLS error');
 
 /**
  * FF writer was failed on HLS streaming
- * @event FAILED_BY_HLSWRITER_ERROR
+ * @event FAILED_BY_HLS_WRITER_ERROR
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
-define(streamStatusInfo, 'FAILED_BY_HLSWRITER_ERROR', 'Failed by HLS writer error');
+define(streamStatusInfo, 'FAILED_BY_HLS_WRITER_ERROR', 'Failed by HLS writer error');
 
 /**
  * FF writer was failed on RTMP streaming
@@ -256,10 +256,10 @@ define(streamStatusInfo, 'STOPPED_BY_SESSION_DISCONNECT', 'Stopped by session di
 
 /**
  * Stream was stopped by rest terminate request
- * @event STOPPED_BYREST_/TERMINATE
+ * @event STOPPED_BY_REST_TERMINATE
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
-define(streamStatusInfo, 'STOPPED_BYREST_/TERMINATE', 'Stopped by rest /terminate');
+define(streamStatusInfo, 'STOPPED_BY_REST_TERMINATE', 'Stopped by rest /terminate');
 
 /**
  * Related publisher stopped its stream or lost connection
@@ -312,24 +312,24 @@ define(streamStatusInfo, 'STREAM_NOT_FOUND', 'Stream not found');
 
 /**
  * This name is used on publish stream
- * @event STREAM_NAME_IS_ALREADY_IN_USE
+ * @event STREAM_NAME_ALREADY_IN_USE
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
-define(streamStatusInfo, 'STREAM_NAME_IS_ALREADY_IN_USE', 'Stream name is already in use');
+define(streamStatusInfo, 'STREAM_NAME_ALREADY_IN_USE', 'Stream name is already in use');
 
 /**
  * MediaSessionId is null or empty
- * @event MEDIASESSIONID_IS_NULL
+ * @event MEDIASESSION_ID_NULL
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
-define(streamStatusInfo, 'MEDIASESSIONID_IS_NULL', 'MediaSessionId is null');
+define(streamStatusInfo, 'MEDIASESSION_ID_NULL', 'MediaSessionId is null');
 
 /**
  * Published or subscribed sessions used this MediaSessionId
- * @event MEDIASESSIONID_IS_ALREADY_IN_USE
+ * @event MEDIASESSION_ALREADY_IN_USE
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
-define(streamStatusInfo, 'MEDIASESSIONID_IS_ALREADY_IN_USE', 'MediaSessionId is already in use');
+define(streamStatusInfo, 'MEDIASESSION_ALREADY_IN_USE', 'MediaSessionId is already in use');
 
 /**
  * Session is not initialized or terminated on play ordinary stream
