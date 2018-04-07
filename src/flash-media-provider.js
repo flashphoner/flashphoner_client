@@ -253,6 +253,9 @@ var createConnection = function(options) {
             }
         };
 
+        var switchCam = function () {
+        };
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -270,6 +273,7 @@ var createConnection = function(options) {
         exports.isVideoMuted = isVideoMuted;
         exports.getStats = getStats;
         exports.fullScreen = fullScreen;
+        exports.switchCam = switchCam;
     });
 };
 

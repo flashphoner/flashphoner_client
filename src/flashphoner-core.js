@@ -1546,15 +1546,13 @@ var createSession = function (options) {
          *
          * @memberOf Stream
          * @inner
-         * @throws {Error} Error if stream status is {@link Flashphoner.constants.STREAM_STATUS.NEW}
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
          */
-		var switchCam = function(localVideo) {
-		    if(sessionStatus === SESSION_STATUS.NEW){
+		var switchCam = function() {
+		    if(status_ !== STREAM_STATUS.PUBLISHING){
 		        throw new Error('Invalid stream state');
             }
-		    if(mediaProvider && mediaProvider.toString() === 'WebRTC') {
-                mediaConnection.switchCam(localVideo);
-            }
+            mediaConnection.switchCam();
         };
 		
         /**

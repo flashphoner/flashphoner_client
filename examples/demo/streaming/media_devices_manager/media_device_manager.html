@@ -125,10 +125,24 @@
                             <label style="text-align: left" class="control-label col-sm-5" for="sendVideo">Send Video</label>
                         </div>
                         <div class="form-group" id="videoInputForm">
+                            <div class="col-sm-1">
+                                <input type="radio" class="checkbox" name="videoGroup" style="margin-top: 4px">
+                            </div>
                             <label style="text-align: left" class="col-sm-4 control-label">Cam</label>
                             <div class="col-sm-6">
                                 <select class="form-control" id="videoInput">
                                 </select>
+                                <button type="button" class="btn btn-default form-control" id="switchBtn">Switch</button>
+                            </div>
+                        </div>
+                        <div class="form-group" id="canvasInputForm">
+                            <div class="col-sm-1">
+                                <input type="radio" class="checkbox" name="videoGroup" style="margin-top: 4px">
+                            </div>
+                            <label style="text-align: left" class="col-sm-4 control-label">Canvas</label>
+
+                            <div class="col-sm-6">
+                                <canvas width="140" height="100">Your browser does not support the HTML5 canvas tag.</canvas>
                             </div>
                         </div>
                         <div class="form-group" id="sendSizeForm">
@@ -191,9 +205,6 @@
                         <label class="col-sm-2 control-label"></label>
                         <div class="col-sm-4">
                             <button type="button" class="btn btn-default" id="publishBtn">Start</button>
-                        </div>
-                        <div class="col-sm-4">
-                            <button type="button" class="btn btn-default" id="switchBtn">Switch</button>
                         </div>
                     </div>
                 </div>

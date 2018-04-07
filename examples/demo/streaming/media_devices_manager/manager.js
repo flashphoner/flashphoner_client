@@ -147,7 +147,7 @@ function onStarted(publishStream, previewStream) {
         previewStream.stop();
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').click(function () {
-        publishStream.switchCam(localVideo);
+        publishStream.switchCam();
     }).prop('disabled', false);
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
