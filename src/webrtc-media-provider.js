@@ -13,7 +13,7 @@ var LOG_PREFIX = "webrtc";
 var audioContext;
 
 var createConnection = function (options) {
-		return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
 
         var id = options.id;
         var connectionConfig = options.connectionConfig || {"iceServers": []};
@@ -33,7 +33,6 @@ var createConnection = function (options) {
         var localVideo;
         var remoteVideo;
         var videoCams = [];
-        var currentStream;
         var switchCount = 0;
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
@@ -72,10 +71,14 @@ var createConnection = function (options) {
                 connection.addStream(localVideo.srcObject);
             }
         }
-        if(localVideo) {
-            if (localVideo.srcObject.getVideoTracks()[0]) {
+        if (localVideo) {
+            var videoTrack = localVideo.srcObject.getVideoTracks()[0];
+            if (videoTrack) {
                 listDevices(false).then(function (devices) {
                     devices.video.forEach(function (device) {
+                        if (videoTrack.label === device.label) {
+                            switchCount = videoCams.length;
+                        }
                         videoCams.push(device.id);
                     })
                 });
@@ -379,27 +382,27 @@ var createConnection = function (options) {
         }
 
         var switchCam = function () {
-            var sender = connection.getSenders()[1];
-            switchCount = (switchCount + 1) % videoCams.length;
-            if(videoCams.length>1 && sender) {
-                connection.getLocalStreams().forEach(function (stream) {
-                    stream.getVideoTracks().forEach(function (track) {
+            if (videoCams.length > 1 && localVideo && localVideo.srcObject) {
+                var currentStream = localVideo.srcObject;
+                connection.getSenders().forEach(function (sender) {
+                    if (sender.track.kind === 'audio') return;
+                    currentStream.getVideoTracks().forEach(function (track) {
                         track.stop();
-                    })
-                });
-                navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: videoCams[switchCount]}}}).then(function (stream) {
-                    if(currentStream) {
-                        currentStream.getTracks().forEach(function (track) { track.stop(); });
-                    }
-                    currentStream = stream;
-                    sender.replaceTrack(currentStream.getVideoTracks()[0]);
-                    localVideo.srcObject = currentStream;
-                }).catch(function (reason) {
-                    logger.error(LOG_PREFIX, reason)
+                        currentStream.removeTrack(track);
+                    });
+                    switchCount = (switchCount + 1) % videoCams.length;
+                    navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: videoCams[switchCount]}}}).then(function (newStream) {
+                        var newVideoTrack = newStream.getVideoTracks()[0];
+                        currentStream.addTrack(newVideoTrack);
+                        sender.replaceTrack(newVideoTrack);
+                    }).catch(function (reason) {
+                        logger.error(LOG_PREFIX, reason)
+                    });
+
                 });
             }
         };
-		
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -417,7 +420,7 @@ var createConnection = function (options) {
         exports.isVideoMuted = isVideoMuted;
         exports.getStats = getStats;
         exports.fullScreen = fullScreen;
-		exports.switchCam = switchCam;
+        exports.switchCam = switchCam;
         connections[id] = exports;
         resolve(exports);
     });
