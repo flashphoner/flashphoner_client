@@ -126,7 +126,7 @@
                         </div>
                         <div class="form-group" id="videoInputForm">
                             <div class="col-sm-1">
-                                <input type="radio" class="checkbox" name="videoGroup" style="margin-top: 4px">
+                                <input type="radio" class="checkbox" name="videoGroup" id="sendVideoStream" checked style="margin-top: 4px">
                             </div>
                             <label style="text-align: left" class="col-sm-4 control-label">Cam</label>
                             <div class="col-sm-6">
@@ -137,12 +137,12 @@
                         </div>
                         <div class="form-group" id="canvasInputForm">
                             <div class="col-sm-1">
-                                <input type="radio" class="checkbox" name="videoGroup" style="margin-top: 4px">
+                                <input type="radio" class="checkbox" name="videoGroup" id="sendCanvasStream" style="margin-top: 4px">
                             </div>
                             <label style="text-align: left" class="col-sm-4 control-label">Canvas</label>
 
                             <div class="col-sm-6">
-                                <canvas width="140" height="100">Your browser does not support the HTML5 canvas tag.</canvas>
+                                <canvas width="320" height="240" id="canvas">Your browser does not support the HTML5 canvas tag.</canvas>
                             </div>
                         </div>
                         <div class="form-group" id="sendSizeForm">
@@ -339,7 +339,6 @@
         off: 'off',
         size: 'md'
     });
-
 </script>
 
 </body>

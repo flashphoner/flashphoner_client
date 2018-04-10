@@ -35,6 +35,8 @@ var createConnection = function (options) {
         var videoCams = [];
         var currentStream;
         var switchCount = 0;
+        var isCustom = options.isCustom;
+
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
             localVideo.id = id + "-local";
@@ -380,8 +382,8 @@ var createConnection = function (options) {
 
         var switchCam = function () {
             var sender = connection.getSenders()[1];
-            switchCount = (switchCount + 1) % videoCams.length;
-            if(videoCams.length>1 && sender) {
+            if(videoCams.length>1 && sender && !isCustom) {
+                switchCount = (switchCount + 1) % videoCams.length;
                 connection.getLocalStreams().forEach(function (stream) {
                     stream.getVideoTracks().forEach(function (track) {
                         track.stop();
@@ -437,27 +439,32 @@ var getMediaAccess = function (constraints, display) {
             releaseMedia(display);
         }
         //check if this is screen sharing
-        if (constraints.video && constraints.video.type && constraints.video.type == "screen") {
-            delete constraints.video.type;
-            getScreenDeviceId(constraints).then(function (screenSharingConstraints) {
-                //copy constraints
-                for (var prop in screenSharingConstraints) {
-                    if (screenSharingConstraints.hasOwnProperty(prop)) {
-                        constraints.video[prop] = screenSharingConstraints[prop];
+        if (constraints.video && constraints.video.type) {
+            if (constraints.video.type == "screen") {
+                delete constraints.video.type;
+                getScreenDeviceId(constraints).then(function (screenSharingConstraints) {
+                    //copy constraints
+                    for (var prop in screenSharingConstraints) {
+                        if (screenSharingConstraints.hasOwnProperty(prop)) {
+                            constraints.video[prop] = screenSharingConstraints[prop];
+                        }
                     }
-                }
-                if (adapter.browserDetails.browser == "chrome") {
-                    delete constraints.video.frameRate;
-                    delete constraints.video.height;
-                    delete constraints.video.width;
-                }
-                getAccess(constraints, true);
-            }, reject);
+                    if (adapter.browserDetails.browser == "chrome") {
+                        delete constraints.video.frameRate;
+                        delete constraints.video.height;
+                        delete constraints.video.width;
+                    }
+                    getAccess(constraints, true, false);
+                }, reject);
+            } else if (constraints.video.type == "custom") {
+                delete constraints.video.type;
+                getAccess(constraints, false, true);
+            }
         } else {
             getAccess(constraints);
         }
 
-        function getAccess(constraints, screenShare) {
+        function getAccess(constraints, screenShare, isCustom) {
             logger.info(LOG_PREFIX, constraints);
             var requestAudioConstraints = null;
             if (screenShare) {
@@ -466,34 +473,42 @@ var getMediaAccess = function (constraints, display) {
                     delete constraints.audio;
                 }
             }
-            navigator.getUserMedia(constraints, function (stream) {
-                var video = getCacheInstance(display);
-                if (!video) {
-                    video = document.createElement('video');
-                    display.appendChild(video);
-                }
-                video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
-                //show local camera
-                video.srcObject = stream;
-                //mute audio
-                video.muted = true;
-                video.onloadedmetadata = function (e) {
-                    video.play();
-                };
-                // This hack for chrome only, firefox supports screen-sharing + audio natively
-                if (requestAudioConstraints && adapter.browserDetails.browser == "chrome") {
-                    logger.info(LOG_PREFIX, "Request for audio stream");
-                    navigator.getUserMedia({audio: requestAudioConstraints}, function (stream) {
-                        logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
-                        video.srcObject.addTrack(stream.getAudioTracks()[0]);
-                        resolve(display);
-                    });
-                } else {
-                    resolve(display);
-                }
-            }, reject);
+            if(isCustom) {
+                loadVideo(constraints.customStream, resolve, requestAudioConstraints, display);
+            } else {
+                navigator.getUserMedia(constraints, function (stream) {
+                    loadVideo(stream, resolve, requestAudioConstraints, display);
+                }, reject);
+            }
         }
     });
+};
+
+var loadVideo = function (stream, resolve,requestAudioConstraints, display) {
+    var video = getCacheInstance(display);
+    if (!video) {
+        video = document.createElement('video');
+        display.appendChild(video);
+    }
+    video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
+    //show custom stream
+    video.srcObject = stream;
+    //mute audio
+    video.muted = true;
+    video.onloadedmetadata = function (e) {
+        video.play();
+    };
+    // This hack for chrome only, firefox supports screen-sharing + audio natively
+    if (requestAudioConstraints && adapter.browserDetails.browser == "chrome") {
+        logger.info(LOG_PREFIX, "Request for audio stream");
+        navigator.getUserMedia({audio: requestAudioConstraints}, function (stream) {
+            logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
+            video.srcObject.addTrack(stream.getAudioTracks()[0]);
+            resolve(display);
+        });
+    } else {
+        resolve(display);
+    }
 };
 
 var getScreenDeviceId = function (constraints) {

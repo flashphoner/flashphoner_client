@@ -7,6 +7,7 @@ var previewStream;
 var publishStream;
 var currentVolumeValue = 50;
 var intervalID;
+var canvas;
 
 try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -40,6 +41,15 @@ function init_page() {
     //local and remote displays
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
+    canvas = document.getElementById("canvas");
+
+    var ctx=canvas.getContext("2d");
+    image = new Image;
+    image.src = 'canvas.png';
+    image.addEventListener("load", function() {
+        ctx.drawImage(image, canvas.width / 2 - image.width / 2,
+            canvas.height / 2 - image.height / 2);
+    }, false);
 
     Flashphoner.getMediaDevices(null, true).then(function (list) {
         list.audio.forEach(function (device) {
@@ -77,7 +87,6 @@ function init_page() {
                 video.appendChild(option);
             }
         });
-
 
 
         $("#url").val(setURL() + "/" + createUUID(8));
@@ -142,13 +151,14 @@ function init_page() {
 }
 
 function onStarted(publishStream, previewStream) {
+    $('input:radio').attr("disabled", true);
     $("#publishBtn").text("Stop").off('click').click(function () {
         $(this).prop('disabled', true);
         previewStream.stop();
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').click(function () {
         publishStream.switchCam();
-    }).prop('disabled', false);
+    }).prop('disabled', $('#sendCanvasStream').is(':checked'));
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
     previewStream.setVolume(currentVolumeValue);
@@ -165,6 +175,7 @@ function onStarted(publishStream, previewStream) {
 }
 
 function onStopped() {
+    $('input:radio').attr("disabled", false);
     $("#publishBtn").text("Start").off('click').click(function () {
         if (validateForm()) {
             muteInputs();
@@ -191,7 +202,7 @@ function startTest() {
         Flashphoner.playFirstVideo(localVideo, true);
         Flashphoner.playFirstVideo(remoteVideo, false);
     }
-    Flashphoner.getMediaAccess(getConstaints(), localVideo).then(function (disp) {
+    Flashphoner.getMediaAccess(getConstraints(), localVideo).then(function (disp) {
         $("#testBtn").text("Release").off('click').click(function () {
             $(this).prop('disabled', true);
             stopTest();
@@ -227,6 +238,8 @@ function startTest() {
         $("#testBtn").prop('disabled', false);
         testStarted = false;
     });
+    
+    drawImage();
 }
 
 
@@ -289,10 +302,11 @@ function start() {
     });
 }
 
-function getConstaints() {
+function getConstraints() {
     constraints = {
         audio: $("#sendAudio").is(':checked'),
-        video: $("#sendVideo").is(':checked')
+        video: $("#sendVideo").is(':checked'),
+        customStream: $("#sendCanvasStream").is(':checked')
     };
     if (constraints.audio) {
         constraints.audio = {
@@ -322,13 +336,18 @@ function getConstaints() {
         if (parseInt($('#fps').val()) > 0)
             constraints.video.frameRate = parseInt($('#fps').val());
     }
+    if(constraints.customStream) {
+        constraints.video.type = "custom";
+        constraints.customStream = canvas.captureStream();
+    }
+
     return constraints;
 }
 
 function startStreaming(session) {
-    var streamName = field("url").split('/')[3];
-    var constraints = getConstaints();
 
+    var streamName = field("url").split('/')[3];
+    var constraints = getConstraints();
     var mediaConnectionConstraints;
     if (!$("#cpuOveruseDetection").is(':checked')) {
         mediaConnectionConstraints = {
@@ -392,6 +411,8 @@ function startStreaming(session) {
                     detectSpeech(previewStream);
                 }, 3000);
             }
+
+            drawImage();
         }).on(STREAM_STATUS.STOPPED, function () {
             publishStream.stop();
         }).on(STREAM_STATUS.FAILED, function () {
@@ -602,4 +623,15 @@ function handleAudio(event) {
             this.lastClip = window.performance.now();
         }
     }
+}
+
+function drawImage() {
+    var ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var image = new Image;
+    image.src = 'canvas.png';
+    image.addEventListener("load", function () {
+        ctx.drawImage(image, canvas.width / 2 - image.width / 2,
+            canvas.height / 2 - image.height / 2);
+    }, false);
 }
