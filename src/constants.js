@@ -213,7 +213,7 @@ define(streamStatusInfo, 'FAILED_BY_ICE_TIMEOUT', 'Failed by ICE timeout');
 define(streamStatusInfo, 'FAILED_BY_KEEP_ALIVE', 'Failed by ICE keep alive');
 
 /**
- * DTLS wrong fingerprint
+ * DTLS has wrong fingerprint
  * @event FAILED_BY_DTLS_FINGERPRINT_ERROR
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
@@ -269,7 +269,7 @@ define(streamStatusInfo, 'STOPPED_BY_REST_TERMINATE', 'Stopped by rest /terminat
 define(streamStatusInfo, 'STOPPED_BY_PUBLISHER_STOP', 'Stopped by publisher stop');
 
 /**
- * Stopped by user with stream.stop() or stream.unpublish()
+ * Stop the media session by user after call was finished or unpublish stream
  * @event STOPPED_BY_USER
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
@@ -297,21 +297,21 @@ define(streamStatusInfo, 'FAILED_BY_ADD_STREAM_TO_PROXY', 'Failed to add stream 
 define(streamStatusInfo, 'DISTRIBUTOR_STOPPED', 'Distributor stopped');
 
 /**
- * Publish stream is not ready
+ * Publish stream is not ready, try again later
  * @event PUBLISH_STREAM_IS_NOT_READY
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
 define(streamStatusInfo, 'PUBLISH_STREAM_IS_NOT_READY', 'Publish stream is not ready');
 
 /**
- * Not found stream by name
+ * Stream with this name is not found, check the correct of the name
  * @event STREAM_NOT_FOUND
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
 define(streamStatusInfo, 'STREAM_NOT_FOUND', 'Stream not found');
 
 /**
- * This name is used on publish stream
+ * Server already has a publish stream with the same name, try using different one
  * @event STREAM_NAME_ALREADY_IN_USE
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
@@ -346,14 +346,14 @@ define(streamStatusInfo, 'SESSION_NOT_READY', 'Session not ready');
 define(streamStatusInfo, 'SESSION_DOES_NOT_EXIST', 'Session does not exist');
 
 /**
- * RTSP has wrong format on play stream
+ * RTSP has wrong format on play stream, check correct of the RTSP url
  * @event RTSP_HAS_WRONG_FORMAT
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
 define(streamStatusInfo, 'RTSP_HAS_WRONG_FORMAT', 'Rtsp has wrong format');
 
 /**
- * File has wrong format on play vod
+ * Failed to play vod stream, this format is not supported
  * @event FILE_HAS_WRONG_FORMAT
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
@@ -367,7 +367,7 @@ define(streamStatusInfo, 'FILE_HAS_WRONG_FORMAT', 'File has wrong format');
 define(streamStatusInfo, 'FAILED_TO_CONNECT_TO_RTSP_STREAM', 'Failed to connect to rtsp stream');
 
 /**
- * Rtsp stream not found where agent received response 404-"Not Found"
+ * Rtsp stream is not found, agent received "404-Not Found"
  * @event RTSP_STREAM_NOT_FOUND
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
@@ -388,14 +388,14 @@ define(streamStatusInfo, 'RTSPAGENT_SHUTDOWN', 'RtspAgent shutdown');
 define(streamStatusInfo, 'STREAM_FAILED', 'Stream failed');
 
 /**
- * No common codecs on setup track
+ * No common codecs on setup track, did not found corresponding trackId->mediaPort
  * @event NO_COMMON_CODECS
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
 define(streamStatusInfo, 'NO_COMMON_CODECS', 'No common codecs');
 
 /**
- * Bad referenced rtsp link
+ * Bad referenced rtsp link, check for correct, example: rtsp://user:b@d_password@127.0.0.1/stream
  * @event BAD_URI
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
@@ -416,14 +416,14 @@ define(streamStatusInfo, 'GOT_EXCEPTION_WHILE_STREAMING_FILE', 'Got exception wh
 define(streamStatusInfo, 'REQUESTED_STREAM_SHUTDOWN', 'Requested stream shutdown');
 
 /**
- * Failed to read file
+ * Failed to create movie, file can not be read
  * @event FAILED_TO_READ_FILE
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
 define(streamStatusInfo, 'FAILED_TO_READ_FILE', 'Failed to read file');
 
 /**
- * File does not exist
+ * File does not exist, check filename
  * @event FILE_NOT_FOUND
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */

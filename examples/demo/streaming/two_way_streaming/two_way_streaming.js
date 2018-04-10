@@ -208,9 +208,41 @@ function setStatus(selector, status, stream) {
     } else if (status == "FAILED") {
         if (stream) {
             if (stream.published()) {
-                $("#publishInfo").text(stream.getInfo()).attr("class", "text-muted");
+                switch(stream.getInfo()){
+                    case Flashphoner.constants.STREAM_STATUS_INFO.STREAM_NAME_ALREADY_IN_USE:
+                        $("#publishInfo").text("Server already has a publish stream with the same name, try using different one").attr("class", "text-muted");
+                        break;
+                    default:
+                        $("#publishInfo").text("Other: "+stream.getInfo()).attr("class", "text-muted");
+                        break;
+                }
             } else {
-                $("#playInfo").text(stream.getInfo()).attr("class", "text-muted");
+                switch(stream.getInfo()){
+                    case Flashphoner.constants.STREAM_STATUS_INFO.SESSION_DOES_NOT_EXIST:
+                        $("#playInfo").text("Actual session does not exist").attr("class", "text-muted");
+                        break;
+                    case Flashphoner.constants.STREAM_STATUS_INFO.STOPPED_BY_PUBLISHER_STOP:
+                        $("#playInfo").text("Related publisher stopped its stream or lost connection").attr("class", "text-muted");
+                        break;
+                    case Flashphoner.constants.STREAM_STATUS_INFO.SESSION_NOT_READY:
+                        $("#playInfo").text("Session is not initialized or terminated on play ordinary stream").attr("class", "text-muted");
+                        break;
+                    case Flashphoner.constants.STREAM_STATUS_INFO.RTSP_STREAM_NOT_FOUND:
+                        $("#playInfo").text("Rtsp stream not found where agent received '404-Not Found'").attr("class", "text-muted");
+                        break;
+                    case Flashphoner.constants.STREAM_STATUS_INFO.FAILED_TO_CONNECT_TO_RTSP_STREAM:
+                        $("#playInfo").text("Failed to connect to rtsp stream").attr("class", "text-muted");
+                        break;
+                    case Flashphoner.constants.STREAM_STATUS_INFO.FILE_NOT_FOUND:
+                        $("#playInfo").text("File does not exist, check filename").attr("class", "text-muted");
+                        break;
+                    case Flashphoner.constants.STREAM_STATUS_INFO.FILE_HAS_WRONG_FORMAT:
+                        $("#playInfo").text("File has wrong format on play vod, this format is not supported").attr("class", "text-muted");
+                        break;
+                    default:
+                        $("#playInfo").text("Other: "+stream.getInfo()).attr("class", "text-muted");
+                        break;
+                }
             }
         }
         statusField.attr("class", "text-danger");
