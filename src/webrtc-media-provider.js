@@ -545,6 +545,7 @@ var releaseMedia = function (display) {
 };
 
 function getCacheInstance(display) {
+    if (!display) return;
     var i;
     for (i = 0; i < display.children.length; i++) {
         if (display.children[i] && (display.children[i].id.indexOf(LOCAL_CACHED_VIDEO) != -1 || display.children[i].id.indexOf(REMOTE_CACHED_VIDEO) != -1)) {
