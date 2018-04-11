@@ -439,32 +439,27 @@ var getMediaAccess = function (constraints, display) {
             releaseMedia(display);
         }
         //check if this is screen sharing
-        if (constraints.video && constraints.video.type) {
-            if (constraints.video.type == "screen") {
-                delete constraints.video.type;
-                getScreenDeviceId(constraints).then(function (screenSharingConstraints) {
-                    //copy constraints
-                    for (var prop in screenSharingConstraints) {
-                        if (screenSharingConstraints.hasOwnProperty(prop)) {
-                            constraints.video[prop] = screenSharingConstraints[prop];
-                        }
+        if (constraints.video && constraints.video.type && constraints.video.type == "screen") {
+            delete constraints.video.type;
+            getScreenDeviceId(constraints).then(function (screenSharingConstraints) {
+                //copy constraints
+                for (var prop in screenSharingConstraints) {
+                    if (screenSharingConstraints.hasOwnProperty(prop)) {
+                        constraints.video[prop] = screenSharingConstraints[prop];
                     }
-                    if (adapter.browserDetails.browser == "chrome") {
-                        delete constraints.video.frameRate;
-                        delete constraints.video.height;
-                        delete constraints.video.width;
-                    }
-                    getAccess(constraints, true, false);
-                }, reject);
-            } else if (constraints.video.type == "custom") {
-                delete constraints.video.type;
-                getAccess(constraints, false, true);
-            }
+                }
+                if (adapter.browserDetails.browser == "chrome") {
+                    delete constraints.video.frameRate;
+                    delete constraints.video.height;
+                    delete constraints.video.width;
+                }
+                getAccess(constraints, true);
+            }, reject);
         } else {
             getAccess(constraints);
         }
 
-        function getAccess(constraints, screenShare, isCustom) {
+        function getAccess(constraints, screenShare) {
             logger.info(LOG_PREFIX, constraints);
             var requestAudioConstraints = null;
             if (screenShare) {
@@ -473,7 +468,7 @@ var getMediaAccess = function (constraints, display) {
                     delete constraints.audio;
                 }
             }
-            if(isCustom) {
+            if(constraints.customStream) {
                 loadVideo(constraints.customStream, resolve, requestAudioConstraints, display);
             } else {
                 navigator.getUserMedia(constraints, function (stream) {

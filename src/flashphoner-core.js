@@ -1481,16 +1481,11 @@ var createSession = function (options) {
             status_ = STREAM_STATUS.PENDING;
             published_ = true;
             var hasAudio = true;
-            var isCustom = false;
-            if (constraints && constraints.video && constraints.video.type && (constraints.video.type == "screen" || constraints.video.type == "custom")) {
+            if (constraints && constraints.video && constraints.video.type && constraints.video.type == "screen") {
                 hasAudio = false;
-                if(constraints.video.type == "custom") {
-                    isCustom = true;
-                }
             }
             //get access to camera
             MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function () {
-
                 if (status_ == STREAM_STATUS.FAILED) {
                     //stream failed while we were waiting for media access, release media
                     if (!cacheLocalResources) {
@@ -1508,7 +1503,7 @@ var createSession = function (options) {
                     flashPort: flashPort,
                     connectionConfig: mediaOptions,
                     connectionConstraints: mediaConnectionConstraints,
-                    isCustom: isCustom
+                    isCustom: constraints.customStream
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({

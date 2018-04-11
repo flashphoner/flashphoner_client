@@ -43,14 +43,7 @@ function init_page() {
     remoteVideo = document.getElementById("remoteVideo");
     canvas = document.getElementById("canvas");
 
-    var ctx=canvas.getContext("2d");
-    image = new Image;
-    image.src = 'canvas.png';
-    image.addEventListener("load", function() {
-        ctx.drawImage(image, canvas.width / 2 - image.width / 2,
-            canvas.height / 2 - image.height / 2);
-    }, false);
-
+    drawImage();
     Flashphoner.getMediaDevices(null, true).then(function (list) {
         list.audio.forEach(function (device) {
             var audio = document.getElementById("audioInput");
@@ -308,6 +301,7 @@ function getConstraints() {
         video: $("#sendVideo").is(':checked'),
         customStream: $("#sendCanvasStream").is(':checked')
     };
+
     if (constraints.audio) {
         constraints.audio = {
             deviceId: $('#audioInput').val()
@@ -319,36 +313,42 @@ function getConstraints() {
         if (parseInt($('#sendAudioBitrate').val()) > 0)
             constraints.audio.bitrate = parseInt($('#sendAudioBitrate').val());
     }
+
     if (constraints.video) {
-        constraints.video = {
-            deviceId: $('#videoInput').val(),
-            width: parseInt($('#sendWidth').val()),
-            height: parseInt($('#sendHeight').val())
-        };
-        if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-            constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
-            constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
+        if (constraints.customStream) {
+            constraints.customStream = canvas.captureStream(30);
+            if(constraints.audio) {
+                navigator.getUserMedia(constraints, function (stream) {
+                    constraints.customStream.addTrack(stream.getAudioTracks()[0]);
+                }, function (error) { console.log("error") });
+            }
+        } else {
+            constraints.video = {
+                deviceId: $('#videoInput').val(),
+                width: parseInt($('#sendWidth').val()),
+                height: parseInt($('#sendHeight').val())
+            };
+            if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+                constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
+                constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
+            }
+            if (parseInt($('#sendVideoMinBitrate').val()) > 0)
+                constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
+            if (parseInt($('#sendVideoMaxBitrate').val()) > 0)
+                constraints.video.maxBitrate = parseInt($('#sendVideoMaxBitrate').val());
+            if (parseInt($('#fps').val()) > 0)
+                constraints.video.frameRate = parseInt($('#fps').val());
         }
-        if (parseInt($('#sendVideoMinBitrate').val()) > 0)
-            constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
-        if (parseInt($('#sendVideoMaxBitrate').val()) > 0)
-            constraints.video.maxBitrate = parseInt($('#sendVideoMaxBitrate').val());
-        if (parseInt($('#fps').val()) > 0)
-            constraints.video.frameRate = parseInt($('#fps').val());
-    }
-    if(constraints.customStream) {
-        constraints.video.type = "custom";
-        constraints.customStream = canvas.captureStream();
     }
 
     return constraints;
 }
 
 function startStreaming(session) {
-
     var streamName = field("url").split('/')[3];
     var constraints = getConstraints();
     var mediaConnectionConstraints;
+
     if (!$("#cpuOveruseDetection").is(':checked')) {
         mediaConnectionConstraints = {
             "mandatory": {
