@@ -1481,9 +1481,14 @@ var createSession = function (options) {
             status_ = STREAM_STATUS.PENDING;
             published_ = true;
             var hasAudio = true;
+            var isCustom = false;
             if (constraints && constraints.video && constraints.video.type && constraints.video.type == "screen") {
                 hasAudio = false;
+                if(constraints.customStream) {
+                    isCustom = true;
+                }
             }
+
             //get access to camera
             MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function () {
                 if (status_ == STREAM_STATUS.FAILED) {
@@ -1503,7 +1508,7 @@ var createSession = function (options) {
                     flashPort: flashPort,
                     connectionConfig: mediaOptions,
                     connectionConstraints: mediaConnectionConstraints,
-                    isCustom: constraints.customStream
+                    isCustom: isCustom
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
