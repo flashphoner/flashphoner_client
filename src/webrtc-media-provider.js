@@ -379,26 +379,20 @@ var createConnection = function (options) {
                     }
                 }
             }
-        }
+        };
 
         var switchCam = function () {
-            if (videoCams.length > 1 && localVideo && localVideo.srcObject) {
-                var currentStream = localVideo.srcObject;
+            if (localVideo && localVideo.srcObject && videoCams.length > 1) {
                 connection.getSenders().forEach(function (sender) {
                     if (sender.track.kind === 'audio') return;
-                    currentStream.getVideoTracks().forEach(function (track) {
-                        track.stop();
-                        currentStream.removeTrack(track);
-                    });
                     switchCount = (switchCount + 1) % videoCams.length;
                     navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: videoCams[switchCount]}}}).then(function (newStream) {
-                        var newVideoTrack = newStream.getVideoTracks()[0];
-                        currentStream.addTrack(newVideoTrack);
-                        sender.replaceTrack(newVideoTrack);
+                        sender.track.stop();
+                        sender.replaceTrack(newStream.getVideoTracks()[0]);
+                        localVideo.srcObject = newStream;
                     }).catch(function (reason) {
                         logger.error(LOG_PREFIX, reason)
                     });
-
                 });
             }
         };
