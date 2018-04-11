@@ -326,10 +326,10 @@ define(streamStatusInfo, 'MEDIASESSION_ID_NULL', 'MediaSessionId is null');
 
 /**
  * Published or subscribed sessions used this MediaSessionId
- * @event MEDIASESSION_ALREADY_IN_USE
+ * @event MEDIASESSION_ID_ALREADY_IN_USE
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
-define(streamStatusInfo, 'MEDIASESSION_ALREADY_IN_USE', 'MediaSessionId is already in use');
+define(streamStatusInfo, 'MEDIASESSION_ID_ALREADY_IN_USE', 'MediaSessionId is already in use');
 
 /**
  * Session is not initialized or terminated on play ordinary stream
@@ -431,10 +431,10 @@ define(streamStatusInfo, 'FILE_NOT_FOUND', 'File not found');
 
 /**
  * Failed to connect to origin stream on agent init
- * @event FAILED_TO_CONNECT_TO_OROGIN_STREAM
+ * @event FAILED_TO_CONNECT_TO_ORIGIN_STREAM
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
-define(streamStatusInfo, 'FAILED_TO_CONNECT_TO_OROGIN_STREAM', 'Failed to connect to origin stream');
+define(streamStatusInfo, 'FAILED_TO_CONNECT_TO_ORIGIN_STREAM', 'Failed to connect to origin stream');
 
 /**
  * CDN stream not found
@@ -499,13 +499,6 @@ define(callStatusInfo, 'FAILED_BY_ICE_ERROR', 'Failed by ICE error');
 define(callStatusInfo, 'FAILED_BY_RTP_ACTIVITY', 'Failed by RTP activity');
 
 /**
- * Failed by error during ICE establishment
- * @event FAILED_BY_ICE_ERROR
- * @memberof Flashphoner.constants.CALL_STATUS_INFO
- */
-define(callStatusInfo, 'FAILED_BY_ICE_ERROR', 'Failed by ICE error');
-
-/**
  * FF writer was failed on RTMP
  * @event FAILED_BY_RTMP_WRITER_ERROR
  * @memberof Flashphoner.constants.CALL_STATUS_INFO
@@ -561,17 +554,17 @@ define(errorInfo, 'NONE_OF_PREFERRED_MEDIAPROVIDERS_AVAILABLE', 'None of preferr
 
 /**
  * Error if API is not initialized
- * @event FLASHPHONER_API_IS_NO_INITIALIZED
+ * @event FLASHPHONER_API_NOT_INITIALIZED
  * @memberof Flashphoner.constants.ERROR_INFO
  */
-define(errorInfo, 'FLASHPHONER_API_IS_NO_INITIALIZED', 'Flashphoner API is not initialized');
+define(errorInfo, 'FLASHPHONER_API_NOT_INITIALIZED', 'Flashphoner API is not initialized');
 
 /**
  * Error if options.urlServer is not specified
- * @event OPTIONS.URLSERVER_MUST_BE_PROVIDED
+ * @event OPTIONS_URLSERVER_MUST_BE_PROVIDED
  * @memberof Flashphoner.constants.ERROR_INFO
  */
-define(errorInfo, 'OPTIONS.URLSERVER_MUST_BE_PROVIDED', 'options.urlServer must be provided');
+define(errorInfo, 'OPTIONS_URLSERVER_MUST_BE_PROVIDED', 'options.urlServer must be provided');
 
 /**
  * Error if session state is not REGISTERED
@@ -617,10 +610,10 @@ define(errorInfo, 'INVALID_SESSION_STATE', 'Invalid session state');
 
 /**
  * Error if options.name is not specified
- * @event OPTIONS.NAME_MUST_BE_PROVIDED
+ * @event OPTIONS_NAME_MUST_BE_PROVIDED
  * @memberof Flashphoner.constants.ERROR_INFO
  */
-define(errorInfo, 'OPTIONS.NAME_MUST_BE_PROVIDED', 'options.name must be provided');
+define(errorInfo, 'OPTIONS_NAME_MUST_BE_PROVIDED', 'options.name must be provided');
 
 var constants = {};
 define(constants, 'SESSION_STATUS', sessionStatus);
