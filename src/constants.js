@@ -284,10 +284,10 @@ define(streamStatusInfo, 'FAILED_BY_ERROR', 'Failed by error');
 
 /**
  * Failed to add stream to proxy on session established
- * @event FAILED_BY_ADD_STREAM_TO_PROXY
+ * @event FAILED_TO_ADD_STREAM_TO_PROXY
  * @memberof Flashphoner.constants.STREAM_STATUS_INFO
  */
-define(streamStatusInfo, 'FAILED_BY_ADD_STREAM_TO_PROXY', 'Failed to add stream to proxy');
+define(streamStatusInfo, 'FAILED_TO_ADD_STREAM_TO_PROXY', 'Failed to add stream to proxy');
 
 /**
  * Stopped shapshot distributor
