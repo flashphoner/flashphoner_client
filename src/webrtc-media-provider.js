@@ -469,7 +469,19 @@ var getMediaAccess = function (constraints, display) {
                 }
             }
             if(constraints.customStream) {
-                loadVideo(constraints.customStream, resolve, requestAudioConstraints, display);
+                if(constraints.audio) {
+                    navigator.getUserMedia({audio: constraints.audio}, function (stream) {
+                        constraints.customStream.addTrack(stream.getAudioTracks()[0]);
+                        loadVideo(constraints.customStream, resolve, requestAudioConstraints, display);
+                    });
+                }
+                if(constraints.video) {
+                    navigator.getUserMedia({audio: constraints.video}, function (stream) {
+                        constraints.customStream.addTrack(stream.getVideoTracks()[0]);
+                        loadVideo(constraints.customStream, resolve, requestAudioConstraints, display);
+                    });
+                }
+
             } else {
                 navigator.getUserMedia(constraints, function (stream) {
                     loadVideo(stream, resolve, requestAudioConstraints, display);

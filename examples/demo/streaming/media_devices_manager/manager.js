@@ -317,11 +317,6 @@ function getConstraints() {
     if (constraints.video) {
         if (constraints.customStream) {
             constraints.customStream = canvas.captureStream(30);
-            if(constraints.audio) {
-                navigator.getUserMedia(constraints, function (stream) {
-                    constraints.customStream.addTrack(stream.getAudioTracks()[0]);
-                }, function (error) { console.log("error") });
-            }
         } else {
             constraints.video = {
                 deviceId: $('#videoInput').val(),
