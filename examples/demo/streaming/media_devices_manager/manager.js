@@ -43,7 +43,8 @@ function init_page() {
     remoteVideo = document.getElementById("remoteVideo");
     canvas = document.getElementById("canvas");
 
-    drawImage();
+    setInterval(drawSquare, 2000);
+
     Flashphoner.getMediaDevices(null, true).then(function (list) {
         list.audio.forEach(function (device) {
             var audio = document.getElementById("audioInput");
@@ -231,8 +232,8 @@ function startTest() {
         $("#testBtn").prop('disabled', false);
         testStarted = false;
     });
-    
-    drawImage();
+
+    drawSquare();
 }
 
 
@@ -317,6 +318,7 @@ function getConstraints() {
     if (constraints.video) {
         if (constraints.customStream) {
             constraints.customStream = canvas.captureStream(30);
+            constraints.video = false;
         } else {
             constraints.video = {
                 deviceId: $('#videoInput').val(),
@@ -407,7 +409,7 @@ function startStreaming(session) {
                 }, 3000);
             }
 
-            drawImage();
+            drawSquare();
         }).on(STREAM_STATUS.STOPPED, function () {
             publishStream.stop();
         }).on(STREAM_STATUS.FAILED, function () {
@@ -620,13 +622,10 @@ function handleAudio(event) {
     }
 }
 
-function drawImage() {
+function drawSquare() {
     var ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    var image = new Image;
-    image.src = 'canvas.png';
-    image.addEventListener("load", function () {
-        ctx.drawImage(image, canvas.width / 2 - image.width / 2,
-            canvas.height / 2 - image.height / 2);
-    }, false);
+    ctx.strokeStyle="#FF0000";
+    ctx.beginPath();
+    ctx.rect(canvas.width / 2 - 100/2, canvas.height / 2 - 100/2, 100 , 100);
+    ctx.stroke();
 }
