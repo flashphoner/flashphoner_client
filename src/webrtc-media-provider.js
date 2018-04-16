@@ -386,8 +386,8 @@ var createConnection = function (options) {
                 connection.getSenders().forEach(function (sender) {
                     if (sender.track.kind === 'audio') return;
                     switchCount = (switchCount + 1) % videoCams.length;
+                    sender.track.stop();
                     navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: videoCams[switchCount]}}}).then(function (newStream) {
-                        sender.track.stop();
                         sender.replaceTrack(newStream.getVideoTracks()[0]);
                         localVideo.srcObject = newStream;
                     }).catch(function (reason) {
