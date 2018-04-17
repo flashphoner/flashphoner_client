@@ -475,6 +475,9 @@ var getMediaAccess = function (constraints, display) {
                 //mute audio
                 video.muted = true;
                 video.onloadedmetadata = function (e) {
+                    if (screenShare && !window.chrome) {
+                        setScreenSesolution(video, stream, constraints);
+                    }
                     video.play();
                 };
                 // This hack for chrome only, firefox supports screen-sharing + audio natively
@@ -492,6 +495,24 @@ var getMediaAccess = function (constraints, display) {
         }
     });
 };
+
+//Fix to set screen resolution for screen sharing in Firefox
+var setScreenSesolution = function(video, stream, constraints){
+    var newHeight;
+    var newWidth;
+    var videoRatio;
+    if (video.videoWidth>video.videoHeight) {
+        videoRatio = video.videoWidth/video.videoHeight;
+        newHeight = constraints.video.videoWidth/videoRatio;
+        newWidth = constraints.video.videoWidth;
+    } else {
+        videoRatio = video.videoHeight/video.videoWidth;
+        newWidth = constraints.video.videoHeight/videoRatio;
+        newHeight = constraints.video.videoHeight;
+    }
+    console.log("videoRatio === "+videoRatio);
+    stream.getVideoTracks()[0].applyConstraints({height: newHeight, width: newWidth});
+}
 
 var getScreenDeviceId = function (constraints) {
     return new Promise(function (resolve, reject) {
@@ -518,18 +539,14 @@ var getScreenDeviceId = function (constraints) {
         } else {
             //firefox case
             o.mediaSource = constraints.video.mediaSource;
-            o.width = {
-                min: constraints.video.width,
-                max: constraints.video.width
-            };
-            o.height = {
-                min: constraints.video.height,
-                max: constraints.video.height
-            };
+            o.width = {};
+            o.height = {};
             o.frameRate = {
                 min: constraints.video.frameRate.max,
                 max: constraints.video.frameRate.max
             };
+            o.videoWidth = constraints.video.width;
+            o.videoHeight = constraints.video.height;
             resolve(o);
         }
     });
