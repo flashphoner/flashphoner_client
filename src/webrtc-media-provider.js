@@ -35,7 +35,7 @@ var createConnection = function (options) {
         var videoCams = [];
         var currentStream;
         var switchCount = 0;
-        var isCustom = options.isCustom;
+        var customStream = options.customStream;
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
@@ -382,7 +382,7 @@ var createConnection = function (options) {
 
         var switchCam = function () {
             var sender = connection.getSenders()[1];
-            if(videoCams.length>1 && sender && !isCustom) {
+            if(videoCams.length>1 && sender && !customStream) {
                 switchCount = (switchCount + 1) % videoCams.length;
                 connection.getLocalStreams().forEach(function (stream) {
                     stream.getVideoTracks().forEach(function (track) {
