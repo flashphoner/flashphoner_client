@@ -476,7 +476,7 @@ var getMediaAccess = function (constraints, display) {
                     });
                 }
                 if(constraints.video) {
-                    navigator.getUserMedia({audio: constraints.video}, function (stream) {
+                    navigator.getUserMedia({video: constraints.video}, function (stream) {
                         constraints.customStream.addTrack(stream.getVideoTracks()[0]);
                         loadVideo(constraints.customStream, resolve, requestAudioConstraints, display);
                     });
