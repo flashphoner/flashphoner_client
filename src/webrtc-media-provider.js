@@ -483,12 +483,12 @@ var getMediaAccess = function (constraints, display) {
                         stream.getTracks().forEach(function (track) {
                             constraints.customStream.addTrack(track);
                         });
-                        //display customStream
-                        loadVideo(display, constraints.customStream, requestAudioConstraints, resolve);
                     }).catch(function (reason) {
                         logger.error(LOG_PREFIX, "Failed to get additional tracks for custom stream. " + reason);
                     });
                 }
+                //display customStream
+                loadVideo(display, constraints.customStream, requestAudioConstraints, resolve);
             } else {
                 navigator.getUserMedia(constraints, function (stream) {
                     loadVideo(display, stream, requestAudioConstraints, resolve);
