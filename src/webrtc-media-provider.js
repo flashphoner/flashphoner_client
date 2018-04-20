@@ -480,7 +480,7 @@ var getMediaAccess = function (constraints, display) {
                     };
                     navigator.getUserMedia(normalizedConstraints, function (stream) {
                         //add resulting tracks to customStream
-                        stream.getTracks().forEach(function(track){
+                        stream.getTracks().forEach(function (track) {
                             constraints.customStream.addTrack(track);
                         });
                         //display customStream
@@ -491,7 +491,7 @@ var getMediaAccess = function (constraints, display) {
                 }
             } else {
                 navigator.getUserMedia(constraints, function (stream) {
-                    loadVideo(stream, resolve, requestAudioConstraints, display);
+                    loadVideo(display, stream, requestAudioConstraints, resolve);
                 }, reject);
             }
         }
