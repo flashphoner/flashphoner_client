@@ -471,18 +471,22 @@ var getMediaAccess = function (constraints, display) {
                 }
             }
             if (constraints.customStream) {
-                //add audio tracks to customStream if constraints.audio exists
-                if (constraints.audio) {
-                    navigator.getUserMedia({audio: constraints.audio}, function (stream) {
-                        constraints.customStream.addTrack(stream.getAudioTracks()[0]);
-                        loadVideo(constraints.customStream, resolve, requestAudioConstraints, display);
-                    });
-                }
-                //add video tracks to customStream if constraints.video exists
-                if (constraints.video) {
-                    navigator.getUserMedia({video: constraints.video}, function (stream) {
-                        constraints.customStream.addTrack(stream.getVideoTracks()[0]);
-                        loadVideo(constraints.customStream, resolve, requestAudioConstraints, display);
+                //get tracks if we have at least one defined constraint
+                if (constraints.audio || constraints.video) {
+                    //remove customStream from constraints before passing to GUM
+                    var normalizedConstraints = {
+                        audio: constraints.audio ? constraints.audio : false,
+                        video: constraints.video ? constraints.video : false
+                    };
+                    navigator.getUserMedia(normalizedConstraints, function (stream) {
+                        //add resulting tracks to customStream
+                        stream.getTracks().forEach(function(track){
+                            constraints.customStream.addTrack(track);
+                        });
+                        //display customStream
+                        loadVideo(display, constraints.customStream, requestAudioConstraints, resolve);
+                    }).catch(function (reason) {
+                        logger.error(LOG_PREFIX, "Failed to get additional tracks for custom stream. " + reason);
                     });
                 }
             } else {
