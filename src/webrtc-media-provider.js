@@ -476,7 +476,7 @@ var getMediaAccess = function (constraints, display) {
                 video.muted = true;
                 video.onloadedmetadata = function (e) {
                     if (screenShare && !window.chrome) {
-                        setScreenSesolution(video, stream, constraints);
+                        setScreenResolution(video, stream, constraints);
                     }
                     video.play();
                 };
@@ -497,7 +497,7 @@ var getMediaAccess = function (constraints, display) {
 };
 
 //Fix to set screen resolution for screen sharing in Firefox
-var setScreenSesolution = function(video, stream, constraints){
+var setScreenResolution = function(video, stream, constraints){
     var newHeight;
     var newWidth;
     var videoRatio;
