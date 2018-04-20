@@ -382,7 +382,7 @@ var createConnection = function (options) {
 
         var switchCam = function () {
             var sender = connection.getSenders()[1];
-            if(videoCams.length>1 && sender && !customStream) {
+            if (sender && videoCams.length > 1 && !customStream) {
                 switchCount = (switchCount + 1) % videoCams.length;
                 connection.getLocalStreams().forEach(function (stream) {
                     stream.getVideoTracks().forEach(function (track) {
@@ -390,8 +390,10 @@ var createConnection = function (options) {
                     })
                 });
                 navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: videoCams[switchCount]}}}).then(function (stream) {
-                    if(currentStream) {
-                        currentStream.getTracks().forEach(function (track) { track.stop(); });
+                    if (currentStream) {
+                        currentStream.getTracks().forEach(function (track) {
+                            track.stop();
+                        });
                     }
                     currentStream = stream;
                     sender.replaceTrack(currentStream.getVideoTracks()[0]);
@@ -468,20 +470,21 @@ var getMediaAccess = function (constraints, display) {
                     delete constraints.audio;
                 }
             }
-            if(constraints.customStream) {
-                if(constraints.audio) {
+            if (constraints.customStream) {
+                //add audio tracks to customStream if constraints.audio exists
+                if (constraints.audio) {
                     navigator.getUserMedia({audio: constraints.audio}, function (stream) {
                         constraints.customStream.addTrack(stream.getAudioTracks()[0]);
                         loadVideo(constraints.customStream, resolve, requestAudioConstraints, display);
                     });
                 }
-                if(constraints.video) {
+                //add video tracks to customStream if constraints.video exists
+                if (constraints.video) {
                     navigator.getUserMedia({video: constraints.video}, function (stream) {
                         constraints.customStream.addTrack(stream.getVideoTracks()[0]);
                         loadVideo(constraints.customStream, resolve, requestAudioConstraints, display);
                     });
                 }
-
             } else {
                 navigator.getUserMedia(constraints, function (stream) {
                     loadVideo(stream, resolve, requestAudioConstraints, display);
@@ -491,14 +494,13 @@ var getMediaAccess = function (constraints, display) {
     });
 };
 
-var loadVideo = function (stream, resolve,requestAudioConstraints, display) {
+var loadVideo = function (display, stream, requestAudioConstraints, resolve) {
     var video = getCacheInstance(display);
     if (!video) {
         video = document.createElement('video');
         display.appendChild(video);
     }
     video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
-    //show custom stream
     video.srcObject = stream;
     //mute audio
     video.muted = true;
