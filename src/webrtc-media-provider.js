@@ -483,9 +483,9 @@ var getMediaAccess = function (constraints, display) {
                         stream.getTracks().forEach(function (track) {
                             constraints.customStream.addTrack(track);
                         });
-                    }).catch(function (reason) {
-                        logger.error(LOG_PREFIX, "Failed to get additional tracks for custom stream. " + reason);
-                    });
+                        loadVideo(display, constraints.customStream, requestAudioConstraints, resolve);
+                    }, reject);
+                    return;
                 }
                 //display customStream
                 loadVideo(display, constraints.customStream, requestAudioConstraints, resolve);
@@ -596,7 +596,6 @@ function removeVideoElement(video) {
         }
         video.srcObject = null;
     }
-
 }
 
 /**
