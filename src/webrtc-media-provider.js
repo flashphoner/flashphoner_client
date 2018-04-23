@@ -34,6 +34,8 @@ var createConnection = function (options) {
         var remoteVideo;
         var videoCams = [];
         var switchCount = 0;
+        var customStream = options.customStream;
+
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
             localVideo.id = id + "-local";
@@ -382,7 +384,7 @@ var createConnection = function (options) {
         };
 
         var switchCam = function () {
-            if (localVideo && localVideo.srcObject && videoCams.length > 1) {
+            if (localVideo && localVideo.srcObject && videoCams.length > 1 && !customStream) {
                 connection.getSenders().forEach(function (sender) {
                     if (sender.track.kind === 'audio') return;
                     switchCount = (switchCount + 1) % videoCams.length;
@@ -463,37 +465,63 @@ var getMediaAccess = function (constraints, display) {
                     delete constraints.audio;
                 }
             }
-            navigator.getUserMedia(constraints, function (stream) {
-                var video = getCacheInstance(display);
-                if (!video) {
-                    video = document.createElement('video');
-                    display.appendChild(video);
-                }
-                video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
-                //show local camera
-                video.srcObject = stream;
-                //mute audio
-                video.muted = true;
-                video.onloadedmetadata = function (e) {
-                    if (screenShare && !window.chrome) {
-                        setScreenResolution(video, stream, constraints);
-                    }
-                    video.play();
-                };
-                // This hack for chrome only, firefox supports screen-sharing + audio natively
-                if (requestAudioConstraints && adapter.browserDetails.browser == "chrome") {
-                    logger.info(LOG_PREFIX, "Request for audio stream");
-                    navigator.getUserMedia({audio: requestAudioConstraints}, function (stream) {
-                        logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
-                        video.srcObject.addTrack(stream.getAudioTracks()[0]);
-                        resolve(display);
-                    });
+           
+            if (constraints.customStream) {
+                //get tracks if we have at least one defined constraint
+                if (constraints.audio || constraints.video) {
+                    //remove customStream from constraints before passing to GUM
+                    var normalizedConstraints = {
+                        audio: constraints.audio ? constraints.audio : false,
+                        video: constraints.video ? constraints.video : false
+                    };
+                    navigator.getUserMedia(normalizedConstraints, function (stream) {
+                        //add resulting tracks to customStream
+                        stream.getTracks().forEach(function (track) {
+                            constraints.customStream.addTrack(track);
+                        });
+                        //display customStream
+                        loadVideo(display, constraints.customStream, requestAudioConstraints, resolve);
+                    }, reject);
                 } else {
-                    resolve(display);
+                    //display customStream
+                    loadVideo(display, constraints.customStream, requestAudioConstraints, resolve);
                 }
-            }, reject);
+            } else {
+                navigator.getUserMedia(constraints, function (stream) {
+                    loadVideo(display, stream, requestAudioConstraints, resolve);
+                }, reject);
+            }
         }
     });
+};
+
+var loadVideo = function (display, stream, requestAudioConstraints, resolve) {
+    var video = getCacheInstance(display);
+    if (!video) {
+        video = document.createElement('video');
+        display.appendChild(video);
+    }
+    video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
+    video.srcObject = stream;
+    //mute audio
+    video.muted = true;
+     video.onloadedmetadata = function (e) {
+        if (screenShare && !window.chrome) {
+            setScreenResolution(video, stream, constraints);
+        }
+        video.play();
+     };
+    // This hack for chrome only, firefox supports screen-sharing + audio natively
+    if (requestAudioConstraints && adapter.browserDetails.browser == "chrome") {
+        logger.info(LOG_PREFIX, "Request for audio stream");
+        navigator.getUserMedia({audio: requestAudioConstraints}, function (stream) {
+            logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
+            video.srcObject.addTrack(stream.getAudioTracks()[0]);
+            resolve(display);
+        });
+    } else {
+        resolve(display);
+    }
 };
 
 //Fix to set screen resolution for screen sharing in Firefox
@@ -512,7 +540,7 @@ var setScreenResolution = function(video, stream, constraints){
     }
     console.log("videoRatio === "+videoRatio);
     stream.getVideoTracks()[0].applyConstraints({height: newHeight, width: newWidth});
-}
+};
 
 var getScreenDeviceId = function (constraints) {
     return new Promise(function (resolve, reject) {
@@ -539,6 +567,7 @@ var getScreenDeviceId = function (constraints) {
         } else {
             //firefox case
             o.mediaSource = constraints.video.mediaSource;
+
             o.width = {};
             o.height = {};
             o.frameRate = {
@@ -583,7 +612,6 @@ function removeVideoElement(video) {
         }
         video.srcObject = null;
     }
-
 }
 
 /**
