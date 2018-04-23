@@ -7,7 +7,6 @@ var previewStream;
 var publishStream;
 var currentVolumeValue = 50;
 var intervalID;
-var canvas;
 
 try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -41,9 +40,6 @@ function init_page() {
     //local and remote displays
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
-    canvas = document.getElementById("canvas");
-
-    setInterval(drawSquare, 2000);
 
     Flashphoner.getMediaDevices(null, true).then(function (list) {
         list.audio.forEach(function (device) {
@@ -81,6 +77,7 @@ function init_page() {
                 video.appendChild(option);
             }
         });
+
 
 
         $("#url").val(setURL() + "/" + createUUID(8));
@@ -145,14 +142,13 @@ function init_page() {
 }
 
 function onStarted(publishStream, previewStream) {
-    $('input:radio').attr("disabled", true);
     $("#publishBtn").text("Stop").off('click').click(function () {
         $(this).prop('disabled', true);
         previewStream.stop();
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').click(function () {
         publishStream.switchCam();
-    }).prop('disabled', $('#sendCanvasStream').is(':checked'));
+    }).prop('disabled', false);
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
     previewStream.setVolume(currentVolumeValue);
@@ -169,7 +165,6 @@ function onStarted(publishStream, previewStream) {
 }
 
 function onStopped() {
-    $('input:radio').attr("disabled", false);
     $("#publishBtn").text("Start").off('click').click(function () {
         if (validateForm()) {
             muteInputs();
@@ -196,7 +191,7 @@ function startTest() {
         Flashphoner.playFirstVideo(localVideo, true);
         Flashphoner.playFirstVideo(remoteVideo, false);
     }
-    Flashphoner.getMediaAccess(getConstraints(), localVideo).then(function (disp) {
+    Flashphoner.getMediaAccess(getConstaints(), localVideo).then(function (disp) {
         $("#testBtn").text("Release").off('click').click(function () {
             $(this).prop('disabled', true);
             stopTest();
@@ -232,8 +227,6 @@ function startTest() {
         $("#testBtn").prop('disabled', false);
         testStarted = false;
     });
-
-    drawSquare();
 }
 
 
@@ -296,13 +289,11 @@ function start() {
     });
 }
 
-function getConstraints() {
+function getConstaints() {
     constraints = {
         audio: $("#sendAudio").is(':checked'),
-        video: $("#sendVideo").is(':checked'),
-        customStream: $("#sendCanvasStream").is(':checked')
+        video: $("#sendVideo").is(':checked')
     };
-
     if (constraints.audio) {
         constraints.audio = {
             deviceId: $('#audioInput').val()
@@ -314,38 +305,31 @@ function getConstraints() {
         if (parseInt($('#sendAudioBitrate').val()) > 0)
             constraints.audio.bitrate = parseInt($('#sendAudioBitrate').val());
     }
-
     if (constraints.video) {
-        if (constraints.customStream) {
-            constraints.customStream = canvas.captureStream(30);
-            constraints.video = false;
-        } else {
-            constraints.video = {
-                deviceId: $('#videoInput').val(),
-                width: parseInt($('#sendWidth').val()),
-                height: parseInt($('#sendHeight').val())
-            };
-            if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-                constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
-                constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
-            }
-            if (parseInt($('#sendVideoMinBitrate').val()) > 0)
-                constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
-            if (parseInt($('#sendVideoMaxBitrate').val()) > 0)
-                constraints.video.maxBitrate = parseInt($('#sendVideoMaxBitrate').val());
-            if (parseInt($('#fps').val()) > 0)
-                constraints.video.frameRate = parseInt($('#fps').val());
+        constraints.video = {
+            deviceId: $('#videoInput').val(),
+            width: parseInt($('#sendWidth').val()),
+            height: parseInt($('#sendHeight').val())
+        };
+        if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+            constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
+            constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
         }
+        if (parseInt($('#sendVideoMinBitrate').val()) > 0)
+            constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
+        if (parseInt($('#sendVideoMaxBitrate').val()) > 0)
+            constraints.video.maxBitrate = parseInt($('#sendVideoMaxBitrate').val());
+        if (parseInt($('#fps').val()) > 0)
+            constraints.video.frameRate = parseInt($('#fps').val());
     }
-
     return constraints;
 }
 
 function startStreaming(session) {
     var streamName = field("url").split('/')[3];
-    var constraints = getConstraints();
-    var mediaConnectionConstraints;
+    var constraints = getConstaints();
 
+    var mediaConnectionConstraints;
     if (!$("#cpuOveruseDetection").is(':checked')) {
         mediaConnectionConstraints = {
             "mandatory": {
@@ -408,8 +392,6 @@ function startStreaming(session) {
                     detectSpeech(previewStream);
                 }, 3000);
             }
-
-            drawSquare();
         }).on(STREAM_STATUS.STOPPED, function () {
             publishStream.stop();
         }).on(STREAM_STATUS.FAILED, function () {
@@ -620,12 +602,4 @@ function handleAudio(event) {
             this.lastClip = window.performance.now();
         }
     }
-}
-
-function drawSquare() {
-    var ctx = canvas.getContext("2d");
-    ctx.strokeStyle="#FF0000";
-    ctx.beginPath();
-    ctx.rect(canvas.width / 2 - 100/2, canvas.height / 2 - 100/2, 100 , 100);
-    ctx.stroke();
 }
