@@ -480,22 +480,22 @@ var getMediaAccess = function (constraints, display) {
                             constraints.customStream.addTrack(track);
                         });
                         //display customStream
-                        loadVideo(display, constraints.customStream, requestAudioConstraints, resolve);
+                        loadVideo(display, constraints.customStream, screenShare, requestAudioConstraints, resolve);
                     }, reject);
                 } else {
                     //display customStream
-                    loadVideo(display, constraints.customStream, requestAudioConstraints, resolve);
+                    loadVideo(display, constraints.customStream, screenShare, requestAudioConstraints, resolve);
                 }
             } else {
                 navigator.getUserMedia(constraints, function (stream) {
-                    loadVideo(display, stream, requestAudioConstraints, resolve);
+                    loadVideo(display, stream, screenShare, requestAudioConstraints, resolve);
                 }, reject);
             }
         }
     });
 };
 
-var loadVideo = function (display, stream, requestAudioConstraints, resolve) {
+var loadVideo = function (display, stream, screenShare, requestAudioConstraints, resolve) {
     var video = getCacheInstance(display);
     if (!video) {
         video = document.createElement('video');

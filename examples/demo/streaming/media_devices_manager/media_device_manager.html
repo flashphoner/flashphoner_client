@@ -44,20 +44,20 @@
             <div class="text-muted text-center" id="playResolution"></div>
         </div>
     </div>
-	<div class="row">
-    
+    <div class="row">
+
         <form id="form" class="form-horizontal" role="form" style="margin-top: 10px; margin-left: 10px">
-                
+
             <div class="col-sm-6">
-        
-				<div class="col-sm-6">
+
+                <div class="col-sm-6">
                     <div class="form-group">
                         &nbsp;
                     </div>
                     <div class="form-group">
                         &nbsp;
                     </div>
-				
+
                     <div class="form-group" id="sendAudioGroup">
                         <div class="form-group">
                             <label class="col-sm-2 control-label"></label>
@@ -91,8 +91,8 @@
                         </div>
                         <div class="form-group" id="stereoForm">
                             <label style="text-align: left" class="col-sm-4 control-label" for="sendStereoAudio">Stereo<sup>
-                                    <i title="For opus codec only" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
-                                </sup>
+                                <i title="For opus codec only" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
+                            </sup>
                             </label>
                             <div class="col-sm-4">
                                 <input type="checkbox" class="checkbox" id="sendStereoAudio" value="true">
@@ -115,8 +115,8 @@
                                 <input id="muteAudioToggle" type="checkbox" />
                             </div>
                         </div>
-			        </div>
-					
+                    </div>
+
                     <div class="form-group" id="sendVideoGroup">
                         <div class="form-group">
                             <div class="col-sm-1">
@@ -126,7 +126,7 @@
                         </div>
                         <div class="form-group" id="videoInputForm">
                             <div class="col-sm-1">
-                                <input type="radio" class="checkbox" name="videoGroup" style="margin-top: 4px">
+                                <input type="radio" class="checkbox" name="videoGroup" id="sendVideoStream" checked style="margin-top: 4px">
                             </div>
                             <label style="text-align: left" class="col-sm-4 control-label">Cam</label>
                             <div class="col-sm-6">
@@ -137,12 +137,12 @@
                         </div>
                         <div class="form-group" id="canvasInputForm">
                             <div class="col-sm-1">
-                                <input type="radio" class="checkbox" name="videoGroup" style="margin-top: 4px">
+                                <input type="radio" class="checkbox" name="videoGroup" id="sendCanvasStream" style="margin-top: 4px">
                             </div>
                             <label style="text-align: left" class="col-sm-4 control-label">Canvas</label>
 
                             <div class="col-sm-6">
-                                <canvas width="140" height="100">Your browser does not support the HTML5 canvas tag.</canvas>
+                                <canvas width="320" height="240" id="canvas">Your browser does not support the HTML5 canvas tag.</canvas>
                             </div>
                         </div>
                         <div class="form-group" id="sendSizeForm">
@@ -189,8 +189,8 @@
                         </div>
                     </div>
                 </div>
-				
-				
+
+
                 <div class="col-sm-6">
                     <div class="form-group" id="urlForm">
                         <label class="col-sm-2 control-label">WCS</label>
@@ -209,21 +209,21 @@
                     </div>
                 </div>
             </div>
-        
+
             <div class="col-sm-4" id="playGroup">
-           
-                <div class="form-group">
-                    &nbsp;
-                </div>        
+
                 <div class="form-group">
                     &nbsp;
                 </div>
-                        
                 <div class="form-group">
-                        <div class="col-sm-1">
-                            <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="playAudio" value="true">
-                        </div>
-                        <label style="text-align: left" class="control-label col-sm-5" for="playAudio">Play audio</label>
+                    &nbsp;
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-1">
+                        <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="playAudio" value="true">
+                    </div>
+                    <label style="text-align: left" class="control-label col-sm-5" for="playAudio">Play audio</label>
                 </div>
                 <div id="volume" class="form-group">
                     <label class="col-sm-2 control-label">Volume</label>
@@ -235,7 +235,7 @@
                     <label class="col-sm-2 control-label">Talking</label>
                     <div class="col-sm-2 talking" id="talking"></div>
                 </div>
-                
+
                 <div class="form-group">
                     <div class="col-sm-8">
                         <div class="form-group">
@@ -258,16 +258,16 @@
                             <div class="col-sm-7 input-group">
                                 <input style="margin-left: 15px" type="text" class="form-control" id="receiveBitrate" value="0" disabled>
                                 <span style="min-width: 65px; text-align: right" class="input-group-addon">bps</span>
-                            </div>              
+                            </div>
                         </div>
-                        <div class="form-group" id="qualityForm">                        
+                        <div class="form-group" id="qualityForm">
                             <label style="text-align: left" class="col-sm-3 control-label">Quality</label>
                             <div class="col-sm-4">
                                 <input type="text" class="form-control" id="quality" value="0" maxlength="3" disabled>
-                            </div>            
+                            </div>
                         </div>
                     </div>
-                    
+
                     <div class="col-sm-4">
                         <div style="margin-top: 10px" class="form-group">
                             &nbsp;
@@ -278,21 +278,21 @@
                             </div>
                             <label style="text-align: left" class="control-label col-sm-3" for="receiveDefaultSize">default</label>
                         </div>
-                        <div class="form-group">                   
+                        <div class="form-group">
                             <div class="col-sm-1">
                                 <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="receiveDefaultBitrate" value="true">
                             </div>
-                            <label style="text-align: left" class="control-label col-sm-3" for="receiveDefaultBitrate">default</label>                                              
+                            <label style="text-align: left" class="control-label col-sm-3" for="receiveDefaultBitrate">default</label>
                         </div>
-                        <div class="form-group">                     
+                        <div class="form-group">
                             <div class="col-sm-1">
                                 <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="receiveDefaultQuality" value="true">
                             </div>
-                            <label style="text-align: left" class="control-label col-sm-3" for="receiveDefaultQuality">default</label>                        
-                        </div>             
+                            <label style="text-align: left" class="control-label col-sm-3" for="receiveDefaultQuality">default</label>
+                        </div>
                     </div>
 
-			    </div>
+                </div>
 
             </div>
 
@@ -309,7 +309,6 @@
 <!-- Plug-in bootstrap-switch here -->
 <script src="../../dependencies/bootstrap/js/switch.js"></script>
 <script>
-
     var $muteAudioToggle = $("#muteAudioToggle");
     $muteAudioToggle.change(function () {
         if ($(this).is(":checked")) {
@@ -318,13 +317,11 @@
             unmuteAudio();
         }
     });
-
     $muteAudioToggle.bootstrapSwitch({
         on: 'on',
         off: 'off',
         size: 'md'
     });
-
     var $muteVideoToggle = $("#muteVideoToggle");
     $muteVideoToggle.change(function () {
         if (this.checked) {
@@ -333,13 +330,11 @@
             unmuteVideo();
         }
     });
-
     $muteVideoToggle.bootstrapSwitch({
         on: 'on',
         off: 'off',
         size: 'md'
     });
-
 </script>
 
 </body>
