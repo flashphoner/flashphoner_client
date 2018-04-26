@@ -78,7 +78,11 @@ function init_page() {
                 var option = document.createElement("option");
                 option.text = device.label || device.id;
                 option.value = device.id;
-                video.appendChild(option);
+                if (option.text.toLowerCase().indexOf("back") >= 0 && video.children.length > 0) {
+                    video.insertBefore(option, video.children[0]);
+                } else {
+                    video.appendChild(option);
+                }
             }
         });
 
@@ -321,7 +325,7 @@ function getConstraints() {
             constraints.video = false;
         } else {
             constraints.video = {
-                deviceId: $('#videoInput').val(),
+                deviceId: {exact: $('#videoInput').val()},
                 width: parseInt($('#sendWidth').val()),
                 height: parseInt($('#sendHeight').val())
             };
