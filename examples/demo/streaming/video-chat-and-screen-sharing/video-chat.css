@@ -1,21 +1,9 @@
 .fp-localVideo {
     border: 1px double black;
     position: absolute !important;
-    width: 222px;
-    height: 167px;
-    margin-top: 44%;
-    margin-left: 2%;
-    z-index: 2147483647;
-    text-align: center;
-    background: #c0c0c0;
-}
-
-.fp-previewVideo {
-    border: 1px double black;
-    position: absolute !important;
     width: 162px;
     height: 122px;
-    margin-top: 51%;
+    margin-top: 30%;
     margin-left: 2%;
     z-index: 2147483647;
     text-align: center;
@@ -25,8 +13,8 @@
 .fp-remoteVideo {
     border: 1px double black;
     position: absolute !important;
-    width: 642px;
-    height: 482px;
+    width: 402px;
+    height: 302px;
     text-align: center;
     background: #c0c0c0;
 }

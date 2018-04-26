@@ -270,36 +270,41 @@ var appSession = function(options) {
                     streamName: function(){return streamName}
                 };
 
-                participant = {
-                    streams: {},
-                    /**
-                     * Get participant name
-                     *
-                     * @returns {String} Participant name
-                     * @memberof roomApi.Room.Participant
-                     * @inner
-                     */
-                    name: function(){
-                        return login;
-                    },
-                    /**
-                     * Send message to participant
-                     *
-                     * @param {String} message Message to send
-                     * @param {Function} error Error callback
-                     * @memberof roomApi.Room.Participant
-                     * @inner
-                     */
-                    sendMessage: attachSendMessage(login),
-                    /**
-                     * Get participant streams
-                     *
-                     * @returns {Array<roomApi.Room.Participant.Stream>} Streams
-                     * @memberof roomApi.Room.Participant
-                     * @inner
-                     */
-                    getStreams: function() { return util.copyObjectToArray(this.streams);}
-                };
+                if (participants[login] != null) {
+                    participant = participants[login];
+                } else {
+                    participant = {
+                        streams: {},
+                        /**
+                         * Get participant name
+                         *
+                         * @returns {String} Participant name
+                         * @memberof roomApi.Room.Participant
+                         * @inner
+                         */
+                        name: function(){
+                            return login;
+                        },
+                        /**
+                         * Send message to participant
+                         *
+                         * @param {String} message Message to send
+                         * @param {Function} error Error callback
+                         * @memberof roomApi.Room.Participant
+                         * @inner
+                         */
+                        sendMessage: attachSendMessage(login),
+                        /**
+                         * Get participant streams
+                         *
+                         * @returns {Array<roomApi.Room.Participant.Stream>} Streams
+                         * @memberof roomApi.Room.Participant
+                         * @inner
+                         */
+                        getStreams: function() { return util.copyObjectToArray(this.streams);}
+                    };
+                    participants[participant.name()] = participant;
+                }
                 /**
                  * Room participant
                  *
