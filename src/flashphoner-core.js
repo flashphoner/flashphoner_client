@@ -1557,7 +1557,17 @@ var createSession = function (options) {
             }
             mediaConnection.switchCam();
         };
-		
+
+        /**
+         * Set Microphone Gain
+         *
+         * @memberOf Stream
+         * @inner
+         */
+		var setMicrophoneGain = function (volume) {
+		    mediaConnection.setMicrophoneGain(volume);
+        };
+
         /**
          * Stop stream.
          *
@@ -1916,6 +1926,7 @@ var createSession = function (options) {
         stream.getInfo = getInfo;
         stream.videoResolution = videoResolution;
         stream.setVolume = setVolume;
+        stream.setMicrophoneGain = setMicrophoneGain;
         stream.getVolume = getVolume;
         stream.muteAudio = muteAudio;
         stream.unmuteAudio = unmuteAudio;

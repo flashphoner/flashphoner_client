@@ -6,6 +6,7 @@ var constraints;
 var previewStream;
 var publishStream;
 var currentVolumeValue = 50;
+var currentGainValue = 50;
 var intervalID;
 var canvas;
 
@@ -129,6 +130,22 @@ function init_page() {
             $("#quality").prop('disabled', false);
         }
     });
+
+    $("#micGainControl").slider({
+        range: "min",
+        min: 0,
+        max: 100,
+        value: currentGainValue,
+        step: 10,
+        animate: true,
+        slide: function (event, ui) {
+            currentGainValue = ui.value;
+            if(previewStream) {
+                publishStream.setMicrophoneGain(currentGainValue);
+            }
+        }
+    });
+
     $("#volumeControl").slider({
         range: "min",
         min: 0,
@@ -159,6 +176,7 @@ function onStarted(publishStream, previewStream) {
     }).prop('disabled', $('#sendCanvasStream').is(':checked'));
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
+    previewStream.setMicrophoneGain(currentGainValue);
     previewStream.setVolume(currentVolumeValue);
     //intervalID = setInterval(function() {
     //    previewStream.getStats(function(stat) {

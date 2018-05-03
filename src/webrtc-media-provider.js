@@ -11,6 +11,7 @@ var defaultConstraints;
 var logger;
 var LOG_PREFIX = "webrtc";
 var audioContext;
+var microphoneGain;
 
 var createConnection = function (options) {
     return new Promise(function (resolve, reject) {
@@ -240,11 +241,19 @@ var createConnection = function (options) {
             }
             return -1;
         };
+
         var setVolume = function (volume) {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
                 remoteVideo.volume = volume / 100;
             }
         };
+
+        var setMicrophoneGain = function (volume) {
+            if(microphoneGain) {
+                microphoneGain.gain.value = volume / 100;
+            }
+        };
+
         var muteAudio = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
                 localVideo.srcObject.getAudioTracks()[0].enabled = false;
@@ -407,6 +416,7 @@ var createConnection = function (options) {
         exports.changeAudioCodec = changeAudioCodec;
         exports.close = close;
         exports.setVolume = setVolume;
+        exports.setMicrophoneGain = setMicrophoneGain;
         exports.getVolume = getVolume;
         exports.muteAudio = muteAudio;
         exports.unmuteAudio = unmuteAudio;
@@ -501,6 +511,9 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
         video = document.createElement('video');
         display.appendChild(video);
     }
+    if(stream.getAudioTracks().length > 0 && adapter.browserDetails.browser == "chrome") {
+        microphoneGain = createGainNode(stream);
+    }
     video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
     video.srcObject = stream;
     //mute audio
@@ -522,6 +535,21 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
     } else {
         resolve(display);
     }
+};
+
+var createGainNode = function(stream) {
+    var audioCtx = audioContext;
+    var source = audioCtx.createMediaStreamSource(stream);
+    var gainNode = audioCtx.createGain();
+    var destination = audioCtx.createMediaStreamDestination();
+    var outputStream = destination.stream;
+    source.connect(gainNode);
+    gainNode.connect(destination);
+    var newTrack = outputStream.getAudioTracks()[0];
+    var originalTrack = stream.getAudioTracks()[0];
+    stream.addTrack(newTrack);
+    stream.removeTrack(originalTrack);
+    return gainNode;
 };
 
 //Fix to set screen resolution for screen sharing in Firefox
