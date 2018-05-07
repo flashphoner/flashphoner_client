@@ -1563,8 +1563,12 @@ var createSession = function (options) {
          *
          * @memberOf Stream
          * @inner
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
          */
 		var setMicrophoneGain = function (volume) {
+            if(status_ !== STREAM_STATUS.PUBLISHING){
+                throw new Error('Invalid stream state');
+            }
 		    mediaConnection.setMicrophoneGain(volume);
         };
 
