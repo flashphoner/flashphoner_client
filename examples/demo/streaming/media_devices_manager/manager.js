@@ -140,7 +140,7 @@ function init_page() {
         animate: true,
         slide: function (event, ui) {
             currentGainValue = ui.value;
-            if(previewStream) {
+            if(publishStream) {
                 publishStream.setMicrophoneGain(currentGainValue);
             }
         }
@@ -176,7 +176,7 @@ function onStarted(publishStream, previewStream) {
     }).prop('disabled', $('#sendCanvasStream').is(':checked'));
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
-    previewStream.setMicrophoneGain(currentGainValue);
+    publishStream.setMicrophoneGain(currentGainValue);
     previewStream.setVolume(currentVolumeValue);
     //intervalID = setInterval(function() {
     //    previewStream.getStats(function(stat) {
