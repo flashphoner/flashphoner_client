@@ -1557,7 +1557,21 @@ var createSession = function (options) {
             }
             mediaConnection.switchCam();
         };
-		
+
+        /**
+         * Set Microphone Gain
+         *
+         * @memberOf Stream
+         * @inner
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
+         */
+		var setMicrophoneGain = function (volume) {
+            if(status_ !== STREAM_STATUS.PUBLISHING){
+                throw new Error('Invalid stream state');
+            }
+		    mediaConnection.setMicrophoneGain(volume);
+        };
+
         /**
          * Stop stream.
          *
@@ -1916,6 +1930,7 @@ var createSession = function (options) {
         stream.getInfo = getInfo;
         stream.videoResolution = videoResolution;
         stream.setVolume = setVolume;
+        stream.setMicrophoneGain = setMicrophoneGain;
         stream.getVolume = getVolume;
         stream.muteAudio = muteAudio;
         stream.unmuteAudio = unmuteAudio;
