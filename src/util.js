@@ -279,11 +279,13 @@ module.exports = {
         if (!codecs.length) return sdp;
 
         var sdpArray = sdp.split("\n");
+        var codecs = codecs.split(",");
 
         //search and delete codecs line
         var pt = [];
         var i;
         for (var p = 0; p < codecs.length; p++) {
+            codecs[p] = codecs[p].toUpperCase();
             console.log("Searching for codec " + codecs[p]);
             for (i = 0; i < sdpArray.length; i++) {
                 if (sdpArray[i].search(codecs[p]) != -1 && sdpArray[i].indexOf("a=rtpmap") == 0) {
