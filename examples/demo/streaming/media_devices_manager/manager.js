@@ -9,6 +9,7 @@ var currentVolumeValue = 50;
 var currentGainValue = 50;
 var intervalID;
 var canvas;
+var extensionId = "bonmiieflfebmegnhopbmkjonngfpcal";
 
 try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -33,7 +34,8 @@ function init_page() {
                     $("#audioInputForm").hide();
                     $("#videoInputForm").hide();
                 }
-            }
+            },
+            screenSharingExtensionId: extensionId
         })
     } catch (e) {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
@@ -100,6 +102,7 @@ function init_page() {
             $("#sendVideo").prop('checked', false).prop('disabled', true);
         }
     }).catch(function (error) {
+        console.log(error);
         $("#notifyFlash").text("Failed to get media devices");
     });
     $("#receiveDefaultSize").click(function () {
@@ -158,6 +161,8 @@ function init_page() {
             previewStream.setVolume(currentVolumeValue);
         }
     }).slider("disable");
+
+
 
     $("#testBtn").text("Test").off('click').click(function () {
         $(this).prop('disabled', true);
@@ -388,12 +393,15 @@ function startStreaming(session) {
         if (video.videoWidth > 0 && video.videoHeight > 0) {
             resizeLocalVideo({target: video});
         }
-        enableMuteToggles(true);
+        enableToggles(true);
         if ($("#muteVideoToggle").is(":checked")) {
             muteVideo();
         }
         if ($("#muteAudioToggle").is(":checked")) {
             muteAudio();
+        }
+        if ($("#browserSoundToggle").is(":checked")) {
+            enableBrowserSound();
         }
         //remove resize listener in case this video was cached earlier
         video.removeEventListener('resize', resizeLocalVideo);
@@ -580,17 +588,33 @@ function unmuteVideo() {
     }
 }
 
-function enableMuteToggles(enable) {
+function enableBrowserSound() {
+    if(publishStream) {
+        publishStream.enableBrowserSound();
+    }
+}
+
+function disableBrowserSound() {
+    if(publishStream) {
+        publishStream.disableBrowserSound();
+    }
+}
+
+function enableToggles(enable) {
+    var $browserSoundToggle = $('#browserSoundToggle');
     var $muteAudioToggle = $("#muteAudioToggle");
     var $muteVideoToggle = $("#muteVideoToggle");
 
     if (enable) {
+        $browserSoundToggle.removeAttr("disabled");
+        $browserSoundToggle.trigger('change');
         $muteAudioToggle.removeAttr("disabled");
         $muteAudioToggle.trigger('change');
         $muteVideoToggle.removeAttr("disabled");
         $muteVideoToggle.trigger('change');
     }
     else {
+        $browserSoundToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $muteAudioToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $muteVideoToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
     }

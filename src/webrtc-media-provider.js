@@ -36,6 +36,7 @@ var createConnection = function (options) {
         var videoCams = [];
         var switchCount = 0;
         var customStream = options.customStream;
+        var originalAudioTrack;
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
@@ -286,6 +287,69 @@ var createConnection = function (options) {
             }
             return true;
         };
+        var enableBrowserSound = function () {
+            if (localVideo && localVideo.srcObject) {
+                if (adapter.browserDetails.browser == "chrome") {
+                    chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
+                        if (response) {
+                            chrome.runtime.sendMessage(extensionId, {type: "getSourceId"}, function (response) {
+                                if (response.error) {
+                                    logger.error(LOG_PREFIX, response.error);
+                                } else {
+                                    var constraints = {
+                                        audio: {
+                                            mandatory: {
+                                                chromeMediaSource: 'desktop',
+                                                chromeMediaSourceId: response.sourceId,
+                                                echoCancellation: true
+                                            },
+                                            optional: []
+                                        },
+                                        video: {
+                                            mandatory: {
+                                                chromeMediaSource: 'desktop',
+                                                chromeMediaSourceId: response.sourceId
+                                            },
+                                            optional: []
+                                        }
+                                    };
+                                    navigator.getUserMedia(constraints, function (audioStream) {
+                                        var stream = localVideo.srcObject;
+                                        if (!originalAudioTrack) {
+                                            if (stream.getAudioTracks().length > 0) {
+                                                originalAudioTrack = stream.getAudioTracks()[0];
+                                            } else {
+                                                originalAudioTrack = new MediaStreamTrack();
+                                            }
+                                        }
+                                        var micSound = audioContext.createMediaStreamSource(stream);
+                                        var systemSound = audioContext.createMediaStreamSource(audioStream);
+                                        var destination = audioContext.createMediaStreamDestination();
+                                        var newStream = destination.stream;
+                                        micSound.connect(destination);
+                                        systemSound.connect(destination);
+                                        stream.addTrack(newStream.getAudioTracks()[0]);
+                                        if (originalAudioTrack) {
+                                            stream.removeTrack(originalAudioTrack);
+                                        }
+                                    }, function (reason) {
+                                        logger.error(LOG_PREFIX, reason);
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        };
+        var disableBrowserSound = function () {
+            if (localVideo && localVideo.srcObject && originalAudioTrack) {
+                var stream = localVideo.srcObject;
+                var currentTrack = stream.getAudioTracks()[0];
+                stream.removeTrack(currentTrack);
+                stream.addTrack(originalAudioTrack);
+            }
+        };
         var getStats = function (callbackFn) {
             if (connection) {
                 if (adapter.browserDetails.browser == "chrome") {
@@ -424,6 +488,8 @@ var createConnection = function (options) {
         exports.muteVideo = muteVideo;
         exports.unmuteVideo = unmuteVideo;
         exports.isVideoMuted = isVideoMuted;
+        exports.enableBrowserSound = enableBrowserSound;
+        exports.disableBrowserSound = disableBrowserSound;
         exports.getStats = getStats;
         exports.fullScreen = fullScreen;
         exports.switchCam = switchCam;

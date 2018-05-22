@@ -1820,6 +1820,39 @@ var createSession = function (options) {
             }
             return true;
         };
+
+        /**
+         * Enable outgoing sound from browser
+         *
+         * @memberof Stream
+         * @inner
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
+         */
+        var enableBrowserSound = function () {
+            if(status_ !== STREAM_STATUS.PUBLISHING){
+                throw new Error('Invalid stream state');
+            }
+            if(mediaConnection) {
+                mediaConnection.enableBrowserSound();
+            }
+        };
+
+        /**
+         * Disable outgoing sound from browser
+         *
+         * @memberof Stream
+         * @inner
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
+         */
+        var disableBrowserSound = function () {
+            if(status_ !== STREAM_STATUS.PUBLISHING){
+                throw new Error('Invalid stream state');
+            }
+            if(mediaConnection) {
+                mediaConnection.disableBrowserSound();
+            }
+        };
+
         /**
          * Get statistics
          *
@@ -1938,6 +1971,8 @@ var createSession = function (options) {
         stream.muteVideo = muteVideo;
         stream.unmuteVideo = unmuteVideo;
         stream.isVideoMuted = isVideoMuted;
+        stream.enableBrowserSound = enableBrowserSound;
+        stream.disableBrowserSound = disableBrowserSound;
         stream.getStats = getStats;
         stream.snapshot = snapshot;
         stream.getNetworkBandwidth = getNetworkBandwidth;

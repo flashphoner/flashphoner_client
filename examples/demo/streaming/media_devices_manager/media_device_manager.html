@@ -85,6 +85,12 @@
                                 <div id="micGainControl" style="margin-top: 12px"></div>
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label style="text-align: left" class="col-sm-4 control-label">Browser Sound</label>
+                            <div class="col-sm-6">
+                                <input id="browserSoundToggle" type="checkbox" />
+                            </div>
+                        </div>
                         <div class="form-group" id="fecForm">
                             <label style="text-align: left" class="col-sm-4 control-label" for="fecForm">FEC
                                 <sup>
@@ -337,6 +343,19 @@
         }
     });
     $muteVideoToggle.bootstrapSwitch({
+        on: 'on',
+        off: 'off',
+        size: 'md'
+    });
+    var $browserSoundToggle = $("#browserSoundToggle");
+    $browserSoundToggle.change(function () {
+        if (this.checked) {
+            enableBrowserSound();
+        } else {
+            disableBrowserSound();
+        }
+    });
+    $browserSoundToggle.bootstrapSwitch({
         on: 'on',
         off: 'off',
         size: 'md'
