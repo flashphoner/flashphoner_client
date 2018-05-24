@@ -567,6 +567,8 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
                         });
                     }
                 });
+            } else {
+                resolveCallback();
             }
         });
     } else {
