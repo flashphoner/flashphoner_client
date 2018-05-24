@@ -25,6 +25,7 @@ function init_page() {
             mediaProvidersReadyCallback: function (mediaProviders) {
                 //hide remote video if current media provider is Flash
                 if (mediaProviders[0] == "Flash") {
+                    $('')
                     $("#fecForm").hide();
                     $("#stereoForm").hide();
                     $("#sendAudioBitrateForm").hide();
@@ -334,6 +335,8 @@ function getConstraints() {
         constraints.audio = {
             deviceId: $('#audioInput').val()
         };
+        if ($('#systemSound').is(':checked'))
+            constraints.audio.systemSound = $('#systemSound').is(':checked');
         if ($("#fec").is(':checked'))
             constraints.audio.fec = $("#fec").is(':checked');
         if ($("#sendStereoAudio").is(':checked'))
@@ -399,9 +402,6 @@ function startStreaming(session) {
         }
         if ($("#muteAudioToggle").is(":checked")) {
             muteAudio();
-        }
-        if ($("#browserSoundToggle").is(":checked")) {
-            enableBrowserSound();
         }
         //remove resize listener in case this video was cached earlier
         video.removeEventListener('resize', resizeLocalVideo);
@@ -588,33 +588,17 @@ function unmuteVideo() {
     }
 }
 
-function enableBrowserSound() {
-    if(publishStream) {
-        publishStream.enableBrowserSound();
-    }
-}
-
-function disableBrowserSound() {
-    if(publishStream) {
-        publishStream.disableBrowserSound();
-    }
-}
-
 function enableToggles(enable) {
-    var $browserSoundToggle = $('#browserSoundToggle');
     var $muteAudioToggle = $("#muteAudioToggle");
     var $muteVideoToggle = $("#muteVideoToggle");
 
     if (enable) {
-        $browserSoundToggle.removeAttr("disabled");
-        $browserSoundToggle.trigger('change');
         $muteAudioToggle.removeAttr("disabled");
         $muteAudioToggle.trigger('change');
         $muteVideoToggle.removeAttr("disabled");
         $muteVideoToggle.trigger('change');
     }
     else {
-        $browserSoundToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $muteAudioToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $muteVideoToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
     }

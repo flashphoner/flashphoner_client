@@ -1505,7 +1505,8 @@ var createSession = function (options) {
                     flashPort: flashPort,
                     connectionConfig: mediaOptions,
                     connectionConstraints: mediaConnectionConstraints,
-                    customStream: constraints && constraints.customStream ? constraints.customStream : false
+                    customStream: constraints && constraints.customStream ? constraints.customStream : false,
+                    systemSound: constraints.audio.systemSound
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
@@ -1822,38 +1823,6 @@ var createSession = function (options) {
         };
 
         /**
-         * Enable outgoing sound from browser
-         *
-         * @memberof Stream
-         * @inner
-         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
-         */
-        var enableBrowserSound = function () {
-            if(status_ !== STREAM_STATUS.PUBLISHING){
-                throw new Error('Invalid stream state');
-            }
-            if(mediaConnection) {
-                mediaConnection.enableBrowserSound();
-            }
-        };
-
-        /**
-         * Disable outgoing sound from browser
-         *
-         * @memberof Stream
-         * @inner
-         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
-         */
-        var disableBrowserSound = function () {
-            if(status_ !== STREAM_STATUS.PUBLISHING){
-                throw new Error('Invalid stream state');
-            }
-            if(mediaConnection) {
-                mediaConnection.disableBrowserSound();
-            }
-        };
-
-        /**
          * Get statistics
          *
          * @param {callbackFn} callbackFn The callback that handles response
@@ -1901,7 +1870,7 @@ var createSession = function (options) {
                 if (mediaConnection)
                     mediaConnection.fullScreen();
             }
-        }
+        };
 
         /**
          * Stream event callback.
@@ -1971,8 +1940,6 @@ var createSession = function (options) {
         stream.muteVideo = muteVideo;
         stream.unmuteVideo = unmuteVideo;
         stream.isVideoMuted = isVideoMuted;
-        stream.enableBrowserSound = enableBrowserSound;
-        stream.disableBrowserSound = disableBrowserSound;
         stream.getStats = getStats;
         stream.snapshot = snapshot;
         stream.getNetworkBandwidth = getNetworkBandwidth;
