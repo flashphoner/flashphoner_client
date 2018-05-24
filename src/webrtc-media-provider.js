@@ -524,7 +524,7 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
         }
         video.play();
     };
-    if (constraints.audio.systemSound && adapter.browserDetails.browser == "chrome") {
+    if (constraints.audio && constraints.audio.systemSound && adapter.browserDetails.browser == "chrome") {
         chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
             if (response) {
                 chrome.runtime.sendMessage(extensionId, {type: "getSourceId"}, function (response) {
