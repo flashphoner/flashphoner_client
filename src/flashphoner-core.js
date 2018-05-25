@@ -1481,7 +1481,11 @@ var createSession = function (options) {
             status_ = STREAM_STATUS.PENDING;
             published_ = true;
             var hasAudio = true;
+            var systemSound = false;
 
+            if(constraints && constratins.audio && constraints.audio.systemSound) {
+                systemSound = true;
+            }
             if (constraints && constraints.video && constraints.video.type && constraints.video.type == "screen") {
                 hasAudio = false;
             }
@@ -1506,7 +1510,7 @@ var createSession = function (options) {
                     connectionConfig: mediaOptions,
                     connectionConstraints: mediaConnectionConstraints,
                     customStream: constraints && constraints.customStream ? constraints.customStream : false,
-                    systemSound: constraints && constraints.audio.systemSound
+                    systemSound: systemSound
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
