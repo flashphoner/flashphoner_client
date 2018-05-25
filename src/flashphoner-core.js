@@ -1506,7 +1506,7 @@ var createSession = function (options) {
                     connectionConfig: mediaOptions,
                     connectionConstraints: mediaConnectionConstraints,
                     customStream: constraints && constraints.customStream ? constraints.customStream : false,
-                    systemSound: constraints.audio.systemSound
+                    systemSound: constraints && constraints.audio.systemSound
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
