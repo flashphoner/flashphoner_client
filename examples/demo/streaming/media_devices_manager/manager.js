@@ -9,7 +9,6 @@ var currentVolumeValue = 50;
 var currentGainValue = 50;
 var intervalID;
 var canvas;
-var extensionId = "bonmiieflfebmegnhopbmkjonngfpcal";
 
 try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -335,8 +334,6 @@ function getConstraints() {
         constraints.audio = {
             deviceId: $('#audioInput').val()
         };
-        if ($('#systemSound').is(':checked'))
-            constraints.audio.systemSound = $('#systemSound').is(':checked');
         if ($("#fec").is(':checked'))
             constraints.audio.fec = $("#fec").is(':checked');
         if ($("#sendStereoAudio").is(':checked'))

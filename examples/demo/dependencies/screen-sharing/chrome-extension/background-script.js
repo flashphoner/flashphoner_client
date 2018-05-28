@@ -11,13 +11,14 @@ function getSourceID(sender, callback) {
     // requires Chrome 40+
     var tab = sender.tab;
     tab.url = sender.url;
-    chrome.desktopCapture.chooseDesktopMedia(session, tab, function (sourceId) {
+    chrome.desktopCapture.chooseDesktopMedia(session, tab, function (sourceId, opts) {
         // "sourceId" will be empty if permission is denied
         if (!sourceId || !sourceId.length) {
             callback({error: 'permissionDenied'});
             return;
         }
-        callback({sourceId: sourceId});
+        console.log(opts.canRequestAudioTrack);
+        callback({sourceId: sourceId, systemSoundAccess: opts.canRequestAudioTrack});
     });
 }
 
