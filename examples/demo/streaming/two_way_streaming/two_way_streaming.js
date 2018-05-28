@@ -1,5 +1,6 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var STREAM_STATUS_INFO = Flashphoner.constants.STREAM_STATUS_INFO;
 var localVideo;
 var remoteVideo;
 
