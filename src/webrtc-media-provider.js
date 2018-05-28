@@ -614,8 +614,12 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
                                 }
                                 resolveCallback();
                             }, function (reason) {
+                                resolveCallback();
                                 logger.error(LOG_PREFIX, reason);
                             });
+                        } else {
+                            resolveCallback();
+                            logger.error(LOG_PREFIX, "System sound: access is denied by the user");
                         }
                     }
                 });
