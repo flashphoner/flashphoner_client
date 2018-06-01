@@ -249,7 +249,7 @@ var createConnection = function (options) {
         };
 
         var setMicrophoneGain = function (volume) {
-            if(microphoneGain) {
+            if (microphoneGain) {
                 microphoneGain.gain.value = volume / 100;
             }
         };
@@ -432,6 +432,17 @@ var createConnection = function (options) {
     });
 };
 
+
+var mixAudioTracks = function (stream1, stream2) {
+    var stream1Sound = audioContext.createMediaStreamSource(stream1);
+    var stream2Sound = audioContext.createMediaStreamSource(stream2);
+    var destination = audioContext.createMediaStreamDestination();
+    var newStream = destination.stream;
+    stream1Sound.connect(destination);
+    stream2Sound.connect(destination);
+    return newStream.getAudioTracks()[0];
+};
+
 var getMediaAccess = function (constraints, display) {
     return new Promise(function (resolve, reject) {
         if (!constraints) {
@@ -450,6 +461,11 @@ var getMediaAccess = function (constraints, display) {
             delete constraints.video.type;
             getScreenDeviceId(constraints).then(function (screenSharingConstraints) {
                 //copy constraints
+                constraints.sourceId = screenSharingConstraints.sourceId;
+                constraints.systemSound = screenSharingConstraints.systemSoundAccess;
+                delete screenSharingConstraints.sourceId;
+                delete screenSharingConstraints.systemSoundAccess;
+
                 for (var prop in screenSharingConstraints) {
                     if (screenSharingConstraints.hasOwnProperty(prop)) {
                         constraints.video[prop] = screenSharingConstraints[prop];
@@ -474,8 +490,18 @@ var getMediaAccess = function (constraints, display) {
                     requestAudioConstraints = constraints.audio;
                     delete constraints.audio;
                 }
+                if (constraints.systemSound) {
+                    constraints.audio = {
+                        mandatory: {
+                            chromeMediaSource: 'desktop',
+                            chromeMediaSourceId: constraints.sourceId,
+                            echoCancellation: true
+                        },
+                        optional: []
+                    };
+                    delete constraints.systemSound;
+                }
             }
-
             if (constraints.customStream) {
                 //get tracks if we have at least one defined constraint
                 if (constraints.audio || constraints.video) {
@@ -511,7 +537,7 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
         video = document.createElement('video');
         display.appendChild(video);
     }
-    if(stream.getAudioTracks().length > 0 && adapter.browserDetails.browser == "chrome") {
+    if (stream.getAudioTracks().length > 0 && adapter.browserDetails.browser == "chrome") {
         microphoneGain = createGainNode(stream);
     }
     video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
@@ -524,20 +550,87 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
         }
         video.play();
     };
-    // This hack for chrome only, firefox supports screen-sharing + audio natively
-    if (requestAudioConstraints && adapter.browserDetails.browser == "chrome") {
-        logger.info(LOG_PREFIX, "Request for audio stream");
-        navigator.getUserMedia({audio: requestAudioConstraints}, function (stream) {
-            logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
-            video.srcObject.addTrack(stream.getAudioTracks()[0]);
-            resolve(display);
-        });
+    if (constraints.systemSound && adapter.browserDetails.browser == "chrome") {
+        addSystemSound();
     } else {
-        resolve(display);
+        resolveCallback();
+    }
+
+    function resolveCallback() {
+        // This hack for chrome only, firefox supports screen-sharing + audio natively
+        if (requestAudioConstraints && adapter.browserDetails.browser == "chrome") {
+            logger.info(LOG_PREFIX, "Request for audio stream");
+            navigator.getUserMedia({audio: requestAudioConstraints}, function (stream) {
+                logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
+                if (video.srcObject.getAudioTracks()[0]) {
+                    var mixedTrack = mixAudioTracks(stream, video.srcObject);
+                    var originalTrack = video.srcObject.getAudioTracks()[0];
+                    video.srcObject.removeTrack(originalTrack);
+                    video.srcObject.addTrack(mixedTrack);
+                } else {
+                    video.srcObject.addTrack(stream.getAudioTracks()[0]);
+                }
+                resolve(display);
+            });
+        } else {
+            resolve(display);
+        }
+    }
+
+    function addSystemSound() {
+        chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
+            if (response) {
+                chrome.runtime.sendMessage(extensionId, {type: "getSourceId"}, function (response) {
+                    if (response.error) {
+                        resolveCallback();
+                        logger.error(LOG_PREFIX, response.error);
+                    } else {
+                        if (response.systemSoundAccess) {
+                            var constraints = {
+                                audio: {
+                                    mandatory: {
+                                        chromeMediaSource: 'desktop',
+                                        chromeMediaSourceId: response.sourceId,
+                                        echoCancellation: true
+                                    },
+                                    optional: []
+                                },
+                                video: {
+                                    mandatory: {
+                                        chromeMediaSource: 'desktop',
+                                        chromeMediaSourceId: response.sourceId
+                                    },
+                                    optional: []
+                                }
+                            };
+                            navigator.getUserMedia(constraints, function (audioStream) {
+                                if (stream.getAudioTracks().length > 0) {
+                                    var originalAudioTrack = stream.getAudioTracks()[0];
+                                    var mixedTrack = mixAudioTracks(stream, audioStream);
+                                    stream.addTrack(mixedTrack);
+                                    stream.removeTrack(originalAudioTrack);
+                                } else {
+                                    stream.addTrack(audioStream.getAudioTracks()[0]);
+                                }
+                                resolveCallback();
+                            }, function (reason) {
+                                resolveCallback();
+                                logger.error(LOG_PREFIX, reason);
+                            });
+                        } else {
+                            resolveCallback();
+                            logger.error(LOG_PREFIX, "System sound: access is denied by the user");
+                        }
+                    }
+                });
+            } else {
+                resolveCallback();
+            }
+        });
     }
 };
 
-var createGainNode = function(stream) {
+var createGainNode = function (stream) {
     var audioCtx = audioContext;
     var source = audioCtx.createMediaStreamSource(stream);
     var gainNode = audioCtx.createGain();
@@ -553,20 +646,20 @@ var createGainNode = function(stream) {
 };
 
 //Fix to set screen resolution for screen sharing in Firefox
-var setScreenResolution = function(video, stream, constraints){
+var setScreenResolution = function (video, stream, constraints) {
     var newHeight;
     var newWidth;
     var videoRatio;
-    if (video.videoWidth>video.videoHeight) {
-        videoRatio = video.videoWidth/video.videoHeight;
-        newHeight = constraints.video.videoWidth/videoRatio;
+    if (video.videoWidth > video.videoHeight) {
+        videoRatio = video.videoWidth / video.videoHeight;
+        newHeight = constraints.video.videoWidth / videoRatio;
         newWidth = constraints.video.videoWidth;
     } else {
-        videoRatio = video.videoHeight/video.videoWidth;
-        newWidth = constraints.video.videoHeight/videoRatio;
+        videoRatio = video.videoHeight / video.videoWidth;
+        newWidth = constraints.video.videoHeight / videoRatio;
         newHeight = constraints.video.videoHeight;
     }
-    console.log("videoRatio === "+videoRatio);
+    console.log("videoRatio === " + videoRatio);
     stream.getVideoTracks()[0].applyConstraints({height: newHeight, width: newWidth});
 };
 
@@ -585,7 +678,11 @@ var getScreenDeviceId = function (constraints) {
                             reject(new Error("Screen access denied"));
                         } else {
                             o.chromeMediaSourceId = response.sourceId;
-                            resolve({mandatory: o});
+                            resolve({
+                                mandatory: o,
+                                sourceId: response.sourceId,
+                                systemSoundAccess: response.systemSoundAccess
+                            });
                         }
                     });
                 } else {

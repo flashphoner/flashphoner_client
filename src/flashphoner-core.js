@@ -1820,6 +1820,7 @@ var createSession = function (options) {
             }
             return true;
         };
+
         /**
          * Get statistics
          *
@@ -1868,7 +1869,7 @@ var createSession = function (options) {
                 if (mediaConnection)
                     mediaConnection.fullScreen();
             }
-        }
+        };
 
         /**
          * Stream event callback.
