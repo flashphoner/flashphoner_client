@@ -216,13 +216,6 @@ var createConnection = function(options) {
             }
             return true;
         };
-
-        var enableBrowserSound = function () {
-
-        };
-        var disableBrowserSound = function () {
-
-        };
         var getStats = function(callbackFn) {
             if (flash) {
                 var statistics = flash.getStats();
@@ -274,8 +267,6 @@ var createConnection = function(options) {
         exports.changeAudioCodec = changeAudioCodec;
         exports.close = close;
         exports.setVolume = setVolume;
-        exports.enableBrowserSound = enableBrowserSound;
-        exports.disableBrowserSound = disableBrowserSound;
         exports.setMicrophoneGain = setMicrophoneGain;
         exports.getVolume = getVolume;
         exports.muteAudio = muteAudio;

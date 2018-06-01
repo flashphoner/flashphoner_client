@@ -24,7 +24,6 @@ function init_page() {
             mediaProvidersReadyCallback: function (mediaProviders) {
                 //hide remote video if current media provider is Flash
                 if (mediaProviders[0] == "Flash") {
-                    $('')
                     $("#fecForm").hide();
                     $("#stereoForm").hide();
                     $("#sendAudioBitrateForm").hide();
@@ -34,8 +33,7 @@ function init_page() {
                     $("#audioInputForm").hide();
                     $("#videoInputForm").hide();
                 }
-            },
-            screenSharingExtensionId: extensionId
+            }
         })
     } catch (e) {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
@@ -102,7 +100,6 @@ function init_page() {
             $("#sendVideo").prop('checked', false).prop('disabled', true);
         }
     }).catch(function (error) {
-        console.log(error);
         $("#notifyFlash").text("Failed to get media devices");
     });
     $("#receiveDefaultSize").click(function () {
@@ -161,8 +158,6 @@ function init_page() {
             previewStream.setVolume(currentVolumeValue);
         }
     }).slider("disable");
-
-
 
     $("#testBtn").text("Test").off('click').click(function () {
         $(this).prop('disabled', true);
@@ -393,7 +388,7 @@ function startStreaming(session) {
         if (video.videoWidth > 0 && video.videoHeight > 0) {
             resizeLocalVideo({target: video});
         }
-        enableToggles(true);
+        enableMuteToggles(true);
         if ($("#muteVideoToggle").is(":checked")) {
             muteVideo();
         }
@@ -585,7 +580,7 @@ function unmuteVideo() {
     }
 }
 
-function enableToggles(enable) {
+function enableMuteToggles(enable) {
     var $muteAudioToggle = $("#muteAudioToggle");
     var $muteVideoToggle = $("#muteVideoToggle");
 

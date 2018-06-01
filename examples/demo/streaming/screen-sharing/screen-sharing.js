@@ -2,7 +2,7 @@ var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var localVideo;
 var remoteVideo;
-var extensionId = "bonmiieflfebmegnhopbmkjonngfpcal";
+var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 
 function init_page() {
     //init api
