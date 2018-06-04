@@ -1,5 +1,6 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
 var localVideo;
 var remoteVideo;
 var constraints;
@@ -46,13 +47,35 @@ function init_page() {
 
     setInterval(drawSquare, 2000);
 
+    Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.OUTPUT).then(function (list) {
+        list.audio.forEach(function (device) {
+            var audio = document.getElementById("audioOutput");
+            var i;
+            var deviceInList = false;
+            for (i = 0; i < audio.options.length; i++) {
+                if (audio.options[i].value === device.id) {
+                    deviceInList = true;
+                    break;
+                }
+            }
+            if (!deviceInList) {
+                var option = document.createElement("option");
+                option.text = device.label || device.id;
+                option.value = device.id;
+                audio.appendChild(option);
+            }
+        });
+    }).catch(function (error) {
+        $("#notifyFlash").text("Failed to get media devices");
+    });
+
     Flashphoner.getMediaDevices(null, true).then(function (list) {
         list.audio.forEach(function (device) {
             var audio = document.getElementById("audioInput");
             var i;
             var deviceInList = false;
             for (i = 0; i < audio.options.length; i++) {
-                if (audio.options[i].value == device.id) {
+                if (audio.options[i].value === device.id) {
                     deviceInList = true;
                     break;
                 }
@@ -70,7 +93,7 @@ function init_page() {
             var i;
             var deviceInList = false;
             for (i = 0; i < video.options.length; i++) {
-                if (video.options[i].value == device.id) {
+                if (video.options[i].value === device.id) {
                     deviceInList = true;
                     break;
                 }
@@ -163,6 +186,12 @@ function init_page() {
         $(this).prop('disabled', true);
         startTest();
     }).prop('disabled', false);
+
+    $( "#audioOutput" ).change(function() {
+        if (previewStream) {
+            previewStream.setAudioOutputId($(this).val());
+        }
+    });
 }
 
 function onStarted(publishStream, previewStream) {
@@ -343,11 +372,12 @@ function getConstraints() {
             constraints.video = false;
         } else {
             constraints.video = {
-                deviceId: {exact: $('#videoInput').val()},
+                deviceId: $('#videoInput').val(),
                 width: parseInt($('#sendWidth').val()),
                 height: parseInt($('#sendHeight').val())
             };
             if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+                constraints.video.deviceId = {exact: $('#videoInput').val()};
                 constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
                 constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
             }
@@ -405,6 +435,11 @@ function startStreaming(session) {
             audio: $("#playAudio").is(':checked'),
             video: $("#playVideo").is(':checked')
         };
+        if (constraints.audio) {
+            constraints.audio = {
+                outputId: $('#audioOutput').val()
+            }
+        }
         if (constraints.video) {
             constraints.video = {
                 width: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveWidth').val()) : 0,
@@ -469,7 +504,9 @@ function setStatus(status) {
 
 function muteInputs() {
     $(":text, select, :checkbox").each(function () {
-        $(this).attr('disabled', 'disabled');
+        if ($(this).attr('id') !== 'audioOutput') {
+            $(this).attr('disabled', 'disabled');
+        }
     });
 }
 

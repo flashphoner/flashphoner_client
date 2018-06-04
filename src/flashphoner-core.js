@@ -229,18 +229,19 @@ var getLogger = function () {
  * @param {String=} mediaProvider Media provider that will be asked for device list
  * @param {Boolean=} labels Ask user for microphone access before getting device list.
  * This will make device label available.
+ * @param {Flashphoner.constants.MEDIA_DEVICE_KIND} kind For media device kind input or output
  * @returns {Promise.<Flashphoner.MediaDeviceList>} Promise with media device list on fulfill
  * @throws {Error} Error if API is not initialized
  * @memberof Flashphoner
  */
-var getMediaDevices = function (mediaProvider, labels) {
+var getMediaDevices = function (mediaProvider, labels, kind) {
     if (!initialized) {
         throw new Error("Flashphoner API is not initialized");
     }
     if (!mediaProvider) {
         mediaProvider = getMediaProviders()[0];
     }
-    return MediaProvider[mediaProvider].listDevices(labels);
+    return MediaProvider[mediaProvider].listDevices(labels, kind);
 };
 
 /**
@@ -681,6 +682,13 @@ var createSession = function (options) {
         if (options.constraints) {
             var constraints = options.constraints;
         }
+
+        var audioOutputId;
+        var audioProperty = getConstraintsProperty(constraints, "audio", undefined);
+        if (typeof audioProperty === 'object') {
+            audioOutputId = getConstraintsProperty(audioProperty, "outputId", 0);
+        }
+
         var stripCodecs = options.stripCodecs || [];
         // Receive media
         var receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : true;
@@ -781,7 +789,8 @@ var createSession = function (options) {
                     flashPort: flashPort,
                     bidirectional: true,
                     login: login,
-                    connectionConfig: mediaOptions
+                    connectionConfig: mediaOptions,
+                    audioOutputId: audioOutputId
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
@@ -901,7 +910,8 @@ var createSession = function (options) {
                     flashPort: flashPort,
                     bidirectional: true,
                     login: cConfig.sipLogin,
-                    connectionConfig: mediaOptions
+                    connectionConfig: mediaOptions,
+                    audioOutputId: audioOutputId
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.setRemoteSdp(sdp);
@@ -990,6 +1000,20 @@ var createSession = function (options) {
         /**
          * Media controls
          */
+
+        /**
+         * Set other oupout audio device
+         *
+         * @param {string} id Id of output device
+         * @memberof Call
+         * @inner
+         */
+        var setAudioOutputId = function(id) {
+            audioOutputId = id;
+            if (mediaConnection && mediaConnection.setAudioOutputId) {
+                return mediaConnection.setAudioOutputId(id);
+            }
+        };
 
         /**
          * Set volume of remote media
@@ -1197,6 +1221,7 @@ var createSession = function (options) {
         call.id = id;
         call.status = status;
         call.getStats = getStats;
+        call.setAudioOutputId = setAudioOutputId;
         call.setVolume = setVolume;
         call.getVolume = getVolume;
         call.muteAudio = muteAudio;
@@ -1224,7 +1249,8 @@ var createSession = function (options) {
      * @param {Object} options Stream options
      * @param {string} options.name Stream name
      * @param {Object=} options.constraints Stream constraints
-     * @param {Boolean} [options.constraints.audio=true] Specifies if published stream should have audio. Played stream always should have audio: the property should not be set to false in that case.
+     * @param {Boolean|Object} [options.constraints.audio=true] Specifies if published stream should have audio. Played stream always should have audio: the property should not be set to false in that case.
+     * @param {string=} [options.constraints.audio.outputId] Set width to publish or play stream with this value
      * @param {Boolean|Object} [options.constraints.video=true] Specifies if published or played stream should have video, or sets video constraints
      * @param {Integer} [options.constraints.video.width=0] Set width to publish or play stream with this value
      * @param {Integer} [options.constraints.video.height=0] Set height to publish or play stream with this value
@@ -1282,6 +1308,7 @@ var createSession = function (options) {
         var mediaConnectionConstraints = options.mediaConnectionConstraints;
         // Receive media
         var receiveAudio;
+        var audioOutputId;
         var audioProperty = getConstraintsProperty(constraints, "audio", undefined);
         if (typeof audioProperty === 'boolean') {
             receiveAudio = audioProperty;
@@ -1290,6 +1317,7 @@ var createSession = function (options) {
             var _stereo = getConstraintsProperty(audioProperty, "stereo", 0);
             var _bitrate = getConstraintsProperty(audioProperty, "bitrate", 0);
             var _fec = getConstraintsProperty(audioProperty, "fec", 0);
+            audioOutputId = getConstraintsProperty(audioProperty, "outputId", 0);
             var _codecOptions = "";
             if (_bitrate) _codecOptions += "maxaveragebitrate=" + _bitrate + ";";
             if (_stereo) _codecOptions += "stereo=1;sprop-stereo=1;";
@@ -1422,7 +1450,8 @@ var createSession = function (options) {
                 flashBufferTime: options.flashBufferTime || 0,
                 flashShowFullScreenButton: options.flashShowFullScreenButton || false,
                 connectionConfig: mediaOptions,
-                connectionConstraints: mediaConnectionConstraints
+                connectionConstraints: mediaConnectionConstraints,
+                audioOutputId: audioOutputId
             }, streamRefreshHandlers[id_]).then(function (newConnection) {
                 mediaConnection = newConnection;
                 try {
@@ -1719,6 +1748,20 @@ var createSession = function (options) {
          */
 
         /**
+         * Set other oupout audio device
+         *
+         * @param {string} id Id of output device
+         * @memberof Call
+         * @inner
+         */
+        var setAudioOutputId = function(id) {
+            audioOutputId = id;
+            if (mediaConnection && mediaConnection.setAudioOutputId) {
+                return mediaConnection.setAudioOutputId(id);
+            }
+        };
+
+        /**
          * Set volume of remote media
          *
          * @param {number} volume Volume between 0 and 100
@@ -1868,7 +1911,7 @@ var createSession = function (options) {
                 if (mediaConnection)
                     mediaConnection.fullScreen();
             }
-        }
+        };
 
         /**
          * Stream event callback.
@@ -1929,6 +1972,7 @@ var createSession = function (options) {
         stream.getRecordInfo = getRecordInfo;
         stream.getInfo = getInfo;
         stream.videoResolution = videoResolution;
+        stream.setAudioOutputId = setAudioOutputId;
         stream.setVolume = setVolume;
         stream.setMicrophoneGain = setMicrophoneGain;
         stream.getVolume = getVolume;

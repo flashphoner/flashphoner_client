@@ -617,6 +617,14 @@ define(errorInfo, 'INVALID_SESSION_STATE', 'Invalid session state');
  */
 define(errorInfo, 'OPTIONS_NAME_MUST_BE_PROVIDED', 'options.name must be provided');
 
+var mediaDeviceKind = {};
+
+define(mediaDeviceKind, 'OUTPUT', 'output');
+
+define(mediaDeviceKind, 'INPUT', 'input');
+
+define(mediaDeviceKind, 'All', '');
+
 var constants = {};
 define(constants, 'SESSION_STATUS', sessionStatus);
 define(constants, 'STREAM_STATUS', streamStatus);
@@ -624,6 +632,7 @@ define(constants, 'CALL_STATUS', callStatus);
 define(constants, 'STREAM_STATUS_INFO', streamStatusInfo);
 define(constants, 'CALL_STATUS_INFO', callStatusInfo);
 define(constants, 'ERROR_INFO', errorInfo);
+define(constants, 'MEDIA_DEVICE_KIND', mediaDeviceKind);
 
 //define helper
 function define(obj, name, value) {

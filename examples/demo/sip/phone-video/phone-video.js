@@ -1,5 +1,6 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS; 
 var CALL_STATUS = Flashphoner.constants.CALL_STATUS;
+var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
 var localVideo;
 var remoteVideo;
 var currentCall;
@@ -33,6 +34,28 @@ function init_page(){
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
     }
+
+    Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.OUTPUT).then(function (list) {
+        list.audio.forEach(function (device) {
+            var audio = document.getElementById("audioOutput");
+            var i;
+            var deviceInList = false;
+            for (i = 0; i < audio.options.length; i++) {
+                if (audio.options[i].value === device.id) {
+                    deviceInList = true;
+                    break;
+                }
+            }
+            if (!deviceInList) {
+                var option = document.createElement("option");
+                option.text = device.label || device.id;
+                option.value = device.id;
+                audio.appendChild(option);
+            }
+        });
+    }).catch(function (error) {
+        $("#notifyFlash").text("Failed to get media devices");
+    });
 	
 	//local and remote displays
     localVideo = document.getElementById("localVideo");
@@ -56,6 +79,12 @@ function init_page(){
             currentCall.unhold();
         }
         $(this).prop('disabled',true);
+    });
+
+    $("#audioOutput").change(function() {
+        if (currentCall) {
+            currentCall.setAudioOutputId($(this).val());
+        }
     });
 }
 
@@ -150,7 +179,7 @@ function call() {
         onHangupIncoming();
         currentCall = null;
     });
-	
+	outCall.setAudioOutputId($('#audioOutput').val());
 	outCall.call();
 	currentCall = outCall;
 	
@@ -208,7 +237,8 @@ function onIncomingCall(inCall) {
 	
     $("#answerBtn").off('click').click(function(){
 		$(this).prop('disabled', true);
-		inCall.answer({
+        outCall.setAudioOutputId($('#audioOutput').val());
+        inCall.answer({
                 localVideoDisplay: localVideo,
                 remoteVideoDisplay: remoteVideo
             });

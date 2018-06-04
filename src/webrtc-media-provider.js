@@ -12,6 +12,8 @@ var logger;
 var LOG_PREFIX = "webrtc";
 var audioContext;
 var microphoneGain;
+var constants = require('./constants');
+
 
 var createConnection = function (options) {
     return new Promise(function (resolve, reject) {
@@ -48,6 +50,10 @@ var createConnection = function (options) {
                 remoteDisplay.appendChild(remoteVideo);
             }
             remoteVideo.id = id + "-remote";
+
+            if (options.audioOutputId) {
+                remoteVideo.setSinkId(options.audioOutputId);
+            }
             /**
              * Workaround for Android 6, 7, Chrome 61.
              * https://bugs.chromium.org/p/chromium/issues/detail?id=769622
@@ -63,6 +69,9 @@ var createConnection = function (options) {
                     display.appendChild(remoteVideo);
                 }
                 remoteVideo.id = id;
+                if (options.audioOutputId) {
+                    remoteVideo.setSinkId(options.audioOutputId);
+                }
                 /**
                  * Workaround for Android 6, 7, Chrome 61.
                  * https://bugs.chromium.org/p/chromium/issues/detail?id=769622
@@ -234,6 +243,12 @@ var createConnection = function (options) {
             });
         };
 
+        var setAudioOutputId = function (id) {
+            if (remoteVideo) {
+                return remoteVideo.setSinkId(id);
+            }
+        };
+
         var getVolume = function () {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
                 //return remoteVideo.srcObject.getAudioTracks()[0].volume * 100;
@@ -264,6 +279,7 @@ var createConnection = function (options) {
                 localVideo.srcObject.getAudioTracks()[0].enabled = true;
             }
         };
+
         var isAudioMuted = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
                 return !localVideo.srcObject.getAudioTracks()[0].enabled;
@@ -415,6 +431,7 @@ var createConnection = function (options) {
         exports.setRemoteSdp = setRemoteSdp;
         exports.changeAudioCodec = changeAudioCodec;
         exports.close = close;
+        exports.setAudioOutputId = setAudioOutputId;
         exports.setVolume = setVolume;
         exports.setMicrophoneGain = setMicrophoneGain;
         exports.getVolume = getVolume;
@@ -652,14 +669,17 @@ var available = function () {
     return ('getUserMedia' in navigator && 'RTCPeerConnection' in window);
 };
 
-var listDevices = function (labels) {
+var listDevices = function (labels, kind) {
+    if (!kind) {
+        kind = constants.MEDIA_DEVICE_KIND.INPUT;
+    }
     var getConstraints = function (devices) {
         var constraints = {};
         for (var i = 0; i < devices.length; i++) {
             var device = devices[i];
-            if (device.kind == "audioinput") {
+            if (device.kind.indexOf("audio"+ kind) === 0) {
                 constraints.audio = true;
-            } else if (device.kind == "videoinput") {
+            } else if (device.kind.indexOf("video"+ kind) === 0) {
                 constraints.video = true;
             } else {
                 logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
@@ -679,10 +699,10 @@ var listDevices = function (labels) {
                 id: device.deviceId,
                 label: device.label
             };
-            if (device.kind == "audioinput") {
+            if (device.kind.indexOf("audio"+ kind) === 0) {
                 ret.type = "mic";
                 list.audio.push(ret);
-            } else if (device.kind == "videoinput") {
+            } else if (device.kind.indexOf("video" + kind) === 0) {
                 ret.type = "camera";
                 list.video.push(ret);
             } else {
