@@ -1863,6 +1863,7 @@ var createSession = function (options) {
             }
             return true;
         };
+
         /**
          * Get statistics
          *
