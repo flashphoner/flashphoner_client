@@ -36,7 +36,9 @@ var createConnection = function (options) {
         var localVideo;
         var remoteVideo;
         var videoCams = [];
-        var switchCount = 0;
+        var switchCamCount = 0;
+        var mics = [];
+        var switchMicCount = 0;
         var customStream = options.customStream;
 
         if (bidirectional) {
@@ -89,9 +91,20 @@ var createConnection = function (options) {
                 listDevices(false).then(function (devices) {
                     devices.video.forEach(function (device) {
                         if (videoTrack.label === device.label) {
-                            switchCount = videoCams.length;
+                            switchCamCount = videoCams.length;
                         }
                         videoCams.push(device.id);
+                    })
+                });
+            }
+            var audioTrack = localVideo.srcObject.getAudioTracks()[0];
+            if (audioTrack) {
+                listDevices(false).then(function (devices) {
+                    devices.audio.forEach(function (device) {
+                        if (audioTrack.label === device.label) {
+                            switchMicCount = mic.length;
+                        }
+                        mics.push(device.id);
                     })
                 });
             }
@@ -412,9 +425,9 @@ var createConnection = function (options) {
             if (localVideo && localVideo.srcObject && videoCams.length > 1 && !customStream) {
                 connection.getSenders().forEach(function (sender) {
                     if (sender.track.kind === 'audio') return;
-                    switchCount = (switchCount + 1) % videoCams.length;
+                    switchCamCount = (switchCamCount + 1) % videoCams.length;
                     sender.track.stop();
-                    navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: videoCams[switchCount]}}}).then(function (newStream) {
+                    navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: videoCams[switchCamCount]}}}).then(function (newStream) {
                         sender.replaceTrack(newStream.getVideoTracks()[0]);
                         localVideo.srcObject = newStream;
                     }).catch(function (reason) {
@@ -423,6 +436,23 @@ var createConnection = function (options) {
                 });
             }
         };
+
+        var switchMic = function () {
+            if (localVideo && localVideo.srcObject && mics.length > 1 && !customStream) {
+                connection.getSenders().forEach(function (sender) {
+                    if (sender.track.kind === 'video') return;
+                    switchMicCount = (switchMicCount + 1) % mics.length;
+                    sender.track.stop();
+                    var hasVideo = localVideo.srcObject.getVideoTracks().length > 0;
+                    navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: mics[switchMicCount]}}, video: hasVideo}).then(function (newStream) {
+                        sender.replaceTrack(newStream.getAudioTracks()[0]);
+                        localVideo.srcObject = newStream;
+                    }).catch(function (reason) {
+                        logger.error(LOG_PREFIX, reason)
+                    });
+                });
+            }
+        }
 
         var exports = {};
         exports.state = state;
@@ -444,6 +474,7 @@ var createConnection = function (options) {
         exports.getStats = getStats;
         exports.fullScreen = fullScreen;
         exports.switchCam = switchCam;
+        exports.switchMic = switchMic;
         connections[id] = exports;
         resolve(exports);
     });

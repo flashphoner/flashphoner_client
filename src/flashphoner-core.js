@@ -1215,6 +1215,36 @@ var createSession = function (options) {
             return call;
         };
 
+        /**
+         * Switch camera in real-time.
+         * Works only with WebRTC
+         *
+         * @memberOf Call
+         * @inner
+         * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.ESTABLISHED}
+         */
+        var switchCam = function() {
+            if(status_ !== CALL_STATUS.ESTABLISHED && !constraints.video){
+                throw new Error('Invalid call state');
+            }
+            mediaConnection.switchCam();
+        };
+
+        /**
+         * Switch mic in real-time.
+         * Works only with WebRTC
+         *
+         * @memberOf Call
+         * @inner
+         * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.ESTABLISHED}
+         */
+        var switchMic = function() {
+            if(status_ !== CALL_STATUS.ESTABLISHED){
+                throw new Error('Invalid call state');
+            }
+            mediaConnection.switchMic();
+        };
+
         call.call = call_;
         call.answer = answer;
         call.hangup = hangup;
@@ -1239,6 +1269,8 @@ var createSession = function (options) {
         call.sendDTMF = sendDTMF;
         call.transfer = transfer;
         call.on = on;
+        call.switchCam = switchCam;
+        call.switchMic = switchMic;
         calls[id_] = call;
         return call;
     };
@@ -1585,6 +1617,21 @@ var createSession = function (options) {
 		        throw new Error('Invalid stream state');
             }
             mediaConnection.switchCam();
+        };
+
+        /**
+         * Switch microphone in real-time.
+         * Works only with WebRTC
+         *
+         * @memberOf Stream
+         * @inner
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
+         */
+        var switchMic = function() {
+            if(status_ !== STREAM_STATUS.PUBLISHING){
+                throw new Error('Invalid stream state');
+            }
+            mediaConnection.switchMic();
         };
 
         /**
@@ -1991,6 +2038,7 @@ var createSession = function (options) {
         stream.on = on;
         stream.available = available;
 		stream.switchCam = switchCam;
+        stream.switchMic = switchMic;
 
         streams[id_] = stream;
         return stream;
