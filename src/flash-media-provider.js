@@ -256,6 +256,9 @@ var createConnection = function(options) {
         var switchCam = function () {
         };
 
+        var switchMic = function () {
+        };
+
         var setMicrophoneGain = function (volume) {
         };
 
@@ -277,7 +280,8 @@ var createConnection = function(options) {
         exports.isVideoMuted = isVideoMuted;
         exports.getStats = getStats;
         exports.fullScreen = fullScreen;
-        exports.switchCam = switchCam
+        exports.switchCam = switchCam;
+        exports.switchMic = switchMic;
     });
 };
 

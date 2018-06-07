@@ -86,6 +86,16 @@ function init_page(){
             currentCall.setAudioOutputId($(this).val());
         }
     });
+    $("#switchCamBtn").click(function() {
+       if (currentCall) {
+           currentCall.switchCam();
+       }
+    }).prop('disabled', true);
+    $("#switchMicBtn").click(function() {
+        if (currentCall) {
+            currentCall.switchMic();
+        }
+    }).prop('disabled', true);
 }
 
 function connect() {
@@ -141,6 +151,8 @@ function connect() {
 		    setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
 			enableMuteToggles(true);
             $("#holdBtn").prop('disabled',false);
+            $("#switchCamBtn").prop('disabled', false);
+            $("#switchMicBtn").prop('disabled', false);
         }).on(CALL_STATUS.FINISH, function(){
 		    setStatus("#callStatus", CALL_STATUS.FINISH);
 			onHangupIncoming();
@@ -226,6 +238,8 @@ function onHangupOutgoing() {
     $('#callee').prop('disabled', false);
     $("#callFeatures").hide();
     $("#holdBtn").text("Hold");
+    $("#switchCamBtn").prop('disabled', true);
+    $("#switchMicBtn").prop('disabled', true);
 	disableOutgoing(false);
 	enableMuteToggles(false);
 }
@@ -253,6 +267,8 @@ function onIncomingCall(inCall) {
 }
 
 function onHangupIncoming() {
+    $("#switchCamBtn").prop('disabled', true);
+    $("#switchMicBtn").prop('disabled', true);
     showOutgoing();
 	enableMuteToggles(false);
 }
@@ -260,6 +276,8 @@ function onHangupIncoming() {
 function onAnswerOutgoing() {
     enableMuteToggles(true);
     $("#callFeatures").show();
+    $("#switchCamBtn").prop('disabled', false);
+    $("#switchMicBtn").prop('disabled', false);
 }
 
 // Set connection and call status
