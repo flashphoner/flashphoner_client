@@ -23,9 +23,9 @@
 
 <!-- full size container -->
 <div class="container-fluid">
-    <div class="row" style="max-width: 1024px">
+    <div class="row" style="max-width: 100%">
 	    <h2 id="notifyFlash" class="text-danger"></h2>
-        <div class="col-sm-7 text-center">
+        <div class="col-sm-5 text-center">
 
             <h1>Phone Video</h1>
             <!-- Connection fields -->
@@ -109,7 +109,20 @@
                 </script>
             </div>
         </div>
+
+        <div class="pull-right">
+        <div class="col-sm-7 text-center">
+            <fieldset id="callVideoStatistics" class="scheduler-border">
+            </fieldset>
+        </div>
+        <div class="col-sm-7 text-center">
+            <fieldset id="callAudioStatistics" class="scheduler-border">
+            </fieldset>
+        </div>
+        </div>
     </div>
+
+
     <div class="row" style="margin-top: 70px;">
         <div class="col-sm-4">
             <a href="https://play.google.com/store/apps/details?id=com.flashphoner.wcsexample.phone_min_video"><img src="../../dependencies/img/google_play.jpg" title="Google Play" alt="Google Play"></a>

@@ -304,77 +304,40 @@ var createConnection = function (options) {
         };
         var getStats = function (callbackFn) {
             if (connection) {
-                if (adapter.browserDetails.browser == "chrome") {
-                    connection.getStats(null).then(function (rawStats) {
-                        var results = rawStats;
-                        var result = {type: "chrome", outgoingStreams: {}, incomingStreams: {}};
-                        if (rawStats instanceof Map) {
-                            rawStats.forEach(function (v, k, m) {
-                                handleResult(v);
-                            });
-                        } else {
-                            for (var i = 0; i < results.length; ++i) {
-                                handleResult(results[i]);
-                            }
-                        }
-
-                        function handleResult(res) {
-                            var resultPart = util.processRtcStatsReport(adapter.browserDetails.browser, res);
-                            if (resultPart != null) {
-                                if (resultPart.type == "googCandidatePair") {
-                                    result.activeCandidate = resultPart;
-                                } else if (resultPart.type == "ssrc") {
-                                    if (resultPart.transportId.indexOf("audio") > -1) {
-                                        if (resultPart.id.indexOf("send") > -1) {
-                                            result.outgoingStreams.audio = resultPart;
-                                        } else {
-                                            result.incomingStreams.audio = resultPart;
-                                        }
-
-                                    } else {
-                                        if (resultPart.id.indexOf("send") > -1) {
-                                            result.outgoingStreams.video = resultPart;
-                                        } else {
-                                            result.incomingStreams.video = resultPart;
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-
-                        callbackFn(result);
-                    }).catch(function (error) {
-                        callbackFn(error)
-                    });
-                } else if (adapter.browserDetails.browser == "firefox") {
-                    connection.getStats(null).then(function (rawStats) {
-                        var result = {type: "firefox", outgoingStreams: {}, incomingStreams: {}};
-                        for (var k in rawStats) {
-                            if (rawStats.hasOwnProperty(k)) {
-                                var resultPart = util.processRtcStatsReport(adapter.browserDetails.browser, rawStats[k]);
-                                if (resultPart != null) {
-                                    if (resultPart.type == "outboundrtp") {
-                                        if (resultPart.id.indexOf("audio") > -1) {
-                                            result.outgoingStreams.audio = resultPart;
-                                        } else {
-                                            result.outgoingStreams.video = resultPart;
-                                        }
-                                    } else if (resultPart.type == "inboundrtp") {
-                                        if (resultPart.id.indexOf("audio") > -1) {
-                                            result.incomingStreams.audio = resultPart;
-                                        } else {
-                                            result.incomingStreams.video = resultPart;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        callbackFn(result);
-                    }).catch(function (error) {
-                        callbackFn(error)
-                    });
+                var result = {otherStats:[]};
+                var senders = connection.getSenders();
+                var receivers = connection.getReceivers();
+                if(senders.length > 0 && senders[0].track) {
+                    loadStats(senders, 'outbound-rtp');
+                } else if(receivers.length > 0 && receivers[0].track) {
+                    loadStats(receivers, 'inbound-rtp');
                 }
+            }
+            
+            function loadStats(receiverOrSender, statType) {
+                if (adapter.browserDetails.browser == "chrome") {
+                    result.type = 'chrome';
+                } else if (adapter.browserDetails.browser == "firefox") {
+                    result.type = 'firefox';
+                } else {
+                    return;
+                }
+                receiverOrSender.forEach(function (receiverOrSender) {
+                    receiverOrSender.getStats().then(function (report) {
+                        report.forEach(function (stat) {
+                            if (stat.type === statType) {
+                                if (receiverOrSender.track.kind === 'audio') {
+                                    result.audioStats = stat;
+                                } else {
+                                    result.videoStats = stat;
+                                }
+                            } else {
+                                result.otherStats.push(stat);
+                            }
+                        });
+                        callbackFn(result);
+                    });
+                })
             }
         };
 
