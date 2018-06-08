@@ -20,7 +20,7 @@ function loadCallControls(){
 }
 
 function init_page(){
-	//init api
+    //init api
     try {
         Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf',
             mediaProvidersReadyCallback: function(mediaProviders) {
@@ -57,16 +57,16 @@ function init_page(){
         $("#notifyFlash").text("Failed to get media devices");
     });
 	
-	//local and remote displays
+    //local and remote displays
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
 
     // Set websocket URL
     $("#urlServer").val(setURL());
-	
-	// Display outgoing call controls
+
+    // Display outgoing call controls
     showOutgoing();
-	
+		
     onHangupOutgoing();
     onDisconnected();
     $("#holdBtn").click(function(){
@@ -104,16 +104,16 @@ function connect() {
         Flashphoner.playFirstVideo(remoteVideo, false);
     }
 
-	var url = $('#urlServer').val();
+    var url = $('#urlServer').val();
     var registerRequired = $("#sipRegisterRequired").is(':checked');
 
     var sipOptions = {
-	    login: $("#sipLogin").val(),
+        login: $("#sipLogin").val(),
         authenticationName: $("#sipAuthenticationName").val(),
-		password: $("#sipPassword").val(),
-		domain: $("#sipDomain").val(),
+        password: $("#sipPassword").val(),
+        domain: $("#sipDomain").val(),
         outboundProxy: $("#sipOutboundProxy").val(),
-		port: $("#sipPort").val(),
+        port: $("#sipPort").val(),
         registerRequired: registerRequired
     };
 
@@ -127,15 +127,15 @@ function connect() {
     Flashphoner.createSession(connectionOptions).on(SESSION_STATUS.ESTABLISHED, function(session){
         setStatus("#regStatus", SESSION_STATUS.ESTABLISHED);
         onConnected(session);
-		if (!registerRequired) {
+        if (!registerRequired) {
             disableOutgoing(false);
-		}
+        }
     }).on(SESSION_STATUS.REGISTERED, function(session){
         setStatus("#regStatus", SESSION_STATUS.REGISTERED);
         onConnected(session);
         if (registerRequired) {
             disableOutgoing(false);
-		}
+        }
     }).on(SESSION_STATUS.DISCONNECTED, function(){
         setStatus("#regStatus", SESSION_STATUS.DISCONNECTED);
         onDisconnected();
@@ -144,48 +144,48 @@ function connect() {
         onDisconnected();
     }).on(SESSION_STATUS.INCOMING_CALL, function(call){ 
         call.on(CALL_STATUS.RING, function(){
-		    setStatus("#callStatus", CALL_STATUS.RING);
+            setStatus("#callStatus", CALL_STATUS.RING);
         }).on(CALL_STATUS.HOLD, function() {
             $("#holdBtn").prop('disabled',false);
         }).on(CALL_STATUS.ESTABLISHED, function(){
-		    setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
-			enableMuteToggles(true);
+            setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
+            enableMuteToggles(true);
             $("#holdBtn").prop('disabled',false);
             $("#switchCamBtn").prop('disabled', false);
             $("#switchMicBtn").prop('disabled', false);
         }).on(CALL_STATUS.FINISH, function(){
-		    setStatus("#callStatus", CALL_STATUS.FINISH);
-			onHangupIncoming();
-		    currentCall = null;
+            setStatus("#callStatus", CALL_STATUS.FINISH);
+            onHangupIncoming();
+            currentCall = null;
         }).on(CALL_STATUS.FAILED, function(){
             setStatus("#callStatus", CALL_STATUS.FAILED);
             onHangupIncoming();
             currentCall = null;
         });
-		onIncomingCall(call);
+        onIncomingCall(call);
     });
 }
 
 function call() {
-	var session = Flashphoner.getSessions()[0];
-	//prepare outgoing call 
+    var session = Flashphoner.getSessions()[0];
+    //prepare outgoing call 
     var outCall = session.createCall({
-		callee: $("#callee").val(),
+        callee: $("#callee").val(),
         visibleName: $("#sipLogin").val(),
-	    localVideoDisplay: localVideo, 
+        localVideoDisplay: localVideo, 
         remoteVideoDisplay: remoteVideo 
-	}).on(CALL_STATUS.RING, function(){
-		setStatus("#callStatus", CALL_STATUS.RING);
+    }).on(CALL_STATUS.RING, function(){
+        setStatus("#callStatus", CALL_STATUS.RING);
     }).on(CALL_STATUS.ESTABLISHED, function(){
-		setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
+        setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
         onAnswerOutgoing();
         $("#holdBtn").prop('disabled',false);
     }).on(CALL_STATUS.HOLD, function() {
         $("#holdBtn").prop('disabled',false);
     }).on(CALL_STATUS.FINISH, function(){
-		setStatus("#callStatus", CALL_STATUS.FINISH);
-	    onHangupOutgoing();
-		currentCall = null;
+        setStatus("#callStatus", CALL_STATUS.FINISH);
+        onHangupOutgoing();
+        currentCall = null;
     }).on(CALL_STATUS.FAILED, function(){
         setStatus("#callStatus", CALL_STATUS.FAILED);
         onHangupIncoming();
@@ -197,30 +197,30 @@ function call() {
 	
 	$("#callBtn").text("Hangup").off('click').click(function(){
         $(this).prop('disabled', true);
-	    outCall.hangup();
+        outCall.hangup();
     }).prop('disabled', false);
 }
 
 function onConnected(session) {
     $("#connectBtn").text("Disconnect").off('click').click(function(){
         $(this).prop('disabled', true);
-		if (currentCall) {
-			showOutgoing();
-			disableOutgoing(true);
-			setStatus("#callStatus", "");
-			currentCall.hangup();
-		}
+        if (currentCall) {
+            showOutgoing();
+            disableOutgoing(true);
+            setStatus("#callStatus", "");
+            currentCall.hangup();
+        }
         session.disconnect();
     }).prop('disabled', false);
 }
 
 function onDisconnected() {
     $("#connectBtn").text("Connect").off('click').click(function(){
-		if (validateForm("formConnection")) {
-			disableConnectionFields("formConnection", true);
-			$(this).prop('disabled', true);
-			connect();
-		}
+        if (validateForm("formConnection")) {
+            disableConnectionFields("formConnection", true);
+            $(this).prop('disabled', true);
+            connect();
+        }
     }).prop('disabled', false);
     disableConnectionFields("formConnection", false);
     disableOutgoing(true);
@@ -230,38 +230,38 @@ function onDisconnected() {
 
 function onHangupOutgoing() {
     $("#callBtn").text("Call").off('click').click(function(){
-		if (filledInput($("#callee"))) {
-			disableOutgoing(true);
-			call();
-		}
+    if (filledInput($("#callee"))) {
+        disableOutgoing(true);
+        call();
+    }
     }).prop('disabled', false);
     $('#callee').prop('disabled', false);
     $("#callFeatures").hide();
     $("#holdBtn").text("Hold");
     $("#switchCamBtn").prop('disabled', true);
     $("#switchMicBtn").prop('disabled', true);
-	disableOutgoing(false);
-	enableMuteToggles(false);
+    disableOutgoing(false);
+    enableMuteToggles(false);
 }
 
 function onIncomingCall(inCall) {
-	currentCall = inCall;
+    currentCall = inCall;
 	
-	showIncoming(inCall.visibleName());
+    showIncoming(inCall.visibleName());
 	
     $("#answerBtn").off('click').click(function(){
-		$(this).prop('disabled', true);
-        outCall.setAudioOutputId($('#audioOutput').val());
+        $(this).prop('disabled', true);
+        inCall.setAudioOutputId($('#audioOutput').val());
         inCall.answer({
-                localVideoDisplay: localVideo,
-                remoteVideoDisplay: remoteVideo
-            });
-		showAnswered();
+            localVideoDisplay: localVideo,
+            remoteVideoDisplay: remoteVideo
+        });
+        showAnswered();
     }).prop('disabled', false);
 	
     $("#hangupBtn").off('click').click(function(){
-		$(this).prop('disabled', true);
-		$("#answerBtn").prop('disabled', true);
+    $(this).prop('disabled', true);
+    $("#answerBtn").prop('disabled', true);
         inCall.hangup();
     }).prop('disabled', false);
 }
@@ -270,7 +270,7 @@ function onHangupIncoming() {
     $("#switchCamBtn").prop('disabled', true);
     $("#switchMicBtn").prop('disabled', true);
     showOutgoing();
-	enableMuteToggles(false);
+    enableMuteToggles(false);
 }
 
 function onAnswerOutgoing() {
@@ -328,7 +328,7 @@ function disableConnectionFields(formId, disable) {
     $('#' + formId + ' :text').each(function(){
        $(this).prop('disabled', disable);
     });
-	$('#' + formId + ' :password').prop('disabled', disable);
+    $('#' + formId + ' :password').prop('disabled', disable);
     $('#' + formId + ' :checkbox').prop('disabled', disable);
 }
 
@@ -337,53 +337,52 @@ function validateForm(formId) {
 	
     $('#' + formId + ' :text').each(function(){
         if(!filledInput($(this)) && valid) {
-			valid = false;
-		}
+            valid = false;
+        }
     });
 	
-	if(!filledInput($('#' + formId + ' :password')) && valid) {
-		valid = false;
-	}
+    if(!filledInput($('#' + formId + ' :password')) && valid) {
+        valid = false;
+    }
 	
     return valid;
 }
 
 function filledInput(input) {
-	var valid = true;
+    var valid = true;
     if (!input.val()) {
-		valid = false;
+        valid = false;
         input.closest('.input-group').addClass("has-error");
     } else {
         input.closest('.input-group').removeClass("has-error");
     }
-	
-	return valid;
+    return valid;
 }
 
 // Mute audio in the call
 function mute() {
-	if (currentCall) {
-	    currentCall.muteAudio();
-	}
+    if (currentCall) {
+        currentCall.muteAudio();
+    }
 }
 
 // Unmute audio in the call
 function unmute() {
-	if (currentCall) {
+    if (currentCall) {
         currentCall.unmuteAudio();
-	}
+    }
 }
 
 // Mute video in the call
 function muteVideo() {
-	if (currentCall) {
+    if (currentCall) {
         currentCall.muteVideo();
-	}
+    }
 }
 
 // Unmute video in the call
 function unmuteVideo() {
-	if (currentCall) {
+    if (currentCall) {
         currentCall.unmuteVideo();
     }
 }
@@ -392,14 +391,14 @@ function enableMuteToggles(enable) {
     var $muteAudioToggle = $("#muteAudioToggle");
     var $muteVideoToggle = $("#muteVideoToggle");
 	
-	if (enable) {
-		$muteAudioToggle.removeAttr("disabled");
-		$muteAudioToggle.trigger('change');
-		$muteVideoToggle.removeAttr("disabled");
-		$muteVideoToggle.trigger('change');
-	}
-	else {
-		$muteAudioToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
-		$muteVideoToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
+    if (enable) {
+        $muteAudioToggle.removeAttr("disabled");
+        $muteAudioToggle.trigger('change');
+        $muteVideoToggle.removeAttr("disabled");
+        $muteVideoToggle.trigger('change');
+    }
+    else {
+        $muteAudioToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
+        $muteVideoToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
     }
 }
