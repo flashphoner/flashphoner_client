@@ -35,24 +35,38 @@ function init_page(){
         return;
     }
 
-    Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.OUTPUT).then(function (list) {
-        list.audio.forEach(function (device) {
-            var audio = document.getElementById("audioOutput");
-            var i;
-            var deviceInList = false;
-            for (i = 0; i < audio.options.length; i++) {
-                if (audio.options[i].value === device.id) {
-                    deviceInList = true;
-                    break;
-                }
+    Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.ALL).then(function (list) {
+        for (var type in list) {
+            if (list.hasOwnProperty(type)) {
+                list[type].forEach(function(device) {
+                    if (device.type == "mic") {
+                        var list = document.getElementById("micList");
+                        if ($("#micList option[value='" + device.id + "'").length == 0) {
+                            var option = document.createElement("option");
+                            option.text = device.label || device.id;
+                            option.value = device.id;
+                            list.appendChild(option);
+                        }
+                    } else if (device.type == "speaker") {
+                        var list = document.getElementById("speakerList");
+                        if ($("#speakerList option[value='" + device.id + "'").length == 0) {
+                            var option = document.createElement("option");
+                            option.text = device.label || device.id;
+                            option.value = device.id;
+                            list.appendChild(option);
+                        }
+                    } else if (device.type == "camera") {
+                        var list = document.getElementById("cameraList");
+                        if ($("#cameraList option[value='" + device.id + "'").length == 0) {
+                            var option = document.createElement("option");
+                            option.text = device.label || device.id;
+                            option.value = device.id;
+                            list.appendChild(option);
+                        }
+                    }
+                });
             }
-            if (!deviceInList) {
-                var option = document.createElement("option");
-                option.text = device.label || device.id;
-                option.value = device.id;
-                audio.appendChild(option);
-            }
-        });
+        }
     }).catch(function (error) {
         $("#notifyFlash").text("Failed to get media devices");
     });
@@ -81,19 +95,25 @@ function init_page(){
         $(this).prop('disabled',true);
     });
 
-    $("#audioOutput").change(function() {
-        if (currentCall) {
-            currentCall.setAudioOutputId($(this).val());
-        }
-    });
     $("#switchCamBtn").click(function() {
        if (currentCall) {
-           currentCall.switchCam();
+           var id = $('#cameraList').find(":selected").val();
+           console.log("Switch camera to " + id);
+           currentCall.switchCam(id);
        }
     }).prop('disabled', true);
     $("#switchMicBtn").click(function() {
         if (currentCall) {
-            currentCall.switchMic();
+            var id = $('#micList').find(":selected").val();
+            console.log("Switch mic to " + id);
+            currentCall.switchMic(id);
+        }
+    }).prop('disabled', true);
+    $("#switchSpkBtn").click(function() {
+        if (currentCall) {
+            var id = $('#speakerList').find(":selected").val();
+            console.log("Switch speaker to " + id);
+            currentCall.setAudioOutputId(id);
         }
     }).prop('disabled', true);
 }
@@ -153,6 +173,7 @@ function connect() {
             $("#holdBtn").prop('disabled',false);
             $("#switchCamBtn").prop('disabled', false);
             $("#switchMicBtn").prop('disabled', false);
+            $("#switchSpkBtn").prop('disabled', false);
         }).on(CALL_STATUS.FINISH, function(){
 		    setStatus("#callStatus", CALL_STATUS.FINISH);
 			onHangupIncoming();
@@ -168,6 +189,10 @@ function connect() {
 
 function call() {
 	var session = Flashphoner.getSessions()[0];
+    var constraints = {
+        video: {deviceId: $('#cameraList').find(":selected").val()},
+        audio: {deviceId: $('#micList').find(":selected").val()}
+    };
 	//prepare outgoing call 
     var outCall = session.createCall({
 		callee: $("#callee").val(),
@@ -191,7 +216,7 @@ function call() {
         onHangupIncoming();
         currentCall = null;
     });
-	outCall.setAudioOutputId($('#audioOutput').val());
+	outCall.setAudioOutputId($('#speakerList').find(":selected").val());
 	outCall.call();
 	currentCall = outCall;
 	
@@ -251,7 +276,7 @@ function onIncomingCall(inCall) {
 	
     $("#answerBtn").off('click').click(function(){
 		$(this).prop('disabled', true);
-        outCall.setAudioOutputId($('#audioOutput').val());
+        inCall.setAudioOutputId($('#speakerList').find(":selected").val());
         inCall.answer({
                 localVideoDisplay: localVideo,
                 remoteVideoDisplay: remoteVideo
@@ -278,6 +303,7 @@ function onAnswerOutgoing() {
     $("#callFeatures").show();
     $("#switchCamBtn").prop('disabled', false);
     $("#switchMicBtn").prop('disabled', false);
+    $("#switchSpkBtn").prop('disabled', false);
 }
 
 // Set connection and call status

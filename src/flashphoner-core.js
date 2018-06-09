@@ -102,10 +102,10 @@ var init = function (options) {
             };
             flashProvider.configure(flashConf);
         }
-        var mediaSourceMediaProvider = require("./media-source-media-provider");
-        if (mediaSourceMediaProvider && mediaSourceMediaProvider.hasOwnProperty('available') && mediaSourceMediaProvider.available()) {
-            MediaProvider.MSE = mediaSourceMediaProvider;
-        }
+        //var mediaSourceMediaProvider = require("./media-source-media-provider");
+        //if (mediaSourceMediaProvider && mediaSourceMediaProvider.hasOwnProperty('available') && mediaSourceMediaProvider.available()) {
+        //    MediaProvider.MSE = mediaSourceMediaProvider;
+        //}
         var websocketProvider = require("./websocket-media-provider");
         if (websocketProvider && websocketProvider.hasOwnProperty('available') && websocketProvider.available(audioContext)) {
             MediaProvider.WSPlayer = websocketProvider;
@@ -1238,11 +1238,11 @@ var createSession = function (options) {
          * @inner
          * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.ESTABLISHED}
          */
-        var switchMic = function() {
+        var switchMic = function(deviceId) {
             if(status_ !== CALL_STATUS.ESTABLISHED){
                 throw new Error('Invalid call state');
             }
-            mediaConnection.switchMic();
+           return mediaConnection.switchMic(deviceId);
         };
 
         call.call = call_;

@@ -93,17 +93,19 @@ var createConnection = function (options) {
                         if (videoTrack.label === device.label) {
                             switchCamCount = videoCams.length;
                         }
+                        console.log("push cam ", device);
                         videoCams.push(device.id);
                     })
                 });
             }
-            var audioTrack = localVideo.srcObject.getAudioTracks()[0];
+            var audioTrack = localVideo.baseStream.getAudioTracks()[0];
             if (audioTrack) {
                 listDevices(false).then(function (devices) {
                     devices.audio.forEach(function (device) {
                         if (audioTrack.label === device.label) {
-                            switchMicCount = mic.length;
+                            switchMicCount = mics.length;
                         }
+                        console.log("push mic ", device);
                         mics.push(device.id);
                     })
                 });
@@ -441,21 +443,27 @@ var createConnection = function (options) {
             }
         };
 
-        var switchMic = function () {
-            if (localVideo && localVideo.srcObject && mics.length > 1 && !customStream) {
+        var switchMic = function (deviceId) {
+            var ret;
+            if (localVideo && localVideo.baseStream && mics.length > 1 && !customStream) {
                 connection.getSenders().forEach(function (sender) {
                     if (sender.track.kind === 'video') return;
                     switchMicCount = (switchMicCount + 1) % mics.length;
                     sender.track.stop();
-                    var hasVideo = localVideo.srcObject.getVideoTracks().length > 0;
-                    navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: mics[switchMicCount]}}, video: hasVideo}).then(function (newStream) {
+                    var hasVideo = localVideo.baseStream.getVideoTracks().length > 0;
+                    var mic = (typeof deviceId !== "undefined") ? mics[deviceId] : mics[switchMicCount];
+                    navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: mic}}, video: hasVideo}).then(function (newStream) {
+                        console.log(newStream);
                         sender.replaceTrack(newStream.getAudioTracks()[0]);
-                        localVideo.srcObject = newStream;
+                        localVideo.baseStream = newStream;
+                        ret = mic;
                     }).catch(function (reason) {
                         logger.error(LOG_PREFIX, reason)
+                        ret = null;
                     });
                 });
             }
+            return ret;
         }
 
         var exports = {};
@@ -818,6 +826,8 @@ var available = function () {
 var listDevices = function (labels, kind) {
     if (!kind) {
         kind = constants.MEDIA_DEVICE_KIND.INPUT;
+    } else if (kind == "all") {
+        kind = "";
     }
     var getConstraints = function (devices) {
         var constraints = {};
@@ -828,7 +838,7 @@ var listDevices = function (labels, kind) {
             } else if (device.kind.indexOf("video"+ kind) === 0) {
                 constraints.video = true;
             } else {
-                logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
+                logger.info(LOG_PREFIX, "> unknown device " + device.kind + " id " + device.deviceId);
             }
         }
         return constraints;
@@ -841,18 +851,19 @@ var listDevices = function (labels, kind) {
         };
         for (var i = 0; i < devices.length; i++) {
             var device = devices[i];
+            console.log(device);
             var ret = {
                 id: device.deviceId,
                 label: device.label
             };
-            if (device.kind.indexOf("audio"+ kind) === 0) {
-                ret.type = "mic";
+            if (device.kind.indexOf("audio" + kind) === 0 && device.deviceId != "communications") {
+                ret.type = (device.kind == "audioinput") ? "mic" : "speaker";
                 list.audio.push(ret);
             } else if (device.kind.indexOf("video" + kind) === 0) {
                 ret.type = "camera";
                 list.video.push(ret);
             } else {
-                logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
+                logger.info(LOG_PREFIX, ">> unknown device " + device.kind + " id " + device.deviceId);
             }
         }
         return list;

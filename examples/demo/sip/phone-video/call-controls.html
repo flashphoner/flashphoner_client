@@ -15,13 +15,36 @@
 <div id="incomingCallAlert" class="alert alert-info">
 </div>
 
-<div id="callOutput" class="row row-space">
-    <div class="col-sm-4">Output</div>
-    <div class="col-sm-4">
-        <select class="form-control" id="audioOutput">
+<div class="row row-space">
+    <div class="input-group">
+        <span class="input-group-addon">Camera</span>
+        <select class="form-control" id="cameraList">
         </select>
+        <span class="input-group-btn">
+            <button class="btn btn-default" id="switchCamBtn">Switch</button>
+        </span>
     </div>
-    <div class="col-sm-4">
+</div>
+
+<div class="row row-space">
+    <div class="input-group">
+        <span class="input-group-addon">Mic</span>
+        <select class="form-control" id="micList">
+        </select>
+        <span class="input-group-btn">
+            <button class="btn btn-default" id="switchMicBtn">Switch</button>
+        </span>
+    </div>
+</div>
+
+<div class="row row-space">
+    <div class="input-group">
+        <span class="input-group-addon">Speaker</span>
+        <select class="form-control" id="speakerList">
+        </select>
+        <span class="input-group-btn">
+            <button class="btn btn-default" id="switchSpkBtn">Switch</button>
+        </span>
     </div>
 </div>
 

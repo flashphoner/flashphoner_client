@@ -623,7 +623,7 @@ define(mediaDeviceKind, 'OUTPUT', 'output');
 
 define(mediaDeviceKind, 'INPUT', 'input');
 
-define(mediaDeviceKind, 'All', '');
+define(mediaDeviceKind, 'ALL', 'all');
 
 var constants = {};
 define(constants, 'SESSION_STATUS', sessionStatus);

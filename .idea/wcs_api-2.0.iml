@@ -4,5 +4,8 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Node.js v6.11.2 Core Modules" level="application" />
+    <orderEntry type="library" name="webaudioapi" level="project" />
+    <orderEntry type="library" name="flashphoner_client_2.0 node_modules" level="project" />
   </component>
 </module>

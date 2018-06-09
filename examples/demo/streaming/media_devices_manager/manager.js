@@ -203,6 +203,9 @@ function onStarted(publishStream, previewStream) {
     $("#switchBtn").text("Switch").off('click').click(function () {
         publishStream.switchCam();
     }).prop('disabled', $('#sendCanvasStream').is(':checked'));
+    $("#switchMicBtn").click(function (){
+        publishStream.switchMic();
+    })
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
     publishStream.setMicrophoneGain(currentGainValue);
