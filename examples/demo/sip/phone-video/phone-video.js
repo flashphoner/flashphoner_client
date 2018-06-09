@@ -98,21 +98,18 @@ function init_page(){
     $("#switchCamBtn").click(function() {
        if (currentCall) {
            var id = $('#cameraList').find(":selected").val();
-           console.log("Switch camera to " + id);
            currentCall.switchCam(id);
        }
     }).prop('disabled', true);
     $("#switchMicBtn").click(function() {
         if (currentCall) {
             var id = $('#micList').find(":selected").val();
-            console.log("Switch mic to " + id);
             currentCall.switchMic(id);
         }
     }).prop('disabled', true);
     $("#switchSpkBtn").click(function() {
         if (currentCall) {
             var id = $('#speakerList').find(":selected").val();
-            console.log("Switch speaker to " + id);
             currentCall.setAudioOutputId(id);
         }
     }).prop('disabled', true);
@@ -171,9 +168,7 @@ function connect() {
 		    setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
 			enableMuteToggles(true);
             $("#holdBtn").prop('disabled',false);
-            $("#switchCamBtn").prop('disabled', false);
-            $("#switchMicBtn").prop('disabled', false);
-            $("#switchSpkBtn").prop('disabled', false);
+            $('[id^=switch]').prop('disabled', false);
         }).on(CALL_STATUS.FINISH, function(){
 		    setStatus("#callStatus", CALL_STATUS.FINISH);
 			onHangupIncoming();
@@ -263,8 +258,7 @@ function onHangupOutgoing() {
     $('#callee').prop('disabled', false);
     $("#callFeatures").hide();
     $("#holdBtn").text("Hold");
-    $("#switchCamBtn").prop('disabled', true);
-    $("#switchMicBtn").prop('disabled', true);
+    $('[id^=switch]').prop('disabled', true);
 	disableOutgoing(false);
 	enableMuteToggles(false);
 }
@@ -292,8 +286,7 @@ function onIncomingCall(inCall) {
 }
 
 function onHangupIncoming() {
-    $("#switchCamBtn").prop('disabled', true);
-    $("#switchMicBtn").prop('disabled', true);
+    $('[id^=switch]').prop('disabled', true);
     showOutgoing();
 	enableMuteToggles(false);
 }
@@ -301,9 +294,7 @@ function onHangupIncoming() {
 function onAnswerOutgoing() {
     enableMuteToggles(true);
     $("#callFeatures").show();
-    $("#switchCamBtn").prop('disabled', false);
-    $("#switchMicBtn").prop('disabled', false);
-    $("#switchSpkBtn").prop('disabled', false);
+    $('[id^=switch]').prop('disabled', false);
 }
 
 // Set connection and call status
