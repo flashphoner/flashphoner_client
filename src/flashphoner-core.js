@@ -102,10 +102,10 @@ var init = function (options) {
             };
             flashProvider.configure(flashConf);
         }
-        //var mediaSourceMediaProvider = require("./media-source-media-provider");
-        //if (mediaSourceMediaProvider && mediaSourceMediaProvider.hasOwnProperty('available') && mediaSourceMediaProvider.available()) {
-        //    MediaProvider.MSE = mediaSourceMediaProvider;
-        //}
+        var mediaSourceMediaProvider = require("./media-source-media-provider");
+        if (mediaSourceMediaProvider && mediaSourceMediaProvider.hasOwnProperty('available') && mediaSourceMediaProvider.available()) {
+            MediaProvider.MSE = mediaSourceMediaProvider;
+        }
         var websocketProvider = require("./websocket-media-provider");
         if (websocketProvider && websocketProvider.hasOwnProperty('available') && websocketProvider.available(audioContext)) {
             MediaProvider.WSPlayer = websocketProvider;
@@ -1223,11 +1223,11 @@ var createSession = function (options) {
          * @inner
          * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.ESTABLISHED}
          */
-        var switchCam = function() {
+        var switchCam = function(deviceId) {
             if(status_ !== CALL_STATUS.ESTABLISHED && !constraints.video){
                 throw new Error('Invalid call state');
             }
-            mediaConnection.switchCam();
+            return mediaConnection.switchCam(deviceId);
         };
 
         /**
@@ -1612,11 +1612,11 @@ var createSession = function (options) {
          * @inner
          * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
          */
-		var switchCam = function() {
+		var switchCam = function(deviceId) {
 		    if(status_ !== STREAM_STATUS.PUBLISHING){
 		        throw new Error('Invalid stream state');
             }
-            mediaConnection.switchCam();
+            return mediaConnection.switchCam(deviceId);
         };
 
         /**
@@ -1627,11 +1627,11 @@ var createSession = function (options) {
          * @inner
          * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
          */
-        var switchMic = function() {
+        var switchMic = function(deviceId) {
             if(status_ !== STREAM_STATUS.PUBLISHING){
                 throw new Error('Invalid stream state');
             }
-            mediaConnection.switchMic();
+            return mediaConnection.switchMic(deviceId);
         };
 
         /**
