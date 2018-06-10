@@ -303,29 +303,30 @@ var createConnection = function (options) {
             return true;
         };
         var getStats = function (callbackFn) {
-            if (connection) {
-                var result = {outboundStream:{}, inboundStream:{}};
+            var browser = adapter.browserDetails.browser;
+            if (connection && browser === "chrome" && browser === "firefox") {
+                var result = {outboundStream: {}, inboundStream: {}};
+                result.type = browser;
                 var senders = connection.getSenders();
                 var receivers = connection.getReceivers();
-                if(senders.length > 0 && senders[0].track) {
+                if (senders.length > 0 && senders[0].track) {
                     loadStats(senders, 'outbound-rtp', function (stats) {
                         result.outboundStream = stats;
-                        if(receivers.length === 0 || !receivers[0].track) {
+                        if (receivers.length === 0 || !receivers[0].track) {
                             callbackFn(result);
                         }
                     });
                 }
-                if(receivers.length > 0 && receivers[0].track) {
+                if (receivers.length > 0 && receivers[0].track) {
                     loadStats(receivers, 'inbound-rtp', function (stats) {
                         result.inboundStream = stats;
                         callbackFn(result);
                     });
                 }
             }
-            
+
             function loadStats(receiverOrSenders, statType, callback) {
-                result.type = adapter.browserDetails.browser;
-                var stats = {audioStats:{}, videoStats:{}, otherStats:[]};
+                var stats = {audioStats: {}, videoStats: {}, otherStats: []};
                 receiverOrSenders.forEach(function (receiverOrSender, index) {
                     receiverOrSender.getStats().then(function (report) {
                         report.forEach(function (stat) {
@@ -339,7 +340,7 @@ var createConnection = function (options) {
                                 stats.otherStats.push(stat);
                             }
                         });
-                        if(index === receiverOrSenders.length-1) {
+                        if (index === receiverOrSenders.length - 1) {
                             callback(stats);
                         }
                     });

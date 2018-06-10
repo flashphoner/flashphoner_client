@@ -20,24 +20,27 @@ try {
 
 function loadStats() {
     publishStream.getStats(function (stats) {
-        $('#outVideoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
-        $('#outVideoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
-        $('#outVideoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
+        if (stats && stats.outboundStream) {
+            $('#outVideoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
+            $('#outVideoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
+            $('#outVideoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
 
-        $('#outAudioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
-        $('#outAudioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+            $('#outAudioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
+            $('#outAudioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+        }
     });
     previewStream.getStats(function (stats) {
-        $('#inVideoStatBytesReceived').text(stats.inboundStream.videoStats.bytesReceived);
-        $('#inVideoStatPacketsReceived').text(stats.inboundStream.videoStats.packetsReceived);
-        $('#inVideoStatFramesDecoded').text(stats.inboundStream.videoStats.framesDecoded);
+        if (stats && stats.inboundStream) {
+            $('#inVideoStatBytesReceived').text(stats.inboundStream.videoStats.bytesReceived);
+            $('#inVideoStatPacketsReceived').text(stats.inboundStream.videoStats.packetsReceived);
+            $('#inVideoStatFramesDecoded').text(stats.inboundStream.videoStats.framesDecoded);
 
-        $('#inAudioStatBytesReceived').text(stats.inboundStream.audioStats.bytesReceived);
-        $('#inAudioStatPacketsReceived').text(stats.inboundStream.audioStats.packetsReceived);
+            $('#inAudioStatBytesReceived').text(stats.inboundStream.audioStats.bytesReceived);
+            $('#inAudioStatPacketsReceived').text(stats.inboundStream.audioStats.packetsReceived);
+        }
     });
-
-
 }
+
 function init_page() {
     //init api
     try {
