@@ -26,7 +26,16 @@
     </div>
     <div class="row">
         <h2 id="notifyFlash" class="text-danger"></h2>
-        <div class="col-sm-4">
+        <div class="col-sm-2" style="width: auto">
+            <label>Video stats</label>
+            <div>Bytes sent: <span id="outVideoStatBytesSent">0</span> </div>
+            <div>Packets sent: <span id="outVideoStatPacketsSent">0</span></div>
+            <div>Frames encoded: <span id="outVideoStatFramesEncoded">0</span></div>
+            <label>Audio stats</label>
+            <div>Bytes sent: <span id="outAudioStatBytesSent">0</span></div>
+            <div>Packets sent: <span id="outAudioStatPacketsSent">0</span></div>
+        </div>
+        <div class="col-sm-3">
             <div class="text-muted text-center">Local</div>
             <div class="fp-remoteVideo">
                 <div id="localVideo" class="display"></div>
@@ -36,12 +45,21 @@
         <div class="col-sm-1 text-center" style="margin: 8% auto">
             <i class="fa fa-arrow-right" aria-hidden="true" style="font-size: 42px"></i>
         </div>
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <div class="text-muted text-center">Preview</div>
             <div class="fp-remoteVideo">
                 <div id="remoteVideo" class="display"></div>
             </div>
             <div class="text-muted text-center" id="playResolution"></div>
+        </div>
+        <div class="col-sm-2">
+            <label>Video stats</label>
+            <div>Bytes received: <span id="inVideoStatBytesReceived">0</span> </div>
+            <div>Packets received: <span id="inVideoStatPacketsReceived">0</span></div>
+            <div>Frames decoded: <span id="inVideoStatFramesDecoded">0</span></div>
+            <label>Audio stats</label>
+            <div>Bytes received: <span id="inAudioStatBytesReceived">0</span></div>
+            <div>Packets received: <span id="inAudioStatPacketsReceived">0</span></div>
         </div>
     </div>
     <div class="row">

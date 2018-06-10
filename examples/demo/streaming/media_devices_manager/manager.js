@@ -8,6 +8,7 @@ var previewStream;
 var publishStream;
 var currentVolumeValue = 50;
 var currentGainValue = 50;
+var statsIntervalID;
 var intervalID;
 var canvas;
 
@@ -17,6 +18,26 @@ try {
     console.warn("Failed to create audio context");
 }
 
+function loadStats() {
+    publishStream.getStats(function (stats) {
+        $('#outVideoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
+        $('#outVideoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
+        $('#outVideoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
+
+        $('#outAudioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
+        $('#outAudioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+    });
+    previewStream.getStats(function (stats) {
+        $('#inVideoStatBytesReceived').text(stats.inboundStream.videoStats.bytesReceived);
+        $('#inVideoStatPacketsReceived').text(stats.inboundStream.videoStats.packetsReceived);
+        $('#inVideoStatFramesDecoded').text(stats.inboundStream.videoStats.framesDecoded);
+
+        $('#inAudioStatBytesReceived').text(stats.inboundStream.audioStats.bytesReceived);
+        $('#inAudioStatPacketsReceived').text(stats.inboundStream.audioStats.packetsReceived);
+    });
+
+
+}
 function init_page() {
     //init api
     try {
@@ -195,9 +216,11 @@ function init_page() {
 }
 
 function onStarted(publishStream, previewStream) {
+    statsIntervalID = setInterval(loadStats, 2000);
     $('input:radio').attr("disabled", true);
     $("#publishBtn").text("Stop").off('click').click(function () {
         $(this).prop('disabled', true);
+        clearInterval(statsIntervalID);
         previewStream.stop();
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').click(function () {

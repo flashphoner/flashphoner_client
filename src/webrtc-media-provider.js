@@ -304,40 +304,46 @@ var createConnection = function (options) {
         };
         var getStats = function (callbackFn) {
             if (connection) {
-                var result = {otherStats:[]};
+                var result = {outboundStream:{}, inboundStream:{}};
                 var senders = connection.getSenders();
                 var receivers = connection.getReceivers();
                 if(senders.length > 0 && senders[0].track) {
-                    loadStats(senders, 'outbound-rtp');
-                } else if(receivers.length > 0 && receivers[0].track) {
-                    loadStats(receivers, 'inbound-rtp');
+                    loadStats(senders, 'outbound-rtp', function (stats) {
+                        result.outboundStream = stats;
+                        if(receivers.length === 0 || !receivers[0].track) {
+                            callbackFn(result);
+                        }
+                    });
+                }
+                if(receivers.length > 0 && receivers[0].track) {
+                    loadStats(receivers, 'inbound-rtp', function (stats) {
+                        result.inboundStream = stats;
+                        callbackFn(result);
+                    });
                 }
             }
             
-            function loadStats(receiverOrSender, statType) {
-                if (adapter.browserDetails.browser == "chrome") {
-                    result.type = 'chrome';
-                } else if (adapter.browserDetails.browser == "firefox") {
-                    result.type = 'firefox';
-                } else {
-                    return;
-                }
-                receiverOrSender.forEach(function (receiverOrSender) {
+            function loadStats(receiverOrSenders, statType, callback) {
+                result.type = adapter.browserDetails.browser;
+                var stats = {audioStats:{}, videoStats:{}, otherStats:[]};
+                receiverOrSenders.forEach(function (receiverOrSender, index) {
                     receiverOrSender.getStats().then(function (report) {
                         report.forEach(function (stat) {
                             if (stat.type === statType) {
                                 if (receiverOrSender.track.kind === 'audio') {
-                                    result.audioStats = stat;
+                                    stats.audioStats = stat;
                                 } else {
-                                    result.videoStats = stat;
+                                    stats.videoStats = stat;
                                 }
                             } else {
-                                result.otherStats.push(stat);
+                                stats.otherStats.push(stat);
                             }
                         });
-                        callbackFn(result);
+                        if(index === receiverOrSenders.length-1) {
+                            callback(stats);
+                        }
                     });
-                })
+                });
             }
         };
 

@@ -13,15 +13,15 @@ $(document).ready(function () {
 function loadStats() {
     if (currentCall) {
         currentCall.getStats(function (stats) {
-            if (stats.videoStats) {
-                $('#videoStatBytesSent').text(stats.videoStats.bytesSent);
-                $('#videoStatPacketsSent').text(stats.videoStats.packetsSent);
-                $('#videoStatFramesEncoded').text(stats.videoStats.framesEncoded);
+            if (stats.outboundStream.videoStats) {
+                $('#videoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
+                $('#videoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
+                $('#videoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
             }
 
-            if (stats.audioStats) {
-                $('#audioStatBytesSent').text(stats.audioStats.bytesSent);
-                $('#audioStatPacketsSent').text(stats.audioStats.packetsSent);
+            if (stats.outboundStream.audioStats) {
+                $('#audioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
+                $('#audioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
             }
         });
     }
