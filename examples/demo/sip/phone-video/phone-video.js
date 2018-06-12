@@ -54,7 +54,7 @@ function init_page(){
             }
         });
     }).catch(function (error) {
-        $("#notifyFlash").text("Failed to get media devices");
+        $('#callOutput').remove();
     });
 	
 	//local and remote displays

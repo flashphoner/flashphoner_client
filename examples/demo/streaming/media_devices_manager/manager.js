@@ -66,7 +66,7 @@ function init_page() {
             }
         });
     }).catch(function (error) {
-        $("#notifyFlash").text("Failed to get media devices");
+        $('#audioOutputForm').remove();
     });
 
     Flashphoner.getMediaDevices(null, true).then(function (list) {
