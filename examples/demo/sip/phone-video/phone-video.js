@@ -253,7 +253,7 @@ function onIncomingCall(inCall) {
 	
     $("#answerBtn").off('click').click(function(){
 		$(this).prop('disabled', true);
-        currentCall.setAudioOutputId($('#audioOutput').val());
+        inCall.setAudioOutputId($('#audioOutput').val());
         inCall.answer({
                 localVideoDisplay: localVideo,
                 remoteVideoDisplay: remoteVideo,
