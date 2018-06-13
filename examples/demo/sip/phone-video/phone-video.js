@@ -184,16 +184,14 @@ function connect() {
 
 function call() {
 	var session = Flashphoner.getSessions()[0];
-    var constraints = {
-        video: {deviceId: $('#cameraList').find(":selected").val()},
-        audio: {deviceId: $('#micList').find(":selected").val()}
-    };
+    var constraints = getConstraints();
 	//prepare outgoing call 
     var outCall = session.createCall({
 		callee: $("#callee").val(),
         visibleName: $("#sipLogin").val(),
 	    localVideoDisplay: localVideo, 
-        remoteVideoDisplay: remoteVideo 
+        remoteVideoDisplay: remoteVideo,
+        constraints: constraints
 	}).on(CALL_STATUS.RING, function(){
 		setStatus("#callStatus", CALL_STATUS.RING);
     }).on(CALL_STATUS.ESTABLISHED, function(){
@@ -265,7 +263,7 @@ function onHangupOutgoing() {
 
 function onIncomingCall(inCall) {
 	currentCall = inCall;
-	
+	var constraints = getConstraints();
 	showIncoming(inCall.visibleName());
 	
     $("#answerBtn").off('click').click(function(){
@@ -273,7 +271,8 @@ function onIncomingCall(inCall) {
         inCall.setAudioOutputId($('#speakerList').find(":selected").val());
         inCall.answer({
                 localVideoDisplay: localVideo,
-                remoteVideoDisplay: remoteVideo
+                remoteVideoDisplay: remoteVideo,
+                constraints: constraints
             });
 		showAnswered();
     }).prop('disabled', false);
@@ -403,6 +402,22 @@ function unmuteVideo() {
 	if (currentCall) {
         currentCall.unmuteVideo();
     }
+}
+
+function getConstraints() {
+    var constraints = {
+        audio: {deviceId: $('#micList').find(":selected").val()},
+        video: {
+            deviceId: $('#cameraList').find(":selected").val(),
+            width: parseInt($('#sendWidth').val()),
+            height: parseInt($('#sendHeight').val())
+        }
+    };
+    if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+        constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
+        constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
+    }
+    return constraints;
 }
 
 function enableMuteToggles(enable) {
