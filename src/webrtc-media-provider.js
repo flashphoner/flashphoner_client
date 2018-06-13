@@ -851,19 +851,23 @@ var listDevices = function (labels, kind) {
     };
 
     return new Promise(function (resolve, reject) {
-        navigator.mediaDevices.enumerateDevices().then(function (devices) {
-            if (labels) {
-                var display = document.createElement("div");
-                getMediaAccess(getConstraints(devices), display).then(function () {
-                    navigator.mediaDevices.enumerateDevices().then(function (devicesWithLabales) {
-                        resolve(getList(devicesWithLabales));
-                        releaseMedia(display);
+        if(kind === constants.MEDIA_DEVICE_KIND.OUTPUT && adapter.browserDetails.browser !== "chrome") {
+            reject({message: "Only supported in chrome"});
+        } else {
+            navigator.mediaDevices.enumerateDevices().then(function (devices) {
+                if (labels) {
+                    var display = document.createElement("div");
+                    getMediaAccess(getConstraints(devices), display).then(function () {
+                        navigator.mediaDevices.enumerateDevices().then(function (devicesWithLabales) {
+                            resolve(getList(devicesWithLabales));
+                            releaseMedia(display);
+                        }, reject);
                     }, reject);
-                }, reject);
-            } else {
-                resolve(getList(devices));
-            }
-        }, reject);
+                } else {
+                    resolve(getList(devices));
+                }
+            }, reject);
+        }
     });
 };
 
