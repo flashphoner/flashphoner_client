@@ -304,46 +304,28 @@ var createConnection = function (options) {
         };
         var getStats = function (callbackFn) {
             var browser = adapter.browserDetails.browser;
-            if (connection && browser === "chrome" && browser === "firefox") {
-                var result = {outboundStream: {}, inboundStream: {}};
+            if (connection && (browser == 'chrome' || browser == 'firefox')) {
+                var result = {outboundStream:{}, inboundStream:{}, otherStats:[]};
                 result.type = browser;
-                var senders = connection.getSenders();
-                var receivers = connection.getReceivers();
-                if (senders.length > 0 && senders[0].track) {
-                    loadStats(senders, 'outbound-rtp', function (stats) {
-                        result.outboundStream = stats;
-                        if (receivers.length === 0 || !receivers[0].track) {
-                            callbackFn(result);
-                        }
-                    });
-                }
-                if (receivers.length > 0 && receivers[0].track) {
-                    loadStats(receivers, 'inbound-rtp', function (stats) {
-                        result.inboundStream = stats;
-                        callbackFn(result);
-                    });
-                }
-            }
-
-            function loadStats(receiverOrSenders, statType, callback) {
-                var stats = {audioStats: {}, videoStats: {}, otherStats: []};
-                receiverOrSenders.forEach(function (receiverOrSender, index) {
-                    receiverOrSender.getStats().then(function (report) {
-                        report.forEach(function (stat) {
-                            if (stat.type === statType) {
-                                if (receiverOrSender.track.kind === 'audio') {
-                                    stats.audioStats = stat;
-                                } else {
-                                    stats.videoStats = stat;
-                                }
+                connection.getStats(null).then(function (stats) {
+                    stats.forEach(function (stat) {
+                        if(stat.type == 'outbound-rtp') {
+                            if(stat.mediaType == 'audio') {
+                                result.outboundStream.audioStats = stat;
                             } else {
-                                stats.otherStats.push(stat);
+                                result.outboundStream.videoStats = stat;
                             }
-                        });
-                        if (index === receiverOrSenders.length - 1) {
-                            callback(stats);
+                        } else if(stat.type == 'inbound-rtp') {
+                            if(stat.mediaType == 'audio') {
+                                result.inboundStream.audioStats = stat;
+                            } else {
+                                result.inboundStream.videoStats = stat;
+                            }
+                        } else {
+                            result.otherStats.push(stat);
                         }
                     });
+                    callbackFn(result);
                 });
             }
         };
