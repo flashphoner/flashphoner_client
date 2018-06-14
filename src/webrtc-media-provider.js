@@ -422,44 +422,74 @@ var createConnection = function (options) {
         };
 
         var switchCam = function (deviceId) {
-            var ret;
-            if (localVideo && localVideo.srcObject && videoCams.length > 1 && !customStream) {
-                connection.getSenders().forEach(function (sender) {
-                    if (sender.track.kind === 'audio') return;
-                    switchCamCount = (switchCamCount + 1) % videoCams.length;
-                    sender.track.stop();
-                    var cam = (typeof deviceId !== "undefined") ? deviceId: videoCams[switchCamCount];
-                    navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: cam}}}).then(function (newStream) {
-                        sender.replaceTrack(newStream.getVideoTracks()[0]);
-                        localVideo.srcObject = newStream;
-                        ret = cam;
-                    }).catch(function (reason) {
-                        logger.error(LOG_PREFIX, reason)
+            return new Promise(function(resolve,reject) {
+                if (localVideo && localVideo.srcObject && videoCams.length > 1 && !customStream) {
+                    connection.getSenders().forEach(function (sender) {
+                        if (sender.track.kind === 'audio') return;
+                        switchCamCount = (switchCamCount + 1) % videoCams.length;
+                        sender.track.stop();
+                        var cam = (typeof deviceId !== "undefined") ? deviceId : videoCams[switchCamCount];
+                        navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: cam}}}).then(function (newStream) {
+                            sender.replaceTrack(newStream.getVideoTracks()[0]);
+                            localVideo.srcObject = newStream;
+                            logger.info("Switch camera to " + cam);
+                            resolve(cam);
+                        }).catch(function (reason) {
+                            logger.error(LOG_PREFIX, reason);
+                            reject(reason);
+                        });
                     });
-                });
-            }
+                } else {
+                    reject(null);
+                }
+            });
+
         };
 
         var switchMic = function (deviceId) {
-            var ret;
-            if (localVideo && localVideo.srcObject && mics.length > 1 && !customStream) {
-                connection.getSenders().forEach(function (sender) {
-                    if (sender.track.kind === 'video') return;
-                    switchMicCount = (switchMicCount + 1) % mics.length;
-                    sender.track.stop();
-                    var hasVideo = localVideo.srcObject.getVideoTracks().length > 0;
-                    var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
-                    navigator.mediaDevices.getUserMedia({audio: {deviceId: {exact: mic}}, video: hasVideo}).then(function (newStream) {
-                        sender.replaceTrack(newStream.getAudioTracks()[0]);
-                        localVideo.srcObject = newStream;
-                        ret = mic;
-                    }).catch(function (reason) {
-                        logger.error(LOG_PREFIX, reason);
-                        ret = null;
+            return new Promise(function(resolve,reject) {
+                if (localVideo && localVideo.srcObject && mics.length > 1 && !customStream) {
+                    connection.getSenders().forEach(function (sender) {
+                        if (sender.track.kind === 'video') return;
+                        switchMicCount = (switchMicCount + 1) % mics.length;
+                        sender.track.stop();
+                        var constraints = {};
+                        if (localVideo.srcObject.getVideoTracks().length > 0) {
+                            constraints.video = {};
+                            var track = localVideo.srcObject.getVideoTracks()[0];
+                            var trackConstraints = track.getConstraints();
+                            if (trackConstraints.hasOwnProperty('advanced')) {
+                                trackConstraints.advanced.forEach(function (k) {
+                                    for (var i in k) {
+                                        if (k.hasOwnProperty(i)) {
+                                            constraints.video[i] = k[i];
+                                        }
+                                    }
+                                })
+                            } else {
+                                for (var i in trackConstraints) {
+                                    if (trackConstraints.hasOwnProperty(i)) {
+                                        constraints.video[i] = trackConstraints[i];
+                                    }
+                                }
+                            }
+                        }
+                        var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
+                        constraints.audio = {deviceId: {exact: mic}};
+                        navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
+                            sender.replaceTrack(newStream.getAudioTracks()[0]);
+                            localVideo.srcObject = newStream;
+                            logger.info("Switch mic to " + mic);
+                            resolve(mic);
+                        }).catch(function (reason) {
+                            logger.error(LOG_PREFIX, reason);
+                            reject(reason);
+                        });
                     });
-                });
-            }
-            return ret;
+                } else {
+                    reject(null);
+                }
+            });
         };
 
         var exports = {};
