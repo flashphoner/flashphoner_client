@@ -94,23 +94,45 @@ function init_page(){
         }
         $(this).prop('disabled',true);
     });
+    $("#cameraList").change(function() {
+        if (currentCall) {
+            var id = $(this).val();
+            currentCall.switchCam(id);
+        }
+    });
+
+    $("#micList").change(function() {
+        if (currentCall) {
+            var id = $(this).val();
+            currentCall.switchMic(id);
+        }
+    });
+
+    $("#speakerList").change(function() {
+        if (currentCall) {
+            var id = $(this).val();
+            currentCall.setAudioOutputId(id);
+        }
+    });
 
     $("#switchCamBtn").click(function() {
-       if (currentCall) {
-           var id = $('#cameraList').find(":selected").val();
-           currentCall.switchCam(id);
-       }
+        if (currentCall) {
+            currentCall.switchCam().then(function(id) {
+                $('#cameraList option[value='+ id +']').attr('selected','selected');
+            }).catch(function(e) {
+                console.log("Error " + e);
+            });
+
+
+        }
     }).prop('disabled', true);
     $("#switchMicBtn").click(function() {
         if (currentCall) {
-            var id = $('#micList').find(":selected").val();
-            currentCall.switchMic(id);
-        }
-    }).prop('disabled', true);
-    $("#switchSpkBtn").click(function() {
-        if (currentCall) {
-            var id = $('#speakerList').find(":selected").val();
-            currentCall.setAudioOutputId(id);
+            currentCall.switchMic().then(function(id) {
+                $('#micList option[value='+ id +']').attr('selected','selected');
+            }).catch(function(e) {
+                console.log("Error " + e);
+            });
         }
     }).prop('disabled', true);
 }
@@ -193,7 +215,8 @@ function call() {
 		callee: $("#callee").val(),
         visibleName: $("#sipLogin").val(),
 	    localVideoDisplay: localVideo, 
-        remoteVideoDisplay: remoteVideo 
+        remoteVideoDisplay: remoteVideo,
+        constraints: constraints
 	}).on(CALL_STATUS.RING, function(){
 		setStatus("#callStatus", CALL_STATUS.RING);
     }).on(CALL_STATUS.ESTABLISHED, function(){
@@ -267,13 +290,19 @@ function onIncomingCall(inCall) {
 	currentCall = inCall;
 	
 	showIncoming(inCall.visibleName());
-	
+
+    var constraints = {
+        video: {deviceId: $('#cameraList').find(":selected").val()},
+        audio: {deviceId: $('#micList').find(":selected").val()}
+    };
+
     $("#answerBtn").off('click').click(function(){
 		$(this).prop('disabled', true);
         inCall.setAudioOutputId($('#speakerList').find(":selected").val());
         inCall.answer({
                 localVideoDisplay: localVideo,
-                remoteVideoDisplay: remoteVideo
+                remoteVideoDisplay: remoteVideo,
+                constraints: constraints
             });
 		showAnswered();
     }).prop('disabled', false);
