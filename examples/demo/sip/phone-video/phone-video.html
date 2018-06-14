@@ -21,9 +21,9 @@
 
 <!-- full size container -->
 <div class="container-fluid">
-    <div class="row" style="max-width: 1024px">
+    <div class="row" style="max-width: 1300px">
 	    <h2 id="notifyFlash" class="text-danger"></h2>
-        <div class="col-sm-7 text-center">
+        <div class="col-sm-5 text-center">
 
             <h1>Phone Video</h1>
             <!-- Connection fields -->
@@ -37,7 +37,6 @@
             </div>
 
         </div>
-
         <!-- Video block -->
         <div class="col-sm-4 text-left fp-videoBlock">
 
@@ -51,7 +50,7 @@
                 <div id="localVideo" class="display"></div>
             </div>
 
-		            <!-- Mute video controls -->
+            <!-- Mute video controls -->
             <div class="fp-muteVideoControls" id="videoControls">
 
                 <div class="row row-space">
@@ -83,50 +82,66 @@
                         <input id="muteVideoToggle" type="checkbox" disabled/>
                     </div>
                 </div>
+            </div>
+        </div>
+        <!--Statistics block-->
+        <div class="col-sm-3 text-center fp-statsBlock">
+            <div class="row row-space">
+                <div>
+                    <fieldset id="callVideoStatistics" class="scheduler-border">
+                    </fieldset>
+                </div>
+            </div>
 
-                <!-- Plug-in bootstrap-switch here -->
-                <script src="../../dependencies/bootstrap/js/switch.js"></script>
-                <script>
-
-                    var $muteAudioToggle = $("#muteAudioToggle");
-                    $muteAudioToggle.change(function () {
-                        if (this.checked) {
-                            mute();
-                        } else {
-                            unmute();
-                        }
-                    });
-
-                    $muteAudioToggle.bootstrapSwitch({
-                        on: 'on',
-                        off: 'off',
-                        size: 'md'
-                    });
-
-                    var $muteVideoToggle = $("#muteVideoToggle");
-                    $muteVideoToggle.change(function () {
-                        if (this.checked) {
-                            muteVideo();
-                        } else {
-                            unmuteVideo();
-                        }
-                    });
-
-                    $muteVideoToggle.bootstrapSwitch({
-                        on: 'on',
-                        off: 'off',
-                        size: 'md'
-                    });
-                </script>
+            <div class="row row-space">
+                <div>
+                    <fieldset id="callAudioStatistics" class="scheduler-border">
+                    </fieldset>
+                </div>
             </div>
         </div>
     </div>
+
+
     <div class="row" style="margin-top: 70px;">
         <div class="col-sm-4">
             <a href="https://play.google.com/store/apps/details?id=com.flashphoner.wcsexample.phone_min_video"><img src="../../dependencies/img/google_play.jpg" title="Google Play" alt="Google Play"></a>
         </div>
     </div>
 </div>
+<!-- Plug-in bootstrap-switch here -->
+<script src="../../dependencies/bootstrap/js/switch.js"></script>
+<script>
 
+    var $muteAudioToggle = $("#muteAudioToggle");
+    $muteAudioToggle.change(function () {
+        if (this.checked) {
+            mute();
+        } else {
+            unmute();
+        }
+    });
+
+    $muteAudioToggle.bootstrapSwitch({
+        on: 'on',
+        off: 'off',
+        size: 'md'
+    });
+
+    var $muteVideoToggle = $("#muteVideoToggle");
+    $muteVideoToggle.change(function () {
+        if (this.checked) {
+            muteVideo();
+        } else {
+            unmuteVideo();
+        }
+    });
+
+    $muteVideoToggle.bootstrapSwitch({
+        on: 'on',
+        off: 'off',
+        size: 'md'
+    });
+</script>
 </body>
 </html>

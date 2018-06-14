@@ -4,19 +4,47 @@ var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
 var localVideo;
 var remoteVideo;
 var currentCall;
+var statIntervalId;
 
 $(document).ready(function () {
     loadCallFieldSet();
 });
 
+function loadStats() {
+    if (currentCall) {
+        currentCall.getStats(function (stats) {
+            if (stats) {
+                if (stats.outboundStream && stats.outboundStream.videoStats) {
+                    $('#videoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
+                    $('#videoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
+                    $('#videoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
+                }
+
+                if (stats.outboundStream && stats.outboundStream.audioStats) {
+                    $('#audioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
+                    $('#audioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+                }
+            }
+        });
+    }
+}
+
 // Include Field Set HTML
-function loadCallFieldSet(){
+function loadCallFieldSet() {
     $("#callFieldSet").load("call-fieldset.html",loadCallControls);
 }
 
 // Include Call Controls HTML
 function loadCallControls(){
-    $("#callControls").load("call-controls.html", init_page);
+    $("#callControls").load("call-controls.html", loadVideoCallStatistics);
+}
+
+function loadVideoCallStatistics() {
+    $("#callVideoStatistics").load("call-video-statistics.html", loadAudioCallStatistics)
+}
+
+function loadAudioCallStatistics() {
+    $("#callAudioStatistics").load("call-audio-statistics.html", init_page)
 }
 
 function init_page(){
@@ -35,6 +63,7 @@ function init_page(){
         return;
     }
 
+  
     Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.ALL).then(function (list) {
         for (var type in list) {
             if (list.hasOwnProperty(type)) {
@@ -66,21 +95,22 @@ function init_page(){
                     }
                 });
             }
+        
         }
     }).catch(function (error) {
         $("#notifyFlash").text("Failed to get media devices");
     });
-	
+
 	//local and remote displays
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
 
     // Set websocket URL
     $("#urlServer").val(setURL());
-	
+
 	// Display outgoing call controls
     showOutgoing();
-	
+
     onHangupOutgoing();
     onDisconnected();
     $("#holdBtn").click(function(){
@@ -95,6 +125,7 @@ function init_page(){
         $(this).prop('disabled',true);
     });
 
+  
     $("#switchCamBtn").click(function() {
        if (currentCall) {
            var id = $('#cameraList').find(":selected").val();
@@ -159,7 +190,7 @@ function connect() {
     }).on(SESSION_STATUS.FAILED, function(){
         setStatus("#regStatus", SESSION_STATUS.FAILED);
         onDisconnected();
-    }).on(SESSION_STATUS.INCOMING_CALL, function(call){ 
+
         call.on(CALL_STATUS.RING, function(){
 		    setStatus("#callStatus", CALL_STATUS.RING);
         }).on(CALL_STATUS.HOLD, function() {
@@ -184,13 +215,11 @@ function connect() {
 
 function call() {
 	var session = Flashphoner.getSessions()[0];
-    var constraints = getConstraints();
-	//prepare outgoing call 
-    var outCall = session.createCall({
+    var constraints = getConstraints();    var outCall = session.createCall({
 		callee: $("#callee").val(),
         visibleName: $("#sipLogin").val(),
-	    localVideoDisplay: localVideo, 
         remoteVideoDisplay: remoteVideo,
+        localVideoDisplay: localVideo,
         constraints: constraints
 	}).on(CALL_STATUS.RING, function(){
 		setStatus("#callStatus", CALL_STATUS.RING);
@@ -212,7 +241,8 @@ function call() {
 	outCall.setAudioOutputId($('#speakerList').find(":selected").val());
 	outCall.call();
 	currentCall = outCall;
-	
+    statIntervalId = setInterval(loadStats, 2000);
+
 	$("#callBtn").text("Hangup").off('click').click(function(){
         $(this).prop('disabled', true);
 	    outCall.hangup();
@@ -265,12 +295,14 @@ function onIncomingCall(inCall) {
 	currentCall = inCall;
 	var constraints = getConstraints();
 	showIncoming(inCall.visibleName());
-	
+
+    statIntervalId = setInterval(loadStats, 2000);
     $("#answerBtn").off('click').click(function(){
 		$(this).prop('disabled', true);
         inCall.setAudioOutputId($('#speakerList').find(":selected").val());
         inCall.answer({
                 localVideoDisplay: localVideo,
+       
                 remoteVideoDisplay: remoteVideo,
                 constraints: constraints
             });
@@ -285,6 +317,7 @@ function onIncomingCall(inCall) {
 }
 
 function onHangupIncoming() {
+clearInterval(statIntervalId);
     $('[id^=switch]').prop('disabled', true);
     showOutgoing();
 	enableMuteToggles(false);

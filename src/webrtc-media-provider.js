@@ -316,78 +316,30 @@ var createConnection = function (options) {
             return true;
         };
         var getStats = function (callbackFn) {
-            if (connection) {
-                if (adapter.browserDetails.browser == "chrome") {
-                    connection.getStats(null).then(function (rawStats) {
-                        var results = rawStats;
-                        var result = {type: "chrome", outgoingStreams: {}, incomingStreams: {}};
-                        if (rawStats instanceof Map) {
-                            rawStats.forEach(function (v, k, m) {
-                                handleResult(v);
-                            });
+            var browser = adapter.browserDetails.browser;
+            if (connection && (browser == 'chrome' || browser == 'firefox')) {
+                var result = {outboundStream:{}, inboundStream:{}, otherStats:[]};
+                result.type = browser;
+                connection.getStats(null).then(function (stats) {
+                    stats.forEach(function (stat) {
+                        if(stat.type == 'outbound-rtp') {
+                            if(stat.mediaType == 'audio') {
+                                result.outboundStream.audioStats = stat;
+                            } else {
+                                result.outboundStream.videoStats = stat;
+                            }
+                        } else if(stat.type == 'inbound-rtp') {
+                            if(stat.mediaType == 'audio') {
+                                result.inboundStream.audioStats = stat;
+                            } else {
+                                result.inboundStream.videoStats = stat;
+                            }
                         } else {
-                            for (var i = 0; i < results.length; ++i) {
-                                handleResult(results[i]);
-                            }
+                            result.otherStats.push(stat);
                         }
-
-                        function handleResult(res) {
-                            var resultPart = util.processRtcStatsReport(adapter.browserDetails.browser, res);
-                            if (resultPart != null) {
-                                if (resultPart.type == "googCandidatePair") {
-                                    result.activeCandidate = resultPart;
-                                } else if (resultPart.type == "ssrc") {
-                                    if (resultPart.transportId.indexOf("audio") > -1) {
-                                        if (resultPart.id.indexOf("send") > -1) {
-                                            result.outgoingStreams.audio = resultPart;
-                                        } else {
-                                            result.incomingStreams.audio = resultPart;
-                                        }
-
-                                    } else {
-                                        if (resultPart.id.indexOf("send") > -1) {
-                                            result.outgoingStreams.video = resultPart;
-                                        } else {
-                                            result.incomingStreams.video = resultPart;
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-
-                        callbackFn(result);
-                    }).catch(function (error) {
-                        callbackFn(error)
                     });
-                } else if (adapter.browserDetails.browser == "firefox") {
-                    connection.getStats(null).then(function (rawStats) {
-                        var result = {type: "firefox", outgoingStreams: {}, incomingStreams: {}};
-                        for (var k in rawStats) {
-                            if (rawStats.hasOwnProperty(k)) {
-                                var resultPart = util.processRtcStatsReport(adapter.browserDetails.browser, rawStats[k]);
-                                if (resultPart != null) {
-                                    if (resultPart.type == "outboundrtp") {
-                                        if (resultPart.id.indexOf("audio") > -1) {
-                                            result.outgoingStreams.audio = resultPart;
-                                        } else {
-                                            result.outgoingStreams.video = resultPart;
-                                        }
-                                    } else if (resultPart.type == "inboundrtp") {
-                                        if (resultPart.id.indexOf("audio") > -1) {
-                                            result.incomingStreams.audio = resultPart;
-                                        } else {
-                                            result.incomingStreams.video = resultPart;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        callbackFn(result);
-                    }).catch(function (error) {
-                        callbackFn(error)
-                    });
-                }
+                    callbackFn(result);
+                });
             }
         };
 
