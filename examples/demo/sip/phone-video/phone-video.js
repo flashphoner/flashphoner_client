@@ -190,7 +190,7 @@ function connect() {
     }).on(SESSION_STATUS.FAILED, function(){
         setStatus("#regStatus", SESSION_STATUS.FAILED);
         onDisconnected();
-
+    }).on(SESSION_STATUS.INCOMING_CALL, function(call){
         call.on(CALL_STATUS.RING, function(){
 		    setStatus("#callStatus", CALL_STATUS.RING);
         }).on(CALL_STATUS.HOLD, function() {
@@ -215,7 +215,8 @@ function connect() {
 
 function call() {
 	var session = Flashphoner.getSessions()[0];
-    var constraints = getConstraints();    var outCall = session.createCall({
+    var constraints = getConstraints();
+    var outCall = session.createCall({
 		callee: $("#callee").val(),
         visibleName: $("#sipLogin").val(),
         remoteVideoDisplay: remoteVideo,
@@ -302,7 +303,6 @@ function onIncomingCall(inCall) {
         inCall.setAudioOutputId($('#speakerList').find(":selected").val());
         inCall.answer({
                 localVideoDisplay: localVideo,
-       
                 remoteVideoDisplay: remoteVideo,
                 constraints: constraints
             });
