@@ -141,6 +141,16 @@ function init_page(){
         $(this).prop('disabled',true);
     });
 
+    $("#cameraList").change(function() {
+        if (currentCall) {
+            currentCall.switchCam($(this).val());
+        }
+    });
+    $("#micList").change(function() {
+        if (currentCall) {
+            currentCall.switchMic($(this).val());
+        }
+    });
   
     $("#switchCamBtn").click(function() {
        if (currentCall) {
