@@ -18,11 +18,18 @@ function loadStats() {
                     $('#videoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
                     $('#videoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
                     $('#videoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
+                } else {
+                    $('#videoStatBytesSent').text(0);
+                    $('#videoStatPacketsSent').text(0);
+                    $('#videoStatFramesEncoded').text(0);
                 }
 
                 if (stats.outboundStream.audioStats) {
                     $('#audioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
                     $('#audioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+                } else {
+                    $('#audioStatBytesSent').text(0);
+                    $('#audioStatPacketsSent').text(0);
                 }
             }
         });

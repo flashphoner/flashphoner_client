@@ -420,6 +420,7 @@ var createConnection = function (options) {
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
                         constraints.audio = {deviceId: {exact: mic}};
                         navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
+                            microphoneGain = createGainNode(newStream);
                             currentAudioTrack = newStream.getAudioTracks()[0];
                             sender.replaceTrack(currentAudioTrack);
                             logger.info("Switch mic to " + mic);

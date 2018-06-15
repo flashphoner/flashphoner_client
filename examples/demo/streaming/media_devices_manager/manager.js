@@ -25,11 +25,18 @@ function loadStats() {
                 $('#outVideoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
                 $('#outVideoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
                 $('#outVideoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
+            } else {
+                $('#outVideoStatBytesSent').text(0);
+                $('#outVideoStatPacketsSent').text(0);
+                $('#outVideoStatFramesEncoded').text(0);
             }
 
             if(stats.outboundStream.audioStats) {
                 $('#outAudioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
                 $('#outAudioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+            } else {
+                $('#outAudioStatBytesSent').text(0);
+                $('#outAudioStatPacketsSent').text(0);
             }
         }
     });
@@ -39,11 +46,18 @@ function loadStats() {
                 $('#inVideoStatBytesReceived').text(stats.inboundStream.videoStats.bytesReceived);
                 $('#inVideoStatPacketsReceived').text(stats.inboundStream.videoStats.packetsReceived);
                 $('#inVideoStatFramesDecoded').text(stats.inboundStream.videoStats.framesDecoded);
+            } else {
+                $('#inVideoStatBytesReceived').text(0);
+                $('#inVideoStatPacketsReceived').text(0);
+                $('#inVideoStatFramesDecoded').text(0);
             }
 
             if(stats.inboundStream.audioStats) {
                 $('#inAudioStatBytesReceived').text(stats.inboundStream.audioStats.bytesReceived);
                 $('#inAudioStatPacketsReceived').text(stats.inboundStream.audioStats.packetsReceived);
+            } else {
+                $('#inAudioStatBytesReceived').text(0);
+                $('#inAudioStatPacketsReceived').text(0);
             }
         }
     });
