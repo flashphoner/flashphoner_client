@@ -40,6 +40,7 @@ var createConnection = function (options) {
         var mics = [];
         var switchMicCount = 0;
         var customStream = options.customStream;
+        var currentAudioTrack;
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
@@ -284,12 +285,20 @@ var createConnection = function (options) {
 
         var muteAudio = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
-                localVideo.srcObject.getAudioTracks()[0].enabled = false;
+                if(currentAudioTrack) {
+                    currentAudioTrack.enabled = false;
+                } else {
+                    localVideo.srcObject.getAudioTracks()[0].enabled = false;
+                }
             }
         };
         var unmuteAudio = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
-                localVideo.srcObject.getAudioTracks()[0].enabled = true;
+                if(currentAudioTrack) {
+                    currentAudioTrack.enabled = true;
+                } else {
+                    localVideo.srcObject.getAudioTracks()[0].enabled = true;
+                }
             }
         };
 
@@ -408,31 +417,11 @@ var createConnection = function (options) {
                         switchMicCount = (switchMicCount + 1) % mics.length;
                         sender.track.stop();
                         var constraints = {};
-                        if (localVideo.srcObject.getVideoTracks().length > 0) {
-                            constraints.video = {};
-                            var track = localVideo.srcObject.getVideoTracks()[0];
-                            var trackConstraints = track.getConstraints();
-                            if (trackConstraints.hasOwnProperty('advanced')) {
-                                trackConstraints.advanced.forEach(function (k) {
-                                    for (var i in k) {
-                                        if (k.hasOwnProperty(i)) {
-                                            constraints.video[i] = k[i];
-                                        }
-                                    }
-                                })
-                            } else {
-                                for (var i in trackConstraints) {
-                                    if (trackConstraints.hasOwnProperty(i)) {
-                                        constraints.video[i] = trackConstraints[i];
-                                    }
-                                }
-                            }
-                        }
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
                         constraints.audio = {deviceId: {exact: mic}};
                         navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
-                            sender.replaceTrack(newStream.getAudioTracks()[0]);
-                            localVideo.srcObject = newStream;
+                            currentAudioTrack = newStream.getAudioTracks()[0];
+                            sender.replaceTrack(currentAudioTrack);
                             logger.info("Switch mic to " + mic);
                             resolve(mic);
                         }).catch(function (reason) {
