@@ -73,7 +73,7 @@ function init_page(){
                 list[type].forEach(function(device) {
                     if (device.type == "mic") {
                         var list = document.getElementById("micList");
-                        if ($("#micList option[value='" + device.id + "'").length == 0) {
+                        if ($("#micList option[value='" + device.id + "']").length == 0) {
                             var option = document.createElement("option");
                             option.text = device.label || device.id;
                             option.value = device.id;
@@ -81,7 +81,7 @@ function init_page(){
                         }
                     } else if (device.type == "speaker") {
                         var list = document.getElementById("speakerList");
-                        if (list && $("#speakerList option[value='" + device.id + "'").length == 0) {
+                        if (list && $("#speakerList option[value='" + device.id + "']").length == 0) {
                             var option = document.createElement("option");
                             option.text = device.label || device.id;
                             option.value = device.id;
@@ -89,7 +89,7 @@ function init_page(){
                         }
                     } else if (device.type == "camera") {
                         var list = document.getElementById("cameraList");
-                        if ($("#cameraList option[value='" + device.id + "'").length == 0) {
+                        if ($("#cameraList option[value='" + device.id + "']").length == 0) {
                             var option = document.createElement("option");
                             option.text = device.label || device.id;
                             option.value = device.id;
@@ -106,7 +106,8 @@ function init_page(){
             }
         });
     }).catch(function (error) {
-        $("#notifyFlash").text("Failed to get media devices");
+
+        $("#notifyFlash").text("Failed to get media devices "+error);
     });
 
 	//local and remote displays
