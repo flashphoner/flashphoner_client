@@ -317,18 +317,18 @@ var createConnection = function (options) {
         };
         var getStats = function (callbackFn) {
             var browser = adapter.browserDetails.browser;
-            if (connection && (browser == 'chrome' || browser == 'firefox')) {
+            if (connection && (browser == 'chrome' || browser == 'firefox' || browser == 'safari')) {
                 var result = {outboundStream:{}, inboundStream:{}, otherStats:[]};
                 result.type = browser;
                 connection.getStats(null).then(function (stats) {
                     stats.forEach(function (stat) {
-                        if(stat.type == 'outbound-rtp') {
+                        if(stat.type == 'outbound-rtp' && !stat.isRemote) {
                             if(stat.mediaType == 'audio') {
                                 result.outboundStream.audioStats = stat;
                             } else {
                                 result.outboundStream.videoStats = stat;
                             }
-                        } else if(stat.type == 'inbound-rtp') {
+                        } else if(stat.type == 'inbound-rtp' && !stat.isRemote) {
                             if(stat.mediaType == 'audio') {
                                 result.inboundStream.audioStats = stat;
                             } else {

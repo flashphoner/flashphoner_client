@@ -13,14 +13,14 @@ $(document).ready(function () {
 function loadStats() {
     if (currentCall) {
         currentCall.getStats(function (stats) {
-            if (stats) {
-                if (stats.outboundStream && stats.outboundStream.videoStats) {
+            if (stats && stats.outboundStream) {
+                if (stats.outboundStream.videoStats) {
                     $('#videoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
                     $('#videoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
                     $('#videoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
                 }
 
-                if (stats.outboundStream && stats.outboundStream.audioStats) {
+                if (stats.outboundStream.audioStats) {
                     $('#audioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
                     $('#audioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
                 }
@@ -63,7 +63,9 @@ function init_page(){
         return;
     }
 
-  
+    if(!Browser.isChrome()) {
+        $('#speakerForm').remove();
+    }
     Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.ALL).then(function (list) {
         for (var type in list) {
             if (list.hasOwnProperty(type)) {
@@ -78,7 +80,7 @@ function init_page(){
                         }
                     } else if (device.type == "speaker") {
                         var list = document.getElementById("speakerList");
-                        if ($("#speakerList option[value='" + device.id + "'").length == 0) {
+                        if (list && $("#speakerList option[value='" + device.id + "'").length == 0) {
                             var option = document.createElement("option");
                             option.text = device.label || device.id;
                             option.value = device.id;
