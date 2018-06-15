@@ -46,7 +46,6 @@ var createConnection = function (options) {
             localVideo = getCacheInstance(localDisplay);
             localVideo.id = id + "-local";
             connection.addStream(localVideo.srcObject);
-
             remoteVideo = getCacheInstance(remoteDisplay);
             if (!remoteVideo) {
                 remoteVideo = document.createElement('video');
@@ -99,6 +98,7 @@ var createConnection = function (options) {
                 });
             }
             var audioTrack = localVideo.srcObject.getAudioTracks()[0];
+            currentAudioTrack = audioTrack;
             if (audioTrack) {
                 listDevices(false).then(function (devices) {
                     devices.audio.forEach(function (device) {
@@ -284,7 +284,7 @@ var createConnection = function (options) {
         };
 
         var muteAudio = function () {
-            if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
+            if (currentAudioTrack || localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
                 if(currentAudioTrack) {
                     currentAudioTrack.enabled = false;
                 } else {
@@ -293,7 +293,7 @@ var createConnection = function (options) {
             }
         };
         var unmuteAudio = function () {
-            if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
+            if (currentAudioTrack || localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
                 if(currentAudioTrack) {
                     currentAudioTrack.enabled = true;
                 } else {
@@ -393,7 +393,9 @@ var createConnection = function (options) {
                         sender.track.stop();
                         var cam = (typeof deviceId !== "undefined") ? deviceId : videoCams[switchCamCount];
                         navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: cam}}}).then(function (newStream) {
-                            sender.replaceTrack(newStream.getVideoTracks()[0]);
+                            var newVideoTrack = newStream.getVideoTracks()[0];
+                            newVideoTrack.enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
+                            sender.replaceTrack(newVideoTrack);
                             localVideo.srcObject = newStream;
                             logger.info("Switch camera to " + cam);
                             resolve(cam);
@@ -421,7 +423,9 @@ var createConnection = function (options) {
                         constraints.audio = {deviceId: {exact: mic}};
                         navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
                             microphoneGain = createGainNode(newStream);
-                            currentAudioTrack = newStream.getAudioTracks()[0];
+                            var newAudioTrack = newStream.getAudioTracks()[0];
+                            newAudioTrack.enabled = currentAudioTrack.enabled;
+                            currentAudioTrack = newAudioTrack;
                             sender.replaceTrack(currentAudioTrack);
                             logger.info("Switch mic to " + mic);
                             resolve(mic);
