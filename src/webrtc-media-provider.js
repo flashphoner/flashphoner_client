@@ -46,7 +46,6 @@ var createConnection = function (options) {
             localVideo = getCacheInstance(localDisplay);
             localVideo.id = id + "-local";
             connection.addStream(localVideo.srcObject);
-
             remoteVideo = getCacheInstance(remoteDisplay);
             if (!remoteVideo) {
                 remoteVideo = document.createElement('video');
@@ -99,6 +98,7 @@ var createConnection = function (options) {
                 });
             }
             var audioTrack = localVideo.srcObject.getAudioTracks()[0];
+            currentAudioTrack = audioTrack;
             if (audioTrack) {
                 listDevices(false).then(function (devices) {
                     devices.audio.forEach(function (device) {
@@ -284,7 +284,7 @@ var createConnection = function (options) {
         };
 
         var muteAudio = function () {
-            if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
+            if (currentAudioTrack || localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
                 if(currentAudioTrack) {
                     currentAudioTrack.enabled = false;
                 } else {
@@ -293,7 +293,7 @@ var createConnection = function (options) {
             }
         };
         var unmuteAudio = function () {
-            if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
+            if (currentAudioTrack || localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
                 if(currentAudioTrack) {
                     currentAudioTrack.enabled = true;
                 } else {
@@ -422,9 +422,6 @@ var createConnection = function (options) {
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
                         constraints.audio = {deviceId: {exact: mic}};
                         navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
-                            if(!currentAudioTrack) {
-                                currentAudioTrack = localVideo.srcObject.getAudioTracks()[0];
-                            }
                             microphoneGain = createGainNode(newStream);
                             var newAudioTrack = newStream.getAudioTracks()[0];
                             newAudioTrack.enabled = currentAudioTrack.enabled;
