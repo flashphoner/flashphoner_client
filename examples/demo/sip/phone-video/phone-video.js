@@ -66,6 +66,7 @@ function init_page(){
     if(!Browser.isChrome()) {
         $('#speakerForm').remove();
     }
+
     Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.ALL).then(function (list) {
         for (var type in list) {
             if (list.hasOwnProperty(type)) {
@@ -99,6 +100,11 @@ function init_page(){
             }
         
         }
+        $( "#speakerList" ).change(function() {
+            if (currentCall) {
+                currentCall.setAudioOutputId($(this).val());
+            }
+        });
     }).catch(function (error) {
         $("#notifyFlash").text("Failed to get media devices");
     });
