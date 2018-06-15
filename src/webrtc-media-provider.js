@@ -393,7 +393,9 @@ var createConnection = function (options) {
                         sender.track.stop();
                         var cam = (typeof deviceId !== "undefined") ? deviceId : videoCams[switchCamCount];
                         navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: cam}}}).then(function (newStream) {
-                            sender.replaceTrack(newStream.getVideoTracks()[0]);
+                            var newVideoTrack = newStream.getVideoTracks()[0];
+                            newVideoTrack.enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
+                            sender.replaceTrack(newVideoTrack);
                             localVideo.srcObject = newStream;
                             logger.info("Switch camera to " + cam);
                             resolve(cam);
@@ -420,8 +422,13 @@ var createConnection = function (options) {
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
                         constraints.audio = {deviceId: {exact: mic}};
                         navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
+                            if(!currentAudioTrack) {
+                                currentAudioTrack = localVideo.srcObject.getAudioTracks()[0];
+                            }
                             microphoneGain = createGainNode(newStream);
-                            currentAudioTrack = newStream.getAudioTracks()[0];
+                            var newAudioTrack = newStream.getAudioTracks()[0];
+                            newAudioTrack.enabled = currentAudioTrack.enabled;
+                            currentAudioTrack = newAudioTrack;
                             sender.replaceTrack(currentAudioTrack);
                             logger.info("Switch mic to " + mic);
                             resolve(mic);
