@@ -144,14 +144,22 @@ function init_page(){
   
     $("#switchCamBtn").click(function() {
        if (currentCall) {
-           var id = $('#cameraList').find(":selected").val();
-           currentCall.switchCam(id);
+           currentCall.switchCam().then(function(id) {
+               $('#cameraList option:selected').prop('selected', false);
+               $('#cameraList option[value='+ id +']').prop('selected', true);
+           }).catch(function(e) {
+               console.log("Error " + e);
+           });
        }
     }).prop('disabled', true);
     $("#switchMicBtn").click(function() {
         if (currentCall) {
-            var id = $('#micList').find(":selected").val();
-            currentCall.switchMic(id);
+            currentCall.switchMic().then(function(id) {
+                $('#micList option:selected').prop('selected', false);
+                $('#micList option[value='+ id +']').prop('selected', true);
+            }).catch(function(e) {
+                console.log("Error " + e);
+            });
         }
     }).prop('disabled', true);
     $("#switchSpkBtn").click(function() {
