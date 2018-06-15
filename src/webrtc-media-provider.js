@@ -321,24 +321,26 @@ var createConnection = function (options) {
                 var result = {outboundStream:{}, inboundStream:{}, otherStats:[]};
                 result.type = browser;
                 connection.getStats(null).then(function (stats) {
-                    stats.forEach(function (stat) {
-                        if(stat.type == 'outbound-rtp' && !stat.isRemote) {
-                            if(stat.mediaType == 'audio') {
-                                result.outboundStream.audioStats = stat;
+                    if(stats) {
+                        stats.forEach(function (stat) {
+                            if (stat.type == 'outbound-rtp' && !stat.isRemote) {
+                                if (stat.mediaType == 'audio') {
+                                    result.outboundStream.audioStats = stat;
+                                } else {
+                                    result.outboundStream.videoStats = stat;
+                                }
+                            } else if (stat.type == 'inbound-rtp' && !stat.isRemote) {
+                                if (stat.mediaType == 'audio') {
+                                    result.inboundStream.audioStats = stat;
+                                } else {
+                                    result.inboundStream.videoStats = stat;
+                                }
                             } else {
-                                result.outboundStream.videoStats = stat;
+                                result.otherStats.push(stat);
                             }
-                        } else if(stat.type == 'inbound-rtp' && !stat.isRemote) {
-                            if(stat.mediaType == 'audio') {
-                                result.inboundStream.audioStats = stat;
-                            } else {
-                                result.inboundStream.videoStats = stat;
-                            }
-                        } else {
-                            result.otherStats.push(stat);
-                        }
-                    });
-                    callbackFn(result);
+                        });
+                        callbackFn(result);
+                    }
                 });
             }
         };
