@@ -253,7 +253,7 @@ function onStarted(publishStream, previewStream) {
     }).prop('disabled', $('#sendCanvasStream').is(':checked'));
     $("#switchMicBtn").click(function (){
         publishStream.switchMic();
-    })
+    }).prop('disabled', !($('#sendAudio').is(':checked')));
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
     publishStream.setMicrophoneGain(currentGainValue);
@@ -280,6 +280,7 @@ function onStopped() {
         }
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').prop('disabled',true);
+    $("#switchMicBtn").text("Switch").off('click').prop('disabled',true);
     unmuteInputs();
     $("#publishResolution").text("");
     $("#playResolution").text("");

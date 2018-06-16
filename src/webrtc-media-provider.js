@@ -151,6 +151,9 @@ var createConnection = function (options) {
             if (connection.signalingState !== "closed") {
                 connection.close();
             }
+            if(currentAudioTrack) {
+                currentAudioTrack.stop();
+            }
             delete connections[id];
         };
         var createOffer = function (options) {
@@ -330,19 +333,23 @@ var createConnection = function (options) {
                 var result = {outboundStream:{}, inboundStream:{}, otherStats:[]};
                 result.type = browser;
                 connection.getStats(null).then(function (stats) {
-                    if(stats) {
+                    if (stats) {
                         stats.forEach(function (stat) {
                             if (stat.type == 'outbound-rtp' && !stat.isRemote) {
                                 if (stat.mediaType == 'audio') {
                                     result.outboundStream.audioStats = stat;
-                                } else {
+                                } else if (stat.mediaType == 'video') {
                                     result.outboundStream.videoStats = stat;
+                                } else {
+                                    result.otherStats.push(stat);
                                 }
                             } else if (stat.type == 'inbound-rtp' && !stat.isRemote) {
-                                if (stat.mediaType == 'audio') {
+                                if (stat.mediaType == 'audio' || (browser == 'safari' && stat.id.indexOf('Audio') != -1)) {
                                     result.inboundStream.audioStats = stat;
-                                } else {
+                                } else if (stat.mediaType == 'video' || (browser == 'safari' && stat.id.indexOf('Video') != -1)) {
                                     result.inboundStream.videoStats = stat;
+                                } else {
+                                    result.otherStats.push(stat);
                                 }
                             } else {
                                 result.otherStats.push(stat);
@@ -422,7 +429,11 @@ var createConnection = function (options) {
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
                         constraints.audio = {deviceId: {exact: mic}};
                         navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
-                            microphoneGain = createGainNode(newStream);
+                            if(microphoneGain) {
+                                var currentGain = microphoneGain.gain.value;
+                                microphoneGain = createGainNode(newStream);
+                                microphoneGain.gain.value = currentGain;
+                            }
                             var newAudioTrack = newStream.getAudioTracks()[0];
                             newAudioTrack.enabled = currentAudioTrack.enabled;
                             currentAudioTrack = newAudioTrack;

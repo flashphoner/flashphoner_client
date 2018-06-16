@@ -156,7 +156,7 @@ function init_page(){
        if (currentCall) {
            currentCall.switchCam().then(function(id) {
                $('#cameraList option:selected').prop('selected', false);
-               $('#cameraList option[value='+ id +']').prop('selected', true);
+               $("#cameraList option[value='"+ id +"']").prop('selected', true);
            }).catch(function(e) {
                console.log("Error " + e);
            });
@@ -166,7 +166,7 @@ function init_page(){
         if (currentCall) {
             currentCall.switchMic().then(function(id) {
                 $('#micList option:selected').prop('selected', false);
-                $('#micList option[value='+ id +']').prop('selected', true);
+                $("#micList option[value='"+ id +"']").prop('selected', true);
             }).catch(function(e) {
                 console.log("Error " + e);
             });
