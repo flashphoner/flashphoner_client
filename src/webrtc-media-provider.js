@@ -397,8 +397,13 @@ var createConnection = function (options) {
                         navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: cam}}}).then(function (newStream) {
                             var newVideoTrack = newStream.getVideoTracks()[0];
                             newVideoTrack.enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
+                            var audioTrack = localVideo.srcObject.getAudioTracks()[0];
                             sender.replaceTrack(newVideoTrack);
                             localVideo.srcObject = newStream;
+                            // On Safari mobile _newStream_ doesn't contain audio track, so we need to add track from previous stream
+                            if (localVideo.srcObject.getAudioTracks().length == 0) {
+                                localVideo.srcObject.addTrack(audioTrack);
+                            }
                             logger.info("Switch camera to " + cam);
                             resolve(cam);
                         }).catch(function (reason) {
