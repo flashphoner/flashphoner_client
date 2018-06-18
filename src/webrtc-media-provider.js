@@ -155,7 +155,11 @@ var createConnection = function (options) {
             //close audio track to prevent "failed to allocate audiosource"
             if(currentAudioTrack) {
                 currentAudioTrack.stop();
+                if(microphoneGain) {
+                    currentAudioTrack.stopOriginalTrack();
+                }
             }
+
             delete connections[id];
         };
         var createOffer = function (options) {
@@ -425,6 +429,7 @@ var createConnection = function (options) {
                         if (sender.track.kind === 'video') return;
                         switchMicCount = (switchMicCount + 1) % mics.length;
                         sender.track.stop();
+                        sender.track.stopOriginalTrack();
                         var constraints = {};
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
                         constraints.audio = {deviceId: {exact: mic}};
@@ -685,6 +690,9 @@ var createGainNode = function (stream) {
     gainNode.connect(destination);
     var newTrack = outputStream.getAudioTracks()[0];
     var originalTrack = stream.getAudioTracks()[0];
+    newTrack.stopOriginalTrack = function () {
+        originalTrack.stop();
+    };
     stream.addTrack(newTrack);
     stream.removeTrack(originalTrack);
     return gainNode;
