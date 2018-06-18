@@ -617,6 +617,20 @@ define(errorInfo, 'INVALID_SESSION_STATE', 'Invalid session state');
  */
 define(errorInfo, 'OPTIONS_NAME_MUST_BE_PROVIDED', 'options.name must be provided');
 
+/**
+ * Error if number of cams is less than 2 or already used custom stream
+ * @event CAN_NOT_SWITCH_CAM
+ * @memberOf Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'CAN_NOT_SWITCH_CAM', 'Number of cams is less than 2 or already used custom stream');
+
+/**
+ * Error if number of mics is less than 2 or already used custom stream
+ * @event CAN_NOT_SWITCH_MIC
+ * @memberOf Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'CAN_NOT_SWITCH_MIC', 'Number of mics is less than 2 or already used custom stream');
+
 var mediaDeviceKind = {};
 
 define(mediaDeviceKind, 'OUTPUT', 'output');

@@ -412,7 +412,7 @@ var createConnection = function (options) {
                         });
                     });
                 } else {
-                    reject(null);
+                    reject(constants.ERROR_INFO.CAN_NOT_SWITCH_CAM);
                 }
             });
 
@@ -446,7 +446,7 @@ var createConnection = function (options) {
                         });
                     });
                 } else {
-                    reject(null);
+                    reject(constants.ERROR_INFO.CAN_NOT_SWITCH_MIC);
                 }
             });
         };
