@@ -151,6 +151,8 @@ var createConnection = function (options) {
             if (connection.signalingState !== "closed") {
                 connection.close();
             }
+
+            //close audio track to prevent "failed to allocate audiosource"
             if(currentAudioTrack) {
                 currentAudioTrack.stop();
             }
@@ -287,21 +289,13 @@ var createConnection = function (options) {
         };
 
         var muteAudio = function () {
-            if (currentAudioTrack || localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
-                if(currentAudioTrack) {
-                    currentAudioTrack.enabled = false;
-                } else {
-                    localVideo.srcObject.getAudioTracks()[0].enabled = false;
-                }
+            if (currentAudioTrack) {
+                currentAudioTrack.enabled = false;
             }
         };
         var unmuteAudio = function () {
-            if (currentAudioTrack || localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
-                if(currentAudioTrack) {
-                    currentAudioTrack.enabled = true;
-                } else {
-                    localVideo.srcObject.getAudioTracks()[0].enabled = true;
-                }
+            if (currentAudioTrack) {
+                currentAudioTrack.enabled = true;
             }
         };
 
@@ -344,6 +338,7 @@ var createConnection = function (options) {
                                     result.otherStats.push(stat);
                                 }
                             } else if (stat.type == 'inbound-rtp' && !stat.isRemote) {
+                                //safari does not have a mediaType variable for incoming statistics
                                 if (stat.mediaType == 'audio' || (browser == 'safari' && stat.id.indexOf('Audio') != -1)) {
                                     result.inboundStream.audioStats = stat;
                                 } else if (stat.mediaType == 'video' || (browser == 'safari' && stat.id.indexOf('Video') != -1)) {
