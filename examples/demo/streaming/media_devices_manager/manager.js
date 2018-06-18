@@ -480,7 +480,8 @@ function startStreaming(session) {
         previewStream = session.createStream({
             name: streamName,
             display: remoteVideo,
-            constraints: constraints
+            constraints: constraints,
+            sdpHook: parseSDP
         }).on(STREAM_STATUS.PLAYING, function (previewStream) {
             document.getElementById(previewStream.id()).addEventListener('resize', function (event) {
                 $("#playResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);
@@ -516,6 +517,15 @@ function startStreaming(session) {
         onStopped();
     });
     publishStream.publish();
+}
+
+function parseSDP(sdp) {
+    if ($("#sdpIn").val() != 0 && $("#sdpOut").val() != 0) {
+        var newSDP = sdp.sdpString+"";
+        newSDP = newSDP.replace($("#sdpIn").val(),  $("#sdpOut").val());
+        return newSDP;
+    }
+    return sdp.sdpString;
 }
 
 //show connection or local stream status

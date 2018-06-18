@@ -221,7 +221,8 @@ function call() {
         visibleName: $("#sipLogin").val(),
         remoteVideoDisplay: remoteVideo,
         localVideoDisplay: localVideo,
-        constraints: constraints
+        constraints: constraints,
+        sdpHook: parseSDP
 	}).on(CALL_STATUS.RING, function(){
 		setStatus("#callStatus", CALL_STATUS.RING);
     }).on(CALL_STATUS.ESTABLISHED, function(){
@@ -304,7 +305,8 @@ function onIncomingCall(inCall) {
         inCall.answer({
                 localVideoDisplay: localVideo,
                 remoteVideoDisplay: remoteVideo,
-                constraints: constraints
+                constraints: constraints,
+                sdpHook: parseSDP
             });
 		showAnswered();
     }).prop('disabled', false);
@@ -467,4 +469,13 @@ function enableMuteToggles(enable) {
 		$muteAudioToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
 		$muteVideoToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
     }
+}
+
+function parseSDP(sdp) {
+    if ($("#sdpIn").val() != 0 && $("#sdpOut").val() != 0) {
+        var newSDP = sdp.sdpString+"";
+        newSDP = newSDP.replace($("#sdpIn").val(),  $("#sdpOut").val());
+        return newSDP;
+    }
+    return sdp.sdpString;
 }
