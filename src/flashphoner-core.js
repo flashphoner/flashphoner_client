@@ -745,9 +745,9 @@ var createSession = function (options) {
                 if (sdpHook != undefined && typeof sdpHook == 'function') {
                     var sdpObject = {sdpString: sdp};
                     var newSdp = sdpHook(sdpObject);
-                    mediaConnection.setRemoteSdp(newSdp, hasTransferredCall, id_).then(function () {
-                    });
-                    return;
+                    if (newSdp != null && newSdp != "") {
+                        sdp = newSdp;
+                    }
                 }
                 mediaConnection.setRemoteSdp(sdp, hasTransferredCall, id_).then(function () {
                 });
@@ -910,7 +910,10 @@ var createSession = function (options) {
                 sdp = remoteSdpCache[id_];
                 if (sdpHook != undefined && typeof sdpHook == 'function') {
                     var sdpObject = {sdpString: sdp};
-                    sdp = sdpHook(sdpObject);
+                    var newSdp = sdpHook(sdpObject);
+                    if (newSdp != null && newSdp != "") {
+                        sdp = newSdp;
+                    }
                 }
                 delete remoteSdpCache[id_];
             }
@@ -1374,9 +1377,6 @@ var createSession = function (options) {
         if (options.constraints && Object.keys(options.constraints).length != 0) {
             var constraints = options.constraints;
         }
-        if (options.sdpHook != undefined) {
-            options.sdpHook("test");
-        }
         var mediaConnectionConstraints = options.mediaConnectionConstraints;
         // Receive media
         var receiveAudio;
@@ -1446,7 +1446,10 @@ var createSession = function (options) {
                 if (_codecOptions) _sdp = util.SDP.writeFmtp(sdp, _codecOptions, "opus");
                 if (sdpHook != undefined && typeof sdpHook == 'function') {
                     var sdpObject = {sdpString: _sdp};
-                    _sdp = sdpHook(sdpObject);
+                    var newSdp = sdpHook(sdpObject);
+                    if (newSdp != null && newSdp != "") {
+                       _sdp = newSdp;
+                    }
                 }
                 mediaConnection.setRemoteSdp(_sdp).then(function () {
                 });
