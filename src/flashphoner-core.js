@@ -742,13 +742,7 @@ var createSession = function (options) {
             }
             //set remote sdp
             if (sdp && sdp !== '') {
-                if (sdpHook != undefined && typeof sdpHook == 'function') {
-                    var sdpObject = {sdpString: sdp};
-                    var newSdp = sdpHook(sdpObject);
-                    if (newSdp != null && newSdp != "") {
-                        sdp = newSdp;
-                    }
-                }
+                sdp = sdpHookHandler(sdp, sdpHook);
                 mediaConnection.setRemoteSdp(sdp, hasTransferredCall, id_).then(function () {
                 });
                 return;
@@ -907,14 +901,7 @@ var createSession = function (options) {
                 logger.error(LOG_PREFIX, "No remote sdp available");
                 throw new Error("No remote sdp available");
             } else {
-                sdp = remoteSdpCache[id_];
-                if (sdpHook != undefined && typeof sdpHook == 'function') {
-                    var sdpObject = {sdpString: sdp};
-                    var newSdp = sdpHook(sdpObject);
-                    if (newSdp != null && newSdp != "") {
-                        sdp = newSdp;
-                    }
-                }
+                sdp = sdpHookHandler(remoteSdpCache[id_], sdpHook);
                 delete remoteSdpCache[id_];
             }
             if (util.SDP.matchPrefix(sdp, "m=video").length == 0) {
@@ -1444,13 +1431,7 @@ var createSession = function (options) {
             if (sdp && sdp !== '') {
                 var _sdp = sdp;
                 if (_codecOptions) _sdp = util.SDP.writeFmtp(sdp, _codecOptions, "opus");
-                if (sdpHook != undefined && typeof sdpHook == 'function') {
-                    var sdpObject = {sdpString: _sdp};
-                    var newSdp = sdpHook(sdpObject);
-                    if (newSdp != null && newSdp != "") {
-                       _sdp = newSdp;
-                    }
-                }
+                _sdp = sdpHookHandler(_sdp, sdpHook);
                 mediaConnection.setRemoteSdp(_sdp).then(function () {
                 });
                 return;
@@ -2264,6 +2245,18 @@ var createSession = function (options) {
         };
         return exports;
     }();
+
+    var sdpHookHandler = function(sdp, sdpHook){
+        if (sdpHook != undefined && typeof sdpHook == 'function') {
+            var sdpObject = {sdpString: sdp};
+            var newSdp = sdpHook(sdpObject);
+            if (newSdp != null && newSdp != "") {
+                return newSdp;
+            }
+            return sdp;
+        }
+        return sdp;
+    }
 
     //export Session
     session.id = id;

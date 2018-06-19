@@ -481,7 +481,7 @@ function startStreaming(session) {
             name: streamName,
             display: remoteVideo,
             constraints: constraints,
-            sdpHook: parseSDP
+            sdpHook: rewriteSdp
         }).on(STREAM_STATUS.PLAYING, function (previewStream) {
             document.getElementById(previewStream.id()).addEventListener('resize', function (event) {
                 $("#playResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);
@@ -519,10 +519,12 @@ function startStreaming(session) {
     publishStream.publish();
 }
 
-function parseSDP(sdp) {
-    if ($("#sdpIn").val() != 0 && $("#sdpOut").val() != 0) {
+function rewriteSdp(sdp) {
+    var sdpStringFind = $("#sdpStringFind").val();
+    var sdpStringReplace = $("#sdpStringReplace").val();
+    if (sdpStringFind != 0 && sdpStringReplace != 0) {
         var newSDP = sdp.sdpString+"";
-        newSDP = newSDP.replace($("#sdpIn").val(),  $("#sdpOut").val());
+        newSDP = newSDP.replace(sdpStringFind, sdpStringReplace);
         return newSDP;
     }
     return sdp.sdpString;

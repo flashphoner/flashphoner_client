@@ -222,7 +222,7 @@ function call() {
         remoteVideoDisplay: remoteVideo,
         localVideoDisplay: localVideo,
         constraints: constraints,
-        sdpHook: parseSDP
+        sdpHook: rewriteSdp
 	}).on(CALL_STATUS.RING, function(){
 		setStatus("#callStatus", CALL_STATUS.RING);
     }).on(CALL_STATUS.ESTABLISHED, function(){
@@ -306,7 +306,7 @@ function onIncomingCall(inCall) {
                 localVideoDisplay: localVideo,
                 remoteVideoDisplay: remoteVideo,
                 constraints: constraints,
-                sdpHook: parseSDP
+                sdpHook: rewriteSdp
             });
 		showAnswered();
     }).prop('disabled', false);
@@ -471,10 +471,12 @@ function enableMuteToggles(enable) {
     }
 }
 
-function parseSDP(sdp) {
-    if ($("#sdpIn").val() != 0 && $("#sdpOut").val() != 0) {
+function rewriteSdp(sdp) {
+    var sdpStringFind = $("#sdpStringFind").val();
+    var sdpStringReplace = $("#sdpStringReplace").val();
+    if (sdpStringFind != 0 && sdpStringReplace != 0) {
         var newSDP = sdp.sdpString+"";
-        newSDP = newSDP.replace($("#sdpIn").val(),  $("#sdpOut").val());
+        newSDP = newSDP.replace(sdpStringFind, sdpStringReplace);
         return newSDP;
     }
     return sdp.sdpString;
