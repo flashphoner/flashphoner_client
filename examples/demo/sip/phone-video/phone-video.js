@@ -473,9 +473,9 @@ function unmuteVideo() {
 
 function getConstraints() {
     var constraints = {
-        audio: {deviceId: $('#micList').find(":selected").val()},
+        audio: {deviceId: {exact: $('#micList').find(":selected").val()}},
         video: {
-            deviceId: $('#cameraList').find(":selected").val(),
+            deviceId: {exact: $('#cameraList').find(":selected").val()},
             width: parseInt($('#sendWidth').val()),
             height: parseInt($('#sendHeight').val())
         }
