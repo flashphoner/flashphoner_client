@@ -523,7 +523,7 @@ function rewriteSdp(sdp) {
     var sdpStringFind = $("#sdpStringFind").val();
     var sdpStringReplace = $("#sdpStringReplace").val();
     if (sdpStringFind != 0 && sdpStringReplace != 0) {
-        var newSDP = sdp.sdpString+"";
+        var newSDP = sdp.sdpString.toString();
         newSDP = newSDP.replace(sdpStringFind, sdpStringReplace);
         return newSDP;
     }
