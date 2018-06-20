@@ -429,7 +429,9 @@ var createConnection = function (options) {
                         if (sender.track.kind === 'video') return;
                         switchMicCount = (switchMicCount + 1) % mics.length;
                         sender.track.stop();
-                        sender.track.stopOriginalTrack();
+                        if(microphoneGain) {
+                            sender.track.stopOriginalTrack();
+                        }
                         var constraints = {};
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
                         constraints.audio = {deviceId: {exact: mic}};
