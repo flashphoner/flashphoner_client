@@ -21,22 +21,44 @@ try {
 function loadStats() {
     publishStream.getStats(function (stats) {
         if (stats && stats.outboundStream) {
-            $('#outVideoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
-            $('#outVideoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
-            $('#outVideoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
+            if(stats.outboundStream.videoStats) {
+                $('#outVideoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
+                $('#outVideoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
+                $('#outVideoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
+            } else {
+                $('#outVideoStatBytesSent').text(0);
+                $('#outVideoStatPacketsSent').text(0);
+                $('#outVideoStatFramesEncoded').text(0);
+            }
 
-            $('#outAudioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
-            $('#outAudioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+            if(stats.outboundStream.audioStats) {
+                $('#outAudioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
+                $('#outAudioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+            } else {
+                $('#outAudioStatBytesSent').text(0);
+                $('#outAudioStatPacketsSent').text(0);
+            }
         }
     });
     previewStream.getStats(function (stats) {
         if (stats && stats.inboundStream) {
-            $('#inVideoStatBytesReceived').text(stats.inboundStream.videoStats.bytesReceived);
-            $('#inVideoStatPacketsReceived').text(stats.inboundStream.videoStats.packetsReceived);
-            $('#inVideoStatFramesDecoded').text(stats.inboundStream.videoStats.framesDecoded);
+            if(stats.inboundStream.videoStats) {
+                $('#inVideoStatBytesReceived').text(stats.inboundStream.videoStats.bytesReceived);
+                $('#inVideoStatPacketsReceived').text(stats.inboundStream.videoStats.packetsReceived);
+                $('#inVideoStatFramesDecoded').text(stats.inboundStream.videoStats.framesDecoded);
+            } else {
+                $('#inVideoStatBytesReceived').text(0);
+                $('#inVideoStatPacketsReceived').text(0);
+                $('#inVideoStatFramesDecoded').text(0);
+            }
 
-            $('#inAudioStatBytesReceived').text(stats.inboundStream.audioStats.bytesReceived);
-            $('#inAudioStatPacketsReceived').text(stats.inboundStream.audioStats.packetsReceived);
+            if(stats.inboundStream.audioStats) {
+                $('#inAudioStatBytesReceived').text(stats.inboundStream.audioStats.bytesReceived);
+                $('#inAudioStatPacketsReceived').text(stats.inboundStream.audioStats.packetsReceived);
+            } else {
+                $('#inAudioStatBytesReceived').text(0);
+                $('#inAudioStatPacketsReceived').text(0);
+            }
         }
     });
 }
@@ -231,7 +253,7 @@ function onStarted(publishStream, previewStream) {
     }).prop('disabled', $('#sendCanvasStream').is(':checked'));
     $("#switchMicBtn").click(function (){
         publishStream.switchMic();
-    })
+    }).prop('disabled', !($('#sendAudio').is(':checked')));
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
     publishStream.setMicrophoneGain(currentGainValue);
@@ -258,6 +280,7 @@ function onStopped() {
         }
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').prop('disabled',true);
+    $("#switchMicBtn").text("Switch").off('click').prop('disabled',true);
     unmuteInputs();
     $("#publishResolution").text("");
     $("#playResolution").text("");

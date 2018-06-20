@@ -13,16 +13,23 @@ $(document).ready(function () {
 function loadStats() {
     if (currentCall) {
         currentCall.getStats(function (stats) {
-            if (stats) {
-                if (stats.outboundStream && stats.outboundStream.videoStats) {
+            if (stats && stats.outboundStream) {
+                if (stats.outboundStream.videoStats) {
                     $('#videoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
                     $('#videoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
                     $('#videoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
+                } else {
+                    $('#videoStatBytesSent').text(0);
+                    $('#videoStatPacketsSent').text(0);
+                    $('#videoStatFramesEncoded').text(0);
                 }
 
-                if (stats.outboundStream && stats.outboundStream.audioStats) {
+                if (stats.outboundStream.audioStats) {
                     $('#audioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
                     $('#audioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+                } else {
+                    $('#audioStatBytesSent').text(0);
+                    $('#audioStatPacketsSent').text(0);
                 }
             }
         });
@@ -63,14 +70,17 @@ function init_page(){
         return;
     }
 
-  
+    if(!Browser.isChrome()) {
+        $('#speakerForm').remove();
+    }
+
     Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.ALL).then(function (list) {
         for (var type in list) {
             if (list.hasOwnProperty(type)) {
                 list[type].forEach(function(device) {
                     if (device.type == "mic") {
                         var list = document.getElementById("micList");
-                        if ($("#micList option[value='" + device.id + "'").length == 0) {
+                        if ($("#micList option[value='" + device.id + "']").length == 0) {
                             var option = document.createElement("option");
                             option.text = device.label || device.id;
                             option.value = device.id;
@@ -78,7 +88,7 @@ function init_page(){
                         }
                     } else if (device.type == "speaker") {
                         var list = document.getElementById("speakerList");
-                        if ($("#speakerList option[value='" + device.id + "'").length == 0) {
+                        if (list && $("#speakerList option[value='" + device.id + "']").length == 0) {
                             var option = document.createElement("option");
                             option.text = device.label || device.id;
                             option.value = device.id;
@@ -86,7 +96,7 @@ function init_page(){
                         }
                     } else if (device.type == "camera") {
                         var list = document.getElementById("cameraList");
-                        if ($("#cameraList option[value='" + device.id + "'").length == 0) {
+                        if ($("#cameraList option[value='" + device.id + "']").length == 0) {
                             var option = document.createElement("option");
                             option.text = device.label || device.id;
                             option.value = device.id;
@@ -97,8 +107,14 @@ function init_page(){
             }
         
         }
+        $( "#speakerList" ).change(function() {
+            if (currentCall) {
+                currentCall.setAudioOutputId($(this).val());
+            }
+        });
     }).catch(function (error) {
-        $("#notifyFlash").text("Failed to get media devices");
+
+        $("#notifyFlash").text("Failed to get media devices "+error);
     });
 
 	//local and remote displays
@@ -125,17 +141,35 @@ function init_page(){
         $(this).prop('disabled',true);
     });
 
+    $("#cameraList").change(function() {
+        if (currentCall) {
+            currentCall.switchCam($(this).val());
+        }
+    });
+    $("#micList").change(function() {
+        if (currentCall) {
+            currentCall.switchMic($(this).val());
+        }
+    });
   
     $("#switchCamBtn").click(function() {
        if (currentCall) {
-           var id = $('#cameraList').find(":selected").val();
-           currentCall.switchCam(id);
+           currentCall.switchCam().then(function(id) {
+               $('#cameraList option:selected').prop('selected', false);
+               $("#cameraList option[value='"+ id +"']").prop('selected', true);
+           }).catch(function(e) {
+               console.log("Error " + e);
+           });
        }
     }).prop('disabled', true);
     $("#switchMicBtn").click(function() {
         if (currentCall) {
-            var id = $('#micList').find(":selected").val();
-            currentCall.switchMic(id);
+            currentCall.switchMic().then(function(id) {
+                $('#micList option:selected').prop('selected', false);
+                $("#micList option[value='"+ id +"']").prop('selected', true);
+            }).catch(function(e) {
+                console.log("Error " + e);
+            });
         }
     }).prop('disabled', true);
     $("#switchSpkBtn").click(function() {
@@ -441,9 +475,9 @@ function unmuteVideo() {
 
 function getConstraints() {
     var constraints = {
-        audio: {deviceId: $('#micList').find(":selected").val()},
+        audio: {deviceId: {exact: $('#micList').find(":selected").val()}},
         video: {
-            deviceId: $('#cameraList').find(":selected").val(),
+            deviceId: {exact: $('#cameraList').find(":selected").val()},
             width: parseInt($('#sendWidth').val()),
             height: parseInt($('#sendHeight').val())
         }

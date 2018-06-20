@@ -40,12 +40,12 @@ var createConnection = function (options) {
         var mics = [];
         var switchMicCount = 0;
         var customStream = options.customStream;
+        var currentAudioTrack;
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
             localVideo.id = id + "-local";
             connection.addStream(localVideo.srcObject);
-
             remoteVideo = getCacheInstance(remoteDisplay);
             if (!remoteVideo) {
                 remoteVideo = document.createElement('video');
@@ -98,6 +98,7 @@ var createConnection = function (options) {
                 });
             }
             var audioTrack = localVideo.srcObject.getAudioTracks()[0];
+            currentAudioTrack = audioTrack;
             if (audioTrack) {
                 listDevices(false).then(function (devices) {
                     devices.audio.forEach(function (device) {
@@ -149,6 +150,11 @@ var createConnection = function (options) {
             }
             if (connection.signalingState !== "closed") {
                 connection.close();
+            }
+
+            //close audio track to prevent "failed to allocate audiosource"
+            if(currentAudioTrack) {
+                currentAudioTrack.stop();
             }
             delete connections[id];
         };
@@ -283,13 +289,13 @@ var createConnection = function (options) {
         };
 
         var muteAudio = function () {
-            if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
-                localVideo.srcObject.getAudioTracks()[0].enabled = false;
+            if (currentAudioTrack) {
+                currentAudioTrack.enabled = false;
             }
         };
         var unmuteAudio = function () {
-            if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
-                localVideo.srcObject.getAudioTracks()[0].enabled = true;
+            if (currentAudioTrack) {
+                currentAudioTrack.enabled = true;
             }
         };
 
@@ -317,28 +323,35 @@ var createConnection = function (options) {
         };
         var getStats = function (callbackFn) {
             var browser = adapter.browserDetails.browser;
-            if (connection && (browser == 'chrome' || browser == 'firefox')) {
+            if (connection && (browser == 'chrome' || browser == 'firefox' || browser == 'safari')) {
                 var result = {outboundStream:{}, inboundStream:{}, otherStats:[]};
                 result.type = browser;
                 connection.getStats(null).then(function (stats) {
-                    stats.forEach(function (stat) {
-                        if(stat.type == 'outbound-rtp') {
-                            if(stat.mediaType == 'audio') {
-                                result.outboundStream.audioStats = stat;
+                    if (stats) {
+                        stats.forEach(function (stat) {
+                            if (stat.type == 'outbound-rtp' && !stat.isRemote) {
+                                if (stat.mediaType == 'audio') {
+                                    result.outboundStream.audioStats = stat;
+                                } else if (stat.mediaType == 'video') {
+                                    result.outboundStream.videoStats = stat;
+                                } else {
+                                    result.otherStats.push(stat);
+                                }
+                            } else if (stat.type == 'inbound-rtp' && !stat.isRemote) {
+                                //safari does not have a mediaType variable for incoming statistics
+                                if (stat.mediaType == 'audio' || (browser == 'safari' && stat.id.indexOf('Audio') != -1)) {
+                                    result.inboundStream.audioStats = stat;
+                                } else if (stat.mediaType == 'video' || (browser == 'safari' && stat.id.indexOf('Video') != -1)) {
+                                    result.inboundStream.videoStats = stat;
+                                } else {
+                                    result.otherStats.push(stat);
+                                }
                             } else {
-                                result.outboundStream.videoStats = stat;
+                                result.otherStats.push(stat);
                             }
-                        } else if(stat.type == 'inbound-rtp') {
-                            if(stat.mediaType == 'audio') {
-                                result.inboundStream.audioStats = stat;
-                            } else {
-                                result.inboundStream.videoStats = stat;
-                            }
-                        } else {
-                            result.otherStats.push(stat);
-                        }
-                    });
-                    callbackFn(result);
+                        });
+                        callbackFn(result);
+                    }
                 });
             }
         };
@@ -382,8 +395,15 @@ var createConnection = function (options) {
                         sender.track.stop();
                         var cam = (typeof deviceId !== "undefined") ? deviceId : videoCams[switchCamCount];
                         navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: cam}}}).then(function (newStream) {
-                            sender.replaceTrack(newStream.getVideoTracks()[0]);
+                            var newVideoTrack = newStream.getVideoTracks()[0];
+                            newVideoTrack.enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
+                            var audioTrack = localVideo.srcObject.getAudioTracks()[0];
+                            sender.replaceTrack(newVideoTrack);
                             localVideo.srcObject = newStream;
+                            // On Safari mobile _newStream_ doesn't contain audio track, so we need to add track from previous stream
+                            if (localVideo.srcObject.getAudioTracks().length == 0) {
+                                localVideo.srcObject.addTrack(audioTrack);
+                            }
                             logger.info("Switch camera to " + cam);
                             resolve(cam);
                         }).catch(function (reason) {
@@ -392,7 +412,7 @@ var createConnection = function (options) {
                         });
                     });
                 } else {
-                    reject(null);
+                    reject(constants.ERROR_INFO.CAN_NOT_SWITCH_CAM);
                 }
             });
 
@@ -406,31 +426,18 @@ var createConnection = function (options) {
                         switchMicCount = (switchMicCount + 1) % mics.length;
                         sender.track.stop();
                         var constraints = {};
-                        if (localVideo.srcObject.getVideoTracks().length > 0) {
-                            constraints.video = {};
-                            var track = localVideo.srcObject.getVideoTracks()[0];
-                            var trackConstraints = track.getConstraints();
-                            if (trackConstraints.hasOwnProperty('advanced')) {
-                                trackConstraints.advanced.forEach(function (k) {
-                                    for (var i in k) {
-                                        if (k.hasOwnProperty(i)) {
-                                            constraints.video[i] = k[i];
-                                        }
-                                    }
-                                })
-                            } else {
-                                for (var i in trackConstraints) {
-                                    if (trackConstraints.hasOwnProperty(i)) {
-                                        constraints.video[i] = trackConstraints[i];
-                                    }
-                                }
-                            }
-                        }
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
                         constraints.audio = {deviceId: {exact: mic}};
                         navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
-                            sender.replaceTrack(newStream.getAudioTracks()[0]);
-                            localVideo.srcObject = newStream;
+                            if(microphoneGain) {
+                                var currentGain = microphoneGain.gain.value;
+                                microphoneGain = createGainNode(newStream);
+                                microphoneGain.gain.value = currentGain;
+                            }
+                            var newAudioTrack = newStream.getAudioTracks()[0];
+                            newAudioTrack.enabled = currentAudioTrack.enabled;
+                            currentAudioTrack = newAudioTrack;
+                            sender.replaceTrack(currentAudioTrack);
                             logger.info("Switch mic to " + mic);
                             resolve(mic);
                         }).catch(function (reason) {
@@ -439,7 +446,7 @@ var createConnection = function (options) {
                         });
                     });
                 } else {
-                    reject(null);
+                    reject(constants.ERROR_INFO.CAN_NOT_SWITCH_MIC);
                 }
             });
         };

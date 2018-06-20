@@ -1240,10 +1240,10 @@ var createSession = function (options) {
          *
          * @memberOf Call
          * @inner
-         * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.ESTABLISHED}
+         * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.ESTABLISHED} and not {@link Flashphoner.constants.CALL_STATUS.HOLD}
          */
         var switchCam = function(deviceId) {
-            if(status_ !== CALL_STATUS.ESTABLISHED && !constraints.video){
+            if(status_ !== CALL_STATUS.ESTABLISHED && !constraints.video && status_ !== CALL_STATUS.HOLD){
                 throw new Error('Invalid call state');
             }
             return mediaConnection.switchCam(deviceId);
@@ -1255,10 +1255,10 @@ var createSession = function (options) {
          *
          * @memberOf Call
          * @inner
-         * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.ESTABLISHED}
+         * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.ESTABLISHED} and not {@link Flashphoner.constants.CALL_STATUS.HOLD}
          */
         var switchMic = function(deviceId) {
-            if(status_ !== CALL_STATUS.ESTABLISHED){
+            if(status_ !== CALL_STATUS.ESTABLISHED && status_ !== CALL_STATUS.HOLD){
                 throw new Error('Invalid call state');
             }
            return mediaConnection.switchMic(deviceId);
