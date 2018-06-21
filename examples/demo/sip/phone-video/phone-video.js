@@ -256,7 +256,8 @@ function call() {
         remoteVideoDisplay: remoteVideo,
         localVideoDisplay: localVideo,
         constraints: constraints,
-        sdpHook: rewriteSdp
+        sdpHook: rewriteSdp,
+        stripCodecs:"SILK"
 	}).on(CALL_STATUS.RING, function(){
 		setStatus("#callStatus", CALL_STATUS.RING);
     }).on(CALL_STATUS.ESTABLISHED, function(){
@@ -340,7 +341,8 @@ function onIncomingCall(inCall) {
                 localVideoDisplay: localVideo,
                 remoteVideoDisplay: remoteVideo,
                 constraints: constraints,
-                sdpHook: rewriteSdp
+                sdpHook: rewriteSdp,
+                stripCodecs:"SILK"
             });
 		showAnswered();
     }).prop('disabled', false);
