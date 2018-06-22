@@ -71,7 +71,7 @@ var createConnection = function (options) {
                     display.appendChild(remoteVideo);
                 }
                 remoteVideo.id = id;
-                if (options.audioOutputId) {
+                if (options.audioOutputId && typeof remoteVideo.setSinkId !== "undefined") {
                     remoteVideo.setSinkId(options.audioOutputId);
                 }
                 /**
@@ -836,10 +836,18 @@ var listDevices = function (labels, kind) {
                 id: device.deviceId,
                 label: device.label
             };
+            var micCount = 0;
+            var camCount = 0;
             if (device.kind.indexOf("audio" + kind) === 0 && device.deviceId != "communications") {
                 ret.type = (device.kind == "audioinput") ? "mic" : "speaker";
+                if (ret.type == "mic" && ret.label == "") {
+                    ret.label = 'microphone' + ++micCount;
+                }
                 list.audio.push(ret);
             } else if (device.kind.indexOf("video" + kind) === 0) {
+                if (ret.label == "") {
+                    ret.label = 'camera' + ++camCount;
+                }
                 ret.type = "camera";
                 list.video.push(ret);
             } else {
