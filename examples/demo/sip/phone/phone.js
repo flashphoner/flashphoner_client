@@ -142,7 +142,8 @@ function call() {
 		remoteVideoDisplay: remoteDisplay,
 		constraints: constraints,
 		receiveAudio: true,
-        receiveVideo: false
+        receiveVideo: false,
+        stripCodecs:"SILK"
 	}).on(CALL_STATUS.RING, function(){
 		setStatus("#callStatus", CALL_STATUS.RING);
     }).on(CALL_STATUS.ESTABLISHED, function(){
@@ -236,7 +237,8 @@ function onIncomingCall(inCall) {
             localVideoDisplay: localDisplay,
             remoteVideoDisplay: remoteDisplay,
             receiveVideo: false,
-            constraints: constraints
+            constraints: constraints,
+            stripCodecs:"SILK"
         });
 		showAnswered();
     }).prop('disabled', false);
