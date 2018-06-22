@@ -70,7 +70,7 @@ function init_page(){
         return;
     }
 
-    if(!Browser.isChrome()) {
+    if(!Browser.isChrome() && !Browser.isAndroid()) {
         $('#speakerForm').remove();
     }
 
