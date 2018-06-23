@@ -799,6 +799,7 @@ var createSession = function (options) {
                     flashPort: flashPort,
                     bidirectional: true,
                     login: login,
+                    constraints: constraints,
                     connectionConfig: mediaOptions,
                     audioOutputId: audioOutputId
                 }).then(function (newConnection) {
@@ -929,6 +930,7 @@ var createSession = function (options) {
                     flashPort: flashPort,
                     bidirectional: true,
                     login: cConfig.sipLogin,
+                    constraints: constraints,
                     connectionConfig: mediaOptions,
                     audioOutputId: audioOutputId
                 }).then(function (newConnection) {
@@ -1593,6 +1595,7 @@ var createSession = function (options) {
                     mainUrl: urlServer,
                     flashProto: flashProto,
                     flashPort: flashPort,
+                    constraints: constraints,
                     connectionConfig: mediaOptions,
                     connectionConstraints: mediaConnectionConstraints,
                     customStream: constraints && constraints.customStream ? constraints.customStream : false

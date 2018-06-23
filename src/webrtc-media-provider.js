@@ -40,6 +40,7 @@ var createConnection = function (options) {
         var mics = [];
         var switchMicCount = 0;
         var customStream = options.customStream;
+        var constraints = options.constraints ? options.constraints : {};
         var currentAudioTrack;
 
         if (bidirectional) {
@@ -53,7 +54,7 @@ var createConnection = function (options) {
             }
             remoteVideo.id = id + "-remote";
 
-            if (options.audioOutputId) {
+            if (options.audioOutputId  && typeof remoteVideo.setSinkId !== "undefined") {
                 remoteVideo.setSinkId(options.audioOutputId);
             }
             /**
@@ -394,7 +395,9 @@ var createConnection = function (options) {
                         switchCamCount = (switchCamCount + 1) % videoCams.length;
                         sender.track.stop();
                         var cam = (typeof deviceId !== "undefined") ? deviceId : videoCams[switchCamCount];
-                        navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: cam}}}).then(function (newStream) {
+                        //use the settings that were set during connection initiation
+                        constraints.video.deviceId = {exact: cam};
+                        navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
                             var newVideoTrack = newStream.getVideoTracks()[0];
                             newVideoTrack.enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
                             var audioTrack = localVideo.srcObject.getAudioTracks()[0];
@@ -428,9 +431,9 @@ var createConnection = function (options) {
                         if(microphoneGain) {
                             sender.track.stopOriginalTrack();
                         }
-                        var constraints = {};
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
-                        constraints.audio = {deviceId: {exact: mic}};
+                        //use the settings that were set during connection initiation
+                        constraints.audio.deviceId = {exact: mic};
                         navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
                             if(microphoneGain) {
                                 var currentGain = microphoneGain.gain.value;
