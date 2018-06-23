@@ -138,28 +138,24 @@ var createConnection = function (options) {
                 remoteVideo.id = remoteVideo.id + REMOTE_CACHED_VIDEO;
                 remoteVideo = null;
             }
-            if (localVideo && !getCacheInstance((localDisplay || display)) && cacheCamera) {
-                localVideo.id = localVideo.id + LOCAL_CACHED_VIDEO;
-                unmuteAudio();
-                unmuteVideo();
-                localVideo = null;
-            } else if (localVideo) {
-                removeVideoElement(localVideo);
-                localVideo.id = localVideo.id + LOCAL_CACHED_VIDEO;
-                localVideo = null;
-            }
-            if (connection.signalingState !== "closed") {
-                connection.close();
-            }
-
-            //close audio track to prevent "failed to allocate audiosource"
-            if(currentAudioTrack) {
-                currentAudioTrack.stop();
-                if(microphoneGain) {
-                    currentAudioTrack.stopOriginalTrack();
+            if(localVideo) {
+                var firstAudioTrack = localVideo.srcObject.getAudioTracks()[0];
+                localVideo.srcObject.removeTrack(firstAudioTrack);
+                localVideo.srcObject.addTrack(currentAudioTrack);
+                if (!getCacheInstance((localDisplay || display)) && cacheCamera) {
+                    localVideo.id = localVideo.id + LOCAL_CACHED_VIDEO;
+                    unmuteAudio();
+                    unmuteVideo();
+                    localVideo = null;
+                } else {
+                    removeVideoElement(localVideo);
+                    localVideo.id = localVideo.id + LOCAL_CACHED_VIDEO;
+                    localVideo = null;
+                }
+                if (connection.signalingState !== "closed") {
+                    connection.close();
                 }
             }
-
             delete connections[id];
         };
         var createOffer = function (options) {
@@ -789,6 +785,9 @@ function removeVideoElement(video) {
         var tracks = video.srcObject.getTracks();
         for (var i = 0; i < tracks.length; i++) {
             tracks[i].stop();
+            if(video.id.indexOf(LOCAL_CACHED_VIDEO) != -1 && tracks[i].kind == 'audio' && microphoneGain) {
+                tracks[i].stopOriginalTrack();
+            }
         }
         video.srcObject = null;
     }
