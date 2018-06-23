@@ -396,8 +396,10 @@ var createConnection = function (options) {
                         sender.track.stop();
                         var cam = (typeof deviceId !== "undefined") ? deviceId : videoCams[switchCamCount];
                         //use the settings that were set during connection initiation
-                        constraints.video.deviceId = {exact: cam};
-                        navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
+                        var clonedConstraints = Object.assign({}, constraints);
+                        clonedConstraints.video.deviceId = {exact: cam};
+                        clonedConstraints.audio = {};
+                        navigator.mediaDevices.getUserMedia(clonedConstraints).then(function (newStream) {
                             var newVideoTrack = newStream.getVideoTracks()[0];
                             newVideoTrack.enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
                             var audioTrack = localVideo.srcObject.getAudioTracks()[0];
@@ -433,8 +435,10 @@ var createConnection = function (options) {
                         }
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
                         //use the settings that were set during connection initiation
-                        constraints.audio.deviceId = {exact: mic};
-                        navigator.mediaDevices.getUserMedia(constraints).then(function (newStream) {
+                        var clonedConstraints = Object.assign({}, constraints);
+                        clonedConstraints.audio.deviceId = {exact: mic};
+                        clonedConstraints.video = {};
+                        navigator.mediaDevices.getUserMedia(clonedConstraints).then(function (newStream) {
                             if(microphoneGain) {
                                 var currentGain = microphoneGain.gain.value;
                                 microphoneGain = createGainNode(newStream);
