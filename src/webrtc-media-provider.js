@@ -41,7 +41,6 @@ var createConnection = function (options) {
         var switchMicCount = 0;
         var customStream = options.customStream;
         var constraints = options.constraints ? options.constraints : {};
-        var currentAudioTrack;
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
@@ -99,7 +98,6 @@ var createConnection = function (options) {
                 });
             }
             var audioTrack = localVideo.srcObject.getAudioTracks()[0];
-            currentAudioTrack = audioTrack;
             if (audioTrack) {
                 listDevices(false).then(function (devices) {
                     devices.audio.forEach(function (device) {
@@ -139,23 +137,18 @@ var createConnection = function (options) {
                 remoteVideo.id = remoteVideo.id + REMOTE_CACHED_VIDEO;
                 remoteVideo = null;
             }
-            if(localVideo) {
-                var firstAudioTrack = localVideo.srcObject.getAudioTracks()[0];
-                localVideo.srcObject.removeTrack(firstAudioTrack);
-                localVideo.srcObject.addTrack(currentAudioTrack);
-                if (!getCacheInstance((localDisplay || display)) && cacheCamera) {
-                    localVideo.id = localVideo.id + LOCAL_CACHED_VIDEO;
-                    unmuteAudio();
-                    unmuteVideo();
-                    localVideo = null;
-                } else {
-                    removeVideoElement(localVideo);
-                    localVideo.id = localVideo.id + LOCAL_CACHED_VIDEO;
-                    localVideo = null;
-                }
-                if (connection.signalingState !== "closed") {
-                    connection.close();
-                }
+            if (localVideo && !getCacheInstance((localDisplay || display)) && cacheCamera) {
+                localVideo.id = localVideo.id + LOCAL_CACHED_VIDEO;
+                unmuteAudio();
+                unmuteVideo();
+                localVideo = null;
+            } else if (localVideo) {
+                removeVideoElement(localVideo);
+                localVideo.id = localVideo.id + LOCAL_CACHED_VIDEO;
+                localVideo = null;
+            }
+            if (connection.signalingState !== "closed") {
+                connection.close();
             }
             delete connections[id];
         };
@@ -290,13 +283,13 @@ var createConnection = function (options) {
         };
 
         var muteAudio = function () {
-            if (currentAudioTrack) {
-                currentAudioTrack.enabled = false;
+            if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
+                localVideo.srcObject.getAudioTracks()[0].enabled = false;
             }
         };
         var unmuteAudio = function () {
-            if (currentAudioTrack) {
-                currentAudioTrack.enabled = true;
+            if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
+                localVideo.srcObject.getAudioTracks()[0].enabled = true;
             }
         };
 
@@ -398,7 +391,7 @@ var createConnection = function (options) {
                         //use the settings that were set during connection initiation
                         var clonedConstraints = Object.assign({}, constraints);
                         clonedConstraints.video.deviceId = {exact: cam};
-                        clonedConstraints.audio = {};
+                        clonedConstraints.audio = false;
                         navigator.mediaDevices.getUserMedia(clonedConstraints).then(function (newStream) {
                             var newVideoTrack = newStream.getVideoTracks()[0];
                             newVideoTrack.enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
@@ -406,7 +399,7 @@ var createConnection = function (options) {
                             sender.replaceTrack(newVideoTrack);
                             localVideo.srcObject = newStream;
                             // On Safari mobile _newStream_ doesn't contain audio track, so we need to add track from previous stream
-                            if (localVideo.srcObject.getAudioTracks().length == 0) {
+                            if (localVideo.srcObject.getAudioTracks().length == 0 && audioTrack) {
                                 localVideo.srcObject.addTrack(audioTrack);
                             }
                             logger.info("Switch camera to " + cam);
@@ -437,7 +430,7 @@ var createConnection = function (options) {
                         //use the settings that were set during connection initiation
                         var clonedConstraints = Object.assign({}, constraints);
                         clonedConstraints.audio.deviceId = {exact: mic};
-                        clonedConstraints.video = {};
+                        clonedConstraints.video = false;
                         navigator.mediaDevices.getUserMedia(clonedConstraints).then(function (newStream) {
                             if(microphoneGain) {
                                 var currentGain = microphoneGain.gain.value;
@@ -445,9 +438,13 @@ var createConnection = function (options) {
                                 microphoneGain.gain.value = currentGain;
                             }
                             var newAudioTrack = newStream.getAudioTracks()[0];
-                            newAudioTrack.enabled = currentAudioTrack.enabled;
-                            currentAudioTrack = newAudioTrack;
-                            sender.replaceTrack(currentAudioTrack);
+                            newAudioTrack.enabled = localVideo.srcObject.getAudioTracks()[0].enabled;
+                            sender.replaceTrack(newAudioTrack);
+                            var videoTrack = localVideo.srcObject.getVideoTracks()[0];
+                            localVideo.srcObject = newStream;
+                            if(videoTrack) {
+                                localVideo.srcObject.addTrack(videoTrack);
+                            }
                             logger.info("Switch mic to " + mic);
                             resolve(mic);
                         }).catch(function (reason) {
