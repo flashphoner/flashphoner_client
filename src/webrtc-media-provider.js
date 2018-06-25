@@ -40,6 +40,7 @@ var createConnection = function (options) {
         var mics = [];
         var switchMicCount = 0;
         var customStream = options.customStream;
+        var currentAudioTrack;
         var constraints = options.constraints ? options.constraints : {};
 
         if (bidirectional) {
@@ -439,6 +440,7 @@ var createConnection = function (options) {
                             }
                             var newAudioTrack = newStream.getAudioTracks()[0];
                             newAudioTrack.enabled = localVideo.srcObject.getAudioTracks()[0].enabled;
+                            currentAudioTrack = newAudioTrack;
                             sender.replaceTrack(newAudioTrack);
                             var videoTrack = localVideo.srcObject.getVideoTracks()[0];
                             localVideo.srcObject = newStream;
