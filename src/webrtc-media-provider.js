@@ -423,7 +423,7 @@ var createConnection = function (options) {
                         if (sender.track.kind === 'video') return;
                         switchMicCount = (switchMicCount + 1) % mics.length;
                         sender.track.stop();
-                        if(microphoneGain) {
+                        if(microphoneGain && typeof sender.track.stopOriginalTrack == 'function') {
                             sender.track.stopOriginalTrack();
                         }
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
@@ -789,7 +789,7 @@ function removeVideoElement(video) {
         var tracks = video.srcObject.getTracks();
         for (var i = 0; i < tracks.length; i++) {
             tracks[i].stop();
-            if(video.id.indexOf(LOCAL_CACHED_VIDEO) != -1 && tracks[i].kind == 'audio' && microphoneGain) {
+            if(video.id.indexOf(LOCAL_CACHED_VIDEO) != -1 && tracks[i].kind == 'audio' && microphoneGain && typeof tracks[i].stopOriginalTrack == 'function') {
                 tracks[i].stopOriginalTrack();
             }
         }
