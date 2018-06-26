@@ -30,6 +30,13 @@ public class Stream
             this.ncStream.bufferTime = 0;
             this.ncStream.addEventListener(AsyncErrorEvent.ASYNC_ERROR,asyncErrorHandler);
             this.ncStream.addEventListener(NetStatusEvent.NET_STATUS,onNetStatus);
+            var client:Object = new Object();
+            client.onMetaData = function (metadataObj:Object):void {
+                for (var metadata:Object in metadataObj) {
+                    Logger.info("Metadata " + metadata + " - " + metadataObj[metadata]);
+                }
+            };
+            this.ncStream.client = client;
         }
 
         public function setup(localMediaControl:LocalMediaControl, remoteMediaControl:RemoteMediaControl,
