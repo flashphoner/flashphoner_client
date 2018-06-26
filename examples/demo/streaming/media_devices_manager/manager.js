@@ -8,6 +8,7 @@ var previewStream;
 var publishStream;
 var currentVolumeValue = 50;
 var currentGainValue = 50;
+var statsIntervalID;
 var intervalID;
 var canvas;
 
@@ -15,6 +16,51 @@ try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
 } catch (e) {
     console.warn("Failed to create audio context");
+}
+
+function loadStats() {
+    publishStream.getStats(function (stats) {
+        if (stats && stats.outboundStream) {
+            if(stats.outboundStream.videoStats) {
+                $('#outVideoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
+                $('#outVideoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
+                $('#outVideoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
+            } else {
+                $('#outVideoStatBytesSent').text(0);
+                $('#outVideoStatPacketsSent').text(0);
+                $('#outVideoStatFramesEncoded').text(0);
+            }
+
+            if(stats.outboundStream.audioStats) {
+                $('#outAudioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
+                $('#outAudioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+            } else {
+                $('#outAudioStatBytesSent').text(0);
+                $('#outAudioStatPacketsSent').text(0);
+            }
+        }
+    });
+    previewStream.getStats(function (stats) {
+        if (stats && stats.inboundStream) {
+            if(stats.inboundStream.videoStats) {
+                $('#inVideoStatBytesReceived').text(stats.inboundStream.videoStats.bytesReceived);
+                $('#inVideoStatPacketsReceived').text(stats.inboundStream.videoStats.packetsReceived);
+                $('#inVideoStatFramesDecoded').text(stats.inboundStream.videoStats.framesDecoded);
+            } else {
+                $('#inVideoStatBytesReceived').text(0);
+                $('#inVideoStatPacketsReceived').text(0);
+                $('#inVideoStatFramesDecoded').text(0);
+            }
+
+            if(stats.inboundStream.audioStats) {
+                $('#inAudioStatBytesReceived').text(stats.inboundStream.audioStats.bytesReceived);
+                $('#inAudioStatPacketsReceived').text(stats.inboundStream.audioStats.packetsReceived);
+            } else {
+                $('#inAudioStatBytesReceived').text(0);
+                $('#inAudioStatPacketsReceived').text(0);
+            }
+        }
+    });
 }
 
 function init_page() {
@@ -66,7 +112,7 @@ function init_page() {
             }
         });
     }).catch(function (error) {
-        $("#notifyFlash").text("Failed to get media devices");
+        $('#audioOutputForm').remove();
     });
 
     Flashphoner.getMediaDevices(null, true).then(function (list) {
@@ -195,14 +241,19 @@ function init_page() {
 }
 
 function onStarted(publishStream, previewStream) {
+    statsIntervalID = setInterval(loadStats, 2000);
     $('input:radio').attr("disabled", true);
     $("#publishBtn").text("Stop").off('click').click(function () {
         $(this).prop('disabled', true);
+        clearInterval(statsIntervalID);
         previewStream.stop();
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').click(function () {
         publishStream.switchCam();
     }).prop('disabled', $('#sendCanvasStream').is(':checked'));
+    $("#switchMicBtn").click(function (){
+        publishStream.switchMic();
+    }).prop('disabled', !($('#sendAudio').is(':checked')));
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
     publishStream.setMicrophoneGain(currentGainValue);
@@ -229,6 +280,7 @@ function onStopped() {
         }
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').prop('disabled',true);
+    $("#switchMicBtn").text("Switch").off('click').prop('disabled',true);
     unmuteInputs();
     $("#publishResolution").text("");
     $("#playResolution").text("");
@@ -451,7 +503,8 @@ function startStreaming(session) {
         previewStream = session.createStream({
             name: streamName,
             display: remoteVideo,
-            constraints: constraints
+            constraints: constraints,
+            sdpHook: rewriteSdp
         }).on(STREAM_STATUS.PLAYING, function (previewStream) {
             document.getElementById(previewStream.id()).addEventListener('resize', function (event) {
                 $("#playResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);
@@ -487,6 +540,17 @@ function startStreaming(session) {
         onStopped();
     });
     publishStream.publish();
+}
+
+function rewriteSdp(sdp) {
+    var sdpStringFind = $("#sdpStringFind").val();
+    var sdpStringReplace = $("#sdpStringReplace").val();
+    if (sdpStringFind != 0 && sdpStringReplace != 0) {
+        var newSDP = sdp.sdpString.toString();
+        newSDP = newSDP.replace(sdpStringFind, sdpStringReplace);
+        return newSDP;
+    }
+    return sdp.sdpString;
 }
 
 //show connection or local stream status

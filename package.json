@@ -9,7 +9,7 @@
     "promise-polyfill": "^6.0.1",
     "swfobject": "^2.2.1",
     "uuid": "^3.1.0",
-    "webrtc-adapter": "^4.2.1"
+    "webrtc-adapter": "^6.2.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",

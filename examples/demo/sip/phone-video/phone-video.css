@@ -27,6 +27,12 @@ legend.scheduler-border {
 .fp-videoBlock {
     left: 0px;
     top: 85px;
+    height: 600px;
+}
+
+/* Statistics block */
+.fp-statsBlock {
+    top: 60px;
 }
 
 /* Remote Video*/
