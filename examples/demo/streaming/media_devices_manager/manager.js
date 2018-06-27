@@ -238,6 +238,9 @@ function init_page() {
             previewStream.setAudioOutputId($(this).val());
         }
     });
+    if (!Browser.isChrome()) {
+        $('#audioOutput').remove();
+    }
 }
 
 function onStarted(publishStream, previewStream) {
