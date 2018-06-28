@@ -151,6 +151,9 @@ var createConnection = function (options) {
             if (connection.signalingState !== "closed") {
                 connection.close();
             }
+            if (microphoneGain) {
+                microphoneGain.release();
+            }
             delete connections[id];
         };
         var createOffer = function (options) {
@@ -692,14 +695,14 @@ var createGainNode = function (stream) {
     var outputStream = destination.stream;
     source.connect(gainNode);
     gainNode.connect(destination);
-
-    gainNode.sourceAudioTrack = stream.getAudioTracks()[0];
+    var sourceAudioTrack = stream.getAudioTracks()[0];
+    gainNode.sourceAudioTrack = sourceAudioTrack;
     gainNode.release = function () {
         this.sourceAudioTrack.stop();
         this.disconnect();
     };
     stream.addTrack(outputStream.getAudioTracks()[0]);
-    stream.removeTrack(stream.getAudioTracks()[0]);
+    stream.removeTrack(sourceAudioTrack);
     return gainNode;
 };
 
