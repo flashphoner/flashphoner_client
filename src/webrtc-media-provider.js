@@ -45,8 +45,10 @@ var createConnection = function (options) {
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
-            localVideo.id = id + "-local";
-            connection.addStream(localVideo.srcObject);
+            if(localVideo) {
+                localVideo.id = id + "-local";
+                connection.addStream(localVideo.srcObject);
+            }
             remoteVideo = getCacheInstance(remoteDisplay);
             if (!remoteVideo) {
                 remoteVideo = document.createElement('video');
@@ -512,6 +514,10 @@ var getMediaAccess = function (constraints, display) {
         } else {
             constraints = normalizeConstraints(constraints);
             releaseMedia(display);
+        }
+        if(!constraints.video && !constraints.audio && !constraints.customStream) {
+            resolve(display);
+            return;
         }
         //check if this is screen sharing
         if (constraints.video && constraints.video.type && constraints.video.type == "screen") {
