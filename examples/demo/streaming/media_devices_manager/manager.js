@@ -487,7 +487,8 @@ function startStreaming(session) {
         display: localVideo,
         cacheLocalResources: true,
         constraints: constraints,
-        mediaConnectionConstraints: mediaConnectionConstraints
+        mediaConnectionConstraints: mediaConnectionConstraints,
+        sdpHook: rewriteSdp
     }).on(STREAM_STATUS.PUBLISHING, function (publishStream) {
         $("#testBtn").prop('disabled', true);
         var video = document.getElementById(publishStream.id());
@@ -528,8 +529,7 @@ function startStreaming(session) {
         previewStream = session.createStream({
             name: streamName,
             display: remoteVideo,
-            constraints: constraints,
-            sdpHook: rewriteSdp
+            constraints: constraints
         }).on(STREAM_STATUS.PLAYING, function (previewStream) {
             document.getElementById(previewStream.id()).addEventListener('resize', function (event) {
                 $("#playResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);
@@ -568,11 +568,11 @@ function startStreaming(session) {
 }
 
 function rewriteSdp(sdp) {
-    var sdpStringFind = $("#sdpStringFind").val();
-    var sdpStringReplace = $("#sdpStringReplace").val();
+    var sdpStringFind = $("#sdpStringFind").val().replace('\\r\\n','\r\n');
+    var sdpStringReplace = $("#sdpStringReplace").val().replace('\\r\\n','\r\n');
     if (sdpStringFind != 0 && sdpStringReplace != 0) {
         var newSDP = sdp.sdpString.toString();
-        newSDP = newSDP.replace(sdpStringFind, sdpStringReplace);
+        newSDP = newSDP.replace(new RegExp(sdpStringFind,"g"), sdpStringReplace);
         return newSDP;
     }
     return sdp.sdpString;
