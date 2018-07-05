@@ -238,6 +238,18 @@ function init_page() {
             previewStream.setAudioOutputId($(this).val());
         }
     });
+
+    $("#videoInput").change(function() {
+        if (publishStream) {
+            publishStream.switchCam($(this).val());
+        }
+    });
+
+    $("#audioInput").change(function() {
+        if (publishStream) {
+            publishStream.switchMic($(this).val());
+        }
+    });
 }
 
 function onStarted(publishStream, previewStream) {
@@ -249,10 +261,20 @@ function onStarted(publishStream, previewStream) {
         previewStream.stop();
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').click(function () {
-        publishStream.switchCam();
+        publishStream.switchCam().then(function(id) {
+               $('#videoInput option:selected').prop('selected', false);
+               $("#videoInput option[value='"+ id +"']").prop('selected', true);
+           }).catch(function(e) {
+               console.log("Error " + e);
+           });
     }).prop('disabled', $('#sendCanvasStream').is(':checked'));
     $("#switchMicBtn").click(function (){
-        publishStream.switchMic();
+        publishStream.switchMic().then(function(id) {
+               $('#audioInput option:selected').prop('selected', false);
+               $("#audioInput option[value='"+ id +"']").prop('selected', true);
+           }).catch(function(e) {
+               console.log("Error " + e);
+           });
     }).prop('disabled', !($('#sendAudio').is(':checked')));
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
@@ -567,7 +589,7 @@ function setStatus(status) {
 }
 
 function muteInputs() {
-    $(":text, select, :checkbox").each(function () {
+    $(":text, :checkbox").each(function () {
         if ($(this).attr('id') !== 'audioOutput') {
             $(this).attr('disabled', 'disabled');
         }
