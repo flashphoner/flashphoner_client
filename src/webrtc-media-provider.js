@@ -45,8 +45,10 @@ var createConnection = function (options) {
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
-            localVideo.id = id + "-local";
-            connection.addStream(localVideo.srcObject);
+            if(localVideo) {
+                localVideo.id = id + "-local";
+                connection.addStream(localVideo.srcObject);
+            }
             remoteVideo = getCacheInstance(remoteDisplay);
             if (!remoteVideo) {
                 remoteVideo = document.createElement('video');
@@ -150,6 +152,9 @@ var createConnection = function (options) {
             }
             if (connection.signalingState !== "closed") {
                 connection.close();
+            }
+            if (microphoneGain) {
+                microphoneGain.release();
             }
             delete connections[id];
         };
@@ -425,7 +430,7 @@ var createConnection = function (options) {
                         switchMicCount = (switchMicCount + 1) % mics.length;
                         sender.track.stop();
                         if(microphoneGain) {
-                            sender.track.stopOriginalTrack();
+                            microphoneGain.release();
                         }
                         var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
                         //use the settings that were set during connection initiation
@@ -509,6 +514,10 @@ var getMediaAccess = function (constraints, display) {
         } else {
             constraints = normalizeConstraints(constraints);
             releaseMedia(display);
+        }
+        if(!constraints.video && !constraints.audio && !constraints.customStream) {
+            resolve(display);
+            return;
         }
         //check if this is screen sharing
         if (constraints.video && constraints.video.type && constraints.video.type == "screen") {
@@ -692,13 +701,14 @@ var createGainNode = function (stream) {
     var outputStream = destination.stream;
     source.connect(gainNode);
     gainNode.connect(destination);
-    var newTrack = outputStream.getAudioTracks()[0];
-    var originalTrack = stream.getAudioTracks()[0];
-    newTrack.stopOriginalTrack = function () {
-        originalTrack.stop();
+    var sourceAudioTrack = stream.getAudioTracks()[0];
+    gainNode.sourceAudioTrack = sourceAudioTrack;
+    gainNode.release = function () {
+        this.sourceAudioTrack.stop();
+        this.disconnect();
     };
-    stream.addTrack(newTrack);
-    stream.removeTrack(originalTrack);
+    stream.addTrack(outputStream.getAudioTracks()[0]);
+    stream.removeTrack(sourceAudioTrack);
     return gainNode;
 };
 
@@ -792,7 +802,7 @@ function removeVideoElement(video) {
         for (var i = 0; i < tracks.length; i++) {
             tracks[i].stop();
             if(video.id.indexOf(LOCAL_CACHED_VIDEO) != -1 && tracks[i].kind == 'audio' && microphoneGain) {
-                tracks[i].stopOriginalTrack();
+                microphoneGain.release();
             }
         }
         video.srcObject = null;
