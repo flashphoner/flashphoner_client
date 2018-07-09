@@ -238,6 +238,21 @@ function init_page() {
             previewStream.setAudioOutputId($(this).val());
         }
     });
+    if (!Browser.isChrome()) {
+        $('#audioOutput').remove();
+    }
+
+    $("#videoInput").change(function() {
+        if (publishStream) {
+            publishStream.switchCam($(this).val());
+        }
+    });
+
+    $("#audioInput").change(function() {
+        if (publishStream) {
+            publishStream.switchMic($(this).val());
+        }
+    });
 }
 
 function onStarted(publishStream, previewStream) {
@@ -249,10 +264,20 @@ function onStarted(publishStream, previewStream) {
         previewStream.stop();
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').click(function () {
-        publishStream.switchCam();
+        publishStream.switchCam().then(function(id) {
+               $('#videoInput option:selected').prop('selected', false);
+               $("#videoInput option[value='"+ id +"']").prop('selected', true);
+           }).catch(function(e) {
+               console.log("Error " + e);
+           });
     }).prop('disabled', $('#sendCanvasStream').is(':checked'));
     $("#switchMicBtn").click(function (){
-        publishStream.switchMic();
+        publishStream.switchMic().then(function(id) {
+               $('#audioInput option:selected').prop('selected', false);
+               $("#audioInput option[value='"+ id +"']").prop('selected', true);
+           }).catch(function(e) {
+               console.log("Error " + e);
+           });
     }).prop('disabled', !($('#sendAudio').is(':checked')));
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
@@ -462,7 +487,8 @@ function startStreaming(session) {
         display: localVideo,
         cacheLocalResources: true,
         constraints: constraints,
-        mediaConnectionConstraints: mediaConnectionConstraints
+        mediaConnectionConstraints: mediaConnectionConstraints,
+        sdpHook: rewriteSdp
     }).on(STREAM_STATUS.PUBLISHING, function (publishStream) {
         $("#testBtn").prop('disabled', true);
         var video = document.getElementById(publishStream.id());
@@ -503,8 +529,7 @@ function startStreaming(session) {
         previewStream = session.createStream({
             name: streamName,
             display: remoteVideo,
-            constraints: constraints,
-            sdpHook: rewriteSdp
+            constraints: constraints
         }).on(STREAM_STATUS.PLAYING, function (previewStream) {
             document.getElementById(previewStream.id()).addEventListener('resize', function (event) {
                 $("#playResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);
@@ -543,11 +568,11 @@ function startStreaming(session) {
 }
 
 function rewriteSdp(sdp) {
-    var sdpStringFind = $("#sdpStringFind").val();
-    var sdpStringReplace = $("#sdpStringReplace").val();
+    var sdpStringFind = $("#sdpStringFind").val().replace('\\r\\n','\r\n');
+    var sdpStringReplace = $("#sdpStringReplace").val().replace('\\r\\n','\r\n');
     if (sdpStringFind != 0 && sdpStringReplace != 0) {
         var newSDP = sdp.sdpString.toString();
-        newSDP = newSDP.replace(sdpStringFind, sdpStringReplace);
+        newSDP = newSDP.replace(new RegExp(sdpStringFind,"g"), sdpStringReplace);
         return newSDP;
     }
     return sdp.sdpString;
@@ -567,7 +592,7 @@ function setStatus(status) {
 }
 
 function muteInputs() {
-    $(":text, select, :checkbox").each(function () {
+    $(":text, :checkbox").each(function () {
         if ($(this).attr('id') !== 'audioOutput') {
             $(this).attr('disabled', 'disabled');
         }

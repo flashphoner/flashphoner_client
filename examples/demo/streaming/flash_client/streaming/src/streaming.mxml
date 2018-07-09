@@ -55,8 +55,8 @@
 				unpublishBtn.visible = false;
 				disconnectBtn.visible = false;
 				var streamName:String = generateRandomString(4);
-				publishStreamName.text = "stream-"+streamName;
-				playStreamName.text = "stream-"+streamName;
+				publishStreamName.text = "Stream-"+streamName;
+				playStreamName.text = "Stream-"+streamName;
 				
 			}
 			
@@ -245,14 +245,6 @@
 				subscribeStream.audioReliable=false;
 				subscribeStream.useHardwareDecoder=true;				
 				subscribeStream.addEventListener(NetStatusEvent.NET_STATUS, handleSubscribeStreamStatus);
-				var client:Object = new Object();
-                client.onMetaData = function (metadataObj:Object):void {
-                    for (var metadata:Object in metadataObj) {
-                        Logger.info("Metadata " + metadata + " - " + metadataObj[metadata]);
-                    }
-                };
-                subscribeStream.client = client;
-
 				if (playStreamName.text.indexOf("rtsp://") != -1) {
 					subscribeStream.bufferTime=0.5;
 				} else {
