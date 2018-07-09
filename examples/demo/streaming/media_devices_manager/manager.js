@@ -1,17 +1,66 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
 var localVideo;
 var remoteVideo;
 var constraints;
 var previewStream;
 var publishStream;
 var currentVolumeValue = 50;
+var currentGainValue = 50;
+var statsIntervalID;
 var intervalID;
+var canvas;
 
 try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
 } catch (e) {
     console.warn("Failed to create audio context");
+}
+
+function loadStats() {
+    publishStream.getStats(function (stats) {
+        if (stats && stats.outboundStream) {
+            if(stats.outboundStream.videoStats) {
+                $('#outVideoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
+                $('#outVideoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
+                $('#outVideoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
+            } else {
+                $('#outVideoStatBytesSent').text(0);
+                $('#outVideoStatPacketsSent').text(0);
+                $('#outVideoStatFramesEncoded').text(0);
+            }
+
+            if(stats.outboundStream.audioStats) {
+                $('#outAudioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
+                $('#outAudioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+            } else {
+                $('#outAudioStatBytesSent').text(0);
+                $('#outAudioStatPacketsSent').text(0);
+            }
+        }
+    });
+    previewStream.getStats(function (stats) {
+        if (stats && stats.inboundStream) {
+            if(stats.inboundStream.videoStats) {
+                $('#inVideoStatBytesReceived').text(stats.inboundStream.videoStats.bytesReceived);
+                $('#inVideoStatPacketsReceived').text(stats.inboundStream.videoStats.packetsReceived);
+                $('#inVideoStatFramesDecoded').text(stats.inboundStream.videoStats.framesDecoded);
+            } else {
+                $('#inVideoStatBytesReceived').text(0);
+                $('#inVideoStatPacketsReceived').text(0);
+                $('#inVideoStatFramesDecoded').text(0);
+            }
+
+            if(stats.inboundStream.audioStats) {
+                $('#inAudioStatBytesReceived').text(stats.inboundStream.audioStats.bytesReceived);
+                $('#inAudioStatPacketsReceived').text(stats.inboundStream.audioStats.packetsReceived);
+            } else {
+                $('#inAudioStatBytesReceived').text(0);
+                $('#inAudioStatPacketsReceived').text(0);
+            }
+        }
+    });
 }
 
 function init_page() {
@@ -40,6 +89,31 @@ function init_page() {
     //local and remote displays
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
+    canvas = document.getElementById("canvas");
+
+    setInterval(drawSquare, 2000);
+
+    Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.OUTPUT).then(function (list) {
+        list.audio.forEach(function (device) {
+            var audio = document.getElementById("audioOutput");
+            var i;
+            var deviceInList = false;
+            for (i = 0; i < audio.options.length; i++) {
+                if (audio.options[i].value === device.id) {
+                    deviceInList = true;
+                    break;
+                }
+            }
+            if (!deviceInList) {
+                var option = document.createElement("option");
+                option.text = device.label || device.id;
+                option.value = device.id;
+                audio.appendChild(option);
+            }
+        });
+    }).catch(function (error) {
+        $('#audioOutputForm').remove();
+    });
 
     Flashphoner.getMediaDevices(null, true).then(function (list) {
         list.audio.forEach(function (device) {
@@ -47,7 +121,7 @@ function init_page() {
             var i;
             var deviceInList = false;
             for (i = 0; i < audio.options.length; i++) {
-                if (audio.options[i].value == device.id) {
+                if (audio.options[i].value === device.id) {
                     deviceInList = true;
                     break;
                 }
@@ -65,7 +139,7 @@ function init_page() {
             var i;
             var deviceInList = false;
             for (i = 0; i < video.options.length; i++) {
-                if (video.options[i].value == device.id) {
+                if (video.options[i].value === device.id) {
                     deviceInList = true;
                     break;
                 }
@@ -74,10 +148,13 @@ function init_page() {
                 var option = document.createElement("option");
                 option.text = device.label || device.id;
                 option.value = device.id;
-                video.appendChild(option);
+                if (option.text.toLowerCase().indexOf("back") >= 0 && video.children.length > 0) {
+                    video.insertBefore(option, video.children[0]);
+                } else {
+                    video.appendChild(option);
+                }
             }
         });
-
 
 
         $("#url").val(setURL() + "/" + createUUID(8));
@@ -122,6 +199,22 @@ function init_page() {
             $("#quality").prop('disabled', false);
         }
     });
+
+    $("#micGainControl").slider({
+        range: "min",
+        min: 0,
+        max: 100,
+        value: currentGainValue,
+        step: 10,
+        animate: true,
+        slide: function (event, ui) {
+            currentGainValue = ui.value;
+            if(publishStream) {
+                publishStream.setMicrophoneGain(currentGainValue);
+            }
+        }
+    });
+
     $("#volumeControl").slider({
         range: "min",
         min: 0,
@@ -139,18 +232,56 @@ function init_page() {
         $(this).prop('disabled', true);
         startTest();
     }).prop('disabled', false);
+
+    $( "#audioOutput" ).change(function() {
+        if (previewStream) {
+            previewStream.setAudioOutputId($(this).val());
+        }
+    });
+    if (!Browser.isChrome()) {
+        $('#audioOutput').remove();
+    }
+
+    $("#videoInput").change(function() {
+        if (publishStream) {
+            publishStream.switchCam($(this).val());
+        }
+    });
+
+    $("#audioInput").change(function() {
+        if (publishStream) {
+            publishStream.switchMic($(this).val());
+        }
+    });
 }
 
 function onStarted(publishStream, previewStream) {
+    statsIntervalID = setInterval(loadStats, 2000);
+    $('input:radio').attr("disabled", true);
     $("#publishBtn").text("Stop").off('click').click(function () {
         $(this).prop('disabled', true);
+        clearInterval(statsIntervalID);
         previewStream.stop();
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').click(function () {
-        publishStream.switchCam();
-    }).prop('disabled', false);
+        publishStream.switchCam().then(function(id) {
+               $('#videoInput option:selected').prop('selected', false);
+               $("#videoInput option[value='"+ id +"']").prop('selected', true);
+           }).catch(function(e) {
+               console.log("Error " + e);
+           });
+    }).prop('disabled', $('#sendCanvasStream').is(':checked'));
+    $("#switchMicBtn").click(function (){
+        publishStream.switchMic().then(function(id) {
+               $('#audioInput option:selected').prop('selected', false);
+               $("#audioInput option[value='"+ id +"']").prop('selected', true);
+           }).catch(function(e) {
+               console.log("Error " + e);
+           });
+    }).prop('disabled', !($('#sendAudio').is(':checked')));
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
+    publishStream.setMicrophoneGain(currentGainValue);
     previewStream.setVolume(currentVolumeValue);
     //intervalID = setInterval(function() {
     //    previewStream.getStats(function(stat) {
@@ -165,6 +296,7 @@ function onStarted(publishStream, previewStream) {
 }
 
 function onStopped() {
+    $('input:radio').attr("disabled", false);
     $("#publishBtn").text("Start").off('click').click(function () {
         if (validateForm()) {
             muteInputs();
@@ -173,6 +305,7 @@ function onStopped() {
         }
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').prop('disabled',true);
+    $("#switchMicBtn").text("Switch").off('click').prop('disabled',true);
     unmuteInputs();
     $("#publishResolution").text("");
     $("#playResolution").text("");
@@ -191,7 +324,7 @@ function startTest() {
         Flashphoner.playFirstVideo(localVideo, true);
         Flashphoner.playFirstVideo(remoteVideo, false);
     }
-    Flashphoner.getMediaAccess(getConstaints(), localVideo).then(function (disp) {
+    Flashphoner.getMediaAccess(getConstraints(), localVideo).then(function (disp) {
         $("#testBtn").text("Release").off('click').click(function () {
             $(this).prop('disabled', true);
             stopTest();
@@ -227,6 +360,8 @@ function startTest() {
         $("#testBtn").prop('disabled', false);
         testStarted = false;
     });
+
+    drawSquare();
 }
 
 
@@ -289,11 +424,13 @@ function start() {
     });
 }
 
-function getConstaints() {
+function getConstraints() {
     constraints = {
         audio: $("#sendAudio").is(':checked'),
-        video: $("#sendVideo").is(':checked')
+        video: $("#sendVideo").is(':checked'),
+        customStream: $("#sendCanvasStream").is(':checked')
     };
+
     if (constraints.audio) {
         constraints.audio = {
             deviceId: $('#audioInput').val()
@@ -305,31 +442,39 @@ function getConstaints() {
         if (parseInt($('#sendAudioBitrate').val()) > 0)
             constraints.audio.bitrate = parseInt($('#sendAudioBitrate').val());
     }
+
     if (constraints.video) {
-        constraints.video = {
-            deviceId: $('#videoInput').val(),
-            width: parseInt($('#sendWidth').val()),
-            height: parseInt($('#sendHeight').val())
-        };
-        if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-            constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
-            constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
+        if (constraints.customStream) {
+            constraints.customStream = canvas.captureStream(30);
+            constraints.video = false;
+        } else {
+            constraints.video = {
+                deviceId: $('#videoInput').val(),
+                width: parseInt($('#sendWidth').val()),
+                height: parseInt($('#sendHeight').val())
+            };
+            if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+                constraints.video.deviceId = {exact: $('#videoInput').val()};
+                constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
+                constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
+            }
+            if (parseInt($('#sendVideoMinBitrate').val()) > 0)
+                constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
+            if (parseInt($('#sendVideoMaxBitrate').val()) > 0)
+                constraints.video.maxBitrate = parseInt($('#sendVideoMaxBitrate').val());
+            if (parseInt($('#fps').val()) > 0)
+                constraints.video.frameRate = parseInt($('#fps').val());
         }
-        if (parseInt($('#sendVideoMinBitrate').val()) > 0)
-            constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
-        if (parseInt($('#sendVideoMaxBitrate').val()) > 0)
-            constraints.video.maxBitrate = parseInt($('#sendVideoMaxBitrate').val());
-        if (parseInt($('#fps').val()) > 0)
-            constraints.video.frameRate = parseInt($('#fps').val());
     }
+
     return constraints;
 }
 
 function startStreaming(session) {
     var streamName = field("url").split('/')[3];
-    var constraints = getConstaints();
-
+    var constraints = getConstraints();
     var mediaConnectionConstraints;
+
     if (!$("#cpuOveruseDetection").is(':checked')) {
         mediaConnectionConstraints = {
             "mandatory": {
@@ -342,7 +487,8 @@ function startStreaming(session) {
         display: localVideo,
         cacheLocalResources: true,
         constraints: constraints,
-        mediaConnectionConstraints: mediaConnectionConstraints
+        mediaConnectionConstraints: mediaConnectionConstraints,
+        sdpHook: rewriteSdp
     }).on(STREAM_STATUS.PUBLISHING, function (publishStream) {
         $("#testBtn").prop('disabled', true);
         var video = document.getElementById(publishStream.id());
@@ -367,6 +513,11 @@ function startStreaming(session) {
             audio: $("#playAudio").is(':checked'),
             video: $("#playVideo").is(':checked')
         };
+        if (constraints.audio) {
+            constraints.audio = {
+                outputId: $('#audioOutput').val()
+            }
+        }
         if (constraints.video) {
             constraints.video = {
                 width: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveWidth').val()) : 0,
@@ -392,6 +543,8 @@ function startStreaming(session) {
                     detectSpeech(previewStream);
                 }, 3000);
             }
+
+            drawSquare();
         }).on(STREAM_STATUS.STOPPED, function () {
             publishStream.stop();
         }).on(STREAM_STATUS.FAILED, function () {
@@ -414,6 +567,17 @@ function startStreaming(session) {
     publishStream.publish();
 }
 
+function rewriteSdp(sdp) {
+    var sdpStringFind = $("#sdpStringFind").val().replace('\\r\\n','\r\n');
+    var sdpStringReplace = $("#sdpStringReplace").val().replace('\\r\\n','\r\n');
+    if (sdpStringFind != 0 && sdpStringReplace != 0) {
+        var newSDP = sdp.sdpString.toString();
+        newSDP = newSDP.replace(new RegExp(sdpStringFind,"g"), sdpStringReplace);
+        return newSDP;
+    }
+    return sdp.sdpString;
+}
+
 //show connection or local stream status
 function setStatus(status) {
     var statusField = $("#streamStatus");
@@ -428,8 +592,10 @@ function setStatus(status) {
 }
 
 function muteInputs() {
-    $(":text, select, :checkbox").each(function () {
-        $(this).attr('disabled', 'disabled');
+    $(":text, :checkbox").each(function () {
+        if ($(this).attr('id') !== 'audioOutput') {
+            $(this).attr('disabled', 'disabled');
+        }
     });
 }
 
@@ -602,4 +768,12 @@ function handleAudio(event) {
             this.lastClip = window.performance.now();
         }
     }
+}
+
+function drawSquare() {
+    var ctx = canvas.getContext("2d");
+    ctx.strokeStyle="#FF0000";
+    ctx.beginPath();
+    ctx.rect(canvas.width / 2 - 100/2, canvas.height / 2 - 100/2, 100 , 100);
+    ctx.stroke();
 }

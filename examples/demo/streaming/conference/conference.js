@@ -67,8 +67,9 @@ function start() {
         }
     }
     if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(document.getElementById("participant1Display"), false);
-        Flashphoner.playFirstVideo(document.getElementById("participant2Display"), false);
+        for (var i = 1; i < _participants; i++){
+            Flashphoner.playFirstVideo(document.getElementById("participant" + i + "Display"), false);
+        }
     }
 
     connection = Flashphoner.roomApi.connect({urlServer: url, username: username}).on(SESSION_STATUS.FAILED, function(session){

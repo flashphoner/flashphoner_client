@@ -252,7 +252,7 @@ function playParticipantsStream(participant) {
                     // check if we already play this stream
                     if (document.getElementById(participant.getStreams()[i].id()) == null) {
                         // setup 1st stream to main div
-                        if (!document.getElementById(pDisplay).hasChildNodes() && participant.getStreams()[i].streamName().indexOf("screenShare") == -1) {
+                        if (participant.getStreams()[i].streamName().indexOf("screenShare") == -1) {
                             participant.getStreams()[i].play(document.getElementById(pDisplay)).on(STREAM_STATUS.PLAYING, function (playingStream) {
                                 document.getElementById(playingStream.id()).addEventListener('resize', function (event) {
                                     resizeVideo(event.target);

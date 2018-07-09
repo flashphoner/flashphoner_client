@@ -256,6 +256,12 @@ var createConnection = function(options) {
         var switchCam = function () {
         };
 
+        var switchMic = function () {
+        };
+
+        var setMicrophoneGain = function (volume) {
+        };
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -264,6 +270,7 @@ var createConnection = function(options) {
         exports.changeAudioCodec = changeAudioCodec;
         exports.close = close;
         exports.setVolume = setVolume;
+        exports.setMicrophoneGain = setMicrophoneGain;
         exports.getVolume = getVolume;
         exports.muteAudio = muteAudio;
         exports.unmuteAudio = unmuteAudio;
@@ -274,6 +281,7 @@ var createConnection = function(options) {
         exports.getStats = getStats;
         exports.fullScreen = fullScreen;
         exports.switchCam = switchCam;
+        exports.switchMic = switchMic;
     });
 };
 

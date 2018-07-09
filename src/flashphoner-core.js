@@ -229,18 +229,19 @@ var getLogger = function () {
  * @param {String=} mediaProvider Media provider that will be asked for device list
  * @param {Boolean=} labels Ask user for microphone access before getting device list.
  * This will make device label available.
+ * @param {Flashphoner.constants.MEDIA_DEVICE_KIND} kind For media device kind input or output
  * @returns {Promise.<Flashphoner.MediaDeviceList>} Promise with media device list on fulfill
  * @throws {Error} Error if API is not initialized
  * @memberof Flashphoner
  */
-var getMediaDevices = function (mediaProvider, labels) {
+var getMediaDevices = function (mediaProvider, labels, kind) {
     if (!initialized) {
         throw new Error("Flashphoner API is not initialized");
     }
     if (!mediaProvider) {
         mediaProvider = getMediaProviders()[0];
     }
-    return MediaProvider[mediaProvider].listDevices(labels);
+    return MediaProvider[mediaProvider].listDevices(labels, kind);
 };
 
 /**
@@ -636,6 +637,13 @@ var createSession = function (options) {
     }
 
     /**
+     * @callback sdpHook
+     * @param {Object} sdp Callback options
+     * @param {String} sdp.sdpString Sdp from the server
+     * @returns {String} sdp New sdp
+     */
+
+    /**
      * Create call.
      *
      * @param {Object} options Call options
@@ -650,6 +658,7 @@ var createSession = function (options) {
      * @param {HTMLElement} options.remoteVideoDisplay Div element remote video should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
      * @param {Array<string>=} options.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
+     * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Call} Call
      * @throws {TypeError} Error if no options provided
      * @throws {Error} Error if session state is not REGISTERED
@@ -681,6 +690,13 @@ var createSession = function (options) {
         if (options.constraints) {
             var constraints = options.constraints;
         }
+
+        var audioOutputId;
+        var audioProperty = getConstraintsProperty(constraints, "audio", undefined);
+        if (typeof audioProperty === 'object') {
+            audioOutputId = getConstraintsProperty(audioProperty, "outputId", 0);
+        }
+
         var stripCodecs = options.stripCodecs || [];
         // Receive media
         var receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : true;
@@ -690,6 +706,7 @@ var createSession = function (options) {
         var status_ = CALL_STATUS.NEW;
         var callbacks = {};
         var hasTransferredCall = false;
+        var sdpHook = options.sdpHook;
         /**
          * Represents sip call.
          *
@@ -725,6 +742,7 @@ var createSession = function (options) {
             }
             //set remote sdp
             if (sdp && sdp !== '') {
+                sdp = sdpHookHandler(sdp, sdpHook);
                 mediaConnection.setRemoteSdp(sdp, hasTransferredCall, id_).then(function () {
                 });
                 return;
@@ -781,7 +799,9 @@ var createSession = function (options) {
                     flashPort: flashPort,
                     bidirectional: true,
                     login: login,
-                    connectionConfig: mediaOptions
+                    constraints: constraints,
+                    connectionConfig: mediaOptions,
+                    audioOutputId: audioOutputId
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
@@ -847,6 +867,13 @@ var createSession = function (options) {
         };
 
         /**
+         * @callback sdpHook
+         * @param {Object} sdp Callback options
+         * @param {String} sdp.sdpString Sdp from the server
+         * @returns {String} sdp New sdp
+         */
+
+        /**
          * Answer incoming call.
          * @param {Object} answerOptions Call options
          * @param {HTMLElement} answerOptions.localVideoDisplay Div element local video should be displayed in
@@ -855,6 +882,7 @@ var createSession = function (options) {
          * @param {Boolean=} answerOptions.receiveVideo Receive video
          * @param {String=} answerOptions.constraints Answer call with constraints
          * @param {Array<string>=} answerOptions.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
+         * @param {sdpHook} sdpHook The callback that handles sdp from the server
          * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.NEW}
          * @memberof Call
          * @name call
@@ -869,11 +897,12 @@ var createSession = function (options) {
             constraints = answerOptions.constraints || getDefaultMediaConstraints();
             status_ = CALL_STATUS.PENDING;
             var sdp;
+            var sdpHook = answerOptions.sdpHook;
             if (!remoteSdpCache[id_]) {
                 logger.error(LOG_PREFIX, "No remote sdp available");
                 throw new Error("No remote sdp available");
             } else {
-                sdp = remoteSdpCache[id_];
+                sdp = sdpHookHandler(remoteSdpCache[id_], sdpHook);
                 delete remoteSdpCache[id_];
             }
             if (util.SDP.matchPrefix(sdp, "m=video").length == 0) {
@@ -901,7 +930,9 @@ var createSession = function (options) {
                     flashPort: flashPort,
                     bidirectional: true,
                     login: cConfig.sipLogin,
-                    connectionConfig: mediaOptions
+                    constraints: constraints,
+                    connectionConfig: mediaOptions,
+                    audioOutputId: audioOutputId
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.setRemoteSdp(sdp);
@@ -990,6 +1021,20 @@ var createSession = function (options) {
         /**
          * Media controls
          */
+
+        /**
+         * Set other oupout audio device
+         *
+         * @param {string} id Id of output device
+         * @memberof Call
+         * @inner
+         */
+        var setAudioOutputId = function(id) {
+            audioOutputId = id;
+            if (mediaConnection && mediaConnection.setAudioOutputId) {
+                return mediaConnection.setAudioOutputId(id);
+            }
+        };
 
         /**
          * Set volume of remote media
@@ -1191,12 +1236,43 @@ var createSession = function (options) {
             return call;
         };
 
+        /**
+         * Switch camera in real-time.
+         * Works only with WebRTC
+         *
+         * @memberOf Call
+         * @inner
+         * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.ESTABLISHED} and not {@link Flashphoner.constants.CALL_STATUS.HOLD}
+         */
+        var switchCam = function(deviceId) {
+            if(status_ !== CALL_STATUS.ESTABLISHED && !constraints.video && status_ !== CALL_STATUS.HOLD){
+                throw new Error('Invalid call state');
+            }
+            return mediaConnection.switchCam(deviceId);
+        };
+
+        /**
+         * Switch mic in real-time.
+         * Works only with WebRTC
+         *
+         * @memberOf Call
+         * @inner
+         * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.ESTABLISHED} and not {@link Flashphoner.constants.CALL_STATUS.HOLD}
+         */
+        var switchMic = function(deviceId) {
+            if(status_ !== CALL_STATUS.ESTABLISHED && status_ !== CALL_STATUS.HOLD){
+                throw new Error('Invalid call state');
+            }
+           return mediaConnection.switchMic(deviceId);
+        };
+
         call.call = call_;
         call.answer = answer;
         call.hangup = hangup;
         call.id = id;
         call.status = status;
         call.getStats = getStats;
+        call.setAudioOutputId = setAudioOutputId;
         call.setVolume = setVolume;
         call.getVolume = getVolume;
         call.muteAudio = muteAudio;
@@ -1214,9 +1290,18 @@ var createSession = function (options) {
         call.sendDTMF = sendDTMF;
         call.transfer = transfer;
         call.on = on;
+        call.switchCam = switchCam;
+        call.switchMic = switchMic;
         calls[id_] = call;
         return call;
     };
+
+    /**
+     * @callback sdpHook
+     * @param {Object} sdp Callback options
+     * @param {String} sdp.sdpString Sdp from the server
+     * @returns {String} sdp New sdp
+     */
 
     /**
      * Create stream.
@@ -1224,7 +1309,8 @@ var createSession = function (options) {
      * @param {Object} options Stream options
      * @param {string} options.name Stream name
      * @param {Object=} options.constraints Stream constraints
-     * @param {Boolean} [options.constraints.audio=true] Specifies if published stream should have audio. Played stream always should have audio: the property should not be set to false in that case.
+     * @param {Boolean|Object} [options.constraints.audio=true] Specifies if published stream should have audio. Played stream always should have audio: the property should not be set to false in that case.
+     * @param {string=} [options.constraints.audio.outputId] Set width to publish or play stream with this value
      * @param {Boolean|Object} [options.constraints.video=true] Specifies if published or played stream should have video, or sets video constraints
      * @param {Integer} [options.constraints.video.width=0] Set width to publish or play stream with this value
      * @param {Integer} [options.constraints.video.height=0] Set height to publish or play stream with this value
@@ -1246,6 +1332,7 @@ var createSession = function (options) {
      * @param {string=} options.rtmpUrl Rtmp url stream should be forwarded to
      * @param {Object=} options.mediaConnectionConstraints Stream specific constraints for underlying RTCPeerConnection
      * @param {Boolean=} options.flashShowFullScreenButton Show full screen button in flash
+     * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
      * @throws {TypeError} Error if options.name is not specified
@@ -1282,6 +1369,7 @@ var createSession = function (options) {
         var mediaConnectionConstraints = options.mediaConnectionConstraints;
         // Receive media
         var receiveAudio;
+        var audioOutputId;
         var audioProperty = getConstraintsProperty(constraints, "audio", undefined);
         if (typeof audioProperty === 'boolean') {
             receiveAudio = audioProperty;
@@ -1290,6 +1378,7 @@ var createSession = function (options) {
             var _stereo = getConstraintsProperty(audioProperty, "stereo", 0);
             var _bitrate = getConstraintsProperty(audioProperty, "bitrate", 0);
             var _fec = getConstraintsProperty(audioProperty, "fec", 0);
+            audioOutputId = getConstraintsProperty(audioProperty, "outputId", 0);
             var _codecOptions = "";
             if (_bitrate) _codecOptions += "maxaveragebitrate=" + _bitrate + ";";
             if (_stereo) _codecOptions += "stereo=1;sprop-stereo=1;";
@@ -1329,6 +1418,7 @@ var createSession = function (options) {
         var info_;
         var remoteBitrate = -1;
         var networkBandwidth = -1;
+        var sdpHook = options.sdpHook;
         //callbacks added using stream.on()
         var callbacks = {};
         /**
@@ -1343,6 +1433,7 @@ var createSession = function (options) {
             if (sdp && sdp !== '') {
                 var _sdp = sdp;
                 if (_codecOptions) _sdp = util.SDP.writeFmtp(sdp, _codecOptions, "opus");
+                _sdp = sdpHookHandler(_sdp, sdpHook);
                 mediaConnection.setRemoteSdp(_sdp).then(function () {
                 });
                 return;
@@ -1422,7 +1513,8 @@ var createSession = function (options) {
                 flashBufferTime: options.flashBufferTime || 0,
                 flashShowFullScreenButton: options.flashShowFullScreenButton || false,
                 connectionConfig: mediaOptions,
-                connectionConstraints: mediaConnectionConstraints
+                connectionConstraints: mediaConnectionConstraints,
+                audioOutputId: audioOutputId
             }, streamRefreshHandlers[id_]).then(function (newConnection) {
                 mediaConnection = newConnection;
                 try {
@@ -1481,9 +1573,11 @@ var createSession = function (options) {
             status_ = STREAM_STATUS.PENDING;
             published_ = true;
             var hasAudio = true;
+
             if (constraints && constraints.video && constraints.video.type && constraints.video.type == "screen") {
                 hasAudio = false;
             }
+
             //get access to camera
             MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function () {
                 if (status_ == STREAM_STATUS.FAILED) {
@@ -1501,8 +1595,10 @@ var createSession = function (options) {
                     mainUrl: urlServer,
                     flashProto: flashProto,
                     flashPort: flashPort,
+                    constraints: constraints,
                     connectionConfig: mediaOptions,
-                    connectionConstraints: mediaConnectionConstraints
+                    connectionConstraints: mediaConnectionConstraints,
+                    customStream: constraints && constraints.customStream ? constraints.customStream : false
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
@@ -1548,13 +1644,42 @@ var createSession = function (options) {
          * @inner
          * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
          */
-		var switchCam = function() {
+		var switchCam = function(deviceId) {
 		    if(status_ !== STREAM_STATUS.PUBLISHING){
 		        throw new Error('Invalid stream state');
             }
-            mediaConnection.switchCam();
+            return mediaConnection.switchCam(deviceId);
         };
-		
+
+        /**
+         * Switch microphone in real-time.
+         * Works only with WebRTC
+         *
+         * @memberOf Stream
+         * @inner
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
+         */
+        var switchMic = function(deviceId) {
+            if(status_ !== STREAM_STATUS.PUBLISHING){
+                throw new Error('Invalid stream state');
+            }
+            return mediaConnection.switchMic(deviceId);
+        };
+
+        /**
+         * Set Microphone Gain
+         *
+         * @memberOf Stream
+         * @inner
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
+         */
+		var setMicrophoneGain = function (volume) {
+            if(status_ !== STREAM_STATUS.PUBLISHING){
+                throw new Error('Invalid stream state');
+            }
+		    mediaConnection.setMicrophoneGain(volume);
+        };
+
         /**
          * Stop stream.
          *
@@ -1702,6 +1827,20 @@ var createSession = function (options) {
          */
 
         /**
+         * Set other oupout audio device
+         *
+         * @param {string} id Id of output device
+         * @memberof Call
+         * @inner
+         */
+        var setAudioOutputId = function(id) {
+            audioOutputId = id;
+            if (mediaConnection && mediaConnection.setAudioOutputId) {
+                return mediaConnection.setAudioOutputId(id);
+            }
+        };
+
+        /**
          * Set volume of remote media
          *
          * @param {number} volume Volume between 0 and 100
@@ -1803,6 +1942,7 @@ var createSession = function (options) {
             }
             return true;
         };
+
         /**
          * Get statistics
          *
@@ -1851,7 +1991,7 @@ var createSession = function (options) {
                 if (mediaConnection)
                     mediaConnection.fullScreen();
             }
-        }
+        };
 
         /**
          * Stream event callback.
@@ -1912,7 +2052,9 @@ var createSession = function (options) {
         stream.getRecordInfo = getRecordInfo;
         stream.getInfo = getInfo;
         stream.videoResolution = videoResolution;
+        stream.setAudioOutputId = setAudioOutputId;
         stream.setVolume = setVolume;
+        stream.setMicrophoneGain = setMicrophoneGain;
         stream.getVolume = getVolume;
         stream.muteAudio = muteAudio;
         stream.unmuteAudio = unmuteAudio;
@@ -1928,6 +2070,7 @@ var createSession = function (options) {
         stream.on = on;
         stream.available = available;
 		stream.switchCam = switchCam;
+        stream.switchMic = switchMic;
 
         streams[id_] = stream;
         return stream;
@@ -2105,6 +2248,18 @@ var createSession = function (options) {
         };
         return exports;
     }();
+
+    var sdpHookHandler = function(sdp, sdpHook){
+        if (sdpHook != undefined && typeof sdpHook == 'function') {
+            var sdpObject = {sdpString: sdp};
+            var newSdp = sdpHook(sdpObject);
+            if (newSdp != null && newSdp != "") {
+                return newSdp;
+            }
+            return sdp;
+        }
+        return sdp;
+    }
 
     //export Session
     session.id = id;

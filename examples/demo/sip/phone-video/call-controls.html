@@ -3,9 +3,9 @@
     <div class="col-sm-6">
         <div class="input-group">
             <input id="callee" type="text" class="form-control" placeholder="Callee SIP username"/>
-                        <span class="input-group-btn">
-                            <button id="callBtn" type="button" class="btn btn-default pull-right">Call</button>
-                        </span>
+            <span class="input-group-btn">
+                <button id="callBtn" type="button" class="btn btn-default pull-right">Call</button>
+            </span>
         </div>
     </div>
     <div class="col-sm-3">
@@ -13,6 +13,36 @@
 </div>
 
 <div id="incomingCallAlert" class="alert alert-info">
+</div>
+
+<div class="row row-space">
+    <div class="input-group">
+        <span class="input-group-addon">Camera</span>
+        <select class="form-control" id="cameraList">
+        </select>
+        <span class="input-group-btn">
+            <button class="btn btn-default" id="switchCamBtn">Next</button>
+        </span>
+    </div>
+</div>
+
+<div class="row row-space">
+    <div class="input-group">
+        <span class="input-group-addon">Mic</span>
+        <select class="form-control" id="micList">
+        </select>
+        <span class="input-group-btn">
+            <button class="btn btn-default" id="switchMicBtn">Next</button>
+        </span>
+    </div>
+</div>
+
+<div class="row row-space" id="speakerForm">
+    <div class="input-group">
+        <span class="input-group-addon">Speaker</span>
+        <select class="form-control" id="speakerList">
+        </select>
+    </div>
 </div>
 
 <div id="callFeatures" class="row row-space">

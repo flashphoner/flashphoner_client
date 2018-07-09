@@ -11,9 +11,12 @@ var defaultConstraints;
 var logger;
 var LOG_PREFIX = "webrtc";
 var audioContext;
+var microphoneGain;
+var constants = require('./constants');
+
 
 var createConnection = function (options) {
-		return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve, reject) {
 
         var id = options.id;
         var connectionConfig = options.connectionConfig || {"iceServers": []};
@@ -33,19 +36,29 @@ var createConnection = function (options) {
         var localVideo;
         var remoteVideo;
         var videoCams = [];
-        var currentStream;
-        var switchCount = 0;
+        var switchCamCount = 0;
+        var mics = [];
+        var switchMicCount = 0;
+        var customStream = options.customStream;
+        var currentAudioTrack;
+        var constraints = options.constraints ? options.constraints : {};
+
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
-            localVideo.id = id + "-local";
-            connection.addStream(localVideo.srcObject);
-
+            if(localVideo) {
+                localVideo.id = id + "-local";
+                connection.addStream(localVideo.srcObject);
+            }
             remoteVideo = getCacheInstance(remoteDisplay);
             if (!remoteVideo) {
                 remoteVideo = document.createElement('video');
                 remoteDisplay.appendChild(remoteVideo);
             }
             remoteVideo.id = id + "-remote";
+
+            if (options.audioOutputId  && typeof remoteVideo.setSinkId !== "undefined") {
+                remoteVideo.setSinkId(options.audioOutputId);
+            }
             /**
              * Workaround for Android 6, 7, Chrome 61.
              * https://bugs.chromium.org/p/chromium/issues/detail?id=769622
@@ -61,6 +74,9 @@ var createConnection = function (options) {
                     display.appendChild(remoteVideo);
                 }
                 remoteVideo.id = id;
+                if (options.audioOutputId && typeof remoteVideo.setSinkId !== "undefined") {
+                    remoteVideo.setSinkId(options.audioOutputId);
+                }
                 /**
                  * Workaround for Android 6, 7, Chrome 61.
                  * https://bugs.chromium.org/p/chromium/issues/detail?id=769622
@@ -72,11 +88,26 @@ var createConnection = function (options) {
                 connection.addStream(localVideo.srcObject);
             }
         }
-        if(localVideo) {
-            if (localVideo.srcObject.getVideoTracks()[0]) {
+        if (localVideo) {
+            var videoTrack = localVideo.srcObject.getVideoTracks()[0];
+            if (videoTrack) {
                 listDevices(false).then(function (devices) {
                     devices.video.forEach(function (device) {
+                        if (videoTrack.label === device.label) {
+                            switchCamCount = videoCams.length;
+                        }
                         videoCams.push(device.id);
+                    })
+                });
+            }
+            var audioTrack = localVideo.srcObject.getAudioTracks()[0];
+            if (audioTrack) {
+                listDevices(false).then(function (devices) {
+                    devices.audio.forEach(function (device) {
+                        if (audioTrack.label === device.label) {
+                            switchMicCount = mics.length;
+                        }
+                        mics.push(device.id);
                     })
                 });
             }
@@ -121,6 +152,9 @@ var createConnection = function (options) {
             }
             if (connection.signalingState !== "closed") {
                 connection.close();
+            }
+            if (microphoneGain) {
+                microphoneGain.release();
             }
             delete connections[id];
         };
@@ -228,6 +262,12 @@ var createConnection = function (options) {
             });
         };
 
+        var setAudioOutputId = function (id) {
+            if (remoteVideo) {
+                return remoteVideo.setSinkId(id);
+            }
+        };
+
         var getVolume = function () {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
                 //return remoteVideo.srcObject.getAudioTracks()[0].volume * 100;
@@ -235,11 +275,19 @@ var createConnection = function (options) {
             }
             return -1;
         };
+
         var setVolume = function (volume) {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
                 remoteVideo.volume = volume / 100;
             }
         };
+
+        var setMicrophoneGain = function (volume) {
+            if (microphoneGain) {
+                microphoneGain.gain.value = volume / 100;
+            }
+        };
+
         var muteAudio = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
                 localVideo.srcObject.getAudioTracks()[0].enabled = false;
@@ -250,6 +298,7 @@ var createConnection = function (options) {
                 localVideo.srcObject.getAudioTracks()[0].enabled = true;
             }
         };
+
         var isAudioMuted = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getAudioTracks().length > 0) {
                 return !localVideo.srcObject.getAudioTracks()[0].enabled;
@@ -273,78 +322,37 @@ var createConnection = function (options) {
             return true;
         };
         var getStats = function (callbackFn) {
-            if (connection) {
-                if (adapter.browserDetails.browser == "chrome") {
-                    connection.getStats(null).then(function (rawStats) {
-                        var results = rawStats;
-                        var result = {type: "chrome", outgoingStreams: {}, incomingStreams: {}};
-                        if (rawStats instanceof Map) {
-                            rawStats.forEach(function (v, k, m) {
-                                handleResult(v);
-                            });
-                        } else {
-                            for (var i = 0; i < results.length; ++i) {
-                                handleResult(results[i]);
-                            }
-                        }
-
-                        function handleResult(res) {
-                            var resultPart = util.processRtcStatsReport(adapter.browserDetails.browser, res);
-                            if (resultPart != null) {
-                                if (resultPart.type == "googCandidatePair") {
-                                    result.activeCandidate = resultPart;
-                                } else if (resultPart.type == "ssrc") {
-                                    if (resultPart.transportId.indexOf("audio") > -1) {
-                                        if (resultPart.id.indexOf("send") > -1) {
-                                            result.outgoingStreams.audio = resultPart;
-                                        } else {
-                                            result.incomingStreams.audio = resultPart;
-                                        }
-
-                                    } else {
-                                        if (resultPart.id.indexOf("send") > -1) {
-                                            result.outgoingStreams.video = resultPart;
-                                        } else {
-                                            result.incomingStreams.video = resultPart;
-                                        }
-
-                                    }
+            var browser = adapter.browserDetails.browser;
+            if (connection && (browser == 'chrome' || browser == 'firefox' || browser == 'safari')) {
+                var result = {outboundStream:{}, inboundStream:{}, otherStats:[]};
+                result.type = browser;
+                connection.getStats(null).then(function (stats) {
+                    if (stats) {
+                        stats.forEach(function (stat) {
+                            if (stat.type == 'outbound-rtp' && !stat.isRemote) {
+                                if (stat.mediaType == 'audio') {
+                                    result.outboundStream.audioStats = stat;
+                                } else if (stat.mediaType == 'video') {
+                                    result.outboundStream.videoStats = stat;
+                                } else {
+                                    result.otherStats.push(stat);
                                 }
-                            }
-                        }
-
-                        callbackFn(result);
-                    }).catch(function (error) {
-                        callbackFn(error)
-                    });
-                } else if (adapter.browserDetails.browser == "firefox") {
-                    connection.getStats(null).then(function (rawStats) {
-                        var result = {type: "firefox", outgoingStreams: {}, incomingStreams: {}};
-                        for (var k in rawStats) {
-                            if (rawStats.hasOwnProperty(k)) {
-                                var resultPart = util.processRtcStatsReport(adapter.browserDetails.browser, rawStats[k]);
-                                if (resultPart != null) {
-                                    if (resultPart.type == "outboundrtp") {
-                                        if (resultPart.id.indexOf("audio") > -1) {
-                                            result.outgoingStreams.audio = resultPart;
-                                        } else {
-                                            result.outgoingStreams.video = resultPart;
-                                        }
-                                    } else if (resultPart.type == "inboundrtp") {
-                                        if (resultPart.id.indexOf("audio") > -1) {
-                                            result.incomingStreams.audio = resultPart;
-                                        } else {
-                                            result.incomingStreams.video = resultPart;
-                                        }
-                                    }
+                            } else if (stat.type == 'inbound-rtp' && !stat.isRemote) {
+                                //safari does not have a mediaType variable for incoming statistics
+                                if (stat.mediaType == 'audio' || (browser == 'safari' && stat.id.indexOf('Audio') != -1)) {
+                                    result.inboundStream.audioStats = stat;
+                                } else if (stat.mediaType == 'video' || (browser == 'safari' && stat.id.indexOf('Video') != -1)) {
+                                    result.inboundStream.videoStats = stat;
+                                } else {
+                                    result.otherStats.push(stat);
                                 }
+                            } else {
+                                result.otherStats.push(stat);
                             }
-                        }
+                        });
                         callbackFn(result);
-                    }).catch(function (error) {
-                        callbackFn(error)
-                    });
-                }
+                    }
+                });
             }
         };
 
@@ -376,30 +384,87 @@ var createConnection = function (options) {
                     }
                 }
             }
-        }
-
-        var switchCam = function () {
-            var sender = connection.getSenders()[1];
-            switchCount = (switchCount + 1) % videoCams.length;
-            if(videoCams.length>1 && sender) {
-                connection.getLocalStreams().forEach(function (stream) {
-                    stream.getVideoTracks().forEach(function (track) {
-                        track.stop();
-                    })
-                });
-                navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: videoCams[switchCount]}}}).then(function (stream) {
-                    if(currentStream) {
-                        currentStream.getTracks().forEach(function (track) { track.stop(); });
-                    }
-                    currentStream = stream;
-                    sender.replaceTrack(currentStream.getVideoTracks()[0]);
-                    localVideo.srcObject = currentStream;
-                }).catch(function (reason) {
-                    logger.error(LOG_PREFIX, reason)
-                });
-            }
         };
-		
+
+        var switchCam = function (deviceId) {
+            return new Promise(function(resolve,reject) {
+                if (localVideo && localVideo.srcObject && videoCams.length > 1 && !customStream) {
+                    connection.getSenders().forEach(function (sender) {
+                        if (sender.track.kind === 'audio') return;
+                        switchCamCount = (switchCamCount + 1) % videoCams.length;
+                        sender.track.stop();
+                        var cam = (typeof deviceId !== "undefined") ? deviceId : videoCams[switchCamCount];
+                        //use the settings that were set during connection initiation
+                        var clonedConstraints = Object.assign({}, constraints);
+                        clonedConstraints.video.deviceId = {exact: cam};
+                        clonedConstraints.audio = false;
+                        navigator.mediaDevices.getUserMedia(clonedConstraints).then(function (newStream) {
+                            var newVideoTrack = newStream.getVideoTracks()[0];
+                            newVideoTrack.enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
+                            var audioTrack = localVideo.srcObject.getAudioTracks()[0];
+                            sender.replaceTrack(newVideoTrack);
+                            localVideo.srcObject = newStream;
+                            // On Safari mobile _newStream_ doesn't contain audio track, so we need to add track from previous stream
+                            if (localVideo.srcObject.getAudioTracks().length == 0 && audioTrack) {
+                                localVideo.srcObject.addTrack(audioTrack);
+                            }
+                            logger.info("Switch camera to " + cam);
+                            resolve(cam);
+                        }).catch(function (reason) {
+                            logger.error(LOG_PREFIX, reason);
+                            reject(reason);
+                        });
+                    });
+                } else {
+                    reject(constants.ERROR_INFO.CAN_NOT_SWITCH_CAM);
+                }
+            });
+
+        };
+
+        var switchMic = function (deviceId) {
+            return new Promise(function(resolve,reject) {
+                if (localVideo && localVideo.srcObject && mics.length > 1 && !customStream) {
+                    connection.getSenders().forEach(function (sender) {
+                        if (sender.track.kind === 'video') return;
+                        switchMicCount = (switchMicCount + 1) % mics.length;
+                        sender.track.stop();
+                        if(microphoneGain) {
+                            microphoneGain.release();
+                        }
+                        var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
+                        //use the settings that were set during connection initiation
+                        var clonedConstraints = Object.assign({}, constraints);
+                        clonedConstraints.audio.deviceId = {exact: mic};
+                        clonedConstraints.video = false;
+                        navigator.mediaDevices.getUserMedia(clonedConstraints).then(function (newStream) {
+                            if(microphoneGain) {
+                                var currentGain = microphoneGain.gain.value;
+                                microphoneGain = createGainNode(newStream);
+                                microphoneGain.gain.value = currentGain;
+                            }
+                            var newAudioTrack = newStream.getAudioTracks()[0];
+                            newAudioTrack.enabled = localVideo.srcObject.getAudioTracks()[0].enabled;
+                            currentAudioTrack = newAudioTrack;
+                            sender.replaceTrack(newAudioTrack);
+                            var videoTrack = localVideo.srcObject.getVideoTracks()[0];
+                            localVideo.srcObject = newStream;
+                            if(videoTrack) {
+                                localVideo.srcObject.addTrack(videoTrack);
+                            }
+                            logger.info("Switch mic to " + mic);
+                            resolve(mic);
+                        }).catch(function (reason) {
+                            logger.error(LOG_PREFIX, reason);
+                            reject(reason);
+                        });
+                    });
+                } else {
+                    reject(constants.ERROR_INFO.CAN_NOT_SWITCH_MIC);
+                }
+            });
+        };
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -407,7 +472,9 @@ var createConnection = function (options) {
         exports.setRemoteSdp = setRemoteSdp;
         exports.changeAudioCodec = changeAudioCodec;
         exports.close = close;
+        exports.setAudioOutputId = setAudioOutputId;
         exports.setVolume = setVolume;
+        exports.setMicrophoneGain = setMicrophoneGain;
         exports.getVolume = getVolume;
         exports.muteAudio = muteAudio;
         exports.unmuteAudio = unmuteAudio;
@@ -417,10 +484,22 @@ var createConnection = function (options) {
         exports.isVideoMuted = isVideoMuted;
         exports.getStats = getStats;
         exports.fullScreen = fullScreen;
-		exports.switchCam = switchCam;
+        exports.switchCam = switchCam;
+        exports.switchMic = switchMic;
         connections[id] = exports;
         resolve(exports);
     });
+};
+
+
+var mixAudioTracks = function (stream1, stream2) {
+    var stream1Sound = audioContext.createMediaStreamSource(stream1);
+    var stream2Sound = audioContext.createMediaStreamSource(stream2);
+    var destination = audioContext.createMediaStreamDestination();
+    var newStream = destination.stream;
+    stream1Sound.connect(destination);
+    stream2Sound.connect(destination);
+    return newStream.getAudioTracks()[0];
 };
 
 var getMediaAccess = function (constraints, display) {
@@ -436,11 +515,20 @@ var getMediaAccess = function (constraints, display) {
             constraints = normalizeConstraints(constraints);
             releaseMedia(display);
         }
+        if(!constraints.video && !constraints.audio && !constraints.customStream) {
+            resolve(display);
+            return;
+        }
         //check if this is screen sharing
         if (constraints.video && constraints.video.type && constraints.video.type == "screen") {
             delete constraints.video.type;
             getScreenDeviceId(constraints).then(function (screenSharingConstraints) {
                 //copy constraints
+                constraints.sourceId = screenSharingConstraints.sourceId;
+                constraints.systemSound = screenSharingConstraints.systemSoundAccess;
+                delete screenSharingConstraints.sourceId;
+                delete screenSharingConstraints.systemSoundAccess;
+
                 for (var prop in screenSharingConstraints) {
                     if (screenSharingConstraints.hasOwnProperty(prop)) {
                         constraints.video[prop] = screenSharingConstraints[prop];
@@ -465,35 +553,181 @@ var getMediaAccess = function (constraints, display) {
                     requestAudioConstraints = constraints.audio;
                     delete constraints.audio;
                 }
+                if (constraints.systemSound) {
+                    constraints.audio = {
+                        mandatory: {
+                            chromeMediaSource: 'desktop',
+                            chromeMediaSourceId: constraints.sourceId,
+                            echoCancellation: true
+                        },
+                        optional: []
+                    };
+                    delete constraints.systemSound;
+                }
             }
-            navigator.getUserMedia(constraints, function (stream) {
-                var video = getCacheInstance(display);
-                if (!video) {
-                    video = document.createElement('video');
-                    display.appendChild(video);
-                }
-                video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
-                //show local camera
-                video.srcObject = stream;
-                //mute audio
-                video.muted = true;
-                video.onloadedmetadata = function (e) {
-                    video.play();
-                };
-                // This hack for chrome only, firefox supports screen-sharing + audio natively
-                if (requestAudioConstraints && adapter.browserDetails.browser == "chrome") {
-                    logger.info(LOG_PREFIX, "Request for audio stream");
-                    navigator.getUserMedia({audio: requestAudioConstraints}, function (stream) {
-                        logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
-                        video.srcObject.addTrack(stream.getAudioTracks()[0]);
-                        resolve(display);
-                    });
+            if (constraints.customStream) {
+                //get tracks if we have at least one defined constraint
+                if (constraints.audio || constraints.video) {
+                    //remove customStream from constraints before passing to GUM
+                    var normalizedConstraints = {
+                        audio: constraints.audio ? constraints.audio : false,
+                        video: constraints.video ? constraints.video : false
+                    };
+                    navigator.getUserMedia(normalizedConstraints, function (stream) {
+                        //add resulting tracks to customStream
+                        stream.getTracks().forEach(function (track) {
+                            constraints.customStream.addTrack(track);
+                        });
+                        //display customStream
+                        loadVideo(display, constraints.customStream, screenShare, requestAudioConstraints, resolve, constraints);
+                    }, reject);
                 } else {
-                    resolve(display);
+                    //display customStream
+                    loadVideo(display, constraints.customStream, screenShare, requestAudioConstraints, resolve, constraints);
                 }
-            }, reject);
+            } else {
+                navigator.getUserMedia(constraints, function (stream) {
+                    loadVideo(display, stream, screenShare, requestAudioConstraints, resolve, constraints);
+                }, reject);
+            }
         }
     });
+};
+
+var loadVideo = function (display, stream, screenShare, requestAudioConstraints, resolve, constraints) {
+    var video = getCacheInstance(display);
+    if (!video) {
+        video = document.createElement('video');
+        display.appendChild(video);
+    }
+    if (stream.getAudioTracks().length > 0 && adapter.browserDetails.browser == "chrome") {
+        microphoneGain = createGainNode(stream);
+    }
+    video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
+    video.srcObject = stream;
+    //mute audio
+    video.muted = true;
+    video.onloadedmetadata = function (e) {
+        if (screenShare && !window.chrome) {
+            setScreenResolution(video, stream, constraints);
+        }
+        video.play();
+    };
+    if (constraints.systemSound && adapter.browserDetails.browser == "chrome") {
+        addSystemSound();
+    } else {
+        resolveCallback();
+    }
+
+    function resolveCallback() {
+        // This hack for chrome only, firefox supports screen-sharing + audio natively
+        if (requestAudioConstraints && adapter.browserDetails.browser == "chrome") {
+            logger.info(LOG_PREFIX, "Request for audio stream");
+            navigator.getUserMedia({audio: requestAudioConstraints}, function (stream) {
+                logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
+                if (video.srcObject.getAudioTracks()[0]) {
+                    var mixedTrack = mixAudioTracks(stream, video.srcObject);
+                    var originalTrack = video.srcObject.getAudioTracks()[0];
+                    video.srcObject.removeTrack(originalTrack);
+                    video.srcObject.addTrack(mixedTrack);
+                } else {
+                    video.srcObject.addTrack(stream.getAudioTracks()[0]);
+                }
+                resolve(display);
+            });
+        } else {
+            resolve(display);
+        }
+    }
+
+    function addSystemSound() {
+        chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
+            if (response) {
+                chrome.runtime.sendMessage(extensionId, {type: "getSourceId"}, function (response) {
+                    if (response.error) {
+                        resolveCallback();
+                        logger.error(LOG_PREFIX, response.error);
+                    } else {
+                        if (response.systemSoundAccess) {
+                            var constraints = {
+                                audio: {
+                                    mandatory: {
+                                        chromeMediaSource: 'desktop',
+                                        chromeMediaSourceId: response.sourceId,
+                                        echoCancellation: true
+                                    },
+                                    optional: []
+                                },
+                                video: {
+                                    mandatory: {
+                                        chromeMediaSource: 'desktop',
+                                        chromeMediaSourceId: response.sourceId
+                                    },
+                                    optional: []
+                                }
+                            };
+                            navigator.getUserMedia(constraints, function (audioStream) {
+                                if (stream.getAudioTracks().length > 0) {
+                                    var originalAudioTrack = stream.getAudioTracks()[0];
+                                    var mixedTrack = mixAudioTracks(stream, audioStream);
+                                    stream.addTrack(mixedTrack);
+                                    stream.removeTrack(originalAudioTrack);
+                                } else {
+                                    stream.addTrack(audioStream.getAudioTracks()[0]);
+                                }
+                                resolveCallback();
+                            }, function (reason) {
+                                resolveCallback();
+                                logger.error(LOG_PREFIX, reason);
+                            });
+                        } else {
+                            resolveCallback();
+                            logger.error(LOG_PREFIX, "System sound: access is denied by the user");
+                        }
+                    }
+                });
+            } else {
+                resolveCallback();
+            }
+        });
+    }
+};
+
+var createGainNode = function (stream) {
+    var audioCtx = audioContext;
+    var source = audioCtx.createMediaStreamSource(stream);
+    var gainNode = audioCtx.createGain();
+    var destination = audioCtx.createMediaStreamDestination();
+    var outputStream = destination.stream;
+    source.connect(gainNode);
+    gainNode.connect(destination);
+    var sourceAudioTrack = stream.getAudioTracks()[0];
+    gainNode.sourceAudioTrack = sourceAudioTrack;
+    gainNode.release = function () {
+        this.sourceAudioTrack.stop();
+        this.disconnect();
+    };
+    stream.addTrack(outputStream.getAudioTracks()[0]);
+    stream.removeTrack(sourceAudioTrack);
+    return gainNode;
+};
+
+//Fix to set screen resolution for screen sharing in Firefox
+var setScreenResolution = function (video, stream, constraints) {
+    var newHeight;
+    var newWidth;
+    var videoRatio;
+    if (video.videoWidth > video.videoHeight) {
+        videoRatio = video.videoWidth / video.videoHeight;
+        newHeight = constraints.video.videoWidth / videoRatio;
+        newWidth = constraints.video.videoWidth;
+    } else {
+        videoRatio = video.videoHeight / video.videoWidth;
+        newWidth = constraints.video.videoHeight / videoRatio;
+        newHeight = constraints.video.videoHeight;
+    }
+    console.log("videoRatio === " + videoRatio);
+    stream.getVideoTracks()[0].applyConstraints({height: newHeight, width: newWidth});
 };
 
 var getScreenDeviceId = function (constraints) {
@@ -511,7 +745,11 @@ var getScreenDeviceId = function (constraints) {
                             reject(new Error("Screen access denied"));
                         } else {
                             o.chromeMediaSourceId = response.sourceId;
-                            resolve({mandatory: o});
+                            resolve({
+                                mandatory: o,
+                                sourceId: response.sourceId,
+                                systemSoundAccess: response.systemSoundAccess
+                            });
                         }
                     });
                 } else {
@@ -521,18 +759,15 @@ var getScreenDeviceId = function (constraints) {
         } else {
             //firefox case
             o.mediaSource = constraints.video.mediaSource;
-            o.width = {
-                min: constraints.video.width,
-                max: constraints.video.width
-            };
-            o.height = {
-                min: constraints.video.height,
-                max: constraints.video.height
-            };
+
+            o.width = {};
+            o.height = {};
             o.frameRate = {
                 min: constraints.video.frameRate.max,
                 max: constraints.video.frameRate.max
             };
+            o.videoWidth = constraints.video.width;
+            o.videoHeight = constraints.video.height;
             resolve(o);
         }
     });
@@ -548,6 +783,7 @@ var releaseMedia = function (display) {
 };
 
 function getCacheInstance(display) {
+    if (!display) return;
     var i;
     for (i = 0; i < display.children.length; i++) {
         if (display.children[i] && (display.children[i].id.indexOf(LOCAL_CACHED_VIDEO) != -1 || display.children[i].id.indexOf(REMOTE_CACHED_VIDEO) != -1)) {
@@ -565,10 +801,12 @@ function removeVideoElement(video) {
         var tracks = video.srcObject.getTracks();
         for (var i = 0; i < tracks.length; i++) {
             tracks[i].stop();
+            if(video.id.indexOf(LOCAL_CACHED_VIDEO) != -1 && tracks[i].kind == 'audio' && microphoneGain) {
+                microphoneGain.release();
+            }
         }
         video.srcObject = null;
     }
-
 }
 
 /**
@@ -581,14 +819,19 @@ var available = function () {
     return ('getUserMedia' in navigator && 'RTCPeerConnection' in window);
 };
 
-var listDevices = function (labels) {
+var listDevices = function (labels, kind) {
+    if (!kind) {
+        kind = constants.MEDIA_DEVICE_KIND.INPUT;
+    } else if (kind == "all") {
+        kind = "";
+    }
     var getConstraints = function (devices) {
         var constraints = {};
         for (var i = 0; i < devices.length; i++) {
             var device = devices[i];
-            if (device.kind == "audioinput") {
+            if (device.kind.indexOf("audio"+ kind) === 0) {
                 constraints.audio = true;
-            } else if (device.kind == "videoinput") {
+            } else if (device.kind.indexOf("video"+ kind) === 0) {
                 constraints.video = true;
             } else {
                 logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
@@ -608,10 +851,18 @@ var listDevices = function (labels) {
                 id: device.deviceId,
                 label: device.label
             };
-            if (device.kind == "audioinput") {
-                ret.type = "mic";
+            var micCount = 0;
+            var camCount = 0;
+            if (device.kind.indexOf("audio" + kind) === 0 && device.deviceId != "communications") {
+                ret.type = (device.kind == "audioinput") ? "mic" : "speaker";
+                if (ret.type == "mic" && ret.label == "") {
+                    ret.label = 'microphone' + ++micCount;
+                }
                 list.audio.push(ret);
-            } else if (device.kind == "videoinput") {
+            } else if (device.kind.indexOf("video" + kind) === 0) {
+                if (ret.label == "") {
+                    ret.label = 'camera' + ++camCount;
+                }
                 ret.type = "camera";
                 list.video.push(ret);
             } else {
@@ -622,19 +873,23 @@ var listDevices = function (labels) {
     };
 
     return new Promise(function (resolve, reject) {
-        navigator.mediaDevices.enumerateDevices().then(function (devices) {
-            if (labels) {
-                var display = document.createElement("div");
-                getMediaAccess(getConstraints(devices), display).then(function () {
-                    navigator.mediaDevices.enumerateDevices().then(function (devicesWithLabales) {
-                        resolve(getList(devicesWithLabales));
-                        releaseMedia(display);
+        if(kind === constants.MEDIA_DEVICE_KIND.OUTPUT && adapter.browserDetails.browser !== "chrome") {
+            reject({message: "Only supported in chrome"});
+        } else {
+            navigator.mediaDevices.enumerateDevices().then(function (devices) {
+                if (labels) {
+                    var display = document.createElement("div");
+                    getMediaAccess(getConstraints(devices), display).then(function () {
+                        navigator.mediaDevices.enumerateDevices().then(function (devicesWithLabales) {
+                            resolve(getList(devicesWithLabales));
+                            releaseMedia(display);
+                        }, reject);
                     }, reject);
-                }, reject);
-            } else {
-                resolve(getList(devices));
-            }
-        }, reject);
+                } else {
+                    resolve(getList(devices));
+                }
+            }, reject);
+        }
     });
 };
 
