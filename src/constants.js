@@ -515,6 +515,13 @@ define(callStatusInfo, 'FAILED_BY_RTMP_WRITER_ERROR', 'Failed by RTMP writer err
 define(callStatusInfo, 'FAILED_BY_DTLS_FINGERPRINT_ERROR', 'Failed by DTLS fingerprint error');
 
 /**
+ * No common codecs in sdp
+ * @event NO_COMMON_CODECS
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'NO_COMMON_CODECS', 'No common codecs');
+
+/**
  * Client did not send DTLS packets or packets were lost/corrupted during transmission.
  * @event FAILED_BY_DTLS_ERROR
  * @memberof Flashphoner.constants.CALL_STATUS_INFO

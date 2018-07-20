@@ -281,7 +281,6 @@ function onStarted(publishStream, previewStream) {
     }).prop('disabled', !($('#sendAudio').is(':checked')));
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
-    publishStream.setMicrophoneGain(currentGainValue);
     previewStream.setVolume(currentVolumeValue);
     //intervalID = setInterval(function() {
     //    previewStream.getStats(function(stat) {
@@ -296,6 +295,7 @@ function onStarted(publishStream, previewStream) {
 }
 
 function onStopped() {
+    publishStream = null;
     $('input:radio').attr("disabled", false);
     $("#publishBtn").text("Start").off('click').click(function () {
         if (validateForm()) {
@@ -506,8 +506,8 @@ function startStreaming(session) {
         //remove resize listener in case this video was cached earlier
         video.removeEventListener('resize', resizeLocalVideo);
         video.addEventListener('resize', resizeLocalVideo);
+        publishStream.setMicrophoneGain(currentGainValue);
         setStatus(STREAM_STATUS.PUBLISHING);
-
         //play preview
         var constraints = {
             audio: $("#playAudio").is(':checked'),

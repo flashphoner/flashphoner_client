@@ -46,8 +46,13 @@ var createConnection = function (options) {
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
             if(localVideo) {
-                localVideo.id = id + "-local";
-                connection.addStream(localVideo.srcObject);
+                //made for safari, if sip call without audio and video, because function playFirstVideo() creates a video element
+                if(localVideo.srcObject) {
+                    localVideo.id = id + "-local";
+                    connection.addStream(localVideo.srcObject);
+                } else {
+                    localVideo = null;
+                }
             }
             remoteVideo = getCacheInstance(remoteDisplay);
             if (!remoteVideo) {
@@ -146,15 +151,12 @@ var createConnection = function (options) {
                 unmuteVideo();
                 localVideo = null;
             } else if (localVideo) {
-                removeVideoElement(localVideo);
                 localVideo.id = localVideo.id + LOCAL_CACHED_VIDEO;
+                removeVideoElement(localVideo);
                 localVideo = null;
             }
             if (connection.signalingState !== "closed") {
                 connection.close();
-            }
-            if (microphoneGain) {
-                microphoneGain.release();
             }
             delete connections[id];
         };
