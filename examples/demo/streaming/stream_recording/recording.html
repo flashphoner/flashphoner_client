@@ -48,6 +48,42 @@
             </div>
         </div>
 
+        <div class="row">
+            <h2 class="col-sm-6 text-center">Several Stream Recording</h2>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div id="localTestVideo" class="fp-localVideo" style="display: none;"></div>
+                <div class="form-group">
+                    <label class="col-sm-6 control-label">Server URL</label>
+                    <div class="col-sm-6">
+                        <input class="form-control" type="text" id="testUrl">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-6 control-label">Count local streams</label>
+                    <div class="col-sm-4">
+                        <input class="form-control" type="text" id="countStreams" value="5">
+                    </div>
+                </div>
+                <div class="input-group col-sm-3" style="margin: 20px auto 0 auto;">
+                    <div class="input-group-btn">
+
+                        <button id="startTestBtn" type="button" class="btn btn-default">Start</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="col-sm-12">
+                    <div class="form-group">
+                        <textarea id="statusLog" class="form-control" rows="20" style="resize: none;"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
         <div class="row" style="margin-top: 70px;">
             <div class="col-sm-4" style="margin-left: 50px;">
                 <a href="https://play.google.com/store/apps/details?id=com.flashphoner.wcsexample.stream_recording"><img src="../../dependencies/img/google_play.jpg" title="Google Play" alt="Google Play"></a>
