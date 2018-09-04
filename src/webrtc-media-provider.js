@@ -373,6 +373,10 @@ var createConnection = function (options) {
                         video.webkitRequestFullscreen();
                     } else if (video.webkitEnterFullscreen) {
                         video.webkitEnterFullscreen();
+                        //hack for iOS safari. Video is getting paused when switching from fullscreen to normal mode.
+                        video.addEventListener("pause", function(){
+                            video.play();
+                        });
                     }
                 } else {
                     if (document.exitFullscreen) {
@@ -836,7 +840,7 @@ var listDevices = function (labels, kind) {
             } else if (device.kind.indexOf("video"+ kind) === 0) {
                 constraints.video = true;
             } else {
-                logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
+                logger.debug(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
             }
         }
         return constraints;
@@ -868,7 +872,7 @@ var listDevices = function (labels, kind) {
                 ret.type = "camera";
                 list.video.push(ret);
             } else {
-                logger.info(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
+                logger.debug(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
             }
         }
         return list;
