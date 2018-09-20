@@ -1263,7 +1263,7 @@ var createSession = function (options) {
             if(status_ !== CALL_STATUS.ESTABLISHED && status_ !== CALL_STATUS.HOLD){
                 throw new Error('Invalid call state');
             }
-           return mediaConnection.switchMic(deviceId);
+            return mediaConnection.switchMic(deviceId);
         };
 
         call.call = call_;
@@ -1450,7 +1450,7 @@ var createSession = function (options) {
                 availableCallbacks=[];
                 return;
             }
-            
+
             var event = streamInfo.status;
             if (event == STREAM_STATUS.RESIZE) {
                 resolution.width = streamInfo.playerVideoWidth;
@@ -1644,9 +1644,9 @@ var createSession = function (options) {
          * @inner
          * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
          */
-		var switchCam = function(deviceId) {
-		    if(status_ !== STREAM_STATUS.PUBLISHING){
-		        throw new Error('Invalid stream state');
+        var switchCam = function(deviceId) {
+            if(status_ !== STREAM_STATUS.PUBLISHING){
+                throw new Error('Invalid stream state');
             }
             return mediaConnection.switchCam(deviceId);
         };
@@ -1666,6 +1666,37 @@ var createSession = function (options) {
             return mediaConnection.switchMic(deviceId);
         };
 
+
+        /**
+         * Switch to screen in real-time.
+         * Works only with WebRTC
+         *
+         * @memberOf Stream
+         * @inner
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
+         */
+        var switchToScreen = function (source) {
+            if(status_ !== STREAM_STATUS.PUBLISHING){
+                throw new Error('Invalid stream state');
+            }
+            return mediaConnection.switchToScreen(source);
+        };
+
+        /**
+         * Switch to cam in real-time.
+         * Works only with WebRTC
+         *
+         * @memberOf Stream
+         * @inner
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
+         */
+        var switchToCam = function () {
+            if(status_ !== STREAM_STATUS.PUBLISHING){
+                throw new Error('Invalid stream state');
+            }
+            mediaConnection.switchToCam();
+        };
+
         /**
          * Set Microphone Gain
          *
@@ -1673,11 +1704,11 @@ var createSession = function (options) {
          * @inner
          * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
          */
-		var setMicrophoneGain = function (volume) {
+        var setMicrophoneGain = function (volume) {
             if(status_ !== STREAM_STATUS.PUBLISHING){
                 throw new Error('Invalid stream state');
             }
-		    mediaConnection.setMicrophoneGain(volume);
+            mediaConnection.setMicrophoneGain(volume);
         };
 
         /**
@@ -2069,8 +2100,10 @@ var createSession = function (options) {
         stream.fullScreen = fullScreen;
         stream.on = on;
         stream.available = available;
-		stream.switchCam = switchCam;
+        stream.switchCam = switchCam;
         stream.switchMic = switchMic;
+        stream.switchToScreen = switchToScreen;
+        stream.switchToCam = switchToCam;
 
         streams[id_] = stream;
         return stream;
@@ -2288,7 +2321,7 @@ var isUsingTemasys = function () {
 module.exports = {
     init: init,
     isUsingTemasys: isUsingTemasys,
-    getMediaProviders: getMediaProviders,
+    getMediaProvifders: getMediaProviders,
     getMediaDevices: getMediaDevices,
     getMediaAccess: getMediaAccess,
     releaseLocalMedia: releaseLocalMedia,

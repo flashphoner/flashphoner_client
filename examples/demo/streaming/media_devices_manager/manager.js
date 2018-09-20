@@ -11,6 +11,7 @@ var currentGainValue = 50;
 var statsIntervalID;
 var intervalID;
 var canvas;
+var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 
 try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -67,6 +68,7 @@ function init_page() {
     //init api
     try {
         Flashphoner.init({
+            screenSharingExtensionId: extensionId,
             flashMediaProviderSwfLocation: '../../../../media-provider.swf',
             mediaProvidersReadyCallback: function (mediaProviders) {
                 //hide remote video if current media provider is Flash
@@ -90,6 +92,13 @@ function init_page() {
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
     canvas = document.getElementById("canvas");
+
+    if(!Browser.isChrome() && !Browser.isFirefox()) {
+        $('#screenShareForm').hide();
+    }
+    if (!Browser.isFirefox()) {
+        $('#mediaSourceForm').hide();
+    }
 
     setInterval(drawSquare, 2000);
 
@@ -265,19 +274,19 @@ function onStarted(publishStream, previewStream) {
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').click(function () {
         publishStream.switchCam().then(function(id) {
-               $('#videoInput option:selected').prop('selected', false);
-               $("#videoInput option[value='"+ id +"']").prop('selected', true);
-           }).catch(function(e) {
-               console.log("Error " + e);
-           });
+            $('#videoInput option:selected').prop('selected', false);
+            $("#videoInput option[value='"+ id +"']").prop('selected', true);
+        }).catch(function(e) {
+            console.log("Error " + e);
+        });
     }).prop('disabled', $('#sendCanvasStream').is(':checked'));
     $("#switchMicBtn").click(function (){
         publishStream.switchMic().then(function(id) {
-               $('#audioInput option:selected').prop('selected', false);
-               $("#audioInput option[value='"+ id +"']").prop('selected', true);
-           }).catch(function(e) {
-               console.log("Error " + e);
-           });
+            $('#audioInput option:selected').prop('selected', false);
+            $("#audioInput option[value='"+ id +"']").prop('selected', true);
+        }).catch(function(e) {
+            console.log("Error " + e);
+        });
     }).prop('disabled', !($('#sendAudio').is(':checked')));
     //enableMuteToggles(false);
     $("#volumeControl").slider("enable");
@@ -455,8 +464,6 @@ function getConstraints() {
             };
             if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
                 constraints.video.deviceId = {exact: $('#videoInput').val()};
-                constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
-                constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
             }
             if (parseInt($('#sendVideoMinBitrate').val()) > 0)
                 constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
@@ -496,7 +503,7 @@ function startStreaming(session) {
         if (video.videoWidth > 0 && video.videoHeight > 0) {
             resizeLocalVideo({target: video});
         }
-        enableMuteToggles(true);
+        enableToggles(true);
         if ($("#muteVideoToggle").is(":checked")) {
             muteVideo();
         }
@@ -706,19 +713,43 @@ function unmuteVideo() {
     }
 }
 
-function enableMuteToggles(enable) {
+function switchToScreen() {
+    if (publishStream) {
+        $('#switchBtn').prop('disabled', true);
+        $('#videoInput').prop('disabled', true);
+        publishStream.switchToScreen($('#mediaSource').val()).catch(function () {
+            $("#screenShareToggle").removeAttr("checked");
+            $('#switchBtn').prop('disabled', false);
+            $('#videoInput').prop('disabled', false);
+        });
+    }
+}
+
+function switchToCam() {
+    if (publishStream) {
+        publishStream.switchToCam();
+        $('#switchBtn').prop('disabled', false);
+        $('#videoInput').prop('disabled', false);
+    }
+}
+
+function enableToggles(enable) {
     var $muteAudioToggle = $("#muteAudioToggle");
     var $muteVideoToggle = $("#muteVideoToggle");
+    var $screenShareToggle = $("#screenShareToggle");
 
     if (enable) {
         $muteAudioToggle.removeAttr("disabled");
         $muteAudioToggle.trigger('change');
         $muteVideoToggle.removeAttr("disabled");
         $muteVideoToggle.trigger('change');
+        $screenShareToggle.removeAttr("disabled");
+        $screenShareToggle.trigger('change');
     }
     else {
         $muteAudioToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $muteVideoToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
+        $screenShareToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
     }
 }
 

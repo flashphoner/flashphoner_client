@@ -97,7 +97,7 @@
                                 <span id="micLevel" style="min-width: 40px; text-align: center; color: green;" class="input-group-addon">0</span>
                             </div>
                             <div class="col-sm-6">
-                            <button type="button" class="btn btn-default form-control" id="switchMicBtn">Switch</button>
+                                <button type="button" class="btn btn-default form-control" id="switchMicBtn">Switch</button>
                             </div>
                         </div>
                         <div class="form-group" id="micGainForm">
@@ -172,13 +172,29 @@
                                 <canvas width="320" height="240" id="canvas">Your browser does not support the HTML5 canvas tag.</canvas>
                             </div>
                         </div>
+                        <div class="form-group" id="screenShareForm">
+                            <label style="text-align: left" class="col-sm-4 control-label">Screen share</label>
+                            <div class="col-sm-6">
+                                <input id="screenShareToggle" type="checkbox" />
+                            </div>
+                        </div>
+                        <div class="form-group" id="mediaSourceForm">
+                            <span class="text-muted"></span>
+                            <label style="text-align: left" class="col-sm-4 control-label">Screen share source</label>
+                            <div class="col-sm-6">
+                                <select id="mediaSource" class="form-control">
+                                    <option value="screen">Screen</option>
+                                    <option value="window">Window</option>
+                                </select>
+                            </div>
+                        </div>
                         <div class="form-group" id="sendSizeForm">
                             <label style="text-align: left" class="col-sm-4 control-label">Size</label>
                             <div class="col-sm-4">
-                                <input type="text" class="form-control" id="sendWidth" value="320">
+                                <input type="text" class="form-control" id="sendWidth" value="640">
                             </div>
                             <div class="col-sm-4">
-                                <input type="text" class="form-control" id="sendHeight" value="240">
+                                <input type="text" class="form-control" id="sendHeight" value="480">
                             </div>
                         </div>
                         <div class="form-group" id="fpsForm">
@@ -376,6 +392,20 @@
         }
     });
     $muteVideoToggle.bootstrapSwitch({
+        on: 'on',
+        off: 'off',
+        size: 'md'
+    });
+
+    var $screenShareToggle = $("#screenShareToggle");
+    $screenShareToggle.change(function () {
+        if (this.checked) {
+            switchToScreen();
+        } else {
+            switchToCam();
+        }
+    });
+    $screenShareToggle.bootstrapSwitch({
         on: 'on',
         off: 'off',
         size: 'md'

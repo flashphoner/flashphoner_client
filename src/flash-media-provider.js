@@ -145,7 +145,7 @@ var createConnection = function(options) {
         };
 
         var changeAudioCodec = function(codec) {
-           flash.changeAudioCodec(codec);
+            flash.changeAudioCodec(codec);
         };
 
         var setRemoteSdp = function(sdp, reinit, id) {
@@ -262,6 +262,12 @@ var createConnection = function(options) {
         var setMicrophoneGain = function (volume) {
         };
 
+        var switchToScreen = function () {
+        };
+
+        var switchToCam = function () {
+        };
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -282,6 +288,8 @@ var createConnection = function(options) {
         exports.fullScreen = fullScreen;
         exports.switchCam = switchCam;
         exports.switchMic = switchMic;
+        exports.switchToScreen = switchToScreen;
+        exports.switchToCam = switchToCam;
     });
 };
 
