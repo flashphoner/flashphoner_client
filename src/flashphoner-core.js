@@ -2321,7 +2321,7 @@ var isUsingTemasys = function () {
 module.exports = {
     init: init,
     isUsingTemasys: isUsingTemasys,
-    getMediaProvifders: getMediaProviders,
+    getMediaProviders: getMediaProviders,
     getMediaDevices: getMediaDevices,
     getMediaAccess: getMediaAccess,
     releaseLocalMedia: releaseLocalMedia,
