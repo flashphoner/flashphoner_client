@@ -467,6 +467,13 @@ define(streamStatusInfo, 'AGENT_SERVICING_ORIGIN_STREAM_IS_SHUTTING_DOWN', 'Agen
 define(streamStatusInfo, 'TERMINATED_BY_KEEP_ALIVE', 'Terminated by keep-alive');
 
 /**
+ * Transcoding required, but disabled in settings
+ * @event TRANSCODING_REQUIRED_BUT_DISABLED
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'TRANSCODING_REQUIRED_BUT_DISABLED', 'Transcoding required, but disabled');
+
+/**
 * @namespace Flashphoner.constants.CALL_STATUS_INFO
 * @see Call
 */
@@ -541,6 +548,13 @@ define(callStatusInfo, 'FAILED_BY_ERROR', 'Failed by error');
  * @memberof Flashphoner.constants.CALL_STATUS_INFO
  */
 define(callStatusInfo, 'FAILED_BY_REQUEST_TIMEOUT', 'Failed by request timeout');
+
+/**
+ * Transcoding required, but disabled in settings
+ * @event TRANSCODING_REQUIRED_BUT_DISABLED
+ * @memberof Flashphoner.constants.CALL_STATUS_INFO
+ */
+define(callStatusInfo, 'TRANSCODING_REQUIRED_BUT_DISABLED', 'Transcoding required, but disabled');
 
 /**
 * @namespace Flashphoner.constants.ERROR_INFO
