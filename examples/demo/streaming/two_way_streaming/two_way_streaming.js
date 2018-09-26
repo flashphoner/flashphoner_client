@@ -165,7 +165,7 @@ function playStream() {
     session.createStream({
         name: streamName,
         display: remoteVideo
-    }).on(STREAM_STATUS.PENDING, function(stream) {
+    }).on(STREAM_STATUS.PENDING, function (stream) {
         var video = document.getElementById(stream.id());
         if (!video.hasListeners) {
             video.hasListeners = true;
@@ -239,6 +239,9 @@ function setStatus(selector, status, stream) {
                         break;
                     case STREAM_STATUS_INFO.FILE_HAS_WRONG_FORMAT:
                         $("#playInfo").text("File has wrong format on play vod, this format is not supported").attr("class", "text-muted");
+                        break;
+                    case STREAM_STATUS_INFO.TRANSCODING_REQUIRED_BUT_DISABLED:
+                        $("#playInfo").text("Transcoding required, but disabled in settings").attr("class", "text-muted");
                         break;
                     default:
                         $("#playInfo").text("Other: "+stream.getInfo()).attr("class", "text-muted");
