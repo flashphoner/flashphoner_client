@@ -285,10 +285,9 @@ module.exports = {
         var pt = [];
         var i;
         for (var p = 0; p < codecsArray.length; p++) {
-            codecsArray[p] = codecsArray[p].toUpperCase();
             console.log("Searching for codec " + codecsArray[p]);
             for (i = 0; i < sdpArray.length; i++) {
-                if (sdpArray[i].search(codecsArray[p]) != -1 && sdpArray[i].indexOf("a=rtpmap") == 0) {
+                if (sdpArray[i].search(new RegExp(codecsArray[p],'i')) != -1 && sdpArray[i].indexOf("a=rtpmap") == 0) {
                     console.log(codecsArray[p] + " detected");
                     pt.push(sdpArray[i].match(/[0-9]+/)[0]);
                     sdpArray[i] = "";
