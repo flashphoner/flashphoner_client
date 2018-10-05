@@ -34,7 +34,8 @@ var createConnection = function (options) {
         var remoteDisplay = options.remoteDisplay;
         var bidirectional = options.bidirectional;
         var localVideo;
-        var remoteVideo;
+        //tweak for custom video players #WCS-1511
+        var remoteVideo = options.remoteVideo;
         var videoCams = [];
         var switchCamCount = 0;
         var mics = [];
@@ -73,27 +74,30 @@ var createConnection = function (options) {
              */
             remoteVideo.style = "border-radius: 1px";
         } else {
-            var cachedVideo = getCacheInstance(display);
-            if (!cachedVideo || cachedVideo.id.indexOf(REMOTE_CACHED_VIDEO) !== -1 || !cachedVideo.srcObject) {
-                if (cachedVideo) {
-                    remoteVideo = cachedVideo;
+            //tweak for custom video players. In order to put MediaStream in srcObject #WCS-1511
+            if (!remoteVideo) {
+                var cachedVideo = getCacheInstance(display);
+                if (!cachedVideo || cachedVideo.id.indexOf(REMOTE_CACHED_VIDEO) !== -1 || !cachedVideo.srcObject) {
+                    if (cachedVideo) {
+                        remoteVideo = cachedVideo;
+                    } else {
+                        remoteVideo = document.createElement('video');
+                        display.appendChild(remoteVideo);
+                    }
+                    remoteVideo.id = id;
+                    if (options.audioOutputId && typeof remoteVideo.setSinkId !== "undefined") {
+                        remoteVideo.setSinkId(options.audioOutputId);
+                    }
+                    /**
+                     * Workaround for Android 6, 7, Chrome 61.
+                     * https://bugs.chromium.org/p/chromium/issues/detail?id=769622
+                     */
+                    remoteVideo.style = "border-radius: 1px";
                 } else {
-                    remoteVideo = document.createElement('video');
-                    display.appendChild(remoteVideo);
+                    localVideo = cachedVideo;
+                    localVideo.id = id;
+                    connection.addStream(localVideo.srcObject);
                 }
-                remoteVideo.id = id;
-                if (options.audioOutputId && typeof remoteVideo.setSinkId !== "undefined") {
-                    remoteVideo.setSinkId(options.audioOutputId);
-                }
-                /**
-                 * Workaround for Android 6, 7, Chrome 61.
-                 * https://bugs.chromium.org/p/chromium/issues/detail?id=769622
-                 */
-                remoteVideo.style = "border-radius: 1px";
-            } else {
-                localVideo = cachedVideo;
-                localVideo.id = id;
-                connection.addStream(localVideo.srcObject);
             }
         }
         if (localVideo) {
@@ -145,7 +149,10 @@ var createConnection = function (options) {
         var close = function (cacheCamera) {
             if (remoteVideo) {
                 removeVideoElement(remoteVideo);
-                remoteVideo.id = remoteVideo.id + REMOTE_CACHED_VIDEO;
+                //tweak for custom video players #WCS-1511
+                if(!options.remoteVideo) {
+                    remoteVideo.id = remoteVideo.id + REMOTE_CACHED_VIDEO;
+                }
                 remoteVideo = null;
             }
             if (localVideo && !getCacheInstance((localDisplay || display)) && cacheCamera) {

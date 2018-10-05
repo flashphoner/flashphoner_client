@@ -1419,6 +1419,7 @@ var createSession = function (options) {
         var remoteBitrate = -1;
         var networkBandwidth = -1;
         var sdpHook = options.sdpHook;
+        var remoteVideo = options.remoteVideo;
         //callbacks added using stream.on()
         var callbacks = {};
         /**
@@ -1514,7 +1515,8 @@ var createSession = function (options) {
                 flashShowFullScreenButton: options.flashShowFullScreenButton || false,
                 connectionConfig: mediaOptions,
                 connectionConstraints: mediaConnectionConstraints,
-                audioOutputId: audioOutputId
+                audioOutputId: audioOutputId,
+                remoteVideo: remoteVideo
             }, streamRefreshHandlers[id_]).then(function (newConnection) {
                 mediaConnection = newConnection;
                 try {
