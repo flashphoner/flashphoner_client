@@ -155,7 +155,7 @@ module.exports = {
             var i;
             for (i = 0; i < sdpArray.length; i++) {
                 if (sdpArray[i].search(codec) != -1 && sdpArray[i].indexOf("a=rtpmap") == 0) {
-                    sdpArray[i] += "\r\na=fmtp:" + sdpArray[i].match(/[0-9]+/)[0] + " " + param + "\r";
+                    sdpArray[i] += "\na=fmtp:" + sdpArray[i].match(/[0-9]+/)[0] + " " + param + "\r";
                 }
             }
             //normalize sdp after modifications
