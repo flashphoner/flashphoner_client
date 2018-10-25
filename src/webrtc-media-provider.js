@@ -1080,12 +1080,15 @@ var playFirstVideo = function (display, isLocal, src) {
         video.setAttribute("webkit-playsinline", "");
         display.appendChild(video);
         video.id = uuid_v1() + (isLocal ? LOCAL_CACHED_VIDEO : REMOTE_CACHED_VIDEO);
-        if (src) {
-            video.src = src;
-        } else {
-            video.src = "../../dependencies/media/preloader.mp4";
-        }
-        video.play();
+        /**
+         * WCS-1560. We do not need to put src in the video element and play it
+         * if (src) {
+         *      video.src = src;
+         * } else {
+         *      video.src = "../../dependencies/media/preloader.mp4";
+         * }
+         * video.play();
+         */
     }
 };
 
