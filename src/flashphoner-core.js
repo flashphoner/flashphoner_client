@@ -658,6 +658,8 @@ var createSession = function (options) {
      * @param {HTMLElement} options.remoteVideoDisplay Div element remote video should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
      * @param {Array<string>=} options.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
+     * @param {Array<string>=} options.sipSDP Array of custom SDP params (ex. bandwidth (b=))
+     * @param {Array<string>=} options.sipHeaders Array of custom SIP headers
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Call} Call
      * @throws {TypeError} Error if no options provided
@@ -707,6 +709,8 @@ var createSession = function (options) {
         var callbacks = {};
         var hasTransferredCall = false;
         var sdpHook = options.sdpHook;
+        var sipSDP = options.sipSDP;
+        var sipHeaders = options.sipHeaders;
         /**
          * Represents sip call.
          *
@@ -820,6 +824,7 @@ var createSession = function (options) {
                         status: status_,
                         mediaProvider: mediaProvider,
                         sdp: offer.sdp,
+                        sipSDP: sipSDP,
                         caller: login,
                         callee: callee_,
                         custom: options.custom,
@@ -882,6 +887,8 @@ var createSession = function (options) {
          * @param {Boolean=} answerOptions.receiveVideo Receive video
          * @param {String=} answerOptions.constraints Answer call with constraints
          * @param {Array<string>=} answerOptions.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
+         * @param {Array<string>=} answerOptions.sipSDP Array of custom SDP params (ex. bandwidth (b=))
+         * @param {Array<string>=} answerOptions.sipHeaders Array of custom SIP headers
          * @param {sdpHook} sdpHook The callback that handles sdp from the server
          * @throws {Error} Error if call status is not {@link Flashphoner.constants.CALL_STATUS.NEW}
          * @memberof Call
@@ -898,6 +905,8 @@ var createSession = function (options) {
             status_ = CALL_STATUS.PENDING;
             var sdp;
             var sdpHook = answerOptions.sdpHook;
+            sipSDP = answerOptions.sipSDP;
+            sipHeaders = answerOptions.sipHeaders;
             if (!remoteSdpCache[id_]) {
                 logger.error(LOG_PREFIX, "No remote sdp available");
                 throw new Error("No remote sdp available");
@@ -952,6 +961,7 @@ var createSession = function (options) {
                             status: status_,
                             mediaProvider: mediaProvider,
                             sdp: sdp,
+                            sipSDP: sipSDP,
                             caller: cConfig.login,
                             callee: callee_,
                             custom: options.custom
