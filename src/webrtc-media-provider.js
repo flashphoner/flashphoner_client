@@ -11,6 +11,7 @@ var defaultConstraints;
 var logger;
 var LOG_PREFIX = "webrtc";
 var audioContext;
+var createMicGainNode;
 var microphoneGain;
 var constants = require('./constants');
 
@@ -709,7 +710,7 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
         video = document.createElement('video');
         display.appendChild(video);
     }
-    if (stream.getAudioTracks().length > 0 && adapter.browserDetails.browser == "chrome") {
+    if (createMicGainNode && stream.getAudioTracks().length > 0 && adapter.browserDetails.browser == "chrome") {
         microphoneGain = createGainNode(stream);
     }
     video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
@@ -1105,6 +1106,7 @@ module.exports = {
         defaultConstraints = configuration.constraints;
         audioContext = configuration.audioContext;
         logger = configuration.logger;
+        createMicGainNode = (typeof configuration.createMicGainNode !== 'undefined') ? configuration.createMicGainNode : true;
         logger.info(LOG_PREFIX, "Initialized");
     }
 };

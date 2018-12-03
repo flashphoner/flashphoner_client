@@ -11,8 +11,11 @@ var session;
 function init_page() {
     //init api
     try {
-        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
-    } catch(e) {
+        Flashphoner.init({
+            flashMediaProviderSwfLocation: '../../../../media-provider.swf',
+            createMicGainNode: false
+        });
+    } catch (e) {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
     }

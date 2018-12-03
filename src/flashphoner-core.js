@@ -58,7 +58,8 @@ var init = function (options) {
                 constraints: options.constraints || getDefaultMediaConstraints(),
                 extensionId: options.screenSharingExtensionId,
                 audioContext: audioContext,
-                logger: logger
+                logger: logger,
+                createMicGainNode: options.createMicGainNode
             };
             webRtcProvider.configure(webRtcConf);
         } else {
