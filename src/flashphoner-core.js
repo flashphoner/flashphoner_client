@@ -528,7 +528,7 @@ var createSession = function (options) {
                         callRefreshHandlers[mediaSessionId](null, sdp);
                     } else {
                         remoteSdpCache[mediaSessionId] = sdp;
-                        logger.warn(LOG_PREFIX, "Media not found, id " + mediaSessionId);
+                        logger.info(LOG_PREFIX, "Media not found, id " + mediaSessionId);
                     }
                     break;
                 case 'notifyVideoFormat':
