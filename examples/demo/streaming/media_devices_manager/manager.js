@@ -10,7 +10,8 @@ var currentVolumeValue = 50;
 var currentGainValue = 50;
 var statsIntervalID;
 var intervalID;
-var canvas;
+var mockVideoElement;
+
 var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 
 try {
@@ -91,7 +92,6 @@ function init_page() {
     //local and remote displays
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
-    canvas = document.getElementById("canvas");
 
     if(!Browser.isChrome() && !Browser.isFirefox()) {
         $('#screenShareForm').hide();
@@ -99,8 +99,6 @@ function init_page() {
     if (!Browser.isFirefox()) {
         $('#mediaSourceForm').hide();
     }
-
-    setInterval(drawSquare, 2000);
 
     Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.OUTPUT).then(function (list) {
         list.audio.forEach(function (device) {
@@ -369,12 +367,12 @@ function startTest() {
         $("#testBtn").prop('disabled', false);
         testStarted = false;
     });
-
-    drawSquare();
 }
 
 
 function stopTest() {
+    //if we used canvas in the test, then stop rendering so that there are no memory leaks
+    stopCanvasStream();
     releaseResourcesForTesting();
     if (Flashphoner.releaseLocalMedia(localVideo)) {
         $("#testBtn").text("Test").off('click').click(function () {
@@ -454,8 +452,10 @@ function getConstraints() {
 
     if (constraints.video) {
         if (constraints.customStream) {
-            constraints.customStream = canvas.captureStream(30);
             constraints.video = false;
+            constraints.audio = false;
+            var stream = createCanvasStream();
+            constraints.customStream = stream;
         } else {
             constraints.video = {
                 deviceId: $('#videoInput').val(),
@@ -477,7 +477,43 @@ function getConstraints() {
     return constraints;
 }
 
+
+//test function to create a canvas with audio and video for later capture in stream
+function createCanvasStream() {
+    var mockCanvasElement = document.createElement("canvas");
+    var canvasContext = mockCanvasElement.getContext("2d");
+    var canvasStream = mockCanvasElement.captureStream(30);
+    mockVideoElement = document.createElement("video");
+    mockVideoElement.src = '../../dependencies/media/test_movie.mp4';
+    mockVideoElement.loop = true;
+    mockVideoElement.addEventListener("play", function () {
+        var $this = this;
+        (function loop() {
+            if (!$this.paused && !$this.ended) {
+                canvasContext.drawImage($this, 0, 0);
+                setTimeout(loop, 1000 / 30); // drawing at 30fps
+            }
+        })();
+    }, 0);
+    mockVideoElement.autoplay = true;
+    var source = audioContext.createMediaElementSource(mockVideoElement);
+    var destination = audioContext.createMediaStreamDestination();
+    source.connect(destination);
+    canvasStream.addTrack(destination.stream.getAudioTracks()[0]);
+    return canvasStream;
+}
+
+function stopCanvasStream() {
+    if(mockVideoElement) {
+        mockVideoElement.pause();
+        mockVideoElement.removeEventListener('play', null);
+        mockVideoElement = null;
+    }
+}
+
 function startStreaming(session) {
+    //if we used canvas in the previous publication, then stop rendering so that there are no memory leaks
+    stopCanvasStream();
     var streamName = field("url").split('/')[3];
     var constraints = getConstraints();
     var mediaConnectionConstraints;
@@ -550,8 +586,6 @@ function startStreaming(session) {
                     detectSpeech(previewStream);
                 }, 3000);
             }
-
-            drawSquare();
         }).on(STREAM_STATUS.STOPPED, function () {
             publishStream.stop();
         }).on(STREAM_STATUS.FAILED, function () {
@@ -799,12 +833,4 @@ function handleAudio(event) {
             this.lastClip = window.performance.now();
         }
     }
-}
-
-function drawSquare() {
-    var ctx = canvas.getContext("2d");
-    ctx.strokeStyle="#FF0000";
-    ctx.beginPath();
-    ctx.rect(canvas.width / 2 - 100/2, canvas.height / 2 - 100/2, 100 , 100);
-    ctx.stroke();
 }
