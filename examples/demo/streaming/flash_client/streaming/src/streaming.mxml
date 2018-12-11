@@ -27,7 +27,8 @@
 			private var videoFarEnd:Video;
 			private var publishStream:NetStream;
 			private var subscribeStream:NetStream;
-			private var subscribeStreamObject:Object;			
+			private var subscribeStreamObject:Object;
+			private var scheduledPublish:Boolean;
 			
 			private function init():void{			
 				
@@ -69,11 +70,13 @@
 				
 				publishBtn.enabled = false;
 				publishBtn.visible = true;
-				
+
 				playBtn.visible = true;
 				playBtn.enabled = false;
 				
 				stopBtn.visible = false;
+
+				enablePublishCheckboxes();
 				
 				setPublishStatus("");
 				setPlayStatus("");
@@ -139,7 +142,7 @@
 					connectBtn.visible = false;
 					playBtn.enabled = true;
 					publishBtn.enabled = true;
-					setConnectionStatus("CONNECTED");					
+					setConnectionStatus("CONNECTED");
 				} else if (event.info.code=="NetConnection.Connect.Closed" || event.info.code=="NetConnection.Connect.Failed"){					
 					nc.removeEventListener(NetStatusEvent.NET_STATUS,handleConnectionStatus);
 					unpublish();
@@ -165,28 +168,36 @@
 					publishStatus.setStyle("color","#FF0000");
 					return;
 				}
+				disablePublishButtons();
+                disablePublishCheckboxes();
 				publishStatus.setStyle("color","#000000");
 				Logger.info("publish audio: "+publishAudio.selected+" video: "+publishVideo.selected);
 				publishStream = new NetStream(nc);
-				if (publishAudio.selected){
-					initMic();
+				initMic();
+				if (publishAudio.selected){					
 					publishStream.attachAudio(mic);
 					Logger.info("Init audio stream");
 				}
-				if (publishVideo.selected){
-					initCam();
+				initCam();
+				if (publishVideo.selected){					
 					publishStream.attachCamera(cam);
-					addH264();
+					if (videoCodec.selectedItem == "H264") {
+					    Logger.info("Video codec H264");
+					    addH264();
+					} else {
+					    Logger.info("Video codec FLV");
+					}
 					Logger.info("Init video stream");
 				}
 				addListenerAndPublish();
 				Logger.info("Publishing");
-				
 			}
 			
 			//unpublish
 			private function unpublish():void{
 				Logger.info("unpublish");
+				disablePublishButtons();
+				disablePublishCheckboxes();
 				if (publishStream!=null){
 					publishStream.close();
 				}
@@ -291,6 +302,8 @@
 			
 			private function handleStreamStatus(event:NetStatusEvent):void{
 				Logger.info("handleStreamStatus: "+event.info.code);
+				enablePublishButtons();
+				enablePublishCheckboxes();
 				switch (event.info.code) {
 					case "NetStream.Failed":
 						Logger.info("Publish failed");
@@ -307,6 +320,11 @@
 						setPublishStatus("PUBLISH STREAM FAILED");
 						break;
 					case "NetStream.Unpublish.Success":
+					    if(scheduledPublish) {
+					        scheduledPublish = false;
+					        publish();
+					        return;
+					    }
 						publishStream.removeEventListener(NetStatusEvent.NET_STATUS, handleStreamStatus);
 						publishStream=null;	
 						setPublishStatus("UNPUBLISHED");
@@ -316,9 +334,8 @@
 					case "NetStream.Publish.Start":
 						setPublishStatus("PUBLISHING");
 						publishBtn.visible = false;
-						unpublishBtn.visible = true;
+                        unpublishBtn.visible = true;
 						break;
-
 				}		
 			}
 			
@@ -382,6 +399,53 @@
 				}
 			}
 			
+			private function switchAudio(event:Event):void {
+				Logger.info("switchAudio");
+				if (publishStream == null || mic == null){
+					Logger.info("No stream or mic. Return.");
+					return;
+				}
+				Logger.info("Switching mic...");
+				republishStream(publishStream);
+			}
+			
+			private function switchVideo(event:Event):void {
+				Logger.info("switchVideo");
+				if (publishStream == null || cam == null){
+					Logger.info("No stream or cam. Return.");
+					return;
+				}
+				Logger.info("Switching cam...");
+				republishStream(publishStream);
+			}
+
+			private function republishStream(stream:NetStream):void {
+                disablePublishCheckboxes();
+                disablePublishButtons();
+                scheduledPublish = true;
+                publishStream.publish(null);
+            }
+
+            private function disablePublishCheckboxes():void {
+                publishAudio.enabled = false;
+                publishVideo.enabled = false;
+            }
+
+            private function enablePublishCheckboxes():void {
+                publishAudio.enabled = true;
+                publishVideo.enabled = true;
+            }
+
+            private function enablePublishButtons():void {
+                publishBtn.enabled = true;
+                unpublishBtn.enabled = true;
+            }
+
+            private function disablePublishButtons():void {
+                publishBtn.enabled = false;
+                unpublishBtn.enabled = false;
+            }
+			
 		]]>
 	</fx:Script>
 	<s:Label x="96" y="34" width="265" styleName="header" text="Flash Streaming"/>
@@ -393,23 +457,33 @@
 	
 	<!-- publish / unpublish -->
 	<s:Button id="publishBtn" x="326" y="143" label="Start" width="90" height="21" click="publish()" enabled="true"/>
-	<s:CheckBox id="publishAudio" x="146" y="505" label="audio" selected="true" />
-	<s:CheckBox id="publishVideo" x="223" y="505" label="video" selected="true"/>	
+	<s:CheckBox id="publishAudio" x="146" y="505" label="audio" change="switchAudio(event)" selected="true"/>
+	<s:CheckBox id="publishVideo" x="223" y="505" label="video" change="switchVideo(event)" selected="true"/>	
+
+	<s:Label x="80" y="561" text="codec"/>
+    <s:DropDownList id="videoCodec" x="67" y="531" width="68" requireSelection="true">
+        <s:dataProvider>
+            <s:ArrayCollection>
+                <fx:String>H264</fx:String>
+                <fx:String>FLV</fx:String>
+            </s:ArrayCollection>
+        </s:dataProvider>
+    </s:DropDownList>
+
+	<s:Label x="140" y="561" text="width"/>
+	<s:TextInput id="camWidth" x="140" y="531" width="32" text="320"/>
 	
-	<s:Label x="120" y="561" text="width"/>
-	<s:TextInput id="camWidth" x="120" y="531" width="32" text="320"/>
+	<s:Label x="179" y="561" text="height"/>
+	<s:TextInput id="camHeight" x="180" y="531" width="31" text="240"/>
 	
-	<s:Label x="159" y="561" text="height"/>
-	<s:TextInput id="camHeight" x="160" y="531" width="31" text="240"/>
+	<s:Label x="226" y="561" text="fps"/>
+	<s:TextInput id="camFPS" x="220" y="531" width="31" text="15"/>
 	
-	<s:Label x="206" y="561" text="fps"/>
-	<s:TextInput id="camFPS" x="200" y="531" width="31" text="15"/>
+	<s:Label x="260" y="561" text="quality"/>
+	<s:TextInput id="camQuality" x="260" y="531" width="31" text="80"/>
 	
-	<s:Label x="240" y="561" text="quality"/>
-	<s:TextInput id="camQuality" x="240" y="531" width="31" text="80"/>
-	
-	<s:Label x="279" y="561" text="keyframe"/>
-	<s:TextInput id="camKeyFrame" x="280" y="531" width="31" text="15"/>	
+	<s:Label x="299" y="561" text="keyframe"/>
+	<s:TextInput id="camKeyFrame" x="300" y="531" width="31" text="15"/>
 	
 	<!-- play / stop -->
 	<s:Button id="playBtn" x="325" y="193" label="Start" width="90" height="21" click="play()" enabled="true"/>
