@@ -295,11 +295,13 @@ function getCookie (c_name) {
 function setCallStatus(status) {
 
     if (status == "ESTABLISHED") {
-        $("#callStatus").removeClass().attr("class","text-success");
+        $("#callStatus").removeClass().attr("class", "text-success");
+        $("#dtmfBtn").prop('disabled', false);
     }
 
     if (status == "FINISHED") {
-        $("#callStatus").removeClass().attr("class","text-muted");
+        $("#callStatus").removeClass().attr("class", "text-muted");
+        $("#dtmfBtn").prop('disabled', true);
     }
 
 }
