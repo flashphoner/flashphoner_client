@@ -87,7 +87,7 @@
 				cam.setQuality(0,int(camQuality.text));								
 				cam.setKeyFrameInterval(int(camKeyFrame.text));
 				cam.setMotionLevel(0,2000);
-				Logger.info("Cam initizlized "+cam.width+"x"+cam.height);
+				Logger.info("Cam initialized "+cam.width+"x"+cam.height);
 			}
 			
 			private function initMic():void{
@@ -129,6 +129,7 @@
 			//disconnect
 			private function disconnect():void{
 				Logger.info("disconnect");
+				publishStream = null;
 				nc.close();				
 			}
 			
