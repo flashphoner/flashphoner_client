@@ -64,7 +64,7 @@ module.exports = {
         if (isEdge)
             browser = "Edge";
         // Chrome 1+
-        var isChrome = !!window.chrome && !!window.chrome.webstore;
+        var isChrome = !!window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor) && !/OPR/.test(navigator.userAgent);
         if (isChrome)
             browser = "Chrome";
         return browser;
@@ -120,7 +120,7 @@ module.exports = {
             return typeof InstallTrigger !== 'undefined';
         },
         isChrome: function () {
-            return !!window.chrome && !!window.chrome.webstore;
+            return !!window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor) && !/OPR/.test(navigator.userAgent);
         },
         isEdge: function () {
             return !isIE && !!window.StyleMedia;

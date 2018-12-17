@@ -1329,6 +1329,7 @@ var createSession = function (options) {
      * @param {Integer} [options.constraints.video.minBitrate=0] Set minimal bitrate to publish stream with this value
      * @param {Integer} [options.constraints.video.maxBitrate=0] Set maximal bitrate to publish stream with this value
      * @param {Integer} [options.constraints.video.quality=0] Set quality to play stream with this value
+     * @param {MediaStream} [options.constraints.customStream] Set a MediaStream  for publish stream from canvas.
      * @param {Boolean=} options.receiveAudio DEPRECATED: Receive audio
      * @param {Boolean=} options.receiveVideo DEPRECATED: Receive video
      * @param {Integer=} options.playWidth DEPRECATED: Set width to play stream with this value

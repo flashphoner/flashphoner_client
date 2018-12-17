@@ -995,11 +995,12 @@ var listDevices = function (labels, kind) {
         } else {
             navigator.mediaDevices.enumerateDevices().then(function (devices) {
                 if (labels) {
-                    var display = document.createElement("div");
-                    getMediaAccess(getConstraints(devices), display).then(function () {
+                    navigator.getUserMedia(getConstraints(devices), function (stream) {
                         navigator.mediaDevices.enumerateDevices().then(function (devicesWithLabales) {
                             resolve(getList(devicesWithLabales));
-                            releaseMedia(display);
+                            stream.getTracks().forEach(function (track) {
+                                track.stop();
+                            });
                         }, reject);
                     }, reject);
                 } else {

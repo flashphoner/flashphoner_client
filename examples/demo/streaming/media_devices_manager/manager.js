@@ -10,8 +10,6 @@ var currentVolumeValue = 50;
 var currentGainValue = 50;
 var statsIntervalID;
 var intervalID;
-var mockVideoElement;
-
 var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 
 try {
@@ -277,7 +275,7 @@ function onStarted(publishStream, previewStream) {
         }).catch(function(e) {
             console.log("Error " + e);
         });
-    }).prop('disabled', $('#sendCanvasStream').is(':checked'));
+    })
     $("#switchMicBtn").click(function (){
         publishStream.switchMic().then(function(id) {
             $('#audioInput option:selected').prop('selected', false);
@@ -371,8 +369,6 @@ function startTest() {
 
 
 function stopTest() {
-    //if we used canvas in the test, then stop rendering so that there are no memory leaks
-    stopCanvasStream();
     releaseResourcesForTesting();
     if (Flashphoner.releaseLocalMedia(localVideo)) {
         $("#testBtn").text("Test").off('click').click(function () {
@@ -435,7 +431,6 @@ function getConstraints() {
     constraints = {
         audio: $("#sendAudio").is(':checked'),
         video: $("#sendVideo").is(':checked'),
-        customStream: $("#sendCanvasStream").is(':checked')
     };
 
     if (constraints.audio) {
@@ -451,69 +446,26 @@ function getConstraints() {
     }
 
     if (constraints.video) {
-        if (constraints.customStream) {
-            constraints.video = false;
-            constraints.audio = false;
-            var stream = createCanvasStream();
-            constraints.customStream = stream;
-        } else {
-            constraints.video = {
-                deviceId: $('#videoInput').val(),
-                width: parseInt($('#sendWidth').val()),
-                height: parseInt($('#sendHeight').val())
-            };
-            if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-                constraints.video.deviceId = {exact: $('#videoInput').val()};
-            }
-            if (parseInt($('#sendVideoMinBitrate').val()) > 0)
-                constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
-            if (parseInt($('#sendVideoMaxBitrate').val()) > 0)
-                constraints.video.maxBitrate = parseInt($('#sendVideoMaxBitrate').val());
-            if (parseInt($('#fps').val()) > 0)
-                constraints.video.frameRate = parseInt($('#fps').val());
+        constraints.video = {
+            deviceId: $('#videoInput').val(),
+            width: parseInt($('#sendWidth').val()),
+            height: parseInt($('#sendHeight').val())
+        };
+        if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+           constraints.video.deviceId = {exact: $('#videoInput').val()};
         }
+        if (parseInt($('#sendVideoMinBitrate').val()) > 0)
+                constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
+        if (parseInt($('#sendVideoMaxBitrate').val()) > 0)
+                constraints.video.maxBitrate = parseInt($('#sendVideoMaxBitrate').val());
+        if (parseInt($('#fps').val()) > 0)
+            constraints.video.frameRate = parseInt($('#fps').val());
     }
 
     return constraints;
 }
 
-
-//test function to create a canvas with audio and video for later capture in stream
-function createCanvasStream() {
-    var mockCanvasElement = document.createElement("canvas");
-    var canvasContext = mockCanvasElement.getContext("2d");
-    var canvasStream = mockCanvasElement.captureStream(30);
-    mockVideoElement = document.createElement("video");
-    mockVideoElement.src = '../../dependencies/media/test_movie.mp4';
-    mockVideoElement.loop = true;
-    mockVideoElement.addEventListener("play", function () {
-        var $this = this;
-        (function loop() {
-            if (!$this.paused && !$this.ended) {
-                canvasContext.drawImage($this, 0, 0);
-                setTimeout(loop, 1000 / 30); // drawing at 30fps
-            }
-        })();
-    }, 0);
-    mockVideoElement.autoplay = true;
-    var source = audioContext.createMediaElementSource(mockVideoElement);
-    var destination = audioContext.createMediaStreamDestination();
-    source.connect(destination);
-    canvasStream.addTrack(destination.stream.getAudioTracks()[0]);
-    return canvasStream;
-}
-
-function stopCanvasStream() {
-    if(mockVideoElement) {
-        mockVideoElement.pause();
-        mockVideoElement.removeEventListener('play', null);
-        mockVideoElement = null;
-    }
-}
-
 function startStreaming(session) {
-    //if we used canvas in the previous publication, then stop rendering so that there are no memory leaks
-    stopCanvasStream();
     var streamName = field("url").split('/')[3];
     var constraints = getConstraints();
     var mediaConnectionConstraints;

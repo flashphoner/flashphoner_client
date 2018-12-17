@@ -142,7 +142,7 @@ var Browser = {
         return typeof InstallTrigger !== 'undefined';
     },
     isChrome: function () {
-        return !!window.chrome && !!window.chrome.webstore;
+        return !!window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor) && !/OPR/.test(navigator.userAgent);
     },
     isEdge: function () {
         return !isIE && !!window.StyleMedia;
