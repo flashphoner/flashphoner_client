@@ -34,7 +34,7 @@ function connect() {
     var url = $('#urlServer').val();
     //create session
     console.log("Create new session with url " + url);
-    var options = {
+    Flashphoner.createSession({
         urlServer: url,
         mediaOptions: {
             "iceServers": [
@@ -45,11 +45,7 @@ function connect() {
                 }
             ]
         }
-    };
-    if ($("#forceRelay").is(':checked')) {
-        options.mediaOptions.iceTransportPolicy = "relay";
-    }
-    Flashphoner.createSession(options).on(SESSION_STATUS.ESTABLISHED, function (session) {
+    }).on(SESSION_STATUS.ESTABLISHED, function (session) {
         setStatus("#connectStatus", session.status());
         onConnected(session);
     }).on(SESSION_STATUS.DISCONNECTED, function () {
