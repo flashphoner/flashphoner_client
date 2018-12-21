@@ -1107,7 +1107,7 @@ module.exports = {
         defaultConstraints = configuration.constraints;
         audioContext = configuration.audioContext;
         logger = configuration.logger;
-        createMicGainNode = (typeof configuration.createMicGainNode !== 'undefined') ? configuration.createMicGainNode : true;
+        createMicGainNode = (typeof configuration.createMicGainNode !== 'undefined') ? configuration.createMicGainNode : false;
         logger.info(LOG_PREFIX, "Initialized");
     }
 };
