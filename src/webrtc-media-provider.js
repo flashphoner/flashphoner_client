@@ -130,7 +130,16 @@ var createConnection = function (options) {
                 remoteVideo.srcObject = event.streams[0];
                 remoteVideo.onloadedmetadata = function (e) {
                     if (remoteVideo) {
-                        remoteVideo.play();
+                        remoteVideo.play().catch(function (e) {
+                            if(adapter.browserDetails.browser == 'chrome' && audioContext.state == 'suspended') {
+                                //WCS-1698. fix autoplay in chrome 71
+                                logger.info(LOG_PREFIX, "Autoplay detected! Trying to play a video with a muted sound...");
+                                remoteVideo.muted = true;
+                                remoteVideo.play();
+                            } else {
+                                logger.error(LOG_PREFIX, e);
+                            }
+                        });
                     }
                 };
             }
@@ -296,6 +305,25 @@ var createConnection = function (options) {
             if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
                 remoteVideo.volume = volume / 100;
             }
+        };
+
+        var unmuteRemoteAudio = function () {
+            if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
+                remoteVideo.muted = false;
+            }
+        };
+
+        var muteRemoteAudio = function () {
+            if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
+                remoteVideo.muted = true;
+            }
+        };
+
+        var isRemoteAudioMuted = function () {
+            if (remoteVideo && remoteVideo.srcObject && remoteVideo.srcObject.getAudioTracks().length > 0) {
+                return remoteVideo.muted;
+            }
+            return true;
         };
 
         var setMicrophoneGain = function (volume) {
@@ -595,6 +623,9 @@ var createConnection = function (options) {
         exports.close = close;
         exports.setAudioOutputId = setAudioOutputId;
         exports.setVolume = setVolume;
+        exports.unmuteRemoteAudio = unmuteRemoteAudio;
+        exports.muteRemoteAudio = muteRemoteAudio;
+        exports.isRemoteAudioMuted = isRemoteAudioMuted;
         exports.setMicrophoneGain = setMicrophoneGain;
         exports.getVolume = getVolume;
         exports.muteAudio = muteAudio;
@@ -714,6 +745,8 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
         display.appendChild(video);
     }
     if (createMicGainNode && stream.getAudioTracks().length > 0 && adapter.browserDetails.browser == "chrome") {
+        //WCS-1696. We need to start audioContext to work with gain control
+        audioContext.resume();
         microphoneGain = createGainNode(stream);
     }
     video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
@@ -1110,7 +1143,7 @@ module.exports = {
         defaultConstraints = configuration.constraints;
         audioContext = configuration.audioContext;
         logger = configuration.logger;
-        createMicGainNode = (typeof configuration.createMicGainNode !== 'undefined') ? configuration.createMicGainNode : false;
+        createMicGainNode = (typeof configuration.createMicGainNode !== 'undefined') ? configuration.createMicGainNode : true;
         logger.info(LOG_PREFIX, "Initialized");
     }
 };

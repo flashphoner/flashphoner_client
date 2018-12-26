@@ -14,7 +14,6 @@ var urlServer = getUrlParam("urlServer") || setURL();
 function init_page() {
     //video display
     remoteVideo = document.getElementById("remoteVideo");
-
     $('#remoteVideo').videoPlayer({
         'playerWidth': 1,
         'videoClass': 'video'
@@ -59,6 +58,12 @@ function onStarted(stream) {
     $(".play-pause").prop('disabled', false);
     $(".fullscreen").prop('disabled', false);
     stream.setVolume(currentVolumeValue);
+}
+
+function volumeEvent(event) {
+    stream.unmuteRemoteAudio();
+    $('.volume').unbind('click',volumeEvent);
+    $('.volume-range-block').unbind('mousedown',volumeEvent);
 }
 
 function onStopped() {
@@ -135,6 +140,12 @@ function playStream(session) {
             video.hasListeners = true;
             video.addEventListener('playing', function () {
                 $("#preloader").hide();
+                if (autoplay && Browser.isChrome() && video.muted) {
+                    //WCS-1698. if autoplay = true, then set the volume slider to 0. When you first click on the slider or icon, sound turn on. https://goo.gl/7K7WLu
+                    $('.volume').click();
+                    $('.volume').bind('click', volumeEvent);
+                    $('.volume-range-block').bind('mousedown', volumeEvent);
+                }
             });
             video.addEventListener('resize', function (event) {
                 var streamResolution = stream.videoResolution();
@@ -243,6 +254,7 @@ function validateForm() {
                         }
                         $(this).addClass('play').removeClass('pause').prop('disabled', true);
                         $("#preloader").hide();
+                        autoplay = false;
                     }
                 }
             });

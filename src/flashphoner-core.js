@@ -1712,6 +1712,42 @@ var createSession = function (options) {
         };
 
         /**
+         * Unmute remote audio
+         *
+         * @memberOf Stream
+         * @inner
+         */
+        var unmuteRemoteAudio = function () {
+            if (mediaConnection && mediaProvider == 'WebRTC') {
+                mediaConnection.unmuteRemoteAudio();
+            }
+        };
+
+        /**
+         * Mute remote audio
+         *
+         * @memberOf Stream
+         * @inner
+         */
+        var muteRemoteAudio = function () {
+            if (mediaConnection && mediaProvider == 'WebRTC') {
+                mediaConnection.muteRemoteAudio();
+            }
+        };
+
+        /**
+         * Is remote audio muted
+         *
+         * @memberOf Stream
+         * @inner
+         */
+        var isRemoteAudioMuted = function () {
+          if(mediaConnection && mediaProvider == 'WebRTC') {
+              return mediaConnection.isRemoteAudioMuted();
+          }
+        };
+
+        /**
          * Set Microphone Gain
          *
          * @memberOf Stream
@@ -2099,6 +2135,9 @@ var createSession = function (options) {
         stream.videoResolution = videoResolution;
         stream.setAudioOutputId = setAudioOutputId;
         stream.setVolume = setVolume;
+        stream.unmuteRemoteAudio = unmuteRemoteAudio;
+        stream.muteRemoteAudio = muteRemoteAudio;
+        stream.isRemoteAudioMuted = isRemoteAudioMuted;
         stream.setMicrophoneGain = setMicrophoneGain;
         stream.getVolume = getVolume;
         stream.muteAudio = muteAudio;
