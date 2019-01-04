@@ -1466,8 +1466,8 @@ var createSession = function (options) {
 
             var event = streamInfo.status;
             if (event == STREAM_STATUS.RESIZE) {
-                resolution.width = streamInfo.playerVideoWidth;
-                resolution.height = streamInfo.playerVideoHeight;
+                resolution.width = streamInfo.streamerVideoWidth;
+                resolution.height = streamInfo.streamerVideoHeight;
             } else if (event == STREAM_STATUS.SNAPSHOT_COMPLETE) {
 
             } else if (event == STREAM_STATUS.NOT_ENOUGH_BANDWIDTH) {
