@@ -154,7 +154,7 @@ var createConnection = function (options) {
         connection.oniceconnectionstatechange = function (event) {
         };
         connection.onicecandidate = function (event) {
-            logger.debug(LOG_PREFIX, "Added icecandidate: "+event.candidate.candidate);
+            if (event.candidate) logger.debug(LOG_PREFIX, "Added icecandidate: "+event.candidate.candidate);
         };
         var state = function () {
             return connection.signalingState;
