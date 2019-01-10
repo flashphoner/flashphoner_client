@@ -128,7 +128,7 @@ function startStreaming(session) {
         video: {
             width: parseInt($('#width').val()),
             height: parseInt($('#height').val()),
-            frameRate: parseInt($('#fps').val())
+            frameRate: {max: parseInt($('#fps').val())}
         }
     };
     if ($("#useMic").prop('checked')) {
@@ -206,7 +206,7 @@ function setStatus(status, stream) {
 //install extension
 function installExtension() {
     if (Browser.isChrome()) {
-        chrome.webstore.install();
+        window.open("https://chrome.google.com/webstore/detail/flashphoner-screen-sharin/nlbaajplpmleofphigmgaifhoikjmbkg");
     } else if (Browser.isFirefox()) {
         var params = {
             "Flashphoner Screen Sharing": { URL: "../../dependencies/screen-sharing/firefox-extension/flashphoner_screen_sharing-0.0.10-fx.xpi",
