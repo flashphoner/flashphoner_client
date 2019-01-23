@@ -5,14 +5,14 @@
 			   xmlns:views="rtmfptest.views.*"
 			   backgroundColor="#F2F0F0"
 			   width="450"
-			   height="592" creationComplete="init()" xmlns:local="*">
+			   height="660" creationComplete="init()" xmlns:local="*">
 	<fx:Declarations>
 		
 	</fx:Declarations>
 	
 	<fx:Style>
 		.header { 
-			fontSize: 36px;
+			fontSize: 24px;
 		}
 	</fx:Style>
 	
@@ -114,7 +114,7 @@
 				Logger.info("connect " + url);
 				nc = new NetConnection();
 				//if (url.indexOf("rtmp") == 0){
-				//	nc.objectEncoding = ObjectEncoding.AMF0;
+				//nc.objectEncoding = ObjectEncoding.AMF0;
 				//}
 				nc.client = this;
 				nc.addEventListener(NetStatusEvent.NET_STATUS, handleConnectionStatus);				
@@ -223,7 +223,39 @@
 			private function setPublishStatus(event:String): void {
 				publishStatus.text = event;
 			}
-			
+
+			private function rotate(degree:Number):void {
+			    var metaDataObj:Object = new Object();
+			    switch(degree) {
+                    case 0:
+                        Logger.info("rotate camera to 0");
+                        metaDataObj.orientation = 0;
+                        break;
+                    case 90:
+                        Logger.info("rotate camera to 90");
+                        metaDataObj.orientation = 1;
+                        break;
+                    case 180:
+                        Logger.info("rotate camera to 180");
+                        metaDataObj.orientation = 2;
+                        break;
+                    case 270:
+                        Logger.info("rotate camera to 270");
+                        metaDataObj.orientation = 3;
+                        break;
+                    default:
+                        metaDataObj.orientation = 0;
+                        break;
+			    }
+			    sendMetaData(metaDataObj);
+			}
+
+			private function sendMetaData(data:Object):void{
+			    if (publishStream != null) {
+			        publishStream.send("@setDataFrame", "onMetaData", data);
+			    }
+			}
+
 			/**
 			 * *************************
 			 * 		PLAY / STOP
@@ -412,12 +444,20 @@
 			
 			private function switchVideo(event:Event):void {
 				Logger.info("switchVideo");
+				changeRotateBtnState(publishVideo.selected);
 				if (publishStream == null || cam == null){
 					Logger.info("No stream or cam. Return.");
 					return;
 				}
 				Logger.info("Switching cam...");
 				republishStream(publishStream);
+			}
+
+			private function changeRotateBtnState(state:Boolean):void {
+			    rotate0btn.enabled = state;
+                rotate90btn.enabled = state;
+                rotate180btn.enabled = state;
+                rotate270btn.enabled = state;
 			}
 
 			private function republishStream(stream:NetStream):void {
@@ -461,8 +501,14 @@
 	<s:CheckBox id="publishAudio" x="146" y="505" label="audio" change="switchAudio(event)" selected="true"/>
 	<s:CheckBox id="publishVideo" x="223" y="505" label="video" change="switchVideo(event)" selected="true"/>	
 
-	<s:Label x="80" y="561" text="codec"/>
-    <s:DropDownList id="videoCodec" x="67" y="531" width="68" requireSelection="true">
+    <s:Label x="67" y="540" text="Rotate camera"/>
+    <s:Button id="rotate0btn" x="160" y="531" label="0" width="40" height="21" click="rotate(0)" toolTip="Works on transcoded streams only"/>
+    <s:Button id="rotate90btn" x="210" y="531" label="90" width="40" height="21" click="rotate(90)" toolTip="Works on transcoded streams only"/>
+    <s:Button id="rotate180btn" x="260" y="531" label="180" width="45" height="21" click="rotate(180)" toolTip="Works on transcoded streams only"/>
+    <s:Button id="rotate270btn" x="315" y="531" label="270" width="45" height="21" click="rotate(270)" toolTip="Works on transcoded streams only"/>
+
+	<s:Label x="80" y="631" text="codec"/>
+    <s:DropDownList id="videoCodec" x="67" y="601" width="68" requireSelection="true">
         <s:dataProvider>
             <s:ArrayCollection>
                 <fx:String>H264</fx:String>
@@ -471,20 +517,20 @@
         </s:dataProvider>
     </s:DropDownList>
 
-	<s:Label x="140" y="561" text="width"/>
-	<s:TextInput id="camWidth" x="140" y="531" width="32" text="320"/>
+	<s:Label x="140" y="571" text="width"/>
+	<s:TextInput id="camWidth" x="140" y="601" width="32" text="320"/>
 	
-	<s:Label x="179" y="561" text="height"/>
-	<s:TextInput id="camHeight" x="180" y="531" width="31" text="240"/>
+	<s:Label x="179" y="571" text="height"/>
+	<s:TextInput id="camHeight" x="180" y="601" width="31" text="240"/>
 	
-	<s:Label x="226" y="561" text="fps"/>
-	<s:TextInput id="camFPS" x="220" y="531" width="31" text="15"/>
+	<s:Label x="226" y="571" text="fps"/>
+	<s:TextInput id="camFPS" x="220" y="601" width="31" text="15"/>
 	
-	<s:Label x="260" y="561" text="quality"/>
-	<s:TextInput id="camQuality" x="260" y="531" width="31" text="80"/>
+	<s:Label x="255" y="571" text="quality"/>
+	<s:TextInput id="camQuality" x="260" y="601" width="31" text="80"/>
 	
-	<s:Label x="299" y="561" text="keyframe"/>
-	<s:TextInput id="camKeyFrame" x="300" y="531" width="31" text="15"/>
+	<s:Label x="299" y="571" text="keyframe"/>
+	<s:TextInput id="camKeyFrame" x="300" y="601" width="31" text="15"/>
 	
 	<!-- play / stop -->
 	<s:Button id="playBtn" x="325" y="193" label="Start" width="90" height="21" click="play()" enabled="true"/>
