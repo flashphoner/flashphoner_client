@@ -51,6 +51,18 @@ var createConnection = function(options, handlers) {
             }
             delete connections[id];
         };
+        var unmuteRemoteAudio = function () {
+            audioContext.resume();
+        };
+        var muteRemoteAudio = function () {
+            audioContext.suspend();
+        };
+        var isRemoteAudioMuted = function () {
+            if(audioContext.state == 'suspended') {
+                return true;
+            }
+            return false;
+        };
         var setVolume = function(volume) {
             WSPlayer_.setVolume(volume);
         };
@@ -115,6 +127,9 @@ var createConnection = function(options, handlers) {
         exports.createOffer = createOffer;
         exports.setRemoteSdp = setRemoteSdp;
         exports.close = close;
+        exports.unmuteRemoteAudio = unmuteRemoteAudio;
+        exports.muteRemoteAudio = muteRemoteAudio;
+        exports.isRemoteAudioMuted = isRemoteAudioMuted;
         exports.setVolume = setVolume;
         exports.getVolume = getVolume;
         exports.fullScreen = fullScreen;

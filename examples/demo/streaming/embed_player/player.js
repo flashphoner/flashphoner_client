@@ -140,7 +140,7 @@ function playStream(session) {
             video.hasListeners = true;
             video.addEventListener('playing', function () {
                 $("#preloader").hide();
-                if (autoplay && Browser.isChrome() && video.muted) {
+                if (autoplay && Browser.isChrome() && stream.isRemoteAudioMuted()) {
                     //WCS-1698. if autoplay = true, then set the volume slider to 0. When you first click on the slider or icon, sound turn on. https://goo.gl/7K7WLu
                     $('.volume').click();
                     $('.volume').bind('click', volumeEvent);

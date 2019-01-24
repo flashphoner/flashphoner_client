@@ -106,6 +106,11 @@ var init = function (options) {
         var mediaSourceMediaProvider = require("./media-source-media-provider");
         if (mediaSourceMediaProvider && mediaSourceMediaProvider.hasOwnProperty('available') && mediaSourceMediaProvider.available()) {
             MediaProvider.MSE = mediaSourceMediaProvider;
+            var mseConf = {
+                audioContext: audioContext,
+                browserDetails: browserDetails.browser
+            };
+            mediaSourceMediaProvider.configure(mseConf);
         }
         var websocketProvider = require("./websocket-media-provider");
         if (websocketProvider && websocketProvider.hasOwnProperty('available') && websocketProvider.available(audioContext)) {
@@ -1718,7 +1723,7 @@ var createSession = function (options) {
          * @inner
          */
         var unmuteRemoteAudio = function () {
-            if (mediaConnection && mediaProvider == 'WebRTC') {
+            if(mediaConnection && mediaProvider != 'Flash') {
                 mediaConnection.unmuteRemoteAudio();
             }
         };
@@ -1730,7 +1735,7 @@ var createSession = function (options) {
          * @inner
          */
         var muteRemoteAudio = function () {
-            if (mediaConnection && mediaProvider == 'WebRTC') {
+            if(mediaConnection && mediaProvider != 'Flash') {
                 mediaConnection.muteRemoteAudio();
             }
         };
@@ -1742,9 +1747,10 @@ var createSession = function (options) {
          * @inner
          */
         var isRemoteAudioMuted = function () {
-          if(mediaConnection && mediaProvider == 'WebRTC') {
+          if(mediaConnection && mediaProvider != 'Flash') {
               return mediaConnection.isRemoteAudioMuted();
           }
+          return false;
         };
 
         /**
