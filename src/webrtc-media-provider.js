@@ -688,6 +688,8 @@ var getMediaAccess = function (constraints, display) {
                         mandatory: screenSharingConstraints.audioMandatory,
                         optional: []
                     };
+                } else {
+                    constraints.audio = false;
                 }
                 delete screenSharingConstraints.audioMandatory;
                 delete screenSharingConstraints.sourceId;
