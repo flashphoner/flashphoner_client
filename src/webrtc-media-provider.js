@@ -131,8 +131,8 @@ var createConnection = function (options) {
                 remoteVideo.onloadedmetadata = function (e) {
                     if (remoteVideo) {
                         remoteVideo.play().catch(function (e) {
-                            if(adapter.browserDetails.browser == 'chrome' && audioContext.state == 'suspended') {
-                                //WCS-1698. fix autoplay in chrome 71
+                            if(adapter.browserDetails.browser == 'chrome') {
+                                //WCS-1698. fix autoplay in chromium based browsers
                                 logger.info(LOG_PREFIX, "Autoplay detected! Trying to play a video with a muted sound...");
                                 remoteVideo.muted = true;
                                 remoteVideo.play();
