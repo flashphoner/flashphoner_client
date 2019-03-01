@@ -1,6 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
+var TRANSPORT_TYPE = Flashphoner.constants.TRANSPORT_TYPE;
 var localVideo;
 var remoteVideo;
 var constraints;
@@ -258,6 +259,26 @@ function init_page() {
             publishStream.switchMic($(this).val());
         }
     });
+
+
+    //init transport forms
+    var transportType;
+    var option;
+    var transportInput = document.getElementById("transportInput");
+    for (transportType in TRANSPORT_TYPE) {
+        option = document.createElement("option");
+        option.text = transportType;
+        option.value = transportType;
+        transportInput.appendChild(option);
+    }
+
+    var transportOutput = document.getElementById("transportOutput");
+    for (transportType in TRANSPORT_TYPE) {
+        option = document.createElement("option");
+        option.text = transportType;
+        option.value = transportType;
+        transportOutput.appendChild(option);
+    }
 }
 
 function onStarted(publishStream, previewStream) {
@@ -469,6 +490,8 @@ function startStreaming(session) {
     var streamName = field("url").split('/')[3];
     var constraints = getConstraints();
     var mediaConnectionConstraints;
+    var transportInput = $('#transportInput').val();
+    var transportOutput = $('#transportOutput').val();
 
     if (!$("#cpuOveruseDetection").is(':checked')) {
         mediaConnectionConstraints = {
@@ -483,7 +506,8 @@ function startStreaming(session) {
         cacheLocalResources: true,
         constraints: constraints,
         mediaConnectionConstraints: mediaConnectionConstraints,
-        sdpHook: rewriteSdp
+        sdpHook: rewriteSdp,
+        transport: transportInput
     }).on(STREAM_STATUS.PUBLISHING, function (publishStream) {
         $("#testBtn").prop('disabled', true);
         var video = document.getElementById(publishStream.id());
@@ -524,7 +548,8 @@ function startStreaming(session) {
         previewStream = session.createStream({
             name: streamName,
             display: remoteVideo,
-            constraints: constraints
+            constraints: constraints,
+            transport: transportOutput
         }).on(STREAM_STATUS.PLAYING, function (previewStream) {
             document.getElementById(previewStream.id()).addEventListener('resize', function (event) {
                 $("#playResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);

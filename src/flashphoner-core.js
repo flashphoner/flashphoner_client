@@ -17,6 +17,7 @@ var isUsingTemasysPlugin = false;
 var SESSION_STATUS = constants.SESSION_STATUS;
 var STREAM_STATUS = constants.STREAM_STATUS;
 var CALL_STATUS = constants.CALL_STATUS;
+var TRANSPORT_TYPE = constants.TRANSPORT_TYPE;
 var MediaProvider = {};
 var sessions = {};
 var initialized = false;
@@ -1349,6 +1350,7 @@ var createSession = function (options) {
      * @param {string=} options.rtmpUrl Rtmp url stream should be forwarded to
      * @param {Object=} options.mediaConnectionConstraints Stream specific constraints for underlying RTCPeerConnection
      * @param {Boolean=} options.flashShowFullScreenButton Show full screen button in flash
+     * @param {string=} options.transport Transport to be used by server for WebRTC media, {@link Flashphoner.constants.TRANSPORT_TYPE}
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
@@ -1436,6 +1438,7 @@ var createSession = function (options) {
         var remoteBitrate = -1;
         var networkBandwidth = -1;
         var sdpHook = options.sdpHook;
+        var transportType = (typeof options.transport !== 'undefined') ? options.transport : TRANSPORT_TYPE.UDP;
         var remoteVideo = options.remoteVideo;
         //callbacks added using stream.on()
         var callbacks = {};
@@ -1566,7 +1569,8 @@ var createSession = function (options) {
                     minBitrate: minBitrate,
                     maxBitrate: maxBitrate,
                     quality: quality,
-                    constraints: constraints
+                    constraints: constraints,
+                    transport: transportType
                 });
                 if (offer.player) {
                     offer.player.play(id_);
@@ -1641,7 +1645,8 @@ var createSession = function (options) {
                         minBitrate: minBitrate,
                         maxBitrate: maxBitrate,
                         rtmpUrl: rtmpUrl,
-                        constraints: constraints
+                        constraints: constraints,
+                        transport: transportType
                     });
                 });
             }).catch(function (error) {

@@ -660,6 +660,12 @@ define(mediaDeviceKind, 'INPUT', 'input');
 
 define(mediaDeviceKind, 'ALL', 'all');
 
+var transportType = {};
+
+define(transportType, 'UDP', 'UDP');
+
+define(transportType, 'TCP', 'TCP');
+
 var constants = {};
 define(constants, 'SESSION_STATUS', sessionStatus);
 define(constants, 'STREAM_STATUS', streamStatus);
@@ -668,6 +674,7 @@ define(constants, 'STREAM_STATUS_INFO', streamStatusInfo);
 define(constants, 'CALL_STATUS_INFO', callStatusInfo);
 define(constants, 'ERROR_INFO', errorInfo);
 define(constants, 'MEDIA_DEVICE_KIND', mediaDeviceKind);
+define(constants, 'TRANSPORT_TYPE', transportType);
 
 //define helper
 function define(obj, name, value) {
