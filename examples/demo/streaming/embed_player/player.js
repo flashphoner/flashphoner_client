@@ -146,6 +146,9 @@ function playStream(session) {
                     $('.volume').bind('click', volumeEvent);
                     $('.volume-range-block').bind('mousedown', volumeEvent);
                 }
+                if ($('.volume').hasClass('volume-none') && !stream.isRemoteAudioMuted()) {
+                	$('.volume').click();
+                }
             });
             video.addEventListener('resize', function (event) {
                 var streamResolution = stream.videoResolution();
