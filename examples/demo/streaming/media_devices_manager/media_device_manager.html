@@ -20,242 +20,228 @@
 <body onload="init_page()">
 <div class="container">
     <div class="row">
-        <div class="col-sm-9">
+        <div class="col-sm-10">
             <h2 class="text-center">Media Devices</h2>
         </div>
     </div>
     <div class="row">
         <h2 id="notifyFlash" class="text-danger"></h2>
         <div class="col-sm-2" style="width: auto">
-            <label>Video stats</label>
-            <div>Bytes sent: <span id="outVideoStatBytesSent">0</span></div>
-            <div>Packets sent: <span id="outVideoStatPacketsSent">0</span></div>
-            <div>Frames encoded: <span id="outVideoStatFramesEncoded">0</span></div>
-            <label>Audio stats</label>
-            <div>Bytes sent: <span id="outAudioStatBytesSent">0</span></div>
-            <div>Packets sent: <span id="outAudioStatPacketsSent">0</span></div>
+            <label id="outVideoStat">Video stats</label>
+            <div></div>
+            <label id="outAudioStat">Audio stats</label>
         </div>
-        <div class="col-sm-3">
-            <div class="text-muted text-center">Local</div>
+        <div class="col-sm-4">
+            <div class="text-center text-muted">Local</div>
             <div class="fp-remoteVideo">
                 <div id="localVideo" class="display"></div>
             </div>
             <div class="text-muted text-center" id="publishResolution"></div>
+            <div id="senderForm" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                <input class="form-control" type="text" id="publishStream" placeholder="Stream Name">
+                <div class="input-group-btn">
+                    <button id="publishBtn" type="button" class="btn btn-default">Publish</button>
+                </div>
+            </div>
+            <div class="text-center" style="margin-top: 20px">
+                <div id="publishStatus"></div>
+            </div>
         </div>
-        <div class="col-sm-1 text-center" style="margin: 8% auto">
-            <i class="fa fa-arrow-right" aria-hidden="true" style="font-size: 42px"></i>
-        </div>
-        <div class="col-sm-3">
-            <div class="text-muted text-center">Preview</div>
+        <div class="col-sm-4">
+            <div class="text-center text-muted">Player</div>
             <div class="fp-remoteVideo">
                 <div id="remoteVideo" class="display"></div>
             </div>
             <div class="text-muted text-center" id="playResolution"></div>
+            <div id="playerForm" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                <input class="form-control" type="text" id="playStream" placeholder="Stream Name">
+                <div class="input-group-btn">
+                    <button id="playBtn" type="button" class="btn btn-default">Play</button>
+                </div>
+            </div>
+            <div class="text-center" style="margin-top: 20px">
+                <div id="playStatus"></div>
+            </div>
         </div>
-        <div class="col-sm-2">
-            <label>Video stats</label>
-            <div>Bytes received: <span id="inVideoStatBytesReceived">0</span></div>
-            <div>Packets received: <span id="inVideoStatPacketsReceived">0</span></div>
-            <div>Frames decoded: <span id="inVideoStatFramesDecoded">0</span></div>
-            <label>Audio stats</label>
-            <div>Bytes received: <span id="inAudioStatBytesReceived">0</span></div>
-            <div>Packets received: <span id="inAudioStatPacketsReceived">0</span></div>
+        <div class="col-sm-2" style="width: auto">
+            <label id="inVideoStat">Video stats</label>
+            <div></div>
+            <label id="inAudioStat">Audio stats</label>
+        </div>
+    </div>
+    <div class="row row-space">
+        <div class="col-sm-4 col-sm-offset-3">
+            <div id="connectionForm" class="input-group">
+                <input class="form-control" id="urlServer" type="text">
+                <div class="input-group-btn">
+                    <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
+                </div>
+            </div>
+            <div class="text-center">
+                <div id="connectStatus"></div>
+            </div>
         </div>
     </div>
     <div class="row">
-
         <form id="form" class="form-horizontal" role="form" style="margin-top: 10px; margin-left: 10px">
-
-            <div class="col-sm-6">
-
-                <div class="col-sm-6">
+            <div class="col-sm-4 col-sm-offset-1">
+                <div class="form-group" id="sendAudioGroup">
                     <div class="form-group">
-                        &nbsp;
+                        <label class="col-sm-2 control-label"></label>
+                        <div class="col-sm-4">
+                            <button type="button" class="btn btn-default" id="testBtn">Test</button>
+                        </div>
                     </div>
                     <div class="form-group">
-                        &nbsp;
+                        <div class="col-sm-1">
+                            <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="sendAudio" value="true">
+                        </div>
+                        <label style="text-align: left" class="control-label col-sm-5" for="sendAudio">Send Audio</label>
                     </div>
-
-                    <div class="form-group" id="sendAudioGroup">
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label"></label>
-                            <div class="col-sm-4">
-                                <button type="button" class="btn btn-default" id="testBtn">Test</button>
-                            </div>
+                    <div class="form-group" id="audioInputForm">
+                        <label style="text-align: left" class="col-sm-4 control-label">Mic</label>
+                        <div class="col-sm-6 input-group">
+                            <select class="form-control" id="audioInput">
+                            </select>
+                            <span id="micLevel" style="min-width: 40px; text-align: center; color: green;" class="input-group-addon">0</span>
                         </div>
-                        <div class="form-group">
-                            <div class="col-sm-1">
-                                <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="sendAudio" value="true">
-                            </div>
-                            <label style="text-align: left" class="control-label col-sm-5" for="sendAudio">Send Audio</label>
+                        <div class="col-sm-6">
+                            <button type="button" class="btn btn-default form-control" id="switchMicBtn">Switch</button>
                         </div>
-                        <div class="form-group" id="audioInputForm">
-                            <label style="text-align: left" class="col-sm-4 control-label">Mic</label>
-                            <div class="col-sm-6 input-group">
-                                <select class="form-control" id="audioInput">
-                                </select>
-                                <span id="micLevel" style="min-width: 40px; text-align: center; color: green;" class="input-group-addon">0</span>
-                            </div>
-                            <div class="col-sm-6">
-                                <button type="button" class="btn btn-default form-control" id="switchMicBtn">Switch</button>
-                            </div>
+                    </div>
+                    <div class="form-group" id="micGainForm">
+                        <label style="text-align: left" class="col-sm-4 control-label">Mic Gain</label>
+                        <div class="col-sm-4" style="height: 34px !important;">
+                            <div id="micGainControl" style="margin-top: 12px"></div>
                         </div>
-                        <div class="form-group" id="micGainForm">
-                            <label style="text-align: left" class="col-sm-4 control-label">Mic Gain</label>
-                            <div class="col-sm-4" style="height: 34px !important;">
-                                <div id="micGainControl" style="margin-top: 12px"></div>
-                            </div>
-                        </div>
-                        <div class="form-group" id="fecForm">
-                            <label style="text-align: left" class="col-sm-4 control-label" for="fecForm">FEC
-                                <sup>
-                                    <i title="For opus codec only" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
-                                </sup>
-                            </label>
-                            <div class="col-sm-4">
-                                <input type="checkbox" class="checkbox" id="fec" value="true">
-                            </div>
-                        </div>
-                        <div class="form-group" id="stereoForm">
-                            <label style="text-align: left" class="col-sm-4 control-label" for="sendStereoAudio">Stereo<sup>
+                    </div>
+                    <div class="form-group" id="fecForm">
+                        <label style="text-align: left" class="col-sm-4 control-label" for="fecForm">FEC
+                            <sup>
                                 <i title="For opus codec only" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
                             </sup>
-                            </label>
-                            <div class="col-sm-4">
-                                <input type="checkbox" class="checkbox" id="sendStereoAudio" value="true">
-                            </div>
-                        </div>
-                        <div class="form-group" id="sendAudioBitrateForm">
-                            <label style="text-align: left" class="col-sm-4 control-label">Bitrate
-                                <sup>
-                                    <i title="For opus codec only" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
-                                </sup>
-                            </label>
-                            <div class="col-sm-6 input-group">
-                                <input style="margin-left: 15px" type="text" class="form-control" id="sendAudioBitrate" value="0">
-                                <span style="min-width: 65px; text-align: right;" class="input-group-addon">bps</span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label style="text-align: left" class="col-sm-4 control-label">Mute</label>
-                            <div class="col-sm-6">
-                                <input id="muteAudioToggle" type="checkbox" />
-                            </div>
+                        </label>
+                        <div class="col-sm-4">
+                            <input type="checkbox" class="checkbox" id="fec" value="true">
                         </div>
                     </div>
-
-                    <div class="form-group" id="sendVideoGroup">
-                        <div class="form-group">
-                            <div class="col-sm-1">
-                                <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="sendVideo" value="true">
-                            </div>
-                            <label style="text-align: left" class="control-label col-sm-5" for="sendVideo">Send Video</label>
+                    <div class="form-group" id="stereoForm">
+                        <label style="text-align: left" class="col-sm-4 control-label" for="sendStereoAudio">Stereo<sup>
+                            <i title="For opus codec only" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
+                        </sup>
+                        </label>
+                        <div class="col-sm-4">
+                            <input type="checkbox" class="checkbox" id="sendStereoAudio" value="true">
                         </div>
-                        <div class="form-group" id="videoInputForm">
-                            <label style="text-align: left" class="col-sm-4 control-label">Cam</label>
-                            <div class="col-sm-6">
-                                <select class="form-control" id="videoInput">
-                                </select>
-                                <button type="button" class="btn btn-default form-control" id="switchBtn">Switch</button>
-                            </div>
+                    </div>
+                    <div class="form-group" id="sendAudioBitrateForm">
+                        <label style="text-align: left" class="col-sm-4 control-label">Bitrate
+                            <sup>
+                                <i title="For opus codec only" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
+                            </sup>
+                        </label>
+                        <div class="col-sm-6 input-group">
+                            <input style="margin-left: 15px" type="text" class="form-control" id="sendAudioBitrate" value="0">
+                            <span style="min-width: 65px; text-align: right;" class="input-group-addon">bps</span>
                         </div>
-                        <div class="form-group" id="screenShareForm">
-                            <label style="text-align: left" class="col-sm-4 control-label">Screen share</label>
-                            <div class="col-sm-6">
-                                <input id="screenShareToggle" type="checkbox" />
-                            </div>
-                        </div>
-                        <div class="form-group" id="mediaSourceForm">
-                            <span class="text-muted"></span>
-                            <label style="text-align: left" class="col-sm-4 control-label">Screen share source</label>
-                            <div class="col-sm-6">
-                                <select id="mediaSource" class="form-control">
-                                    <option value="screen">Screen</option>
-                                    <option value="window">Window</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group" id="sendSizeForm">
-                            <label style="text-align: left" class="col-sm-4 control-label">Size</label>
-                            <div class="col-sm-4">
-                                <input type="text" class="form-control" id="sendWidth" value="640">
-                            </div>
-                            <div class="col-sm-4">
-                                <input type="text" class="form-control" id="sendHeight" value="480">
-                            </div>
-                        </div>
-                        <div class="form-group" id="fpsForm">
-                            <label style="text-align: left" class="col-sm-4 control-label">FPS</label>
-                            <div class="col-sm-4">
-                                <input type="text" class="form-control" id="fps" value="30">
-                            </div>
-                        </div>
-                        <div class="form-group" id="sendBitrateForm">
-                            <label style="text-align: left" class="col-sm-4 control-label">Bitrate</label>
-                            <div class="col-sm-4">
-                                <span>min</span>
-                                <input type="text" class="form-control" id="sendVideoMinBitrate" value="0">
-                            </div>
-                            <div class="col-sm-4">
-                                <span>max</span>
-                                <input type="text" class="form-control" id="sendVideoMaxBitrate" value="0">
-                            </div>
-                        </div>
-                        <div class="form-group" id="cpuOveruseDetectionForm">
-                            <label style="text-align: left" class="col-sm-4 control-label" for="cpuOveruseDetectionForm">COD
-                                <sup>
-                                    <i title="CpuOveruseDetection, turn off for webrtc hd" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
-                                </sup>
-                            </label>
-                            <div class="col-sm-4">
-                                <input type="checkbox" class="checkbox" id="cpuOveruseDetection" value="true" checked>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label style="text-align: left" class="col-sm-4 control-label">Mute</label>
-                            <div class="col-sm-6">
-                                <input id="muteVideoToggle" type="checkbox" />
-                            </div>
-                        </div>
-                        <div class="form-group" id="transportInputForm">
-                            <label style="text-align: left" class="col-sm-4 control-label">Transport</label>
-                            <div class="col-sm-6">
-                                <select class="form-control" id="transportInput">
-                                </select>
-                            </div>
+                    </div>
+                    <div class="form-group">
+                        <label style="text-align: left" class="col-sm-4 control-label">Mute</label>
+                        <div class="col-sm-6">
+                            <input id="muteAudioToggle" type="checkbox" />
                         </div>
                     </div>
                 </div>
 
-
-                <div class="col-sm-6">
-                    <div class="form-group" id="urlForm">
-                        <label class="col-sm-2 control-label">WCS</label>
-                        <div class="col-sm-9">
-                            <input type="text" class="form-control" id="url">
-                            <div class="text-center">
-                                <div id="streamStatus"></div>
-                            </div>
+                <div class="form-group" id="sendVideoGroup">
+                    <div class="form-group">
+                        <div class="col-sm-1">
+                            <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="sendVideo" value="true">
+                        </div>
+                        <label style="text-align: left" class="control-label col-sm-5" for="sendVideo">Send Video</label>
+                    </div>
+                    <div class="form-group" id="videoInputForm">
+                        <label style="text-align: left" class="col-sm-4 control-label">Cam</label>
+                        <div class="col-sm-6">
+                            <select class="form-control" id="videoInput">
+                            </select>
+                            <button type="button" class="btn btn-default form-control" id="switchBtn">Switch</button>
+                        </div>
+                    </div>
+                    <div class="form-group" id="screenShareForm">
+                        <label style="text-align: left" class="col-sm-4 control-label">Screen share</label>
+                        <div class="col-sm-6">
+                            <input id="screenShareToggle" type="checkbox" />
+                        </div>
+                    </div>
+                    <div class="form-group" id="mediaSourceForm">
+                        <span class="text-muted"></span>
+                        <label style="text-align: left" class="col-sm-4 control-label">Screen share source</label>
+                        <div class="col-sm-6">
+                            <select id="mediaSource" class="form-control">
+                                <option value="screen">Screen</option>
+                                <option value="window">Window</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group" id="sendSizeForm">
+                        <label style="text-align: left" class="col-sm-4 control-label">Size</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="sendWidth" value="640">
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="sendHeight" value="480">
+                        </div>
+                    </div>
+                    <div class="form-group" id="fpsForm">
+                        <label style="text-align: left" class="col-sm-4 control-label">FPS</label>
+                        <div class="col-sm-4">
+                            <input type="text" class="form-control" id="fps" value="30">
+                        </div>
+                    </div>
+                    <div class="form-group" id="sendBitrateForm">
+                        <label style="text-align: left" class="col-sm-4 control-label">Bitrate</label>
+                        <div class="col-sm-4">
+                            <span>min</span>
+                            <input type="text" class="form-control" id="sendVideoMinBitrate" value="0">
+                        </div>
+                        <div class="col-sm-4">
+                            <span>max</span>
+                            <input type="text" class="form-control" id="sendVideoMaxBitrate" value="0">
+                        </div>
+                    </div>
+                    <div class="form-group" id="cpuOveruseDetectionForm">
+                        <label style="text-align: left" class="col-sm-4 control-label" for="cpuOveruseDetectionForm">COD
+                            <sup>
+                                <i title="CpuOveruseDetection, turn off for webrtc hd" class="fa fa-question-circle-o" aria-hidden="true"  style="font-size: 10px"></i>
+                            </sup>
+                        </label>
+                        <div class="col-sm-4">
+                            <input type="checkbox" class="checkbox" id="cpuOveruseDetection" value="true" checked>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-2 control-label"></label>
-                        <div class="col-sm-4">
-                            <button type="button" class="btn btn-default" id="publishBtn">Start</button>
+                        <label style="text-align: left" class="col-sm-4 control-label">Mute</label>
+                        <div class="col-sm-6">
+                            <input id="muteVideoToggle" type="checkbox" />
+                        </div>
+                    </div>
+                    <div class="form-group" id="transportInputForm">
+                        <label style="text-align: left" class="col-sm-4 control-label">Transport</label>
+                        <div class="col-sm-6">
+                            <select class="form-control" id="transportInput">
+                            </select>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-sm-4" id="playGroup">
+            <div class="col-sm-4 col-sm-offset-1">
 
                 <div class="form-group">
                     &nbsp;
                 </div>
-                <div class="form-group">
-                    &nbsp;
-                </div>
-
+                <div class="form-group" id="playGroup">
                 <div class="form-group">
                     <div class="col-sm-1">
                         <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="playAudio" value="true">
@@ -264,7 +250,7 @@
                 </div>
                 <div class="form-group" id="audioOutputForm">
                     <label style="text-align: left" class="col-sm-2 control-label">Output</label>
-                    <div class="col-sm-4 input-group">
+                    <div class="col-sm-7">
                         <select class="form-control" id="audioOutput">
                         </select>
                     </div>
@@ -356,7 +342,7 @@
                         <input type="text" class="form-control" id="sdpStringReplace", value="0">
                     </div>
                 </div>
-
+                </div>
             </div>
 
         </form>
@@ -368,7 +354,6 @@
         </div>
     </div>
 </div>
-
 <!-- Plug-in bootstrap-switch here -->
 <script src="../../dependencies/bootstrap/js/switch.js"></script>
 <script>
@@ -413,6 +398,5 @@
         size: 'md'
     });
 </script>
-
 </body>
 </html>

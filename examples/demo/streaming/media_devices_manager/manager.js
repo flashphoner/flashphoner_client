@@ -2,6 +2,7 @@ var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
 var TRANSPORT_TYPE = Flashphoner.constants.TRANSPORT_TYPE;
+var STAT_INTERVAL = 1000;
 var localVideo;
 var remoteVideo;
 var constraints;
@@ -12,56 +13,15 @@ var currentGainValue = 50;
 var statsIntervalID;
 var intervalID;
 var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
+var videoBytesSent = 0;
+var audioBytesSent = 0;
+var videoBytesReceived = 0;
+var audioBytesReceived = 0;
 
 try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
 } catch (e) {
     console.warn("Failed to create audio context");
-}
-
-function loadStats() {
-    publishStream.getStats(function (stats) {
-        if (stats && stats.outboundStream) {
-            if(stats.outboundStream.videoStats) {
-                $('#outVideoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
-                $('#outVideoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
-                $('#outVideoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
-            } else {
-                $('#outVideoStatBytesSent').text(0);
-                $('#outVideoStatPacketsSent').text(0);
-                $('#outVideoStatFramesEncoded').text(0);
-            }
-
-            if(stats.outboundStream.audioStats) {
-                $('#outAudioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
-                $('#outAudioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
-            } else {
-                $('#outAudioStatBytesSent').text(0);
-                $('#outAudioStatPacketsSent').text(0);
-            }
-        }
-    });
-    previewStream.getStats(function (stats) {
-        if (stats && stats.inboundStream) {
-            if(stats.inboundStream.videoStats) {
-                $('#inVideoStatBytesReceived').text(stats.inboundStream.videoStats.bytesReceived);
-                $('#inVideoStatPacketsReceived').text(stats.inboundStream.videoStats.packetsReceived);
-                $('#inVideoStatFramesDecoded').text(stats.inboundStream.videoStats.framesDecoded);
-            } else {
-                $('#inVideoStatBytesReceived').text(0);
-                $('#inVideoStatPacketsReceived').text(0);
-                $('#inVideoStatFramesDecoded').text(0);
-            }
-
-            if(stats.inboundStream.audioStats) {
-                $('#inAudioStatBytesReceived').text(stats.inboundStream.audioStats.bytesReceived);
-                $('#inAudioStatPacketsReceived').text(stats.inboundStream.audioStats.packetsReceived);
-            } else {
-                $('#inAudioStatBytesReceived').text(0);
-                $('#inAudioStatPacketsReceived').text(0);
-            }
-        }
-    });
 }
 
 function init_page() {
@@ -102,9 +62,8 @@ function init_page() {
     Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.OUTPUT).then(function (list) {
         list.audio.forEach(function (device) {
             var audio = document.getElementById("audioOutput");
-            var i;
             var deviceInList = false;
-            for (i = 0; i < audio.options.length; i++) {
+            for (var i = 0; i < audio.options.length; i++) {
                 if (audio.options[i].value === device.id) {
                     deviceInList = true;
                     break;
@@ -118,15 +77,15 @@ function init_page() {
             }
         });
     }).catch(function (error) {
+        console.error(error);
         $('#audioOutputForm').remove();
     });
 
     Flashphoner.getMediaDevices(null, true).then(function (list) {
         list.audio.forEach(function (device) {
             var audio = document.getElementById("audioInput");
-            var i;
             var deviceInList = false;
-            for (i = 0; i < audio.options.length; i++) {
+            for (var i = 0; i < audio.options.length; i++) {
                 if (audio.options[i].value === device.id) {
                     deviceInList = true;
                     break;
@@ -142,9 +101,8 @@ function init_page() {
         list.video.forEach(function (device) {
             console.log(device);
             var video = document.getElementById("videoInput");
-            var i;
             var deviceInList = false;
-            for (i = 0; i < video.options.length; i++) {
+            for (var i = 0; i < video.options.length; i++) {
                 if (video.options[i].value === device.id) {
                     deviceInList = true;
                     break;
@@ -161,13 +119,9 @@ function init_page() {
                 }
             }
         });
-
-
         $("#url").val(setURL() + "/" + createUUID(8));
-
         //set initial button callback
-        onStopped();
-
+        onDisconnected();
         if (list.audio.length === 0) {
             $("#sendAudio").prop('checked', false).prop('disabled', true);
         }
@@ -177,120 +131,73 @@ function init_page() {
     }).catch(function (error) {
         $("#notifyFlash").text("Failed to get media devices");
     });
-    $("#receiveDefaultSize").click(function () {
-        if ($(this).is(':checked')) {
-            $("#receiveWidth").prop('disabled', true);
-            $("#receiveHeight").prop('disabled', true);
 
-        } else {
-            $("#receiveWidth").prop('disabled', false);
-            $("#receiveHeight").prop('disabled', false);
+    $("#urlServer").val(setURL());
+    var streamName = createUUID(4);
+    $("#publishStream").val(streamName);
+    $("#playStream").val(streamName);
+
+    readyControls();
+}
+
+function onStopped() {
+    previewStream = null;
+    $("#playBtn").text("Play").off('click').click(function () {
+        if (validateForm("play")) {
+            muteInputs("play");
+            $(this).prop('disabled', true);
+            play();
         }
-    });
-    $("#receiveDefaultBitrate").click(function () {
-        if ($(this).is(':checked')) {
-            $("#receiveMinBitrate").prop('disabled', true);
-            $("#receiveMaxBitrate").prop('disabled', true);
-
-        } else {
-            $("#receiveMinBitrate").prop('disabled', false);
-            $("#receiveMaxBitrate").prop('disabled', false);
-        }
-    });
-    $("#receiveDefaultQuality").click(function () {
-        if ($(this).is(':checked')) {
-            $("#quality").prop('disabled', true);
-
-        } else {
-            $("#quality").prop('disabled', false);
-        }
-    });
-
-    $("#micGainControl").slider({
-        range: "min",
-        min: 0,
-        max: 100,
-        value: currentGainValue,
-        step: 10,
-        animate: true,
-        slide: function (event, ui) {
-            currentGainValue = ui.value;
-            if(publishStream) {
-                publishStream.setMicrophoneGain(currentGainValue);
-            }
-        }
-    });
-
-    $("#volumeControl").slider({
-        range: "min",
-        min: 0,
-        max: 100,
-        value: currentVolumeValue,
-        step: 10,
-        animate: true,
-        slide: function (event, ui) {
-            currentVolumeValue = ui.value;
-            previewStream.setVolume(currentVolumeValue);
-        }
-    }).slider("disable");
-
-    $("#testBtn").text("Test").off('click').click(function () {
-        $(this).prop('disabled', true);
-        startTest();
     }).prop('disabled', false);
-
-    $( "#audioOutput" ).change(function() {
-        if (previewStream) {
-            previewStream.setAudioOutputId($(this).val());
-        }
-    });
-    if (!Browser.isChrome()) {
-        $('#audioOutput').remove();
-    }
-
-    $("#videoInput").change(function() {
-        if (publishStream) {
-            publishStream.switchCam($(this).val());
-        }
-    });
-
-    $("#audioInput").change(function() {
-        if (publishStream) {
-            publishStream.switchMic($(this).val());
-        }
-    });
-
-
-    //init transport forms
-    var transportType;
-    var option;
-    var transportInput = document.getElementById("transportInput");
-    for (transportType in TRANSPORT_TYPE) {
-        option = document.createElement("option");
-        option.text = transportType;
-        option.value = transportType;
-        transportInput.appendChild(option);
-    }
-
-    var transportOutput = document.getElementById("transportOutput");
-    for (transportType in TRANSPORT_TYPE) {
-        option = document.createElement("option");
-        option.text = transportType;
-        option.value = transportType;
-        transportOutput.appendChild(option);
+    unmuteInputs("play");
+    $("#playResolution").text("");
+    $("#volumeControl").slider("enable");
+    var disable = !(Flashphoner.getSessions()[0] && Flashphoner.getSessions()[0].status() == SESSION_STATUS.ESTABLISHED);
+    $("#playBtn").prop('disabled', disable);
+    $("#playStream").prop('disabled', disable);
+    clearStatInfo("in");
+    if (!publishStream && !previewStream) {
+        clearInterval(statsIntervalID);
+        statsIntervalID = null;
     }
 }
 
-function onStarted(publishStream, previewStream) {
-    statsIntervalID = setInterval(loadStats, 2000);
+function onUnpublished() {
+    publishStream = null;
+    $('input:radio').attr("disabled", false);
+    $("#publishBtn").text("Publish").off('click').click(function () {
+        if (validateForm("send")) {
+            muteInputs("send");
+            $(this).prop('disabled', true);
+            publish();
+        }
+    }).prop('disabled', false);
+    $("#switchBtn").text("Switch").off('click').prop('disabled',true);
+    $("#switchMicBtn").text("Switch").off('click').prop('disabled',true);
+    unmuteInputs("send");
+    $("#publishResolution").text("");
+    $("#testBtn").prop('disabled', false);
+    var disable = !(Flashphoner.getSessions()[0] && Flashphoner.getSessions()[0].status() == SESSION_STATUS.ESTABLISHED);
+    $("#publishBtn").prop('disabled', disable);
+    $("#publishStream").prop('disabled', disable);
+    clearStatInfo("out");
+    if (!publishStream && !previewStream) {
+        clearInterval(statsIntervalID);
+        statsIntervalID = null;
+    }
+}
+
+function onPublishing(stream) {
+    if (!statsIntervalID) {
+        statsIntervalID = setInterval(loadStats, STAT_INTERVAL);
+    }
     $('input:radio').attr("disabled", true);
     $("#publishBtn").text("Stop").off('click').click(function () {
         $(this).prop('disabled', true);
-        clearInterval(statsIntervalID);
-        previewStream.stop();
+        stream.stop();
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').click(function () {
-        publishStream.switchCam().then(function(id) {
+        stream.switchCam().then(function(id) {
             $('#videoInput option:selected').prop('selected', false);
             $("#videoInput option[value='"+ id +"']").prop('selected', true);
         }).catch(function(e) {
@@ -298,7 +205,7 @@ function onStarted(publishStream, previewStream) {
         });
     })
     $("#switchMicBtn").click(function (){
-        publishStream.switchMic().then(function(id) {
+        stream.switchMic().then(function(id) {
             $('#audioInput option:selected').prop('selected', false);
             $("#audioInput option[value='"+ id +"']").prop('selected', true);
         }).catch(function(e) {
@@ -306,8 +213,7 @@ function onStarted(publishStream, previewStream) {
         });
     }).prop('disabled', !($('#sendAudio').is(':checked')));
     //enableMuteToggles(false);
-    $("#volumeControl").slider("enable");
-    previewStream.setVolume(currentVolumeValue);
+    stream.setVolume(currentVolumeValue);
     //intervalID = setInterval(function() {
     //    previewStream.getStats(function(stat) {
     //        if (stat.incomingStreams.audio && stat.incomingStreams.audio.audioOutputLevel > 100) {
@@ -317,135 +223,165 @@ function onStarted(publishStream, previewStream) {
     //        }
     //    });
     //},250);
-
 }
 
-function onStopped() {
-    publishStream = null;
-    $('input:radio').attr("disabled", false);
-    $("#publishBtn").text("Start").off('click').click(function () {
-        if (validateForm()) {
-            muteInputs();
-            $(this).prop('disabled', true);
-            start();
-        }
+function onPlaying(stream) {
+    if (!statsIntervalID) {
+        statsIntervalID = setInterval(loadStats, STAT_INTERVAL);
+    }
+    $("#playBtn").text("Stop").off('click').click(function () {
+        $(this).prop('disabled', true);
+        stream.stop();
     }).prop('disabled', false);
-    $("#switchBtn").text("Switch").off('click').prop('disabled',true);
-    $("#switchMicBtn").text("Switch").off('click').prop('disabled',true);
-    unmuteInputs();
-    $("#publishResolution").text("");
-    $("#playResolution").text("");
-    $("#volumeControl").slider("disable");
-    clearInterval(intervalID);
-    $("#testBtn").prop('disabled', false);
-    //enableMuteToggles(false);
+    $("#volumeControl").slider("enable");
 }
 
-var micLevelInterval;
-var testStarted;
-var audioContextForTest;
-
-function startTest() {
-    if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(localVideo, true);
-        Flashphoner.playFirstVideo(remoteVideo, false);
-    }
-    Flashphoner.getMediaAccess(getConstraints(), localVideo).then(function (disp) {
-        $("#testBtn").text("Release").off('click').click(function () {
-            $(this).prop('disabled', true);
-            stopTest();
-        }).prop('disabled', false);
-
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (Flashphoner.getMediaProviders()[0] == "WebRTC" && window.AudioContext) {
-            for (i = 0; i < localVideo.children.length; i++) {
-                if (localVideo.children[i] && localVideo.children[i].id.indexOf("-LOCAL_CACHED_VIDEO") != -1) {
-                    var stream = localVideo.children[i].srcObject;
-                    audioContextForTest = new AudioContext();
-                    var microphone = audioContextForTest.createMediaStreamSource(stream);
-                    var javascriptNode = audioContextForTest.createScriptProcessor(1024, 1, 1);
-                    microphone.connect(javascriptNode);
-                    javascriptNode.connect(audioContextForTest.destination);
-                    javascriptNode.onaudioprocess = function (event) {
-                        var inpt_L = event.inputBuffer.getChannelData(0);
-                        var sum_L = 0.0;
-                        for (var i = 0; i < inpt_L.length; ++i) {
-                            sum_L += inpt_L[i] * inpt_L[i];
-                        }
-                        $("#micLevel").text(Math.floor(Math.sqrt(sum_L / inpt_L.length) * 100));
-                    }
-                }
-            }
-        } else if (Flashphoner.getMediaProviders()[0] == "Flash") {
-            micLevelInterval = setInterval(function () {
-                $("#micLevel").text(disp.children[0].getMicrophoneLevel());
-            }, 500);
-        }
-        testStarted = true;
-    }).catch(function (error) {
-        $("#testBtn").prop('disabled', false);
-        testStarted = false;
-    });
+function onConnected(session) {
+    $("#connectBtn").text("Disconnect").off('click').click(function () {
+        $(this).prop('disabled', true);
+        session.disconnect();
+    }).prop('disabled', false);
+    onUnpublished();
+    onStopped();
 }
 
-
-function stopTest() {
-    releaseResourcesForTesting();
-    if (Flashphoner.releaseLocalMedia(localVideo)) {
-        $("#testBtn").text("Test").off('click').click(function () {
-            $(this).prop('disabled', true);
-            startTest();
-        }).prop('disabled', false);
-    } else {
-        $("#testBtn").prop('disabled', false);
-    }
+function onDisconnected() {
+    $("#connectBtn").text("Connect").off('click').click(function () {
+        $('#urlServer').prop('disabled', true);
+        $(this).prop('disabled', true);
+        connect();
+    }).prop('disabled', false);
+    $('#urlServer').prop('disabled', false);
+    onUnpublished();
+    onStopped();
 }
 
-function releaseResourcesForTesting() {
-    testStarted = false;
-    clearInterval(micLevelInterval);
-    if (audioContextForTest) {
-        audioContextForTest.close();
-        audioContextForTest = null;
-    }
-}
+function connect() {
+    var url = $('#urlServer').val();
 
-function start() {
-    if (testStarted)
-        stopTest();
-    if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(localVideo, true);
-        Flashphoner.playFirstVideo(remoteVideo, false);
-    }
-    //check if we already have session
-    var url = $('#url').val();
-    //check if we already have session
-    if (Flashphoner.getSessions().length > 0) {
-        var session = Flashphoner.getSessions()[0];
-        if (session.getServerUrl() == url) {
-            startStreaming(session);
-            return;
-        } else {
-            //remove session DISCONNECTED and FAILED callbacks
-            session.on(SESSION_STATUS.DISCONNECTED, function () {
-            });
-            session.on(SESSION_STATUS.FAILED, function () {
-            });
-            session.disconnect();
-        }
-    }
-
+    //create session
     console.log("Create new session with url " + url);
     Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function (session) {
-        //session connected, start streaming
-        startStreaming(session);
+        setStatus("#connectStatus", session.status());
+        onConnected(session);
     }).on(SESSION_STATUS.DISCONNECTED, function () {
-        setStatus(SESSION_STATUS.DISCONNECTED);
-        onStopped();
+        setStatus("#connectStatus", SESSION_STATUS.DISCONNECTED);
+        onDisconnected();
     }).on(SESSION_STATUS.FAILED, function () {
-        setStatus(SESSION_STATUS.FAILED);
+        setStatus("#connectStatus", SESSION_STATUS.FAILED);
+        onDisconnected();
+    });
+}
+
+function play() {
+    if (Browser.isSafariWebRTC()) {
+        Flashphoner.playFirstVideo(remoteVideo, false);
+    }
+    var streamName = $('#playStream').val();
+    var session = Flashphoner.getSessions()[0];
+    var transportOutput = $('#transportOutput').val();
+    var constraints = {
+        audio: $("#playAudio").is(':checked'),
+        video: $("#playVideo").is(':checked')
+    };
+    if (constraints.audio) {
+        constraints.audio = {
+            outputId: $('#audioOutput').val()
+        }
+    }
+    if (constraints.video) {
+        constraints.video = {
+            width: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveWidth').val()) : 0,
+            height: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveHeight').val()) : 0,
+            bitrate: (!$("#receiveDefaultBitrate").is(":checked")) ? $("#receiveBitrate").val() : 0,
+            quality: (!$("#receiveDefaultQuality").is(":checked")) ? $('#quality').val() : 0
+        };
+    }
+    previewStream = session.createStream({
+        name: streamName,
+        display: remoteVideo,
+        constraints: constraints,
+        transport: transportOutput
+    }).on(STREAM_STATUS.PLAYING, function (stream) {
+        setStatus("#playStatus", stream.status());
+        onPlaying(stream);
+        document.getElementById(stream.id()).addEventListener('resize', function (event) {
+            $("#playResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);
+            resizeVideo(event.target);
+        });
+        //wait for incoming stream
+        if (Flashphoner.getMediaProviders()[0] == "WebRTC") {
+            setTimeout(function () {
+                detectSpeech(stream);
+            }, 3000);
+        }
+    }).on(STREAM_STATUS.STOPPED, function () {
+        setStatus("#playStatus", STREAM_STATUS.STOPPED);
+        onStopped();
+    }).on(STREAM_STATUS.FAILED, function (stream) {
+        setStatus("#playStatus", STREAM_STATUS.FAILED, stream);
         onStopped();
     });
+    previewStream.play();
+}
+
+function publish() {
+    if (testStarted)
+        stopTest();
+
+    if (Browser.isSafariWebRTC()) {
+        Flashphoner.playFirstVideo(localVideo, true);
+    }
+
+    var streamName = $('#publishStream').val();
+    var constraints = getConstraints();
+    var mediaConnectionConstraints;
+    var session = Flashphoner.getSessions()[0];
+    var transportInput = $('#transportInput').val();
+
+    if (!$("#cpuOveruseDetection").is(':checked')) {
+        mediaConnectionConstraints = {
+            "mandatory": {
+                googCpuOveruseDetection: false
+            }
+        }
+    }
+    publishStream = session.createStream({
+        name: streamName,
+        display: localVideo,
+        cacheLocalResources: true,
+        constraints: constraints,
+        mediaConnectionConstraints: mediaConnectionConstraints,
+        sdpHook: rewriteSdp,
+        transport: transportInput
+    }).on(STREAM_STATUS.PUBLISHING, function (stream) {
+        $("#testBtn").prop('disabled', true);
+        var video = document.getElementById(stream.id());
+        //resize local if resolution is available
+        if (video.videoWidth > 0 && video.videoHeight > 0) {
+            resizeLocalVideo({target: video});
+        }
+        enableToggles(true);
+        if ($("#muteVideoToggle").is(":checked")) {
+            muteVideo();
+        }
+        if ($("#muteAudioToggle").is(":checked")) {
+            muteAudio();
+        }
+        //remove resize listener in case this video was cached earlier
+        video.removeEventListener('resize', resizeLocalVideo);
+        video.addEventListener('resize', resizeLocalVideo);
+        publishStream.setMicrophoneGain(currentGainValue);
+        setStatus("#publishStatus", STREAM_STATUS.PUBLISHING);
+        onPublishing(stream);
+    }).on(STREAM_STATUS.UNPUBLISHED, function () {
+        setStatus("#publishStatus", STREAM_STATUS.UNPUBLISHED);
+        onUnpublished();
+    }).on(STREAM_STATUS.FAILED, function () {
+        setStatus("#publishStatus", STREAM_STATUS.FAILED);
+        onUnpublished();
+    });
+    publishStream.publish();
 }
 
 function getConstraints() {
@@ -473,116 +409,17 @@ function getConstraints() {
             height: parseInt($('#sendHeight').val())
         };
         if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-           constraints.video.deviceId = {exact: $('#videoInput').val()};
+            constraints.video.deviceId = {exact: $('#videoInput').val()};
         }
         if (parseInt($('#sendVideoMinBitrate').val()) > 0)
-                constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
+            constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
         if (parseInt($('#sendVideoMaxBitrate').val()) > 0)
-                constraints.video.maxBitrate = parseInt($('#sendVideoMaxBitrate').val());
+            constraints.video.maxBitrate = parseInt($('#sendVideoMaxBitrate').val());
         if (parseInt($('#fps').val()) > 0)
             constraints.video.frameRate = parseInt($('#fps').val());
     }
 
     return constraints;
-}
-
-function startStreaming(session) {
-    var streamName = field("url").split('/')[3];
-    var constraints = getConstraints();
-    var mediaConnectionConstraints;
-    var transportInput = $('#transportInput').val();
-    var transportOutput = $('#transportOutput').val();
-
-    if (!$("#cpuOveruseDetection").is(':checked')) {
-        mediaConnectionConstraints = {
-            "mandatory": {
-                googCpuOveruseDetection: false
-            }
-        }
-    }
-    publishStream = session.createStream({
-        name: streamName,
-        display: localVideo,
-        cacheLocalResources: true,
-        constraints: constraints,
-        mediaConnectionConstraints: mediaConnectionConstraints,
-        sdpHook: rewriteSdp,
-        transport: transportInput
-    }).on(STREAM_STATUS.PUBLISHING, function (publishStream) {
-        $("#testBtn").prop('disabled', true);
-        var video = document.getElementById(publishStream.id());
-        //resize local if resolution is available
-        if (video.videoWidth > 0 && video.videoHeight > 0) {
-            resizeLocalVideo({target: video});
-        }
-        enableToggles(true);
-        if ($("#muteVideoToggle").is(":checked")) {
-            muteVideo();
-        }
-        if ($("#muteAudioToggle").is(":checked")) {
-            muteAudio();
-        }
-        //remove resize listener in case this video was cached earlier
-        video.removeEventListener('resize', resizeLocalVideo);
-        video.addEventListener('resize', resizeLocalVideo);
-        publishStream.setMicrophoneGain(currentGainValue);
-        setStatus(STREAM_STATUS.PUBLISHING);
-        //play preview
-        var constraints = {
-            audio: $("#playAudio").is(':checked'),
-            video: $("#playVideo").is(':checked')
-        };
-        if (constraints.audio) {
-            constraints.audio = {
-                outputId: $('#audioOutput').val()
-            }
-        }
-        if (constraints.video) {
-            constraints.video = {
-                width: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveWidth').val()) : 0,
-                height: (!$("#receiveDefaultSize").is(":checked")) ? parseInt($('#receiveHeight').val()) : 0,
-                bitrate: (!$("#receiveDefaultBitrate").is(":checked")) ? $("#receiveBitrate").val() : 0,
-                quality: (!$("#receiveDefaultQuality").is(":checked")) ? $('#quality').val() : 0
-            };
-        }
-        previewStream = session.createStream({
-            name: streamName,
-            display: remoteVideo,
-            constraints: constraints,
-            transport: transportOutput
-        }).on(STREAM_STATUS.PLAYING, function (previewStream) {
-            document.getElementById(previewStream.id()).addEventListener('resize', function (event) {
-                $("#playResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);
-                resizeVideo(event.target);
-            });
-            //enable stop button
-            onStarted(publishStream, previewStream);
-            //wait for incoming stream
-            if (Flashphoner.getMediaProviders()[0] == "WebRTC") {
-                setTimeout(function () {
-                    detectSpeech(previewStream);
-                }, 3000);
-            }
-        }).on(STREAM_STATUS.STOPPED, function () {
-            publishStream.stop();
-        }).on(STREAM_STATUS.FAILED, function () {
-            //preview failed, stop publishStream
-            if (publishStream.status() == STREAM_STATUS.PUBLISHING) {
-                setStatus(STREAM_STATUS.FAILED);
-                publishStream.stop();
-            }
-        });
-        previewStream.play();
-    }).on(STREAM_STATUS.UNPUBLISHED, function () {
-        setStatus(STREAM_STATUS.UNPUBLISHED);
-        //enable start button
-        onStopped();
-    }).on(STREAM_STATUS.FAILED, function () {
-        setStatus(STREAM_STATUS.FAILED);
-        //enable start button
-        onStopped();
-    });
-    publishStream.publish();
 }
 
 function rewriteSdp(sdp) {
@@ -595,39 +432,37 @@ function rewriteSdp(sdp) {
     }
     return sdp.sdpString;
 }
-
-//show connection or local stream status
-function setStatus(status) {
-    var statusField = $("#streamStatus");
+// UI helpers
+// show connection, or local, or remote stream status
+function setStatus(selector, status, stream) {
+    var statusField = $(selector);
     statusField.text(status).removeClass();
-    if (status == "PUBLISHING") {
+    if (status == "PLAYING" || status == "ESTABLISHED" || status == "PUBLISHING") {
         statusField.attr("class", "text-success");
-    } else if (status == "DISCONNECTED" || status == "UNPUBLISHED") {
+    } else if (status == "DISCONNECTED" || status == "UNPUBLISHED" || status == "STOPPED") {
         statusField.attr("class", "text-muted");
     } else if (status == "FAILED") {
         statusField.attr("class", "text-danger");
     }
 }
 
-function muteInputs() {
-    $(":text, :checkbox").each(function () {
+function muteInputs(selector) {
+    $('[class*=group][id^=' + selector + ']').find('input').each(function () {
         if ($(this).attr('id') !== 'audioOutput') {
-            $(this).attr('disabled', 'disabled');
+            $(this).prop('disabled', true);
         }
     });
 }
 
-function unmuteInputs() {
-    $(":text, select, :checkbox").each(function () {
+function unmuteInputs(selector) {
+    $('[class*=group][id^=' + selector + ']').find('input').each(function() {
         if ($(this).attr('id') == 'sendAudio' && $("#audioInput option").length === 0) {
             return;
         } else if ($(this).attr('id') == 'sendVideo' && $("#videoInput option").length === 0) {
             return;
         } else if (($(this).attr('id') == 'receiveWidth' || $(this).attr('id') == 'receiveHeight')) {
             if (!$("#receiveDefaultSize").is(":checked")) $(this).removeAttr("disabled");
-        } else if ($(this).attr('id') == 'receiveMinBitrate') {
-            if (!$("#receiveDefaultBitrate").is(":checked")) $(this).removeAttr("disabled");
-        } else if ($(this).attr('id') == 'receiveMaxBitrate') {
+        } else if ($(this).attr('id') == 'receiveBitrate') {
             if (!$("#receiveDefaultBitrate").is(":checked")) $(this).removeAttr("disabled");
         } else if ($(this).attr('id') == 'quality') {
             if (!$("#receiveDefaultQuality").is(":checked")) $(this).removeAttr("disabled");
@@ -646,25 +481,18 @@ function resizeLocalVideo(event) {
     resizeVideo(event.target);
 }
 
-function validateForm() {
-    var valid = true;
-    if (!$("#sendVideo").is(':checked') && !$("#sendAudio").is(':checked')) {
-        highlightInput($("#sendVideo"));
-        highlightInput($("#sendAudio"));
-        valid = false;
-    } else {
-        removeHighlight($("#sendVideo"));
-        removeHighlight($("#sendAudio"));
-    }
-    if (!$("#playVideo").is(':checked') && !$("#playAudio").is(':checked')) {
-        highlightInput($("#playVideo"));
-        highlightInput($("#playAudio"));
-        valid = false;
-    } else {
-        removeHighlight($("#playVideo"));
-        removeHighlight($("#playAudio"));
-    }
 
+
+function validateForm(s) {
+    var valid = true;
+    if (!$("#" + s + "Video").is(':checked') && !$("#" + s + "Audio").is(':checked')) {
+        highlightInput($("#" + s + "Video"));
+        highlightInput($("#" + s + "Audio"));
+        valid = false;
+    } else {
+        removeHighlight($("#" + s + "Video"));
+        removeHighlight($("#" + s + "Audio"));
+    }
     var validateInputs = function (selector) {
         $('#form ' + selector + ' :text, ' + selector + ' select').each(function () {
             if (!$(this).val()) {
@@ -681,14 +509,16 @@ function validateForm() {
             }
         });
     };
-
-    if ($("#sendAudio").is(':checked')) {
-        validateInputs("#sendAudioGroup");
+    if (s == "send") {
+        if ($("#sendAudio").is(':checked')) {
+            validateInputs("#sendAudioGroup");
+        }
+        if ($("#sendVideo").is(':checked')) {
+            validateInputs("#sendVideoGroup");
+        }
+    } else {
+        validateInputs("#playGroup");
     }
-    if ($("#sendVideo").is(':checked')) {
-        validateInputs("#sendVideoGroup");
-    }
-    validateInputs("#playGroup");
     return valid;
 
     function highlightInput(input) {
@@ -810,4 +640,258 @@ function handleAudio(event) {
             this.lastClip = window.performance.now();
         }
     }
+}
+
+//Ready controls
+function readyControls() {
+    $("#receiveDefaultSize").click(function () {
+        $("#receiveWidth").prop('disabled', $(this).is(':checked'));
+        $("#receiveHeight").prop('disabled', $(this).is(':checked'));
+    });
+    $("#receiveDefaultBitrate").click(function () {
+        $("#receiveBitrate").prop('disabled', $(this).is(':checked'));
+    });
+    $("#receiveDefaultQuality").click(function () {
+        if ($(this).is(':checked')) {
+            $("#quality").prop('disabled', true);
+
+        } else {
+            $("#quality").prop('disabled', false);
+        }
+    });
+
+    $("#micGainControl").slider({
+        range: "min",
+        min: 0,
+        max: 100,
+        value: currentGainValue,
+        step: 10,
+        animate: true,
+        slide: function (event, ui) {
+            currentGainValue = ui.value;
+            if(publishStream) {
+                publishStream.setMicrophoneGain(currentGainValue);
+            }
+        }
+    });
+
+    $("#volumeControl").slider({
+        range: "min",
+        min: 0,
+        max: 100,
+        value: currentVolumeValue,
+        step: 10,
+        animate: true,
+        slide: function (event, ui) {
+            currentVolumeValue = ui.value;
+            previewStream.setVolume(currentVolumeValue);
+        }
+    }).slider("disable");
+
+    $("#testBtn").text("Test").off('click').click(function () {
+        $(this).prop('disabled', true);
+        startTest();
+    }).prop('disabled', false);
+
+    $("#audioOutput").change(function() {
+        if (previewStream) {
+            previewStream.setAudioOutputId($(this).val());
+        }
+    });
+    if (!Browser.isChrome()) {
+        $('#audioOutput').remove();
+    }
+
+    $("#videoInput").change(function() {
+        if (publishStream) {
+            publishStream.switchCam($(this).val());
+        }
+    });
+
+    $("#audioInput").change(function() {
+        if (publishStream) {
+            publishStream.switchMic($(this).val());
+        }
+    });
+
+    //init transport forms
+    var transportType;
+    var option;
+    var transportInput = document.getElementById("transportInput");
+    for (transportType in TRANSPORT_TYPE) {
+        option = document.createElement("option");
+        option.text = transportType;
+        option.value = transportType;
+        transportInput.appendChild(option);
+    }
+
+    var transportOutput = document.getElementById("transportOutput");
+    for (transportType in TRANSPORT_TYPE) {
+        option = document.createElement("option");
+        option.text = transportType;
+        option.value = transportType;
+        transportOutput.appendChild(option);
+    }
+}
+
+// Stat
+function loadStats() {
+    if (publishStream) {
+        publishStream.getStats(function (stats) {
+            if (stats && stats.outboundStream) {
+                if (stats.outboundStream.video) {
+                    showStat(stats.outboundStream.video, "outVideoStat");
+                    let vBitrate = (stats.outboundStream.video.bytesSent - videoBytesSent) * 8;
+                    if ($('#outVideoStatBitrate').length == 0) {
+                        let html = "<div>Bitrate: " + "<span id='outVideoStatBitrate' style='font-weight: normal'>" + vBitrate + "</span>" + "</div>";
+                        $("#outVideoStat").append(html);
+                    } else {
+                        $('#outVideoStatBitrate').text(vBitrate);
+                    }
+                    videoBytesSent = stats.outboundStream.video.bytesSent;
+                }
+
+                if (stats.outboundStream.audio) {
+                    showStat(stats.outboundStream.audio, "outAudioStat");
+                    let aBitrate = (stats.outboundStream.audio.bytesSent - audioBytesSent) * 8;
+                    if ($('#outAudioStatBitrate').length == 0) {
+                        let html = "<div>Bitrate: " + "<span id='outAudioStatBitrate' style='font-weight: normal'>" + aBitrate + "</span>" + "</div>";
+                        $("#outAudioStat").append(html);
+                    } else {
+                        $('#outAudioStatBitrate').text(aBitrate);
+                    }
+                    audioBytesSent = stats.outboundStream.audio.bytesSent;
+                }
+            }
+        });
+    }
+    if (previewStream) {
+        previewStream.getStats(function (stats) {
+            if (stats && stats.inboundStream) {
+                if (stats.inboundStream.video) {
+                    showStat(stats.inboundStream.video, "inVideoStat");
+                    let vBitrate = (stats.inboundStream.video.bytesReceived - videoBytesReceived) * 8;
+                    if ($('#inVideoStatBitrate').length == 0) {
+                        let html = "<div>Bitrate: " + "<span id='inVideoStatBitrate' style='font-weight: normal'>" + vBitrate + "</span>" + "</div>";
+                        $("#inVideoStat").append(html);
+                    } else {
+                        $('#inVideoStatBitrate').text(vBitrate);
+                    }
+                    videoBytesReceived = stats.inboundStream.video.bytesReceived;
+                }
+
+                if (stats.inboundStream.audio) {
+                    showStat(stats.inboundStream.audio, "inAudioStat");
+                    let aBitrate = (stats.inboundStream.audio.bytesReceived - audioBytesReceived) * 8;
+                    if ($('#inAudioStatBitrate').length == 0) {
+                        let html = "<div style='font-weight: bold'>Bitrate: " + "<span id='inAudioStatBitrate' style='font-weight: normal'>" + aBitrate + "</span>" + "</div>";
+                        $("#inAudioStat").append(html);
+                    } else {
+                        $('#inAudioStatBitrate').text(aBitrate);
+                    }
+                    audioBytesReceived = stats.inboundStream.audio.bytesReceived;
+                }
+            }
+        });
+    }
+    function showStat(stat, type) {
+        Object.keys(stat).forEach(function(key) {
+            if (typeof stat[key] !== 'object') {
+                let k = key.split(/(?=[A-Z])/);
+                let metric = "";
+                for (let i = 0; i < k.length; i++) {
+                    metric += k[i][0].toUpperCase() + k[i].substring(1) + " ";
+                }
+                if ($("#" + key + "-" + type).length == 0) {
+                    let html = "<div style='font-weight: bold'>" + metric.trim() + ": <span id='" + key  + "-" + type + "' style='font-weight: normal'></span>" + "</div>";
+                    // $(html).insertAfter("#" + type);
+                    $("#" + type).append(html);
+                } else {
+                    $("#" + key + "-" + type).text(stat[key]);
+                }
+            }
+        });
+    }
+}
+
+//Test
+var micLevelInterval;
+var testStarted;
+var audioContextForTest;
+
+function startTest() {
+    if (Browser.isSafariWebRTC()) {
+        Flashphoner.playFirstVideo(localVideo, true);
+        Flashphoner.playFirstVideo(remoteVideo, false);
+    }
+    Flashphoner.getMediaAccess(getConstraints(), localVideo).then(function (disp) {
+        $("#testBtn").text("Release").off('click').click(function () {
+            $(this).prop('disabled', true);
+            stopTest();
+        }).prop('disabled', false);
+
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (Flashphoner.getMediaProviders()[0] == "WebRTC" && window.AudioContext) {
+            for (i = 0; i < localVideo.children.length; i++) {
+                if (localVideo.children[i] && localVideo.children[i].id.indexOf("-LOCAL_CACHED_VIDEO") != -1) {
+                    var stream = localVideo.children[i].srcObject;
+                    audioContextForTest = new AudioContext();
+                    var microphone = audioContextForTest.createMediaStreamSource(stream);
+                    var javascriptNode = audioContextForTest.createScriptProcessor(1024, 1, 1);
+                    microphone.connect(javascriptNode);
+                    javascriptNode.connect(audioContextForTest.destination);
+                    javascriptNode.onaudioprocess = function (event) {
+                        var inpt_L = event.inputBuffer.getChannelData(0);
+                        var sum_L = 0.0;
+                        for (var i = 0; i < inpt_L.length; ++i) {
+                            sum_L += inpt_L[i] * inpt_L[i];
+                        }
+                        $("#micLevel").text(Math.floor(Math.sqrt(sum_L / inpt_L.length) * 100));
+                    }
+                }
+            }
+        } else if (Flashphoner.getMediaProviders()[0] == "Flash") {
+            micLevelInterval = setInterval(function () {
+                $("#micLevel").text(disp.children[0].getMicrophoneLevel());
+            }, 500);
+        }
+        testStarted = true;
+    }).catch(function (error) {
+        $("#testBtn").prop('disabled', false);
+        testStarted = false;
+    });
+}
+
+
+function stopTest() {
+    releaseResourcesForTesting();
+    if (Flashphoner.releaseLocalMedia(localVideo)) {
+        $("#testBtn").text("Test").off('click').click(function () {
+            $(this).prop('disabled', true);
+            startTest();
+        }).prop('disabled', false);
+    } else {
+        $("#testBtn").prop('disabled', false);
+    }
+}
+
+function releaseResourcesForTesting() {
+    testStarted = false;
+    clearInterval(micLevelInterval);
+    if (audioContextForTest) {
+        audioContextForTest.close();
+        audioContextForTest = null;
+    }
+}
+
+function clearStatInfo(selector) {
+    if (selector == 'in') {
+        audioBytesReceived = 0;
+        videoBytesReceived = 0;
+    } else {
+        audioBytesSent = 0;
+        videoBytesSent = 0;
+    }
+    $("#" + selector + "VideoStat").children().each(function() {$(this).remove()});
+    $("#" + selector + "AudioStat").children().each(function() {$(this).remove()});
 }

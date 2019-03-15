@@ -1163,13 +1163,14 @@ var createSession = function (options) {
          * Get statistics
          *
          * @param {callbackFn} callbackFn The callback that handles response
+         * @param {Boolean} nativeStats  If true, use native browser statistics
          * @returns {Object} Call audio\video statistics
          * @memberof Call
          * @inner
          */
-        var getStats = function (callbackFn) {
+        var getStats = function (callbackFn, nativeStats) {
             if (mediaConnection) {
-                mediaConnection.getStats(callbackFn);
+                mediaConnection.getStats(callbackFn, nativeStats);
             }
         };
         /**
@@ -2039,13 +2040,14 @@ var createSession = function (options) {
          * Get statistics
          *
          * @param {callbackFn} callbackFn The callback that handles response
+         * @param {Boolean} nativeStats If true, use native browser statistics
          * @returns {Object} Stream audio\video statistics
          * @memberof Stream
          * @inner
          */
-        var getStats = function (callbackFn) {
+        var getStats = function (callbackFn, nativeStats) {
             if (mediaConnection) {
-                mediaConnection.getStats(callbackFn);
+                mediaConnection.getStats(callbackFn, nativeStats);
             }
         };
 

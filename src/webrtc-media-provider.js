@@ -14,6 +14,7 @@ var audioContext;
 var createMicGainNode;
 var microphoneGain;
 var constants = require('./constants');
+var validBrowsers = ["firefox", "chrome", "safari"];
 
 
 var createConnection = function (options) {
@@ -367,40 +368,53 @@ var createConnection = function (options) {
             }
             return true;
         };
-        var getStats = function (callbackFn) {
+        var getStat = function (callbackFn, nativeStats) {
             var browser = adapter.browserDetails.browser;
-            if (connection && (browser == 'chrome' || browser == 'firefox' || browser == 'safari')) {
-                var result = {outboundStream:{}, inboundStream:{}, otherStats:[]};
-                result.type = browser;
-                connection.getStats(null).then(function (stats) {
-                    if (stats) {
-                        stats.forEach(function (stat) {
-                            if (stat.type == 'outbound-rtp' && !stat.isRemote) {
-                                if (stat.mediaType == 'audio') {
-                                    result.outboundStream.audioStats = stat;
-                                } else if (stat.mediaType == 'video') {
-                                    result.outboundStream.videoStats = stat;
-                                } else {
-                                    result.otherStats.push(stat);
+            var result = {outboundStream:{}, inboundStream:{}, otherStats:[]};
+            if (connection && validBrowsers.includes(browser)) {
+                if (nativeStats) {
+                    return connection.getStats(null);
+                } else {
+                    connection.getStats(null).then(function(stat) {
+                        if (stat) {
+                            stat.forEach(function (report) {
+                                if (!report.isRemote) {
+                                    if (report.type == 'outbound-rtp') {
+                                        fillStatObject(result.outboundStream, report);
+                                        if (report.mediaType == 'video') {
+                                            var vSettings = localVideo.srcObject.getVideoTracks()[0].getSettings();
+                                            result.outboundStream[report.mediaType].height = vSettings.height;
+                                            result.outboundStream[report.mediaType].width = vSettings.width;
+                                        }
+                                    } else if (report.type == 'inbound-rtp') {
+                                        fillStatObject(result.inboundStream, report);
+                                        if (report.mediaType == 'video') {
+                                            result.inboundStream[report.mediaType].height = remoteVideo.videoHeight;
+                                            result.inboundStream[report.mediaType].width = remoteVideo.videoWidth;
+                                        }
+                                    }
                                 }
-                            } else if (stat.type == 'inbound-rtp' && !stat.isRemote) {
-                                //safari does not have a mediaType variable for incoming statistics
-                                if (stat.mediaType == 'audio' || (browser == 'safari' && stat.id.indexOf('Audio') != -1)) {
-                                    result.inboundStream.audioStats = stat;
-                                } else if (stat.mediaType == 'video' || (browser == 'safari' && stat.id.indexOf('Video') != -1)) {
-                                    result.inboundStream.videoStats = stat;
-                                } else {
-                                    result.otherStats.push(stat);
-                                }
-                            } else {
-                                result.otherStats.push(stat);
-                            }
-                        });
+                            });
+
+                        }
                         callbackFn(result);
-                    }
-                });
+                    });
+                }
             }
         };
+
+        function fillStatObject(obj, report) {
+            var mediaType = report.mediaType;
+            obj[mediaType] = {};
+            var codec = util.getCurrentCodecAndSampleRate(connection.currentRemoteDescription.sdp, mediaType);
+            obj[mediaType]["codec"] = codec.name;
+            obj[mediaType]["codecRate"] = codec.sampleRate;
+            Object.keys(report).forEach(function(key) {
+                if (key.startsWith("bytes") || key.startsWith("packets") || key.indexOf("Count") != -1) {
+                    obj[mediaType][key] = report[key];
+                }
+            });
+        }
 
         var fullScreen = function () {
             var video = document.getElementById(id);
@@ -636,7 +650,7 @@ var createConnection = function (options) {
         exports.muteVideo = muteVideo;
         exports.unmuteVideo = unmuteVideo;
         exports.isVideoMuted = isVideoMuted;
-        exports.getStats = getStats;
+        exports.getStats = getStat;
         exports.fullScreen = fullScreen;
         exports.switchCam = switchCam;
         exports.switchMic = switchMic;
