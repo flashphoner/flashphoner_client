@@ -230,9 +230,9 @@ $.fn.serializeObject = function()
 
 function setURL() {
     if (window.location.protocol == "http:") {
-        $("#restUrl").val("http://" + window.location.hostname + ":9091/RESTCall");
+        $("#restUrl").val("http://" + window.location.hostname + ":8081/RESTCall");
     } else {
-        $("#restUrl").val("https://" + window.location.hostname + ":8888/RESTCall");
+        $("#restUrl").val("https://" + window.location.hostname + ":8444/RESTCall");
     }
 }
 

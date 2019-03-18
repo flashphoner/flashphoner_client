@@ -126,7 +126,7 @@ $(function() {
 });
 
 function createNode(id, ip) {
-    var api = FlashphonerRestApi.instance("http://"+ip+":9091", "http://"+ip+":8081");
+    var api = FlashphonerRestApi.instance("http://"+ip+":8081", "http://"+ip+":8081");
     api.id = id;
     api.ip = ip;
     api.tests = [];

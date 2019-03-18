@@ -221,9 +221,9 @@ $.fn.serializeObject = function()
 
 function setURL() {
     if (window.location.protocol == "http:") {
-        $("#restUrl").val("http://" + window.location.hostname + ":9091/rest-api");
+        $("#restUrl").val("http://" + window.location.hostname + ":8081/rest-api");
     } else {
-        $("#restUrl").val("https://" + window.location.hostname + ":8888/rest-api");
+        $("#restUrl").val("https://" + window.location.hostname + ":8444/rest-api");
     }
 }
 
