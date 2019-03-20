@@ -1439,7 +1439,7 @@ var createSession = function (options) {
         var remoteBitrate = -1;
         var networkBandwidth = -1;
         var sdpHook = options.sdpHook;
-        var transportType = (typeof options.transport !== 'undefined') ? options.transport : TRANSPORT_TYPE.UDP;
+        var transportType = options.transport;
         var remoteVideo = options.remoteVideo;
         //callbacks added using stream.on()
         var callbacks = {};
