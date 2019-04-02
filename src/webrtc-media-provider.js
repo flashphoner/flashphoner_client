@@ -904,7 +904,7 @@ var getScreenDeviceId = function (constraints) {
                 if (response) {
                     o.maxWidth = constraints.video.width;
                     o.maxHeight = constraints.video.height;
-                    o.maxFrameRate = constraints.video.frameRate.max;
+                    o.maxFrameRate = constraints.video.frameRate.ideal;
                     o.chromeMediaSource = "desktop";
                     chrome.runtime.sendMessage(extensionId, {type: "getSourceId"}, function (response) {
                         if (response.error) {
