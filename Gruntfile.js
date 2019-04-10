@@ -62,6 +62,7 @@ module.exports = function(grunt) {
                 dest: './flashphoner-no-webrtc.js',
                 options: {
                     ignore: ['./src/temasys-media-provider.js', 'adapterjs', './src/webrtc-media-provider.js'],
+		    transform: [['babelify', {presets: ["@babel/preset-env", { "sourceType": "unambiguous" }], global: true}]],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
@@ -94,6 +95,7 @@ module.exports = function(grunt) {
                 dest: './flashphoner-temasys-flash-websocket-without-adapterjs.js',
                 options: {
                     ignore: ['adapterjs','./src/webrtc-media-provider.js'],
+		    transform: [['babelify', {presets: ["@babel/preset-env", { "sourceType": "unambiguous" }], global: true}]],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
