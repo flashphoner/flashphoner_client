@@ -1069,13 +1069,11 @@ var listDevices = function (labels, kind) {
 
 function normalizeConstraints(constraints) {
     if (constraints.video) {
-        if (constraints.video.hasOwnProperty('frameRate') && typeof constraints.video.frameRate !== 'object') {
-            // Set default FPS value
-            var frameRate = (constraints.video.frameRate == 0) ? 30 : constraints.video.frameRate;
-            constraints.video.frameRate = {
-                ideal: frameRate
-            }
-        }
+        // Set default FPS value
+        var frameRate = (!constraints.video.frameRate || constraints.video.frameRate == 0) ? 30 : constraints.video.frameRate;
+        constraints.video.frameRate = {
+            ideal: frameRate
+        };
         if (constraints.video === true) {
             constraints.video = {};
         }

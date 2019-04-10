@@ -1284,6 +1284,37 @@ var createSession = function (options) {
             return mediaConnection.switchMic(deviceId);
         };
 
+        /**
+         * Switch to screen in real-time.
+         * Works only with WebRTC
+         *
+         * @memberOf Call
+         * @inner
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
+         */
+        var switchToScreen = function (source) {
+            if(status_ !== CALL_STATUS.ESTABLISHED && status_ !== CALL_STATUS.HOLD){
+                throw new Error('Invalid call state');
+            }
+            return mediaConnection.switchToScreen(source);
+        };
+
+        /**
+         * Switch to cam in real-time.
+         * Works only with WebRTC
+         *
+         * @memberOf Call
+         * @inner
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
+         */
+        var switchToCam = function () {
+            if(status_ !== CALL_STATUS.ESTABLISHED && status_ !== CALL_STATUS.HOLD){
+                throw new Error('Invalid call state');
+            }
+            mediaConnection.switchToCam();
+        };
+
+
         call.call = call_;
         call.answer = answer;
         call.hangup = hangup;
@@ -1310,6 +1341,8 @@ var createSession = function (options) {
         call.on = on;
         call.switchCam = switchCam;
         call.switchMic = switchMic;
+        call.switchToScreen = switchToScreen;
+        call.switchToCam = switchToCam;
         calls[id_] = call;
         return call;
     };
@@ -1487,11 +1520,6 @@ var createSession = function (options) {
                 status_ = event;
             }
 
-            if (event == STREAM_STATUS.PUBLISHING) {
-                if (record_) {
-                    recordFileName = streamInfo.recordName;
-                }
-            }
             if (streamInfo.info)
                 info_ = streamInfo.info;
 
@@ -1504,6 +1532,9 @@ var createSession = function (options) {
                 if (mediaConnection) {
                     mediaConnection.close(cacheLocalResources);
                 }
+            }
+            if (record_ && typeof streamInfo.recordName !== 'undefined') {
+                recordFileName = streamInfo.recordName;
             }
             //fire stream event
             if (callbacks[event]) {

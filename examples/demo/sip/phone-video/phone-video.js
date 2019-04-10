@@ -5,6 +5,7 @@ var localVideo;
 var remoteVideo;
 var currentCall;
 var statIntervalId;
+var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 
 $(document).ready(function () {
     loadCallFieldSet();
@@ -64,7 +65,8 @@ function init_page(){
                     $("#remoteVideoWrapper").hide();
                     $("#localVideoWrapper").attr('class', 'fp-remoteVideo');
                 }
-            }});
+            },
+            screenSharingExtensionId: extensionId});
     } catch(e) {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
         return;
@@ -178,6 +180,25 @@ function init_page(){
             currentCall.setAudioOutputId(id);
         }
     }).prop('disabled', true);
+
+    var $screenShareToggle = $("#screenSharingToggle");
+    $screenShareToggle.bootstrapSwitch({
+        on: 'on',
+        off: 'off',
+        size: 'md'
+    });
+
+    $screenShareToggle.change(function () {
+        if (this.checked) {
+            switchToScreen();
+        } else {
+            switchToCam();
+        }
+    });
+
+    if(!Browser.isFirefox()) {
+        $('#sourceList').remove();
+    }
 }
 
 function connect() {
@@ -494,16 +515,43 @@ function getConstraints() {
 function enableMuteToggles(enable) {
     var $muteAudioToggle = $("#muteAudioToggle");
     var $muteVideoToggle = $("#muteVideoToggle");
+    var $screenShareToogle = $('#screenSharingToggle');
 	
 	if (enable) {
 		$muteAudioToggle.removeAttr("disabled");
 		$muteAudioToggle.trigger('change');
 		$muteVideoToggle.removeAttr("disabled");
 		$muteVideoToggle.trigger('change');
+        $screenShareToogle.removeAttr("disabled");
+        $screenShareToogle.trigger('change');
 	}
 	else {
 		$muteAudioToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
 		$muteVideoToggle.prop('checked',false).attr('disabled','disabled').trigger('change');
+        $screenShareToogle.prop('checked',false).attr('disabled','disabled').trigger('change');
+    }
+}
+
+function switchToScreen() {
+    if (currentCall) {
+        $('#sourceList').prop('disabled',true);
+        $('#cameraList').prop('disabled', true);
+        $('#switchCamBtn').prop('disabled', true);
+        currentCall.switchToScreen($('#sourceList').val()).catch(function () {
+            $("#screenSharingToggle").removeAttr("checked");
+            $('#sourceList').prop('disabled',false);
+            $('#cameraList').prop('disabled', false);
+            $('#switchCamBtn').prop('disabled', false);
+        });
+    }
+}
+
+function switchToCam() {
+    if (currentCall) {
+        currentCall.switchToCam();
+        $('#sourceList').prop('disabled',false);
+        $('#cameraList').prop('disabled', false);
+        $('#switchCamBtn').prop('disabled', false);
     }
 }
 
