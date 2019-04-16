@@ -388,7 +388,7 @@ var createConnection = function (options) {
                                         }
                                     } else if (report.type == 'inbound-rtp') {
                                         fillStatObject(result.inboundStream, report);
-                                        if (report.mediaType == 'video') {
+                                        if (report.mediaType == 'video'  && remoteVideo != undefined) {
                                             result.inboundStream[report.mediaType].height = remoteVideo.videoHeight;
                                             result.inboundStream[report.mediaType].width = remoteVideo.videoWidth;
                                         }
@@ -406,7 +406,9 @@ var createConnection = function (options) {
         function fillStatObject(obj, report) {
             var mediaType = report.mediaType;
             obj[mediaType] = {};
-            var codec = util.getCurrentCodecAndSampleRate(connection.currentRemoteDescription.sdp, mediaType);
+            //WCS-1922, currentRemoteDescription - browser compatibilitySection: Chrome 70, FF 57, Safari 11
+            var description = connection.currentRemoteDescription != undefined ? connection.currentRemoteDescription : connection.remoteDescription;
+            var codec = util.getCurrentCodecAndSampleRate(description.sdp, mediaType);
             obj[mediaType]["codec"] = codec.name;
             obj[mediaType]["codecRate"] = codec.sampleRate;
             Object.keys(report).forEach(function(key) {
