@@ -51,7 +51,7 @@ module.exports = function(grunt) {
                 dest: './flashphoner.js',
                 options: {
                     ignore: ['./src/temasys-media-provider.js', 'adapterjs'],
-                    transform: [['babelify', {presets: ["@babel/preset-env", { "sourceType": "unambiguous" }], global: true}]],
+                    transform: [['babelify', {presets: ["@babel/preset-env", { "sourceType": "unambiguous" }], global: true, exclude: ['./src/media-source-media-provider.js','./src/media-source-media-provider.min.js']}]],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
