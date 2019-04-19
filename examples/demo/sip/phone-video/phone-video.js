@@ -16,19 +16,17 @@ function loadStats() {
     if (currentCall) {
         currentCall.getStats(function (stats) {
             if (stats && stats.outboundStream) {
-                if (stats.outboundStream.videoStats) {
-                    $('#videoStatBytesSent').text(stats.outboundStream.videoStats.bytesSent);
-                    $('#videoStatPacketsSent').text(stats.outboundStream.videoStats.packetsSent);
-                    $('#videoStatFramesEncoded').text(stats.outboundStream.videoStats.framesEncoded);
+                if (stats.outboundStream.video) {
+                    $('#videoStatBytesSent').text(stats.outboundStream.video.bytesSent);
+                    $('#videoStatPacketsSent').text(stats.outboundStream.video.packetsSent);
                 } else {
                     $('#videoStatBytesSent').text(0);
                     $('#videoStatPacketsSent').text(0);
-                    $('#videoStatFramesEncoded').text(0);
                 }
 
-                if (stats.outboundStream.audioStats) {
-                    $('#audioStatBytesSent').text(stats.outboundStream.audioStats.bytesSent);
-                    $('#audioStatPacketsSent').text(stats.outboundStream.audioStats.packetsSent);
+                if (stats.outboundStream.audio) {
+                    $('#audioStatBytesSent').text(stats.outboundStream.audio.bytesSent);
+                    $('#audioStatPacketsSent').text(stats.outboundStream.audio.packetsSent);
                 } else {
                     $('#audioStatBytesSent').text(0);
                     $('#audioStatPacketsSent').text(0);
