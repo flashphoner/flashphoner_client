@@ -3,6 +3,7 @@ var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var localVideo;
 var remoteVideo;
 var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
+var extensionNotInstalled;
 
 function init_page() {
     //init api
@@ -35,6 +36,11 @@ function init_page() {
                     onExtensionAvailable();
                 } else {
                     (inIframe()) ? $("#installFromMarket").show() : $("#installExtensionButton").show();
+                    clearInterval(interval);
+                    onExtensionAvailable();
+                    $('#woChromeExtension').prop('checked', true);
+                    $('#woChromeExtension').prop('disabled', true);
+                    extensionNotInstalled = true;
                 }
             });
         }, 500);
@@ -249,6 +255,9 @@ function muteInputs() {
 
 function unmuteInputs() {
     $(":input").each(function() {
+        if($(this).attr('id') == 'woChromeExtension' && extensionNotInstalled) {
+            return;
+        }
         $(this).prop('disabled',false);
     });
 }

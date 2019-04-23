@@ -7,6 +7,8 @@ var currentCall;
 var statIntervalId;
 var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 var screenSharing;
+var extensionInterval;
+var extensionNotInstalled;
 
 $(document).ready(function () {
     loadCallFieldSet();
@@ -197,6 +199,7 @@ function init_page() {
         }
     });
 
+
     if (!Browser.isFirefox()) {
         $('#sourceList').remove();
     }
@@ -207,6 +210,16 @@ function init_page() {
         off: 'no',
         size: 'md'
     });
+
+    extensionInterval = setInterval(function () {
+        chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
+            if (!response) {
+                clearInterval(extensionInterval);
+                $("#screenSharingExtensionToggle").prop('checked', true).attr('disabled', 'disabled').trigger('change');
+                extensionNotInstalled = true;
+            }
+        });
+    }, 500);
 
     if(!Browser.isChrome()) {
         $('#screenSharingExtensionForm').remove();
@@ -549,13 +562,17 @@ function enableMuteToggles(enable) {
         $muteVideoToggle.trigger('change');
         $screenShareToogle.removeAttr("disabled");
         $screenShareToogle.trigger('change');
-        $screenSharingExtensionToggle.removeAttr("disabled");
-        $screenSharingExtensionToggle.trigger('change');
+        if(!extensionNotInstalled) {
+            $screenSharingExtensionToggle.removeAttr("disabled");
+            $screenSharingExtensionToggle.trigger('change');
+        }
     } else {
         $muteAudioToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $muteVideoToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $screenShareToogle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
-        $screenSharingExtensionToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
+        if(!extensionNotInstalled) {
+            $screenSharingExtensionToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
+        }
     }
 }
 
