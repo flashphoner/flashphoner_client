@@ -62,6 +62,10 @@ function init_page() {
             }
         });
     });
+
+    if(!Browser.isChrome()) {
+        $('#chromeExtension').remove();
+    }
 }
 
 function onExtensionAvailable() {
@@ -137,6 +141,9 @@ function startStreaming(session) {
         };
     }
     constraints.video.type = "screen";
+    if ($("#woChromeExtension").prop('checked')) {
+        constraints.video.withoutExtension = true;
+    }
     if (Browser.isFirefox()){
         constraints.video.mediaSource = $('#mediaSource').val();
     }

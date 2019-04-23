@@ -201,6 +201,17 @@ function init_page() {
         $('#sourceList').remove();
     }
 
+    var $screenSharingExtensionToggle = $("#screenSharingExtensionToggle");
+    $screenSharingExtensionToggle.bootstrapSwitch({
+        on: 'yes',
+        off: 'no',
+        size: 'md'
+    });
+
+    if(!Browser.isChrome()) {
+        $('#screenSharingExtensionForm').remove();
+    }
+
     if (!(Browser.isFirefox() || Browser.isChrome())) {
         $('#screenSharingForm').remove();
     }
@@ -529,6 +540,7 @@ function enableMuteToggles(enable) {
     var $muteAudioToggle = $("#muteAudioToggle");
     var $muteVideoToggle = $("#muteVideoToggle");
     var $screenShareToogle = $('#screenSharingToggle');
+    var $screenSharingExtensionToggle = $('#screenSharingExtensionToggle');
 
     if (enable) {
         $muteAudioToggle.removeAttr("disabled");
@@ -537,10 +549,13 @@ function enableMuteToggles(enable) {
         $muteVideoToggle.trigger('change');
         $screenShareToogle.removeAttr("disabled");
         $screenShareToogle.trigger('change');
+        $screenSharingExtensionToggle.removeAttr("disabled");
+        $screenSharingExtensionToggle.trigger('change');
     } else {
         $muteAudioToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $muteVideoToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $screenShareToogle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
+        $screenSharingExtensionToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
     }
 }
 
@@ -550,7 +565,7 @@ function switchToScreen() {
         $('#cameraList').prop('disabled', true);
         $('#switchCamBtn').prop('disabled', true);
         screenSharing = true;
-        currentCall.switchToScreen($('#sourceList').val()).catch(function () {
+        currentCall.switchToScreen($('#sourceList').val(), $("#screenSharingExtensionToggle").prop('checked')).catch(function () {
             screenSharing = false;
             $("#screenSharingToggle").removeAttr("checked");
             $('#sourceList').prop('disabled', false);

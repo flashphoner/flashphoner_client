@@ -287,8 +287,8 @@ var getDefaultMediaConstraints = function () {
         return {
             audio: true,
             video: {
-                width: {min: 320, max: 640},
-                height: {min: 240, max: 480}
+                width: {ideal: 320},
+                height: {ideal: 240}
             }
         };
     }
@@ -1288,15 +1288,17 @@ var createSession = function (options) {
          * Switch to screen in real-time.
          * Works only with WebRTC
          *
+         * @param {String} source Screen sharing source (for firefox)
+         * @param {Boolean} woExtension Screen sharing without extension (for chrome)
          * @memberOf Call
          * @inner
          * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
          */
-        var switchToScreen = function (source) {
+        var switchToScreen = function (source, woExtension) {
             if(status_ !== CALL_STATUS.ESTABLISHED && status_ !== CALL_STATUS.HOLD){
                 throw new Error('Invalid call state');
             }
-            return mediaConnection.switchToScreen(source);
+            return mediaConnection.switchToScreen(source, woExtension);
         };
 
         /**
@@ -1727,15 +1729,17 @@ var createSession = function (options) {
          * Switch to screen in real-time.
          * Works only with WebRTC
          *
+         * @param {String} source Screen sharing source (for firefox)
+         * @param {Boolean} woExtension Screen sharing without extension (for chrome)
          * @memberOf Stream
          * @inner
          * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
          */
-        var switchToScreen = function (source) {
+        var switchToScreen = function (source, woExtension) {
             if(status_ !== STREAM_STATUS.PUBLISHING){
                 throw new Error('Invalid stream state');
             }
-            return mediaConnection.switchToScreen(source);
+            return mediaConnection.switchToScreen(source, woExtension);
         };
 
         /**

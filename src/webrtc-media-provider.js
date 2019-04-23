@@ -538,7 +538,7 @@ var createConnection = function (options) {
             });
         };
 
-        var switchToScreen = function (source) {
+        var switchToScreen = function (source, woExtension) {
             return new Promise(function(resolve,reject) {
                 if (!screenShare) {
                     var clonedConstraints = {
@@ -548,9 +548,18 @@ var createConnection = function (options) {
                     if(adapter.browserDetails.browser === 'firefox') {
                         clonedConstraints.video.mediaSource = source;
                     }
+                    if(window.chrome && woExtension) {
+                        getScreenDeviceIdWoExtension(clonedConstraints).then(function (screenSharingConstraints) {
+                            navigator.mediaDevices.getDisplayMedia(screenSharingConstraints).then(
+                                (stream) => {
+                                    processScreenStream(stream, resolve);
+                                }).catch(reject);
+                        });
+                        return;
+                    }
                     getScreenDeviceId(clonedConstraints).then(function (screenSharingConstraints) {
                         clonedConstraints.sourceId = screenSharingConstraints.sourceId;
-                        if(screenSharingConstraints.audioMandatory) {
+                        if (screenSharingConstraints.audioMandatory) {
                             clonedConstraints.audio = {
                                 mandatory: screenSharingConstraints.audioMandatory,
                                 optional: []
@@ -567,32 +576,7 @@ var createConnection = function (options) {
                             }
                         }
                         navigator.mediaDevices.getUserMedia(clonedConstraints).then(function (stream) {
-                            connection.getSenders().forEach(function (sender) {
-                                if (sender.track.kind === 'audio') return;
-                                currentAudioTrack = localVideo.srcObject.getAudioTracks()[0];
-                                currentVideoTrack = localVideo.srcObject.getVideoTracks()[0];
-                                var newVideoTrack = stream.getVideoTracks()[0];
-                                newVideoTrack.enabled = currentVideoTrack.enabled;
-                                sender.replaceTrack(newVideoTrack);
-                                localVideo.srcObject = stream;
-                                if (stream.getAudioTracks()[0]) {
-                                    systemSoundTrack = stream.getAudioTracks()[0];
-                                    connection.getSenders().forEach(function (sender) {
-                                        if (sender.track.kind === 'video') return;
-                                        var mixedTrack = mixAudioTracks(stream, new MediaStream([sender.track]));
-                                        mixedTrack.enabled = currentAudioTrack.enabled;
-                                        sender.replaceTrack(mixedTrack);
-                                        localVideo.srcObject.removeTrack(stream.getAudioTracks()[0]);
-                                        localVideo.srcObject.addTrack(mixedTrack);
-                                        currentAudioTrack.enabled = true;
-                                    });
-                                } else {
-                                    localVideo.srcObject.addTrack(currentAudioTrack);
-                                }
-                            });
-                            logger.info("Switch to screen");
-                            screenShare = true;
-                            resolve();
+                            processScreenStream(stream, resolve);
                         }).catch(function(reason){
                             logger.error(reason);
                             reject(reason);
@@ -603,6 +587,35 @@ var createConnection = function (options) {
                     });
                 }
             });
+        };
+
+        var processScreenStream = function (stream, resolve) {
+            connection.getSenders().forEach(function (sender) {
+                if (sender.track.kind === 'audio') return;
+                currentAudioTrack = localVideo.srcObject.getAudioTracks()[0];
+                currentVideoTrack = localVideo.srcObject.getVideoTracks()[0];
+                var newVideoTrack = stream.getVideoTracks()[0];
+                newVideoTrack.enabled = currentVideoTrack.enabled;
+                sender.replaceTrack(newVideoTrack);
+                localVideo.srcObject = stream;
+                if (stream.getAudioTracks()[0]) {
+                    systemSoundTrack = stream.getAudioTracks()[0];
+                    connection.getSenders().forEach(function (sender) {
+                        if (sender.track.kind === 'video') return;
+                        var mixedTrack = mixAudioTracks(stream, new MediaStream([sender.track]));
+                        mixedTrack.enabled = currentAudioTrack.enabled;
+                        sender.replaceTrack(mixedTrack);
+                        localVideo.srcObject.removeTrack(stream.getAudioTracks()[0]);
+                        localVideo.srcObject.addTrack(mixedTrack);
+                        currentAudioTrack.enabled = true;
+                    });
+                } else {
+                    localVideo.srcObject.addTrack(currentAudioTrack);
+                }
+            });
+            logger.info("Switch to screen");
+            screenShare = true;
+            resolve();
         };
 
         var switchToCam = function () {
@@ -694,6 +707,12 @@ var getMediaAccess = function (constraints, display) {
         //check if this is screen sharing
         if (constraints.video && constraints.video.type && constraints.video.type == "screen") {
             delete constraints.video.type;
+            if(window.chrome && constraints.video.withoutExtension) {
+                getScreenDeviceIdWoExtension(constraints).then(function (screenSharingConstraints) {
+                    getScreenAccessWoExtension(screenSharingConstraints, constraints.audio);
+                });
+                return;
+            }
             var requestAudioConstraints = null;
             getScreenDeviceId(constraints).then(function (screenSharingConstraints) {
                 //copy constraints
@@ -727,6 +746,14 @@ var getMediaAccess = function (constraints, display) {
             }, reject);
         } else {
             getAccess(constraints);
+        }
+
+        function getScreenAccessWoExtension(constraints, requestAudioConstraints) {
+            //WCS-1952. exact constraints and system audio are not supported!
+            navigator.mediaDevices.getDisplayMedia(constraints).then(
+                (stream) => {
+                    loadVideo(display, stream, true, requestAudioConstraints, resolve, constraints);
+                }).catch(reject);
         }
 
         function getAccess(constraints, screenShare, requestAudioConstraints) {
@@ -898,6 +925,17 @@ var setScreenResolution = function (video, stream, constraints) {
     stream.getVideoTracks()[0].applyConstraints({height: newHeight, width: newWidth});
 };
 
+
+//for chrome
+var getScreenDeviceIdWoExtension = function (constraints) {
+    return new Promise(function (resolve, reject) {
+        //WCS-1952. exact constraints and system audio are not supported. System audio will be supported in chrome 74/75.
+        resolve({
+            video: true
+        });
+    });
+};
+
 var getScreenDeviceId = function (constraints) {
     return new Promise(function (resolve, reject) {
         var o = {};
@@ -917,7 +955,7 @@ var getScreenDeviceId = function (constraints) {
                                 mandatory: o,
                                 sourceId: response.sourceId
                             };
-                            if(response.systemSoundAccess) {
+                            if (response.systemSoundAccess) {
                                 result.audioMandatory = {
                                     chromeMediaSource: "desktop",
                                     chromeMediaSourceId: response.sourceId,
@@ -1084,11 +1122,11 @@ function normalizeConstraints(constraints) {
             var height = constraints.video.height;
             if (adapter.browserDetails.browser == "safari") {
                 if (!width || !height) {
-                    constraints.video.width = {min: 320, max: 640};
-                    constraints.video.height = {min: 240, max: 480};
+                    constraints.video.width = {ideal: 320};
+                    constraints.video.height = {ideal: 240};
                 } else if (typeof width !== 'object' || typeof height !== 'object') {
-                    constraints.video.width = {min: width, max: width};
-                    constraints.video.height = {min: height, max: height};
+                    constraints.video.width = {ideal: width};
+                    constraints.video.height = {ideal: height};
                 }
             } else if (isNaN(width) || width === 0 || isNaN(height) || height === 0) {
                 constraints.video.width = 320;
