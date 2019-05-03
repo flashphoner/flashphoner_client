@@ -237,18 +237,21 @@ var getLogger = function () {
  * @param {Boolean=} labels Ask user for microphone access before getting device list.
  * This will make device label available.
  * @param {Flashphoner.constants.MEDIA_DEVICE_KIND} kind For media device kind input or output
+ * @param {Object=} deviceConstraints If labels == true.
+ * If {audio: true, video: false}, then access to the camera will not be requested.
+ * If {audio: false, video: true}, then access to the microphone will not be requested.
  * @returns {Promise.<Flashphoner.MediaDeviceList>} Promise with media device list on fulfill
  * @throws {Error} Error if API is not initialized
  * @memberof Flashphoner
  */
-var getMediaDevices = function (mediaProvider, labels, kind) {
+var getMediaDevices = function (mediaProvider, labels, kind, deviceConstraints) {
     if (!initialized) {
         throw new Error("Flashphoner API is not initialized");
     }
     if (!mediaProvider) {
         mediaProvider = getMediaProviders()[0];
     }
-    return MediaProvider[mediaProvider].listDevices(labels, kind);
+    return MediaProvider[mediaProvider].listDevices(labels, kind, deviceConstraints);
 };
 
 /**

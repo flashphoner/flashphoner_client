@@ -941,10 +941,12 @@ var getScreenDeviceId = function (constraints) {
         var o = {};
         if (window.chrome) {
             chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
+                //WCS-1972. fixed "TypeError"
                 if (response) {
-                    o.maxWidth = constraints.video.width;
-                    o.maxHeight = constraints.video.height;
-                    o.maxFrameRate = constraints.video.frameRate.ideal;
+                    o.maxWidth = constraints && constraints.video && constraints.video.width ? constraints.video.width : 320;
+                    o.maxHeight = constraints && constraints.video && constraints.video.height ? constraints.video.height : 240;
+                    o.maxFrameRate = constraints && constraints.video && constraints.video.frameRate && constraints.video.frameRate.ideal ? constraints.video.frameRate.ideal : 30;
+
                     o.chromeMediaSource = "desktop";
                     chrome.runtime.sendMessage(extensionId, {type: "getSourceId"}, function (response) {
                         if (response.error) {
@@ -1032,7 +1034,14 @@ var available = function () {
     return ('getUserMedia' in navigator && 'RTCPeerConnection' in window);
 };
 
-var listDevices = function (labels, kind) {
+var listDevices = function (labels, kind, deviceConstraints) {
+    //WCS-1963. added deviceConstraints.
+    if (!deviceConstraints) {
+        deviceConstraints = {
+            audio: true,
+            video: true
+        }
+    }
     if (!kind) {
         kind = constants.MEDIA_DEVICE_KIND.INPUT;
     } else if (kind == "all") {
@@ -1042,9 +1051,9 @@ var listDevices = function (labels, kind) {
         var constraints = {};
         for (var i = 0; i < devices.length; i++) {
             var device = devices[i];
-            if (device.kind.indexOf("audio"+ kind) === 0) {
+            if (device.kind.indexOf("audio"+ kind) === 0 && deviceConstraints.audio) {
                 constraints.audio = true;
-            } else if (device.kind.indexOf("video"+ kind) === 0) {
+            } else if (device.kind.indexOf("video"+ kind) === 0 && deviceConstraints.video) {
                 constraints.video = true;
             } else {
                 logger.debug(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
@@ -1109,11 +1118,6 @@ var listDevices = function (labels, kind) {
 
 function normalizeConstraints(constraints) {
     if (constraints.video) {
-        // Set default FPS value
-        var frameRate = (!constraints.video.frameRate || constraints.video.frameRate == 0) ? 30 : constraints.video.frameRate;
-        constraints.video.frameRate = {
-            ideal: frameRate
-        };
         if (constraints.video === true) {
             constraints.video = {};
         }
@@ -1132,6 +1136,13 @@ function normalizeConstraints(constraints) {
                 constraints.video.width = 320;
                 constraints.video.height = 240;
             }
+
+            //WCS-1972. fixed "TypeError"
+            // Set default FPS value
+            var frameRate = (!constraints.video.frameRate || constraints.video.frameRate == 0) ? 30 : constraints.video.frameRate;
+            constraints.video.frameRate = {
+                ideal: frameRate
+            };
         }
     }
 
