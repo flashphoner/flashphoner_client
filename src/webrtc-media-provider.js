@@ -929,9 +929,11 @@ var setScreenResolution = function (video, stream, constraints) {
 //for chrome
 var getScreenDeviceIdWoExtension = function (constraints) {
     return new Promise(function (resolve, reject) {
-        //WCS-1952. exact constraints and system audio are not supported. System audio will be supported in chrome 74/75.
+        //WCS-1952. exact constraints are not supported.
+        //WCS-1986. added audio: true to constraints.
         resolve({
-            video: true
+            video: true,
+            audio: true
         });
     });
 };
