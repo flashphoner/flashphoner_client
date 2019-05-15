@@ -474,6 +474,20 @@ define(streamStatusInfo, 'TERMINATED_BY_KEEP_ALIVE', 'Terminated by keep-alive')
 define(streamStatusInfo, 'TRANSCODING_REQUIRED_BUT_DISABLED', 'Transcoding required, but disabled');
 
 /**
+ * Access restricted by access list
+ * @event RESTRICTED_ACCESS
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'RESTRICTED_ACCESS', 'Restricted access');
+
+/**
+ * No available transcoders for stream
+ * @event RESTRICTED_ACCESS
+ * @memberof Flashphoner.constants.STREAM_STATUS_INFO
+ */
+define(streamStatusInfo, 'NO_AVAILABLE_TRANSCODERS', 'No available transcoders');
+
+/**
 * @namespace Flashphoner.constants.CALL_STATUS_INFO
 * @see Call
 */
