@@ -243,6 +243,9 @@ function setStatus(selector, status, stream) {
                     case STREAM_STATUS_INFO.TRANSCODING_REQUIRED_BUT_DISABLED:
                         $("#playInfo").text("Transcoding required, but disabled in settings").attr("class", "text-muted");
                         break;
+                    case STREAM_STATUS_INFO.NO_AVAILABLE_TRANSCODERS:
+                        $("#playInfo").text("No available transcoders for stream").attr("class", "text-muted");
+                        break;
                     default:
                         $("#playInfo").text("Other: "+stream.getInfo()).attr("class", "text-muted");
                         break;
