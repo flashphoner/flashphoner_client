@@ -25,6 +25,7 @@
 			private var cam:Camera;
 			private var mic:Microphone;
 			private var videoFarEnd:Video;
+			private var videoFarEndOrientation:Number;
 			private var publishStream:NetStream;
 			private var subscribeStream:NetStream;
 			private var subscribeStreamObject:Object;
@@ -47,6 +48,7 @@
 				videoMy.attachCamera(cam);
 				mic = Microphone.getEnhancedMicrophone();
 				videoFarEnd = new Video();
+				videoFarEndOrientation = 0;
 				var container:UIComponent = new UIComponent();
 				container.addChild(videoFarEnd);
 				canvas.addChild(container);
@@ -271,6 +273,7 @@
 				playStatus.setStyle("color","#000000");
 				Logger.info("play");
 				subscribeStream = new NetStream(nc);
+				subscribeStream.client = this;
 				addListenerAndPlay();
 			}
 			
@@ -300,6 +303,10 @@
 				subscribeStreamObject = createStreamObject();
 				subscribeStream.play(playStreamName.text);
 				videoFarEnd.attachNetStream(subscribeStream);
+                videoFarEnd.x = 0;
+                videoFarEnd.y = 0;
+				videoFarEnd.rotation = 0;
+				videoFarEndOrientation = 0;
 				videoFarEnd.width = 320;
 				videoFarEnd.height = 240;
 				videoFarEnd.visible = true;
@@ -486,7 +493,37 @@
                 publishBtn.enabled = false;
                 unpublishBtn.enabled = false;
             }
-			
+
+            public function onMetaData(info:Object):void {
+                Logger.info("Video orientation " + info.orientation);
+                revertVideoFarEndPos();
+                if (info.orientation == 0) {
+                    videoFarEnd.rotation = 0;
+                } else if (info.orientation == 1) {
+                    videoFarEnd.rotation = 90;
+                    videoFarEnd.x = videoFarEnd.x + videoFarEnd.width;
+                } else if (info.orientation == 2) {
+                    videoFarEnd.rotation = 180;
+                    videoFarEnd.x = videoFarEnd.x + videoFarEnd.width;
+                    videoFarEnd.y = videoFarEnd.y + videoFarEnd.height;
+                } else if (info.orientation == 3) {
+                    videoFarEnd.rotation = 270;
+                    videoFarEnd.y = videoFarEnd.y + videoFarEnd.height;
+                }
+                videoFarEndOrientation = info.orientation;
+            }
+
+            public function revertVideoFarEndPos():void {
+                if (videoFarEndOrientation == 1) {
+                    videoFarEnd.x = videoFarEnd.x - videoFarEnd.width;
+                } else if (videoFarEndOrientation == 2) {
+                    videoFarEnd.x = videoFarEnd.x - videoFarEnd.width;
+                    videoFarEnd.y = videoFarEnd.y - videoFarEnd.height;
+                } else if (videoFarEndOrientation == 3) {
+                    videoFarEnd.y = videoFarEnd.y - videoFarEnd.height;
+                }
+            }
+
 		]]>
 	</fx:Script>
 	<s:Label x="96" y="34" width="265" styleName="header" text="Flash Streaming"/>

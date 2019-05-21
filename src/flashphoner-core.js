@@ -1390,6 +1390,7 @@ var createSession = function (options) {
      * @param {Object=} options.mediaConnectionConstraints Stream specific constraints for underlying RTCPeerConnection
      * @param {Boolean=} options.flashShowFullScreenButton Show full screen button in flash
      * @param {string=} options.transport Transport to be used by server for WebRTC media, {@link Flashphoner.constants.TRANSPORT_TYPE}
+     * @param {Boolean=} options.cvoExtension Enable rtp video orientation extension
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
@@ -1478,6 +1479,7 @@ var createSession = function (options) {
         var networkBandwidth = -1;
         var sdpHook = options.sdpHook;
         var transportType = options.transport;
+        var cvoExtension = options.cvoExtension;
         var remoteVideo = options.remoteVideo;
         //callbacks added using stream.on()
         var callbacks = {};
@@ -1607,7 +1609,8 @@ var createSession = function (options) {
                     maxBitrate: maxBitrate,
                     quality: quality,
                     constraints: constraints,
-                    transport: transportType
+                    transport: transportType,
+                    cvoExtension: cvoExtension
                 });
                 if (offer.player) {
                     offer.player.play(id_);
@@ -1683,7 +1686,8 @@ var createSession = function (options) {
                         maxBitrate: maxBitrate,
                         rtmpUrl: rtmpUrl,
                         constraints: constraints,
-                        transport: transportType
+                        transport: transportType,
+                        cvoExtension: cvoExtension
                     });
                 });
             }).catch(function (error) {

@@ -338,6 +338,7 @@ function publish() {
     var mediaConnectionConstraints;
     var session = Flashphoner.getSessions()[0];
     var transportInput = $('#transportInput').val();
+    var cvo = $("#cvo").is(':checked');
 
     if (!$("#cpuOveruseDetection").is(':checked')) {
         mediaConnectionConstraints = {
@@ -353,7 +354,8 @@ function publish() {
         constraints: constraints,
         mediaConnectionConstraints: mediaConnectionConstraints,
         sdpHook: rewriteSdp,
-        transport: transportInput
+        transport: transportInput,
+        cvoExtension: cvo
     }).on(STREAM_STATUS.PUBLISHING, function (stream) {
         $("#testBtn").prop('disabled', true);
         var video = document.getElementById(stream.id());
