@@ -138,7 +138,8 @@ function startStreaming(session) {
         video: {
             width: parseInt($('#width').val()),
             height: parseInt($('#height').val()),
-            frameRate: {max: parseInt($('#fps').val())}
+            //WCS-2014. fixed window/tab sharing
+            frameRate: parseInt($('#fps').val())
         }
     };
     if ($("#useMic").prop('checked')) {
