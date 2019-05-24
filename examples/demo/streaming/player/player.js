@@ -145,17 +145,21 @@ function playStream(session) {
             video.addEventListener('playing', function () {
                 $("#preloader").hide();
             });
-            video.addEventListener('resize', function (event) {
-                var streamResolution = stream.videoResolution();
-                if (Object.keys(streamResolution).length === 0) {
-                    resizeVideo(event.target);
-                } else {
-                    // Change aspect ratio to prevent video stretching
-                    var ratio = streamResolution.width / streamResolution.height;
-                    var newHeight = Math.floor(options.playWidth / ratio);
-                    resizeVideo(event.target, options.playWidth, newHeight);
-                }
-            });
+            //don't resize html5 video
+            if (video.nodeName.toLowerCase() !== "video") {
+                video.addEventListener('resize', function (event) {
+                    var streamResolution = stream.videoResolution();
+                    console.log("Stream resolution " + streamResolution);
+                    if (Object.keys(streamResolution).length === 0) {
+                        resizeVideo(event.target);
+                    } else {
+                        // Change aspect ratio to prevent video stretching
+                        var ratio = streamResolution.width / streamResolution.height;
+                        var newHeight = Math.floor(options.playWidth / ratio);
+                        resizeVideo(event.target, options.playWidth, newHeight);
+                    }
+                });
+            }
         }
     }).on(STREAM_STATUS.PLAYING, function(stream) {
         $("#preloader").show();
