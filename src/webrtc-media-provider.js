@@ -292,6 +292,14 @@ var createConnection = function (options) {
 
         var setAudioOutputId = function (id) {
             if (remoteVideo) {
+                //WCS-2063. fixed output device switch
+                if (adapter.browserDetails.browser == "edge") {
+                    var srcObject = remoteVideo.srcObject;
+                    remoteVideo.srcObject = null;
+                    var res = remoteVideo.setSinkId(id);
+                    remoteVideo.srcObject = srcObject;
+                    return res;
+                }
                 return remoteVideo.setSinkId(id);
             }
         };
@@ -1069,18 +1077,23 @@ var listDevices = function (labels, kind, deviceConstraints) {
             audio: [],
             video: []
         };
+
+        var micCount = 0;
+        var outputCount = 0;
+        var camCount = 0;
         for (var i = 0; i < devices.length; i++) {
             var device = devices[i];
             var ret = {
                 id: device.deviceId,
                 label: device.label
             };
-            var micCount = 0;
-            var camCount = 0;
             if (device.kind.indexOf("audio" + kind) === 0 && device.deviceId != "communications") {
                 ret.type = (device.kind == "audioinput") ? "mic" : "speaker";
                 if (ret.type == "mic" && ret.label == "") {
                     ret.label = 'microphone' + ++micCount;
+                }
+                if(ret.type == "speaker" && ret.label == "") {
+                    ret.label = 'speaker' + ++outputCount;
                 }
                 list.audio.push(ret);
             } else if (device.kind.indexOf("video" + kind) === 0) {
@@ -1097,9 +1110,7 @@ var listDevices = function (labels, kind, deviceConstraints) {
     };
 
     return new Promise(function (resolve, reject) {
-        if(kind === constants.MEDIA_DEVICE_KIND.OUTPUT && adapter.browserDetails.browser !== "chrome") {
-            reject({message: "Only supported in chrome"});
-        } else {
+
             navigator.mediaDevices.enumerateDevices().then(function (devices) {
                 if (labels) {
                     navigator.getUserMedia(getConstraints(devices), function (stream) {
@@ -1114,7 +1125,7 @@ var listDevices = function (labels, kind, deviceConstraints) {
                     resolve(getList(devices));
                 }
             }, reject);
-        }
+
     });
 };
 

@@ -700,9 +700,6 @@ function readyControls() {
             previewStream.setAudioOutputId($(this).val());
         }
     });
-    if (!Browser.isChrome()) {
-        $('#audioOutput').remove();
-    }
 
     $("#videoInput").change(function() {
         if (publishStream) {
