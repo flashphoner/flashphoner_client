@@ -198,20 +198,16 @@ var createConnection = function (options) {
                         hasVideo = false;
                         options.receiveVideo = false;
                     }
-                } else if (adapter.browserDetails.browser == "safari") {
+                } else if (!connection.getTransceivers().length) {
                     if (options.receiveAudio) {
-                        connection.addTransceiver('audio');
+                        connection.addTransceiver('audio', {direction: "recvonly"});
                     }
                     if (options.receiveVideo) {
-                        connection.addTransceiver('video');
+                        connection.addTransceiver('video', {direction: "recvonly"});
                     }
                 }
-                var constraints = {
-                    offerToReceiveAudio: options.receiveAudio ? 1 : 0,
-                    offerToReceiveVideo: options.receiveVideo ? 1 : 0
-                };
                 //create offer and set local sdp
-                connection.createOffer(constraints).then(function (offer) {
+                connection.createOffer().then(function (offer) {
                     connection.setLocalDescription(offer).then(function () {
                         var o = {};
                         o.sdp = util.stripCodecs(offer.sdp, options.stripCodecs);
