@@ -290,8 +290,8 @@ var getDefaultMediaConstraints = function () {
         return {
             audio: true,
             video: {
-                width: {ideal: 320},
-                height: {ideal: 240}
+                width: {min: 320, max: 640},
+                height: {min: 240, max: 480}
             }
         };
     }

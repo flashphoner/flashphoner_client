@@ -1141,11 +1141,11 @@ function normalizeConstraints(constraints) {
             var height = constraints.video.height;
             if (adapter.browserDetails.browser == "safari") {
                 if (!width || !height) {
-                    constraints.video.width = {ideal: 320};
-                    constraints.video.height = {ideal: 240};
+                    constraints.video.width = {min: 320, max: 640};
+                    constraints.video.height = {min: 240, max: 480};
                 } else if (typeof width !== 'object' || typeof height !== 'object') {
-                    constraints.video.width = {ideal: width};
-                    constraints.video.height = {ideal: height};
+                    constraints.video.width = {min: width, max: width};
+                    constraints.video.height = {min: height, max: height};
                 }
             } else if (isNaN(width) || width === 0 || isNaN(height) || height === 0) {
                 constraints.video.width = 320;
