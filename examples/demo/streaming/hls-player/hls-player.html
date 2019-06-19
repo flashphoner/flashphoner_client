@@ -48,11 +48,17 @@
 
                 <div class="row" style="margin-top:10px">
                     <div class="form-group">
-                        <label class="control-label col-sm-1 fp-buttonVerticalAlign  text-right"
-                               for="playStream">Auth Token</label>
+                        <label class="control-label col-sm-1 fp-buttonVerticalAlign  text-left"
+                               for="playStream">Auth</label>
 
                         <div class="col-sm-12">
-                            <input type="text" class="form-control" id="token" placeholder="Auth Token"/>
+                            <div class="col-sm-4 nopadding">
+                                <input type="text" class="form-control" id="key" placeholder="Key"/>
+                            </div>
+
+                            <div class="col-sm-8 nopadding">
+                                <input type="text" class="form-control" id="token" placeholder="Value"/>
+                            </div>
                         </div>
                     </div>
                 </div>

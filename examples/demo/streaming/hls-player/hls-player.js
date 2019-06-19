@@ -5,9 +5,10 @@ function initPage() {
         var streamName = $("#playStream").val();
         streamName = encodeURIComponent(streamName);
         var src = $("#urlServer").val() + "/" + streamName + "/" + streamName + ".m3u8";
+        var key = $('#key').val();
         var token = $("#token").val();
-        if (token.length > 0) {
-            src += "?token=" +token;
+        if (key.length > 0 && token.length > 0) {
+            src += "?" + key + "=" + token;
         }
         player.src({
             src: src,

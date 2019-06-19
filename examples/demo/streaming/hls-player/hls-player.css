@@ -4,3 +4,7 @@
     height: 34px;
     line-height: 34px;
 }
+
+.nopadding {
+    padding: 0 !important;
+}
