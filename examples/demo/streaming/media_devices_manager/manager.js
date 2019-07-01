@@ -297,11 +297,14 @@ function play() {
             quality: (!$("#receiveDefaultQuality").is(":checked")) ? $('#quality').val() : 0
         };
     }
+    var strippedCodecs = $("#stripPlayCodecs").val();
+
     previewStream = session.createStream({
         name: streamName,
         display: remoteVideo,
         constraints: constraints,
-        transport: transportOutput
+        transport: transportOutput,
+        stripCodecs: strippedCodecs
     }).on(STREAM_STATUS.PLAYING, function (stream) {
         setStatus("#playStatus", stream.status());
         onPlaying(stream);
@@ -339,6 +342,7 @@ function publish() {
     var session = Flashphoner.getSessions()[0];
     var transportInput = $('#transportInput').val();
     var cvo = $("#cvo").is(':checked');
+    var strippedCodecs = $("#stripPublishCodecs").val();
 
     if (!$("#cpuOveruseDetection").is(':checked')) {
         mediaConnectionConstraints = {
@@ -355,7 +359,8 @@ function publish() {
         mediaConnectionConstraints: mediaConnectionConstraints,
         sdpHook: rewriteSdp,
         transport: transportInput,
-        cvoExtension: cvo
+        cvoExtension: cvo,
+        stripCodecs: strippedCodecs
     }).on(STREAM_STATUS.PUBLISHING, function (stream) {
         $("#testBtn").prop('disabled', true);
         var video = document.getElementById(stream.id());
@@ -497,7 +502,7 @@ function validateForm(s) {
     }
     var validateInputs = function (selector) {
         $('#form ' + selector + ' :text, ' + selector + ' select').each(function () {
-            if (!$(this).val()) {
+            if (!$(this).val() && ($(this).get(0).id && !$(this).get(0).id.startsWith("strip"))) {
                 highlightInput($(this));
                 valid = false;
             } else {
