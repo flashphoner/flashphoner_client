@@ -341,8 +341,9 @@ module.exports = {
                 ret.sampleRate = rows[i].split(" ")[1].split("/")[1];
                 return ret;
             }
+            //WCS-2136. WebRTC statistics doesn't work for VP8
             if (rows[i].indexOf("m=" + mediaType) != -1) {
-                codecPt = rows[i].split(" ")[3];
+                codecPt = rows[i].split(" ")[3].trim();
             }
         }
     }
