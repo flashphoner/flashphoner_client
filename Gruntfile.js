@@ -120,7 +120,9 @@ module.exports = function(grunt) {
         },
         uglify: {
           options: {
-              compress: true,
+              compress: {
+                  typeofs: false
+              },
               mangle: false
           },
           minify: {
