@@ -14,7 +14,7 @@ function init_page() {
             screenSharingExtensionId: extensionId
         });
     } catch(e) {
-        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
+        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology needed for this example");
         return;
     }
     var interval;

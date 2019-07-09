@@ -21,7 +21,7 @@ function init_page() {
             preferredMediaProvider: mediaProvider
         });
     } catch(e) {
-        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology necessary for work of an example");
+        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology needed for this example");
         return;
     }
     if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
@@ -60,7 +60,7 @@ function onStarted(stream) {
         stream.stop();
     }).prop('disabled', false);
     $("#fullScreenBtn").off('click').click(function(){
-       stream.fullScreen();
+        stream.fullScreen();
     }).prop('disabled', false);
     $("#volumeControl").slider("enable");
     stream.setVolume(currentVolumeValue);
@@ -88,7 +88,7 @@ function start() {
     } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] === "MSE") {
         Flashphoner.playFirstVideo(remoteVideo);
     }
-    
+
     var url = $('#url').val();
     //check if we already have session
     if (Flashphoner.getSessions().length > 0) {

@@ -1,6 +1,6 @@
 'use strict';
 
-var adapter = require('webrtc-adapter');
+var browserDetails = require('webrtc-adapter').default.browserDetails;
 var uuid_v1 = require('uuid/v1');
 var util = require('./util');
 var connections = {};
@@ -132,7 +132,7 @@ var createConnection = function (options) {
                 remoteVideo.onloadedmetadata = function (e) {
                     if (remoteVideo) {
                         remoteVideo.play().catch(function (e) {
-                            if(adapter.browserDetails.browser == 'chrome') {
+                            if(browserDetails.browser == 'chrome') {
                                 //WCS-1698. fix autoplay in chromium based browsers
                                 logger.info(LOG_PREFIX, "Autoplay detected! Trying to play a video with a muted sound...");
                                 remoteVideo.muted = true;
@@ -198,7 +198,7 @@ var createConnection = function (options) {
                         hasVideo = false;
                         options.receiveVideo = false;
                     }
-                } else if (adapter.browserDetails.browser == "safari" && !connection.getTransceivers().length) {
+                } else if (browserDetails.browser == "safari" && !connection.getTransceivers().length) {
                     if (options.receiveAudio) {
                         connection.addTransceiver('audio', {direction: "recvonly"});
                     }
@@ -252,7 +252,7 @@ var createConnection = function (options) {
                 });
                 connection.setRemoteDescription(rtcSdp).then(function () {
                     //use in edge for ice
-                    if (adapter.browserDetails.browser == "edge") {
+                    if (browserDetails.browser == "edge") {
                         // var sdpArray = sdp.split("\n");
                         // var i;
                         // for (i = 0; i < sdpArray.length; i++) {
@@ -294,7 +294,7 @@ var createConnection = function (options) {
         var setAudioOutputId = function (id) {
             if (remoteVideo) {
                 //WCS-2063. fixed output device switch
-                if (adapter.browserDetails.browser == "edge") {
+                if (browserDetails.browser == "edge") {
                     var srcObject = remoteVideo.srcObject;
                     remoteVideo.srcObject = null;
                     var res = remoteVideo.setSinkId(id);
@@ -378,7 +378,7 @@ var createConnection = function (options) {
             return true;
         };
         var getStat = function (callbackFn, nativeStats) {
-            var browser = adapter.browserDetails.browser;
+            var browser = browserDetails.browser;
             var result = {outboundStream:{}, inboundStream:{}, otherStats:[]};
             if (connection && validBrowsers.includes(browser)) {
                 if (nativeStats) {
@@ -554,7 +554,7 @@ var createConnection = function (options) {
                         video: Object.assign({}, constraints.video),
                         audio: Object.assign({}, constraints.audio)
                     };
-                    if(adapter.browserDetails.browser === 'firefox') {
+                    if(browserDetails.browser === 'firefox') {
                         clonedConstraints.video.mediaSource = source;
                     }
                     if(window.chrome && woExtension) {
@@ -576,9 +576,9 @@ var createConnection = function (options) {
                         } else {
                             delete clonedConstraints.audio;
                         }
-                        if (adapter.browserDetails.browser == "firefox") {
+                        if (browserDetails.browser == "firefox") {
                             clonedConstraints.video = screenSharingConstraints;
-                        } else if (adapter.browserDetails.browser == "chrome") {
+                        } else if (browserDetails.browser == "chrome") {
                             delete clonedConstraints.video;
                             clonedConstraints.video = {
                                 mandatory: screenSharingConstraints.mandatory
@@ -745,7 +745,7 @@ var getMediaAccess = function (constraints, display) {
                         constraints.video[prop] = screenSharingConstraints[prop];
                     }
                 }
-                if (adapter.browserDetails.browser == "chrome") {
+                if (browserDetails.browser == "chrome") {
                     delete constraints.video.frameRate;
                     delete constraints.video.height;
                     delete constraints.video.width;
@@ -802,7 +802,7 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
         video = document.createElement('video');
         display.appendChild(video);
     }
-    if (createMicGainNode && stream.getAudioTracks().length > 0 && adapter.browserDetails.browser == "chrome") {
+    if (createMicGainNode && stream.getAudioTracks().length > 0 && browserDetails.browser == "chrome") {
         //WCS-1696. We need to start audioContext to work with gain control
         audioContext.resume();
         microphoneGain = createGainNode(stream);
@@ -817,7 +817,7 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
         }
         video.play();
     };
-    if (constraints.systemSound && adapter.browserDetails.browser == "chrome") {
+    if (constraints.systemSound && browserDetails.browser == "chrome") {
         addSystemSound();
     } else {
         resolveCallback();
@@ -825,7 +825,7 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
 
     function resolveCallback() {
         // This hack for chrome only, firefox supports screen-sharing + audio natively
-        if (requestAudioConstraints && adapter.browserDetails.browser == "chrome") {
+        if (requestAudioConstraints && browserDetails.browser == "chrome") {
             logger.info(LOG_PREFIX, "Request for audio stream");
             navigator.getUserMedia({audio: requestAudioConstraints}, function (stream) {
                 logger.info(LOG_PREFIX, "Got audio stream, add it to video stream");
@@ -1140,7 +1140,7 @@ function normalizeConstraints(constraints) {
         if (typeof constraints.video === 'object') {
             var width = constraints.video.width;
             var height = constraints.video.height;
-            if (adapter.browserDetails.browser == "safari") {
+            if (browserDetails.browser == "safari") {
                 if (!width || !height) {
                     constraints.video.width = {min: 320, max: 640};
                     constraints.video.height = {min: 240, max: 480};

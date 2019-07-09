@@ -322,7 +322,7 @@ function detectFlash() {
         }
     }
     if (!hasFlash) {
-        $("#player").text("Your browser doesn't support the Flash technology necessary for work of an example").css("font-weight", "bold").css("font-size","200%");
+        $("#player").text("Your browser doesn't support Flash or WebRTC technology needed for this example").css("font-weight", "bold").css("font-size","200%");
     }
 }
 

@@ -6,7 +6,7 @@ var util = require('./util');
 var logger = require('./util').logger;
 var loggerConf = {push: false, severity: "INFO"};
 var Promise = require('promise-polyfill');
-var browserDetails = require('webrtc-adapter').browserDetails;
+var browserDetails = require('webrtc-adapter').default.browserDetails;
 var LOG_PREFIX = "core";
 var isUsingTemasysPlugin = false;
 
