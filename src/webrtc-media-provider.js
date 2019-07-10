@@ -696,7 +696,7 @@ var mixAudioTracks = function (stream1, stream2) {
     return newStream.getAudioTracks()[0];
 };
 
-var getMediaAccess = function (constraints, display) {
+var getMediaAccess = function (constraints, display, disableConstraintsNormalization) {
     return new Promise(function (resolve, reject) {
         if (!constraints) {
             constraints = defaultConstraints;
@@ -706,7 +706,9 @@ var getMediaAccess = function (constraints, display) {
                 return;
             }
         } else {
-            constraints = normalizeConstraints(constraints);
+            if(!disableConstraintsNormalization) {
+                constraints = normalizeConstraints(constraints);
+            }
             releaseMedia(display);
         }
         if(!constraints.video && !constraints.audio && !constraints.customStream) {

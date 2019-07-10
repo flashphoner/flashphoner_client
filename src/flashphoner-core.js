@@ -269,19 +269,20 @@ var getMediaDevices = function (mediaProvider, labels, kind, deviceConstraints) 
  * @param {String} constraints.video.mediaSource Video source type for FF: screen, window
  * @param {HTMLElement} display Div element local media should be displayed in
  * @param {String} mediaProvider Media provider type
+ * @param {Boolean} disableConstraintsNormalization Disable constraints normalization
  * @returns {Promise.<HTMLElement>} Promise with display on fulfill
  * @throws {Error} Error if API is not initialized
  * @memberof Flashphoner
  */
 
-var getMediaAccess = function (constraints, display, mediaProvider) {
+var getMediaAccess = function (constraints, display, mediaProvider, disableConstraintsNormalization) {
     if (!initialized) {
         throw new Error("Flashphoner API is not initialized");
     }
     if (!mediaProvider) {
         mediaProvider = getMediaProviders()[0];
     }
-    return MediaProvider[mediaProvider].getMediaAccess(constraints, display);
+    return MediaProvider[mediaProvider].getMediaAccess(constraints, display, disableConstraintsNormalization);
 };
 
 //default constraints helper
@@ -702,6 +703,9 @@ var createSession = function (options) {
         if (options.constraints) {
             var constraints = options.constraints;
         }
+        if (options.disableConstraintsNormalization) {
+            var disableConstraintsNormalization = options.disableConstraintsNormalization;
+        }
 
         var audioOutputId;
         var audioProperty = getConstraintsProperty(constraints, "audio", undefined);
@@ -794,7 +798,7 @@ var createSession = function (options) {
             status_ = CALL_STATUS.PENDING;
             var hasAudio = true;
             //get access to camera
-            MediaProvider[mediaProvider].getMediaAccess(constraints, localDisplay).then(function () {
+            MediaProvider[mediaProvider].getMediaAccess(constraints, localDisplay, disableConstraintsNormalization).then(function () {
                 if (status_ == CALL_STATUS.FAILED) {
                     //call failed while we were waiting for media access, release media
                     if (!cacheLocalResources) {
@@ -930,7 +934,7 @@ var createSession = function (options) {
             var stripCodecs = answerOptions.stripCodecs || [];
             var hasAudio = true;
             //get access to camera
-            MediaProvider[mediaProvider].getMediaAccess(constraints, localDisplay).then(function () {
+            MediaProvider[mediaProvider].getMediaAccess(constraints, localDisplay, disableConstraintsNormalization).then(function () {
                 if (status_ == CALL_STATUS.FAILED) {
                     //call failed while we were waiting for media access, release media
                     if (!cacheLocalResources) {
@@ -1425,6 +1429,10 @@ var createSession = function (options) {
         if (options.constraints && Object.keys(options.constraints).length != 0) {
             var constraints = options.constraints;
         }
+        if (options.disableConstraintsNormalization) {
+            var disableConstraintsNormalization = options.disableConstraintsNormalization;
+        }
+
         var mediaConnectionConstraints = options.mediaConnectionConstraints;
         // Receive media
         var receiveAudio;
@@ -1642,7 +1650,7 @@ var createSession = function (options) {
             }
 
             //get access to camera
-            MediaProvider[mediaProvider].getMediaAccess(constraints, display).then(function () {
+            MediaProvider[mediaProvider].getMediaAccess(constraints, display, disableConstraintsNormalization).then(function () {
                 if (status_ == STREAM_STATUS.FAILED) {
                     //stream failed while we were waiting for media access, release media
                     if (!cacheLocalResources) {
