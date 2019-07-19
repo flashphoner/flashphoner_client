@@ -1199,22 +1199,26 @@ var playFirstSound = function () {
 };
 
 var playFirstVideo = function (display, isLocal, src) {
-    if (!getCacheInstance(display)) {
-        var video = document.createElement('video');
-        video.setAttribute("playsinline", "");
-        video.setAttribute("webkit-playsinline", "");
-        display.appendChild(video);
-        video.id = uuid_v1() + (isLocal ? LOCAL_CACHED_VIDEO : REMOTE_CACHED_VIDEO);
-        /**
-         * WCS-1560. We do not need to put src in the video element and play it
-         * if (src) {
-         *      video.src = src;
-         * } else {
-         *      video.src = "../../dependencies/media/preloader.mp4";
-         * }
-         * video.play();
-         */
-    }
+    return new Promise(function (resolve, reject) {
+        if (!getCacheInstance(display)) {
+            var video = document.createElement('video');
+            video.setAttribute("playsinline", "");
+            video.setAttribute("webkit-playsinline", "");
+            display.appendChild(video);
+            video.id = uuid_v1() + (isLocal ? LOCAL_CACHED_VIDEO : REMOTE_CACHED_VIDEO);
+
+            //in WCS-1560 we removed video.play() call, because it triggers the “Unhandled Promise Rejection” exception in iOS Safari
+            //in WCS-2160 we rolled back the changes made in WCS-1560 due to no audio on first playback in iOS Safari
+            if (src) {
+                video.src = src;
+                video.play().then(function () {
+                    resolve();
+                });
+                return;
+            }
+        }
+        resolve();
+    });
 };
 
 module.exports = {

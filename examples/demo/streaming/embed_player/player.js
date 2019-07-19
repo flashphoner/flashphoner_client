@@ -1,5 +1,6 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var remoteVideo;
 var resolution_for_wsplayer;
 var stream;
@@ -95,9 +96,15 @@ function start() {
     if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
         Flashphoner.playFirstSound();
     } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] == "MSE") {
-        Flashphoner.playFirstVideo(remoteVideo);
+        Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function() {
+            createSession();
+        });
+        return;
     }
+    createSession();
+}
 
+function createSession() {
     //check if we already have session
     if (Flashphoner.getSessions().length > 0) {
         var session = Flashphoner.getSessions()[0];
@@ -118,7 +125,6 @@ function start() {
         setStatus(SESSION_STATUS.FAILED);
         onStopped();
     });
-
 }
 
 function playStream(session) {

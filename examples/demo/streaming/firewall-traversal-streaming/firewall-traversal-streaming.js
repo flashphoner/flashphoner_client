@@ -1,5 +1,6 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var localVideo;
 var remoteVideo;
 
@@ -91,19 +92,27 @@ function onPublishing(stream) {
 }
 
 function onUnpublished() {
-    $("#publishBtn").text("Publish").off('click').click(function () {
-        if (validateForm("streamerForm")) {
-            $('#publishStream').prop('disabled', true);
-            $(this).prop('disabled', true);
-            publishStream();
-        }
-    });
+    $("#publishBtn").text("Publish").off('click').click(publishBtnClick);
     if (Flashphoner.getSessions()[0] && Flashphoner.getSessions()[0].status() == SESSION_STATUS.ESTABLISHED) {
         $("#publishBtn").prop('disabled', false);
         $('#publishStream').prop('disabled', false);
     } else {
         $("#publishBtn").prop('disabled', true);
         $('#publishStream').prop('disabled', true);
+    }
+}
+
+function publishBtnClick() {
+    if (validateForm("streamerForm")) {
+        $('#publishStream').prop('disabled', true);
+        $(this).prop('disabled', true);
+        if (Browser.isSafariWebRTC()) {
+            Flashphoner.playFirstVideo(localVideo, true, PRELOADER_URL).then(function() {
+                publishStream();
+            });
+            return;
+        }
+        publishStream();
     }
 }
 
@@ -115,13 +124,7 @@ function onPlaying(stream) {
 }
 
 function onStopped() {
-    $("#playBtn").text("Play").off('click').click(function () {
-        if (validateForm("playerForm")) {
-            $('#playStream').prop('disabled', true);
-            $(this).prop('disabled', true);
-            playStream();
-        }
-    });
+    $("#playBtn").text("Play").off('click').click(playBtnClick);
     if (Flashphoner.getSessions()[0] && Flashphoner.getSessions()[0].status() == SESSION_STATUS.ESTABLISHED) {
         $("#playBtn").prop('disabled', false);
         $('#playStream').prop('disabled', false);
@@ -131,10 +134,21 @@ function onStopped() {
     }
 }
 
-function publishStream() {
-    if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(localVideo, true);
+function playBtnClick() {
+    if (validateForm("playerForm")) {
+        $('#playStream').prop('disabled', true);
+        $(this).prop('disabled', true);
+        if (Browser.isSafariWebRTC()) {
+            Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function() {
+                playStream();
+            });
+            return;
+        }
+        playStream();
     }
+}
+
+function publishStream() {
     var session = Flashphoner.getSessions()[0];
     var streamName = $('#publishStream').val();
     session.createStream({
@@ -156,9 +170,6 @@ function publishStream() {
 }
 
 function playStream() {
-    if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(remoteVideo, false);
-    }
     var session = Flashphoner.getSessions()[0];
     var streamName = $('#playStream').val();
     session.createStream({

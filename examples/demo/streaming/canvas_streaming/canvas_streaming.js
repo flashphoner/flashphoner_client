@@ -1,6 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var STREAM_STATUS_INFO = Flashphoner.constants.STREAM_STATUS_INFO;
+var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var localVideo;
 var remoteVideo;
 var canvas;
@@ -35,6 +36,12 @@ function connect() {
     console.log("Create new session with url " + url);
     Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function (session) {
         setStatus("#connectStatus", session.status());
+        if (Browser.isSafariWebRTC()) {
+            Flashphoner.playFirstVideo(localVideo, true, PRELOADER_URL).then(function() {
+                startStreaming();
+            });
+            return;
+        }
         startStreaming();
     }).on(SESSION_STATUS.DISCONNECTED, function () {
         setStatus("#connectStatus", SESSION_STATUS.DISCONNECTED);
@@ -87,10 +94,6 @@ function startStreaming() {
     var streamName = field("urlServer").split('/')[3];
     var constraints = getConstraints();
 
-    if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(localVideo, true);
-    }
-
     session.createStream({
         name: streamName,
         display: localVideo,
@@ -98,6 +101,15 @@ function startStreaming() {
         constraints: constraints
     }).on(STREAM_STATUS.PUBLISHING, function (stream) {
         setStatus("#publishStatus", STREAM_STATUS.PUBLISHING);
+        if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
+            Flashphoner.playFirstSound();
+        } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] === "MSE") {
+            Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function() {
+                playStream();
+                onPublishing(stream);
+            });
+            return;
+        }
         playStream();
         onPublishing(stream);
     }).on(STREAM_STATUS.UNPUBLISHED, function () {
@@ -122,12 +134,6 @@ function stopStreaming() {
 function playStream() {
     var session = Flashphoner.getSessions()[0];
     var streamName = field("urlServer").split('/')[3];
-
-    if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
-        Flashphoner.playFirstSound();
-    } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] === "MSE") {
-        Flashphoner.playFirstVideo(remoteVideo, false);
-    }
 
     session.createStream({
         name: streamName,

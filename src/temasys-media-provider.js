@@ -544,7 +544,9 @@ var playFirstSound = function () {
 };
 
 var playFirstVideo = function () {
-    return true;
+    return new Promise(function (resolve, reject) {
+        resolve();
+    });
 };
 
 

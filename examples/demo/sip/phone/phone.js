@@ -1,5 +1,6 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS; 
 var CALL_STATUS = Flashphoner.constants.CALL_STATUS;
+var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var localDisplay;
 var remoteDisplay;
 var currentCall;
@@ -47,26 +48,34 @@ function init_page(){
             $(this).text("Hold");
             currentCall.unhold();
         }
-        $(this).prop('disabled',true);
+        $(this).prop('disabled', true);
     });
 }
 
 function connect(authToken) {
     if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        Flashphoner.playFirstVideo(localDisplay, true);
-        Flashphoner.playFirstVideo(remoteDisplay, false);
+            Flashphoner.playFirstVideo(localDisplay, true, PRELOADER_URL).then(function () {
+                Flashphoner.playFirstVideo(remoteDisplay, false, PRELOADER_URL).then(function () {
+                    createSession(authToken);
+                });
+            });
+            return;
     }
-	var url = $('#urlServer').val();
+    createSession(authToken);
+}
+
+function createSession(authToken) {
+    var url = $('#urlServer').val();
 
     var registerRequired = $("#sipRegisterRequired").is(':checked');
     var sipOptions = {
-	    login: $("#sipLogin").val(),
+        login: $("#sipLogin").val(),
         authenticationName: $("#sipAuthenticationName").val(),
-		password: $("#sipPassword").val(),
-		domain: $("#sipDomain").val(),
+        password: $("#sipPassword").val(),
+        domain: $("#sipDomain").val(),
         outboundProxy: $("#sipOutboundProxy").val(),
-		port: $("#sipPort").val(),
-		registerRequired: registerRequired
+        port: $("#sipPort").val(),
+        registerRequired: registerRequired
     };
 
     if (authToken) {
@@ -89,40 +98,40 @@ function connect(authToken) {
         setStatus("#regStatus", SESSION_STATUS.ESTABLISHED);
         $("#authToken").val(connection.authToken);
         onConnected(session);
-		if (!registerRequired) {
+        if (!registerRequired) {
             disableOutgoing(false);
-		}
+        }
     }).on(SESSION_STATUS.REGISTERED, function(session){
         setStatus("#regStatus", SESSION_STATUS.REGISTERED);
         onConnected(session);
         if (registerRequired) {
             disableOutgoing(false);
-		}
+        }
     }).on(SESSION_STATUS.DISCONNECTED, function(){
         setStatus("#regStatus", SESSION_STATUS.DISCONNECTED);
         onDisconnected();
     }).on(SESSION_STATUS.FAILED, function(){
         setStatus("#regStatus", SESSION_STATUS.FAILED);
         onDisconnected();
-    }).on(SESSION_STATUS.INCOMING_CALL, function(call){ 
+    }).on(SESSION_STATUS.INCOMING_CALL, function(call){
         call.on(CALL_STATUS.RING, function(){
-		    setStatus("#callStatus", CALL_STATUS.RING);
+            setStatus("#callStatus", CALL_STATUS.RING);
         }).on(CALL_STATUS.ESTABLISHED, function(){
-		    setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
+            setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
             $("#holdBtn").prop('disabled',false);
-			enableMuteToggle(true);
+            enableMuteToggle(true);
         }).on(CALL_STATUS.HOLD, function() {
             $("#holdBtn").prop('disabled',false);
         }).on(CALL_STATUS.FINISH, function(){
-		    setStatus("#callStatus", CALL_STATUS.FINISH);
-			onHangupIncoming();
-		    currentCall = null;
+            setStatus("#callStatus", CALL_STATUS.FINISH);
+            onHangupIncoming();
+            currentCall = null;
         }).on(CALL_STATUS.FAILED, function(){
             setStatus("#callStatus", CALL_STATUS.FAILED);
             onHangupIncoming();
             currentCall = null;
         });
-		onIncomingCall(call);
+        onIncomingCall(call);
     });
 }
 

@@ -1,5 +1,6 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var remoteVideo;
 var resolution_for_wsplayer;
 var stream;
@@ -67,14 +68,7 @@ function onStarted(stream) {
 }
 
 function onStopped() {
-    $("#playBtn").text("Start").off('click').click(function(){
-        if (validateForm()) {
-            $(this).prop('disabled', true);
-            $('#url').prop('disabled', true);
-            $("#streamName").prop('disabled', true);
-            start();
-        }
-    }).prop('disabled', false);
+    $("#playBtn").text("Start").off('click').click(playBtnClick).prop('disabled', false);
     $('#url').prop('disabled', false);
     $("#streamName").prop('disabled', false);
     $("#volumeControl").slider("disable");
@@ -82,13 +76,24 @@ function onStopped() {
     $("#preloader").hide();
 }
 
-function start() {
-    if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
-        Flashphoner.playFirstSound();
-    } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] === "MSE") {
-        Flashphoner.playFirstVideo(remoteVideo);
+function playBtnClick() {
+    if (validateForm()) {
+        $(this).prop('disabled', true);
+        $('#url').prop('disabled', true);
+        $("#streamName").prop('disabled', true);
+        if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
+            Flashphoner.playFirstSound();
+        } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] === "MSE") {
+            Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function() {
+                start();
+            });
+            return;
+        }
+        start();
     }
+}
 
+function start() {
     var url = $('#url').val();
     //check if we already have session
     if (Flashphoner.getSessions().length > 0) {

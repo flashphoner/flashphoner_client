@@ -44,6 +44,8 @@ Phone.prototype.connect = function () {
         sipOptions: this.sipOptions
     };
 
+
+    initSounds();
     Flashphoner.createSession(connectionOptions).on(SESSION_STATUS.ESTABLISHED, function(session){
         me.session = session;
         me.connectionStatusListener(SESSION_STATUS.ESTABLISHED);

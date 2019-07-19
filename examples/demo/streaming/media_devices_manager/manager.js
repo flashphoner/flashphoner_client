@@ -2,6 +2,7 @@ var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
 var TRANSPORT_TYPE = Flashphoner.constants.TRANSPORT_TYPE;
+var preloaderUrl = "../../dependencies/media/preloader.mp4";
 var STAT_INTERVAL = 1000;
 var localVideo;
 var remoteVideo;
@@ -142,13 +143,7 @@ function init_page() {
 
 function onStopped() {
     previewStream = null;
-    $("#playBtn").text("Play").off('click').click(function () {
-        if (validateForm("play")) {
-            muteInputs("play");
-            $(this).prop('disabled', true);
-            play();
-        }
-    }).prop('disabled', false);
+    $("#playBtn").text("Play").off('click').click(playBtnClick).prop('disabled', false);
     unmuteInputs("play");
     $("#playResolution").text("");
     $("#volumeControl").slider("enable");
@@ -162,16 +157,24 @@ function onStopped() {
     }
 }
 
+function playBtnClick() {
+    if (validateForm("play")) {
+        muteInputs("play");
+        $(this).prop('disabled', true);
+        if (Browser.isSafariWebRTC()) {
+            Flashphoner.playFirstVideo(remoteVideo, false, preloaderUrl).then(function() {
+                play();
+            });
+            return;
+        }
+        play();
+    }
+}
+
 function onUnpublished() {
     publishStream = null;
     $('input:radio').attr("disabled", false);
-    $("#publishBtn").text("Publish").off('click').click(function () {
-        if (validateForm("send")) {
-            muteInputs("send");
-            $(this).prop('disabled', true);
-            publish();
-        }
-    }).prop('disabled', false);
+    $("#publishBtn").text("Publish").off('click').click(publishBtnClick).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').prop('disabled',true);
     $("#switchMicBtn").text("Switch").off('click').prop('disabled',true);
     unmuteInputs("send");
@@ -184,6 +187,20 @@ function onUnpublished() {
     if (!publishStream && !previewStream) {
         clearInterval(statsIntervalID);
         statsIntervalID = null;
+    }
+}
+
+function publishBtnClick() {
+    if (validateForm("send")) {
+        muteInputs("send");
+        $(this).prop('disabled', true);
+        if (Browser.isSafariWebRTC()) {
+            Flashphoner.playFirstVideo(localVideo, true, preloaderUrl).then(function() {
+                publish();
+            });
+            return;
+        }
+        publish();
     }
 }
 
@@ -274,9 +291,6 @@ function connect() {
 }
 
 function play() {
-    if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(remoteVideo, false);
-    }
     var streamName = $('#playStream').val();
     var session = Flashphoner.getSessions()[0];
     var transportOutput = $('#transportOutput').val();
@@ -331,10 +345,6 @@ function play() {
 function publish() {
     if (testStarted)
         stopTest();
-
-    if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(localVideo, true);
-    }
 
     var streamName = $('#publishStream').val();
     var constraints = getConstraints();
@@ -697,6 +707,14 @@ function readyControls() {
 
     $("#testBtn").text("Test").off('click').click(function () {
         $(this).prop('disabled', true);
+        if (Browser.isSafariWebRTC()) {
+            Flashphoner.playFirstVideo(localVideo, true, preloaderUrl).then(function() {
+                Flashphoner.playFirstVideo(remoteVideo, false, preloaderUrl).then(function() {
+                    startTest();
+                });
+            });
+            return;
+        }
         startTest();
     }).prop('disabled', false);
 
@@ -824,10 +842,6 @@ var testStarted;
 var audioContextForTest;
 
 function startTest() {
-    if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(localVideo, true);
-        Flashphoner.playFirstVideo(remoteVideo, false);
-    }
     Flashphoner.getMediaAccess(getConstraints(), localVideo).then(function (disp) {
         $("#testBtn").text("Release").off('click').click(function () {
             $(this).prop('disabled', true);

@@ -1,5 +1,6 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS; 
 var CALL_STATUS = Flashphoner.constants.CALL_STATUS;
+var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 
 
 /////////////////////////////
@@ -24,32 +25,44 @@ function init_page(){
 }
 
 function connect() {
-	//check if there is already a session
+    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+        Flashphoner.playFirstVideo(localDisplay, true, PRELOADER_URL).then(function () {
+            Flashphoner.playFirstVideo(remoteDisplay, false, PRELOADER_URL).then(function () {
+                createSession();
+            });
+        });
+        return;
+    }
+    createSession();
+}
+
+function createSession() {
+    //check if there is already a session
     if (Flashphoner.getSessions().length > 0) {
         call(Flashphoner.getSessions()[0]);
     } else {
         var url = $('#urlServer').val();
-	    var appKey = "clickToCallApp";
+        var appKey = "clickToCallApp";
 
-	    var connectionOptions = {
-		    urlServer: url,
-		    appKey: appKey
-	    };
+        var connectionOptions = {
+            urlServer: url,
+            appKey: appKey
+        };
 
-	    //create session
-	    console.log("Create new session with url " + url);
-	    Flashphoner.createSession(connectionOptions).on(SESSION_STATUS.ESTABLISHED, function(session){
-		    setStatus("Session", SESSION_STATUS.ESTABLISHED);
-			//session connected, place call
-		    call(session);
-	    }).on(SESSION_STATUS.DISCONNECTED, function(){
-	        setStatus("Session", SESSION_STATUS.DISCONNECTED);
-	        onHangup();
-	    }).on(SESSION_STATUS.FAILED, function(){
-	        setStatus("Session", SESSION_STATUS.FAILED);
-	        onHangup();
-		});
-	}
+        //create session
+        console.log("Create new session with url " + url);
+        Flashphoner.createSession(connectionOptions).on(SESSION_STATUS.ESTABLISHED, function(session){
+            setStatus("Session", SESSION_STATUS.ESTABLISHED);
+            //session connected, place call
+            call(session);
+        }).on(SESSION_STATUS.DISCONNECTED, function(){
+            setStatus("Session", SESSION_STATUS.DISCONNECTED);
+            onHangup();
+        }).on(SESSION_STATUS.FAILED, function(){
+            setStatus("Session", SESSION_STATUS.FAILED);
+            onHangup();
+        });
+    }
 }
 
 function call(session) {

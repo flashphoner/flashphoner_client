@@ -1,6 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var ROOM_EVENT = Flashphoner.roomApi.events;
+var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var connection;
 
 //initialize interface
@@ -68,10 +69,16 @@ function start() {
     }
     if (Browser.isSafariWebRTC()) {
         for (var i = 1; i < _participants; i++){
-            Flashphoner.playFirstVideo(document.getElementById("participant" + i + "Display"), false);
+            Flashphoner.playFirstVideo(document.getElementById("participant" + i + "Display"), false, PRELOADER_URL).then(function() {
+                createConnection(url, username);
+            });
+            return;
         }
     }
+    createConnection(url, username);
+}
 
+function createConnection(url, username) {
     connection = Flashphoner.roomApi.connect({urlServer: url, username: username}).on(SESSION_STATUS.FAILED, function(session){
         setStatus('#status', session.status());
         onLeft();
@@ -107,6 +114,13 @@ function joinRoom() {
             addMessage("chat", chatState);
         } else {
             addMessage("chat", " room is empty");
+        }
+        if (Browser.isSafariWebRTC()) {
+            Flashphoner.playFirstVideo(document.getElementById("localDisplay"), true, PRELOADER_URL).then(function() {
+                publishLocalMedia(room);
+                onJoined(room);
+            });
+            return;
         }
         publishLocalMedia(room);
         onJoined(room);
@@ -225,9 +239,7 @@ function publishLocalMedia(room) {
         video: true
     };
     var display = document.getElementById("localDisplay");
-    if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(display, true);
-    }
+
     room.publish({
         display: display,
         constraints: constraints,

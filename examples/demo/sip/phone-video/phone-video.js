@@ -1,6 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var CALL_STATUS = Flashphoner.constants.CALL_STATUS;
 var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
+var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var localVideo;
 var remoteVideo;
 var currentCall;
@@ -211,15 +212,17 @@ function init_page() {
         size: 'md'
     });
 
-    extensionInterval = setInterval(function () {
-        chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
-            if (!response) {
-                clearInterval(extensionInterval);
-                $("#screenSharingExtensionToggle").prop('checked', true).attr('disabled', 'disabled').trigger('change');
-                extensionNotInstalled = true;
-            }
-        });
-    }, 500);
+    if(Browser.isChrome()) {
+        extensionInterval = setInterval(function () {
+            chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
+                if (!response) {
+                    clearInterval(extensionInterval);
+                    $("#screenSharingExtensionToggle").prop('checked', true).attr('disabled', 'disabled').trigger('change');
+                    extensionNotInstalled = true;
+                }
+            });
+        }, 500);
+    }
 
     if(!Browser.isChrome()) {
         $('#screenSharingExtensionForm').remove();
@@ -231,11 +234,6 @@ function init_page() {
 }
 
 function connect() {
-    if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        Flashphoner.playFirstVideo(localVideo, true);
-        Flashphoner.playFirstVideo(remoteVideo, false);
-    }
-
     var url = $('#urlServer').val();
     var registerRequired = $("#sipRegisterRequired").is(':checked');
 
@@ -353,17 +351,27 @@ function onConnected(session) {
 }
 
 function onDisconnected() {
-    $("#connectBtn").text("Connect").off('click').click(function () {
-        if (validateForm("formConnection")) {
-            disableConnectionFields("formConnection", true);
-            $(this).prop('disabled', true);
-            connect();
-        }
-    }).prop('disabled', false);
+    $("#connectBtn").text("Connect").off('click').click(connectBtnClick).prop('disabled', false);
     disableConnectionFields("formConnection", false);
     disableOutgoing(true);
     showOutgoing();
     setStatus("#callStatus", "");
+}
+
+function connectBtnClick() {
+    if (validateForm("formConnection")) {
+        disableConnectionFields("formConnection", true);
+        $(this).prop('disabled', true);
+        if (Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
+            Flashphoner.playFirstVideo(localVideo, true, PRELOADER_URL).then(function () {
+                Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function () {
+                    connect();
+                });
+            });
+            return;
+        }
+        connect();
+    }
 }
 
 function onHangupOutgoing() {

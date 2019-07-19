@@ -196,7 +196,7 @@ var playFirstSound = function(noise) {
  */
 var playFirstVideo = function (display, isLocal, src) {
     for (var mp in MediaProvider) {
-        MediaProvider[mp].playFirstVideo(display, isLocal, src);
+        return MediaProvider[mp].playFirstVideo(display, isLocal, src);
     }
 };
 

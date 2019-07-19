@@ -1,5 +1,6 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var localVideo;
 
 $(document).ready(function () {
@@ -33,21 +34,26 @@ function onStarted(previewStream) {
 }
 
 function onStopped() {
-    $("#publishBtn").text("Start").off('click').click(function(){
-        if (validateForm()) {
-            $(this).prop('disabled', true);
-            start();
-        }
-    }).prop('disabled', false);
+    $("#publishBtn").text("Start").off('click').click(publishBtnClick).prop('disabled', false);
     $("#rtmpUrl").prop('disabled', false);
     $("#streamName").prop('disabled', false);
     $('#url').prop('disabled', false);
 }
 
-function start() {
-    if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(localVideo, true);
+function publishBtnClick() {
+    if (validateForm()) {
+        $(this).prop('disabled', true);
+        if (Browser.isSafariWebRTC()) {
+            Flashphoner.playFirstVideo(localVideo, true, PRELOADER_URL).then(function() {
+                start();
+            });
+            return;
+        }
+        start();
     }
+}
+
+function start() {
     //check if we already have session
     if (Flashphoner.getSessions().length > 0) {
         startStreaming(Flashphoner.getSessions()[0]);

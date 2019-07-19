@@ -1,5 +1,6 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 
 function init_page() {
     //init api
@@ -54,16 +55,9 @@ function onDisconnected() {
     onStopped(2);
 }
 
-function playStream(index) {
+function playStream(index, display) {
     var session = Flashphoner.getSessions()[0];
     var streamName = $('#streamName' + index).val();
-    var display = document.getElementById("player" + index);
-
-    if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
-        Flashphoner.playFirstSound();
-    } else if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(display, false);
-    }
 
     session.createStream({
         name: streamName,
@@ -96,12 +90,8 @@ function onPlaying(index, stream) {
 }
 
 function onStopped(index) {
-    $("#playBtn" + index).text("Play").off('click').click(function(){
-        if (validateForm("form" + index)) {
-            $('#streamName' + index).prop('disabled', true);
-            $(this).prop('disabled', true);
-            playStream(index);
-        }
+    $("#playBtn" + index).text("Play").off('click').click(function () {
+        playBtnClick(index);
     });
     if (Flashphoner.getSessions()[0] && Flashphoner.getSessions()[0].status() == SESSION_STATUS.ESTABLISHED) {
         $("#playBtn" + index).prop('disabled', false);
@@ -109,6 +99,25 @@ function onStopped(index) {
     } else {
         $("#playBtn" + index).prop('disabled', true);
         $('#streamName' + index).prop('disabled', true);
+    }
+}
+
+function playBtnClick(index) {
+    if (validateForm("form" + index)) {
+        $('#streamName' + index).prop('disabled', true);
+        $(this).prop('disabled', true);
+
+        var display = document.getElementById("player" + index);
+
+        if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
+            Flashphoner.playFirstSound();
+        } else if (Browser.isSafariWebRTC()) {
+            Flashphoner.playFirstVideo(display, false, PRELOADER_URL).then(function () {
+                playStream(index, display);
+            });
+            return;
+        }
+        playStream(index, display);
     }
 }
 

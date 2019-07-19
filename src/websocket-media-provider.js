@@ -173,7 +173,9 @@ var playFirstSound = function(noise) {
 };
 
 var playFirstVideo = function() {
-    return true;
+    return new Promise(function (resolve, reject) {
+        resolve();
+    });
 };
 
 /**
