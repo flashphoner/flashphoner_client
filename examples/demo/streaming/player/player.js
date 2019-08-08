@@ -144,12 +144,10 @@ function playStream(session) {
         options.playHeight = resolution.split("x")[1];
     }
     stream = session.createStream(options).on(STREAM_STATUS.PENDING, function(stream) {
+        $("#preloader").show();
         var video = document.getElementById(stream.id());
         if (!video.hasListeners) {
             video.hasListeners = true;
-            video.addEventListener('playing', function () {
-                $("#preloader").hide();
-            });
             //don't resize html5 video
             if (video.nodeName.toLowerCase() !== "video") {
                 video.addEventListener('resize', function (event) {
@@ -167,13 +165,15 @@ function playStream(session) {
             }
         }
     }).on(STREAM_STATUS.PLAYING, function(stream) {
-        $("#preloader").show();
+        $("#preloader").hide();
         setStatus(stream.status());
         onStarted(stream);
     }).on(STREAM_STATUS.STOPPED, function() {
+        $("#preloader").hide();
         setStatus(STREAM_STATUS.STOPPED);
         onStopped();
     }).on(STREAM_STATUS.FAILED, function(stream) {
+        $("#preloader").hide();
         setStatus(STREAM_STATUS.FAILED, stream);
         onStopped();
     }).on(STREAM_STATUS.NOT_ENOUGH_BANDWIDTH, function(stream){

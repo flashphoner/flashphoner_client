@@ -282,7 +282,8 @@ var createConnection = function (options) {
                         //         connection.addIceCandidate(rtcIceCandidate2);
                         //     }
                         // }
-                        connection.addIceCandidate(null);
+                        // WCS-2204. fixed InvalidStateError
+                        // connection.addIceCandidate(null);
                     }
                     resolve();
                 }).catch(function (error) {
