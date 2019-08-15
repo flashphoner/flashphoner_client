@@ -26,7 +26,7 @@ function init_page() {
             }
         }, 500);
 
-    } else if (Browser.isChrome()) {
+    } else if (Browser.isChrome() && !Browser.isAndroid() && !Browser.isiOS()) {
         $('#mediaSourceForm').hide();
         interval = setInterval(function() {
             chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
