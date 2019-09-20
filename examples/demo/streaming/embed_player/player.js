@@ -38,7 +38,6 @@ function init_page() {
         if (Browser.isiOS()) {
             $(".fullscreen").hide();
         }
-        resolution_for_wsplayer = {playWidth: 640, playHeight: 480};
     }
     if (Flashphoner.getMediaProviders()[0] === "Flash") {
         $(".fullscreen").hide();

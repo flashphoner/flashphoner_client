@@ -501,6 +501,7 @@ var createSession = function (options) {
                 clientVersion: "0.5.28",
                 clientOSVersion: window.navigator.appVersion,
                 clientBrowserVersion: window.navigator.userAgent,
+                msePacketizationVersion: 2,
                 custom: options.custom
             };
             if (sipConfig) {

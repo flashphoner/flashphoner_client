@@ -25,9 +25,6 @@ function init_page() {
         $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology needed for this example");
         return;
     }
-    if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
-        resolution_for_wsplayer = {playWidth:640,playHeight:480};
-    }
 
     $("#streamName").val(getUrlParam("streamName"));
 
