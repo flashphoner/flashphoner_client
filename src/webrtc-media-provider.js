@@ -16,7 +16,6 @@ var microphoneGain;
 var constants = require('./constants');
 var validBrowsers = ["firefox", "chrome", "safari"];
 
-
 var createConnection = function (options) {
     return new Promise(function (resolve, reject) {
 
@@ -699,20 +698,26 @@ var mixAudioTracks = function (stream1, stream2) {
 
 var getMediaAccess = function (constraints, display, disableConstraintsNormalization) {
     return new Promise(function (resolve, reject) {
+
         if (!constraints) {
             constraints = defaultConstraints;
-            var cacheInstance = getCacheInstance(display);
-            if (cacheInstance && cacheInstance.srcObject) {
-                resolve(display);
-                return;
-            }
-        } else {
-            if(!disableConstraintsNormalization) {
-                constraints = normalizeConstraints(constraints);
-            }
-            releaseMedia(display);
         }
-        if(!constraints.video && !constraints.audio && !constraints.customStream) {
+
+        if (!disableConstraintsNormalization) {
+            constraints = normalizeConstraints(constraints);
+        }
+
+        var cacheInstance = getCacheInstance(display);
+        if (cacheInstance && cacheInstance.srcObject && JSON.stringify(display.mediaTrackConstraints) == JSON.stringify(constraints)) {
+            resolve(display);
+            return;
+        }
+
+        display.mediaTrackConstraints = constraints;
+
+        releaseMedia(display);
+
+        if (!constraints.video && !constraints.audio && !constraints.customStream) {
             resolve(display);
             return;
         }
