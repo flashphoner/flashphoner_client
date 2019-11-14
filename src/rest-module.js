@@ -6,7 +6,9 @@ var CONNECTION_PATH = "/rest-api/connection";
 var PUSH_PATH = "/rest-api/push";
 var RTSP_PATH = "/rest-api/rtsp";
 var API_PATH = "/rest-api/api";
-var CDN_PATH = "/rest-api/cdn"
+var CDN_PATH = "/rest-api/cdn";
+var CALL_PATH = "/rest-api/call";
+var MIXER_PATH = "/rest-api/mixer";
 
 var instance = function (url, coreUrl) {
     var pullApi = function() {
@@ -249,6 +251,75 @@ var instance = function (url, coreUrl) {
             hangup: hangup
         }
     };
+    var call = function() {
+        var api = url + CALL_PATH;
+        var startup = function(params) {
+            return send(api + "/startup", params);
+        };
+        var findAll = function() {
+            return send(api + "/find_all");
+        };
+        var find = function(params) {
+            return send(api + "/find", params);
+        };
+        var terminate = function(params) {
+            return send(api + "/terminate", params);
+        };
+        var sendDtmf = function(params) {
+            return send(api + "/send_dtmf", params);
+        };
+        var injectSound = function(params) {
+            return send(api + "/inject_sound", params);
+        };
+        var injectStream = function() {
+            var subApi = api + "/inject_stream";
+            var startup = function(params) {
+                return send(subApi + "/startup", params);
+            };
+            var terminate = function(params) {
+                return send(subApi + "/terminate", params);
+            };
+            return {
+                startup : startup,
+                terminate : terminate
+            }
+        };
+        return {
+            startup : startup,
+            findAll : findAll,
+            find : find,
+            terminate : terminate,
+            sendDtmf : sendDtmf,
+            injectSound : injectSound,
+            injectStream : injectStream()
+        }
+    };
+    var mixer = function() {
+        var api = url + MIXER_PATH;
+        var startup = function(params) {
+            return send(api + "/startup", params);
+        };
+        var add = function(params) {
+            return send(api + "/add", params);
+        };
+        var remove = function(params) {
+            return send(api + "/remove", params);
+        };
+        var findAll = function() {
+            return send(api + "/find_all");
+        };
+        var terminate = function(params) {
+            return send(api + "/terminate", params);
+        };
+        return {
+            startup : startup,
+            add : add,
+            remove : remove,
+            findAll : findAll,
+            terminate : terminate
+        }
+    };
+
     return {
         pull: pullApi(),
         stream: stream(),
@@ -257,7 +328,9 @@ var instance = function (url, coreUrl) {
         rtsp: rtsp(),
         stat: stat(),
         api: api(),
-        cdn: cdn()
+        cdn: cdn(),
+        call: call(),
+        mixer: mixer()
     };
 };
 /** XHR WRAPPER **/
