@@ -6,6 +6,7 @@ var util = require('./util');
 var logger = require('./util').logger;
 var loggerConf = {push: false, severity: "INFO"};
 var Promise = require('promise-polyfill');
+var KalmanFilter = require('kalmanjs');
 var browserDetails = require('webrtc-adapter').default.browserDetails;
 var LOG_PREFIX = "core";
 var isUsingTemasysPlugin = false;
@@ -18,9 +19,15 @@ var SESSION_STATUS = constants.SESSION_STATUS;
 var STREAM_STATUS = constants.STREAM_STATUS;
 var CALL_STATUS = constants.CALL_STATUS;
 var TRANSPORT_TYPE = constants.TRANSPORT_TYPE;
+var CONNECTION_QUALITY = constants.CONNECTION_QUALITY;
+var BITRATE_GOOD_QUALITY_PERCENT_DIFFERENCE = 20;
+var BITRATE_BAD_QUALITY_PERCENT_DIFFERENCE = 50;
+var LOW_BITRATE_THRESHOLD_BAD_PERFECT = 50000;
+var LOW_BITRATE_BAD_QUALITY_PERCENT_DIFFERENCE = 150;
 var MediaProvider = {};
 var sessions = {};
 var initialized = false;
+var disableConnectionQualityCalculation;
 
 /**
  * Static initializer.
@@ -52,6 +59,7 @@ var init = function (options) {
         } catch (e) {
             console.warn("Failed to create audio context");
         }
+        disableConnectionQualityCalculation = options.disableConnectionQualityCalculation;
         var webRtcProvider = require("./webrtc-media-provider");
         if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
             MediaProvider.WebRTC = webRtcProvider;
@@ -60,7 +68,7 @@ var init = function (options) {
                 extensionId: options.screenSharingExtensionId,
                 audioContext: audioContext,
                 logger: logger,
-                createMicGainNode: options.createMicGainNode
+                createMicGainNode: options.createMicGainNode,
             };
             webRtcProvider.configure(webRtcConf);
         } else {
@@ -614,6 +622,12 @@ var createSession = function (options) {
                     availableStream.available = obj.status;
                     if (streamRefreshHandlers[availableStream.mediaSessionId]) {
                         streamRefreshHandlers[availableStream.mediaSessionId](availableStream);
+                    }
+                    break;
+                case 'incomingBitrate':
+                    if (streamRefreshHandlers[obj.mediaSessionId]) {
+                        obj.status = 'incomingBitrate';
+                        streamRefreshHandlers[obj.mediaSessionId](obj);
                     }
                     break;
                 default:
@@ -1421,6 +1435,9 @@ var createSession = function (options) {
             throw new TypeError("options.name must be provided");
         }
 
+        var clientKf = new KalmanFilter();
+        var serverKf = new KalmanFilter();
+
         var id_ = uuid_v1();
         var name_ = options.name;
         var mediaProvider = options.mediaProvider || getMediaProviders()[0];
@@ -1492,6 +1509,11 @@ var createSession = function (options) {
         var remoteVideo = options.remoteVideo;
         //callbacks added using stream.on()
         var callbacks = {};
+
+        var connectionQuality;
+
+        var videoBytesSent = 0;
+
         /**
          * Represents media stream.
          *
@@ -1510,19 +1532,25 @@ var createSession = function (options) {
                 return;
             }
 
-            if (streamInfo.available!=undefined) {
+            if (streamInfo.available != undefined) {
                 for (var i = 0; i < availableCallbacks.length; i++) {
-                    if (streamInfo.available=="true"){
+                    if (streamInfo.available == "true") {
                         availableCallbacks[i].resolve(stream);
-                    }else{
+                    } else {
                         availableCallbacks[i].reject(stream);
                     }
                 }
-                availableCallbacks=[];
+                availableCallbacks = [];
                 return;
             }
 
             var event = streamInfo.status;
+            
+            if (event == 'incomingBitrate') {
+                detectConnectionQuality(streamInfo);
+                return;
+            }
+
             if (event == STREAM_STATUS.RESIZE) {
                 resolution.width = streamInfo.streamerVideoWidth;
                 resolution.height = streamInfo.streamerVideoHeight;
@@ -1556,6 +1584,53 @@ var createSession = function (options) {
             if (callbacks[event]) {
                 callbacks[event](stream);
             }
+        };
+
+        var detectConnectionQuality = function (streamInfo) {
+            if(disableConnectionQualityCalculation) {
+                return;
+            }
+            mediaConnection.getStats(function (stats) {
+                if (stats && stats.outboundStream) {
+                    if (stats.outboundStream.video && stats.outboundStream.video.bytesSent > 0) {
+                        if (!videoBytesSent) {
+                            videoBytesSent = stats.outboundStream.video.bytesSent;
+                            return;
+                        }
+                        var currentVideoBitrate = ((stats.outboundStream.video.bytesSent - videoBytesSent) * 8);
+                        if (currentVideoBitrate == 0) {
+                            return;
+                        }
+
+                        var clientFiltered = clientKf.filter(currentVideoBitrate);
+                        var serverFiltered = serverKf.filter(streamInfo.videoBitrate);
+
+                        var videoBitrateDifference = Math.abs((serverFiltered - clientFiltered) / ((serverFiltered+ clientFiltered) / 2)) * 100;
+                        var currentQuality;
+                        if(serverFiltered < LOW_BITRATE_THRESHOLD_BAD_PERFECT || clientFiltered < LOW_BITRATE_THRESHOLD_BAD_PERFECT) {
+                            if (videoBitrateDifference > LOW_BITRATE_BAD_QUALITY_PERCENT_DIFFERENCE) {
+                                currentQuality = CONNECTION_QUALITY.BAD;
+                            } else {
+                                currentQuality = CONNECTION_QUALITY.PERFECT;
+                            }
+                        } else {
+                            if (videoBitrateDifference > BITRATE_BAD_QUALITY_PERCENT_DIFFERENCE) {
+                                currentQuality = CONNECTION_QUALITY.BAD;
+                            } else if (videoBitrateDifference > BITRATE_GOOD_QUALITY_PERCENT_DIFFERENCE) {
+                                currentQuality = CONNECTION_QUALITY.GOOD;
+                            } else {
+                                currentQuality = CONNECTION_QUALITY.PERFECT;
+                            }
+                        }
+                        if (callbacks[CONNECTION_QUALITY.UPDATE]) {
+                            connectionQuality = currentQuality;
+                            callbacks[CONNECTION_QUALITY.UPDATE](connectionQuality, clientFiltered, serverFiltered);
+                        }
+                        videoBytesSent = stats.outboundStream.video.bytesSent;
+                    }
+                }
+            });
+            return;
         };
 
         /**

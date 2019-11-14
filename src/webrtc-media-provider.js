@@ -50,7 +50,7 @@ var createConnection = function (options) {
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
-            if(localVideo) {
+            if (localVideo) {
                 //made for safari, if sip call without audio and video, because function playFirstVideo() creates a video element
                 if(localVideo.srcObject) {
                     localVideo.id = id + "-local";

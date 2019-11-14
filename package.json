@@ -9,7 +9,8 @@
     "promise-polyfill": "^6.0.1",
     "swfobject": "^2.2.1",
     "uuid": "^3.1.0",
-    "webrtc-adapter": "^7.2.6"
+    "webrtc-adapter": "^7.2.6",
+    "kalmanjs": "^1.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",

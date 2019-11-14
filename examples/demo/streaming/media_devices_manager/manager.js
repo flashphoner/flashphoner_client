@@ -1,7 +1,9 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var CONNECTION_QUALITY = Flashphoner.constants.CONNECTION_QUALITY;
 var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
 var TRANSPORT_TYPE = Flashphoner.constants.TRANSPORT_TYPE;
+var CONNECTION_QUALITY_UPDATE_TIMEOUT_MS = 10000;
 var preloaderUrl = "../../dependencies/media/preloader.mp4";
 var STAT_INTERVAL = 1000;
 var localVideo;
@@ -18,6 +20,8 @@ var videoBytesSent = 0;
 var audioBytesSent = 0;
 var videoBytesReceived = 0;
 var audioBytesReceived = 0;
+var connectionQuality;
+var lastConnectionQualityUpdateTimestamp;
 
 try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -26,6 +30,7 @@ try {
 }
 
 function init_page() {
+    $("#bitrateChart").hide();
     //init api
     try {
         Flashphoner.init({
@@ -313,6 +318,7 @@ function play() {
     }
     var strippedCodecs = $("#stripPlayCodecs").val();
 
+
     previewStream = session.createStream({
         name: streamName,
         display: remoteVideo,
@@ -342,6 +348,8 @@ function play() {
     previewStream.play();
 }
 
+var bitrateComparisonChart;
+
 function publish() {
     if (testStarted)
         stopTest();
@@ -361,6 +369,17 @@ function publish() {
             }
         }
     }
+
+    $("#bitrateChart").show();
+    var canvas = document.getElementById('bitrateChart');
+    var ctx = canvas.getContext('2d');
+
+    if (!bitrateComparisonChart) {
+        bitrateComparisonChart = new ComparisonChart(ctx);
+    } else {
+        bitrateComparisonChart.clearBitrateChart();
+    }
+
     publishStream = session.createStream({
         name: streamName,
         display: localVideo,
@@ -372,6 +391,7 @@ function publish() {
         cvoExtension: cvo,
         stripCodecs: strippedCodecs
     }).on(STREAM_STATUS.PUBLISHING, function (stream) {
+        lastConnectionQualityUpdateTimestamp = new Date().valueOf();
         $("#testBtn").prop('disabled', true);
         var video = document.getElementById(stream.id());
         //resize local if resolution is available
@@ -397,6 +417,11 @@ function publish() {
     }).on(STREAM_STATUS.FAILED, function () {
         setStatus("#publishStatus", STREAM_STATUS.FAILED);
         onUnpublished();
+    }).on(CONNECTION_QUALITY.UPDATE, function (quality, clientFiltered, serverFiltered) {
+        var timestamp = new Date().valueOf();
+        lastConnectionQualityUpdateTimestamp = timestamp;
+        bitrateComparisonChart.updateChart(clientFiltered, serverFiltered);
+        connectionQuality = quality;
     });
     publishStream.publish();
 }
@@ -771,6 +796,9 @@ function loadStats() {
                         $('#outVideoStatBitrate').text(vBitrate);
                     }
                     videoBytesSent = stats.outboundStream.video.bytesSent;
+                    if(new Date().valueOf() - CONNECTION_QUALITY_UPDATE_TIMEOUT_MS > lastConnectionQualityUpdateTimestamp) {
+                        connectionQuality = CONNECTION_QUALITY.UNKNOWN;
+                    }
                 }
 
                 if (stats.outboundStream.audio) {
@@ -784,6 +812,9 @@ function loadStats() {
                     }
                     audioBytesSent = stats.outboundStream.audio.bytesSent;
                 }
+            }
+            if (connectionQuality !== undefined) {
+                showStat({"quality": connectionQuality}, "connection");
             }
         });
     }

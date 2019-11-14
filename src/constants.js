@@ -680,6 +680,13 @@ define(transportType, 'UDP', 'UDP');
 
 define(transportType, 'TCP', 'TCP');
 
+var connectionQuality = {};
+define(connectionQuality, 'PERFECT', 'PERFECT');
+define(connectionQuality, 'GOOD', 'GOOD');
+define(connectionQuality, 'BAD', 'BAD');
+define(connectionQuality, 'UNKNOWN', 'UNKNOWN');
+define(connectionQuality, 'UPDATE', 'UPDATE');
+
 var constants = {};
 define(constants, 'SESSION_STATUS', sessionStatus);
 define(constants, 'STREAM_STATUS', streamStatus);
@@ -689,6 +696,7 @@ define(constants, 'CALL_STATUS_INFO', callStatusInfo);
 define(constants, 'ERROR_INFO', errorInfo);
 define(constants, 'MEDIA_DEVICE_KIND', mediaDeviceKind);
 define(constants, 'TRANSPORT_TYPE', transportType);
+define(constants, 'CONNECTION_QUALITY', connectionQuality);
 
 //define helper
 function define(obj, name, value) {
