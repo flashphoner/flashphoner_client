@@ -1,0 +1,57 @@
+.fp-remoteVideo {
+    border: 1px double black;
+    width: 802px;
+    height: 402px;
+    text-align: center;
+    background: #c0c0c0;
+    display: inline-block;
+}
+
+.display {
+    width: 100%;
+    max-width: 800px;
+    height: 100%;
+    max-height: 400px;
+    display: inline-block;
+}
+
+video, canvas, object {
+    width: 100%;
+    height: 100%;
+}
+
+video:-webkit-full-screen {
+    border-radius: 1px;
+}
+
+.ui-slider {
+    height: 10px !important;
+    background: #c0c0c0;
+}
+
+.ui-slider-handle {
+    width: 16px !important;
+    height: 16px !important;
+    position:absolute;
+    -moz-border-radius: 70px;
+    -webkit-border-radius: 70px;
+    border-radius: 70px;
+}
+.ui-widget-header {
+    background: #c0c0c0;
+}
+
+.ui-slider-range-min {
+    background: black;
+}
+
+/* Prevent stretched picture in full screen mode */
+canvas:-webkit-full-screen {
+    width: initial;
+    height: initial;
+}
+
+canvas:-moz-full-screen {
+    width: initial;
+    height: initial;
+}

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="jquery-ui.css">
+    <link rel="stylesheet" href="mcu_client.css">
+
+    <title>MCU Conference</title>
+    <script type="text/javascript" src="../../../../flashphoner.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
+
+    <script type="text/javascript" src="mcu_client.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
+</head>
+<body onload="init_page()">
+<div class="container">
+    <div class="row">
+
+        <h2 class="text-center col-sm-10">MCU Client</h2>
+        <h5 class="text-center col-sm-10">Before use: please set the server parameters as described <a target="_blank" href="https://docs.flashphoner.com/display/WEBSDK2EN/MCU+client">here</a></h5>
+
+        <h2 id="notifyFlash" class="text-danger"></h2>
+
+        <div class="col-sm-10 text-center">
+            <div class="fp-remoteVideo">
+                <div class="display" id="remoteVideo">
+                    <i id="preloader" class="fa fa-spinner fa-pulse fa-3x fa-fw" aria-hidden="true" style="position: absolute; top: 43%; left: 47.5%;"></i>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-sm-8 text-center col-sm-offset-2" style="margin-top: 20px">
+            <form id="form" class="form-horizontal" role="form" style="margin-top: 10px">
+                <div id="connForm" class="form-group">
+                    <label class="col-sm-2 control-label">WCS URL</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="url">
+                    </div>
+                </div>
+
+                <div id="loginForm" class="form-group">
+                    <label class="col-sm-2 control-label">Login</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="login">
+                    </div>
+                </div>
+                <div id="roomForm" class="form-group">
+                    <label class="col-sm-2 control-label">Room</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" id="room">
+                    </div>
+                </div>
+
+                <div id="volume" class="form-group">
+                    <label class="col-sm-2 control-label">Volume</label>
+                    <div class="col-sm-4" style="height: 34px !important;">
+                        <div id="volumeControl" style="margin-top: 12px"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Audio</label>
+                    <div class="col-sm-1">
+                        <input type="checkbox" class="checkbox" checked id="hasAudio" value="true">
+                    </div>
+                </div>
+                <div id="fullScreen" class="form-group">
+                    <label class="col-sm-2 control-label">Full Screen</label>
+                    <div class="col-sm-1" >
+                        <button type="button" class="btn btn-default btn-sm" id="fullScreenBtn">
+                            <span class="glyphicon glyphicon-fullscreen"></span>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-4 control-label">
+                        <div id="status"></div>
+                        <div id="info"></div>
+                    </div>
+                    <div class="col-sm-2 text-right">
+                        <button id="joinBtn" type="button" class="btn btn-default">Join</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
