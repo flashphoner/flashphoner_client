@@ -78,10 +78,17 @@
     </div>
     <div class="row row-space">
         <div class="col-sm-4 col-sm-offset-3">
-            <div id="connectionForm" class="input-group">
+            <div id="connectionForm" class="input-group form-group">
                 <input class="form-control" id="urlServer" type="text">
                 <div class="input-group-btn">
                     <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
+                </div>
+            </div>
+            <div class="input-group form-group">
+                <label style="padding-top: 7px;" class="col-sm-4 colcontrol-label">Timeout</label>
+                <div style="float: left;" class="col-sm-6 input-group">
+                    <input type="text" class="form-control" id="timeout" value="1000">
+                    <span style="min-width: 65px; text-align: right;" class="input-group-addon">msec</span>
                 </div>
             </div>
             <div class="text-center">

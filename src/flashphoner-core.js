@@ -390,6 +390,7 @@ var getSession = function (id) {
  * @param {Object=} options.custom User provided custom object that will be available in REST App code
  * @param {Object=} options.sipOptions Sip configuration
  * @param {Object=} options.mediaOptions Media connection configuration
+ * @param {Integer=} options.timeout Connection timeout in milliseconds
  * @returns {Session} Created session
  * @throws {Error} Error if API is not initialized
  * @throws {TypeError} Error if options.urlServer is not specified
@@ -413,6 +414,8 @@ var createSession = function (options) {
     var appKey = options.appKey || "defaultApp";
     var mediaOptions = options.mediaOptions;
     var keepAlive = options.keepAlive;
+    var timeout = options.timeout;
+    var connectionTimeout;
 
     var cConfig;
     //SIP config
@@ -493,6 +496,14 @@ var createSession = function (options) {
     //connect session to server
     function createWS(url) {
         wsConnection = new WebSocket(url);
+        if (timeout != undefined && timeout > 0) {
+          connectionTimeout = setTimeout(function() {
+            if (wsConnection.readyState == 0) {
+              console.log("WS connection timeout");
+              wsConnection.close();
+            }
+          }, timeout);
+        }
         wsConnection.onerror = function () {
             onSessionStatusChange(SESSION_STATUS.FAILED);
         };
@@ -503,6 +514,7 @@ var createSession = function (options) {
         };
         wsConnection.onopen = function () {
             onSessionStatusChange(SESSION_STATUS.CONNECTED);
+            clearTimeout(connectionTimeout);
             cConfig = {
                 appKey: appKey,
                 mediaProviders: Object.keys(MediaProvider),

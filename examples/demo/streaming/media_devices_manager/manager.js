@@ -284,10 +284,11 @@ function onDisconnected() {
 
 function connect() {
     var url = $('#urlServer').val();
+    var tm = parseInt($('#timeout').val());
 
     //create session
     console.log("Create new session with url " + url);
-    Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function (session) {
+    Flashphoner.createSession({urlServer: url, timeout: tm}).on(SESSION_STATUS.ESTABLISHED, function (session) {
         setStatus("#connectStatus", session.status());
         onConnected(session);
     }).on(SESSION_STATUS.DISCONNECTED, function () {
