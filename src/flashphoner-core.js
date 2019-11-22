@@ -20,10 +20,12 @@ var STREAM_STATUS = constants.STREAM_STATUS;
 var CALL_STATUS = constants.CALL_STATUS;
 var TRANSPORT_TYPE = constants.TRANSPORT_TYPE;
 var CONNECTION_QUALITY = constants.CONNECTION_QUALITY;
-var BITRATE_GOOD_QUALITY_PERCENT_DIFFERENCE = 20;
-var BITRATE_BAD_QUALITY_PERCENT_DIFFERENCE = 50;
-var LOW_BITRATE_THRESHOLD_BAD_PERFECT = 50000;
-var LOW_BITRATE_BAD_QUALITY_PERCENT_DIFFERENCE = 150;
+var VIDEO_RATE_GOOD_QUALITY_PERCENT_DIFFERENCE = 20;
+var VIDEO_RATE_BAD_QUALITY_PERCENT_DIFFERENCE = 50;
+var LOW_VIDEO_RATE_THRESHOLD_BAD_PERFECT = 50000;
+var LOW_VIDEO_RATE_BAD_QUALITY_PERCENT_DIFFERENCE = 150;
+var OUTBOUND_VIDEO_RATE = "outboundVideoRate";
+var INBOUND_VIDEO_RATE = "inboundVideoRate";
 var MediaProvider = {};
 var sessions = {};
 var initialized = false;
@@ -624,9 +626,10 @@ var createSession = function (options) {
                         streamRefreshHandlers[availableStream.mediaSessionId](availableStream);
                     }
                     break;
-                case 'incomingBitrate':
+                case OUTBOUND_VIDEO_RATE:
+                case INBOUND_VIDEO_RATE:
                     if (streamRefreshHandlers[obj.mediaSessionId]) {
-                        obj.status = 'incomingBitrate';
+                        obj.status = data.message;
                         streamRefreshHandlers[obj.mediaSessionId](obj);
                     }
                     break;
@@ -1512,7 +1515,7 @@ var createSession = function (options) {
 
         var connectionQuality;
 
-        var videoBytesSent = 0;
+        var videoBytes = 0;
 
         /**
          * Represents media stream.
@@ -1546,8 +1549,8 @@ var createSession = function (options) {
 
             var event = streamInfo.status;
             
-            if (event == 'incomingBitrate') {
-                detectConnectionQuality(streamInfo);
+            if (event == INBOUND_VIDEO_RATE || event == OUTBOUND_VIDEO_RATE) {
+                detectConnectionQuality(event, streamInfo);
                 return;
             }
 
@@ -1586,49 +1589,57 @@ var createSession = function (options) {
             }
         };
 
-        var detectConnectionQuality = function (streamInfo) {
-            if(disableConnectionQualityCalculation) {
+        var detectConnectionQuality = function (event, streamInfo) {
+            if (disableConnectionQualityCalculation) {
                 return;
             }
             mediaConnection.getStats(function (stats) {
-                if (stats && stats.outboundStream) {
-                    if (stats.outboundStream.video && stats.outboundStream.video.bytesSent > 0) {
-                        if (!videoBytesSent) {
-                            videoBytesSent = stats.outboundStream.video.bytesSent;
-                            return;
-                        }
-                        var currentVideoBitrate = ((stats.outboundStream.video.bytesSent - videoBytesSent) * 8);
-                        if (currentVideoBitrate == 0) {
-                            return;
-                        }
-
-                        var clientFiltered = clientKf.filter(currentVideoBitrate);
-                        var serverFiltered = serverKf.filter(streamInfo.videoBitrate);
-
-                        var videoBitrateDifference = Math.abs((serverFiltered - clientFiltered) / ((serverFiltered+ clientFiltered) / 2)) * 100;
-                        var currentQuality;
-                        if(serverFiltered < LOW_BITRATE_THRESHOLD_BAD_PERFECT || clientFiltered < LOW_BITRATE_THRESHOLD_BAD_PERFECT) {
-                            if (videoBitrateDifference > LOW_BITRATE_BAD_QUALITY_PERCENT_DIFFERENCE) {
-                                currentQuality = CONNECTION_QUALITY.BAD;
-                            } else {
-                                currentQuality = CONNECTION_QUALITY.PERFECT;
-                            }
-                        } else {
-                            if (videoBitrateDifference > BITRATE_BAD_QUALITY_PERCENT_DIFFERENCE) {
-                                currentQuality = CONNECTION_QUALITY.BAD;
-                            } else if (videoBitrateDifference > BITRATE_GOOD_QUALITY_PERCENT_DIFFERENCE) {
-                                currentQuality = CONNECTION_QUALITY.GOOD;
-                            } else {
-                                currentQuality = CONNECTION_QUALITY.PERFECT;
-                            }
-                        }
-                        if (callbacks[CONNECTION_QUALITY.UPDATE]) {
-                            connectionQuality = currentQuality;
-                            callbacks[CONNECTION_QUALITY.UPDATE](connectionQuality, clientFiltered, serverFiltered);
-                        }
-                        videoBytesSent = stats.outboundStream.video.bytesSent;
+                var bytesSentReceived = 0;
+                if (stats) {
+                    if (event == OUTBOUND_VIDEO_RATE && stats.inboundStream && stats.inboundStream.video && stats.inboundStream.video.bytesReceived > 0) {
+                        bytesSentReceived = stats.inboundStream.video.bytesReceived;
+                    } else if (stats.outboundStream && stats.outboundStream.video && stats.outboundStream.video.bytesSent > 0) {
+                        bytesSentReceived = stats.outboundStream.video.bytesSent;
+                    } else {
+                        return;
                     }
                 }
+
+                if (!videoBytes) {
+                    videoBytes = bytesSentReceived;
+                    return;
+                }
+
+                var currentVideoRate = ((bytesSentReceived - videoBytes) * 8);
+                if (currentVideoRate == 0) {
+                    return;
+                }
+
+                var clientFiltered = clientKf.filter(currentVideoRate);
+                var serverFiltered = serverKf.filter(streamInfo.videoRate);
+
+                var videoRateDifference = Math.abs((serverFiltered - clientFiltered) / ((serverFiltered + clientFiltered) / 2)) * 100;
+                var currentQuality;
+                if (serverFiltered < LOW_VIDEO_RATE_THRESHOLD_BAD_PERFECT || clientFiltered < LOW_VIDEO_RATE_THRESHOLD_BAD_PERFECT) {
+                    if (videoRateDifference > LOW_VIDEO_RATE_BAD_QUALITY_PERCENT_DIFFERENCE) {
+                        currentQuality = CONNECTION_QUALITY.BAD;
+                    } else {
+                        currentQuality = CONNECTION_QUALITY.PERFECT;
+                    }
+                } else {
+                    if (videoRateDifference > VIDEO_RATE_BAD_QUALITY_PERCENT_DIFFERENCE) {
+                        currentQuality = CONNECTION_QUALITY.BAD;
+                    } else if (videoRateDifference > VIDEO_RATE_GOOD_QUALITY_PERCENT_DIFFERENCE) {
+                        currentQuality = CONNECTION_QUALITY.GOOD;
+                    } else {
+                        currentQuality = CONNECTION_QUALITY.PERFECT;
+                    }
+                }
+                if (callbacks[CONNECTION_QUALITY.UPDATE]) {
+                    connectionQuality = currentQuality;
+                    callbacks[CONNECTION_QUALITY.UPDATE](connectionQuality, clientFiltered, serverFiltered);
+                }
+                videoBytes = bytesSentReceived;
             });
             return;
         };

@@ -79,7 +79,7 @@ function getDefaultChartConfig(timestamp) {
                 duration: 0
             },
             maintainAspectRatio: false,
-            responsive: true,
+            responsive: false,
             scales: {
                 xAxes: [{
                     type: 'time',

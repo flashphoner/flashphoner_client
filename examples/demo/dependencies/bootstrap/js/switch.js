@@ -65,14 +65,14 @@
             applyChange(c.is(':checked'));
 
             on.click(function(e) {
+                e.preventDefault();
                 if (!c.is(":disabled")) {
-                    e.preventDefault();
                     c.prop("checked", !c.prop("checked")).trigger('change')
                 }
             });
             off.click(function(e) {
+                e.preventDefault();
                 if (!c.is(":disabled")) {
-                    e.preventDefault();
                     c.prop("checked", !c.prop("checked")).trigger('change')
                 }
             });

@@ -34,7 +34,7 @@
             <div></div>
             <label id="outAudioStat">Audio stats</label>
             <div></div>
-            <label id="connection">Connection</label>
+            <label id="outConnectionStat">Connection</label>
         </div>
         <div class="col-sm-4">
             <div class="text-center text-muted">Local</div>
@@ -72,6 +72,8 @@
             <label id="inVideoStat">Video stats</label>
             <div></div>
             <label id="inAudioStat">Audio stats</label>
+            <div></div>
+            <label id="inConnectionStat">Connection</label>
         </div>
     </div>
     <div class="row row-space">
@@ -86,9 +88,6 @@
                 <div id="connectStatus"></div>
             </div>
         </div>
-    </div>
-    <div class="row row-space">
-            <canvas id="bitrateChart" width="100" height="300"></canvas>
     </div>
     <div class="row">
         <form id="form" class="form-horizontal" role="form" style="margin-top: 10px; margin-left: 10px">
@@ -105,6 +104,16 @@
                             <input style="margin-top: 4px" type="checkbox" class="checkbox" checked id="sendAudio" value="true">
                         </div>
                         <label style="text-align: left" class="control-label col-sm-5" for="sendAudio">Send Audio</label>
+                    </div>
+                    <div class="form-group">
+                        <label style="text-align: left" class="col-sm-5 control-label">Publish bitrate chart</label>
+                        <div class="col-sm-6">
+                            <input id="publishChartToggle" type="checkbox" />
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <canvas id="publishBitrateChart" width="400" height="300"></canvas>
                     </div>
                     <div class="form-group" id="audioInputForm">
                         <label style="text-align: left" class="col-sm-4 control-label">Mic</label>
@@ -252,6 +261,17 @@
                         </div>
                     </div>
 
+                    <div class="form-group" id="sdpForm">
+                        <label style="text-align: left" class="col-sm-4 control-label">SDP replace</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="sdpStringFind" value="0">
+                        </div>
+                        <label style="text-align: left;padding-left: 5px;padding-right: 5px;" class="col-sm-1 control-label">with</label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="sdpStringReplace" value="0">
+                        </div>
+                    </div>
+
                     <div class="form-group" id="stripPublishCodecsForm">
                         <label style="text-align: left" class="col-sm-4 control-label">Strip codecs</label>
                         <div class="col-sm-6">
@@ -273,6 +293,13 @@
                     </div>
                     <label style="text-align: left" class="control-label col-sm-5" for="playAudio">Play audio</label>
                 </div>
+                    <div class="form-group">
+                        <label style="text-align: left" class="col-sm-5 control-label">Play bitrate chart</label>
+                        <div class="col-sm-6">
+                            <input id="playChartToggle" type="checkbox" />
+                        </div>
+                        <canvas id="playBitrateChart" width="400" height="300"></canvas>
+                    </div>
                 <div class="form-group" id="audioOutputForm">
                     <label style="text-align: left" class="col-sm-2 control-label">Output</label>
                     <div class="col-sm-7">
@@ -349,28 +376,18 @@
 
                 </div>
 
-                <div class="form-group" id="transportOutputForm">
-                    <label style="text-align: left" class="col-sm-2 control-label">Transport</label>
-                    <div class="col-sm-4">
-                        <select class="form-control" id="transportOutput">
-                        </select>
+                    <div class="form-group" id="transportOutputForm">
+                        <label style="text-align: left" class="col-sm-2 control-label">Transport</label>
+                        <div class="col-sm-4">
+                            <select class="form-control" id="transportOutput">
+                            </select>
+                        </div>
                     </div>
-                </div>
-
-                <div class="form-group" id="sdpForm">
-                    <label style="text-align: left" class="col-sm-2 control-label">SDP replace</label>
-                    <div class="col-sm-4">
-                        <input type="text" class="form-control" id="sdpStringFind" value="0">
-                    </div>
-                    <label style="text-align: left;padding-left: 5px;padding-right: 5px;" class="col-sm-1 control-label">with</label>
-                    <div class="col-sm-4">
-                        <input type="text" class="form-control" id="sdpStringReplace", value="0">
-                    </div>
-                </div>
                     <div class="form-group" id="stripPlayCodecsForm">
                         <label style="text-align: left" class="col-sm-4 control-label">Strip codecs</label>
                         <div class="col-sm-6">
-                            <input type="text" class="form-control" id="stripPlayCodecs" placeholder="H264,VP8,OPUS,G722,ALAW,ULAW">
+                            <input type="text" class="form-control" id="stripPlayCodecs"
+                                   placeholder="H264,VP8,OPUS,G722,ALAW,ULAW">
                         </div>
                     </div>
                 </div>
@@ -413,6 +430,34 @@
         on: 'on',
         off: 'off',
         size: 'md'
+    });
+
+    var $publishChartToggle = $('#publishChartToggle');
+    $publishChartToggle.bootstrapSwitch({
+        on:'show',
+        off: 'hide',
+        size: 'md'
+    });
+    $publishChartToggle.change(function () {
+        if(this.checked) {
+            $('#publishBitrateChart').show();
+        } else {
+            $('#publishBitrateChart').hide();
+        }
+    });
+
+    var $playChartToggle = $('#playChartToggle');
+    $playChartToggle.bootstrapSwitch({
+        on:'show',
+        off: 'hide',
+        size: 'md'
+    });
+    $playChartToggle.change(function () {
+        if(this.checked) {
+            $('#playBitrateChart').show();
+        } else {
+            $('#playBitrateChart').hide();
+        }
     });
 
     var $screenShareToggle = $("#screenShareToggle");
