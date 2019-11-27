@@ -5,10 +5,9 @@ var remoteVideo;
 var conferenceStream;
 var publishStream;
 var currentVolumeValue = 50;
-var mockLocalDisplay;
+var localDisplay;
 
 function init_page() {
-
     //init api
     try {
         Flashphoner.init({
@@ -21,7 +20,7 @@ function init_page() {
 
     //video display
     remoteVideo = document.getElementById("remoteVideo");
-    mockLocalDisplay = document.createElement("div");
+    localDisplay = document.getElementById("localVideo");
 
     $("#url").val(setURL());
     $("#volumeControl").slider({
@@ -38,6 +37,7 @@ function init_page() {
     }).slider("disable");
     if (Flashphoner.getMediaProviders()[0] == "Flash") {
         $("#fullScreen").hide();
+        $("#localVideoContainer").show();
     }
     onStopped();
 }
@@ -56,7 +56,7 @@ function onStarted() {
 }
 
 function onStopped() {
-    $("#joinBtn").text("Join").off('click').click(playBtnClick).prop('disabled', false);
+    $("#joinBtn").text("Join").off('click').click(joinBtnClick).prop('disabled', false);
     $('#url').prop('disabled', false);
     $("#room").prop('disabled', false);
     $("#login").prop('disabled', false);
@@ -68,11 +68,15 @@ function onStopped() {
 }
 
 function stopStreams() {
-    conferenceStream.stop();
-    publishStream.stop();
+    if(conferenceStream) {
+        conferenceStream.stop();
+    }
+    if(publishStream) {
+        publishStream.stop();
+    }
 }
 
-function playBtnClick() {
+function joinBtnClick() {
     if (validateForm()) {
         $(this).prop('disabled', true);
         $('#url').prop('disabled', true);
@@ -127,7 +131,7 @@ function startStreaming(session) {
     var streamName = login + "#" + roomName;
     publishStream = session.createStream({
         name: streamName,
-        display: mockLocalDisplay,
+        display: localDisplay,
         receiveVideo: false,
         receiveAudio: false,
         constraints: getConstraints()
@@ -152,7 +156,8 @@ function playStream(session) {
     conferenceStream = session.createStream({
         name: streamName,
         display: remoteVideo,
-        constraints: getConstraints()
+        constraints: getConstraints(),
+        flashShowFullScreenButton: true
     }).on(STREAM_STATUS.PENDING, function (stream) {
         $("#preloader").show();
         var video = document.getElementById(stream.id());
@@ -161,16 +166,7 @@ function playStream(session) {
             //don't resize html5 video
             if (video.nodeName.toLowerCase() !== "video") {
                 video.addEventListener('resize', function (event) {
-                    var streamResolution = stream.videoResolution();
-                    console.log("Stream resolution " + streamResolution);
-                    if (Object.keys(streamResolution).length === 0) {
-                        resizeVideo(event.target);
-                    } else {
-                        // Change aspect ratio to prevent video stretching
-                        var ratio = streamResolution.width / streamResolution.height;
-                        var newHeight = Math.floor(options.playWidth / ratio);
-                        resizeVideo(event.target, options.playWidth, newHeight);
-                    }
+                    resizeVideo(event.target);
                 });
             }
         }
