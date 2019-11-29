@@ -246,7 +246,10 @@ var getLogger = function () {
  * @param {String=} mediaProvider Media provider that will be asked for device list
  * @param {Boolean=} labels Ask user for microphone access before getting device list.
  * This will make device label available.
- * @param {Flashphoner.constants.MEDIA_DEVICE_KIND} kind For media device kind input or output
+ * @param {Flashphoner.constants.MEDIA_DEVICE_KIND} kind Media devices kind to access:
+ * MEDIA_DEVICE_KIND.INPUT (default) get access to input devices only (camera, mic).
+ * MEDIA_DEVICE_KIND.OUTPUT get access to output devices only (speaker, headphone).
+ * MEDIA_DEVICE_KIND.ALL get access to all devices (cam, mic, speaker, headphone).
  * @param {Object=} deviceConstraints If labels == true.
  * If {audio: true, video: false}, then access to the camera will not be requested.
  * If {audio: false, video: true}, then access to the microphone will not be requested.
