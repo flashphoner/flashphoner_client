@@ -1140,7 +1140,10 @@ var listDevices = function (labels, kind, deviceConstraints) {
 
 function normalizeConstraints(constraints) {
     //WCS-2010. fixed TypeError after publish->stop->publish
+    //WCS-2373. fixed customStream
+    var customStream = constraints.customStream;
     constraints = JSON.parse(JSON.stringify(constraints));
+    constraints.customStream = customStream;
     if (constraints.video) {
         if (constraints.video === true) {
             constraints.video = {};
