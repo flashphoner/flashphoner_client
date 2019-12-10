@@ -225,7 +225,7 @@ module.exports = {
             var prefix = this.date() + " INFO " + src + " - ";
             this.pushLogs(prefix + JSON.stringify(text) + '\n');
             if (this.verbosity >= 2) {
-                if (this.customLogger !== null) {
+                if (this.customLogger != null) {
                     this.customLogger.info(text);
                 } else {
                     console.log(prefix,text);
@@ -239,7 +239,7 @@ module.exports = {
             var prefix = this.date() + " DEBUG " + src + " - ";
             this.pushLogs(prefix + JSON.stringify(text) + '\n');
             if (this.verbosity >= 3) {
-                if (this.customLogger !== null) {
+                if (this.customLogger != null) {
                     this.customLogger.debug(text);
                 } else {
                     console.log(prefix,text);
@@ -253,7 +253,7 @@ module.exports = {
 			var prefix = this.date() + " TRACE " + src + " - ";
             this.pushLogs(prefix + JSON.stringify(text) + '\n');
             if (this.verbosity >= 4) {
-                if (this.customLogger !== null) {
+                if (this.customLogger != null) {
                     this.customLogger.trace(text);
                 } else {
                     console.log(prefix,text);
@@ -267,7 +267,7 @@ module.exports = {
 			var prefix = this.date() + " WARN " + src + " - ";
             this.pushLogs(prefix + JSON.stringify(text) + '\n');
             if (this.verbosity >= 1) {
-                if (this.customLogger !== null) {
+                if (this.customLogger != null) {
                     this.customLogger.warn(text);
                 } else {
                     console.warn(prefix,text);
@@ -281,7 +281,7 @@ module.exports = {
 			var prefix = this.date() + " ERROR " + src + " - ";
             this.pushLogs(prefix + JSON.stringify(text) + '\n');
             if (this.verbosity >= 0) {
-                if (this.customLogger !== null) {
+                if (this.customLogger != null) {
                     this.customLogger.error(text);
                 } else {
                     console.error(prefix,text);
