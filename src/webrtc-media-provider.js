@@ -708,7 +708,7 @@ var getMediaAccess = function (constraints, display, disableConstraintsNormaliza
         }
 
         var cacheInstance = getCacheInstance(display);
-        if (cacheInstance && cacheInstance.srcObject && JSON.stringify(display.mediaTrackConstraints) == JSON.stringify(constraints)) {
+        if (cacheInstance && cacheInstance.srcObject && JSON.stringify(display.mediaTrackConstraints) == JSON.stringify(constraints) && !constraints.customStream) {
             resolve(display);
             return;
         }

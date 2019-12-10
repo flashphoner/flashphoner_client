@@ -97,7 +97,6 @@ function startStreaming() {
     session.createStream({
         name: streamName,
         display: localVideo,
-        cacheLocalResources: true,
         constraints: constraints
     }).on(STREAM_STATUS.PUBLISHING, function (stream) {
         setStatus("#publishStatus", STREAM_STATUS.PUBLISHING);
