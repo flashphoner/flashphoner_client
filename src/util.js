@@ -169,7 +169,7 @@ module.exports = {
         }
     },
     logger: {
-        init: function (verbosity, enablePushLogs) {
+        init: function (verbosity, enablePushLogs, customLogger, enableLogs) {
             switch (verbosity.toUpperCase()) {
                 case "DEBUG":
                     this.verbosity = 3;
@@ -194,6 +194,8 @@ module.exports = {
             };
             this.enablePushLogs = enablePushLogs;
             var delayedLogs = [];
+            this.customLogger = customLogger;
+            this.enableLogs = enableLogs;
             this.pushLogs = function(log) {
                 if (this.wsConnection && this.enablePushLogs) {
                     if (delayedLogs.length) {
@@ -217,34 +219,80 @@ module.exports = {
             }
         },
         info: function (src, text) {
+            if (!this.enableLogs){
+                return;
+            }
             var prefix = this.date() + " INFO " + src + " - ";
             this.pushLogs(prefix + JSON.stringify(text) + '\n');
-            if (this.verbosity >= 2)
-                console.log(prefix,text);
+            if (this.verbosity >= 2) {
+                if (this.customLogger !== null) {
+                    this.customLogger.info(text);
+                } else {
+                    console.log(prefix,text);
+            	}
+            }
         },
         debug: function (src, text) {
+            if (!this.enableLogs){
+                return;
+            }
             var prefix = this.date() + " DEBUG " + src + " - ";
             this.pushLogs(prefix + JSON.stringify(text) + '\n');
-            if (this.verbosity >= 3)
-                console.log(prefix,text);
+            if (this.verbosity >= 3) {
+                if (this.customLogger !== null) {
+                    this.customLogger.debug(text);
+                } else {
+                    console.log(prefix,text);
+                }
+            }
         },
         trace: function (src, text) {
-            var prefix = this.date() + " TRACE " + src + " - ";
+            if (!this.enableLogs){
+                return;
+            }
+			var prefix = this.date() + " TRACE " + src + " - ";
             this.pushLogs(prefix + JSON.stringify(text) + '\n');
-            if (this.verbosity >= 4)
-                console.log(prefix,text);
+            if (this.verbosity >= 4) {
+                if (this.customLogger !== null) {
+                    this.customLogger.trace(text);
+                } else {
+                    console.log(prefix,text);
+                }
+            }
         },
         warn: function (src, text) {
-            var prefix = this.date() + " WARN " + src + " - ";
+            if (!this.enableLogs){
+                return;
+            }
+			var prefix = this.date() + " WARN " + src + " - ";
             this.pushLogs(prefix + JSON.stringify(text) + '\n');
-            if (this.verbosity >= 1)
-                console.warn(prefix,text);
+            if (this.verbosity >= 1) {
+                if (this.customLogger !== null) {
+                    this.customLogger.warn(text);
+                } else {
+                    console.warn(prefix,text);
+                }
+            }
         },
         error: function (src, text) {
-            var prefix = this.date() + " ERROR " + src + " - ";
+            if (!this.enableLogs){
+                return;
+            }
+			var prefix = this.date() + " ERROR " + src + " - ";
             this.pushLogs(prefix + JSON.stringify(text) + '\n');
-            if (this.verbosity >= 0)
-                console.error(prefix,text);
+            if (this.verbosity >= 0) {
+                if (this.customLogger !== null) {
+                    this.customLogger.error(text);
+                } else {
+                    console.error(prefix,text);
+                }
+            }
+        },
+        setEnableLogs: function(enableLogs) {
+            this.enableLogs = enableLogs;
+        },
+        setCustomLogger: function(customLogger) {
+            this.customLogger = customLogger;
         },
         setConnection: function(connection) {
             this.wsConnection = connection;

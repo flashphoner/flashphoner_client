@@ -53,8 +53,11 @@ var init = function (options) {
             options = {};
         }
         loggerConf = options.logger || loggerConf;
+        if (options.logger !== null) {
+          loggerConf.enableLogs = true;
+        }
         // init logger
-        logger.init(loggerConf.severity || "INFO", loggerConf.push || false);
+        logger.init(loggerConf.severity || "INFO", loggerConf.push || false, loggerConf.customLogger, loggerConf.enableLogs);
         var waitingTemasys = false;
         try {
             var audioContext = new (window.AudioContext || window.webkitAudioContext)();
