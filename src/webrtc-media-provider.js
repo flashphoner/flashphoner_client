@@ -131,8 +131,9 @@ var createConnection = function (options) {
                 remoteVideo.onloadedmetadata = function (e) {
                     if (remoteVideo) {
                         remoteVideo.play().catch(function (e) {
-                            if(browserDetails.browser == 'chrome') {
-                                //WCS-1698. fix autoplay in chromium based browsers
+                            if(browserDetails.browser == 'chrome' || browserDetails.browser == 'safari') {
+                                //WCS-1698. fixed autoplay in chromium based browsers
+                                //WCS-2375. fixed autoplay in ios safari
                                 logger.info(LOG_PREFIX, "Autoplay detected! Trying to play a video with a muted sound...");
                                 remoteVideo.muted = true;
                                 remoteVideo.play();
@@ -1213,7 +1214,6 @@ var playFirstVideo = function (display, isLocal, src) {
             var video = document.createElement('video');
             video.setAttribute("playsinline", "");
             video.setAttribute("webkit-playsinline", "");
-            display.appendChild(video);
             video.id = uuid_v1() + (isLocal ? LOCAL_CACHED_VIDEO : REMOTE_CACHED_VIDEO);
 
             //in WCS-1560 we removed video.play() call, because it triggers the “Unhandled Promise Rejection” exception in iOS Safari
@@ -1221,7 +1221,20 @@ var playFirstVideo = function (display, isLocal, src) {
             if (src) {
                 video.src = src;
                 video.play().then(function () {
+                    display.appendChild(video);
                     resolve();
+                }).catch(function () {
+                    //WCS-2375. fixed autoplay in ios safari
+                    logger.info(LOG_PREFIX, "Autoplay detected! Trying to play a video with a muted sound...");
+                    video.muted = true;
+                    video.play().then(function () {
+                        display.appendChild(video);
+                        resolve();
+                    });
+                    //WCS-2375. low power mode suspends video play
+                    video.onsuspend = function (event) {
+                        reject();
+                    };
                 });
                 return;
             }

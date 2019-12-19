@@ -97,6 +97,8 @@ function start() {
     } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] == "MSE") {
         Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function() {
             createSession();
+        }).catch(function() {
+            onStopped();
         });
         return;
     }

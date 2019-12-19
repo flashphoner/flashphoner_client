@@ -40,6 +40,8 @@ function init_page() {
         step: 10,
         animate: true,
         slide: function(event, ui) {
+            //WCS-2375. fixed autoplay in ios safari
+            stream.unmuteRemoteAudio();
             currentVolumeValue = ui.value;
             stream.setVolume(currentVolumeValue);
         }
@@ -83,6 +85,8 @@ function playBtnClick() {
         } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] === "MSE") {
             Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function() {
                 start();
+            }).catch(function () {
+                onStopped();
             });
             return;
         }
@@ -140,7 +144,7 @@ function playStream(session) {
         options.playWidth = resolution.split("x")[0];
         options.playHeight = resolution.split("x")[1];
     }
-    stream = session.createStream(options).on(STREAM_STATUS.PENDING, function(stream) {
+    stream = session.createStream(options).on(STREAM_STATUS.PENDING, function (stream) {
         $("#preloader").show();
         var video = document.getElementById(stream.id());
         if (!video.hasListeners) {
@@ -159,13 +163,20 @@ function playStream(session) {
                         resizeVideo(event.target, options.playWidth, newHeight);
                     }
                 });
+            } else {
+                //WCS-2375. fixed autoplay in ios safari
+                video.addEventListener('playing', function () {
+                    if (autoplay && stream.isRemoteAudioMuted()) {
+                        $("#volumeControl").slider('value', 0);
+                    }
+                });
             }
         }
-    }).on(STREAM_STATUS.PLAYING, function(stream) {
+    }).on(STREAM_STATUS.PLAYING, function (stream) {
         $("#preloader").hide();
         setStatus(stream.status());
         onStarted(stream);
-    }).on(STREAM_STATUS.STOPPED, function() {
+    }).on(STREAM_STATUS.STOPPED, function () {
         $("#preloader").hide();
         setStatus(STREAM_STATUS.STOPPED);
         onStopped();
