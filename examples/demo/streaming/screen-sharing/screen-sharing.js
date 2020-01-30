@@ -30,17 +30,17 @@ function init_page() {
         $('#mediaSourceForm').hide();
         interval = setInterval(function() {
             chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
-                if (response) {
-                    $("#extension").hide();
-                    clearInterval(interval);
-                    onExtensionAvailable();
-                } else {
+                if (chrome.runtime.lastError) {         //WCS-2369 - cacth runtime.lastError
                     (inIframe()) ? $("#installFromMarket").show() : $("#installExtensionButton").show();
                     clearInterval(interval);
                     onExtensionAvailable();
                     $('#woChromeExtension').prop('checked', true);
                     $('#woChromeExtension').prop('disabled', true);
                     extensionNotInstalled = true;
+                } else {
+                    $("#extension").hide();
+                    clearInterval(interval);
+                    onExtensionAvailable();
                 }
             });
         }, 500);
