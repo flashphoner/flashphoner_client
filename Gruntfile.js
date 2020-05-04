@@ -18,7 +18,7 @@ module.exports = function(grunt) {
         },
         flash: {
             options: {
-                sdk: env.FLEX_HOME,
+                sdk: '',//env.FLEX_HOME,
                 flashVersion: '11.1'
             },
             debug : {
@@ -96,6 +96,17 @@ module.exports = function(grunt) {
                 options: {
                     ignore: ['adapterjs','./src/webrtc-media-provider.js'],
 		    transform: [['babelify', {presets: ["@babel/preset-env", { "sourceType": "unambiguous" }], global: true}]],
+                    browserifyOptions: {
+                        standalone: 'Flashphoner'
+                    }
+                }
+            },
+            flashphonerGlobalObjectWebRTCOnly: {
+                src: ['./src/flashphoner-core.js'],
+                dest: './flashphoner-webrtc-only.js',
+                options: {
+                    ignore: ['./src/temasys-media-provider.js', 'adapterjs', './src/websocket-media-provider.js', './src/flash-media-provider.js', './src/media-source-media-provider.js'],
+                    transform: [['babelify', {presets: ["@babel/preset-env", { "sourceType": "unambiguous" }], global: true}]],
                     browserifyOptions: {
                         standalone: 'Flashphoner'
                     }
