@@ -18,7 +18,7 @@ module.exports = function(grunt) {
         },
         flash: {
             options: {
-                sdk: '',//env.FLEX_HOME,
+                sdk: env.FLEX_HOME,
                 flashVersion: '11.1'
             },
             debug : {
