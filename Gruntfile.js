@@ -142,7 +142,8 @@ module.exports = function(grunt) {
                   './flashphoner-no-webrtc.min.js': ['./flashphoner-no-webrtc.js'],
                   './flashphoner-no-flash.min.js': ['./flashphoner-no-flash.js'],
                   './flashphoner-no-wsplayer.min.js': ['./flashphoner-no-wsplayer.js'],
-                  './flashphoner-temasys-flash-websocket.min.js':['./flashphoner-temasys-flash-websocket.js']
+                  './flashphoner-temasys-flash-websocket.min.js':['./flashphoner-temasys-flash-websocket.js'],
+                  './flashphoner-webrtc-only.min.js' : ['./flashphoner-webrtc-only.js']
               }
           }
         },
@@ -166,11 +167,13 @@ module.exports = function(grunt) {
                             'flashphoner-no-webrtc.js',
                             'flashphoner-no-wsplayer.js',
                             'flashphoner-temasys-flash-websocket.js',
+                            'flashphoner-webrtc-only.js',
                             'flashphoner.min.js',
                             'flashphoner-no-flash.min.js',
                             'flashphoner-no-webrtc.min.js',
                             'flashphoner-no-wsplayer.min.js',
                             'flashphoner-temasys-flash-websocket.min.js',
+                            'flashphoner-webrtc-only.min.js',
                             'flashphoner-rest-api.js',
                             'media-provider.swf'
                         ],
