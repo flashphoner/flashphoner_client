@@ -1,16 +1,15 @@
-var player = null;
+var remoteVideo = null;
 
 function loadPlayerPage() {
-    $("#playerPage").load("player-page.html", initPage );
+    $("#playerPage").load("../hls-player/player-page.html", initPage );
 }
 
 function initPage() {
-    $("#header").text("HLS VideoJS Player Minimal");
+    $("#header").text("HLS Native Player Minimal");
     $("#urlServer").val(getHLSUrl());
     $("#applyBtn").prop('disabled', false).text("Play").off('click').click(playBtnClick);
-    var remoteVideo = document.getElementById('remoteVideo');
-    remoteVideo.className = "video-js vjs-default-skin";
-    player = videojs(remoteVideo);
+    remoteVideo = document.getElementById('remoteVideo');
+    remoteVideo.style ="background-color: lightgrey;";
 }
 
 function playBtnClick() {
@@ -23,21 +22,29 @@ function playBtnClick() {
         if (key.length > 0 && token.length > 0) {
             videoSrc += "?" + key + "=" + token;
         }
-        player.src({
-            src: videoSrc,
-            type: "application/vnd.apple.mpegurl"
-        });
-        console.log("Play with VideoJs");
-        player.play();
-        onStarted();
+        if (remoteVideo.canPlayType('application/vnd.apple.mpegurl')) {
+            remoteVideo.src = videoSrc;
+            remoteVideo.addEventListener('loadedmetadata', function() {
+                console.log("Play native HLS");
+                remoteVideo.play();
+                onStarted();
+            });
+        }
+        else {
+            $("#notifyFlash").text("Your browser doesn't support native HLS playback");
+            cleanRemoteVideo();
+        }
     }
 }
 
 
 function stopBtnClick() {
-    if (player != null) {
-        console.log("Stop VideoJS player");
-        player.pause();
+    if (remoteVideo != null) {
+        console.log("Stop HTML5 player");
+        remoteVideo.pause();
+        remoteVideo.currentTime = 0;
+        remoteVideo.removeAttribute('src');
+        remoteVideo.load();
     }
     onStopped();
 }

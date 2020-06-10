@@ -1,0 +1,59 @@
+    <div class="row">
+        <div class="col-sm-12 text-center" style="max-width: 525px">
+
+            <h2 id="header"></h2>
+
+            <h2 id="notifyFlash" class="text-danger"></h2>
+            <fieldset id="fieldset" class="scheduler-border fp-streamingControls">
+                <div class="row" style="margin-top: 20px">
+                    <label class="control-label col-sm-1 fp-buttonVerticalAlign text-right" for="urlServer">WCS
+                        URL</label>
+
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" id="urlServer" placeholder="WCS Server URL"/>
+                    </div>
+                </div>
+
+                <div id="playDiv" class="row" style="margin-top:10px">
+                    <div id="playForm" class="form-group">
+                        <label class="control-label col-sm-1 fp-buttonVerticalAlign  text-right"
+                               for="playStream">Stream Name</label>
+
+                        <div class="col-sm-12">
+                            <input type="text" class="form-control" id="playStream" placeholder="Stream Name"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div class="form-group">
+                        <label class="control-label col-sm-1 fp-buttonVerticalAlign  text-left"
+                               for="playStream">Auth</label>
+
+                        <div class="col-sm-12">
+                            <div class="col-sm-4 nopadding">
+                                <input type="text" class="form-control" id="key" placeholder="Key"/>
+                            </div>
+
+                            <div class="col-sm-8 nopadding">
+                                <input type="text" class="form-control" id="token" placeholder="Value"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 20px">
+                    <div class="col-sm-12 text-right">
+                        <button id="applyBtn" type="button" class="btn btn-default">Play</button>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12 text-center" style="margin-top: 20px; max-width: 852px">
+            <video id="remoteVideo" width="852" height="480"
+                   controls="controls"
+                   autoplay="autoplay"
+                   type="application/vnd.apple.mpegurl"></video>
+        </div>
+    </div>

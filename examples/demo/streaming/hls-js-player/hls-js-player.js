@@ -1,17 +1,17 @@
-var player = null;
+var remoteVideo = null;
 
 function loadPlayerPage() {
-    $("#playerPage").load("player-page.html", initPage );
+    $("#playerPage").load("../hls-player/player-page.html", initPage );
 }
 
 function initPage() {
-    $("#header").text("HLS VideoJS Player Minimal");
+    $("#header").text("HLS.JS Player Minimal");
     $("#urlServer").val(getHLSUrl());
     $("#applyBtn").prop('disabled', false).text("Play").off('click').click(playBtnClick);
-    var remoteVideo = document.getElementById('remoteVideo');
-    remoteVideo.className = "video-js vjs-default-skin";
-    player = videojs(remoteVideo);
+    remoteVideo = document.getElementById('remoteVideo');
+    remoteVideo.style ="background-color: lightgrey;";
 }
+
 
 function playBtnClick() {
     if (validateForm()) {
@@ -23,21 +23,30 @@ function playBtnClick() {
         if (key.length > 0 && token.length > 0) {
             videoSrc += "?" + key + "=" + token;
         }
-        player.src({
-            src: videoSrc,
-            type: "application/vnd.apple.mpegurl"
-        });
-        console.log("Play with VideoJs");
-        player.play();
-        onStarted();
+        if (Hls.isSupported()) {
+            var hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(remoteVideo);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                console.log("Play with HLS.js");
+                remoteVideo.play();
+                onStarted();            
+            });
+        }
+        else {
+            $("#notifyFlash").text("Your browser doesn't support MSE technology required to play video");
+        }
     }
 }
 
 
 function stopBtnClick() {
-    if (player != null) {
-        console.log("Stop VideoJS player");
-        player.pause();
+    if (remoteVideo != null) {
+        console.log("Stop HTML5 player");
+        remoteVideo.pause();
+        remoteVideo.currentTime = 0;
+        remoteVideo.removeAttribute('src');
+        remoteVideo.load();
     }
     onStopped();
 }

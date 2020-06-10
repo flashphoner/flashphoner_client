@@ -1,0 +1,10 @@
+.fp-buttonVerticalAlign {
+    vertical-align: middle;
+    display: inline-block;
+    height: 34px;
+    line-height: 34px;
+}
+
+.nopadding {
+    padding: 0 !important;
+}
