@@ -1,6 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
+var PROCESSING_STATUS = "PROCESSING";
 var localVideo;
 var streams = [];
 var testSession;
@@ -26,6 +27,7 @@ function init_page() {
 
 function onStarted(stream) {
     $("#publishBtn").text("Stop").off('click').click(function () {
+        setStatus(PROCESSING_STATUS);
         $(this).prop('disabled', true);
         stream.stop();
     }).prop('disabled', false);
