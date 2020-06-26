@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="recording.css">
-    <title>Stream Recording</title>
+    <link rel="stylesheet" href="several_streams_recording.css">
+    <title>Several Streams Recording</title>
     <script type="text/javascript" src="../../../../flashphoner.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
     <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
 
-    <script type="text/javascript" src="recording.js"></script>
+    <script type="text/javascript" src="several_streams_recording.js"></script>
     <!-- Bootstrap JS -->
     <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
 </head>
@@ -19,7 +19,7 @@
     <div class="container">
     
         <div class="row">
-            <h2 class="col-sm-6 text-center">Stream Recording</h2>
+            <h2 class="col-sm-6 text-center">Several Streams Recording</h2>
         </div>
 
         <div class="row">
@@ -33,18 +33,29 @@
                         <button id="publishBtn" type="button" class="btn btn-default">Start</button>
                     </div>
                 </div>
+
+                <div class="input-group col-sm-7" style="margin: 20px auto 0 auto;">
+                    <label class="col-sm-8 control-label">Count local streams</label>
+                    <div class="col-sm-4">
+                        <input class="form-control" type="text" id="countStreams" value="5">
+                    </div>
+                </div>
+
                 <div class="text-center" style="margin-top: 20px">
                     <div id="status"></div>
                     <div id="info"></div>
                 </div>
             </div>
             <div class="col-sm-4">
-                <div class="fp-remoteVideo">
-                    <video id="recVideo"></video>
+                <div class="form-group">
+                    <textarea id="statusLog" class="form-control" rows="20" style="resize: none;"></textarea>
                 </div>
-                <div id="downloadDiv" class="text-center" style="margin: 0 auto;">
-                    <a id="link" href="#">Download recorded stream </a>
-                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div id="localTestVideo" class="fp-localVideo" style="display: none;"></div>
             </div>
         </div>
 

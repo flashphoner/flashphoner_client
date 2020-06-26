@@ -3,8 +3,6 @@ var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var PROCESSING_STATUS = "PROCESSING";
 var localVideo;
-var streams = [];
-var testSession;
 
 function init_page() {
     //init api
@@ -19,10 +17,8 @@ function init_page() {
 
     $("#url").val(setURL() + "/" + createUUID(8));
     $("#downloadDiv").hide();
-    $("#testUrl").val(setURL());
 
     onStopped();
-    toInitialState();
 }
 
 function onStarted(stream) {
@@ -124,9 +120,9 @@ function setStatus(status, info) {
     }
 }
 
-
 // Show link to download recorded stream
 function showDownloadLink(name) {
+    console.log(name);
     if (name) {
         // Set correct path for records. Stream records are saved to WCS_HOME/records directory.
         // http://flashphoner.com/docs/wcs4/wcs_docs/html/en/wcs-developer-guide/quick_start_recording_streams.htm
@@ -135,99 +131,6 @@ function showDownloadLink(name) {
         $("#recVideo").attr("src", link).attr("controls", true);
         $("#downloadDiv").show();
     }
-}
-
-
-function toRecordedState() {
-    $("#startTestBtn").text("Stop").off('click').click(function () {
-        for (var i in streams) {
-            streams[i].stop();
-        }
-        streams = [];
-        toInitialState();
-    }).prop('disabled', false);
-}
-
-function toInitialState() {
-    $("#startTestBtn").text("Start").off('click').click(function () {
-        $(this).prop('disabled', true);
-        startRecordingSeveralStreams();
-    }).prop('disabled', false);
-    $('#testUrl').prop('disabled', false);
-}
-
-function startRecordingSeveralStreams() {
-    var url = $('#testUrl').val();
-    console.log("Create new session with url " + url);
-    if (testSession) {
-        testSession.on(SESSION_STATUS.DISCONNECTED, function () {
-        });
-        testSession.on(SESSION_STATUS.FAILED, function () {
-        });
-        testSession.disconnect();
-        testSession = undefined;
-    }
-    testSession = Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function (session) {
-        addSessionStatusLog(session);
-        //session connected, start playback
-        publishStreams(session);
-    }).on(SESSION_STATUS.DISCONNECTED, function (session) {
-        addSessionStatusLog(session);
-        toInitialState();
-    }).on(SESSION_STATUS.FAILED, function (session) {
-        addSessionStatusLog(session);
-        toInitialState();
-    });
-}
-
-function publishStreams(session) {
-    var streamName = createUUID(8);
-
-    function checkCountStreams() {
-        var $startTestBtn = $("#startTestBtn");
-        if ($startTestBtn.text() === "Start" && $startTestBtn.prop('disabled') ) {
-            if (streams.length < $("#countStreams").val()) {
-                publishStreams(session);
-            } else {
-                toRecordedState();
-            }
-        }
-    }
-
-    var stream = session.createStream({
-        name: streamName,
-        display: document.getElementById("localTestVideo"),
-        record: true,
-        receiveVideo: false,
-        receiveAudio: false
-    }).on(STREAM_STATUS.PUBLISHING, function (stream) {
-        checkCountStreams();
-
-        addStatusLog(stream);
-    }).on(STREAM_STATUS.UNPUBLISHED, function (stream) {
-        checkCountStreams();
-        addStatusLog(stream);
-    }).on(STREAM_STATUS.FAILED, function (stream) {
-        checkCountStreams();
-        addStatusLog(stream);
-
-    });
-    addStatusLog(stream);
-    stream.publish();
-    streams.push(stream);
-}
-
-//show connection or local stream status
-function addStatusLog(stream) {
-    var statusField = $("#statusLog");
-    statusField.text(statusField.text() + "Stream: " + stream.name() + " - " + stream.status() + (stream.getInfo() ? " - " + stream.getInfo() : "") + "\n");
-    statusField.scrollTop(statusField[0].scrollHeight - statusField.height());
-}
-
-function addSessionStatusLog(session) {
-    var statusField = $("#statusLog");
-    statusField.text(statusField.text() + "Session: " + session.getServerUrl() + " - " + session.status() + "\n");
-    statusField.scrollTop(statusField[0].scrollHeight - statusField.height());
 }
 
 function validateForm() {

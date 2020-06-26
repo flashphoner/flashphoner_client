@@ -1,0 +1,25 @@
+video:-webkit-full-screen {
+    border-radius: 1px;
+}
+
+.fp-remoteVideo {
+    border: 1px double #777;
+    width: 322px;
+    height: 242px;
+    margin: 0 auto;
+}
+.fp-remoteVideo>video {
+    width: 320px;
+    height: 240px;
+}
+
+.fp-localVideo {
+    border: 1px double #777;
+    width: 322px;
+    height: 242px;
+    margin: 0 auto;
+}
+.fp-localVideo>video {
+    width: 320px;
+    height: 240px;
+}
