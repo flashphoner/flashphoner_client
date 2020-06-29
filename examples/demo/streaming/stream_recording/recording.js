@@ -23,7 +23,7 @@ function init_page() {
 
 function onStarted(stream) {
     $("#publishBtn").text("Stop").off('click').click(function () {
-        setStatus(PROCESSING_STATUS);
+    	setStatus(PROCESSING_STATUS);
         $(this).prop('disabled', true);
         stream.stop();
     }).prop('disabled', false);
@@ -122,7 +122,6 @@ function setStatus(status, info) {
 
 // Show link to download recorded stream
 function showDownloadLink(name) {
-    console.log(name);
     if (name) {
         // Set correct path for records. Stream records are saved to WCS_HOME/records directory.
         // http://flashphoner.com/docs/wcs4/wcs_docs/html/en/wcs-developer-guide/quick_start_recording_streams.htm
