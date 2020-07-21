@@ -1431,6 +1431,7 @@ var createSession = function (options) {
      * @param {Boolean=} options.flashShowFullScreenButton Show full screen button in flash
      * @param {string=} options.transport Transport to be used by server for WebRTC media, {@link Flashphoner.constants.TRANSPORT_TYPE}
      * @param {Boolean=} options.cvoExtension Enable rtp video orientation extension
+     * @param {Integer=} options.playoutDelay Time delay between network reception of media and playout
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
@@ -1530,6 +1531,7 @@ var createSession = function (options) {
         var remoteVideo = options.remoteVideo;
         //callbacks added using stream.on()
         var callbacks = {};
+        var playoutDelay = options.playoutDelay;
 
         var connectionQuality;
 
@@ -1688,7 +1690,8 @@ var createSession = function (options) {
                 connectionConfig: mediaOptions,
                 connectionConstraints: mediaConnectionConstraints,
                 audioOutputId: audioOutputId,
-                remoteVideo: remoteVideo
+                remoteVideo: remoteVideo,
+                playoutDelay: playoutDelay
             }, streamRefreshHandlers[id_]).then(function (newConnection) {
                 mediaConnection = newConnection;
                 try {

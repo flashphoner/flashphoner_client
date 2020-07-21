@@ -47,6 +47,7 @@ var createConnection = function (options) {
         var systemSoundTrack;
         var constraints = options.constraints ? options.constraints : {};
         var screenShare = false;
+        var playoutDelay = options.playoutDelay;
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
@@ -144,6 +145,14 @@ var createConnection = function (options) {
                     }
                 };
             }
+
+            //WCS-2771 add playback delay
+            connection.getReceivers().forEach((track) => {
+                if (track.playoutDelayHint === undefined) {
+                    logger.warn("playout delay unsupported");
+                }
+                track.playoutDelayHint = playoutDelay;
+            });
         };
         connection.onremovestream = function (event) {
             if (remoteVideo) {
