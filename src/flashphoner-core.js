@@ -20,6 +20,7 @@ var STREAM_STATUS = constants.STREAM_STATUS;
 var CALL_STATUS = constants.CALL_STATUS;
 var TRANSPORT_TYPE = constants.TRANSPORT_TYPE;
 var CONNECTION_QUALITY = constants.CONNECTION_QUALITY;
+var ERROR_INFO = constants.ERROR_INFO;
 var VIDEO_RATE_GOOD_QUALITY_PERCENT_DIFFERENCE = 20;
 var VIDEO_RATE_BAD_QUALITY_PERCENT_DIFFERENCE = 50;
 var LOW_VIDEO_RATE_THRESHOLD_BAD_PERFECT = 50000;
@@ -735,6 +736,9 @@ var createSession = function (options) {
         var mediaConnection;
         var localDisplay = options.localVideoDisplay;
         var remoteDisplay = options.remoteVideoDisplay;
+
+        var info_;
+        var errorInfo_;
         // Constraints
         if (options.constraints) {
             var constraints = options.constraints;
@@ -884,6 +888,8 @@ var createSession = function (options) {
             }).catch(function (error) {
                 logger.error(LOG_PREFIX, error);
                 status_ = CALL_STATUS.FAILED;
+                info_ = ERROR_INFO.LOCAL_ERROR;
+                errorInfo_ = error.message;
                 callRefreshHandlers[id_]({status: CALL_STATUS.FAILED});
                 hangup();
             });
@@ -1022,6 +1028,8 @@ var createSession = function (options) {
                 });
             }).catch(function (error) {
                 logger.error(LOG_PREFIX, error);
+                info_ = ERROR_INFO.LOCAL_ERROR;
+                errorInfo_ = error.message;
                 status_ = CALL_STATUS.FAILED;
                 callRefreshHandlers[id_]({status: CALL_STATUS.FAILED});
             });
@@ -1359,11 +1367,33 @@ var createSession = function (options) {
             mediaConnection.switchToCam();
         };
 
+        /**
+         * Get call info
+         * @returns {string} Info
+         * @memberof Stream
+         * @inner
+         */
+        var getInfo = function () {
+            return info_;
+        };
+
+        /**
+         * Get stream error info
+         * @returns {string} Error info
+         * @memberof Stream
+         * @inner
+         */
+        var getErrorInfo = function () {
+            return errorInfo_;
+        };
+
 
         call.call = call_;
         call.answer = answer;
         call.hangup = hangup;
         call.id = id;
+        call.getInfo = getInfo;
+        call.getErrorInfo = getErrorInfo;
         call.status = status;
         call.getStats = getStats;
         call.setAudioOutputId = setAudioOutputId;
@@ -1523,6 +1553,7 @@ var createSession = function (options) {
         var status_ = STREAM_STATUS.NEW;
         var rtmpUrl = options.rtmpUrl;
         var info_;
+        var errorInfo_;
         var remoteBitrate = -1;
         var networkBandwidth = -1;
         var sdpHook = options.sdpHook;
@@ -1808,7 +1839,8 @@ var createSession = function (options) {
                 });
             }).catch(function (error) {
                 logger.warn(LOG_PREFIX, error);
-                stream.info = error.message;
+                info_ = ERROR_INFO.LOCAL_ERROR;
+                errorInfo_ = error.message;
                 status_ = STREAM_STATUS.FAILED;
                 //fire stream event
                 if (callbacks[status_]) {
@@ -2060,6 +2092,16 @@ var createSession = function (options) {
         };
 
         /**
+         * Get stream error info
+         * @returns {string} Error info
+         * @memberof Stream
+         * @inner
+         */
+        var getErrorInfo = function () {
+            return errorInfo_;
+        };
+
+        /**
          * Get stream video size
          * @returns {Object} Video size
          * @memberof Stream
@@ -2303,6 +2345,7 @@ var createSession = function (options) {
         stream.published = published;
         stream.getRecordInfo = getRecordInfo;
         stream.getInfo = getInfo;
+        stream.getErrorInfo = getErrorInfo;
         stream.videoResolution = videoResolution;
         stream.setAudioOutputId = setAudioOutputId;
         stream.setVolume = setVolume;

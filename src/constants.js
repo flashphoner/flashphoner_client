@@ -666,6 +666,13 @@ define(errorInfo, 'CAN_NOT_SWITCH_CAM', 'Number of cams is less than 2 or alread
  */
 define(errorInfo, 'CAN_NOT_SWITCH_MIC', 'Number of mics is less than 2 or already used custom stream');
 
+/**
+ * Error if recived local error
+ * @event CAN_NOT_SWITCH_MIC
+ * @memberOf Flashphoner.constants.ERROR_INFO
+ */
+define(errorInfo, 'LOCAL_ERROR', 'Local error');
+
 var mediaDeviceKind = {};
 
 define(mediaDeviceKind, 'OUTPUT', 'output');

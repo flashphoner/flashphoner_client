@@ -1,6 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var STREAM_STATUS_INFO = Flashphoner.constants.STREAM_STATUS_INFO;
+var ERROR_INFO = Flashphoner.constants.ERROR_INFO;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var localVideo;
 var remoteVideo;
@@ -161,8 +162,8 @@ function publishStream() {
     }).on(STREAM_STATUS.UNPUBLISHED, function () {
         setStatus("#publishStatus", STREAM_STATUS.UNPUBLISHED);
         onUnpublished();
-    }).on(STREAM_STATUS.FAILED, function () {
-        setStatus("#publishStatus", STREAM_STATUS.FAILED);
+    }).on(STREAM_STATUS.FAILED, function (stream) {
+        setStatus("#publishStatus", STREAM_STATUS.FAILED, stream);
         onUnpublished();
     }).publish();
 }
@@ -221,6 +222,9 @@ function setStatus(selector, status, stream) {
                 switch(stream.getInfo()){
                     case STREAM_STATUS_INFO.STREAM_NAME_ALREADY_IN_USE:
                         $("#publishInfo").text("Server already has a publish stream with the same name, try using different one").attr("class", "text-muted");
+                        break;
+                    case ERROR_INFO.LOCAL_ERROR:
+                        $("#publishInfo").text("Browser error detected: " + stream.getErrorInfo()).attr("class", "text-muted");
                         break;
                     default:
                         $("#publishInfo").text("Other: "+stream.getInfo()).attr("class", "text-muted");
