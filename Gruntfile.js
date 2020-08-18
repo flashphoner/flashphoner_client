@@ -129,7 +129,7 @@ module.exports = function(grunt) {
                 dest: './flashphoner-temasys-flash-websocket.js'
             }
         },
-        uglify: {
+        terser: {
           options: {
               compress: {
                   typeofs: false
@@ -224,14 +224,14 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-string-replace');
     grunt.loadNpmTasks('grunt-contrib-clean');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-terser');
     grunt.registerTask('build', [
         'clean:build',
         'string-replace:version',
         'flash:release_media_provider',
         'browserify',
         'concat',
-        'uglify',
+        'terser',
         'flash:release_examples_streaming',
         'flash:release_examples_chat',
         'jsdoc'
