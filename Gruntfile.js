@@ -18,7 +18,7 @@ module.exports = function(grunt) {
         },
         flash: {
             options: {
-                sdk: env.FLEX_HOME,
+                sdk: process.env.FLEX_HOME,
                 flashVersion: '11.1'
             },
             debug : {
@@ -225,21 +225,31 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-string-replace');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-terser');
+    grunt.registerTask('minify', [
+        'terser'
+    ]);
     grunt.registerTask('build', [
         'clean:build',
         'string-replace:version',
         'flash:release_media_provider',
         'browserify',
         'concat',
-        'terser',
+        'minify',
         'flash:release_examples_streaming',
         'flash:release_examples_chat',
         'jsdoc'
-
     ]);
     grunt.registerTask('release', [
         'clean:release',
         'build',
         'copy'
+    ]);
+    grunt.registerTask('webrtc', [
+        'clean:build',
+        'string-replace:version',
+        'browserify:flashphonerGlobalObjectWebRTCOnly',
+        'browserify:flashphonerGlobalObjectRestApi',
+        'minify',
+        'jsdoc'
     ]);
 };
