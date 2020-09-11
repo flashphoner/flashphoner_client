@@ -432,9 +432,15 @@ function pullStreamBatch() {
         return false;
     }
     var node = getActiveNode();
-    var remote = "ws://"+$("#pullStreamBatchNodes").val()+":8080/";
+    var proto = $("#pullStreamBatchProto").val();
     var localName = $("#pullBatchLocalName").val();
     var remoteName = $("#pullBatchRemoteName").val();
+    var remote;
+    if (proto == "ws") {
+        remote = "ws://" + $("#pullStreamBatchNodes").val() + ":8080/";
+    } else {
+        remote = "rtmp://" + $("#pullStreamBatchNodes").val() + ":1935/live/" + remoteName;
+    }
     var qty = parseInt($("#pullBatchQty").val());
     var interval = setInterval(function(){
         if (qty > 0) {
