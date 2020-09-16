@@ -132,7 +132,7 @@ var createConnection = function (options) {
                 remoteVideo.onloadedmetadata = function (e) {
                     if (remoteVideo) {
                         remoteVideo.play().catch(function (e) {
-                            if (browserDetails.browser == 'chrome' || browserDetails.browser == 'safari') {
+                            if (validBrowsers.includes(browserDetails.browser)) {
                                 //WCS-1698. fixed autoplay in chromium based browsers
                                 //WCS-2375. fixed autoplay in ios safari
                                 logger.info(LOG_PREFIX, "Autoplay detected! Trying to play a video with a muted sound...");

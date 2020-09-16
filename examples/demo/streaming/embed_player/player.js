@@ -149,7 +149,8 @@ function playStream(session) {
                 $("#preloader").hide();
                 if (autoplay && stream.isRemoteAudioMuted()) {
                     //WCS-1698. if autoplay = true, then set the volume slider to 0. When you first click on the slider or icon, sound turn on. https://goo.gl/7K7WLu
-                    $('.volume').click();
+                    //WCS-2870. The code below was commented out because it break autoplay in latest iOS and macOS Safari
+                    //$('.volume').click();
                     $('.volume').bind('click', volumeEvent);
                     $('.volume-range-block').bind('mousedown', volumeEvent);
                 }
