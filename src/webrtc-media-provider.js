@@ -146,13 +146,16 @@ var createConnection = function (options) {
                 };
             }
 
-            //WCS-2771 add playback delay
-            connection.getReceivers().forEach((track) => {
-                if (track.playoutDelayHint === undefined) {
-                    logger.warn("playout delay unsupported");
-                }
-                track.playoutDelayHint = playoutDelay;
-            });
+            //WCS-2904 check playoutDelay to prevent TypeError in some browsers
+            if (playoutDelay !== undefined) {
+                //WCS-2771 add playback delay
+                connection.getReceivers().forEach((track) => {
+                    if (track.playoutDelayHint === undefined) {
+                        logger.warn("playout delay unsupported");
+                    }
+                    track.playoutDelayHint = playoutDelay;
+                });
+            }
         };
         connection.onremovestream = function (event) {
             if (remoteVideo) {
