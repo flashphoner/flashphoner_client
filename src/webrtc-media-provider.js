@@ -15,6 +15,10 @@ var createMicGainNode;
 var microphoneGain;
 var constants = require('./constants');
 var validBrowsers = ["firefox", "chrome", "safari"];
+// list of presented video input devices
+var videoCams = [];
+// list of presented audio input devices
+var mics = [];
 
 var createConnection = function (options) {
     return new Promise(function (resolve, reject) {
@@ -37,9 +41,7 @@ var createConnection = function (options) {
         var localVideo;
         //tweak for custom video players #WCS-1511
         var remoteVideo = options.remoteVideo;
-        var videoCams = [];
         var switchCamCount = 0;
-        var mics = [];
         var switchMicCount = 0;
         var customStream = options.customStream;
         var currentAudioTrack;
@@ -105,24 +107,18 @@ var createConnection = function (options) {
         if (localVideo) {
             var videoTrack = localVideo.srcObject.getVideoTracks()[0];
             if (videoTrack) {
-                listDevices(false).then(function (devices) {
-                    devices.video.forEach(function (device) {
-                        if (videoTrack.label === device.label) {
-                            switchCamCount = videoCams.length;
-                        }
-                        videoCams.push(device.id);
-                    })
+                videoCams.forEach((cam) => {
+                   if (videoTrack.label === cam.label) {
+                       switchCamCount = videoCams.length;
+                   }
                 });
             }
             var audioTrack = localVideo.srcObject.getAudioTracks()[0];
             if (audioTrack) {
-                listDevices(false).then(function (devices) {
-                    devices.audio.forEach(function (device) {
-                        if (audioTrack.label === device.label) {
-                            switchMicCount = mics.length;
-                        }
-                        mics.push(device.id);
-                    })
+                mics.forEach((mic) => {
+                    if (audioTrack.label === mic.label) {
+                        switchMicCount = mics.length;
+                    }
                 });
             }
         }
@@ -809,8 +805,17 @@ var getMediaAccess = function (constraints, display, disableConstraintsNormaliza
                     loadVideo(display, constraints.customStream, screenShare, requestAudioConstraints, resolve, constraints);
                 }
             } else {
-                navigator.getUserMedia(constraints, function (stream) {
-                    loadVideo(display, stream, screenShare, requestAudioConstraints, resolve, constraints);
+                // WCS-2933, fix mobile streaming issues, gather info about available devices before streaming, but not during
+                listDevices(false).then((devices) => {
+                    devices.video.forEach(function (device) {
+                        videoCams.push(device.id);
+                    })
+                    devices.audio.forEach(function (device) {
+                        mics.push(device.id);
+                    })
+                    navigator.getUserMedia(constraints, function (stream) {
+                        loadVideo(display, stream, screenShare, requestAudioConstraints, resolve, constraints);
+                    }, reject);
                 }, reject);
             }
         }
