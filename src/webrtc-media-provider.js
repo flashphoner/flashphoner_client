@@ -221,6 +221,10 @@ var createConnection = function (options) {
 
                 //create offer and set local sdp
                 connection.createOffer(constraints).then(function (offer) {
+                    //WCS-2919 Workaround for Chromium bug to play stereo
+                    if (options.stereo) {
+                        offer.sdp = offer.sdp.replace('minptime=10', 'minptime=10;stereo=1;sprop-stereo=1');
+                    }
                     connection.setLocalDescription(offer).then(function () {
                         var o = {};
                         o.sdp = util.stripCodecs(offer.sdp, options.stripCodecs);

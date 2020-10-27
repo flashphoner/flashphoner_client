@@ -1733,7 +1733,8 @@ var createSession = function (options) {
                 return mediaConnection.createOffer({
                     receiveAudio: receiveAudio,
                     receiveVideo: receiveVideo,
-                    stripCodecs: stripCodecs
+                    stripCodecs: stripCodecs,
+                    stereo: _stereo
                 });
             }).then(function (offer) {
                 logger.debug(LOG_PREFIX, "Offer SDP:\n" + offer.sdp);

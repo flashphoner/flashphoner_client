@@ -41,7 +41,7 @@ function init_page() {
                 //hide remote video if current media provider is Flash
                 if (mediaProviders[0] == "Flash") {
                     $("#fecForm").hide();
-                    $("#stereoForm").hide();
+                    $("#sendStereoForm").hide();
                     $("#sendAudioBitrateForm").hide();
                     $("#cpuOveruseDetectionForm").hide();
                 }
@@ -311,6 +311,10 @@ function play() {
     if (constraints.audio) {
         constraints.audio = {
             outputId: $('#audioOutput').val()
+        }
+        if ($("#playStereoAudio").is(':checked'))
+        {
+            constraints.audio.stereo = $("#playStereoAudio").is(':checked');
         }
     }
     if (constraints.video) {
