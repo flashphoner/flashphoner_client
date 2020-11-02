@@ -44,6 +44,13 @@ function init_page() {
                 }
             });
         }, 500);
+    } else if(isSafariMacOS()) {
+        $("#extension").hide();
+        $('#mediaSourceForm').hide();
+        $('#micInput').hide();
+        $('#mic').hide();
+        clearInterval(interval);
+        onExtensionAvailable();
     } else {
         $("#notify").modal('show');
         return false;
@@ -74,11 +81,15 @@ function init_page() {
     }
 }
 
+function isSafariMacOS() {
+    return Browser.isSafari() && !Browser.isAndroid() && !Browser.isiOS();
+}
+
 function onExtensionAvailable() {
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
     $("#url").val(setURL() + "/" + createUUID(8));
-    onStopped();
+    onDisconnected();
 }
 
 function onStarted(publishStream, previewStream) {
@@ -86,29 +97,61 @@ function onStarted(publishStream, previewStream) {
         $(this).prop('disabled', true);
         previewStream.stop();
     }).prop('disabled', false);
+    $("#connectBtn").prop('disabled', false);
     $('#mediaSource').prop('disabled', true);
 }
 
-function onStopped() {
+function onStopped(session) {
     $("#publishBtn").text("Start").off('click').click(function(){
         if (validateForm()) {
             muteInputs();
             $(this).prop('disabled', true);
-            start();
+            startStreaming(session);
+        }
+    }).prop('disabled', false);
+    $("#connectBtn").prop('disabled', false);
+    $('#mediaSource').prop('disabled', false);
+}
+
+function onConnected(session) {
+    $("#publishBtn").text("Start").off('click').click(function(){
+        if (validateForm()) {
+            muteInputs();
+            $(this).prop('disabled', true);
+            startStreaming(session);
+        }
+    }).prop('disabled', false);
+    $("#connectBtn").text("Disconnect").off('click').click(function(){
+        if (validateForm()) {
+            muteInputs();
+            $(this).prop('disabled', true);
+            session.disconnect();
+        }
+    }).prop('disabled', false);
+
+    $('#mediaSource').prop('disabled', false);
+}
+
+function onDisconnected() {
+    unmuteInputs();
+    $("#publishBtn").prop('disabled', true);
+    $("#connectBtn").text("Connect").off('click').click(function(){
+        if (validateForm()) {
+            muteInputs();
+            $(this).prop('disabled', true);
+            connect();
         }
     }).prop('disabled', false);
     $('#mediaSource').prop('disabled', false);
-    unmuteInputs();
 }
 
-function start() {
+function connect() {
     //check if we already have session
     var url = $('#url').val();
     //check if we already have session
     if (Flashphoner.getSessions().length > 0) {
         var session = Flashphoner.getSessions()[0];
         if (session.getServerUrl() == url) {
-            startStreaming(session);
             return;
         } else {
             //remove session DISCONNECTED and FAILED callbacks
@@ -121,13 +164,14 @@ function start() {
     console.log("Create new session with url " + url);
     Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function(session){
         //session connected, start streaming
-        startStreaming(session);
+        setStatus(SESSION_STATUS.ESTABLISHED);
+        onConnected(session);
     }).on(SESSION_STATUS.DISCONNECTED, function(){
         setStatus(SESSION_STATUS.DISCONNECTED);
-        onStopped();
+        onDisconnected();
     }).on(SESSION_STATUS.FAILED, function(){
         setStatus(SESSION_STATUS.FAILED);
-        onStopped();
+        onDisconnected();
     });
 
 }
@@ -148,17 +192,22 @@ function startStreaming(session) {
         };
     }
     constraints.video.type = "screen";
-    if ($("#woChromeExtension").prop('checked')) {
+    if ($("#woChromeExtension").prop('checked') || Browser.isSafari()) {
         constraints.video.withoutExtension = true;
     }
     if (Browser.isFirefox()){
         constraints.video.mediaSource = $('#mediaSource').val();
     }
-    session.createStream({
+    var options = {
         name: streamName,
         display: localVideo,
         constraints: constraints
-    }).on(STREAM_STATUS.PUBLISHING, function(publishStream){
+    }
+    if (isSafariMacOS()) {
+        options.disableConstraintsNormalization = true;
+    }
+    session.createStream(options
+        ).on(STREAM_STATUS.PUBLISHING, function(publishStream){
         /*
          * User can stop sharing screen capture using Chrome "stop" button.
          * Catch onended video track event and stop publishing.
@@ -192,11 +241,11 @@ function startStreaming(session) {
     }).on(STREAM_STATUS.UNPUBLISHED, function(){
         setStatus(STREAM_STATUS.UNPUBLISHED);
         //enable start button
-        onStopped();
+        onStopped(session);
     }).on(STREAM_STATUS.FAILED, function(stream){
         setStatus(STREAM_STATUS.FAILED, stream);
         //enable start button
-        onStopped();
+        onStopped(session);
     }).publish();
 }
 
@@ -205,7 +254,7 @@ function setStatus(status, stream) {
     var statusField = $("#status");
     var infoField = $("#info");
     statusField.text(status).removeClass();
-    if (status == "PUBLISHING") {
+    if (status == "PUBLISHING" || status == "ESTABLISHED") {
         statusField.attr("class","text-success");
     } else if (status == "DISCONNECTED" || status == "UNPUBLISHED") {
         statusField.attr("class","text-muted");

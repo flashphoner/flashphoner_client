@@ -737,7 +737,8 @@ var getMediaAccess = function (constraints, display, disableConstraintsNormaliza
         //check if this is screen sharing
         if (constraints.video && constraints.video.type && constraints.video.type == "screen") {
             delete constraints.video.type;
-            if (window.chrome && constraints.video.withoutExtension) {
+            //WCS-2751 Add screen capture using getDisplayMedia in Safari
+            if (screenCaptureSupportedBrowsers() && constraints.video.withoutExtension) {
                 getScreenDeviceIdWoExtension(constraints).then(function (screenSharingConstraints) {
                     getScreenAccessWoExtension(screenSharingConstraints, constraints.audio);
                 });
@@ -842,7 +843,8 @@ var loadVideo = function (display, stream, screenShare, requestAudioConstraints,
     //mute audio
     video.muted = true;
     video.onloadedmetadata = function (e) {
-        if (screenShare && !window.chrome) {
+        //WCS-2751 Add screen capture using getDisplayMedia in Safari
+        if (screenShare && !screenCaptureSupportedBrowsers()) {
             setScreenResolution(video, stream, constraints);
         }
         video.play();
@@ -968,11 +970,24 @@ var setScreenResolution = function (video, stream, constraints) {
 //for chrome
 var getScreenDeviceIdWoExtension = function (constraints) {
     return new Promise(function (resolve, reject) {
-        //WCS-1952. exact constraints are not supported.
+        //WCS-2751. exact constraints are supported.
         //WCS-1986. added audio: true to constraints.
+        var video = {};
+        if (constraints.video.frameRate.ideal) {
+          video.frameRate = constraints.video.frameRate.ideal;
+        }
+        if (constraints.video.width) {
+          video.width = constraints.video.width;
+        }
+        if (constraints.video.height) {
+          video.height = constraints.video.height;
+        }
+        if (Object.keys(video).length === 0) {
+          video = true;
+        }
         resolve({
-            video: true,
-            audio: true
+          video: video,
+          audio: true
         });
     });
 };
@@ -1267,6 +1282,10 @@ var playFirstVideo = function (display, isLocal, src) {
         }
         resolve();
     });
+};
+
+var screenCaptureSupportedBrowsers = function () {
+    return (Browser.isChrome() || Browser.isSafari());
 };
 
 module.exports = {
