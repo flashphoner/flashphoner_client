@@ -134,6 +134,7 @@ var createConnection = function (options) {
                             if(adapter.browserDetails.browser == 'chrome' && audioContext.state == 'suspended') {
                                 //WCS-1698. fix autoplay in chrome 71
                                 logger.info(LOG_PREFIX, "Autoplay detected! Trying to play a video with a muted sound...");
+                                if (browserDetails.browser == 'safari') remoteVideo.playsInline = true;
                                 remoteVideo.muted = true;
                                 remoteVideo.play();
                             } else {
@@ -1116,6 +1117,7 @@ var playFirstVideo = function (display, isLocal, src) {
         var video = document.createElement('video');
         video.setAttribute("playsinline", "");
         video.setAttribute("webkit-playsinline", "");
+        video.setAttribute("playsInline", "");
         display.appendChild(video);
         video.id = uuid_v1() + (isLocal ? LOCAL_CACHED_VIDEO : REMOTE_CACHED_VIDEO);
         /**
