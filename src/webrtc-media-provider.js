@@ -132,6 +132,7 @@ var createConnection = function (options) {
                                 //WCS-1698. fixed autoplay in chromium based browsers
                                 //WCS-2375. fixed autoplay in ios safari
                                 logger.info(LOG_PREFIX, "Autoplay detected! Trying to play a video with a muted sound...");
+                                if (browserDetails.browser == 'safari') remoteVideo.playsInline = true;
                                 remoteVideo.muted = true;
                                 remoteVideo.play();
                             } else {
@@ -1255,6 +1256,7 @@ var playFirstVideo = function (display, isLocal, src) {
             var video = document.createElement('video');
             video.setAttribute("playsinline", "");
             video.setAttribute("webkit-playsinline", "");
+            video.setAttribute("playsInline", "");
             video.id = uuid_v1() + (isLocal ? LOCAL_CACHED_VIDEO : REMOTE_CACHED_VIDEO);
 
             //in WCS-1560 we removed video.play() call, because it triggers the “Unhandled Promise Rejection” exception in iOS Safari
