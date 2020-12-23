@@ -303,13 +303,14 @@ var getMediaAccess = function (constraints, display, mediaProvider, disableConst
 };
 
 //default constraints helper
+//WCS-3016 16:9 ratio
 var getDefaultMediaConstraints = function () {
     if (browserDetails.browser == "safari") {
         return {
             audio: true,
             video: {
                 width: {min: 320, max: 640},
-                height: {min: 240, max: 480}
+                height: {min: 180, max: 360}
             }
         };
     }

@@ -1195,8 +1195,9 @@ function normalizeConstraints(constraints) {
             var height = constraints.video.height;
             if (browserDetails.browser == "safari") {
                 if (!width || !height) {
+                    //WCS-3016 16:9 ratio
                     constraints.video.width = {min: 320, max: 640};
-                    constraints.video.height = {min: 240, max: 480};
+                    constraints.video.height = {min: 180, max: 360};
                 } else if (typeof width !== 'object' || typeof height !== 'object') {
                     constraints.video.width = {min: width, max: width};
                     constraints.video.height = {min: height, max: height};
