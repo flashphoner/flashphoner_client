@@ -88,7 +88,7 @@ function createSession(authToken) {
         connectionOptions = {
             urlServer: url,
             sipOptions: sipOptions,
-            keepAlive: true
+            keepAlive: false
         };
     }
 
