@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="stream_filter.css">
+    <title>Stream Filter</title>
+    <script type="text/javascript" src="../../../../flashphoner.js"></script>
+    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
+    <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
+
+    <script type="text/javascript" src="stream_filter.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
+</head>
+<body onload="init_page()">
+<div class="container">
+    <div class="row">
+
+        <h2 id="notifyFlash" class="text-danger"></h2>
+
+        <div class="col-sm-9 text-center">
+
+            <h2 class="text-center">Stream Filter</h2>
+
+            <div class="col-sm-6">
+                <div class="text-center text-muted">Local</div>
+                <div class="fp-Video">
+                    <div id="localVideo" class="display"></div>
+                </div>
+
+                <div id="streamerForm" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                    <input class="form-control" type="text" id="publishStream" placeholder="Stream Name">
+                    <div class="input-group-btn">
+                        <button id="publishBtn" type="button" class="btn btn-default">Publish</button>
+                    </div>
+                </div>
+                <div class="text-center" style="margin-top: 20px">
+                    <div id="publishStatus"></div>
+                    <div id="publishInfo"></div>
+                </div>
+                <div class="form-group col-sm-10 col-sm-offset-1">
+                    <label for="filter">Filter</label>
+                    <select class="form-control" id="filter" onchange="applyFilter()">
+                        <option value="0">None</option>
+                        <option value="1">Sepia</option>
+                        <option value="2">Threshold</option>
+                        <option value="3">Invert</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="text-center text-muted">Player</div>
+                <div class="fp-Video">
+                    <div id="remoteVideo" class="display"></div>
+                </div>
+                <div id="playerForm" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                    <input class="form-control" type="text" id="playStream" placeholder="Stream Name"> 
+                    <div class="input-group-btn">
+                        <button id="playBtn" type="button" class="btn btn-default">Play</button>
+                        <button id="availableBtn" type="button" class="btn btn-default">Available</button>
+                    </div>
+                    <div id="availableStatus" style="width: 60px; line-height: normal;"></div>
+                </div> 
+                <div class="text-center" style="margin-top: 20px">
+                    <div id="playStatus"></div>
+                    <div id="playInfo"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row row-space">
+        <div class="col-sm-5 col-sm-offset-2">
+            <div id="connectionForm" class="input-group">
+                <input class="form-control" id="urlServer" type="text">
+                <div class="input-group-btn">
+                    <button id="connectBtn" type="button" class="btn btn-default">Connect</button>
+                </div>
+            </div>
+            <div class="text-center">
+                <div id="connectStatus"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

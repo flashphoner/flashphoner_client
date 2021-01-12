@@ -709,7 +709,7 @@ var mixAudioTracks = function (stream1, stream2) {
     return newStream.getAudioTracks()[0];
 };
 
-var getMediaAccess = function (constraints, display, disableConstraintsNormalization) {
+var getMediaAccess = function (constraints, display, disableConstraintsNormalization, useCanvas) {
     return new Promise(function (resolve, reject) {
 
         if (!constraints) {
@@ -819,7 +819,7 @@ var getMediaAccess = function (constraints, display, disableConstraintsNormaliza
                         mics.push(device.id);
                     })
                     navigator.getUserMedia(constraints, function (stream) {
-                        loadVideo(display, stream, screenShare, requestAudioConstraints, resolve, constraints);
+                        loadVideo(display, stream, screenShare, requestAudioConstraints, resolve, constraints, useCanvas);
                     }, reject);
                 }, reject);
             }
@@ -827,28 +827,134 @@ var getMediaAccess = function (constraints, display, disableConstraintsNormaliza
     });
 };
 
-var loadVideo = function (display, stream, screenShare, requestAudioConstraints, resolve, constraints) {
-    var video = getCacheInstance(display);
-    if (!video) {
-        video = document.createElement('video');
-        display.appendChild(video);
+var loadOrdinaryVideo = function(display, stream, screenShare, constraints, video) {
+    let vEl = video;
+    if (!vEl) {
+        vEl = document.createElement('video');
+        display.appendChild(vEl);
     }
+    vEl.id = uuid_v1() + LOCAL_CACHED_VIDEO;
+    vEl.srcObject = stream;
+    //mute audio
+    vEl.muted = true;
+    vEl.onloadedmetadata = function (e) {
+        //WCS-2751 Add screen capture using getDisplayMedia in Safari
+        if (screenShare && !screenCaptureSupportedBrowsers()) {
+            setScreenResolution(vEl, stream, constraints);
+        }
+        vEl.play();
+    };
+
+    return vEl;
+}
+
+var loadCanvasVideo = function (display, stream, video) {
+    let vEl = video;
+    if (!vEl) {
+        createCanvasEl(display);
+        createVideoEl(display.children[0]);
+        vEl = display.children[0];
+    } else {
+        // replace local video with canvas, set source video element as child for canvas
+        if (vEl.tagName !== 'CANVAS') {
+            let canvas = document.createElement('canvas');
+            display.replaceChild(canvas, vEl);
+            canvas.appendChild(vEl);
+            vEl = canvas;
+        }
+    }
+    vEl.id = uuid_v1() + LOCAL_CACHED_VIDEO;
+
+    let child = vEl.children[0];
+    child.srcObject = stream;
+    //mute audio
+    child.muted = true;
+    child.onloadedmetadata = function (e) {
+        child.play();
+        vEl.width = child.videoWidth;
+        vEl.height = child.videoHeight;
+        // Resize canvas to save aspect ratio
+        resizeCanvas(vEl, child.videoWidth, child.videoHeight);
+    };
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1572422
+    if (Browser.isFirefox()) {
+        vEl.getContext('2d');
+    }
+    vEl.srcObject = vEl.captureStream(30);
+    if (stream.getAudioTracks().length > 0) {
+        vEl.srcObject.addTrack(stream.getAudioTracks()[0]);
+    }
+
+    function createCanvasEl(parent) {
+        let canvas = document.createElement('canvas');
+        parent.appendChild(canvas);
+    }
+
+    function createVideoEl(parent) {
+        let video = document.createElement('video');
+        parent.appendChild(video);
+    }
+
+    function resizeCanvas(canvas, videoWidth, videoHeight) {
+        if (!canvas.parentNode) {
+            return;
+        }
+        let display = vEl.parentNode;
+        let parentSize = {
+            w: display.parentNode.clientWidth,
+            h: display.parentNode.clientHeight
+        };
+        let newSize;
+        if (videoWidth && videoHeight) {
+            newSize = downScaleToFitSize(videoWidth, videoHeight, parentSize.w, parentSize.h);
+        } else {
+            newSize = downScaleToFitSize(canvas.videoWidth, canvas.videoHeight, parentSize.w, parentSize.h);
+        }
+        display.style.width = newSize.w + "px";
+        display.style.height = newSize.h + "px";
+
+        //vertical align
+        let margin = 0;
+        if (parentSize.h - newSize.h > 1) {
+            margin = Math.floor((parentSize.h - newSize.h) / 2);
+        }
+        display.style.margin = margin + "px auto";
+
+        function downScaleToFitSize(videoWidth, videoHeight, dstWidth, dstHeight) {
+            let newWidth, newHeight;
+            let videoRatio = videoWidth / videoHeight;
+            let dstRatio = dstWidth / dstHeight;
+            if (dstRatio > videoRatio) {
+                newHeight = dstHeight;
+                newWidth = Math.floor(videoRatio * dstHeight);
+            } else {
+                newWidth = dstWidth;
+                newHeight = Math.floor(dstWidth / videoRatio);
+            }
+            return {
+                w: newWidth,
+                h: newHeight
+            };
+        }
+    }
+
+    return vEl;
+}
+
+var loadVideo = function (display, stream, screenShare, requestAudioConstraints, resolve, constraints, useCanvas) {
+    let video;
+    if (useCanvas) {
+        video = loadCanvasVideo(display, stream, getCacheInstance(display));
+    } else {
+        video = loadOrdinaryVideo(display, stream, screenShare, constraints, getCacheInstance(display));
+    }
+
     if (createMicGainNode && stream.getAudioTracks().length > 0 && browserDetails.browser == "chrome") {
         //WCS-1696. We need to start audioContext to work with gain control
         audioContext.resume();
         microphoneGain = createGainNode(stream);
     }
-    video.id = uuid_v1() + LOCAL_CACHED_VIDEO;
-    video.srcObject = stream;
-    //mute audio
-    video.muted = true;
-    video.onloadedmetadata = function (e) {
-        //WCS-2751 Add screen capture using getDisplayMedia in Safari
-        if (screenShare && !screenCaptureSupportedBrowsers()) {
-            setScreenResolution(video, stream, constraints);
-        }
-        video.play();
-    };
+
     if (constraints.systemSound && browserDetails.browser == "chrome") {
         addSystemSound();
     } else {
@@ -1077,6 +1183,11 @@ function removeVideoElement(video) {
             }
         }
         video.srcObject = null;
+        if (video.tagName === 'CANVAS') {
+            for (let i = 0; i < video.children.length; i++) {
+                removeVideoElement(video.children[i]);
+            }
+        }
     }
 }
 

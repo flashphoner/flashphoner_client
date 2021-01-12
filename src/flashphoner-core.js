@@ -1463,6 +1463,7 @@ var createSession = function (options) {
      * @param {string=} options.transport Transport to be used by server for WebRTC media, {@link Flashphoner.constants.TRANSPORT_TYPE}
      * @param {Boolean=} options.cvoExtension Enable rtp video orientation extension
      * @param {Integer=} options.playoutDelay Time delay between network reception of media and playout
+     * @param {string=} options.useCanvasMediaStream EXPERIMENTAL: when publish bind browser's media stream to the canvas. It can be useful for image filtering
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
@@ -1564,6 +1565,7 @@ var createSession = function (options) {
         //callbacks added using stream.on()
         var callbacks = {};
         var playoutDelay = options.playoutDelay;
+        var useCanvasMediaStream = options.useCanvasMediaStream;
 
         var connectionQuality;
 
@@ -1791,7 +1793,7 @@ var createSession = function (options) {
             }
 
             //get access to camera
-            MediaProvider[mediaProvider].getMediaAccess(constraints, display, disableConstraintsNormalization).then(function () {
+            MediaProvider[mediaProvider].getMediaAccess(constraints, display, disableConstraintsNormalization, useCanvasMediaStream).then(function () {
                 if (status_ == STREAM_STATUS.FAILED) {
                     //stream failed while we were waiting for media access, release media
                     if (!cacheLocalResources) {

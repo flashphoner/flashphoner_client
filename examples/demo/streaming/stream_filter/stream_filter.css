@@ -1,0 +1,23 @@
+.fp-Video {
+    border: 1px double black;
+    width: 322px;
+    height: 242px;
+    text-align: center;
+    background: #c0c0c0;
+    margin: 0 auto 0 auto;
+}
+
+.display {
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+}
+
+.display > video, object, canvas {
+    width: 100%;
+    height: 100%;
+}
+
+video:-webkit-full-screen {
+    border-radius: 1px;
+}
