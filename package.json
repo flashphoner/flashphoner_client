@@ -1,8 +1,8 @@
 {
-  "name": "flashphoner-api",
-  "version": "0.5.28",
+  "name": "@flashphoner/websdk",
+  "version": "2.0",
+  "description": "Official Flashphoner WebCallServer WebSDK package",
   "main": "./src/flashphoner-core.js",
-  "description": "Flashphoner Web Call Server API",
   "dependencies": {
     "adapterjs": "0.14.3",
     "es6-promise": "4.0.5",
@@ -28,5 +28,12 @@
     "grunt-string-replace": "^1.3.0",
     "grunt-terser": "^1.0.0",
     "mocha": "^2.5.3"
-  }
+  },
+  "keywords": [
+    "Flashphoner",
+    "WebCallServer",
+    "WebSDK"
+  ],
+  "author": "Flashphoner",
+  "license": "MIT"
 }
