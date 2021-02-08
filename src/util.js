@@ -139,6 +139,9 @@ module.exports = {
         },
         isSafariWebRTC: function () {
             return navigator.mediaDevices && Browser.isSafari();
+        },
+        isSamsungBrowser: function() {
+            return /SamsungBrowser/i.test(navigator.userAgent);
         }
     },
     SDP: {
