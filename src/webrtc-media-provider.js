@@ -107,17 +107,17 @@ var createConnection = function (options) {
         if (localVideo) {
             var videoTrack = localVideo.srcObject.getVideoTracks()[0];
             if (videoTrack) {
-                videoCams.forEach((cam) => {
+                videoCams.forEach((cam, index) => {
                    if (videoTrack.label === cam.label) {
-                       switchCamCount = videoCams.length;
+                       switchCamCount = index;
                    }
                 });
             }
             var audioTrack = localVideo.srcObject.getAudioTracks()[0];
             if (audioTrack) {
-                mics.forEach((mic) => {
+                mics.forEach((mic, index) => {
                     if (audioTrack.label === mic.label) {
-                        switchMicCount = mics.length;
+                        switchMicCount = index;
                     }
                 });
             }
@@ -481,7 +481,7 @@ var createConnection = function (options) {
                         if (sender.track.kind === 'audio') return;
                         switchCamCount = (switchCamCount + 1) % videoCams.length;
                         sender.track.stop();
-                        var cam = (typeof deviceId !== "undefined") ? deviceId : videoCams[switchCamCount];
+                        var cam = (typeof deviceId !== "undefined") ? deviceId : videoCams[switchCamCount].id;
                         //use the settings that were set during connection initiation
                         var clonedConstraints = Object.assign({}, constraints);
                         clonedConstraints.video.deviceId = {exact: cam};
@@ -520,7 +520,7 @@ var createConnection = function (options) {
                         if (microphoneGain) {
                             microphoneGain.release();
                         }
-                        var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount];
+                        var mic = (typeof deviceId !== "undefined") ? deviceId : mics[switchMicCount].id;
                         //use the settings that were set during connection initiation
                         var clonedConstraints = Object.assign({}, constraints);
                         clonedConstraints.audio.deviceId = {exact: mic};
@@ -813,10 +813,10 @@ var getMediaAccess = function (constraints, display, disableConstraintsNormaliza
                 // WCS-2933, fix mobile streaming issues, gather info about available devices before streaming, but not during
                 listDevices(false).then((devices) => {
                     devices.video.forEach(function (device) {
-                        videoCams.push(device.id);
+                        videoCams.push(device);
                     })
                     devices.audio.forEach(function (device) {
-                        mics.push(device.id);
+                        mics.push(device);
                     })
                     navigator.getUserMedia(constraints, function (stream) {
                         loadVideo(display, stream, screenShare, requestAudioConstraints, resolve, constraints, useCanvas);
