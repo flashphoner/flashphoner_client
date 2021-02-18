@@ -142,6 +142,9 @@ module.exports = {
         },
         isSamsungBrowser: function() {
             return /SamsungBrowser/i.test(navigator.userAgent);
+        },
+        isAndroidFirefox: function () {
+            return this.isAndroid() && /Firefox/i.test(navigator.userAgent);
         }
     },
     SDP: {

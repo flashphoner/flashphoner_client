@@ -70,7 +70,7 @@ var init = function (options) {
         if (webRtcProvider && webRtcProvider.hasOwnProperty('available') && webRtcProvider.available()) {
             MediaProvider.WebRTC = webRtcProvider;
             // WCS-2996 Fix audio-video out of sync in case of using Samsung browser
-            var enableGainNode = util.Browser.isSamsungBrowser() ? false : options.createMicGainNode;
+            var enableGainNode = util.Browser.isSamsungBrowser() || util.Browser.isAndroidFirefox() ? false : options.createMicGainNode;
             var webRtcConf = {
                 constraints: options.constraints || getDefaultMediaConstraints(),
                 extensionId: options.screenSharingExtensionId,
