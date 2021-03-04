@@ -644,6 +644,7 @@ var createSession = function (options) {
                     var availableStream = {};
                     availableStream.mediaSessionId = obj.id;
                     availableStream.available = obj.status;
+                    availableStream.reason = obj.info;
                     if (streamRefreshHandlers[availableStream.mediaSessionId]) {
                         streamRefreshHandlers[availableStream.mediaSessionId](availableStream);
                     }
@@ -1593,6 +1594,7 @@ var createSession = function (options) {
 
             if (streamInfo.available != undefined) {
                 for (var i = 0; i < availableCallbacks.length; i++) {
+                    info_ = streamInfo.reason;
                     if (streamInfo.available == "true") {
                         availableCallbacks[i].resolve(stream);
                     } else {

@@ -203,8 +203,11 @@ function availableStream(){
         display: remoteVideo
     }).available().then(function(stream){
         $("#availableStatus").text("AVAILABLE").attr("class", "text-success");
+        $("#availableInfo").text("").attr("class", "text-muted");
     }, function(stream){
+        console.log(stream);
         $("#availableStatus").text("UNAVAILABLE").attr("class", "text-danger");
+        $("#availableInfo").text(stream.getInfo()).attr("class", "text-muted");
     });
 }
 
