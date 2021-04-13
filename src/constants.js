@@ -688,14 +688,24 @@ define(transportType, 'UDP', 'UDP');
 define(transportType, 'TCP', 'TCP');
 
 var connectionQuality = {};
+
 define(connectionQuality, 'PERFECT', 'PERFECT');
 define(connectionQuality, 'GOOD', 'GOOD');
 define(connectionQuality, 'BAD', 'BAD');
 define(connectionQuality, 'UNKNOWN', 'UNKNOWN');
 define(connectionQuality, 'UPDATE', 'UPDATE');
 
+var streamEventType = {};
+
+define(streamEventType, 'AUDIO_MUTED', 'audioMuted');
+define(streamEventType, 'AUDIO_UNMUTED', 'audioUnmuted');
+define(streamEventType, 'VIDEO_MUTED', 'videoMuted');
+define(streamEventType, 'VIDEO_UNMUTED', 'videoUnmuted');
+
 var constants = {};
 define(constants, 'SESSION_STATUS', sessionStatus);
+define(constants, 'STREAM_EVENT_TYPE', streamEventType);
+define(constants, 'STREAM_EVENT', 'STREAM_EVENT');
 define(constants, 'STREAM_STATUS', streamStatus);
 define(constants, 'CALL_STATUS', callStatus);
 define(constants, 'STREAM_STATUS_INFO', streamStatusInfo);

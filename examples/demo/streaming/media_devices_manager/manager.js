@@ -1,5 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var STREAM_EVENT = Flashphoner.constants.STREAM_EVENT;
+var STREAM_EVENT_TYPE = Flashphoner.constants.STREAM_EVENT_TYPE;
 var CONNECTION_QUALITY = Flashphoner.constants.CONNECTION_QUALITY;
 var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
 var TRANSPORT_TYPE = Flashphoner.constants.TRANSPORT_TYPE;
@@ -260,6 +262,12 @@ function onPlaying(stream) {
     }).prop('disabled', false);
     $("#volumeControl").slider("enable");
     enablePlayToggles(true);
+    if (stream.getAudioState()) {
+        $("#audioMuted").text(stream.getAudioState().muted);
+    }
+    if (stream.getVideoState()) {
+        $("#videoMuted").text(stream.getVideoState().muted);
+    }
 }
 
 function onConnected(session) {
@@ -357,6 +365,23 @@ function play() {
         onStopped();
     }).on(CONNECTION_QUALITY.UPDATE, function (quality, clientFiltered, serverFiltered) {
         updateChart(quality, clientFiltered, serverFiltered, playConnectionQualityStat);
+    }).on(STREAM_EVENT, function(streamEvent) {
+        switch (streamEvent.type) {
+            case STREAM_EVENT_TYPE.AUDIO_MUTED:
+                $("#audioMuted").text(true);
+                break;
+            case STREAM_EVENT_TYPE.AUDIO_UNMUTED:
+                $("#audioMuted").text(false);
+                break;
+            case STREAM_EVENT_TYPE.VIDEO_MUTED:
+                $("#videoMuted").text(true);
+                break;
+            case STREAM_EVENT_TYPE.VIDEO_UNMUTED:
+                $("#videoMuted").text(false);
+                break;
+
+        }
+        console.log("Received streamEvent ", streamEvent.type);
     });
     previewStream.play();
 }

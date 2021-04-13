@@ -16,6 +16,8 @@ var isUsingTemasysPlugin = false;
  */
 
 var SESSION_STATUS = constants.SESSION_STATUS;
+var STREAM_EVENT = constants.STREAM_EVENT;
+var STREAM_EVENT_TYPE = constants.STREAM_EVENT_TYPE;
 var STREAM_STATUS = constants.STREAM_STATUS;
 var CALL_STATUS = constants.CALL_STATUS;
 var TRANSPORT_TYPE = constants.TRANSPORT_TYPE;
@@ -448,6 +450,8 @@ var createSession = function (options) {
     var streams = {};
     var calls = {};
     var mediaConnections = {};
+    //session to stream event callbacks
+    var streamEventRefreshHandlers = {};
     //session to stream callbacks
     var streamRefreshHandlers = {};
     //session to call callbacks
@@ -579,6 +583,12 @@ var createSession = function (options) {
                     if (streamRefreshHandlers[obj.mediaSessionId]) {
                         //update stream status
                         streamRefreshHandlers[obj.mediaSessionId](obj);
+                    }
+                    break;
+                case 'notifyStreamEvent':
+                    if (streamEventRefreshHandlers[obj.mediaSessionId]) {
+                        //update stream status
+                        streamEventRefreshHandlers[obj.mediaSessionId](obj);
                     }
                     break;
                 case 'DataStatusEvent':
@@ -1570,6 +1580,9 @@ var createSession = function (options) {
         var playoutDelay = options.playoutDelay;
         var useCanvasMediaStream = options.useCanvasMediaStream;
 
+        var audioState_;
+        var videoState_;
+
         var connectionQuality;
 
         var videoBytes = 0;
@@ -1581,6 +1594,13 @@ var createSession = function (options) {
          * @see Session~createStream
          */
         var stream = {};
+
+        streamEventRefreshHandlers[id_] = function (streamEvent) {
+            if (callbacks[STREAM_EVENT]) {
+                callbacks[STREAM_EVENT](streamEvent);
+            }
+        }
+
         streamRefreshHandlers[id_] = function (streamInfo, sdp) {
             //set remote sdp
             if (sdp && sdp !== '') {
@@ -1606,7 +1626,7 @@ var createSession = function (options) {
             }
 
             var event = streamInfo.status;
-            
+
             if (event == INBOUND_VIDEO_RATE || event == OUTBOUND_VIDEO_RATE) {
                 detectConnectionQuality(event, streamInfo);
                 return;
@@ -1625,6 +1645,9 @@ var createSession = function (options) {
                 status_ = event;
             }
 
+            audioState_ = streamInfo.audioState;
+            videoState_ = streamInfo.videoState;
+
             if (streamInfo.info)
                 info_ = streamInfo.info;
 
@@ -1634,6 +1657,7 @@ var createSession = function (options) {
 
                 delete streams[id_];
                 delete streamRefreshHandlers[id_];
+                delete streamEventRefreshHandlers[id_];
                 if (mediaConnection) {
                     mediaConnection.close(cacheLocalResources);
                 }
@@ -2168,6 +2192,14 @@ var createSession = function (options) {
             return -1;
         };
 
+        function sendStreamEvent(type, info = '') {
+            send("sendStreamEvent", {
+                mediaSessionId: id_,
+                type: type,
+                info: info
+            });
+        }
+
         /**
          * Mute outgoing audio
          *
@@ -2177,6 +2209,7 @@ var createSession = function (options) {
         var muteAudio = function () {
             if (mediaConnection) {
                 mediaConnection.muteAudio();
+                sendStreamEvent(STREAM_EVENT_TYPE.AUDIO_MUTED);
             }
         };
 
@@ -2189,6 +2222,7 @@ var createSession = function (options) {
         var unmuteAudio = function () {
             if (mediaConnection) {
                 mediaConnection.unmuteAudio();
+                sendStreamEvent(STREAM_EVENT_TYPE.AUDIO_UNMUTED);
             }
         };
 
@@ -2215,6 +2249,7 @@ var createSession = function (options) {
         var muteVideo = function () {
             if (mediaConnection) {
                 mediaConnection.muteVideo();
+                sendStreamEvent(STREAM_EVENT_TYPE.VIDEO_MUTED);
             }
         };
 
@@ -2227,6 +2262,8 @@ var createSession = function (options) {
         var unmuteVideo = function () {
             if (mediaConnection) {
                 mediaConnection.unmuteVideo();
+                sendStreamEvent(STREAM_EVENT_TYPE.VIDEO_UNMUTED);
+
             }
         };
 
@@ -2282,6 +2319,27 @@ var createSession = function (options) {
         };
 
         /**
+         * Get audio state (muted)
+         *
+         * @returns AudioState
+         * @memberof Stream
+         * @inner
+         */
+        var getAudioState = function () {
+            return audioState_;
+        };
+
+        /**
+         * Get video state (muted)
+         *
+         * @returns VideoState
+         * @memberof Stream
+         * @inner
+         */
+        var getVideoState = function () {
+            return videoState_;
+        };
+        /**
          * Request full screen for player stream
          * @memberof Stream
          * @inner
@@ -2296,14 +2354,14 @@ var createSession = function (options) {
         };
 
         /**
-         * Stream event callback.
+         * Stream status event callback.
          *
          * @callback Stream~eventCallback
          * @param {Stream} stream Stream that corresponds to the event
          */
 
         /**
-         * Add stream event callback.
+         * Add stream status event callback.
          *
          * @param {string} event One of {@link Flashphoner.constants.STREAM_STATUS} events
          * @param {Stream~eventCallback} callback Callback function
@@ -2370,6 +2428,8 @@ var createSession = function (options) {
         stream.isVideoMuted = isVideoMuted;
         stream.getStats = getStats;
         stream.snapshot = snapshot;
+        stream.getAudioState = getAudioState;
+        stream.getVideoState = getVideoState;
         stream.getNetworkBandwidth = getNetworkBandwidth;
         stream.getRemoteBitrate = getRemoteBitrate;
         stream.fullScreen = fullScreen;
