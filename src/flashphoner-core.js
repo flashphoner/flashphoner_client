@@ -1944,6 +1944,23 @@ var createSession = function (options) {
             mediaConnection.switchToCam();
         };
 
+
+        /**
+         * Send data from published stream.
+         *
+         * @param {Object} payload Any object
+         * @throws {Error} Error if stream status is not {@link Flashphoner.constants.STREAM_STATUS.PUBLISHING}
+         * @memberof Stream
+         * @inner
+         */
+        var sendData = function (payload) {
+            if(status_ !== STREAM_STATUS.PUBLISHING){
+                throw new Error('Invalid stream state');
+            }
+            sendStreamEvent(STREAM_EVENT_TYPE.DATA, payload);
+        };
+
+
         /**
          * Unmute remote audio
          *
@@ -2192,11 +2209,11 @@ var createSession = function (options) {
             return -1;
         };
 
-        function sendStreamEvent(type, info = '') {
+        function sendStreamEvent(type, payload) {
             send("sendStreamEvent", {
                 mediaSessionId: id_,
                 type: type,
-                info: info
+                payload: payload
             });
         }
 
@@ -2439,6 +2456,7 @@ var createSession = function (options) {
         stream.switchMic = switchMic;
         stream.switchToScreen = switchToScreen;
         stream.switchToCam = switchToCam;
+        stream.sendData = sendData;
 
         streams[id_] = stream;
         return stream;

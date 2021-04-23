@@ -40,6 +40,17 @@
                     <div id="publishStatus"></div>
                     <div id="publishInfo"></div>
                 </div>
+
+                <div class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                    <div class="form-group">
+                        <textarea id="streamData" class="form-control" rows="5" style="resize: none;">{"count": 23}</textarea>
+                    </div>
+                </div>
+                <div class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                    <div class="pull-right">
+                        <button id="sendDataBtn" type="button" class="btn btn-default">Send payload as object</button>
+                    </div>
+                </div>
             </div>
 
             <div class="col-sm-6">
@@ -48,17 +59,23 @@
                     <div id="remoteVideo" class="display"></div>
                 </div>
                 <div id="playerForm" class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
-                    <input class="form-control" type="text" id="playStream" placeholder="Stream Name"> 
+                    <input class="form-control" type="text" id="playStream" placeholder="Stream Name">
                     <div class="input-group-btn">
                         <button id="playBtn" type="button" class="btn btn-default">Play</button>
                         <button id="availableBtn" type="button" class="btn btn-default">Available</button>
                     </div>
                     <div id="availableStatus" style="width: 60px; line-height: normal;"></div>
                     <div id="availableInfo" style="width: 60px; line-height: normal;"></div>
-                </div> 
+                </div>
                 <div class="text-center" style="margin-top: 20px">
                     <div id="playStatus"></div>
                     <div id="playInfo"></div>
+                </div>
+
+                <div class="input-group col-sm-10" style="margin: 10px auto 0 auto;">
+                    <div class="form-group">
+                        <div id="receivedData" style="overflow-y: scroll; height: 100px;" class="text-left form-control"></div>
+                    </div>
                 </div>
             </div>
         </div>

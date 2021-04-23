@@ -701,6 +701,8 @@ define(streamEventType, 'AUDIO_MUTED', 'audioMuted');
 define(streamEventType, 'AUDIO_UNMUTED', 'audioUnmuted');
 define(streamEventType, 'VIDEO_MUTED', 'videoMuted');
 define(streamEventType, 'VIDEO_UNMUTED', 'videoUnmuted');
+define(streamEventType, 'DATA', 'data');
+
 
 var constants = {};
 define(constants, 'SESSION_STATUS', sessionStatus);

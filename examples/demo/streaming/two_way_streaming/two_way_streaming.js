@@ -1,5 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var STREAM_EVENT = Flashphoner.constants.STREAM_EVENT;
+var STREAM_EVENT_TYPE = Flashphoner.constants.STREAM_EVENT_TYPE;
 var STREAM_STATUS_INFO = Flashphoner.constants.STREAM_STATUS_INFO;
 var ERROR_INFO = Flashphoner.constants.ERROR_INFO;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
@@ -77,6 +79,11 @@ function onPublishing(stream) {
         stream.stop();
     }).prop('disabled', false);
     $("#publishInfo").text("");
+
+    $('#sendDataBtn').off('click').click(function(){
+        var streamData = field('streamData');
+        stream.sendData(JSON.parse(streamData));
+    }).prop('disabled',false);
 }
 
 function onUnpublished() {
@@ -88,6 +95,7 @@ function onUnpublished() {
         $("#publishBtn").prop('disabled', true);
         $('#publishStream').prop('disabled', true);
     }
+    $('#sendDataBtn').prop('disabled',true);
 }
 
 function publishBtnClick() {
@@ -192,7 +200,23 @@ function playStream() {
     }).on(STREAM_STATUS.FAILED, function (stream) {
         setStatus("#playStatus", STREAM_STATUS.FAILED, stream);
         onStopped();
+    }).on(STREAM_EVENT, function(streamEvent) {
+        switch (streamEvent.type) {
+            case STREAM_EVENT_TYPE.DATA:
+                addPayload(streamEvent.payload);
+                break;
+        }
+        console.log("Received streamEvent ", streamEvent.type);
     }).play();
+}
+
+function addPayload(payload) {
+    var date = new Date();
+    var time = date.getHours() + ":" + (date.getMinutes()<10?'0':'') + date.getMinutes();
+    var newMessage = time + " - "+JSON.stringify(payload) + '<br/>';
+    var receivedData = $("#receivedData");
+    receivedData.html(receivedData.html() + newMessage);
+    receivedData.scrollTop(receivedData.prop('scrollHeight'));
 }
 
 function availableStream(){
