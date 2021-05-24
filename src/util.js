@@ -138,7 +138,7 @@ module.exports = {
             return navigator.userAgent.toLowerCase().indexOf("android") > -1;
         },
         isSafariWebRTC: function () {
-            return navigator.mediaDevices && Browser.isSafari();
+            return navigator.mediaDevices && this.isSafari();
         },
         isSamsungBrowser: function() {
             return /SamsungBrowser/i.test(navigator.userAgent);

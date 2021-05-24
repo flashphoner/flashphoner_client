@@ -877,7 +877,7 @@ var loadCanvasVideo = function (display, stream, video) {
         resizeCanvas(vEl, child.videoWidth, child.videoHeight);
     };
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1572422
-    if (Browser.isFirefox()) {
+    if (util.Browser.isFirefox()) {
         vEl.getContext('2d');
     }
     vEl.srcObject = vEl.captureStream(30);
@@ -1397,7 +1397,7 @@ var playFirstVideo = function (display, isLocal, src) {
 };
 
 var screenCaptureSupportedBrowsers = function () {
-    return (Browser.isChrome() || Browser.isSafari());
+    return (util.Browser.isChrome() || util.Browser.isSafari());
 };
 
 module.exports = {
