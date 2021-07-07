@@ -3,7 +3,7 @@ var SESSION_STATUS = require('./constants').SESSION_STATUS;
 var STREAM_STATUS = require('./constants').STREAM_STATUS;
 var Promise = require('promise-polyfill');
 var util = require('./util');
-var uuid_v1 = require('uuid/v1');
+import { v1 as uuid_v1 } from 'uuid';
 var ROOM_REST_APP = "roomApp";
 
 /**

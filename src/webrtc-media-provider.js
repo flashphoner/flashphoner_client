@@ -1,7 +1,7 @@
 'use strict';
 
 var browserDetails = require('webrtc-adapter').default.browserDetails;
-var uuid_v1 = require('uuid/v1');
+import { v1 as uuid_v1 } from 'uuid';
 var util = require('./util');
 var connections = {};
 var LOCAL_CACHED_VIDEO = "-LOCAL_CACHED_VIDEO";

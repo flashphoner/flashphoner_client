@@ -132,7 +132,8 @@ module.exports = {
             return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         },
         isSafari: function () {
-            return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            var userAgent = navigator.userAgent.toLowerCase();
+            return /(safary|applewebkit)/i.test(userAgent) && !userAgent.includes("chrome") && !userAgent.includes("android");
         },
         isAndroid: function () {
             return navigator.userAgent.toLowerCase().indexOf("android") > -1;
