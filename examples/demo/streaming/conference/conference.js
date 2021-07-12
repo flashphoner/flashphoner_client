@@ -6,6 +6,12 @@ var connection;
 
 //initialize interface
 function init_page() {
+    var url = window.location.href;
+    if(url.includes('?')) {
+        $('#recordBox').hide();
+    } else {
+        $('#recordBox').show();
+    }
     //init api
     try {
         Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
@@ -92,7 +98,7 @@ function createConnection(url, username) {
 }
 
 function joinRoom() {
-    connection.join({name: getRoomName()}).on(ROOM_EVENT.STATE, function(room){
+    connection.join({name: getRoomName(), needRecord: isNeedRecord()}).on(ROOM_EVENT.STATE, function(room){
         var participants = room.getParticipants();
         console.log("Current number of participants in the room: " + participants.length);
         if (participants.length >= _participants) {
@@ -192,6 +198,10 @@ function getRoomName() {
         return name;
     }
     return "room-"+createUUID(6);
+}
+
+function isNeedRecord() {
+    return $('#recordCheckBox').is(":checked");
 }
 
 function setInviteAddress(name) {
