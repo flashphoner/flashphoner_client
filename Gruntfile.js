@@ -231,12 +231,9 @@ module.exports = function(grunt) {
     grunt.registerTask('build', [
         'clean:build',
         'string-replace:version',
-        'flash:release_media_provider',
         'browserify',
         'concat',
         'minify',
-        'flash:release_examples_streaming',
-        'flash:release_examples_chat',
         'jsdoc'
     ]);
     grunt.registerTask('release', [
@@ -245,11 +242,26 @@ module.exports = function(grunt) {
         'copy'
     ]);
     grunt.registerTask('webrtc', [
+        'clean:release',
         'clean:build',
         'string-replace:version',
         'browserify:flashphonerGlobalObjectWebRTCOnly',
         'browserify:flashphonerGlobalObjectRestApi',
         'minify',
-        'jsdoc'
+        'jsdoc',
+        'copy'
+    ]);
+    grunt.registerTask('with-flash', [
+        'clean:release',
+        'clean:build',
+        'string-replace:version',
+        'flash:release_media_provider',
+        'browserify',
+        'concat',
+        'minify',
+        'flash:release_examples_streaming',
+        'flash:release_examples_chat',
+        'jsdoc',
+        'copy'
     ]);
 };

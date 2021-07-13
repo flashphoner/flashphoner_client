@@ -68,7 +68,7 @@ var resolutions = [
 function init_page() {
 
     try {
-        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
+        Flashphoner.init();
     } catch (e) {
         console.warn(e);
     }

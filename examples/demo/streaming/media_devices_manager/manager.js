@@ -38,15 +38,7 @@ function init_page() {
     try {
         Flashphoner.init({
             screenSharingExtensionId: extensionId,
-            flashMediaProviderSwfLocation: '../../../../media-provider.swf',
             mediaProvidersReadyCallback: function (mediaProviders) {
-                //hide remote video if current media provider is Flash
-                if (mediaProviders[0] == "Flash") {
-                    $("#fecForm").hide();
-                    $("#sendStereoForm").hide();
-                    $("#sendAudioBitrateForm").hide();
-                    $("#cpuOveruseDetectionForm").hide();
-                }
                 if (Flashphoner.isUsingTemasys()) {
                     $("#audioInputForm").hide();
                     $("#videoInputForm").hide();
@@ -54,7 +46,7 @@ function init_page() {
             }
         })
     } catch (e) {
-        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology needed for this example");
+        $("#notifyFlash").text("Your browser doesn't support WebRTC technology needed for this example");
         return;
     }
     //local and remote displays
@@ -962,10 +954,6 @@ function startTest() {
                     }
                 }
             }
-        } else if (Flashphoner.getMediaProviders()[0] == "Flash") {
-            micLevelInterval = setInterval(function () {
-                $("#micLevel").text(disp.children[0].getMicrophoneLevel());
-            }, 500);
         }
         testStarted = true;
     }).catch(function (error) {

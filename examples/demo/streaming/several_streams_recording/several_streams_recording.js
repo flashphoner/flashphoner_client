@@ -8,9 +8,9 @@ var testSession;
 function init_page() {
     //init api
     try {
-        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
+        Flashphoner.init();
     } catch (e) {
-        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology needed for this example");
+        $("#notifyFlash").text("Your browser doesn't support WebRTC technology needed for this example");
         return;
     }
 

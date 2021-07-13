@@ -11,7 +11,6 @@
     <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
     <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
     <script type="text/javascript" src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
     <script type="text/javascript" src="webrtc-as-rtmp-republishing.js"></script>
 </head>
 <body>
@@ -54,9 +53,10 @@
                         </div>
                     </form>
                 </fieldset>
-                <h3>RTMP Player</h3>
+                <h3>RTMP playback URL</h3>
                 <div class="text-center">
-                    <div id="player"></div>
+                    <div>Copy this URL to a third party player to play</div>
+                    <div id="player" class="text-muted text-center" style="border: 1px solid">Not connected</div>
                 </div>
             </div>
         </div>

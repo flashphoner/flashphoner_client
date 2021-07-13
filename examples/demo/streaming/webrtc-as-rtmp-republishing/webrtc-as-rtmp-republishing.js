@@ -9,12 +9,11 @@ $(document).ready(function () {
 
 function init_page() {
     $("#url").val(setURL());
-    loadPlayer();
     //init api
     try {
-        Flashphoner.init({flashMediaProviderSwfLocation: '../../../../media-provider.swf'});
+        Flashphoner.init();
     } catch(e) {
-        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology needed for this example");
+        $("#notifyFlash").text("Your browser doesn't support WebRTC technology needed for this example");
         return;
     }
     localVideo = document.getElementById("localVideo");
@@ -114,34 +113,16 @@ function setStatus(status) {
     }
 }
 
-function loadPlayer() {
-    detectFlash();
-    var attributes = {};
-    attributes.id = "player";
-    attributes.name = "player";
-    attributes.styleclass="center-block";
-    var flashvars = {};
-    var pathToSWF = "../../dependencies/rtmp_player/player.swf";
-    var elementId = "player";
-    var params = {};
-    params.menu = "true";
-    params.swliveconnect = "true";
-    params.allowfullscreen = "true";
-    params.allowscriptaccess = "always";
-    params.bgcolor = "#777777";
-    swfobject.embedSWF(pathToSWF, elementId, "350", "400", "11.2.202", "expressInstall.swf", flashvars, params, attributes);
-}
-
-//Call embedded AS3 function (setURLtoFlash)
+// Show RTMP URL to play in a third party player (VLC, ffplay etc)
 function sendDataToPlayer() {
-    var player = document.getElementById("player");
+    var player = $("#player");
     var host = field("rtmpUrl")
         .replace("localhost", window.location.hostname)
         .replace("127.0.0.1", window.location.hostname);
 
     var rtmpStreamPrefix = "rtmp_";
     var url = host + "/" + rtmpStreamPrefix + field("streamName");
-    player.setURLtoFlash(url);
+    player.text(url);
 }
 
 function validateForm() {

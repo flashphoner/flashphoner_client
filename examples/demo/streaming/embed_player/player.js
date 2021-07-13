@@ -25,7 +25,6 @@ function init_page() {
     //init api
     try {
         Flashphoner.init({
-            flashMediaProviderSwfLocation: '../../../../media-provider.swf',
             receiverLocation: '../../dependencies/websocket-player/WSReceiver2.js',
             decoderLocation: '../../dependencies/websocket-player/video-worker2.js',
             preferredMediaProviders: mediaProviders && mediaProviders !== "" ? mediaProviders.split(','): []
@@ -38,10 +37,6 @@ function init_page() {
         if (Browser.isiOS()) {
             $(".fullscreen").hide();
         }
-    }
-    if (Flashphoner.getMediaProviders()[0] === "Flash") {
-        $(".fullscreen").hide();
-        $(".player").css('width','75%');
     }
     if ((Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] == "WebRTC")) {
         $('.volume').hide();

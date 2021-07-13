@@ -60,19 +60,9 @@ function loadAudioCallStatistics() {
 function init_page() {
     //init api
     try {
-        Flashphoner.init({
-            flashMediaProviderSwfLocation: '../../../../media-provider.swf',
-            mediaProvidersReadyCallback: function (mediaProviders) {
-                //hide remote video if current media provider is Flash
-                if (mediaProviders[0] == "Flash") {
-                    $("#remoteVideoWrapper").hide();
-                    $("#localVideoWrapper").attr('class', 'fp-remoteVideo');
-                }
-            },
-            screenSharingExtensionId: extensionId
-        });
+        Flashphoner.init({screenSharingExtensionId: extensionId});
     } catch (e) {
-        $("#notifyFlash").text("Your browser doesn't support Flash or WebRTC technology needed for this example");
+        $("#notifyFlash").text("Your browser doesn't support WebRTC technology needed for this example");
         return;
     }
 

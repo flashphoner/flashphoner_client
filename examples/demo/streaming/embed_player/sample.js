@@ -46,7 +46,7 @@ function init_page() {
     $('#url,#streamName').on('input',function () {
         constructCode();
     });
-    $('#WebRTC,#Flash,#MSE,#WSPlayer').change(function() {
+    $('#WebRTC,#MSE,#WSPlayer').change(function() {
         constructCode();
     });
     constructCode();

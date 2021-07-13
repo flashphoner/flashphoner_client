@@ -13,7 +13,6 @@
     <script type="text/javascript" src="sip-as-rtmp-2.js"></script>
     <!-- Bootstrap JS -->
     <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
-    <script type="text/javascript" src="../../dependencies/swf/swfobject.js"></script>
 </head>
 <body>
 <div class="container">
@@ -154,10 +153,11 @@
             </div>
             <div id="restStatus"></div>
             <div class="row">
-                <h3>RTMP Player</h3>
+                <h3>RTMP playback URL</h3>
             </div>
             <div class="text-center">
-                <div id="player"></div>
+                <div>Copy this URL to a third party player</div>
+                <div id="player" class="text-muted text-center" style="border: 1px solid">Not connected</div>
             </div>
 
         </div>
