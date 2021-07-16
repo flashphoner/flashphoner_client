@@ -4,31 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
-
-    <style type="text/css">
-
-        .fp-FlashDiv {
-            width: 218px;
-            height: 138px;
-            margin: auto;
-            /*margin-top: 85px;*/
-            /*margin-left: 175px;*/
-            /*position: absolute;*/
-        }
-
-        .fp-Click2CallButton {
-            width: 50%;
-            height: 80px;
-            margin-top: 30px;
-        }
-
-        .fp-Click2CallCode {
-            height: 100px !important;
-            resize: none;
-        }
-    </style>
-
-    <title>Click-to-Call minimal using WCS JavaScript API</title>
+    <link rel="stylesheet" href="click-to-call.css">
+    <title>Click-to-Call</title>
     <script type="text/javascript" src="../../../../flashphoner.js"></script>
 	<script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
 	<script type="text/javascript" src="../../dependencies/js/utils.js"></script>
@@ -70,6 +47,40 @@
             </div>
         </div>
     </div>
+
+    <div class="row row-space" style="margin-top:50px">
+        <div class="col-md-6 text-center">
+
+            <button id="sipCredentialsBtn" type="button" class="btn btn-block center-block">SIP credentials</button>
+            <form id="formConnection" class="form-horizontal" style="display:none;" role="form">
+                <div class="form-group" style="margin-top: 30px">
+                    <label class="pull-left" for="sipLogin">SIP Login</label>
+                    <input type="text" class="form-control" type="text" size="20" id="sipLogin" placeholder="SIP username"/>
+                </div>
+                <div class="form-group" style="margin-top: 30px">
+                    <label class="pull-left" for="sipAuthenticationName">SIP Auth Name</label>
+                    <input type="text" class="form-control" type="text" size="20" id="sipAuthenticationName" placeholder="SIP auth name"/>
+                </div>
+                <div class="form-group" style="margin-top: 30px">
+                    <label class="pull-left" for="sipPassword">SIP Password</label>
+                    <input type="password" class="form-control" type="text" size="20" id="sipPassword" placeholder="SIP password"/>
+                </div>
+                <div class="form-group" style="margin-top: 30px">
+                    <label class="pull-left" for="sipDomain">SIP Domain</label>
+                    <input type="text" class="form-control" type="text" size="20" id="sipDomain" placeholder="SIP domain"/>
+                </div>
+                <div class="form-group" style="margin-top: 30px">
+                    <label class="pull-left" for="sipOutboundProxy">SIP Outbound Proxy</label>
+                    <input type="text" class="form-control" type="text" size="20" id="sipOutboundProxy" placeholder="SIP outbound proxy"/>
+                </div>
+                <div class="form-group" style="margin-top: 30px">
+                    <label class="pull-left" for="sipPort">SIP Port</label>
+                    <input type="text" class="form-control" type="text" size="20" id="sipPort" placeholder="5060"/>
+                </div>
+                <button id="okBtn" type="button" class="btn btn-lg btn-success btn-block center-block">OK</button>
+            </form>
+        </div>
+    </div>    
 	
 	<!-- Display block -->
     <div class="row row-space" style="margin-top:50px">

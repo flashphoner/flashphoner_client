@@ -1,0 +1,10 @@
+.fp-Click2CallButton {
+    width: 50%;
+    height: 80px;
+    margin-top: 30px;
+}
+
+.fp-Click2CallCode {
+    height: 100px !important;
+    resize: none;
+}
