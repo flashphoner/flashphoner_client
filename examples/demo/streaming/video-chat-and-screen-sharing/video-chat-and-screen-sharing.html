@@ -18,13 +18,20 @@
 </head>
 <body onload="init_page()">
 <div class="container-fluid">
-    <div class="row" id="extension">
-        <div class="col-sm-5 text-center">
-            <span class="text-muted" style="padding: 0 10px">Extension required</span>
-            <button class="btn btn-toolbar" type="button" id="installExtensionButton"
-                    onclick="installExtension()" style="display: none;">Install Now</button>
-            <button class="btn btn-toolbar" type="button" id="installFromMarket"
-                    onclick="installFromMarket();return false;" style="display: none;">Install Now</button>
+    <div id="notify" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h2 class="modal-title text-center text-danger">Warning!</h2>
+                </div>
+                <div class="modal-body text-center">
+                    <h2 class="text-primary">Screen sharing works only in Chrome, Firefox and Safari browsers on desktop</h2>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
         </div>
     </div>
     <div class="row">
