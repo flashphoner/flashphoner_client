@@ -18,3 +18,20 @@ function initPage() {
     $("#applyBtn").prop('disabled', false).click(applyFn);
 
 }
+
+function getHLSUrl() {
+
+    var proto;
+    var port;
+
+    if (window.location.protocol == "http:") {
+        proto = "http://";
+        port = "8082";
+    } else {
+        proto = "https://";
+        port = "8445";
+    }
+
+    var url = proto + window.location.hostname + ":" + port;
+    return url;
+}

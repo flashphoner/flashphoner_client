@@ -133,38 +133,6 @@ $(function () {
     });
 });
 
-// Detect browser
-var Browser = {
-    isIE: function () {
-        return /*@cc_on!@*/false || !!document.documentMode;
-    },
-    isFirefox: function () {
-        return typeof InstallTrigger !== 'undefined';
-    },
-    isChrome: function () {
-        return !!window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor) && !/OPR/.test(navigator.userAgent);
-    },
-    isEdge: function () {
-        return !isIE && !!window.StyleMedia;
-    },
-    isOpera: function () {
-        return (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-    },
-    isiOS: function () {
-        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    },
-    isSafari: function () {
-        var userAgent = navigator.userAgent.toLowerCase();
-        return /(safary|applewebkit)/i.test(userAgent) && !userAgent.includes("chrome") && !userAgent.includes("android");
-    },
-    isAndroid: function () {
-        return navigator.userAgent.toLowerCase().indexOf("android") > -1;
-    },
-    isSafariWebRTC: function () {
-        return navigator.mediaDevices && Browser.isSafari();
-    }
-};
-
 // Generate simple uuid
 function createUUID(length) {
     var s = [];

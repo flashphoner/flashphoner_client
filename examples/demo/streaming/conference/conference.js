@@ -2,6 +2,7 @@ var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var ROOM_EVENT = Flashphoner.roomApi.events;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
+var Browser = Flashphoner.Browser;
 var connection;
 
 //initialize interface

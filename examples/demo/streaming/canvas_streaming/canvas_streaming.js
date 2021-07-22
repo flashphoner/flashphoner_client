@@ -2,6 +2,7 @@ var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var STREAM_STATUS_INFO = Flashphoner.constants.STREAM_STATUS_INFO;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
+var Browser = Flashphoner.Browser;
 var localVideo;
 var remoteVideo;
 var canvas;

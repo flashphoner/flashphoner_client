@@ -1,6 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS; 
 var CALL_STATUS = Flashphoner.constants.CALL_STATUS;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
+var Browser = Flashphoner.Browser;
 var localDisplay;
 var remoteDisplay;
 var currentCall;

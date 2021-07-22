@@ -3,6 +3,7 @@ var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 var STREAM_STATUS_INFO = Flashphoner.constants.STREAM_STATUS_INFO;
 var ERROR_INFO = Flashphoner.constants.ERROR_INFO;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
+var Browser = Flashphoner.Browser;
 var localVideo;
 var remoteVideo;
 var filters = [empty, sepia, threshold, invert];

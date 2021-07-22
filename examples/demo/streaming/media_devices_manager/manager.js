@@ -7,6 +7,7 @@ var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
 var TRANSPORT_TYPE = Flashphoner.constants.TRANSPORT_TYPE;
 var CONNECTION_QUALITY_UPDATE_TIMEOUT_MS = 10000;
 var preloaderUrl = "../../dependencies/media/preloader.mp4";
+var Browser = Flashphoner.Browser;
 var STAT_INTERVAL = 1000;
 var localVideo;
 var remoteVideo;

@@ -2690,5 +2690,6 @@ module.exports = {
      * The Screensharing whitelist is no longer needed to share your screen or windows starting Firefox 52
      * https://wiki.mozilla.org/Screensharing
      */
-    firefoxScreenSharingExtensionInstalled: true
+    firefoxScreenSharingExtensionInstalled: true,
+    Browser: util.Browser
 };

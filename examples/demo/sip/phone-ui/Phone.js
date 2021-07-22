@@ -1,5 +1,6 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var CALL_STATUS = Flashphoner.constants.CALL_STATUS;
+var Browser = Flashphoner.Browser;
 
 var Phone = function () {
     this.flashphonerListener = null;
