@@ -50,6 +50,8 @@ var createConnection = function (options) {
         var constraints = options.constraints ? options.constraints : {};
         var screenShare = false;
         var playoutDelay = options.playoutDelay;
+        // Set video track contentHint to `detail` by default to workaround Chromium 91 bug #WCS-3257
+        var videoContentHint = options.videoContentHint ? options.videoContentHint : 'detail';
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
@@ -57,6 +59,7 @@ var createConnection = function (options) {
                 //made for safari, if sip call without audio and video, because function playFirstVideo() creates a video element
                 if (localVideo.srcObject) {
                     localVideo.id = id + "-local";
+                    setContentHint(localVideo.srcObject, videoContentHint);
                     connection.addStream(localVideo.srcObject);
                 } else {
                     localVideo = null;
@@ -100,6 +103,7 @@ var createConnection = function (options) {
                 } else {
                     localVideo = cachedVideo;
                     localVideo.id = id;
+                    setContentHint(localVideo.srcObject, videoContentHint);
                     connection.addStream(localVideo.srcObject);
                 }
             }
@@ -122,6 +126,16 @@ var createConnection = function (options) {
                 });
             }
         }
+        function setContentHint(stream, hint) {
+            stream.getVideoTracks().forEach(function(track) {
+                if(track.contentHint === undefined) {
+                    logger.warn("contentHint unsupported");
+                } else {
+                    logger.info("Set video track contentHint to " + hint);
+                    track.contentHint = hint;
+                }
+            });
+        }      
         connection.ontrack = function (event) {
             if (remoteVideo) {
                 remoteVideo.srcObject = event.streams[0];

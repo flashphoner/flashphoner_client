@@ -722,6 +722,7 @@ var createSession = function (options) {
      * @param {Array<string>=} options.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
      * @param {Array<string>=} options.sipSDP Array of custom SDP params (ex. bandwidth (b=))
      * @param {Array<string>=} options.sipHeaders Array of custom SIP headers
+     * @param {string=} options.videoContentHint Video content hint for browser ('detail' by default to maintain resolution), {@link Flashphoner.constants.CONTENT_HINT_TYPE}
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Call} Call
      * @throws {TypeError} Error if no options provided
@@ -779,6 +780,7 @@ var createSession = function (options) {
         var sdpHook = options.sdpHook;
         var sipSDP = options.sipSDP;
         var sipHeaders = options.sipHeaders;
+        var videoContentHint = options.videoContentHint;
         /**
          * Represents sip call.
          *
@@ -873,7 +875,8 @@ var createSession = function (options) {
                     login: login,
                     constraints: constraints,
                     connectionConfig: mediaOptions,
-                    audioOutputId: audioOutputId
+                    audioOutputId: audioOutputId,
+                    videoContentHint: videoContentHint
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({
@@ -1477,6 +1480,7 @@ var createSession = function (options) {
      * @param {Boolean=} options.cvoExtension Enable rtp video orientation extension
      * @param {Integer=} options.playoutDelay Time delay between network reception of media and playout
      * @param {string=} options.useCanvasMediaStream EXPERIMENTAL: when publish bind browser's media stream to the canvas. It can be useful for image filtering
+     * @param {string=} options.videoContentHint Video content hint for browser ('detail' by default to maintain resolution), {@link Flashphoner.constants.CONTENT_HINT_TYPE}
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
@@ -1579,6 +1583,7 @@ var createSession = function (options) {
         var callbacks = {};
         var playoutDelay = options.playoutDelay;
         var useCanvasMediaStream = options.useCanvasMediaStream;
+        var videoContentHint = options.videoContentHint;
 
         var audioState_;
         var videoState_;
@@ -1840,7 +1845,8 @@ var createSession = function (options) {
                     constraints: constraints,
                     connectionConfig: mediaOptions,
                     connectionConstraints: mediaConnectionConstraints,
-                    customStream: constraints && constraints.customStream ? constraints.customStream : false
+                    customStream: constraints && constraints.customStream ? constraints.customStream : false,
+                    videoContentHint: videoContentHint
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.createOffer({

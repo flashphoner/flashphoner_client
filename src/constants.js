@@ -703,6 +703,10 @@ define(streamEventType, 'VIDEO_MUTED', 'videoMuted');
 define(streamEventType, 'VIDEO_UNMUTED', 'videoUnmuted');
 define(streamEventType, 'DATA', 'data');
 
+var contentHintType = {};
+define(contentHintType, 'MOTION', 'motion');
+define(contentHintType, 'DETAIL', 'detail');
+define(contentHintType, 'TEXT', 'text');
 
 var constants = {};
 define(constants, 'SESSION_STATUS', sessionStatus);
@@ -716,6 +720,7 @@ define(constants, 'ERROR_INFO', errorInfo);
 define(constants, 'MEDIA_DEVICE_KIND', mediaDeviceKind);
 define(constants, 'TRANSPORT_TYPE', transportType);
 define(constants, 'CONNECTION_QUALITY', connectionQuality);
+define(constants, 'CONTENT_HINT_TYPE', contentHintType);
 
 //define helper
 function define(obj, name, value) {
