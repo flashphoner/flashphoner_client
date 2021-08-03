@@ -1,6 +1,6 @@
 'use strict';
 
-import { v1 as uuid_v1 } from 'uuid';
+const { v1: uuid_v1 } = require('uuid');
 var constants = require("./constants");
 var util = require('./util');
 var logger = require('./util').logger;

@@ -2,7 +2,7 @@
 
 var swfobject = require('swfobject');
 var Promise = require('promise-polyfill');
-import { v1 as uuid_v1 } from 'uuid';
+const { v1: uuid_v1 } = require('uuid');
 var connections = {};
 var flashScope;
 var swfLocation = "media-provider.swf";

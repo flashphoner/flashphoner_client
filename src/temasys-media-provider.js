@@ -1,7 +1,7 @@
 'use strict';
 
 var webrtcAdapter = require('webrtc-adapter');
-import { v1 as uuid_v1 } from 'uuid';
+const { v1: uuid_v1 } = require('uuid');
 var util = require('./util');
 var connections = {};
 var CACHED_INSTANCE_POSTFIX = "-CACHED_WEBRTC_INSTANCE";
