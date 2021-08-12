@@ -171,6 +171,7 @@ var appSession = function (options) {
          */
         var room = {};
         var name_ = options.name;
+        var record_ = options.record;
         var participants = {};
         var callbacks = {};
         var stateStreams = {};
@@ -504,7 +505,7 @@ var appSession = function (options) {
             return session.sendData(command);
         }
 
-        sendAppCommand("join", {name: name_}).then(function () {
+        sendAppCommand("join", {name: name_, record: record_}).then(function () {
         }, function (info) {
             if (callbacks["FAILED"]) {
                 callbacks["FAILED"](room, info.info);
