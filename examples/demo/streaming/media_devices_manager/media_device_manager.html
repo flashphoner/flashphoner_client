@@ -124,11 +124,12 @@
                     </div>
                     <div class="form-group" id="audioInputForm">
                         <label style="text-align: left" class="col-sm-4 control-label">Mic</label>
-                        <div class="col-sm-6 input-group">
-                            <select class="form-control" id="audioInput">
+                        <div style="text-align: left" class="col-sm-6 input-group">
+                            <select style="margin-left: 15px" class="form-control" id="audioInput">
                             </select>
-                            <span id="micLevel" style="min-width: 40px; text-align: center; color: green;" class="input-group-addon">0</span>
+                            <span id="micLevel" style="min-width: 50px; text-align: right; color: green;" class="input-group-addon">0</span>
                         </div>
+                        <label style="text-align: left" class="col-sm-4 control-label"></label>
                         <div class="col-sm-6">
                             <button type="button" class="btn btn-default form-control" id="switchMicBtn">Switch</button>
                         </div>
@@ -196,16 +197,6 @@
                         <label style="text-align: left" class="col-sm-4 control-label">Screen share</label>
                         <div class="col-sm-6">
                             <input id="screenShareToggle" type="checkbox" />
-                        </div>
-                    </div>
-                    <div class="form-group" id="mediaSourceForm">
-                        <span class="text-muted"></span>
-                        <label style="text-align: left" class="col-sm-4 control-label">Screen share source</label>
-                        <div class="col-sm-6">
-                            <select id="mediaSource" class="form-control">
-                                <option value="screen">Screen</option>
-                                <option value="window">Window</option>
-                            </select>
                         </div>
                     </div>
                     <div class="form-group" id="sendSizeForm">
@@ -330,13 +321,15 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-sm-2 control-label">Talking</label>
+                    <label style="text-align: left" class="col-sm-2 control-label">Talking</label>
                     <div class="col-sm-2 talking" id="talking"></div>
                 </div>
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">Muted</label>
-                        <div class="col-sm-2 control-label" id="audioMuted">false</div>
-                    </div>
+                <div class="form-group">
+                    <label style="text-align: left" class="col-sm-2 control-label">Muted</label>
+                    <div style="text-align: left" class="col-sm-2 control-label" id="audioMuted">false</div>
+                    <label style="text-align: left" class="col-sm-2 control-label">Stream</label>
+                    <div style="text-align: left" class="col-sm-4 control-label" id="audioMutedStream"></div>
+                </div>
 
                 <div class="form-group">
                     <div class="col-sm-8">
@@ -397,22 +390,24 @@
                 </div>
 
                     <div class="form-group" id="transportOutputForm">
-                        <label style="text-align: left" class="col-sm-2 control-label">Transport</label>
+                        <label style="text-align: left" class="col-sm-3 control-label">Transport</label>
                         <div class="col-sm-4">
                             <select class="form-control" id="transportOutput">
                             </select>
                         </div>
                     </div>
                     <div class="form-group" id="stripPlayCodecsForm">
-                        <label style="text-align: left" class="col-sm-4 control-label">Strip codecs</label>
+                        <label style="text-align: left" class="col-sm-3 control-label">Strip codecs</label>
                         <div class="col-sm-6">
                             <input type="text" class="form-control" id="stripPlayCodecs"
                                    placeholder="H264,VP8,OPUS,G722,ALAW,ULAW">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="col-sm-2 control-label">Muted</label>
-                        <div class="col-sm-2 control-label" id="videoMuted">false</div>
+                        <label style="text-align: left" class="col-sm-2 control-label">Muted</label>
+                        <div style="text-align: left" class="col-sm-2 control-label" id="videoMuted">false</div>
+                        <label style="text-align: left" class="col-sm-2 control-label">Stream</label>
+                        <div style="text-align: left" class="col-sm-4 control-label" id="videoMutedStream"></div>
                     </div>
                 </div>
             </div>

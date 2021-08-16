@@ -7,10 +7,7 @@ var localVideo;
 var remoteVideo;
 var currentCall;
 var statIntervalId;
-var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 var screenSharing;
-var extensionInterval;
-var extensionNotInstalled;
 
 $(document).ready(function () {
     loadCallFieldSet();
@@ -61,7 +58,7 @@ function loadAudioCallStatistics() {
 function init_page() {
     //init api
     try {
-        Flashphoner.init({screenSharingExtensionId: extensionId});
+        Flashphoner.init();
     } catch (e) {
         $("#notifyFlash").text("Your browser doesn't support WebRTC technology needed for this example");
         return;
@@ -192,34 +189,7 @@ function init_page() {
     });
 
 
-    if (!Browser.isFirefox()) {
-        $('#sourceList').remove();
-    }
-
-    var $screenSharingExtensionToggle = $("#screenSharingExtensionToggle");
-    $screenSharingExtensionToggle.bootstrapSwitch({
-        on: 'yes',
-        off: 'no',
-        size: 'md'
-    });
-
-    if(Browser.isChrome()) {
-        extensionInterval = setInterval(function () {
-            chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
-                if (!response) {
-                    clearInterval(extensionInterval);
-                    $("#screenSharingExtensionToggle").prop('checked', true).attr('disabled', 'disabled').trigger('change');
-                    extensionNotInstalled = true;
-                }
-            });
-        }, 500);
-    }
-
-    if(!Browser.isChrome()) {
-        $('#screenSharingExtensionForm').remove();
-    }
-
-    if (!(Browser.isFirefox() || Browser.isChrome())) {
+    if (Browser.isAndroid() || Browser.isiOS()) {
         $('#screenSharingForm').remove();
     }
 }
@@ -538,7 +508,8 @@ function getConstraints() {
         video: {
             deviceId: {exact: $('#cameraList').find(":selected").val()},
             width: parseInt($('#sendWidth').val()),
-            height: parseInt($('#sendHeight').val())
+            height: parseInt($('#sendHeight').val()),
+            frameRate: parseInt($('#sendFramerate').val())
         }
     };
     if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
@@ -552,7 +523,6 @@ function enableMuteToggles(enable) {
     var $muteAudioToggle = $("#muteAudioToggle");
     var $muteVideoToggle = $("#muteVideoToggle");
     var $screenShareToogle = $('#screenSharingToggle');
-    var $screenSharingExtensionToggle = $('#screenSharingExtensionToggle');
 
     if (enable) {
         $muteAudioToggle.removeAttr("disabled");
@@ -561,30 +531,21 @@ function enableMuteToggles(enable) {
         $muteVideoToggle.trigger('change');
         $screenShareToogle.removeAttr("disabled");
         $screenShareToogle.trigger('change');
-        if(!extensionNotInstalled) {
-            $screenSharingExtensionToggle.removeAttr("disabled");
-            $screenSharingExtensionToggle.trigger('change');
-        }
     } else {
         $muteAudioToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $muteVideoToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
         $screenShareToogle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
-        if(!extensionNotInstalled) {
-            $screenSharingExtensionToggle.prop('checked', false).attr('disabled', 'disabled').trigger('change');
-        }
     }
 }
 
 function switchToScreen() {
     if (currentCall) {
-        $('#sourceList').prop('disabled', true);
         $('#cameraList').prop('disabled', true);
         $('#switchCamBtn').prop('disabled', true);
         screenSharing = true;
-        currentCall.switchToScreen($('#sourceList').val(), $("#screenSharingExtensionToggle").prop('checked')).catch(function () {
+        currentCall.switchToScreen("screen", true).catch(function () {
             screenSharing = false;
             $("#screenSharingToggle").removeAttr("checked");
-            $('#sourceList').prop('disabled', false);
             $('#cameraList').prop('disabled', false);
             $('#switchCamBtn').prop('disabled', false);
         });
@@ -594,7 +555,6 @@ function switchToScreen() {
 function switchToCam() {
     if (currentCall) {
         currentCall.switchToCam();
-        $('#sourceList').prop('disabled', false);
         $('#cameraList').prop('disabled', false);
         $('#switchCamBtn').prop('disabled', false);
         screenSharing = false;

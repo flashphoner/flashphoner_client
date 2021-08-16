@@ -584,7 +584,7 @@ var createConnection = function (options) {
                     if (browserDetails.browser === 'firefox') {
                         clonedConstraints.video.mediaSource = source;
                     }
-                    if (window.chrome && woExtension) {
+                    if (screenCaptureSupportedBrowsers() && woExtension) {
                         getScreenDeviceIdWoExtension(clonedConstraints).then(function (screenSharingConstraints) {
                             navigator.mediaDevices.getDisplayMedia(screenSharingConstraints).then(
                                 (stream) => {

@@ -28,7 +28,6 @@ function init_page() {
         }, 500);
 
     } else if (Browser.isChrome() && !Browser.isAndroid() && !Browser.isiOS()) {
-        $('#mediaSourceForm').hide();
         interval = setInterval(function() {
             chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
                 if (chrome.runtime.lastError) {         //WCS-2369 - cacth runtime.lastError
@@ -47,7 +46,6 @@ function init_page() {
         }, 500);
     } else if(isSafariMacOS()) {
         $("#extension").hide();
-        $('#mediaSourceForm').hide();
         $('#micInput').hide();
         $('#mic').hide();
         clearInterval(interval);
@@ -99,7 +97,6 @@ function onStarted(publishStream, previewStream) {
         previewStream.stop();
     }).prop('disabled', false);
     $("#connectBtn").prop('disabled', false);
-    $('#mediaSource').prop('disabled', true);
 }
 
 function onStopped(session) {
@@ -111,7 +108,6 @@ function onStopped(session) {
         }
     }).prop('disabled', false);
     $("#connectBtn").prop('disabled', false);
-    $('#mediaSource').prop('disabled', false);
 }
 
 function onConnected(session) {
@@ -129,8 +125,6 @@ function onConnected(session) {
             session.disconnect();
         }
     }).prop('disabled', false);
-
-    $('#mediaSource').prop('disabled', false);
 }
 
 function onDisconnected() {
@@ -143,7 +137,6 @@ function onDisconnected() {
             connect();
         }
     }).prop('disabled', false);
-    $('#mediaSource').prop('disabled', false);
 }
 
 function connect() {
@@ -197,7 +190,7 @@ function startStreaming(session) {
         constraints.video.withoutExtension = true;
     }
     if (Browser.isFirefox()){
-        constraints.video.mediaSource = $('#mediaSource').val();
+        constraints.video.mediaSource = "screen";
     }
     var options = {
         name: streamName,
