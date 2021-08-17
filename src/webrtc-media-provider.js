@@ -448,7 +448,8 @@ var createConnection = function (options) {
             obj[mediaType]["codec"] = codec.name;
             obj[mediaType]["codecRate"] = codec.sampleRate;
             Object.keys(report).forEach(function (key) {
-                if (key.startsWith("bytes") || key.startsWith("packets") || key.indexOf("Count") != -1) {
+                // Add audioLevel parameter parsing #WCS-3290
+                if (key.startsWith("bytes") || key.startsWith("packets") || key.indexOf("Count") != -1 || key.indexOf("audioLevel") != -1) {
                     obj[mediaType][key] = report[key];
                 }
             });
@@ -584,7 +585,7 @@ var createConnection = function (options) {
                     if (browserDetails.browser === 'firefox') {
                         clonedConstraints.video.mediaSource = source;
                     }
-                    if (screenCaptureSupportedBrowsers() && woExtension) {
+                    if (window.chrome && woExtension) {
                         getScreenDeviceIdWoExtension(clonedConstraints).then(function (screenSharingConstraints) {
                             navigator.mediaDevices.getDisplayMedia(screenSharingConstraints).then(
                                 (stream) => {

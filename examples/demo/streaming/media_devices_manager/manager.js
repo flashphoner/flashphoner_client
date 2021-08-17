@@ -17,13 +17,21 @@ var publishStream;
 var currentVolumeValue = 50;
 var currentGainValue = 50;
 var statsIntervalID;
-var intervalID;
+var speechIntervalID;
+var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 var videoBytesSent = 0;
 var audioBytesSent = 0;
 var videoBytesReceived = 0;
 var audioBytesReceived = 0;
 var playConnectionQualityStat = {};
 var publishConnectionQualityStat = {};
+// Speech detection parameters using incoming audio stats in Chrome #WCS-3290
+var statSpeechDetector = {
+    clipping: false,
+    lastClip: 0,
+    threshold: 0.010,
+    latency: 750
+};
 
 try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -37,6 +45,7 @@ function init_page() {
     //init api
     try {
         Flashphoner.init({
+            screenSharingExtensionId: extensionId,
             mediaProvidersReadyCallback: function (mediaProviders) {
                 if (Flashphoner.isUsingTemasys()) {
                     $("#audioInputForm").hide();
@@ -52,8 +61,11 @@ function init_page() {
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
 
-    if(Browser.isAndroid() || Browser.isiOS()) {
+    if(!Browser.isChrome() && !Browser.isFirefox()) {
         $('#screenShareForm').hide();
+    }
+    if (!Browser.isFirefox()) {
+        $('#mediaSourceForm').hide();
     }
 
     Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.OUTPUT).then(function (list) {
@@ -147,15 +159,16 @@ function onStopped() {
     $("#playBtn").prop('disabled', disable);
     $("#playStream").prop('disabled', disable);
     clearStatInfo("in");
-    if (!publishStream && !previewStream) {
+    if (statsIntervalID) {
         clearInterval(statsIntervalID);
         statsIntervalID = null;
     }
+    if (speechIntervalID) {
+        clearInterval(speechIntervalID);
+        speechIntervalID = null;
+        $("#talking").css('background-color', 'red');
+    }
     enablePlayToggles(false);
-    $("#audioMuted").text(false);
-    $("#videoMuted").text(false);
-    $("#audioMutedStream").text("");
-    $("#videoMutedStream").text("");
 }
 
 function playBtnClick() {
@@ -185,7 +198,7 @@ function onUnpublished() {
     $("#publishBtn").prop('disabled', disable);
     $("#publishStream").prop('disabled', disable);
     clearStatInfo("out");
-    if (!publishStream && !previewStream) {
+    if (statsIntervalID) {
         clearInterval(statsIntervalID);
         statsIntervalID = null;
     }
@@ -231,17 +244,7 @@ function onPublishing(stream) {
             console.log("Error " + e);
         });
     }).prop('disabled', !($('#sendAudio').is(':checked')));
-    //enableMuteToggles(false);
     stream.setVolume(currentVolumeValue);
-    //intervalID = setInterval(function() {
-    //    previewStream.getStats(function(stat) {
-    //        if (stat.incomingStreams.audio && stat.incomingStreams.audio.audioOutputLevel > 100) {
-    //            $("#talking").css('background-color', 'green');
-    //        } else {
-    //            $("#talking").css('background-color', 'red');
-    //        }
-    //    });
-    //},250);
 }
 
 function onPlaying(stream) {
@@ -256,15 +259,9 @@ function onPlaying(stream) {
     enablePlayToggles(true);
     if (stream.getAudioState()) {
         $("#audioMuted").text(stream.getAudioState().muted);
-        if (stream.getAudioState().muted) {
-            $("#audioMutedStream").text(stream.name());
-        }
     }
     if (stream.getVideoState()) {
         $("#videoMuted").text(stream.getVideoState().muted);
-        if (stream.getVideoState().muted) {
-            $("#videoMutedStream").text(stream.name());
-        }
     }
 }
 
@@ -352,7 +349,11 @@ function play() {
         //wait for incoming stream
         if (Flashphoner.getMediaProviders()[0] == "WebRTC") {
             setTimeout(function () {
-                detectSpeech(stream);
+                if(Browser.isChrome()) {
+                    detectSpeechChrome(stream);
+                } else {
+                    detectSpeech(stream);
+                }
             }, 3000);
         }
     }).on(STREAM_STATUS.STOPPED, function () {
@@ -364,29 +365,20 @@ function play() {
     }).on(CONNECTION_QUALITY.UPDATE, function (quality, clientFiltered, serverFiltered) {
         updateChart(quality, clientFiltered, serverFiltered, playConnectionQualityStat);
     }).on(STREAM_EVENT, function(streamEvent) {
-        let mutedStreamName="";
-        if(streamEvent.payload !== undefined) {
-            mutedStreamName = streamEvent.payload.streamName;
-        } else {
-            mutedStreamName = streamName;
-        }
         switch (streamEvent.type) {
             case STREAM_EVENT_TYPE.AUDIO_MUTED:
                 $("#audioMuted").text(true);
-                $("#audioMutedStream").text(mutedStreamName);
                 break;
             case STREAM_EVENT_TYPE.AUDIO_UNMUTED:
                 $("#audioMuted").text(false);
-                $("#audioMutedStream").text("");
                 break;
             case STREAM_EVENT_TYPE.VIDEO_MUTED:
                 $("#videoMuted").text(true);
-                $("#videoMutedStream").text(mutedStreamName);
                 break;
             case STREAM_EVENT_TYPE.VIDEO_UNMUTED:
                 $("#videoMuted").text(false);
-                $("#videoMutedStream").text("");
                 break;
+
         }
         console.log("Received streamEvent ", streamEvent.type);
     });
@@ -649,7 +641,7 @@ function switchToScreen() {
     if (publishStream) {
         $('#switchBtn').prop('disabled', true);
         $('#videoInput').prop('disabled', true);
-        publishStream.switchToScreen("screen", true).catch(function () {
+        publishStream.switchToScreen($('#mediaSource').val()).catch(function () {
             $("#screenShareToggle").removeAttr("checked");
             $('#switchBtn').prop('disabled', false);
             $('#videoInput').prop('disabled', false);
@@ -724,7 +716,7 @@ function detectSpeech(stream, level, latency) {
     source.connect(processor);
 
     // Check speech every 500 ms
-    intervalID = setInterval(function () {
+    speechIntervalID = setInterval(function () {
         if (processor.isSpeech()) {
             $("#talking").css('background-color', 'green');
         } else {
@@ -744,6 +736,35 @@ function handleAudio(event) {
             this.lastClip = window.performance.now();
         }
     }
+}
+
+// Detect speech using timer in Chrome because both ScriptProcessor and AudioWorklet don't work for incoming streams #WCS-3290
+function detectSpeechChrome(stream, level, latency) {
+    statSpeechDetector.threshold = level || 0.010;
+    statSpeechDetector.latency = latency || 750;
+    statSpeechDetector.clipping = false;
+    statSpeechDetector.lastClip = 0;
+    speechIntervalID = setInterval(function() {
+        stream.getStats(function(stat) {
+            let audioStats = stat.inboundStream.audio;
+            if(!audioStats) {
+                return;
+            }
+            // Using audioLevel WebRTC stats parameter
+            if (audioStats.audioLevel >= statSpeechDetector.threshold) {
+                statSpeechDetector.clipping = true;
+                statSpeechDetector.lastClip = window.performance.now();
+            }
+            if ((statSpeechDetector.lastClip + statSpeechDetector.latency) < window.performance.now()) {
+                statSpeechDetector.clipping = false;
+            }
+            if (statSpeechDetector.clipping) {
+                $("#talking").css('background-color', 'green');
+            } else {
+                $("#talking").css('background-color', 'red');
+            }
+        });
+    },500);
 }
 
 //Ready controls
@@ -901,6 +922,10 @@ function loadStats() {
                 }
 
                 if (stats.inboundStream.audio) {
+                    if (stats.inboundStream.audio.audioLevel) {
+                        // Round audio level to 6 decimal places
+                        stats.inboundStream.audio.audioLevel = stats.inboundStream.audio.audioLevel.toFixed(6);
+                    }
                     showStat(stats.inboundStream.audio, "inAudioStat");
                     let aBitrate = (stats.inboundStream.audio.bytesReceived - audioBytesReceived) * 8;
                     if ($('#inAudioStatBitrate').length == 0) {
