@@ -1,4 +1,5 @@
 var remoteVideo = null;
+var hlsPlayer = null
 
 function loadPlayerPage() {
     $("#playerPage").load("../hls-player/player-page.html", initPage );
@@ -10,11 +11,13 @@ function initPage() {
     $("#applyBtn").prop('disabled', false).text("Play").off('click').click(playBtnClick);
     remoteVideo = document.getElementById('remoteVideo');
     remoteVideo.style ="background-color: lightgrey;";
+    $('#llHlsMode').show();
 }
 
 
 function playBtnClick() {
     if (validateForm()) {
+        var llHlsEnabled = $('#llHlsEnabled').is(":checked");
         var streamName = $('#playStream').val();
         streamName = encodeURIComponent(streamName);
         var videoSrc = $("#urlServer").val() + '/' + streamName + '/' + streamName + '.m3u8';
@@ -24,10 +27,11 @@ function playBtnClick() {
             videoSrc += "?" + key + "=" + token;
         }
         if (Hls.isSupported()) {
-            var hls = new Hls();
-            hls.loadSource(videoSrc);
-            hls.attachMedia(remoteVideo);
-            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            console.log("Low Latency HLS: "+llHlsEnabled)
+            hlsPlayer = new Hls(getHlsConfig(llHlsEnabled));
+            hlsPlayer.loadSource(videoSrc);
+            hlsPlayer.attachMedia(remoteVideo);
+            hlsPlayer.on(Hls.Events.MANIFEST_PARSED, function() {
                 console.log("Play with HLS.js");
                 remoteVideo.play();
                 onStarted();            
@@ -40,7 +44,35 @@ function playBtnClick() {
 }
 
 
+function getHlsConfig(llHlsEnabled) {
+    var config = {
+        lowLatencyMode: false,
+        enableWorker: true,
+        backBufferLength: 90
+    };
+    if(llHlsEnabled) {
+        // Here we configure HLS.JS for lower latency
+        config = {
+           lowLatencyMode: llHlsEnabled,
+           enableWorker: true,
+           backBufferLength: 90,
+           liveBackBufferLength: 0,
+           liveSyncDuration: 0.5,
+           liveMaxLatencyDuration: 5,
+           liveDurationInfinity: true,
+           highBufferWatchdogPeriod: 1,
+        };
+    }
+    return config;
+}
+
+
 function stopBtnClick() {
+    if (hlsPlayer != null) {
+        console.log("Stop HLS segments loading");
+        hlsPlayer.stopLoad();
+        hlsPlayer = null;
+    }
     if (remoteVideo != null) {
         console.log("Stop HTML5 player");
         remoteVideo.pause();
@@ -58,6 +90,7 @@ function onStarted() {
     $("#key").prop('disabled', true);
     $("#token").prop('disabled', true);
     $("#player").prop('disabled', true);
+    $('#llHlsEnabled').prop('disabled', true);
     $("#applyBtn").prop('disabled', false).text("Stop").off('click').click(stopBtnClick);
 }
 
@@ -68,6 +101,7 @@ function onStopped() {
     $("#key").prop('disabled', false);
     $("#token").prop('disabled', false);
     $("#player").prop('disabled', false);
+    $('#llHlsEnabled').prop('disabled', false);
     $("#applyBtn").prop('disabled', false).text("Play").off('click').click(playBtnClick);
 }
 
