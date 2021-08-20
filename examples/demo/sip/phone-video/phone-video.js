@@ -15,6 +15,11 @@ $(document).ready(function () {
 
 function loadStats() {
     if (currentCall) {
+        // Stats shoukld be collected for active calls only #WCS-3260
+        let status = currentCall.status();
+        if (status != CALL_STATUS.ESTABLISHED && status != CALL_STATUS.HOLD) {
+            return;
+        }
         currentCall.getStats(function (stats) {
             if (stats && stats.outboundStream) {
                 if (stats.outboundStream.video) {
@@ -246,6 +251,7 @@ function connect() {
             if (screenSharing) {
                 $('[id=switchCamBtn]').prop('disabled', true);
             }
+            statIntervalId = setInterval(loadStats, 2000);
         }).on(CALL_STATUS.FINISH, function () {
             setStatus("#callStatus", CALL_STATUS.FINISH);
             currentCall = null;
@@ -276,6 +282,7 @@ function call() {
         setStatus("#callStatus", CALL_STATUS.ESTABLISHED);
         onAnswerOutgoing();
         $("#holdBtn").prop('disabled', false);
+        statIntervalId = setInterval(loadStats, 2000);
     }).on(CALL_STATUS.HOLD, function () {
         $("#holdBtn").prop('disabled', false);
     }).on(CALL_STATUS.FINISH, function () {
@@ -290,7 +297,6 @@ function call() {
     outCall.setAudioOutputId($('#speakerList').find(":selected").val());
     outCall.call();
     currentCall = outCall;
-    statIntervalId = setInterval(loadStats, 2000);
 
     $("#callBtn").text("Hangup").off('click').click(function () {
         $(this).prop('disabled', true);
@@ -336,6 +342,10 @@ function connectBtnClick() {
 }
 
 function onHangupOutgoing() {
+    if(statIntervalId) {
+        clearInterval(statIntervalId);
+        statIntervalId = null;
+    }
     $("#callBtn").text("Call").off('click').click(function () {
         if (filledInput($("#callee"))) {
             disableOutgoing(true);
@@ -356,7 +366,6 @@ function onIncomingCall(inCall) {
     var constraints = getConstraints();
     showIncoming(inCall.visibleName());
 
-    statIntervalId = setInterval(loadStats, 2000);
     $("#answerBtn").off('click').click(function () {
         $(this).prop('disabled', true);
         inCall.setAudioOutputId($('#speakerList').find(":selected").val());
@@ -378,7 +387,10 @@ function onIncomingCall(inCall) {
 }
 
 function onHangupIncoming() {
-    clearInterval(statIntervalId);
+    if(statIntervalId) {
+        clearInterval(statIntervalId);
+        statIntervalId = null;
+    }
     $('[id^=switch]').prop('disabled', true);
     $('#cameraList').prop('disabled', false);
     showOutgoing();
