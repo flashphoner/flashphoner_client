@@ -78,8 +78,10 @@ function joinBtnClick() {
         $("#room").prop('disabled', true);
         $("#login").prop('disabled', true);
         if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] === "MSE") {
-            Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function () {
-                start();
+            Flashphoner.playFirstVideo(localDisplay, true, PRELOADER_URL).then(function () {
+                Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function () {
+                    start();
+                });
             });
             return;
         }
