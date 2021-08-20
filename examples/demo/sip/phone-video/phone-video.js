@@ -512,10 +512,6 @@ function getConstraints() {
             frameRate: parseInt($('#sendFramerate').val())
         }
     };
-    if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-        constraints.video.width = {min: parseInt($('#sendWidth').val()), max: 640};
-        constraints.video.height = {min: parseInt($('#sendHeight').val()), max: 480};
-    }
     return constraints;
 }
 
