@@ -28,7 +28,7 @@ function onJoined(room) {
     $("#joinBtn").text("Leave").off('click').click(function(){
         $(this).prop('disabled', true);
         room.leave().then(onLeft, onLeft);
-    }).prop('disabled', false);
+    });
     $('#sendMessageBtn').off('click').click(function(){
         var message = field('message');
         addMessage(connection.username(), message);
@@ -99,7 +99,7 @@ function createConnection(url, username) {
 }
 
 function joinRoom() {
-    connection.join({name: getRoomName(), record: isRecord()}).on(ROOM_EVENT.STATE, function(room){
+    connection.join({name: getRoomName(), record: isRecord()}).on(ROOM_EVENT.STATE, function(room) {
         var participants = room.getParticipants();
         console.log("Current number of participants in the room: " + participants.length);
         if (participants.length >= _participants) {
@@ -232,6 +232,7 @@ function onMediaPublished(stream) {
             stream.muteVideo();
         }
     }).prop('disabled',false);
+    $("#joinBtn").prop('disabled', false);
 }
 
 function onMediaStopped(room) {
@@ -241,10 +242,12 @@ function onMediaStopped(room) {
     }).prop('disabled', (connection.getRooms().length == 0));
     $("#localAudioToggle").prop("disabled", true);
     $("#localVideoToggle").prop("disabled", true);
+    $("#joinBtn").prop('disabled', false);
 }
 
 //publish local video
 function publishLocalMedia(room) {
+    $("#joinBtn").prop('disabled', true);
     var constraints = {
         audio: true,
         video: true
