@@ -8,6 +8,7 @@ var remoteVideo;
 var canvas;
 var previewStream;
 var publishStream;
+var canvStream;
 
 //////////////////////////////////
 /////////////// Init /////////////
@@ -25,12 +26,13 @@ function init_page() {
     localVideo = document.createElement("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
     canvas = document.getElementById("canvas");
-    
+
     $("#urlServer").val(setURL() + "/" + createUUID(4));
     onDisconnected();
 }
 
 function connect() {
+    canvStream = createCanvasStream();
     var url = $('#urlServer').val();
 
     //create session
@@ -69,12 +71,14 @@ function onDisconnected() {
         if (validateForm("connectionForm")) {
             $('#urlServer').prop('disabled', true);
             $(this).prop('disabled', true);
+            $('#usedAnimFrame').prop('disabled', true);
             $('#sendAudio').prop('disabled', true);
             $('#sendVideo').prop('disabled', true);
             connect();
         }
     }).prop('disabled', false);
     $('#urlServer').prop('disabled', false);
+    $('#usedAnimFrame').prop('disabled', false);
     $('#sendAudio').prop('disabled', false);
     $('#sendVideo').prop('disabled', false);
 }
@@ -134,10 +138,12 @@ function stopStreaming() {
 function playStream() {
     var session = Flashphoner.getSessions()[0];
     var streamName = field("urlServer").split('/')[3];
+    var constraints = {audio: !Browser.isiOS()};
 
     session.createStream({
         name: streamName,
-        display: remoteVideo
+        display: remoteVideo,
+        constraints: constraints
     }).on(STREAM_STATUS.PENDING, function (stream) {
         var video = document.getElementById(stream.id());
         if (!video.hasListeners) {
@@ -244,7 +250,7 @@ function validateForm(formId) {
 
 function getConstraints() {
     var constraints;
-    var stream = createCanvasStream();
+    var stream = canvStream;
     constraints = {
         audio: false,
         video: false,
@@ -257,15 +263,22 @@ function createCanvasStream() {
     var canvasContext = canvas.getContext("2d");
     var canvasStream = canvas.captureStream(30);
     mockVideoElement = document.createElement("video");
+    mockVideoElement.setAttribute("playsinline", "");
+    mockVideoElement.setAttribute("webkit-playsinline", "");
     mockVideoElement.src = '../../dependencies/media/test_movie.mp4';
     mockVideoElement.loop = true;
     mockVideoElement.muted = true;
+    var useRequestAnimationFrame = $("#usedAnimFrame").is(':checked');
     mockVideoElement.addEventListener("play", function () {
         var $this = this;
         (function loop() {
             if (!$this.paused && !$this.ended) {
                 canvasContext.drawImage($this, 0, 0);
-                setTimeout(loop, 1000 / 30); // drawing at 30fps
+                if (useRequestAnimationFrame) {
+                    requestAnimationFrame(loop);
+                } else {
+                    setTimeout(loop, 1000 / 30); // drawing at 30fps
+                }
             }
         })();
     }, 0);
