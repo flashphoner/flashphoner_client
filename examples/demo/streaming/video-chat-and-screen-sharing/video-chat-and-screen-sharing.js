@@ -1,6 +1,7 @@
+var Flashphoner = RoomApi.sdk;
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
-var ROOM_EVENT = Flashphoner.roomApi.events;
+var ROOM_EVENT = RoomApi.events;
 var Browser = Flashphoner.Browser;
 var connection;
 var room_;
@@ -150,7 +151,7 @@ function start() {
             return;
         }
     }
-    connection = Flashphoner.roomApi.connect({urlServer: url, username: username}).on(SESSION_STATUS.FAILED, function(session){
+    connection = RoomApi.connect({urlServer: url, username: username}).on(SESSION_STATUS.FAILED, function(session){
         setStatus('#status', session.status());
         onLeft();
     }).on(SESSION_STATUS.DISCONNECTED, function(session) {

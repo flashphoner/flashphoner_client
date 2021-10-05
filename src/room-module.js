@@ -5,6 +5,7 @@ var Promise = require('promise-polyfill');
 const { v1: uuid_v1 } = require('uuid');
 var util = require('./util');
 var ROOM_REST_APP = "roomApp";
+var Flashphoner = require('./flashphoner-core');
 
 /**
  * Room api based on core api
@@ -545,5 +546,6 @@ var events = {
 
 module.exports = {
     connect: appSession,
-    events: events
+    events: events,
+    sdk: Flashphoner    
 };

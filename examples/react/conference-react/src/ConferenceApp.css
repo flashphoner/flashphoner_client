@@ -1,0 +1,34 @@
+video:-webkit-full-screen {
+    border-radius: 1px;
+}
+
+.fp-remoteVideo {
+    border: 1px double black;
+    width: 322px;
+    height: 242px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.display {
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+}
+
+.fp-localVideo {
+    border: 1px double black;
+    width: 222px;
+    height: 167px;
+    text-align: center;
+    margin: 0 auto;
+}
+.fp-localVideo>video {
+    width: 220px;
+    height: 165px;
+}
+
+video, object {
+    width: 100%;
+    height: 100%;
+}

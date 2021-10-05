@@ -534,7 +534,7 @@ var createSession = function (options) {
                 mediaProviders: Object.keys(MediaProvider),
                 keepAlive: keepAlive,
                 authToken:authToken,
-                clientVersion: "0.5.28",
+                clientVersion: "2.0.1",
                 clientOSVersion: window.navigator.appVersion,
                 clientBrowserVersion: window.navigator.userAgent,
                 msePacketizationVersion: 2,
@@ -2690,7 +2690,6 @@ module.exports = {
     playFirstSound: playFirstSound,
     playFirstVideo: playFirstVideo,
     getLogger: getLogger,
-    roomApi: require('./room-module'),
     constants: constants,
     /**
      * The Screensharing whitelist is no longer needed to share your screen or windows starting Firefox 52

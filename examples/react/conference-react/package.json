@@ -1,0 +1,42 @@
+{
+  "name": "conference-react",
+  "description": "Conference React appliction example using Flashphoner Web SDK",
+  "author": "Flashphoner",
+  "license": "MIT",
+  "version": "1.0.0",
+  "homepage": ".",
+  "private": true,
+  "dependencies": {
+    "@flashphoner/websdk": "^2.0.198",
+    "bootstrap": "^5.1.1",
+    "immutability-helper": "^3.1.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3",
+    "react-scrollable-feed": "^1.3.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
