@@ -3,6 +3,7 @@
   "version": "2.0",
   "description": "Official Flashphoner WebCallServer WebSDK package",
   "main": "./src/flashphoner-core.js",
+  "types": "./src/flashphoner-core.d.ts",
   "dependencies": {
     "adapterjs": "0.15.5",
     "es6-promise": "4.0.5",

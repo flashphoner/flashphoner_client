@@ -1,0 +1,45 @@
+{
+  "name": "two-way-streaming-ts",
+  "description": "Two Way Streaming React appliction example written in Typescript using Flashphoner Web SDK",
+  "author": "Flashphoner",
+  "license": "MIT",
+  "version": "1.0.0",
+  "homepage": ".",
+  "private": true,
+  "dependencies": {
+    "@flashphoner/websdk": "^2.0.202",
+    "@types/jest": "^27.0.2",
+    "@types/node": "^16.10.3",
+    "@types/react": "^17.0.27",
+    "@types/react-dom": "^17.0.9",
+    "bootstrap": "^5.1.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-scripts": "4.0.3",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
