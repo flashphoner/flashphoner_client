@@ -719,7 +719,7 @@ var createSession = function (options) {
      * @param {HTMLElement} options.localVideoDisplay Div element local video should be displayed in
      * @param {HTMLElement} options.remoteVideoDisplay Div element remote video should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
-     * @param {Array<string>=} options.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
+     * @param {string=} options.stripCodecs Comma separated strings of codecs which should be stripped from WebRTC SDP (ex. "SILK,G722")
      * @param {Array<string>=} options.sipSDP Array of custom SDP params (ex. bandwidth (b=))
      * @param {Array<string>=} options.sipHeaders Array of custom SIP headers
      * @param {string=} options.videoContentHint Video content hint for browser ('detail' by default to maintain resolution), {@link Flashphoner.constants.CONTENT_HINT_TYPE}
@@ -959,7 +959,7 @@ var createSession = function (options) {
          * @param {Boolean=} answerOptions.receiveAudio Receive audio
          * @param {Boolean=} answerOptions.receiveVideo Receive video
          * @param {String=} answerOptions.constraints Answer call with constraints
-         * @param {Array<string>=} answerOptions.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
+         * @param {String=} answerOptions.stripCodecs Comma separated string of codecs which should be stripped from WebRTC SDP (ex. "SILK,G722")
          * @param {Array<string>=} answerOptions.sipSDP Array of custom SDP params (ex. bandwidth (b=))
          * @param {Array<string>=} answerOptions.sipHeaders Array of custom SIP headers
          * @param {sdpHook} sdpHook The callback that handles sdp from the server
@@ -1472,7 +1472,7 @@ var createSession = function (options) {
      * @param {HTMLElement} options.display Div element stream should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
      * @param {Integer} [options.flashBufferTime=0] Specifies how long to buffer messages before starting to display the stream (Flash-only)
-     * @param {Array<string>=} options.stripCodecs Array of codecs which should be stripped from SDP (WebRTC)
+     * @param {String=} options.stripCodecs Comma separated string of codecs which should be stripped from WebRTC SDP (ex. "H264,PCMA,PCMU,G722")
      * @param {string=} options.rtmpUrl Rtmp url stream should be forwarded to
      * @param {Object=} options.mediaConnectionConstraints Stream specific constraints for underlying RTCPeerConnection
      * @param {Boolean=} options.flashShowFullScreenButton Show full screen button in flash

@@ -5,6 +5,7 @@ var STREAM_EVENT_TYPE = Flashphoner.constants.STREAM_EVENT_TYPE;
 var CONNECTION_QUALITY = Flashphoner.constants.CONNECTION_QUALITY;
 var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
 var TRANSPORT_TYPE = Flashphoner.constants.TRANSPORT_TYPE;
+var CONTENT_HINT_TYPE = Flashphoner.constants.CONTENT_HINT_TYPE;
 var CONNECTION_QUALITY_UPDATE_TIMEOUT_MS = 10000;
 var preloaderUrl = "../../dependencies/media/preloader.mp4";
 var Browser = Flashphoner.Browser;
@@ -412,6 +413,7 @@ function publish() {
     var mediaConnectionConstraints;
     var session = Flashphoner.getSessions()[0];
     var transportInput = $('#transportInput').val();
+    var contentHint = $('#contentHintInput').val();
     var cvo = $("#cvo").is(':checked');
     var strippedCodecs = $("#stripPublishCodecs").val();
 
@@ -434,7 +436,8 @@ function publish() {
         sdpHook: rewriteSdp,
         transport: transportInput,
         cvoExtension: cvo,
-        stripCodecs: strippedCodecs
+        stripCodecs: strippedCodecs,
+        videoContentHint: contentHint
     }).on(STREAM_STATUS.PUBLISHING, function (stream) {
         $("#testBtn").prop('disabled', true);
         var video = document.getElementById(stream.id());
@@ -861,6 +864,29 @@ function readyControls() {
         option.text = transportType;
         option.value = transportType;
         transportOutput.appendChild(option);
+    }
+
+    //init content hint form
+    var contentType;
+    var contentTypeValue;
+    var option;
+    var contentHintInput = document.getElementById("contentHintInput");
+    for (contentType in CONTENT_HINT_TYPE) {
+        option = document.createElement("option");
+        switch(contentType) {
+            case 'MOTION':
+                contentTypeValue = CONTENT_HINT_TYPE.MOTION;
+            break;
+            case 'DETAIL':
+                contentTypeValue = CONTENT_HINT_TYPE.DETAIL;
+            break;
+            case 'TEXT':
+                contentTypeValue = CONTENT_HINT_TYPE.TEXT;
+            break;
+        }
+        option.text = contentTypeValue;
+        option.value = contentTypeValue;
+        contentHintInput.appendChild(option);
     }
 }
 
