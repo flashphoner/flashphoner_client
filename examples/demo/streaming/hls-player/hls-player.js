@@ -37,7 +37,8 @@ function playBtnClick() {
 function stopBtnClick() {
     if (player != null) {
         console.log("Stop VideoJS player");
-        player.pause();
+        //player.pause();
+        player.dispose();
     }
     onStopped();
 }
@@ -60,6 +61,23 @@ function onStopped() {
     $("#token").prop('disabled', false);
     $("#player").prop('disabled', false);
     $("#applyBtn").prop('disabled', false).text("Play").off('click').click(playBtnClick);
+    if(!document.getElementById('remoteVideo')) {
+        createRemoteVideo(document.getElementById('videoContainer'));
+    }
+}
+
+
+function createRemoteVideo(parent) {
+    remoteVideo = document.createElement("video");
+    remoteVideo.id = "remoteVideo";
+    remoteVideo.width=852;
+    remoteVideo.height=480;
+    remoteVideo.controls="controls";
+    remoteVideo.autoplay="autoplay";
+    remoteVideo.type="application/vnd.apple.mpegurl";
+    remoteVideo.className = "video-js vjs-default-skin";
+    parent.appendChild(remoteVideo);
+    player = videojs(remoteVideo);
 }
 
 
