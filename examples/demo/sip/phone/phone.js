@@ -79,18 +79,15 @@ function createSession(authToken) {
         registerRequired: registerRequired
     };
 
+    var connectionOptions = {
+        urlServer: url,
+        keepAlive: true
+    };
+
     if (authToken) {
-        connectionOptions = {
-            urlServer: url,
-            authToken: authToken,
-            keepAlive: true
-        };
+        connectionOptions.authToken = authToken;
     } else {
-        connectionOptions = {
-            urlServer: url,
-            sipOptions: sipOptions,
-            keepAlive: false
-        };
+        connectionOptions.sipOptions = sipOptions;
     }
 
     //create session
