@@ -417,14 +417,14 @@ var createConnection = function (options) {
                                 if (!report.isRemote) {
                                     if (report.type == 'outbound-rtp') {
                                         fillStatObject(result.outboundStream, report);
-                                        if (report.mediaType == 'video') {
+                                        if (report.mediaType == 'video' && localVideo != undefined && localVideo != null) {
                                             var vSettings = localVideo.srcObject.getVideoTracks()[0].getSettings();
                                             result.outboundStream[report.mediaType].height = vSettings.height;
                                             result.outboundStream[report.mediaType].width = vSettings.width;
                                         }
                                     } else if (report.type == 'inbound-rtp') {
                                         fillStatObject(result.inboundStream, report);
-                                        if (report.mediaType == 'video' && remoteVideo != undefined) {
+                                        if (report.mediaType == 'video' && remoteVideo != undefined && remoteVideo != null) {
                                             result.inboundStream[report.mediaType].height = remoteVideo.videoHeight;
                                             result.inboundStream[report.mediaType].width = remoteVideo.videoWidth;
                                         }
