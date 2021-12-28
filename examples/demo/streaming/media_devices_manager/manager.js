@@ -62,11 +62,8 @@ function init_page() {
     localVideo = document.getElementById("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
 
-    if(!Browser.isChrome() && !Browser.isFirefox()) {
+    if(Browser.isAndroid() || Browser.isiOS()) {
         $('#screenShareForm').hide();
-    }
-    if (!Browser.isFirefox()) {
-        $('#mediaSourceForm').hide();
     }
 
     Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.OUTPUT).then(function (list) {
@@ -644,7 +641,7 @@ function switchToScreen() {
     if (publishStream) {
         $('#switchBtn').prop('disabled', true);
         $('#videoInput').prop('disabled', true);
-        publishStream.switchToScreen($('#mediaSource').val()).catch(function () {
+        publishStream.switchToScreen($('#mediaSource').val(), true).catch(function () {
             $("#screenShareToggle").removeAttr("checked");
             $('#switchBtn').prop('disabled', false);
             $('#videoInput').prop('disabled', false);

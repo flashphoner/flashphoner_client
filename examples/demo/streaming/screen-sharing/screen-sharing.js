@@ -16,7 +16,7 @@ function init_page() {
     }
 
     var interval;
-    if (Browser.isFirefox()) {
+    if (Browser.isFirefox() && !Browser.isAndroid() && !Browser.isiOS()) {
         $("#installExtensionButton").show();
         interval = setInterval(function() {
             if (Flashphoner.firefoxScreenSharingExtensionInstalled) {
