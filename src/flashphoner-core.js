@@ -403,6 +403,9 @@ var getSession = function (id) {
  * @param {Object=} options.sipOptions Sip configuration
  * @param {Object=} options.mediaOptions Media connection configuration
  * @param {Integer=} options.timeout Connection timeout in milliseconds
+ * @param {Integer=} options.pingInterval Server ping interval in milliseconds [0]
+ * @param {Integer=} options.receiveProbes A maximum subsequental pings received missing count [0]
+ * @param {Integer=} options.probesInterval Interval to check subsequental pings received [0]
  * @returns {Session} Created session
  * @throws {Error} Error if API is not initialized
  * @throws {TypeError} Error if options.urlServer is not specified
@@ -427,6 +430,8 @@ var createSession = function (options) {
     var mediaOptions = options.mediaOptions;
     var keepAlive = options.keepAlive;
     var timeout = options.timeout;
+    var wsPingSender = new WSPingSender(options.pingInterval || 0);
+    var wsPingReceiver = new WSPingReceiver(options.receiveProbes || 0, options.probesInterval || 0);
     var connectionTimeout;
 
     var cConfig;
@@ -546,6 +551,10 @@ var createSession = function (options) {
             //connect to REST App
             send("connection", cConfig);
             logger.setConnection(wsConnection);
+            // Send ping messages to server to check if connection is still alive #WCS-3410
+            wsPingSender.start();
+            // Check subsequintel pings received from server to check if connection is still alive #WCS-3410
+            wsPingReceiver.start();
         };
         wsConnection.onmessage = function (event) {
             var data = {};
@@ -558,6 +567,7 @@ var createSession = function (options) {
             switch (data.message) {
                 case 'ping':
                     send("pong", null);
+                    wsPingReceiver.success();
                     break;
                 case 'getUserData':
                     authToken = obj.authToken;
@@ -684,6 +694,10 @@ var createSession = function (options) {
     function onSessionStatusChange(newStatus, obj) {
         sessionStatus = newStatus;
         if (sessionStatus == SESSION_STATUS.DISCONNECTED || sessionStatus == SESSION_STATUS.FAILED) {
+            // Stop pinging server #WCS-3410
+            wsPingSender.stop();
+            // Stop checking pings received #WCS-3410
+            wsPingReceiver.stop();
             //remove streams
             for (var prop in streamRefreshHandlers) {
                 if (streamRefreshHandlers.hasOwnProperty(prop) && typeof streamRefreshHandlers[prop] === 'function') {
@@ -697,6 +711,65 @@ var createSession = function (options) {
             callbacks[sessionStatus](session, obj);
         }
     }
+
+    // Websocket periodic ping sender
+    function WSPingSender(interval) {
+        this.interval = interval || 0;
+        this.intervalId = null;
+        this.start = function() {
+            if (this.interval > 0) {
+                this.intervalId = setInterval(function() {
+                    send("ping", null);
+                }, this.interval);
+            }
+        };
+        this.stop = function() {
+            if (this.intervalId) {
+                clearInterval(this.intervalId);
+            }
+        };
+        
+        return(this);
+    }
+
+    // Websocket ping receive prober
+    function WSPingReceiver(receiveProbes, probesInterval) {
+        this.maxPings = receiveProbes || 0;
+        this.interval = probesInterval || 0;
+        this.intervalId = null;
+        this.pingsMissing = 0;
+        this.start = function() {
+            if (this.maxPings > 0 && this.interval > 0) {
+                let receiver = this;
+                this.intervalId = setInterval(function() {
+                    receiver.checkPingsReceived();
+                }, this.interval);
+            }
+        };
+        this.stop = function() {
+            if (this.intervalId) {
+                clearInterval(this.intervalId);
+            }
+            this.pingsMissing = 0;
+        };
+        this.checkPingsReceived = function() {
+            this.pingsMissing++;
+            if (this.pingsMissing >= this.maxPings) {
+                this.failure();
+            }
+        };
+        this.success = function() {
+            this.pingsMissing = 0;
+        };
+        this.failure = function() {
+            logger.info(LOG_PREFIX, "Missing " + this.pingsMissing + " pings from server, connection seems to be down");
+            onSessionStatusChange(SESSION_STATUS.FAILED);
+            wsConnection.close();
+        };
+
+        return(this);
+    }
+
 
     /**
      * @callback sdpHook

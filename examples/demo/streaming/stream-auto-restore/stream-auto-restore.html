@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="stream-auto-restore.css">
-    <title>Two-way Streaming</title>
+    <title>Streaming Auto Restore</title>
     <script type="text/javascript" src="../../../../flashphoner.js"></script>
     <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
     <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
@@ -68,6 +68,82 @@
             </div>
             <div class="text-center">
                 <div id="connectStatus"></div>
+            </div>
+        </div>
+    </div>
+    <div id="bitrateForm">
+        <div class="row row-space">
+            <div class="form-group col-sm-6 col-sm-offset-2">
+                <label class="col-sm-3 control-label">Check bitrate</label>
+                <div class="col-sm-1">
+                    <input type="checkbox" class="checkbox" checked id="checkBitrate" value="true">
+                </div>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="form-group col-sm-6 col-sm-offset-2">
+                <label class="col-sm-3 control-label">Change codec</label>
+                <div class="col-sm-1">
+                    <input type="checkbox" class="checkbox" checked id="changeCodec" value="true">
+                </div>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="form-group col-sm-6 col-sm-offset-2">
+                <label class="col-sm-3 control-label">Bitrate check interval</label>
+                <div class="col-sm-3">
+                    <input class="form-control" id="bitrateInteval" type="text">    
+                </div>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="form-group col-sm-6 col-sm-offset-2">
+                <label class="col-sm-3 control-label">Max tries</label>
+                <div class="col-sm-3">
+                    <input class="form-control" id="bitrateMaxTries" type="text">    
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="reconnectForm">
+        <div class="row row-space">
+            <div class="form-group col-sm-6 col-sm-offset-2">
+                    <label class="col-sm-3 control-label">Restore connection</label>
+                    <div class="col-sm-1">
+                        <input type="checkbox" class="checkbox" checked id="restoreConnection" value="true">
+                    </div>
+                </div>
+        </div>
+        <div class="row row-space">
+            <div class="form-group col-sm-6 col-sm-offset-2">
+                <label class="col-sm-3 control-label">Timeout</label>
+                <div class="col-sm-3">
+                    <input class="form-control" id="restoreTimeout" type="text">    
+                </div>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="form-group col-sm-6 col-sm-offset-2">
+                <label class="col-sm-3 control-label">Max tries</label>
+                <div class="col-sm-3">
+                    <input class="form-control" id="restoreMaxTries" type="text">    
+                </div>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="form-group col-sm-6 col-sm-offset-2">
+                <label class="col-sm-3 control-label">Missing pings</label>
+                <div class="col-sm-3">
+                    <input class="form-control" id="maxPingsMissing" type="text">    
+                </div>
+            </div>
+        </div>
+        <div class="row row-space">
+            <div class="form-group col-sm-6 col-sm-offset-2">
+                <label class="col-sm-3 control-label">Pings check period</label>
+                <div class="col-sm-3">
+                    <input class="form-control" id="pingsPeriod" type="text">    
+                </div>
             </div>
         </div>
     </div>

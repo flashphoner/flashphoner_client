@@ -179,7 +179,10 @@ export function createSession(options: {
     custom?: any | undefined;
     sipOptions?: any | undefined;
     mediaOptions?: any | undefined;
-    timeout?: any | undefined;
+    timeout?: number | undefined;
+    pingInterval?: number | undefined;
+    receiveProbes?: number | undefined;
+    probesInterval?: number | undefined;
 }): Session;
 export function playFirstSound (noise?: boolean): any;
 export function playFirstVideo (display: any, isLocal: boolean, src: any): any;
