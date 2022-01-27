@@ -39,12 +39,6 @@ function connect() {
     console.log("Create new session with url " + url);
     Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function (session) {
         setStatus("#connectStatus", session.status());
-        if (Browser.isSafariWebRTC()) {
-            Flashphoner.playFirstVideo(localVideo, true, PRELOADER_URL).then(function() {
-                startStreaming();
-            });
-            return;
-        }
         startStreaming();
     }).on(SESSION_STATUS.DISCONNECTED, function () {
         setStatus("#connectStatus", SESSION_STATUS.DISCONNECTED);
@@ -107,12 +101,6 @@ function startStreaming() {
         setStatus("#publishStatus", STREAM_STATUS.PUBLISHING);
         if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
             Flashphoner.playFirstSound();
-        } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] === "MSE") {
-            Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function() {
-                playStream();
-                onPublishing(stream);
-            });
-            return;
         }
         playStream();
         onPublishing(stream);

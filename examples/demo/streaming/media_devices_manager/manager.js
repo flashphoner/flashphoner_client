@@ -173,12 +173,6 @@ function playBtnClick() {
     if (validateForm("play")) {
         muteInputs("play");
         $(this).prop('disabled', true);
-        if (Browser.isSafariWebRTC()) {
-            Flashphoner.playFirstVideo(remoteVideo, false, preloaderUrl).then(function() {
-                play();
-            });
-            return;
-        }
         play();
     }
 }
@@ -207,12 +201,6 @@ function publishBtnClick() {
     if (validateForm("send")) {
         muteInputs("send");
         $(this).prop('disabled', true);
-        if (Browser.isSafariWebRTC()) {
-            Flashphoner.playFirstVideo(localVideo, true, preloaderUrl).then(function() {
-                publish();
-            });
-            return;
-        }
         publish();
     }
 }

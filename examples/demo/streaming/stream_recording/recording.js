@@ -40,12 +40,6 @@ function publishBtnClick() {
         $(this).prop('disabled', true);
         $('#url').prop('disabled', true);
         $("#downloadDiv").hide();
-        if (Browser.isSafariWebRTC()) {
-            Flashphoner.playFirstVideo(localVideo, true, PRELOADER_URL).then(function() {
-                startRecording();
-            });
-            return;
-        }
         startRecording();
     }
 }

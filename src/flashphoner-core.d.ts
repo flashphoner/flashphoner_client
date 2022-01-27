@@ -6,7 +6,7 @@ export declare class Call {
         receiveAudio?: boolean | undefined;
         receiveVideo?: boolean | undefined;
         constraints?: string | undefined;
-        stripCodecs?: Array<string> | undefined;
+        stripCodecs?: string | undefined;
         sipSDP?: Array<string> | undefined;
         sipHeaders?: Array<string> | undefined;
     }) => void;
@@ -91,12 +91,25 @@ export declare class Session {
         cacheLocalResources?: boolean | undefined;
         playWidth?: number | undefined;
         playHeight?: number | undefined;
-
+        record?: boolean | undefined;
+        display: any;
+        custom?: any | undefined;
+        stripCodecs?: string | undefined;
+        rtmpUrl?: string | undefined;
+        mediaConnectionConstraints?: any | undefined;
+        flashShowFullScreenButton?: boolean | undefined;
+        transport?: string | undefined;
+        cvoExtension?: boolean | undefined;
+        playoutDelay?: number | undefined;
+        useCanvasMediaStream?: boolean | undefined;
+        videoContentHint?: string | undefined;
+        unmutePlayOnStart?: boolean | undefined;
+        sdpHook?: any | undefined
     }) => Stream;
     createCall: (options: {
         callee: string;
         visibleName?: string | undefined;
-        constraints: any;
+        constraints?: any | undefined;
         mediaProvider: string;
         receiveAudio?: boolean | undefined;
         receiveVideo?: boolean | undefined;
@@ -104,10 +117,11 @@ export declare class Session {
         localVideoDisplay: HTMLElement;
         remoteVideoDisplay: HTMLElement;
         custom?: any | undefined;
-        stripCodecs?: Array<string> | undefined;
+        stripCodecs?: string | undefined;
         sipSDP?: Array<string> | undefined;
         sipHeaders?: Array<string> | undefined;
         videoContentHint?: string | undefined;
+        toStream?: string | undefined;
     }) => Call;
     getStream: (streamId: string) => any;
     getStreams: () => any[];

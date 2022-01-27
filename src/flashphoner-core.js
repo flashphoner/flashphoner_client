@@ -1545,7 +1545,7 @@ var createSession = function (options) {
      * @param {HTMLElement} options.display Div element stream should be displayed in
      * @param {Object=} options.custom User provided custom object that will be available in REST App code
      * @param {Integer} [options.flashBufferTime=0] Specifies how long to buffer messages before starting to display the stream (Flash-only)
-     * @param {String=} options.stripCodecs Comma separated string of codecs which should be stripped from WebRTC SDP (ex. "H264,PCMA,PCMU,G722")
+     * @param {string=} options.stripCodecs Comma separated string of codecs which should be stripped from WebRTC SDP (ex. "H264,PCMA,PCMU,G722")
      * @param {string=} options.rtmpUrl Rtmp url stream should be forwarded to
      * @param {Object=} options.mediaConnectionConstraints Stream specific constraints for underlying RTCPeerConnection
      * @param {Boolean=} options.flashShowFullScreenButton Show full screen button in flash
@@ -1554,6 +1554,7 @@ var createSession = function (options) {
      * @param {Integer=} options.playoutDelay Time delay between network reception of media and playout
      * @param {string=} options.useCanvasMediaStream EXPERIMENTAL: when publish bind browser's media stream to the canvas. It can be useful for image filtering
      * @param {string=} options.videoContentHint Video content hint for browser ('detail' by default to maintain resolution), {@link Flashphoner.constants.CONTENT_HINT_TYPE}
+     * @param {Boolean=} options.unmutePlayOnStart Unmute playback on start. May be used after user gesture only, so set 'unmutePlayOnStart: false' for autoplay
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
@@ -1657,6 +1658,7 @@ var createSession = function (options) {
         var playoutDelay = options.playoutDelay;
         var useCanvasMediaStream = options.useCanvasMediaStream;
         var videoContentHint = options.videoContentHint;
+        var unmutePlayOnStart = options.unmutePlayOnStart;
 
         var audioState_;
         var videoState_;
@@ -1831,7 +1833,8 @@ var createSession = function (options) {
                 connectionConstraints: mediaConnectionConstraints,
                 audioOutputId: audioOutputId,
                 remoteVideo: remoteVideo,
-                playoutDelay: playoutDelay
+                playoutDelay: playoutDelay,
+                unmutePlayOnStart: unmutePlayOnStart
             }, streamRefreshHandlers[id_]).then(function (newConnection) {
                 mediaConnection = newConnection;
                 try {

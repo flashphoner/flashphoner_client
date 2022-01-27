@@ -41,14 +41,19 @@ function init_page() {
         animate: true,
         slide: function(event, ui) {
             //WCS-2375. fixed autoplay in ios safari
-            stream.unmuteRemoteAudio();
+            if (stream.isRemoteAudioMuted()) {
+                stream.unmuteRemoteAudio();
+            }
             currentVolumeValue = ui.value;
             stream.setVolume(currentVolumeValue);
         }
     }).slider("disable");
     onStopped();
-    if (autoplay)
+    if (autoplay) {
+        // We can start autoplay with muted audio only, so set volume slider to 0 #WCS-2425
+        $("#volumeControl").slider('value', 0);
         $("#playBtn").click();
+    }
 }
 
 function onStarted(stream) {
@@ -141,6 +146,9 @@ function playStream(session) {
         options.playWidth = resolution.split("x")[0];
         options.playHeight = resolution.split("x")[1];
     }
+    if (autoplay) {
+        options.unmutePlayOnStart = false;
+    }
     stream = session.createStream(options).on(STREAM_STATUS.PENDING, function (stream) {
         $("#preloader").show();
         var video = document.getElementById(stream.id());
@@ -158,13 +166,6 @@ function playStream(session) {
                         var ratio = streamResolution.width / streamResolution.height;
                         var newHeight = Math.floor(options.playWidth / ratio);
                         resizeVideo(event.target, options.playWidth, newHeight);
-                    }
-                });
-            } else {
-                //WCS-2375. fixed autoplay in ios safari
-                video.addEventListener('playing', function () {
-                    if (autoplay && stream.isRemoteAudioMuted()) {
-                        $("#volumeControl").slider('value', 0);
                     }
                 });
             }

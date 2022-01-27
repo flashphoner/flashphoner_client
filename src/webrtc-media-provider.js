@@ -52,6 +52,8 @@ var createConnection = function (options) {
         var playoutDelay = options.playoutDelay;
         // Set video track contentHint to `detail` by default to workaround Chromium 91 bug #WCS-3257
         var videoContentHint = options.videoContentHint ? options.videoContentHint : 'detail';
+        // Pass the option to unmute automatically (true by default) #WCS-2425
+        var unmutePlayOnStart = options.unmutePlayOnStart !== undefined ? options.unmutePlayOnStart : true;
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
@@ -67,7 +69,7 @@ var createConnection = function (options) {
             }
             remoteVideo = getCacheInstance(remoteDisplay);
             if (!remoteVideo) {
-                remoteVideo = document.createElement('video');
+                remoteVideo = createVideoElement();
                 remoteDisplay.appendChild(remoteVideo);
             }
             remoteVideo.id = id + "-remote";
@@ -88,7 +90,7 @@ var createConnection = function (options) {
                     if (cachedVideo) {
                         remoteVideo = cachedVideo;
                     } else {
-                        remoteVideo = document.createElement('video');
+                        remoteVideo = createVideoElement();
                         display.appendChild(remoteVideo);
                     }
                     remoteVideo.id = id;
@@ -141,7 +143,12 @@ var createConnection = function (options) {
                 remoteVideo.srcObject = event.streams[0];
                 remoteVideo.onloadedmetadata = function (e) {
                     if (remoteVideo) {
-                        remoteVideo.play().catch(function (e) {
+                        remoteVideo.play().then(function() {
+                            // Automatically unmute video if needed #WCS-2425
+                            if (unmutePlayOnStart) {
+                                remoteVideo.muted = false;
+                            }
+                        }).catch(function (e) {
                             if (validBrowsers.includes(browserDetails.browser)) {
                                 //WCS-1698. fixed autoplay in chromium based browsers
                                 //WCS-2375. fixed autoplay in ios safari
@@ -714,6 +721,7 @@ var createConnection = function (options) {
 };
 
 
+
 var mixAudioTracks = function (stream1, stream2) {
     var stream1Sound = audioContext.createMediaStreamSource(stream1);
     var stream2Sound = audioContext.createMediaStreamSource(stream2);
@@ -845,13 +853,11 @@ var getMediaAccess = function (constraints, display, disableConstraintsNormaliza
 var loadOrdinaryVideo = function(display, stream, screenShare, constraints, video) {
     let vEl = video;
     if (!vEl) {
-        vEl = document.createElement('video');
+        vEl = createVideoElement();
         display.appendChild(vEl);
     }
     vEl.id = uuid_v1() + LOCAL_CACHED_VIDEO;
     vEl.srcObject = stream;
-    //mute audio
-    vEl.muted = true;
     vEl.onloadedmetadata = function (e) {
         //WCS-2751 Add screen capture using getDisplayMedia in Safari
         if (screenShare && !screenCaptureSupportedBrowsers()) {
@@ -1183,6 +1189,17 @@ function getCacheInstance(display) {
             return display.children[i];
         }
     }
+}
+
+function createVideoElement() {
+    let video = document.createElement('video');
+    // Prepare video tag to auto play and add specific Safari tweaks #WCS-2425
+    video.muted = true;
+    if(util.Browser.isSafariWebRTC()) {
+       video.setAttribute("playsinline", "");
+       video.setAttribute("webkit-playsinline", "");
+    }
+    return(video);
 }
 
 function removeVideoElement(video) {

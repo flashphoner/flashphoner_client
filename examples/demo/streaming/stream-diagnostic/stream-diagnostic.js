@@ -45,14 +45,6 @@ function onStopped() {
 
 function publishBtnClick() {
     $(this).prop('disabled', true);
-    if (Browser.isSafariWebRTC()) {
-        Flashphoner.playFirstVideo(localVideo, true, PRELOADER_URL).then(function () {
-            Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function () {
-                start();
-            });
-        });
-        return;
-    }
     start();
 }
 

@@ -77,14 +77,6 @@ function joinBtnClick() {
         $('#url').prop('disabled', true);
         $("#room").prop('disabled', true);
         $("#login").prop('disabled', true);
-        if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] === "MSE") {
-            Flashphoner.playFirstVideo(localDisplay, true, PRELOADER_URL).then(function () {
-                Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function () {
-                    start();
-                });
-            });
-            return;
-        }
         start();
     }
 }

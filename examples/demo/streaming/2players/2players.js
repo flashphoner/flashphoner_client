@@ -112,11 +112,6 @@ function playBtnClick(index) {
 
         if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
             Flashphoner.playFirstSound();
-        } else if (Browser.isSafariWebRTC()) {
-            Flashphoner.playFirstVideo(display, false, PRELOADER_URL).then(function () {
-                playStream(index, display);
-            });
-            return;
         }
         playStream(index, display);
     }

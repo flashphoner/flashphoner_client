@@ -107,12 +107,6 @@ function publishBtnClick() {
     if (validateForm("streamerForm")) {
         $('#publishStream').prop('disabled', true);
         $(this).prop('disabled', true);
-        if (Browser.isSafariWebRTC()) {
-            Flashphoner.playFirstVideo(localVideo, true, PRELOADER_URL).then(function() {
-                publishStream();
-            });
-            return;
-        }
         publishStream();
     }
 }
@@ -139,12 +133,6 @@ function playBtnClick() {
     if (validateForm("playerForm")) {
         $('#playStream').prop('disabled', true);
         $(this).prop('disabled', true);
-        if (Browser.isSafariWebRTC()) {
-            Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function() {
-                playStream();
-            });
-            return;
-        }
         playStream();
     }
 }

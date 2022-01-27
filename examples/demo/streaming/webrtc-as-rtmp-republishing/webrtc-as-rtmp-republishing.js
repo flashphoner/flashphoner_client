@@ -43,12 +43,6 @@ function onStopped() {
 function publishBtnClick() {
     if (validateForm()) {
         $(this).prop('disabled', true);
-        if (Browser.isSafariWebRTC()) {
-            Flashphoner.playFirstVideo(localVideo, true, PRELOADER_URL).then(function() {
-                start();
-            });
-            return;
-        }
         start();
     }
 }
