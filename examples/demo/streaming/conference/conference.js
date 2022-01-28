@@ -47,6 +47,9 @@ function onLeft() {
     $("[id$=Name]").not(":contains('NONE')").each(function(index,value) {
         $(value).text('NONE');
     });
+    for (var i = 0; i < _participants; i++) {
+        $("#participant" + i + "Btn").text("Play").off('click').prop('disabled', true);
+    };
     $("#joinBtn").text("Join").off('click').click(function(){
         if (validateForm()) {
             $(this).prop('disabled', true);
@@ -72,14 +75,6 @@ function start() {
             connection.disconnect();
         } else {
             joinRoom();
-            return;
-        }
-    }
-    if (Browser.isSafariWebRTC()) {
-        for (var i = 1; i < _participants; i++){
-            Flashphoner.playFirstVideo(document.getElementById("participant" + i + "Display"), false, PRELOADER_URL).then(function() {
-                createConnection(url, username);
-            });
             return;
         }
     }
@@ -123,14 +118,7 @@ function joinRoom() {
         } else {
             addMessage("chat", " room is empty");
         }
-        if (Browser.isSafariWebRTC()) {
-            Flashphoner.playFirstVideo(document.getElementById("localDisplay"), true, PRELOADER_URL).then(function() {
-                publishLocalMedia(room);
-                onJoined(room);
-            });
-            return;
-        }
-        publishLocalMedia(room);
+        publishLocalStream(room);
         onJoined(room);
     }).on(ROOM_EVENT.JOINED, function(participant){
         installParticipant(participant);
@@ -164,7 +152,6 @@ function installParticipant(participant) {
     } else {
         var p = $("[id$=Name]:contains('NONE')")[0].id.replace('Name','');
         var pName = '#' + p + 'Name';
-        var pDisplay = p + 'Display';
         $(pName).text(participant.name());
         playParticipantsStream(participant);
     }
@@ -174,6 +161,8 @@ function removeParticipant(participant) {
     $("[id$=Name]").each(function(index,value) {
        if ($(value).text() == participant.name()) {
            $(value).text('NONE');
+           var pButtonId = value.id.replace('Name', '') + 'Btn';
+           $("#" + pButtonId).text("Play").off('click').prop('disabled', true);
        }
     });
 }
@@ -183,15 +172,66 @@ function playParticipantsStream(participant) {
         $("[id$=Name]").each(function (index, value) {
             if ($(value).text() == participant.name()) {
                 var p = value.id.replace('Name', '');
-                var pDisplay = p + 'Display';
-                participant.getStreams()[0].play(document.getElementById(pDisplay)).on(STREAM_STATUS.PLAYING, function (playingStream) {
-                    document.getElementById(playingStream.id()).addEventListener('resize', function (event) {
-                        resizeVideo(event.target);
+                var pDisplay = document.getElementById(p + 'Display');
+                if (Browser.isSafariWebRTC()) {
+                    Flashphoner.playFirstVideo(pDisplay, false, PRELOADER_URL).then(function() {
+                        playStream(participant, pDisplay);
+                    }).catch(function (error) {
+                        // Low Power Mode detected, user action is needed to start playback in this mode #WCS-2639
+                        console.log("Can't atomatically play participant" + participant.name() + " stream, use Play button");
+                        for (var i = 0; i < pDisplay.children.length; i++) {
+                            if (pDisplay.children[i]) {
+                                console.log("remove cached instance id " + pDisplay.children[i].id);
+                                pDisplay.removeChild(pDisplay.children[i]);
+                            }
+                        }
+                        onParticipantStopped(participant);
                     });
-                });
+                } else {
+                    playStream(participant, pDisplay);
+                }
             }
         });
     }
+}
+
+function playStream(participant, display) {
+    var button = getParticipantButton(participant);
+    participant.getStreams()[0].play(display).on(STREAM_STATUS.PLAYING, function (playingStream) {
+        document.getElementById(playingStream.id()).addEventListener('resize', function (event) {
+            resizeVideo(event.target);
+        });
+        if (button) {
+            $(button).text("Stop").off('click').click(function(){
+                $(this).prop('disabled', true);
+                playingStream.stop();
+            }).prop('disabled', false);
+        }
+    }).on(STREAM_STATUS.STOPPED, function () {
+        onParticipantStopped(participant);
+    }).on(STREAM_STATUS.FAILED, function () {
+        onParticipantStopped(participant);
+    });
+}
+
+function onParticipantStopped(participant) {
+    var button = getParticipantButton(participant);
+    if (button) {
+        $(button).text("Play").off('click').click(function() {
+            playParticipantsStream(participant);
+        }).prop('disabled', false);
+    }
+}
+
+function getParticipantButton(participant) {
+    var button = null;
+    $("[id$=Name]").each(function (index, value) {
+        if ($(value).text() == participant.name()) {
+            button = document.getElementById(value.id.replace('Name', '') + 'Btn');
+            return(button);
+        }
+    });
+    return(button);
 }
 
 function getRoomName() {
@@ -239,7 +279,7 @@ function onMediaPublished(stream) {
 function onMediaStopped(room) {
     $("#localStopBtn").text("Publish").off('click').click(function(){
         $(this).prop('disabled', true);
-        publishLocalMedia(room);
+        publishLocalStream(room);
     }).prop('disabled', (connection.getRooms().length == 0));
     $("#localAudioToggle").prop("disabled", true);
     $("#localVideoToggle").prop("disabled", true);
@@ -272,6 +312,26 @@ function publishLocalMedia(room) {
         setStatus("#localStatus", stream.status());
         onMediaStopped(room);
     });
+}
+
+function publishLocalStream(room) {
+    if (Browser.isSafariWebRTC()) {
+        var display = document.getElementById("localDisplay");
+        Flashphoner.playFirstVideo(display, true, PRELOADER_URL).then(function() {
+            publishLocalMedia(room);
+        }).catch(function (error) {
+            console.log("Can't atomatically publish local stream, use Publish button");
+            for (var i = 0; i < display.children.length; i++) {
+                if (display.children[i]) {
+                    console.log("remove cached instance id " + display.children[i].id);
+                    display.removeChild(display.children[i]);
+                }
+            }
+            onMediaStopped(room);
+        });
+        return;
+    }
+    publishLocalMedia(room);
 }
 
 function muteConnectInputs() {
