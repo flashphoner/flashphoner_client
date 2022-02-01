@@ -329,9 +329,9 @@ function publishLocalStream(room) {
             }
             onMediaStopped(room);
         });
-        return;
+    } else {
+        publishLocalMedia(room);
     }
-    publishLocalMedia(room);
 }
 
 function muteConnectInputs() {

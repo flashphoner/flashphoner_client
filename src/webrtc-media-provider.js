@@ -1399,6 +1399,8 @@ var playFirstVideo = function (display, isLocal, src) {
             var video = document.createElement('video');
             video.setAttribute("playsinline", "");
             video.setAttribute("webkit-playsinline", "");
+            //Mute video tag to prevent local audio playback in Safari #WCS-3430
+            video.muted = true;
             video.id = uuid_v1() + (isLocal ? LOCAL_CACHED_VIDEO : REMOTE_CACHED_VIDEO);
 
             //in WCS-1560 we removed video.play() call, because it triggers the “Unhandled Promise Rejection” exception in iOS Safari
