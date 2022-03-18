@@ -451,8 +451,15 @@ var appSession = function (options) {
 
         //participant helpers
         function play(streamName) {
-            return function (display) {
-                var stream = session.createStream({name: streamName, display: display, custom: {name: name_}});
+            // Pass stream options to play #WCS-3445
+            return function (display, options = {}) {
+                var streamOptions = {
+                    ...options,
+                    name: streamName,
+                    display: display,
+                    custom: {name: name_}
+                };
+                var stream = session.createStream(streamOptions);
                 stream.play();
                 return stream;
             }

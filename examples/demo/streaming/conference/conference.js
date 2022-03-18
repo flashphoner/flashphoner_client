@@ -5,6 +5,7 @@ var ROOM_EVENT = RoomApi.events;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var Browser = Flashphoner.Browser;
 var connection;
+var participantStateList;
 
 //initialize interface
 function init_page() {
@@ -21,6 +22,7 @@ function init_page() {
         $("#notifyFlash").text("Your browser doesn't support WebRTC technology needed for this example");
         return;
     }
+    participantStateList = new ParticipantLocalStateList();
     $("#url").val(setURL());
     onLeft();
 }
@@ -48,7 +50,7 @@ function onLeft() {
         $(value).text('NONE');
     });
     for (var i = 0; i < _participants; i++) {
-        $("#participant" + i + "Btn").text("Play").off('click').prop('disabled', true);
+        resetParticipantButtons("participant" + i);
     };
     $("#joinBtn").text("Join").off('click').click(function(){
         if (validateForm()) {
@@ -150,88 +152,131 @@ function installParticipant(participant) {
     if (($("[id$=Name]").not(":contains('NONE')").length + 1) == _participants) {
         console.warn("More than " + _participants + " participants, ignore participant " + participant.name());
     } else {
-        var p = $("[id$=Name]:contains('NONE')")[0].id.replace('Name','');
-        var pName = '#' + p + 'Name';
+        var pBase = $("[id$=Name]:contains('NONE')")[0].id.replace('Name','');
+        var pName = '#' + pBase + 'Name';
         $(pName).text(participant.name());
+        participantStateList.add(participant, pBase);
         playParticipantsStream(participant);
     }
 }
 
 function removeParticipant(participant) {
-    $("[id$=Name]").each(function(index,value) {
-       if ($(value).text() == participant.name()) {
-           $(value).text('NONE');
-           var pButtonId = value.id.replace('Name', '') + 'Btn';
-           $("#" + pButtonId).text("Play").off('click').prop('disabled', true);
-       }
-    });
+    var participantState = participantStateList.getState(participant);
+    if (participantState) {
+        $(participantState.getName()).text('NONE');
+        resetParticipantButtons(participantState.getBaseId());
+        participantStateList.remove(participant);
+    } else {
+        console.log("Cannot remove " + participant.name() + " from participants list: not found");
+    }
 }
 
 function playParticipantsStream(participant) {
-    if (participant.getStreams().length > 0) {
-        $("[id$=Name]").each(function (index, value) {
-            if ($(value).text() == participant.name()) {
-                var p = value.id.replace('Name', '');
-                var pDisplay = document.getElementById(p + 'Display');
-                if (Browser.isSafariWebRTC()) {
-                    Flashphoner.playFirstVideo(pDisplay, false, PRELOADER_URL).then(function() {
-                        playStream(participant, pDisplay);
-                    }).catch(function (error) {
-                        // Low Power Mode detected, user action is needed to start playback in this mode #WCS-2639
-                        console.log("Can't atomatically play participant" + participant.name() + " stream, use Play button");
-                        for (var i = 0; i < pDisplay.children.length; i++) {
-                            if (pDisplay.children[i]) {
-                                console.log("remove cached instance id " + pDisplay.children[i].id);
-                                pDisplay.removeChild(pDisplay.children[i]);
-                            }
-                        }
-                        onParticipantStopped(participant);
-                    });
-                } else {
+    var participantState = participantStateList.getState(participant);
+    if (participantState) {
+        if (participant.getStreams().length > 0) {
+            var pDisplay = participantState.getDisplay();
+            if (Browser.isSafariWebRTC()) {
+                Flashphoner.playFirstVideo(pDisplay, false, PRELOADER_URL).then(function() {
                     playStream(participant, pDisplay);
-                }
+                }).catch(function (error) {
+                    // Low Power Mode detected, user action is needed to start playback in this mode #WCS-2639
+                    console.log("Can't atomatically play participant" + participant.name() + " stream, use Play button");
+                    for (var i = 0; i < pDisplay.children.length; i++) {
+                        if (pDisplay.children[i]) {
+                            console.log("remove cached instance id " + pDisplay.children[i].id);
+                            pDisplay.removeChild(pDisplay.children[i]);
+                        }
+                    }
+                    onParticipantStopped(participant);
+                });
+            } else {
+                playStream(participant, pDisplay);
             }
-        });
+        }
+    } else {
+        console.log("Cannot play participant " + participant.name() + " stream: participant not found");
     }
 }
 
 function playStream(participant, display) {
-    var button = getParticipantButton(participant);
-    participant.getStreams()[0].play(display).on(STREAM_STATUS.PLAYING, function (playingStream) {
-        document.getElementById(playingStream.id()).addEventListener('resize', function (event) {
-            resizeVideo(event.target);
-        });
-        if (button) {
-            $(button).text("Stop").off('click').click(function(){
-                $(this).prop('disabled', true);
-                playingStream.stop();
-            }).prop('disabled', false);
+    var participantState = participantStateList.getState(participant);
+    if (participantState) {
+        var playBtn = participantState.getPlayButton();
+        var audioBtn = participantState.getAudioButton();
+        var options = {
+            unmutePlayOnStart: true,
+            constraints: {
+                audio: {
+                    deviceId: 'default'
+                }
+            }
+        };
+        // Leave participant stream muted in Android Edge browser #WCS-3445
+        if (Browser.isChromiumEdge() && Browser.isAndroid()) {
+            options.unmutePlayOnStart = false;
         }
-    }).on(STREAM_STATUS.STOPPED, function () {
-        onParticipantStopped(participant);
-    }).on(STREAM_STATUS.FAILED, function () {
-        onParticipantStopped(participant);
-    });
-}
-
-function onParticipantStopped(participant) {
-    var button = getParticipantButton(participant);
-    if (button) {
-        $(button).text("Play").off('click').click(function() {
-            playParticipantsStream(participant);
-        }).prop('disabled', false);
+        participant.getStreams()[0].play(display, options).on(STREAM_STATUS.PLAYING, function (playingStream) {
+            var video = document.getElementById(playingStream.id())
+            video.addEventListener('resize', function (event) {
+                resizeVideo(event.target);
+            });
+            // Set up participant Stop/Play button
+            if (playBtn) {
+                $(playBtn).text("Stop").off('click').click(function() {
+                    $(this).prop('disabled', true);
+                    playingStream.stop();
+                }).prop('disabled', false);
+            }
+            // Set up participant audio toggle button #WCS-3445
+            if (audioBtn) {
+                $(audioBtn).text("Audio").off('click').click(function() {
+                    if (playingStream.isRemoteAudioMuted()) {
+                        playingStream.unmuteRemoteAudio();
+                    } else {
+                        playingStream.muteRemoteAudio();
+                    }
+                }).prop('disabled', false);
+            }
+            // Start participant audio state checking timer #WCS-3445
+            participantState.startMutedCheck(playingStream);
+        }).on(STREAM_STATUS.STOPPED, function () {
+            onParticipantStopped(participant);
+        }).on(STREAM_STATUS.FAILED, function () {
+            onParticipantStopped(participant);
+        });
+    } else {
+        console.log("Cannot play stream: participant " + participant.name() + " not found");
     }
 }
 
-function getParticipantButton(participant) {
-    var button = null;
-    $("[id$=Name]").each(function (index, value) {
-        if ($(value).text() == participant.name()) {
-            button = document.getElementById(value.id.replace('Name', '') + 'Btn');
-            return(button);
+function onParticipantStopped(participant) {
+    var participantState = participantStateList.getState(participant);
+    if (participantState) {
+        var playBtn = participantState.getPlayButton();
+        var audioBtn = participantState.getAudioButton();
+        var audioState = participantState.getAudioState();
+        if (playBtn) {
+            $(playBtn).text("Play").off('click').click(function() {
+                playParticipantsStream(participant);
+            }).prop('disabled', false);
         }
-    });
-    return(button);
+        if (audioBtn) {
+            $(audioBtn).text("Audio").off('click').prop('disabled', true);
+        }
+        if (audioState) {
+            participantState.stopMutedCheck();
+            $(audioState).text("");
+        }
+    } else {
+        console.log("Cannot perfom onStopped actions: " + participant.name() + " not found");
+    }
+}
+
+function resetParticipantButtons(id) {
+    $("#" + id + 'Btn').text("Play").off('click').prop('disabled', true);
+    $("#" + id + 'AudioBtn').text("Audio").off('click').prop('disabled', true);
+    $("#" + id + 'AudioState').text("");
 }
 
 function getRoomName() {
@@ -376,4 +421,95 @@ function setStatus(selector, status) {
     } else if (status == "FAILED") {
         statusField.attr("class","text-danger");
     }
+}
+
+// Object to store local state to display participant #WCS-3445
+function ParticipantLocalState(participant, id) {
+    var state = {
+        participant: participant,
+        baseId: id,
+        audioTimer: null,
+        getBaseId: function() {
+            return state.baseId;
+        },
+        getName: function() {
+            return document.getElementById(state.baseId + 'Name');
+        },
+        getDisplay: function() {
+            return document.getElementById(state.baseId + 'Display');
+        },
+        getPlayButton: function() {
+            return document.getElementById(state.baseId + 'Btn');
+        },
+        getAudioButton: function() {
+            return document.getElementById(state.baseId + 'AudioBtn');
+        },
+        getAudioState: function() {
+            return document.getElementById(state.baseId + 'AudioState');
+        },
+        startMutedCheck: function(stream) {
+            var audioState = state.getAudioState();
+            state.stopMutedCheck();
+            state.audioTimer = setInterval(function () {
+                if (stream.isRemoteAudioMuted()) {
+                    $(audioState).text("Muted");
+                } else {
+                    $(audioState).text("Unmuted");
+                }
+            }, 500);
+        },
+        stopMutedCheck: function() {
+            if (state.audioTimer) {
+                clearInterval(state.audioTimer);
+                state.audioTimer = null;
+            }
+        }
+    }
+
+    return state;
+}
+
+// Array object to store local participant states #WCS-3445
+function ParticipantLocalStateList() {
+    var stateList = {
+        list: [],
+        add: function(participant, id) {
+            var state = new ParticipantLocalState(participant, id);
+            stateList.list.push(state);
+        },
+        remove: function(participant) {
+            for (var i = 0; i < stateList.list.length; i++) {
+                if (stateList.list[i].participant && (stateList.list[i].participant.name() === participant.name())) {
+                    stateList.list[i].stopMutedCheck();
+                    stateList.list.splice(i, 1);
+                }
+            }
+        },
+        getState: function(participant) {
+            for (var i = 0; i < stateList.list.length; i++) {
+                if (stateList.list[i].participant && (stateList.list[i].participant.name() === participant.name())) {
+                    return stateList.list[i];
+                }
+            }
+            return null;
+        },
+        startMutedCheck: function(participant, stream) {
+            var item = stateList.getState(participant);
+            if (item) {
+                item.startMutedCheck(stream);
+            } else {
+                console.error("Cannot start muted check timer for participant " + participant);
+            }
+        },
+        stopMutedCheck: function(participant) {
+            var item = stateList.getState(participant);
+            if (item) {
+                item.stopMutedCheck();
+            } else {
+                console.error("Cannot stop muted check timer for participant " + participant);
+            }
+        }
+    }
+
+    return stateList;
 }

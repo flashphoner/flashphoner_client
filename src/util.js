@@ -112,6 +112,9 @@ module.exports = {
         },
         isAndroidFirefox: function () {
             return this.isAndroid() && /Firefox/i.test(navigator.userAgent);
+        },
+        isChromiumEdge: function () {
+            return /Chrome/i.test(navigator.userAgent) && /Edg/i.test(navigator.userAgent);
         }
     },
     SDP: {
