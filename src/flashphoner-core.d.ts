@@ -35,6 +35,7 @@ export declare class Call {
     switchMic: (deviceId: any) => any;
     switchToScreen: (source: string, woExtension: boolean) => any;
     switchToCam: () => void;
+    getLogger: () => any;
 }
 
 export declare class Stream {
@@ -76,6 +77,7 @@ export declare class Stream {
     switchToScreen: (source: string, woExtension: boolean) => any;
     switchToCam: () => void;
     sendData: (payload: any) => void;
+    getLogger: () => any;
 }
 
 export declare class Session {
@@ -104,7 +106,8 @@ export declare class Session {
         useCanvasMediaStream?: boolean | undefined;
         videoContentHint?: string | undefined;
         unmutePlayOnStart?: boolean | undefined;
-        sdpHook?: any | undefined
+        sdpHook?: any | undefined;
+        logger?: any | undefined;
     }) => Stream;
     createCall: (options: {
         callee: string;
@@ -122,6 +125,7 @@ export declare class Session {
         sipHeaders?: Array<string> | undefined;
         videoContentHint?: string | undefined;
         toStream?: string | undefined;
+        logger?: any | undefined;
     }) => Call;
     getStream: (streamId: string) => any;
     getStreams: () => any[];
@@ -131,6 +135,7 @@ export declare class Session {
     startDebug: () => void;
     stopDebug: () => void;
     on: (event: string, callback: any) => Session;
+    getLogger: () => any;
 }
 
 export namespace Browser {
@@ -197,6 +202,7 @@ export function createSession(options: {
     pingInterval?: number | undefined;
     receiveProbes?: number | undefined;
     probesInterval?: number | undefined;
+    logger?: any | undefined;
 }): Session;
 export function playFirstSound (noise?: boolean): any;
 export function playFirstVideo (display: any, isLocal: boolean, src: any): any;
@@ -204,6 +210,3 @@ export function getLogger(): any;
 import { constants } from "@flashphoner/websdk/src/constants";
 export declare const firefoxScreenSharingExtensionInstalled: boolean;
 export { constants };
-
-
-

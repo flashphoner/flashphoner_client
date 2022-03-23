@@ -42,6 +42,11 @@ var createConnection = function(options) {
         var display = options.display || options.localDisplay;
         var flashBufferTime = options.flashBufferTime || 0;
 
+        // Set connection logger #WCS-2434
+        if (options.logger) {
+            logger = options.logger;
+        }
+
         var url = getConnectionUrl(options.mainUrl, options.flashProto, options.flashPort);
 
         //todo state from flash instance

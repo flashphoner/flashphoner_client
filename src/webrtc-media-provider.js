@@ -23,6 +23,11 @@ var mics = [];
 var createConnection = function (options) {
     return new Promise(function (resolve, reject) {
 
+        // Set connection logger #WCS-2434
+        if (options.logger) {
+            logger = options.logger;
+        }
+
         var id = options.id;
         var connectionConfig = options.connectionConfig || {"iceServers": []};
         var connectionConstraints = options.connectionConstraints || {};
@@ -131,9 +136,9 @@ var createConnection = function (options) {
         function setContentHint(stream, hint) {
             stream.getVideoTracks().forEach(function(track) {
                 if(track.contentHint === undefined) {
-                    logger.warn("contentHint unsupported");
+                    logger.warn(LOG_PREFIX, "Track contentHint unsupported");
                 } else {
-                    logger.info("Set video track contentHint to " + hint);
+                    logger.info(LOG_PREFIX, "Set video track contentHint to " + hint);
                     track.contentHint = hint;
                 }
             });
@@ -168,7 +173,7 @@ var createConnection = function (options) {
                 //WCS-2771 add playback delay
                 connection.getReceivers().forEach((track) => {
                     if (track.playoutDelayHint === undefined) {
-                        logger.warn("playout delay unsupported");
+                        logger.warn(LOG_PREFIX, "Playout delay unsupported");
                     }
                     track.playoutDelayHint = playoutDelay;
                 });
@@ -518,7 +523,7 @@ var createConnection = function (options) {
                             if (localVideo.srcObject.getAudioTracks().length == 0 && audioTrack) {
                                 localVideo.srcObject.addTrack(audioTrack);
                             }
-                            logger.info("Switch camera to " + cam);
+                            logger.info(LOG_PREFIX, "Switch camera to " + cam);
                             resolve(cam);
                         }).catch(function (reason) {
                             logger.error(LOG_PREFIX, reason);
@@ -569,7 +574,7 @@ var createConnection = function (options) {
                             if (videoTrack) {
                                 localVideo.srcObject.addTrack(videoTrack);
                             }
-                            logger.info("Switch mic to " + mic);
+                            logger.info(LOG_PREFIX, "Switch mic to " + mic);
                             resolve(mic);
                         }).catch(function (reason) {
                             logger.error(LOG_PREFIX, reason);
@@ -657,7 +662,7 @@ var createConnection = function (options) {
                     localVideo.srcObject.addTrack(currentAudioTrack);
                 }
             });
-            logger.info("Switch to screen");
+            logger.info(LOG_PREFIX, "Switch to screen");
             screenShare = true;
             resolve();
         };
@@ -685,7 +690,7 @@ var createConnection = function (options) {
                     }
                 });
             }
-            logger.info("Switch to cam");
+            logger.info(LOG_PREFIX, "Switch to cam");
             screenShare = false;
         };
 

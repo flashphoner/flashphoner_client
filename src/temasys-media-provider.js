@@ -13,6 +13,11 @@ var Promise = require('es6-promise').Promise;
 
 var createConnection = function (options) {
     return new Promise(function (resolve, reject) {
+        // Set connection logger #WCS-2434
+        if (options.logger) {
+            logger = options.logger;
+        }
+
         var id = options.id;
         var connectionConfig = options.connectionConfig || {"iceServers": []};
         var connection = new RTCPeerConnection(connectionConfig, {
