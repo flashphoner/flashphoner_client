@@ -49,6 +49,7 @@ function onLeft() {
     $("[id$=Name]").not(":contains('NONE')").each(function(index,value) {
         $(value).text('NONE');
     });
+    participantStateList.clean();
     for (var i = 0; i < _participants; i++) {
         resetParticipantButtons("participant" + i);
     };
@@ -163,9 +164,9 @@ function installParticipant(participant) {
 function removeParticipant(participant) {
     var participantState = participantStateList.getState(participant);
     if (participantState) {
+        participantStateList.remove(participant);
         $(participantState.getName()).text('NONE');
         resetParticipantButtons(participantState.getBaseId());
-        participantStateList.remove(participant);
     } else {
         console.log("Cannot remove " + participant.name() + " from participants list: not found");
     }
@@ -173,26 +174,24 @@ function removeParticipant(participant) {
 
 function playParticipantsStream(participant) {
     var participantState = participantStateList.getState(participant);
-    if (participantState) {
-        if (participant.getStreams().length > 0) {
-            var pDisplay = participantState.getDisplay();
-            if (Browser.isSafariWebRTC()) {
-                Flashphoner.playFirstVideo(pDisplay, false, PRELOADER_URL).then(function() {
-                    playStream(participant, pDisplay);
-                }).catch(function (error) {
-                    // Low Power Mode detected, user action is needed to start playback in this mode #WCS-2639
-                    console.log("Can't atomatically play participant" + participant.name() + " stream, use Play button");
-                    for (var i = 0; i < pDisplay.children.length; i++) {
-                        if (pDisplay.children[i]) {
-                            console.log("remove cached instance id " + pDisplay.children[i].id);
-                            pDisplay.removeChild(pDisplay.children[i]);
-                        }
-                    }
-                    onParticipantStopped(participant);
-                });
-            } else {
+    if (participantState && participant.getStreams().length > 0) {
+        var pDisplay = participantState.getDisplay();
+        if (Browser.isSafariWebRTC()) {
+            Flashphoner.playFirstVideo(pDisplay, false, PRELOADER_URL).then(function() {
                 playStream(participant, pDisplay);
-            }
+            }).catch(function (error) {
+                // Low Power Mode detected, user action is needed to start playback in this mode #WCS-2639
+                console.log("Can't atomatically play participant" + participant.name() + " stream, use Play button");
+                for (var i = 0; i < pDisplay.children.length; i++) {
+                    if (pDisplay.children[i]) {
+                        console.log("remove cached instance id " + pDisplay.children[i].id);
+                        pDisplay.removeChild(pDisplay.children[i]);
+                    }
+                }
+                onParticipantStopped(participant);
+            });
+        } else {
+            playStream(participant, pDisplay);
         }
     } else {
         console.log("Cannot play participant " + participant.name() + " stream: participant not found");
@@ -483,6 +482,12 @@ function ParticipantLocalStateList() {
                     stateList.list[i].stopMutedCheck();
                     stateList.list.splice(i, 1);
                 }
+            }
+        },
+        clean: function() {
+            while (stateList.list.length) {
+                var state = stateList.list.pop();
+                state.stopMutedCheck();
             }
         },
         getState: function(participant) {
