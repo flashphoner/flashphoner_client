@@ -13,10 +13,11 @@
  * @memberof roomApi
  * @method connect
  */
+import Flashphoner = require("./flashphoner-core");
 declare function appSession(options: {
     urlServer: string;
     username: string;
-}): any;
+}): Flashphoner.Session;
 export namespace events {
     const STATE: string;
     const JOINED: string;
@@ -25,5 +26,4 @@ export namespace events {
     const MESSAGE: string;
     const FAILED: string;
 }
-import Flashphoner = require("@flashphoner/websdk/src/flashphoner-core");
 export { appSession as connect, Flashphoner as sdk };
