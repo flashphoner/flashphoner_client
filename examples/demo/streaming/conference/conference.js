@@ -70,6 +70,7 @@ function onLeft() {
 function start() {
     var url = $('#url').val();
     var username = $('#login').val();
+    var display = document.getElementById("localDisplay");
     if (connection && connection.status() == SESSION_STATUS.ESTABLISHED) {
         //check url and username
         if (connection.getServerUrl() != url || connection.username() != username) {
@@ -81,7 +82,14 @@ function start() {
             return;
         }
     }
-    createConnection(url, username);
+    // Requesting media access before connecting to the server #WCS-3449
+    Flashphoner.getMediaAccess(null, localDisplay).then(function() {
+        createConnection(url, username);
+    }).catch(function(error) {
+        console.error("User not allowed media access: "+error);
+        $("#failedInfo").text("User not allowed media access. Refresh the page");
+        onLeft();
+    });
 }
 
 function createConnection(url, username) {
