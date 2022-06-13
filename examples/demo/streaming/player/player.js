@@ -1,5 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var STREAM_EVENT = Flashphoner.constants.STREAM_EVENT;
+var STREAM_EVENT_TYPE = Flashphoner.constants.STREAM_EVENT_TYPE;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var Browser = Flashphoner.Browser;
 var remoteVideo;
@@ -182,8 +184,16 @@ function playStream(session) {
         $("#preloader").hide();
         setStatus(STREAM_STATUS.FAILED, stream);
         onStopped();
-    }).on(STREAM_STATUS.NOT_ENOUGH_BANDWIDTH, function(stream){
-        console.log("Not enough bandwidth, consider using lower video resolution or bitrate. Bandwidth " + (Math.round(stream.getNetworkBandwidth() / 1000)) + " bitrate " + (Math.round(stream.getRemoteBitrate() / 1000)));
+    }).on(STREAM_EVENT, function(streamEvent){
+        if (STREAM_EVENT_TYPE.NOT_ENOUGH_BANDWIDTH === streamEvent.type) {
+            var info = streamEvent.payload.info.split("/");
+            var remoteBitrate = info[0];
+            var networkBandwidth = info[1];
+            console.log("Not enough bandwidth, consider using lower video resolution or bitrate. Bandwidth " + (Math.round(networkBandwidth / 1000)) + " bitrate " + (Math.round(remoteBitrate / 1000)));
+        } else if (STREAM_EVENT_TYPE.RESIZE === streamEvent.type) {
+            console.log("New video size: " + streamEvent.payload.streamerVideoWidth + "x" + streamEvent.payload.streamerVideoHeight);
+        }
+
     });
     stream.play();
 }

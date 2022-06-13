@@ -561,7 +561,7 @@ var createSession = function (options) {
                 mediaProviders: Object.keys(MediaProvider),
                 keepAlive: keepAlive,
                 authToken:authToken,
-                clientVersion: "2.0.1",
+                clientVersion: "2.0",
                 clientOSVersion: window.navigator.appVersion,
                 clientBrowserVersion: window.navigator.userAgent,
                 msePacketizationVersion: 2,
@@ -1721,6 +1721,14 @@ var createSession = function (options) {
         var stream = {};
 
         streamEventRefreshHandlers[id_] = function (streamEvent) {
+            if (streamEvent.type == STREAM_EVENT_TYPE.NOT_ENOUGH_BANDWIDTH) {
+                var info = streamEvent.payload.info.split("/");
+                remoteBitrate = info[0];
+                networkBandwidth = info[1];
+            } else if (streamEvent.type == STREAM_EVENT_TYPE.RESIZE) {
+                resolution.width = streamEvent.payload.streamerVideoWidth;
+                resolution.height = streamEvent.payload.streamerVideoHeight;
+            }
             if (callbacks[STREAM_EVENT]) {
                 callbacks[STREAM_EVENT](streamEvent);
             }
@@ -1757,6 +1765,7 @@ var createSession = function (options) {
                 return;
             }
 
+            //Depricated. WCS-3228: RESIZE, SNAPSHOT_COMPLETE and NOT_ENOUGH_BANDWIDTH moved to STREAM_EVENT
             if (event == STREAM_STATUS.RESIZE) {
                 resolution.width = streamInfo.streamerVideoWidth;
                 resolution.height = streamInfo.streamerVideoHeight;

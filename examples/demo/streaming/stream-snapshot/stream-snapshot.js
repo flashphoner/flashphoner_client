@@ -1,5 +1,7 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+var STREAM_EVENT = Flashphoner.constants.STREAM_EVENT;
+var STREAM_EVENT_TYPE = Flashphoner.constants.STREAM_EVENT_TYPE;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
 var Browser = Flashphoner.Browser;
 var localVideo;
@@ -30,17 +32,15 @@ function init_page() {
 function snapshot(name) {
     setSnapshotStatus();
     var session = Flashphoner.getSessions()[0];
-    session.createStream({name: name}).on(STREAM_STATUS.SNAPSHOT_COMPLETE, function(stream){
-        console.log("Snapshot complete");
-        setSnapshotStatus(STREAM_STATUS.SNAPSHOT_COMPLETE);
-        snapshotImg.src = "data:image/png;base64,"+stream.getInfo();
-        //remove failed callback
-        stream.on(STREAM_STATUS.FAILED, function(){});
-        //release stream object
-        stream.stop();
-    }).on(STREAM_STATUS.FAILED, function(stream){
-        setSnapshotStatus(STREAM_STATUS.FAILED);
-        console.log("Snapshot failed, info: " + stream.getInfo());
+    session.createStream({name: name}).on(STREAM_EVENT, function(streamEvent){
+        if (STREAM_EVENT_TYPE.SNAPSHOT_COMPLETED === streamEvent.type) {
+            console.log("Snapshot complete");
+            setSnapshotStatus(STREAM_STATUS.SNAPSHOT_COMPLETE);
+            snapshotImg.src = "data:image/png;base64,"+streamEvent.payload.snapshot;
+        } else if (STREAM_EVENT_TYPE.SNAPSHOT_FAILED === streamEvent.type) {
+            setSnapshotStatus(STREAM_STATUS.FAILED);
+            console.log("Snapshot failed, info: " + streamEvent.payload.info);
+        }
     }).snapshot();
 }
 

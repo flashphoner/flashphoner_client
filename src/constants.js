@@ -147,12 +147,14 @@ const STREAM_STATUS = Object.freeze({
      */
     PLAYBACK_PROBLEM: 'PLAYBACK_PROBLEM',
     /**
+     * @deprecated WCS-3228 moved to {@link STREAM_EVENT_TYPE}
      * Fires if playing {@link Stream} picture resizing.
      * @event RESIZE
      * @memberof Flashphoner.constants.STREAM_STATUS
      */
     RESIZE: 'RESIZE',
     /**
+     * @deprecated WCS-3228 moved to {@link STREAM_EVENT_TYPE}
      * Fires when {@link Stream} snapshot becomes available.
      * Snapshot is base64 encoded png available through {@link Stream.getInfo}
      * @event SNAPSHOT_COMPLETE
@@ -160,6 +162,7 @@ const STREAM_STATUS = Object.freeze({
      */
     SNAPSHOT_COMPLETE: 'SNAPSHOT_COMPLETE',
     /**
+     * @deprecated WCS-3228 moved to {@link STREAM_EVENT_TYPE}
      * Fires on playing {@link Stream} if bitrate is higher than available network bandwidth.
      * @event NOT_ENOUGH_BANDWIDTH
      * @memberof Flashphoner.constants.NOT_ENOUGH_BANDWIDTH
@@ -775,7 +778,31 @@ const STREAM_EVENT_TYPE = Object.freeze({
      * @see Stream
      * @memberOf Flashphoner.constants.STREAM_EVENT_TYPE
      */
-    DATA: 'data'
+    DATA: 'data',
+    /**
+     * Stream snapshot is completed
+     * @see Stream
+     * @memberOf Flashphoner.constants.STREAM_EVENT_TYPE
+     */
+    SNAPSHOT_COMPLETED: 'snapshotCompleted',
+    /**
+     * Stream snapshot is failed
+     * @see Stream
+     * @memberOf Flashphoner.constants.STREAM_EVENT_TYPE
+     */
+    SNAPSHOT_FAILED: 'snapshotFailed',
+    /**
+     * Fires if playing {@link Stream} picture resizing.
+     * @event RESIZE
+     * @memberof Flashphoner.constants.STREAM_STATUS
+     */
+    RESIZE: 'resize',
+    /**
+     * Fires on playing {@link Stream} if bitrate is higher than available network bandwidth.
+     * @event NOT_ENOUGH_BANDWIDTH
+     * @memberof Flashphoner.constants.NOT_ENOUGH_BANDWIDTH
+     */
+    NOT_ENOUGH_BANDWIDTH: 'notEnoughBandwidth'
 });
 
 /**
