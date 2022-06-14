@@ -46,7 +46,15 @@ var instance = function (url, coreUrl) {
 
     var stream = function() {
         var api = url + STREAM_PATH;
-        var find = function (mediaSessionId, name, published) {
+        var find = function (mediaSessionId, name, published, metrics) {
+            if (metrics) {
+                return send(api + "/find", {
+                    mediaSessionId: mediaSessionId,
+                    name: name,
+                    published: published,
+                    display: ["metrics"]
+                });
+            }
             return send(api + "/find", {
                 mediaSessionId: mediaSessionId,
                 name: name,

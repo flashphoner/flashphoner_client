@@ -6,12 +6,14 @@
         <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
         <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
         <link rel="stylesheet" href="console.css">
+        <link rel="stylesheet" type="text/css" href="jquery.dataTables.css">
         <title>Console</title>
         <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
         <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
         <script type="text/javascript" src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
         <script type="text/javascript" src="../../../../flashphoner-rest-api.js"></script>
+        <script type="text/javascript" charset="utf8" src="jquery.dataTables.js"></script>
         <script type="text/javascript" src="console.js"></script>
     </head>
     <body>
@@ -19,7 +21,7 @@
             <div class="row vdivide" id="controls">
                 <div class="col-sm-4">
                     <div id="addNodeForm" class="input-group">
-                        <input class="form-control" type="text" id="nodeIp" value="" placeholder="Node ip/domain name">
+                        <input class="form-control" type="text" id="nodeIp" placeholder="Node ip/domain name">
                         <span class="input-group-btn">
                             <button id="addNodeFormSubmit" type="button" class="btn btn-primary">Add node</button>
                         </span>
@@ -59,6 +61,8 @@
                     <button id="callStressBatchModalBtn" data-toggle='modal' data-target='#callStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Call</button>
                     <button id="streamStressBatchModalBtn" data-toggle='modal' data-target='#streamStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Play Stream</button>
                     <button id="streamPublishStressBatchModalBtn" data-toggle='modal' data-target='#streamPublishStressBatchModal' type="button" class="btn btn-default btn-success btn-block">Stress Publish Stream</button>
+                    <hr>
+                    <button id="metricsModalBtn" data-toggle='modal' data-target='#streamMetricsModal' type="button" class="btn btn-default btn-success btn-block">Monitoring</button>
                 </div>
                 <div class="col-sm-9">
                     <form class="form-inline" action="">
@@ -556,6 +560,150 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="streamMetricsModal" class="modal fade" role="dialog">
+                <div class="modal-dialog" style="width: 1250px">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Stream monitoring</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="streamMonitoringForm">
+                                <div class="form-group">
+                                    <label for="mediaTypeFilter">Stream type</label>
+                                    <select name="mediaTypeFilter" id="mediaTypeFilter">
+                                        <option value="all" selected>All</option>
+                                        <option value="publish">Publish</option>
+                                        <option value="play">Play</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="allStreams"></label>
+                                    <input type="checkbox" id="allStreams" value="true" checked> All streams
+                                </div>
+                                <div class="form-group">
+                                    <label for="monitoredStreamName"><span class="glyphicon glyphicon-play-circle"></span> Stream name</label>
+                                    <input type="text" class="form-control" id="monitoredStreamName" placeholder="Stream name" disabled >
+                                </div>
+<!--                                <div class="form-group">-->
+<!--                                    <label for="monitoringPollInterval"><span class="glyphicon glyphicon-play-circle"></span> Poll interval</label>-->
+<!--                                    <input type="text" class="form-control" id="monitoringPollInterval" value="1000" placeholder="Polling interval (ms)">-->
+<!--                                </div>-->
+                                <div class="form-group">
+                                    <label for="mediaProviderFilter">Media provider</label>
+                                    <select name="mediaProviderFilter" id="mediaProviderFilter">
+                                        <option value="all" selected>All</option>
+                                        <option value="WebRTC">WebRTC</option>
+                                        <option value="Flash">RTMP</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="streamTypeThresholdFilter">Apply filters to</label>
+                                    <select name="streamTypeThresholdFilter" id="streamTypeThresholdFilter">
+                                        <option value="all" selected>All</option>
+                                        <option value="publish">Published</option>
+                                        <option value="play">Playing</option>
+                                    </select>
+                                </div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">Metric thresholds</div>
+                                    <table class="table">
+                                        <thead>
+                                        <tr>
+                                            <th>VIDEO_RATE</th>
+                                            <th>VIDEO_FPS</th>
+                                            <th>VIDEO_NACK</th>
+                                            <th>VIDEO_B_FRAMES</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td>
+                                                <input id="videoRateThreshold" type="text" class="text" value="0">
+                                                <select id="videoRateThresholdFilter">
+                                                    <option value="eq">Equal</option>
+                                                    <option selected value="gt">Greater than</option>
+                                                    <option value="goe">Greater or equal</option>
+                                                    <option value="lt">Lower than</option>
+                                                    <option value="loe">Lower or equal</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input id="videoFpsThreshold" type="text" class="text" value="0">
+                                                <select id="videoFpsThresholdFilter">
+                                                    <option value="eq">Equal</option>
+                                                    <option selected value="gt">Greater than</option>
+                                                    <option value="goe">Greater or equal</option>
+                                                    <option value="lt">Lower than</option>
+                                                    <option value="loe">Lower or equal</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input id="videoNackThreshold" type="text" class="text" value="0">
+                                                <select id="videoNackThresholdFilter">
+                                                    <option selected value="eq">Equal</option>
+                                                    <option value="gt">Greater than</option>
+                                                    <option value="goe">Greater or equal</option>
+                                                    <option value="lt">Lower than</option>
+                                                    <option value="loe">Lower or equal</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input id="videoBFramesThreshold" type="text" class="text" value="0">
+                                                <select id="videoBFramesThresholdFilter">
+                                                    <option selected value="eq">Equal</option>
+                                                    <option value="gt">Greater than</option>
+                                                    <option value="goe">Greater or equal</option>
+                                                    <option value="lt">Lower than</option>
+                                                    <option value="loe">Lower or equal</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <button id="streamMonitoring" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Start</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="streamMetricsDetailsModal" class="modal fade" role="dialog">
+                <div class="modal-dialog" style="width: 100%">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Stream metrics details</h4>
+                        </div>
+                        <div class="modal-body">
+                            <table id="metricsTable" class="metricsTable" width="100%">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>WIDTH</th>
+                                        <th>HEIGHT</th>
+                                        <th>V_RATE</th>
+                                        <th>NACK</th>
+                                        <th>B_FRAMES</th>
+                                        <th>V_LOST</th>
+                                        <th>FPS</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                            <button type="button" class="btn btn-default pull-right" id="refreshMetricsBtn"><span class="glyphicon glyphicon-refresh"></span> Refresh</button>
                         </div>
                     </div>
                 </div>

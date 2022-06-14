@@ -112,6 +112,25 @@ $(function() {
     $("#streamPublishStressBatch").on("click", function(e){
         streamPublishStressTest();
     });
+    $("#streamMonitoring").on("click", function(e){
+        streamMonitoring();
+    });
+    $('#streamMetricsModal').on('show.bs.modal', function(e) {
+        populateNodes($("#streamMonitoringNodes"));
+    });
+    $("#allStreams").on("click", function(e){
+        $("#monitoredStreamName").prop('disabled', $('#allStreams').is(':checked'));
+    })
+    $('#streamMetricsDetailsModal').on('hidden.bs.modal', function(e) {
+        $('#refreshMetricsBtn').off('click');
+        if ( $.fn.dataTable.isDataTable('#metricsTable') ) {
+            console.log("Destroy data table");
+            const table = $('#metricsTable').DataTable();
+            $('#metricsTable tbody').off('click', 'td.dt-control');
+            table.destroy();
+        }
+    });
+
 
     $("#generalInfoTable").sortable();
     $("#streamStressMode").change(function() {
@@ -126,9 +145,16 @@ $(function() {
 });
 
 function createNode(id, ip) {
-    var api = FlashphonerRestApi.instance("http://"+ip+":8081", "http://"+ip+":8081");
+    let nodeIp = ip;
+    let port = 8081;
+    if (ip.indexOf(':') !== -1) {
+        port = ip.substring(ip.indexOf(":") + 1);
+        nodeIp = ip.substring(0, ip.indexOf(":"));
+    }
+    var api = FlashphonerRestApi.instance("http://"+nodeIp+":"+port, "http://"+nodeIp+":"+port);
     api.id = id;
-    api.ip = ip;
+    api.ip = nodeIp;
+    api.port = port;
     api.tests = [];
     var state = NODE_STATE.NEW;
     var pollState = function(){
@@ -242,11 +268,19 @@ function createNode(id, ip) {
                 break;
         }
     };
+    api.getTranscodingGroupStat = async function() {
+        const result = await fetch("http://" + nodeIp + ":" + port + "/?action=stat&format=json&groups=transcoding_stats")
+        const json = await result.json();
+        return json;
+    }
     return api;
 }
 
 function addNode(ip) {
     var id = ip.replace(/\./g, "");
+    if (ip.indexOf(':') !== -1) {
+        id = ip.substring(ip.indexOf(":") + 1).replace(/\./g, "");
+    }
     if (nodes[id]) {
         return;
     }
@@ -1035,6 +1069,252 @@ function streamPlayStressTest() {
     console.log("Stress streams started");
     STRESS_TESTS.PLAY_STREAM.running = true;
     $("#streamStressBatchModal").modal('hide');
+}
+
+async function streamMonitoring() {
+
+    const node = getActiveNode();
+    const mediaTypeFilter = $('#mediaTypeFilter option:selected').val();
+    const mediaProviderFilter = $('#mediaProviderFilter option:selected').val();
+    const streamTypeThresholdFilter = $('#streamTypeThresholdFilter option:selected').val();
+    const isAllStreams = $('#allStreams').is(':checked');
+    const streamName = $('#monitoredStreamName').val();
+
+
+    // Metric thresholds
+    const thresholds = {
+        VIDEO_RATE: {
+            value: parseInt($('#videoRateThreshold').val()),
+            filter: $('#videoRateThresholdFilter option:selected').val()
+        },
+        VIDEO_FPS: {
+            value: parseInt($('#videoFpsThreshold').val()),
+            filter: $('#videoFpsThresholdFilter option:selected').val(),
+        },
+        VIDEO_NACK: {
+            value: parseInt($('#videoNackThreshold').val()),
+            filter: $('#videoNackThresholdFilter option:selected').val()
+        },
+        VIDEO_B_FRAMES: {
+            value: parseInt($('#videoBFramesThreshold').val()),
+            filter: $('#videoBFramesThresholdFilter option:selected').val()
+        }
+    }
+
+    const formatExtendedData = (row, data) => {
+        const distributors = data.distributors;
+        const info = $(
+            '<div> <b>SessionId:</b> ' + data.sessionId + '</div>' +
+            '<div> <b>MediaProvider:</b> ' + data.mediaProvider + '</div>'
+        );
+
+        // Append nested distributor stat table
+        if (data.published) {
+            const table = $('<table id="' + data.mediaSessionId + '" class="display" width="100%"/>');
+            table.appendTo(info);
+
+            const distributorsData = [];
+            Object.keys(distributors).forEach(key => {
+                const stat = distributors[key];
+                distributorsData.push({
+                    id: key,
+                    codec: stat.codec,
+                    queueSize: stat.queueSize,
+                    resolution: stat.resolution,
+                    videoGroupsSendStats: stat.videoGroupsSendStats
+                })
+            })
+            const distributorsTable = table.DataTable({
+                data: distributorsData,
+                columns: [
+                    {
+                        className: 'sub-dt-control',
+                        orderable: false,
+                        data: null,
+                        defaultContent: ''
+                    },
+                    {data: 'id', title: 'Id'},
+                    {data: 'codec', title: 'Codec'},
+                    {data: 'resolution', title: 'Resolution'},
+                    {data: 'queueSize', title: 'QueueSize'}
+                ],
+                paging: false,
+
+            });
+            const format = (d) => {
+                let result = '';
+                if (d.videoGroupsSendStats) {
+                    Object.keys(d.videoGroupsSendStats).forEach(key => {
+                        let groupInfo = '';
+                        const group = d.videoGroupsSendStats[key];
+                        groupInfo += '<div><b>ID:</b> ' + key + '</div>';
+                        groupInfo += '<p>';
+                        group.videoGroupSendStats.forEach(participant => {
+                            groupInfo += '<div><b>ID</b>: ' + participant.id + ' ; <b>maxSendTime:</b> ' + participant.maxSendTime + ' ; <b>minSendTime:</b> ' + participant.minSendTime + ' ; <b>averageSendTime:</b> ' + participant.averageSendTime + '</div>';
+                        });
+                        groupInfo += '</p>';
+                        result += groupInfo;
+                    })
+                }
+                return result;
+            }
+            // Add event listener for opening and closing details
+            table.on('click', 'td.sub-dt-control', function () {
+                const tr = $(this).closest('tr');
+                const row = distributorsTable.row(tr);
+
+                if (row.child.isShown()) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                } else {
+                    // Open this row
+                    row.child(format(row.data())).show();
+                    tr.addClass('shown');
+                }
+            });
+        }
+        row.child( info ).show();
+
+    }
+
+    //Todo: remove netsted table and do off event listeners
+    const destroyDataTable = () => {
+        if ( $.fn.dataTable.isDataTable('#metricsTable') ) {
+            const table = $('#metricsTable').DataTable();
+            $('#metricsTable tbody').off('click', 'td.dt-control');
+            table.destroy();
+        }
+    }
+
+    const createDataTable = () => {
+        if ( $.fn.dataTable.isDataTable('#metricsTable') ) {
+            destroyDataTable();
+        }
+        return $('#metricsTable').DataTable({
+            columns: [
+                {
+                    className: 'dt-control',
+                    orderable: false,
+                    data: null,
+                    defaultContent: ''
+                },
+                {data: 'name'},
+                {data: 'mediaType'},
+                {data: 'metrics.VIDEO_WIDTH'},
+                {data: 'metrics.VIDEO_HEIGHT'},
+                {data: 'metrics.VIDEO_RATE'},
+                {data: 'metrics.VIDEO_NACK'},
+                {data: 'metrics.VIDEO_B_FRAMES'},
+                {data: 'metrics.VIDEO_LOST'},
+                {data: 'metrics.VIDEO_FPS'}
+            ]
+        });
+    }
+
+    const metricTable = createDataTable();
+
+    const feedDataTable = (data) => {
+
+        metricTable.clear();
+        metricTable.rows.add(data);
+        metricTable.draw();
+
+        // Add event listener for opening and closing details
+        $('#metricsTable tbody').on('click', 'td.dt-control', function() {
+            const tr = $(this).closest('tr');
+            const row = metricTable.row(tr);
+
+            if (row.child.isShown()) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+            } else {
+                // Open this row
+                row.child(formatExtendedData(row, row.data())).show();
+                tr.addClass('shown');
+            }
+        });
+    }
+
+    const transcodingGroupStat = await node.getTranscodingGroupStat();
+
+    const filterData = (data) => {
+        const filteredData = [];
+        let tmpData = data;
+        if (mediaProviderFilter !== "all") {
+            tmpData = data.filter(stream => stream.mediaProvider === mediaProviderFilter);
+        }
+        if (mediaTypeFilter === "play") {
+            tmpData = data.filter(stream => stream.mediaType === mediaTypeFilter);
+        }
+
+        const checkMetricThresholds = (metrics) => {
+            const matched = [];
+            Object.keys(thresholds).forEach(key => {
+                if (thresholds[key].value >= 0) {
+                    const metric = parseInt(metrics[key]);
+                    switch (thresholds[key].filter) {
+                        case "eq":
+                            matched.push(metric === thresholds[key].value);
+                            break;
+                        case "gt":
+                            matched.push(metric > thresholds[key].value);
+                            break;
+                        case "lt":
+                            matched.push(metric < thresholds[key].value);
+                            break;
+                        case "goe":
+                            matched.push(metric >= thresholds[key].value);
+                            break;
+                        case "loe":
+                            matched.push(metric <= thresholds[key].value);
+                            break;
+                    }
+                } else {
+                    matched.push(false);
+                }
+            })
+            return !matched.some(el => el === false);
+        }
+
+        tmpData.forEach(stream => {
+            const published = stream.published;
+            if (streamTypeThresholdFilter === "all" || stream.mediaType === streamTypeThresholdFilter) {
+                if (checkMetricThresholds(stream.metrics)) {
+                    if (published) {
+                        const stat = transcodingGroupStat.transcoding_stats.transcoding_video_full_info[stream.name];
+                        stream['distributors'] = stat.distributors;
+                    }
+                    filteredData.push(stream);
+                }
+            }
+        })
+        return filteredData;
+    }
+
+    const publishedOnly = (mediaTypeFilter === "publish") ? true : null;
+
+    const getStreams = () => {
+        const streams = node.stream.find(null, (isAllStreams) ? null : streamName, publishedOnly, true);
+        streams
+            .then((result) => {
+                console.log("rest response: ", result);
+                feedDataTable(filterData(result));
+            })
+            .catch((e) => {
+                console.log("Failed to get all streams ", e);
+            })
+    }
+    
+    getStreams();
+
+    $('#refreshMetricsBtn').on('click', () => {
+        getStreams();
+    })
+
+    $("#streamMetricsModal").modal('hide');
+    $("#streamMetricsDetailsModal").modal('show');
 }
 
 function streamPublishStressTest() {
