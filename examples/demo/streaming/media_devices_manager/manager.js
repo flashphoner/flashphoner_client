@@ -17,7 +17,8 @@ var previewStream;
 var publishStream;
 var currentVolumeValue = 50;
 var currentGainValue = 50;
-var statsIntervalID;
+var publishStatsIntervalID;
+var playStatsIntervalID;
 var speechIntervalID;
 var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 var videoBytesSent = 0;
@@ -157,9 +158,9 @@ function onStopped() {
     $("#playBtn").prop('disabled', disable);
     $("#playStream").prop('disabled', disable);
     clearStatInfo("in");
-    if (statsIntervalID) {
-        clearInterval(statsIntervalID);
-        statsIntervalID = null;
+    if (playStatsIntervalID) {
+        clearInterval(playStatsIntervalID);
+        playStatsIntervalID = null;
     }
     if (speechIntervalID) {
         clearInterval(speechIntervalID);
@@ -190,9 +191,9 @@ function onUnpublished() {
     $("#publishBtn").prop('disabled', disable);
     $("#publishStream").prop('disabled', disable);
     clearStatInfo("out");
-    if (statsIntervalID) {
-        clearInterval(statsIntervalID);
-        statsIntervalID = null;
+    if (publishStatsIntervalID) {
+        clearInterval(publishStatsIntervalID);
+        publishStatsIntervalID = null;
     }
     enablePublishToggles(false);
 }
@@ -206,8 +207,8 @@ function publishBtnClick() {
 }
 
 function onPublishing(stream) {
-    if (!statsIntervalID) {
-        statsIntervalID = setInterval(loadStats, STAT_INTERVAL);
+    if (!publishStatsIntervalID) {
+        publishStatsIntervalID = setInterval(loadPublishStats, STAT_INTERVAL);
     }
     $('input:radio').attr("disabled", true);
     $("#publishBtn").text("Stop").off('click').click(function () {
@@ -234,8 +235,8 @@ function onPublishing(stream) {
 }
 
 function onPlaying(stream) {
-    if (!statsIntervalID) {
-        statsIntervalID = setInterval(loadStats, STAT_INTERVAL);
+    if (!playStatsIntervalID) {
+        playStatsIntervalID = setInterval(loadPlayStats, STAT_INTERVAL);
     }
     $("#playBtn").text("Stop").off('click').click(function () {
         $(this).prop('disabled', true);
@@ -293,6 +294,7 @@ function play() {
     var streamName = $('#playStream').val();
     var session = Flashphoner.getSessions()[0];
     var transportOutput = $('#transportOutput').val();
+    var mutedName="";
     var constraints = {
         audio: $("#playAudio").is(':checked'),
         video: $("#playVideo").is(':checked')
@@ -351,18 +353,25 @@ function play() {
     }).on(CONNECTION_QUALITY.UPDATE, function (quality, clientFiltered, serverFiltered) {
         updateChart(quality, clientFiltered, serverFiltered, playConnectionQualityStat);
     }).on(STREAM_EVENT, function(streamEvent) {
+        if(streamEvent.payload !== undefined) {
+            mutedName=streamEvent.payload.streamName;
+        }
         switch (streamEvent.type) {
             case STREAM_EVENT_TYPE.AUDIO_MUTED:
                 $("#audioMuted").text(true);
+                $("#audioMutedStream").text(mutedName);
                 break;
             case STREAM_EVENT_TYPE.AUDIO_UNMUTED:
                 $("#audioMuted").text(false);
+                $("#audioMutedStream").text(mutedName);
                 break;
             case STREAM_EVENT_TYPE.VIDEO_MUTED:
                 $("#videoMuted").text(true);
+                $("#videoMutedStream").text(mutedName);
                 break;
             case STREAM_EVENT_TYPE.VIDEO_UNMUTED:
                 $("#videoMuted").text(false);
+                $("#videoMutedStream").text(mutedName);
                 break;
 
         }
@@ -503,6 +512,7 @@ function rewriteSdp(sdp) {
     }
     return sdp.sdpString;
 }
+
 // UI helpers
 // show connection, or local, or remote stream status
 function setStatus(selector, status, stream) {
@@ -542,6 +552,8 @@ function unmuteInputs(selector) {
         }
     });
 }
+
+
 
 function resizeLocalVideo(event) {
     var requested = constraints.video;
@@ -875,8 +887,8 @@ function readyControls() {
     }
 }
 
-// Stat
-function loadStats() {
+// Get WebRTC publishing stats
+function loadPublishStats() {
     if (publishStream) {
         publishStream.getStats(function (stats) {
             if (stats && stats.outboundStream) {
@@ -913,6 +925,10 @@ function loadStats() {
             }
         });
     }
+}
+
+// Get WebRTC playback stats
+function loadPlayStats() {
     if (previewStream) {
         previewStream.getStats(function (stats) {
             if (stats && stats.inboundStream) {
@@ -953,25 +969,28 @@ function loadStats() {
             }
         });
     }
-    function showStat(stat, type) {
-        Object.keys(stat).forEach(function(key) {
-            if (typeof stat[key] !== 'object') {
-                let k = key.split(/(?=[A-Z])/);
-                let metric = "";
-                for (let i = 0; i < k.length; i++) {
-                    metric += k[i][0].toUpperCase() + k[i].substring(1) + " ";
-                }
-                if ($("#" + key + "-" + type).length == 0) {
-                    let html = "<div style='font-weight: bold'>" + metric.trim() + ": <span id='" + key  + "-" + type + "' style='font-weight: normal'></span>" + "</div>";
-                    // $(html).insertAfter("#" + type);
-                    $("#" + type).append(html);
-                } else {
-                    $("#" + key + "-" + type).text(stat[key]);
-                }
-            }
-        });
-    }
 }
+
+// Helper funcltion to display stats
+function showStat(stat, type) {
+    Object.keys(stat).forEach(function(key) {
+        if (typeof stat[key] !== 'object') {
+            let k = key.split(/(?=[A-Z])/);
+            let metric = "";
+            for (let i = 0; i < k.length; i++) {
+                metric += k[i][0].toUpperCase() + k[i].substring(1) + " ";
+            }
+            if ($("#" + key + "-" + type).length == 0) {
+                let html = "<div style='font-weight: bold'>" + metric.trim() + ": <span id='" + key  + "-" + type + "' style='font-weight: normal'></span>" + "</div>";
+                // $(html).insertAfter("#" + type);
+                $("#" + type).append(html);
+            } else {
+                $("#" + key + "-" + type).text(stat[key]);
+            }
+        }
+    });
+}
+
 
 //Test
 var micLevelInterval;
