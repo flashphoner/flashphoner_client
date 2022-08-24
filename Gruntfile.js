@@ -14,7 +14,33 @@ module.exports = function(grunt) {
                         }
                     ]
                 }
-            }
+            },
+            enable_flash: {
+                files: {
+                    'src/flashphoner-core.js': 'src/flashphoner-core.js'
+                },
+                options: {
+                    replacements: [
+                        {
+                            pattern: /var flashProvider = null;/,
+                            replacement: 'var flashProvider = require(\"./flash-media-provider\");'
+                        }
+                    ]
+                }
+            },
+            disable_flash: {
+                files: {
+                    'src/flashphoner-core.js': 'src/flashphoner-core.js'
+                },
+                options: {
+                    replacements: [
+                        {
+                            pattern: /require\(\"\.\/flash-media-provider\"\);/,
+                            replacement: 'null;'
+                        }
+                    ]
+                }
+            },
         },
         flash: {
             options: {
@@ -243,6 +269,7 @@ module.exports = function(grunt) {
     grunt.registerTask('build', [
         'clean:build',
         'string-replace:version',
+        'string-replace:disable_flash',
         'browserify',
         'concat',
         'minify',
@@ -257,6 +284,7 @@ module.exports = function(grunt) {
         'clean:release',
         'clean:build',
         'string-replace:version',
+        'string-replace:disable_flash',
         'browserify:flashphonerGlobalObjectWebRTCOnly',
         'browserify:flashphonerGlobalObjectRestApi',
         'browserify:flashphonerGlobalObjectRoomApi',
@@ -268,6 +296,7 @@ module.exports = function(grunt) {
         'clean:release',
         'clean:build',
         'string-replace:version',
+        'string-replace:enable_flash',
         'flash:release_media_provider',
         'browserify',
         'concat',

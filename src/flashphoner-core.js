@@ -108,7 +108,8 @@ var init = function (options) {
             }
         }
 
-        var flashProvider = require("./flash-media-provider");
+        // flashMediaProvider is disables by default due to end of support in the most browsers #WCS-3577
+        var flashProvider = null;
         if (flashProvider && flashProvider.hasOwnProperty('available') && flashProvider.available() &&
             (!MediaProvider.WebRTC || (options.preferredMediaProviders && options.preferredMediaProviders.indexOf("Flash") >= 0))) {
             MediaProvider.Flash = flashProvider;
