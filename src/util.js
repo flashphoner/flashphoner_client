@@ -366,9 +366,9 @@ const stripCodecs = function(sdp, codecs) {
 const getCurrentCodecAndSampleRate = function(sdp, mediaType) {
     var rows = sdp.split("\n");
     var codecPt;
+    var ret = {};
     for (var i = 0; i < rows.length ; i++) {
         if (codecPt && rows[i].indexOf("a=rtpmap:" + codecPt) != -1) {
-            var ret = {};
             ret.name = rows[i].split(" ")[1].split("/")[0];
             ret.sampleRate = rows[i].split(" ")[1].split("/")[1];
             return ret;
@@ -378,6 +378,10 @@ const getCurrentCodecAndSampleRate = function(sdp, mediaType) {
             codecPt = rows[i].split(" ")[3].trim();
         }
     }
+    // A workaround for empty sdp passed #WCS-3583
+    ret.name = "undefined";
+    ret.sampleRate = "undefined";
+    return ret;
 };
 
 

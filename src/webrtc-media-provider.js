@@ -456,7 +456,14 @@ var createConnection = function (options) {
             obj[mediaType] = {};
             //WCS-1922, currentRemoteDescription - browser compatibilitySection: Chrome 70, FF 57, Safari 11
             var description = connection.currentRemoteDescription != undefined ? connection.currentRemoteDescription : connection.remoteDescription;
-            var codec = util.getCurrentCodecAndSampleRate(description.sdp, mediaType);
+            // SDP may be null in Safari 12.1 and older, prevent TypeError here #WCS-3583
+            var sdp = "";
+            if (description && description.sdp) {
+               sdp = description.sdp;
+            } else {
+               logger.debug(LOG_PREFIX, "Can't parse current SDP to detect codec and sampleRate");
+            }
+            var codec = util.getCurrentCodecAndSampleRate(sdp, mediaType);
             obj[mediaType]["codec"] = codec.name;
             obj[mediaType]["codecRate"] = codec.sampleRate;
             Object.keys(report).forEach(function (key) {
