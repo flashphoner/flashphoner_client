@@ -18,6 +18,7 @@ const HTML_VOLUME_LOW='<svg height="100%" version="1.1" viewBox="0 0 36 36" widt
 const HTML_VOLUME_HIGH='<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"<defs><clipPath><path d="m 14.35,-0.14 -5.86,5.86 20.73,20.78 5.86,-5.91 z"></path><path d="M 7.07,6.87 -1.11,15.33 19.61,36.11 27.80,27.60 z"></path><path d="M 9.09,5.20 6.47,7.88 26.82,28.77 29.66,25.99 z" transform="translate(0, 0)"></path></clipPath><clipPath><path d="m -11.45,-15.55 -4.44,4.51 20.45,20.94 4.55,-4.66 z" transform="translate(0, 0)"></path></clipPath></defs><path style="fill: #fff;" clip-path="url(#ytp-svg-volume-animation-mask)" d="M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,19.77 21.5,18 C21.5,16.26 20.48,14.74 19,14 ZM19,11.29 C21.89,12.15 24,14.83 24,18 C24,21.17 21.89,23.85 19,24.71 L19,26.77 C23.01,25.86 26,22.28 26,18 C26,13.72 23.01,10.14 19,9.23 L19,11.29 Z" fill="#fff" id="ytp-svg-12"></path></svg>';
 const HTML_FULLSCREEN_EXIT='<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><g class="ytp-fullscreen-button-corner-2"><path style="fill: #fff;" d="m 14,14 -4,0 0,2 6,0 0,-6 -2,0 0,4 0,0 z"></path></g><g><path style="fill: #fff;" d="m 22,14 0,-4 -2,0 0,6 6,0 0,-2 -4,0 0,0 z"></path></g><g><path style="fill: #fff;" d="m 20,26 2,0 0,-4 4,0 0,-2 -6,0 0,6 0,0 z"></path></g><g><path style="fill: #fff;" d="m 10,22 4,0 0,4 2,0 0,-6 -6,0 0,2 0,0 z"></path></g></svg>';
 let firstUnmuted = true;
+let useVideoControls = false;
 
 function init_page() {
     //video display
@@ -45,9 +46,13 @@ function init_page() {
             $(".fullscreen").hide();
         }
     }
-    if ((Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] == "WebRTC")) {
-        $('.volume').hide();
-        $('.volume-range-block').hide();
+    if ((Browser.isSafariWebRTC() && Flashphoner.getMediaProviders()[0] == "WebRTC")) {
+        if (Browser.version() > 13) {
+            // Enable video controls for fullscreen mode to work in Safari
+            useVideoControls = true;
+            // Hide custom controls 
+            $('.player').hide();
+        }
     }
     if (autoplay ) {
         // Autoplay will start for muted video tag only, adjust mute button and slider view
@@ -61,7 +66,8 @@ function init_page() {
 
 function onStarted(stream) {
     stopped = false;
-    $('#play').css('display', 'none');
+    centralButton.setView("stop");
+    centralButton.hide();
     $(".play-pause").prop('disabled', false);
     $(".fullscreen").prop('disabled', false);
     stream.setVolume(currentVolumeValue);
@@ -69,13 +75,15 @@ function onStarted(stream) {
 
 function onStopped() {
     stopped = true;
-    $('#play').css('display', 'block');
-    $('#play').on('click', function() {
+    centralButton.stopTimer();
+    centralButton.setView("play");
+    centralButton.display();
+    centralButton.setAction(function() {
         if (!$('.play-pause').prop('disabled')) {
             if (stopped) {
                 start();
                 $('.play-pause').addClass('pause').removeClass('play').prop('disabled', true);
-                $('#play').css('display', 'none');
+                centralButton.hide();
             } else {
                 if (stream) {
                     stream.stop();
@@ -96,7 +104,7 @@ function start() {
     if (Flashphoner.getMediaProviders()[0] == "WSPlayer") {
         Flashphoner.playFirstSound();
     } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] == "MSE") {
-        Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function() {
+        Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL, useVideoControls).then(function() {
             createSession();
         }).catch(function() {
             onStopped();
@@ -133,7 +141,8 @@ function playStream(session) {
     var options = {
         name: streamName,
         display: remoteVideo,
-        flashShowFullScreenButton: true
+        flashShowFullScreenButton: true,
+        useControls: useVideoControls
     };
     if (resolution_for_wsplayer) {
         options.playWidth = resolution_for_wsplayer.playWidth;
@@ -163,6 +172,21 @@ function playStream(session) {
                     resizeVideo(event.target, options.playWidth, newHeight);
                 }
             });
+            if (useVideoControls && Browser.isSafariWebRTC()) {
+                // iOS/MacOS hack when using standard controls to leave fullscreen mode
+                var needRestart = false;
+                video.addEventListener("pause", function () {
+                    if(needRestart) {
+                        console.log("Video paused after fullscreen, continue...");
+                        video.play();
+                        needRestart = false;
+                    }
+                });
+                video.addEventListener("webkitendfullscreen", function () {
+                    video.play();
+                    needRestart = true;
+                });                
+            }
         }
     }).on(STREAM_STATUS.PLAYING, function (stream) {
         setStatus(stream.status());
@@ -263,6 +287,51 @@ function setVolume(volume, slider) {
     return(true);
 }
 
+// Object to manage central Play/Stop button
+centralButton = {
+    timer: null,
+    displayed: false,
+    display: function(timeout = 0) {
+        $('#play').show();
+        centralButton.displayed = true;
+        if (timeout > 0 && !centralButton.timer) {
+            centralButton.timer = setTimeout(function() {
+                centralButton.hide();
+            }, timeout);
+        }
+    },
+    displayToggle: function(timeout) {
+        if(!centralButton.displayed) {
+            centralButton.display(timeout);
+        } else {
+            centralButton.hide();
+        }
+    },
+    setAction: function(action) {
+        $('#play').on('click', action);
+    },
+    setView: function(view) {
+        if (view === "play") {
+            $('#play').addClass('play').removeClass('stop');
+            $('#play img').prop('src', 'images/play.png');        
+        } else if (view === "stop") {
+            $('#play').addClass('stop').removeClass('play');
+            $('#play img').prop('src', 'images/stop.png');                    
+        }
+    },
+    hide: function() {
+        $('#play').hide();
+        centralButton.displayed = false;
+        centralButton.stopTimer();
+    },
+    stopTimer: function() {
+        if (centralButton.timer) {
+            clearTimeout(centralButton.timer);
+            centralButton.timer = null;
+        }
+    }
+};
+
 (function ($) {
     $.fn.videoPlayer = function (options) {
         var settings = {
@@ -299,7 +368,7 @@ function setVolume(volume, slider) {
                     if (stopped) {
                         start();
                         $(this).addClass('pause').removeClass('play').prop('disabled', true);
-                        $('#play').css('display', 'none');
+                        centralButton.hide();
                     } else {
                         if (stream) {
                             stream.stop();
@@ -310,18 +379,20 @@ function setVolume(volume, slider) {
                 }
             });
 
+
             $that.bind('click', function () {
                 if ( !stopped ) {
-                if ($clearTimeout) {
-                    clearTimeout($clearTimeout);
-                }
-                $that.find('.player').stop(true, false).animate({'opacity': '1'}, 0.5);
-                $clearTimeout = setTimeout(function() {
-                    $that.find('.player').stop(true, false).animate({'opacity': '0'}, 0.5);
-                }, 5000);
+                    if ($clearTimeout) {
+                        clearTimeout($clearTimeout);
+                    }
+                    centralButton.displayToggle(5000);
+                    $that.find('.player').stop(true, false).animate({'opacity': '1'}, 0.5);
+                    $clearTimeout = setTimeout(function() {
+                        $that.find('.player').stop(true, false).animate({'opacity': '0'}, 0.5);
+                    }, 5000);
                 };
             });
-
+            
             $that.find('.volume').hover(function () {
                 $volhover = true;
             }, function () {
@@ -330,10 +401,17 @@ function setVolume(volume, slider) {
 
             $('body, html').bind('mousemove', function (e) {
    				if ( !stopped ) {
+   				    // Prevent central button displaying by mousemove in mobile browsers
+   				    if (!(Browser.isAndroid() || Browser.isiOS())) {
+                        centralButton.display(5000);
+                    }
        				$that.hover(function () {
            				$that.find('.player').stop(true, false).animate({'opacity': '1'}, 0.5);
        				}, function () {
            				$that.find('.player').stop(true, false).animate({'opacity': '0'}, 0.5);
+           				if (!stopped) {
+           				    centralButton.hide();
+           				}
        				});
    	            }
                 if (!$volhover) {
@@ -430,11 +508,11 @@ function setVolume(volume, slider) {
 
             $(document).on('webkitfullscreenchange mozfullscreenchange fullscreenchange', function(e) {
                 if (stream) {
-
+                
                     $('.player').toggleClass('fullscreenon');  //Add class for all controls in full screen mode
                     $('.volume-range-block').toggleClass('fullscreen-vol'); //Add class to volume control for full screen mode
 
-                    if ( $('.player').hasClass('fullscreenon') ) {
+                    if ( e.target === document.fullscreenElement ) {
                         prevFull = $('.fullscreenBtn').html();
 
                         //change full screen button to full screen exit button
@@ -450,6 +528,7 @@ function setVolume(volume, slider) {
                                 $that.find('.player').stop(true, false).animate({'opacity': '0'}, 0.5);
                             }, 15000);
                         });
+
                     } else {
 
                         $('.fullscreenBtn').html(prevFull);
@@ -459,6 +538,8 @@ function setVolume(volume, slider) {
                             };
                         });
                     };
+                    // Resize video to a parent tag when toggling fullscreen (we may not receive `resize` event in Safari 16) #WCS-3606
+                    resizeVideo(e.target);
                 };
             });
         });

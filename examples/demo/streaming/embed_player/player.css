@@ -73,13 +73,23 @@ video:-webkit-full-screen {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(1);
-    background: #00CBFF;
     border-radius: 26%;
+    z-index: 2147483647 !important;
 }
 
 #play img {
     display: block;
     width: 100%;
+}
+
+.play {
+    background: #00CBFF;
+}
+
+.stop {
+    -webkit-box-shadow: inset 0px 1px 29px 0px rgba(102, 31, 36, 0.75);
+    -moz-box-shadow: inset 0px 1px 29px 0px rgba(102, 31, 36, 0.75);
+    box-shadow: inset 0px 1px 29px 0px rgba(102, 31, 36, 0.75);
 }
 
 #play:hover {

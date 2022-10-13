@@ -819,6 +819,7 @@ var createSession = function (options) {
      * @param {Array<string>=} options.sipSDP Array of custom SDP params (ex. bandwidth (b=))
      * @param {Array<string>=} options.sipHeaders Array of custom SIP headers
      * @param {string=} options.videoContentHint Video content hint for browser ('detail' by default to maintain resolution), {@link Flashphoner.constants.CONTENT_HINT_TYPE}
+     * @param {Boolean=} options.useControls Use a standard HTML5 video controls (play, pause, fullscreen). May be a workaround for fullscreen mode to work in Safari 16
      * @param {Object=} options.logger Call logger options
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Call} Call
@@ -883,6 +884,7 @@ var createSession = function (options) {
         var sipSDP = options.sipSDP;
         var sipHeaders = options.sipHeaders;
         var videoContentHint = options.videoContentHint;
+        var useControls = options.useControls;
         /**
          * Represents sip call.
          *
@@ -979,6 +981,7 @@ var createSession = function (options) {
                     connectionConfig: mediaOptions,
                     audioOutputId: audioOutputId,
                     videoContentHint: videoContentHint,
+                    useControls: useControls,
                     logger: logger
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
@@ -1117,7 +1120,8 @@ var createSession = function (options) {
                     login: cConfig.sipLogin,
                     constraints: constraints,
                     connectionConfig: mediaOptions,
-                    audioOutputId: audioOutputId
+                    audioOutputId: audioOutputId,
+                    useControls: useControls
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
                     return mediaConnection.setRemoteSdp(sdp);
@@ -1595,6 +1599,7 @@ var createSession = function (options) {
      * @param {string=} options.useCanvasMediaStream EXPERIMENTAL: when publish bind browser's media stream to the canvas. It can be useful for image filtering
      * @param {string=} options.videoContentHint Video content hint for browser ('detail' by default to maintain resolution), {@link Flashphoner.constants.CONTENT_HINT_TYPE}
      * @param {Boolean=} options.unmutePlayOnStart Unmute playback on start. May be used after user gesture only, so set 'unmutePlayOnStart: false' for autoplay
+     * @param {Boolean=} options.useControls Use a standard HTML5 video controls (play, pause, fullscreen). May be a workaround for fullscreen mode to work in Safari 16
      * @param {Object=} options.logger Stream logger options
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Stream} Stream
@@ -1705,6 +1710,7 @@ var createSession = function (options) {
         var useCanvasMediaStream = options.useCanvasMediaStream;
         var videoContentHint = options.videoContentHint;
         var unmutePlayOnStart = options.unmutePlayOnStart;
+        var useControls = options.useControls;
 
         var audioState_;
         var videoState_;
@@ -1890,6 +1896,7 @@ var createSession = function (options) {
                 remoteVideo: remoteVideo,
                 playoutDelay: playoutDelay,
                 unmutePlayOnStart: unmutePlayOnStart,
+                useControls: useControls,
                 logger: logger
             }, streamRefreshHandlers[id_]).then(function (newConnection) {
                 mediaConnection = newConnection;
@@ -1979,6 +1986,7 @@ var createSession = function (options) {
                     connectionConstraints: mediaConnectionConstraints,
                     customStream: constraints && constraints.customStream ? constraints.customStream : false,
                     videoContentHint: videoContentHint,
+                    useControls: useControls,
                     logger: logger
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;

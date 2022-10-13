@@ -1,4 +1,4 @@
-'use strict';
+-'use strict';
 
 var browserDetails = require('webrtc-adapter').default.browserDetails;
 const { v1: uuid_v1 } = require('uuid');
@@ -59,6 +59,8 @@ var createConnection = function (options) {
         var videoContentHint = options.videoContentHint ? options.videoContentHint : 'detail';
         // Pass the option to unmute automatically (true by default) #WCS-2425
         var unmutePlayOnStart = options.unmutePlayOnStart !== undefined ? options.unmutePlayOnStart : true;
+        // Use a standard HTML5 video controls if needed (to enable fullscreen in Safari 16 for example) #WCS-3606
+        var useControls = options.useControls || false;
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
@@ -74,7 +76,7 @@ var createConnection = function (options) {
             }
             remoteVideo = getCacheInstance(remoteDisplay);
             if (!remoteVideo) {
-                remoteVideo = createVideoElement();
+                remoteVideo = createVideoElement(useControls);
                 remoteDisplay.appendChild(remoteVideo);
             }
             remoteVideo.id = id + "-remote";
@@ -95,7 +97,7 @@ var createConnection = function (options) {
                     if (cachedVideo) {
                         remoteVideo = cachedVideo;
                     } else {
-                        remoteVideo = createVideoElement();
+                        remoteVideo = createVideoElement(useControls);
                         display.appendChild(remoteVideo);
                     }
                     remoteVideo.id = id;
@@ -113,9 +115,18 @@ var createConnection = function (options) {
                     setContentHint(localVideo.srcObject, videoContentHint);
                     connection.addStream(localVideo.srcObject);
                 }
+            } else {
+                // There is a custom video element, get its id if set #WCS-3606
+                if (remoteVideo.id) {
+                    id = remoteVideo.id;
+                }
             }
         }
         if (localVideo) {
+            // Enable local video controls if option requires #WCS-3606
+            if (useControls) {
+                enableVideoControls(localVideo);
+            }
             var videoTrack = localVideo.srcObject.getVideoTracks()[0];
             if (videoTrack) {
                 videoCams.forEach((cam, index) => {
@@ -131,6 +142,12 @@ var createConnection = function (options) {
                         switchMicCount = index;
                     }
                 });
+            }
+        }
+        if (remoteVideo) {
+            // Enable remote video  controls if option requires #WCS-3606
+            if (useControls) {
+                enableVideoControls(remoteVideo);
             }
         }
         function setContentHint(stream, hint) {
@@ -480,7 +497,13 @@ var createConnection = function (options) {
                 if (!document.fullscreenElement && !document.mozFullScreenElement &&
                     !document.webkitFullscreenElement && !document.msFullscreenElement) {
                     if (video.requestFullscreen) {
-                        video.requestFullscreen();
+                        var result = video.requestFullscreen();
+                        // Chromium based browsers return a promise which is rejected although user click is present #WCS-3606
+                        if (util.isPromise(result)) {
+                            result.catch(function(e) {
+                                logger.debug(LOG_PREFIX, e);
+                            });
+                        }
                     } else if (video.msRequestFullscreen) {
                         video.msRequestFullscreen();
                     } else if (video.mozRequestFullScreen) {
@@ -489,10 +512,18 @@ var createConnection = function (options) {
                         video.webkitRequestFullscreen();
                     } else if (video.webkitEnterFullscreen) {
                         video.webkitEnterFullscreen();
-                        //hack for iOS safari. Video is getting paused when switching from fullscreen to normal mode.
+                        // iOS (all versions)/MacOS (since 15) Safari hack: video is paused when leaving fullscreen mode #WCS-3606
+                        var needRestart = false;
                         video.addEventListener("pause", function () {
-                            video.play();
+                            if(needRestart) {
+                                video.play();
+                                needRestart = false;
+                            }
                         });
+                        video.addEventListener("webkitendfullscreen", function () {
+                            video.play();
+                            needRestart = true;
+                        });                
                     }
                 } else {
                     if (document.exitFullscreen) {
@@ -868,7 +899,9 @@ var loadOrdinaryVideo = function(display, stream, screenShare, constraints, vide
         vEl = createVideoElement();
         display.appendChild(vEl);
     }
-    vEl.id = uuid_v1() + LOCAL_CACHED_VIDEO;
+    if (!vEl.id) {
+        vEl.id = uuid_v1() + LOCAL_CACHED_VIDEO;
+    }
     vEl.srcObject = stream;
     vEl.onloadedmetadata = function (e) {
         //WCS-2751 Add screen capture using getDisplayMedia in Safari
@@ -896,7 +929,9 @@ var loadCanvasVideo = function (display, stream, video) {
             vEl = canvas;
         }
     }
-    vEl.id = uuid_v1() + LOCAL_CACHED_VIDEO;
+    if (!vEl.id) {
+        vEl.id = uuid_v1() + LOCAL_CACHED_VIDEO;
+    }
 
     let child = vEl.children[0];
     child.srcObject = stream;
@@ -1203,13 +1238,16 @@ function getCacheInstance(display) {
     }
 }
 
-function createVideoElement() {
+function createVideoElement(useControls = false) {
     let video = document.createElement('video');
     // Prepare video tag to auto play and add specific Safari tweaks #WCS-2425
     video.muted = true;
-    if(util.Browser.isSafariWebRTC()) {
-       video.setAttribute("playsinline", "");
-       video.setAttribute("webkit-playsinline", "");
+    if (util.Browser.isSafariWebRTC()) {
+        video.setAttribute("playsinline", "");
+        video.setAttribute("webkit-playsinline", "");
+    }
+    if (useControls) {
+        enableVideoControls(video);
     }
     return(video);
 }
@@ -1232,6 +1270,12 @@ function removeVideoElement(video) {
                 removeVideoElement(video.children[i]);
             }
         }
+    }
+}
+
+function enableVideoControls(video) {
+    if(video && !video.controls) {
+        video.setAttribute("controls", "controls");
     }
 }
 
@@ -1405,12 +1449,10 @@ var playFirstSound = function () {
     return false;
 };
 
-var playFirstVideo = function (display, isLocal, src) {
+var playFirstVideo = function (display, isLocal, src, useControls = false) {
     return new Promise(function (resolve, reject) {
         if (!getCacheInstance(display)) {
-            var video = document.createElement('video');
-            video.setAttribute("playsinline", "");
-            video.setAttribute("webkit-playsinline", "");
+            var video = createVideoElement(useControls);
             //Mute video tag to prevent local audio playback in Safari #WCS-3430
             video.muted = true;
             video.id = uuid_v1() + (isLocal ? LOCAL_CACHED_VIDEO : REMOTE_CACHED_VIDEO);
@@ -1421,6 +1463,7 @@ var playFirstVideo = function (display, isLocal, src) {
                 video.src = src;
                 video.play().then(function () {
                     display.appendChild(video);
+                    video.removeAttribute("src");
                     resolve();
                 }).catch(function () {
                     //WCS-2375. fixed autoplay in ios safari
@@ -1428,6 +1471,7 @@ var playFirstVideo = function (display, isLocal, src) {
                     video.muted = true;
                     video.play().then(function () {
                         display.appendChild(video);
+                        video.removeAttribute("src");
                         resolve();
                     });
                     //WCS-2375. low power mode suspends video play

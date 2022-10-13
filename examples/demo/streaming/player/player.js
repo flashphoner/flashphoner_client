@@ -14,6 +14,8 @@ var resolution = getUrlParam("resolution");
 var mediaProvider = getUrlParam("mediaProvider") || null;
 var mseCutByIFrameOnly = getUrlParam("mseCutByIFrameOnly");
 
+var useVideoControls = false;
+
 function init_page() {
 
     //init api
@@ -56,6 +58,11 @@ function init_page() {
         $("#volumeControl").slider('value', 0);
         $("#playBtn").click();
     }
+    // Enable video controls for fullscreen mode to work in Safari 16
+    if (Browser.isSafariWebRTC() && Browser.version() > 13) {
+        useVideoControls = true;
+        $("#fullScreen").hide();
+    }
 }
 
 function onStarted(stream) {
@@ -87,7 +94,7 @@ function playBtnClick() {
         if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
             Flashphoner.playFirstSound();
         } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] === "MSE") {
-            Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL).then(function() {
+            Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL, useVideoControls).then(function() {
                 start();
             }).catch(function () {
                 onStopped();
@@ -134,7 +141,8 @@ function playStream(session) {
     var options = {
         name: streamName,
         display: remoteVideo,
-        flashShowFullScreenButton: true
+        flashShowFullScreenButton: true,
+        useControls: useVideoControls
     };
     if (Flashphoner.getMediaProviders()[0] === "MSE" && mseCutByIFrameOnly) {
         options.mediaConnectionConstraints = {
@@ -170,6 +178,21 @@ function playStream(session) {
                         resizeVideo(event.target, options.playWidth, newHeight);
                     }
                 });
+            }
+            if (useVideoControls && Browser.isSafariWebRTC()) {
+                // iOS hack when using standard controls to leave fullscreen mode
+                var needRestart = false;
+                video.addEventListener("pause", function () {
+                    if(needRestart) {
+                        console.log("Video paused after fullscreen, continue...");
+                        video.play();
+                        needRestart = false;
+                    }
+                });
+                video.addEventListener("webkitendfullscreen", function () {
+                    video.play();
+                    needRestart = true;
+                });                
             }
         }
     }).on(STREAM_STATUS.PLAYING, function (stream) {

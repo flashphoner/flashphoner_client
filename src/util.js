@@ -92,7 +92,7 @@ const Browser = {
         return !!window.chrome && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor) && !/OPR/.test(navigator.userAgent);
     },
     isEdge: function () {
-        return !isIE && !!window.StyleMedia;
+        return !this.isIE() && !!window.StyleMedia;
     },
     isOpera: function () {
         return (!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
@@ -118,6 +118,33 @@ const Browser = {
     },
     isChromiumEdge: function () {
         return /Chrome/i.test(navigator.userAgent) && /Edg/i.test(navigator.userAgent);
+    },
+    version: function () {
+        var version = navigator.userAgent.match(/version\/(\d+)/i);
+        if (version) {
+            return version[1];
+        } else {
+            if (this.isEdge()) {
+                version = /\brv[ :]+(\d+)/g.exec(navigator.userAgent) || [];
+            }
+            if (this.isOpera()) {
+                version = navigator.userAgent.match(/\b(OPR)\/(\d+)/) || [];
+            }
+            if (this.isChromiumEdge()) {
+                version = navigator.userAgent.match(/\b(Edg)\/(\d+)/) || [];
+            }
+            if (this.isSamsungBrowser()) {
+                version = navigator.userAgent.match(/\b(SamsungBrowser)\/(\d+)/) || [];
+            }
+            if (this.isChrome()) {
+                version = navigator.userAgent.match(/\b(Chrome)\/(\d+)/) || [];
+            }
+            if (this.isFirefox()) {
+                version = navigator.userAgent.match(/\b(Firefox)\/(\d+)/) || [];
+            }
+            return version[2] || 0;
+        }
+        return 0;
     }
 };
 
@@ -384,6 +411,16 @@ const getCurrentCodecAndSampleRate = function(sdp, mediaType) {
     return ret;
 };
 
+const isPromise = function(object) {
+    if (object !== null &&
+        typeof object === 'object' &&
+        typeof object.then === 'function' &&
+        typeof object.catch === 'function') {
+        return true;
+    }
+    
+    return false;
+};
 
 module.exports = {
     isEmptyObject,
@@ -394,5 +431,6 @@ module.exports = {
     SDP,
     logger,
     stripCodecs,
-    getCurrentCodecAndSampleRate
+    getCurrentCodecAndSampleRate,
+    isPromise
 };
