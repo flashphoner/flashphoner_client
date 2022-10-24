@@ -210,9 +210,9 @@ var playFirstSound = function(noise) {
  *
  * @memberof Flashphoner
  */
-var playFirstVideo = function (display, isLocal, src) {
+var playFirstVideo = function (display, isLocal, src, useControls) {
     for (var mp in MediaProvider) {
-        return MediaProvider[mp].playFirstVideo(display, isLocal, src);
+        return MediaProvider[mp].playFirstVideo(display, isLocal, src, useControls);
     }
 };
 

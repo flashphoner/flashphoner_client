@@ -53,15 +53,18 @@ function init_page() {
         }
     }).slider("disable");
     onStopped();
+    if (Browser.isSafari()) {
+        // Enable video controls for fullscreen mode to work in Safari 16
+        useVideoControls = true;
+        $("#fullScreen").hide();
+        if (Browser.isiOS()) {
+            $("#volume").hide();
+        }
+    }
     if (autoplay) {
         // We can start autoplay with muted audio only, so set volume slider to 0 #WCS-2425
         $("#volumeControl").slider('value', 0);
         $("#playBtn").click();
-    }
-    // Enable video controls for fullscreen mode to work in Safari 16
-    if (Browser.isSafariWebRTC() && Browser.version() > 13) {
-        useVideoControls = true;
-        $("#fullScreen").hide();
     }
 }
 
@@ -93,7 +96,7 @@ function playBtnClick() {
         $("#streamName").prop('disabled', true);
         if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
             Flashphoner.playFirstSound();
-        } else if (Browser.isSafariWebRTC() || Flashphoner.getMediaProviders()[0] === "MSE") {
+        } else if (Browser.isSafari()) {
             Flashphoner.playFirstVideo(remoteVideo, false, PRELOADER_URL, useVideoControls).then(function() {
                 start();
             }).catch(function () {
@@ -108,6 +111,7 @@ function playBtnClick() {
 function start() {
     var url = $('#url').val();
     //check if we already have session
+    $("#preloader").show();
     if (Flashphoner.getSessions().length > 0) {
         var session = Flashphoner.getSessions()[0];
         if (session.getServerUrl() == url) {
@@ -141,7 +145,6 @@ function playStream(session) {
     var options = {
         name: streamName,
         display: remoteVideo,
-        flashShowFullScreenButton: true,
         useControls: useVideoControls
     };
     if (Flashphoner.getMediaProviders()[0] === "MSE" && mseCutByIFrameOnly) {
@@ -160,7 +163,6 @@ function playStream(session) {
         options.unmutePlayOnStart = false;
     }
     stream = session.createStream(options).on(STREAM_STATUS.PENDING, function (stream) {
-        $("#preloader").show();
         var video = document.getElementById(stream.id());
         if (!video.hasListeners) {
             video.hasListeners = true;
@@ -194,17 +196,25 @@ function playStream(session) {
                     needRestart = true;
                 });                
             }
+            // Hide preloader when playing video
+            video.addEventListener("playing", function () {
+                $("#preloader").hide();
+            });
         }
     }).on(STREAM_STATUS.PLAYING, function (stream) {
-        $("#preloader").hide();
+        // Android Firefox may pause stream playback via MSE even if video element is muted
+        if (Flashphoner.getMediaProviders()[0] == "MSE" && autoplay && Browser.isAndroidFirefox()) {
+            let video = document.getElementById(stream.id());
+            if (video && video.paused) {
+                video.play();
+            }
+        }
         setStatus(stream.status());
         onStarted(stream);
     }).on(STREAM_STATUS.STOPPED, function () {
-        $("#preloader").hide();
         setStatus(STREAM_STATUS.STOPPED);
         onStopped();
     }).on(STREAM_STATUS.FAILED, function(stream) {
-        $("#preloader").hide();
         setStatus(STREAM_STATUS.FAILED, stream);
         onStopped();
     }).on(STREAM_EVENT, function(streamEvent){

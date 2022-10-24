@@ -3,78 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
     <base href="/shared/examples/demo/streaming/embed_player/">
-    <link rel="stylesheet" href="../../dependencies/bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="../../dependencies/bootstrap/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="jquery-ui.css">
     <link rel="stylesheet" href="player.css">
 
     <title>Player</title>
     <script type="text/javascript" src="../../../../flashphoner.js"></script>
-    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
-    <script type="text/javascript" src="../../dependencies/jquery/jquery-ui.js"></script>
-    <script type="text/javascript" src="jquery.ui.touch-punch.min.js"></script>
-    <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
+    <script type="text/javascript" src="utils.js"></script>
     <script type="text/javascript" src="player.js"></script>
 </head>
 <body onload="init_page()">
-<div class="video">
-    <div id="error_output"></div>
+<div class="video" id="container">
+    <div id="status"></div>
     <div id="play"><img src="images/play.png" alt=""></div>
-    <i id="preloader" class="fa fa-spinner fa-pulse fa-3x fa-fw" aria-hidden="true"
-       style="color: #ffffff; position: absolute; top: 40%; left: 45.5%;"></i>
+    <div id="preloader" class="loader" aria-hidden="true"></div>
     <div class="display" id="remoteVideo"></div>
-    <div class="player">
-        <div class="status"></div>
-        <div class="play-pause">
-            <span class="play-button"></span>
-            <div class="pause-button">
-                <span> </span>
-            </div>
-        </div>
-        <div class="volume" style="cursor: pointer">
-
-            <svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%">
-            				<defs>
-            								<clipPath>
-            												<path d="m 14.35,-0.14 -5.86,5.86 20.73,20.78 5.86,-5.91 z"></path>
-            												<path d="M 7.07,6.87 -1.11,15.33 19.61,36.11 27.80,27.60 z"></path>
-            												<path d="M 9.09,5.20 6.47,7.88 26.82,28.77 29.66,25.99 z" transform="translate(0, 0)"></path>
-            								</clipPath>
-            								<clipPath>
-            												<path d="m -11.45,-15.55 -4.44,4.51 20.45,20.94 4.55,-4.66 z" transform="translate(0, 0)"></path>
-            								</clipPath>
-            				</defs>
-            				<path style="fill: #fff;" clip-path="url(#ytp-svg-volume-animation-mask)" d="M8,21 L12,21 L17,26 L17,10 L12,15 L8,15 L8,21 Z M19,14 L19,22 C20.48,21.32 21.5,19.77 21.5,18 C21.5,16.26 20.48,14.74 19,14 Z" fill="#fff" id="ytp-svg-12"></path>
-            </svg>
-        </div>
-
-        <div class="volume-range-block" tabindex="0">
-        				<input type="hidden" value="50" id="volume-range">
-                <div id="slider" ></div>
-        </div>
-
-        <div class="fullscreen">
-            <div class="fullscreenBtn">
-            				<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%">
-            								<g>
-            												<path style="fill: #fff;" d="m 10,16 2,0 0,-4 4,0 0,-2 L 10,10 l 0,6 0,0 z"></path>
-            								</g>
-            								<g>
-            												<path style="fill: #fff;" d="m 20,10 0,2 4,0 0,4 2,0 L 26,10 l -6,0 0,0 z"></path>
-            								</g>
-            								<g>
-            												<path style="fill: #fff;" d="m 24,24 -4,0 0,2 L 26,26 l 0,-6 -2,0 0,4 0,0 z"></path>
-            								</g>
-            								<g>
-            												<path style="fill: #fff;" d="M 12,20 10,20 10,26 l 6,0 0,-2 -4,0 0,-4 0,0 z"></path>
-            								</g>
-
-
-            </div>
-        </div>
-    </div>
 </div>
 </body>
 </html>
