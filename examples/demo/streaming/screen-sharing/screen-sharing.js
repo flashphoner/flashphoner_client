@@ -6,6 +6,8 @@ var remoteVideo;
 var extensionId = "nlbaajplpmleofphigmgaifhoikjmbkg";
 var extensionNotInstalled;
 
+var askExtension = getUrlParam("askExtension") || false;
+
 function init_page() {
     //init api
     try {
@@ -29,20 +31,22 @@ function init_page() {
 
     } else if (Browser.isChrome() && !Browser.isAndroid() && !Browser.isiOS()) {
         interval = setInterval(function() {
-            chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
-                if (chrome.runtime.lastError) {         //WCS-2369 - cacth runtime.lastError
-                    (inIframe()) ? $("#installFromMarket").show() : $("#installExtensionButton").show();
+            try {
+                chrome.runtime.sendMessage(extensionId, {type: "isInstalled"}, function (response) {
+                    if (chrome.runtime.lastError) {         //WCS-2369 - catch runtime.lastError
+                        onExtensionNotFound();
+                    } else {
+                        $("#extension").hide();
+                        onExtensionAvailable();
+                    }
                     clearInterval(interval);
-                    onExtensionAvailable();
-                    $('#woChromeExtension').prop('checked', true);
-                    $('#woChromeExtension').prop('disabled', true);
-                    extensionNotInstalled = true;
-                } else {
-                    $("#extension").hide();
-                    clearInterval(interval);
-                    onExtensionAvailable();
-                }
-            });
+                });
+            } catch (e) {
+                // Catch chrome.runtime.sendMessage undefined exception #WCS-3638
+                console.log("Can't detect screen sharing extension: "+e);
+                onExtensionNotFound();
+                clearInterval(interval);
+            }
         }, 500);
     } else if(isSafariMacOS()) {
         $("#extension").hide();
@@ -82,6 +86,22 @@ function init_page() {
 
 function isSafariMacOS() {
     return Browser.isSafari() && !Browser.isAndroid() && !Browser.isiOS();
+}
+
+function onExtensionNotFound() {
+    if (askExtension === true) {
+        if (inIframe()) {
+            $("#installFromMarket").show();
+        } else {
+            $("#installExtensionButton").show();
+        }
+    } else {
+        $("#extension").hide();
+    }
+    onExtensionAvailable();
+    $('#woChromeExtension').prop('checked', true);
+    $('#woChromeExtension').prop('disabled', true);
+    extensionNotInstalled = true;
 }
 
 function onExtensionAvailable() {
