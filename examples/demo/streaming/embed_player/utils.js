@@ -1,4 +1,7 @@
-//Set WCS URL
+/**
+ * Set WCS URL
+ * @return WCS URL to connect
+ */
 function setURL() {
     let proto;
     let url;
@@ -15,20 +18,55 @@ function setURL() {
     return url;
 }
 
+
+/**
+ * Check if value is URI encoded
+ * @param value a string to check for encoding
+ * @return true if value is encoded
+ */
+function isEncoded(value) {
+  value = value || '';
+  let result;
+
+  try {
+     result = (value !== decodeURIComponent(value));
+  } catch (e) {
+     result = false;
+  }
+
+  return result;
+}
+
+/**
+ * Get a parameter passed in URL by name
+ * @param name parameter name
+ * @return parameter value decoded if needed
+ */
 function getUrlParam(name) {
     let url = window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
-    let regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+    // Fixed streams playback with '#' char in name (test#m1) #WCS-3655
+    let regex = new RegExp("[?&]" + name + "(=([^&]*)|&|$)"),
         results = regex.exec(url);
     if (!results) return null;
     if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
+    let value = results[2];
+    if (isEncoded(value)) {
+        value = decodeURIComponent(value);
+    }
+    // Add workaround to play RTSP streams with '@' char in password #WCS-3655
+    if (value.startsWith("rtsp://") || value.startsWith("rtmp://")) {
+        return value.replace(/\@(?=.*\@)/g, '%40');
+    }
+    return value;
 }
 
 /**
  * Resize video object to fit parent div.
  * Div structure: div WxH -> div wrapper (display) -> video
  * @param video HTML element from resize event target
+ * @param width optional width to scale
+ * @param height optional height to scale
  */
 function resizeVideo(video, width, height) {
     if (!video.parentNode) {
@@ -62,6 +100,14 @@ function resizeVideo(video, width, height) {
 }
 
 
+/**
+ * Helper function to resize video
+ * @param videoWidth source video width
+ * @param videoHeight source video height
+ * @param dstWidth destination video width
+ * @param dstHeight destination video height
+ * @return new width and height
+ */
 function downScaleToFitSize(videoWidth, videoHeight, dstWidth, dstHeight) {
     let newWidth, newHeight;
     let videoRatio = videoWidth / videoHeight;
