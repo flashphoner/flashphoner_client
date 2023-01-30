@@ -11,7 +11,7 @@
  * @param {String} options.username Username to login with
  * @param {String} options.token JWT token
  * @param {String} options.appKey Application key
- * @returns {roomApi.Session}
+ * @returns {roomApi.RoomSession}
  * @memberof roomApi
  * @method connect
  */
