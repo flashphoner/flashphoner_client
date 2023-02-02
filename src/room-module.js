@@ -19,7 +19,9 @@ var Flashphoner = require('./flashphoner-core');
  * @param {Object} options session options
  * @param {String} options.urlServer Server address in form of [ws,wss]://host.domain:port
  * @param {String} options.username Username to login with
- * @returns {roomApi.Session}
+ * @param {String} options.token JWT Token
+ * @param {String} options.appKey Application Key
+ * @returns {roomApi.RoomSession}
  * @memberof roomApi
  * @method connect
  */
@@ -27,7 +29,7 @@ var appSession = function (options) {
     /**
      * Represents connection to room api app
      *
-     * @namespace roomApi.Session
+     * @namespace roomApi.RoomSession
      */
     var callbacks = {};
     var rooms = {};
@@ -70,7 +72,7 @@ var appSession = function (options) {
     /**
      * Disconnect session
      *
-     * @memberof roomApi.Session
+     * @memberof roomApi.RoomSession
      * @inner
      */
     var disconnect = function () {
@@ -81,7 +83,7 @@ var appSession = function (options) {
      * Get session status
      *
      * @returns {string} One of {@link Flashphoner.constants.SESSION_STATUS}
-     * @memberof roomApi.Session
+     * @memberof roomApi.RoomSession
      * @inner
      */
     var status = function () {
@@ -92,7 +94,7 @@ var appSession = function (options) {
      * Get session id
      *
      * @returns {string} session id
-     * @memberof roomApi.Session
+     * @memberof roomApi.RoomSession
      * @inner
      */
     var id = function () {
@@ -103,7 +105,7 @@ var appSession = function (options) {
      * Get server address
      *
      * @returns {string} Server url
-     * @memberof roomApi.Session
+     * @memberof roomApi.RoomSession
      * @inner
      */
     var getServerUrl = function () {
@@ -114,7 +116,7 @@ var appSession = function (options) {
      * Get session username
      *
      * @returns {string} username
-     * @memberof roomApi.Session
+     * @memberof roomApi.RoomSession
      * @inner
      */
     var username = function () {
@@ -125,7 +127,7 @@ var appSession = function (options) {
      * Get rooms
      *
      * @returns {roomApi.Room[]}
-     * @memberof roomApi.Session
+     * @memberof roomApi.RoomSession
      * @inner
      */
     var getRooms = function () {
@@ -137,11 +139,11 @@ var appSession = function (options) {
      * Add session event callback.
      *
      * @param {string} event One of {@link Flashphoner.constants.SESSION_STATUS} events
-     * @param {Session~eventCallback} callback Callback function
-     * @returns {roomApi.Session} Session
+     * @param {RoomSession~eventCallback} callback Callback function
+     * @returns {roomApi.RoomSession} Room Session
      * @throws {TypeError} Error if event is not specified
      * @throws {Error} Error if callback is not a valid function
-     * @memberof roomApi.Session
+     * @memberof roomApi.RoomSession
      * @inner
      */
     var on = function (event, callback) {
@@ -160,8 +162,9 @@ var appSession = function (options) {
      *
      * @param {Object} options Room options
      * @param {String} options.name Room name
+     * @param {Boolean} options.record Record
      * @returns {roomApi.Room}
-     * @memberof roomApi.Session
+     * @memberof roomApi.RoomSession
      * @inner
      */
     var join = function (options) {

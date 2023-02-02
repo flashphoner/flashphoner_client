@@ -80,35 +80,38 @@ export declare class Stream {
     getLogger: () => any;
 }
 
+export declare class CreateStreamOptions {
+    name: string;
+    constraints?: any | undefined;
+    mediaProvider: string;
+    receiveAudio?: boolean | undefined;
+    receiveVideo?: boolean | undefined;
+    cacheLocalResources?: boolean | undefined;
+    playWidth?: number | undefined;
+    playHeight?: number | undefined;
+    record?: boolean | undefined;
+    display: any;
+    custom?: any | undefined;
+    stripCodecs?: string | undefined;
+    rtmpUrl?: string | undefined;
+    mediaConnectionConstraints?: any | undefined;
+    flashShowFullScreenButton?: boolean | undefined;
+    transport?: string | undefined;
+    cvoExtension?: boolean | undefined;
+    playoutDelay?: number | undefined;
+    useCanvasMediaStream?: boolean | undefined;
+    videoContentHint?: string | undefined;
+    unmutePlayOnStart?: boolean | undefined;
+    sdpHook?: any | undefined
+    logger?: any | undefined;
+    disableConstraintsNormalization?: boolean | undefined;
+}
+
 export declare class Session {
     id: () => string;
     status: () => string;
     getServerUrl: () => string;
-    createStream: (options: {
-        name: string;
-        constraints?: any | undefined;
-        mediaProvider: string;
-        receiveAudio?: boolean | undefined;
-        receiveVideo?: boolean | undefined;
-        cacheLocalResources?: boolean | undefined;
-        playWidth?: number | undefined;
-        playHeight?: number | undefined;
-        record?: boolean | undefined;
-        display: any;
-        custom?: any | undefined;
-        stripCodecs?: string | undefined;
-        rtmpUrl?: string | undefined;
-        mediaConnectionConstraints?: any | undefined;
-        flashShowFullScreenButton?: boolean | undefined;
-        transport?: string | undefined;
-        cvoExtension?: boolean | undefined;
-        playoutDelay?: number | undefined;
-        useCanvasMediaStream?: boolean | undefined;
-        videoContentHint?: string | undefined;
-        unmutePlayOnStart?: boolean | undefined;
-        sdpHook?: any | undefined
-        logger?: any | undefined;
-    }) => Stream;
+    createStream: (options: CreateStreamOptions) => Stream;
     createCall: (options: {
         callee: string;
         visibleName?: string | undefined;
