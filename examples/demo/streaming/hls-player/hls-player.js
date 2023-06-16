@@ -1,3 +1,4 @@
+var Browser = Flashphoner.Browser;
 var player = null;
 
 function loadPlayerPage() {
@@ -10,7 +11,7 @@ function initPage() {
     $("#applyBtn").prop('disabled', false).text("Play").off('click').click(playBtnClick);
     var remoteVideo = document.getElementById('remoteVideo');
     remoteVideo.className = "video-js vjs-default-skin";
-    player = videojs(remoteVideo);
+    player = initVideoJsPlayer(remoteVideo);
 }
 
 function playBtnClick() {
@@ -23,12 +24,23 @@ function playBtnClick() {
         if (key.length > 0 && token.length > 0) {
             videoSrc += "?" + key + "=" + token;
         }
+        player.on('loadedmetadata', function() {
+            console.log("Play with VideoJs");
+            player.play();
+        });
+        player.on('error', function() {
+            var error = player.error();
+            // Stop on error
+            stopBtnClick();
+            if (error && error.code == error.MEDIA_ERR_DECODE) {
+                // Restart playback in case of decode error
+                playBtnClick();
+            }
+        });
         player.src({
             src: videoSrc,
             type: "application/vnd.apple.mpegurl"
         });
-        console.log("Play with VideoJs");
-        player.play();
         onStarted();
     }
 }
@@ -76,8 +88,10 @@ function createRemoteVideo(parent) {
     remoteVideo.autoplay="autoplay";
     remoteVideo.type="application/vnd.apple.mpegurl";
     remoteVideo.className = "video-js vjs-default-skin";
+    remoteVideo.setAttribute("playsinline","");
+    remoteVideo.setAttribute("webkit-playsinline","");
     parent.appendChild(remoteVideo);
-    player = videojs(remoteVideo);
+    player = initVideoJsPlayer(remoteVideo);
 }
 
 
@@ -108,4 +122,24 @@ function highlightInput(input) {
 
 function removeHighlight(input) {
     input.closest('.form-group').removeClass("has-error");
+}
+
+function initVideoJsPlayer(video) {
+    var videoJsPlayer = videojs(video);
+    if (Browser.isSafariWebRTC() && Browser.isiOS()) {
+        // iOS hack when using standard controls to leave fullscreen mode
+        var videoTag = getActualVideoTag();
+        if(videoTag) {
+            setWebkitFullscreenHandlers(videoTag);
+        }
+    }
+    return videoJsPlayer;
+}
+
+function getActualVideoTag() {
+    var videos = document.querySelectorAll("video");
+    if (videos && videos.length > 0) {
+        return videos[0];
+    }
+    return null;
 }

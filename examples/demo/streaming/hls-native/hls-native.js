@@ -1,3 +1,4 @@
+var Browser = Flashphoner.Browser;
 var remoteVideo = null;
 
 function loadPlayerPage() {
@@ -10,6 +11,10 @@ function initPage() {
     $("#applyBtn").prop('disabled', false).text("Play").off('click').click(playBtnClick);
     remoteVideo = document.getElementById('remoteVideo');
     remoteVideo.style ="background-color: lightgrey;";
+    if (Browser.isSafariWebRTC() && Browser.isiOS()) {
+        // iOS hack when using standard controls to leave fullscreen mode
+        setWebkitFullscreenHandlers(remoteVideo);
+    }
 }
 
 function playBtnClick() {
@@ -32,7 +37,6 @@ function playBtnClick() {
         }
         else {
             $("#notifyFlash").text("Your browser doesn't support native HLS playback");
-            cleanRemoteVideo();
         }
     }
 }

@@ -1,3 +1,4 @@
+var Browser = Flashphoner.Browser;
 var remoteVideo = null;
 var hlsPlayer = null
 
@@ -29,17 +30,17 @@ function playBtnClick() {
         if (Hls.isSupported()) {
             console.log("Low Latency HLS: "+llHlsEnabled)
             hlsPlayer = new Hls(getHlsConfig(llHlsEnabled));
-            hlsPlayer.loadSource(videoSrc);
-            hlsPlayer.attachMedia(remoteVideo);
             hlsPlayer.on(Hls.Events.MANIFEST_PARSED, function() {
                 console.log("Play with HLS.js");
                 remoteVideo.play();
-                onStarted();            
             });
+            hlsPlayer.loadSource(videoSrc);
+            hlsPlayer.attachMedia(remoteVideo);
         }
         else {
             $("#notifyFlash").text("Your browser doesn't support MSE technology required to play video");
         }
+        onStarted();            
     }
 }
 
@@ -48,7 +49,8 @@ function getHlsConfig(llHlsEnabled) {
     var config = {
         lowLatencyMode: false,
         enableWorker: true,
-        backBufferLength: 90
+        backBufferLength: 90,
+        manifestLoadingTimeOut: 15000
     };
     if(llHlsEnabled) {
         // Here we configure HLS.JS for lower latency
@@ -61,6 +63,7 @@ function getHlsConfig(llHlsEnabled) {
            liveMaxLatencyDuration: 5,
            liveDurationInfinity: true,
            highBufferWatchdogPeriod: 1,
+           manifestLoadingTimeOut: 15000
         };
     }
     return config;

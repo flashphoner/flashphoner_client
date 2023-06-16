@@ -202,3 +202,42 @@ function downScaleToFitSize(videoWidth, videoHeight, dstWidth, dstHeight) {
         h: newHeight
     };
 }
+
+function setWebkitFullscreenHandlers(video) {
+    if (video) {
+        let needRestart = false;
+        // iOS hack when using standard controls to leave fullscreen mode
+        video.addEventListener("pause", function () {
+            if (needRestart) {
+                console.log("Video paused after fullscreen, continue...");
+                video.play();
+                needRestart = false;
+            }
+        });
+        video.addEventListener("webkitendfullscreen", function () {
+            video.play();
+            needRestart = true;
+        });                
+        // Start playback in fullscreen if webkit-playsinline is set
+        video.addEventListener("playing", function () {
+            if (canWebkitFullScreen(video)) {
+                // After pausing and resuming the video tag may be in invalid state
+                try {
+                    video.webkitEnterFullscreen();
+                } catch (e) {
+                    console.log("Fullscreen is not allowed: " + e);
+                }
+            }
+        });
+    } else {
+        console.log("No video tag is passed, skip webkit fullscreen handlers setup");
+    }
+}
+
+function canWebkitFullScreen(video) {
+    let canFullscreen = false;
+    if (video) {
+        canFullscreen = video.webkitSupportsFullscreen && !video.webkitDisplayingFullscreen && !document.webkitFullscreenElement;
+    }
+    return canFullscreen;
+}
