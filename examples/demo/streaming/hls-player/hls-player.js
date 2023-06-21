@@ -126,6 +126,7 @@ function removeHighlight(input) {
 
 function initVideoJsPlayer(video) {
     var videoJsPlayer = videojs(video);
+    console.log("Using VideoJs " + videojs.VERSION);
     if (Browser.isSafariWebRTC() && Browser.isiOS()) {
         // iOS hack when using standard controls to leave fullscreen mode
         var videoTag = getActualVideoTag();
