@@ -206,28 +206,33 @@ function downScaleToFitSize(videoWidth, videoHeight, dstWidth, dstHeight) {
 function setWebkitFullscreenHandlers(video) {
     if (video) {
         let needRestart = false;
+        let wasFullscreen = false;
         // iOS hack when using standard controls to leave fullscreen mode
         video.addEventListener("pause", function () {
             if (needRestart) {
                 console.log("Video paused after fullscreen, continue...");
+                wasFullscreen = true;
                 video.play();
                 needRestart = false;
             }
         });
         video.addEventListener("webkitendfullscreen", function () {
+            wasFullscreen = true;
             video.play();
             needRestart = true;
         });                
         // Start playback in fullscreen if webkit-playsinline is set
         video.addEventListener("playing", function () {
-            if (canWebkitFullScreen(video)) {
-                // After pausing and resuming the video tag may be in invalid state
+            // Do not enter fullscreen again if we just left it #WCS-3860
+            if (canWebkitFullScreen(video) && !wasFullscreen) {
+                // We should catch if fullscreen mode is not available
                 try {
                     video.webkitEnterFullscreen();
                 } catch (e) {
                     console.log("Fullscreen is not allowed: " + e);
                 }
             }
+            wasFullscreen = false;
         });
     } else {
         console.log("No video tag is passed, skip webkit fullscreen handlers setup");
@@ -237,7 +242,7 @@ function setWebkitFullscreenHandlers(video) {
 function canWebkitFullScreen(video) {
     let canFullscreen = false;
     if (video) {
-        canFullscreen = video.webkitSupportsFullscreen && !video.webkitDisplayingFullscreen && !document.webkitFullscreenElement;
+        canFullscreen = video.webkitSupportsFullscreen && !video.webkitDisplayingFullscreen;
     }
     return canFullscreen;
 }
