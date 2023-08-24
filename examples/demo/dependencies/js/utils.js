@@ -2,6 +2,32 @@
 ///////////// Utils ////////////
 ///////////////////////////////////
 
+/**
+ * Default server ports description
+ *
+ * @type {{legacy: {http: number, https: number}, wss: number, http: number, https: number, ws: number, hls: {http: number, https: number}}}
+ */
+const DEFAULT_PORTS = {
+    http: 8081,
+    https: 8444,
+    legacy: {
+        http: 9091,
+        https: 8888
+    },
+    ws: 8080,
+    wss: 8443,
+    hls: {
+        http: 8082,
+        https: 8445
+    }
+}
+
+/**
+ * Check if object is not empty
+ *
+ * @param obj object to check
+ * @returns {boolean} true if object is not empty
+*/
 function notEmpty(obj) {
     if (obj != null && obj != 'undefined' && obj != '') {
         return true;
@@ -9,34 +35,165 @@ function notEmpty(obj) {
     return false;
 }
 
-//Trace
+/**
+ * Print trace string to
+ *
+ * @param str string to print
+ */
 function trace(str) {
     console.log(str);
 }
 
-//Get field
+/**
+ * Get HTML page field
+ *
+ * @param name field name
+ * @returns {*} field
+ */
 function field(name) {
     var field = document.getElementById(name).value;
     return field;
 }
 
-//Set WCS URL
-function setURL() {
-    var proto;
-    var url;
-    var port;
+/**
+ * Set default value to port if it is not defined
+ *
+ * @param port
+ * @param value
+ * @returns {*}
+ */
+function setDefaultPort(port, value) {
+    if (port === undefined) {
+        return value;
+    }
+    return port;
+}
+
+/**
+ * Get server ports configuration
+ *
+ * @returns {{legacy: {http: number, https: number}, wss: number, http: number, https: number, ws: number, hls: {http: number, https: number}}}
+ */
+function getPortsConfig() {
+    let portsConfig = DEFAULT_PORTS;
+    try {
+        // Try to get ports from a separate config declaring the SERVER_PORTS constant
+        portsConfig = SERVER_PORTS;
+        // Fill the ports absent in config by default values
+        portsConfig.http = setDefaultPort(portsConfig.http, DEFAULT_PORTS.http);
+        portsConfig.https = setDefaultPort(portsConfig.https, DEFAULT_PORTS.https);
+        portsConfig.legacy = setDefaultPort(portsConfig.legacy, DEFAULT_PORTS.legacy);
+        portsConfig.legacy.http = setDefaultPort(portsConfig.legacy.http, DEFAULT_PORTS.legacy.http);
+        portsConfig.legacy.https = setDefaultPort(portsConfig.legacy.https, DEFAULT_PORTS.legacy.https);
+        portsConfig.ws = setDefaultPort(portsConfig.ws, DEFAULT_PORTS.ws);
+        portsConfig.wss = setDefaultPort(portsConfig.wss, DEFAULT_PORTS.wss);
+        portsConfig.hls = setDefaultPort(portsConfig.hls, DEFAULT_PORTS.hls);
+        portsConfig.hls.http = setDefaultPort(portsConfig.hls.http, DEFAULT_PORTS.hls.http);
+        portsConfig.hls.https = setDefaultPort(portsConfig.hls.https, DEFAULT_PORTS.hls.https);
+        console.log("Use custom server ports");
+    } catch(e) {
+        console.log("Use default server ports");
+        console.log(e.stack);
+    }
+    return portsConfig;
+}
+
+/**
+ * Get web interface standard port depending on connection type
+ *
+ * @returns {string}
+ */
+function getWebPort() {
+    let portsConfig = getPortsConfig();
+    let port;
+    if (window.location.protocol == "http:") {
+        port = portsConfig.http;
+    } else {
+        port = portsConfig.https;
+    }
+    return port;
+}
+
+/**
+ * Get HTML protocol used depending on connection type
+ *
+ * @returns {string}
+ */
+function getWebProtocol() {
+    let proto;
+    if (window.location.protocol == "http:") {
+        proto = "http://";
+    } else {
+        proto = "https://";
+    }
+    return proto;
+}
+
+/**
+ * Get websocket standard port depending on connection type
+ *
+ * @returns {string}
+ */
+function getWsPort() {
+    let portsConfig = getPortsConfig();
+    let port;
+    if (window.location.protocol == "http:") {
+        port = portsConfig.ws;
+    } else {
+        port = portsConfig.wss;
+    }
+    return port;
+}
+
+/**
+ * Get websocket protocol type depending on connection type
+ *
+ * @returns {string}
+ */
+function getWsProtocol() {
+    let proto;
     if (window.location.protocol == "http:") {
         proto = "ws://";
-        port = "8080";
     } else {
         proto = "wss://";
-        port = "8443";
     }
+    return proto;
+}
 
-    url = proto + window.location.hostname + ":" + port;
+/**
+ * Get standard HLS port depending on connection type
+ *
+ * @returns {string}
+ */
+function getHlsPort() {
+    let portsConfig = getPortsConfig();
+    let port;
+    if (window.location.protocol == "http:") {
+        port = portsConfig.hls.http;
+    } else {
+        port = portsConfig.hls.https;
+    }
+    return port;
+}
+
+/**
+ * Set default WCS websocket URL (used in most examples)
+ *
+ * @returns {string}
+ */
+function setURL() {
+    var proto = getWsProtocol();
+    var port = getWsPort();
+    var url = proto + window.location.hostname + ":" + port;
     return url;
 }
 
+/**
+ * Get URL parameter
+ *
+ * @param name
+ * @returns {string|null}
+ */
 function getUrlParam(name) {
     var url = window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
@@ -47,40 +204,83 @@ function getUrlParam(name) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
+/**
+ * Get default HLS url
+ *
+ * @returns {string}
+ */
 function getHLSUrl() {
-
-    var proto;
-    var port;
-
-    if (window.location.protocol == "http:") {
-        proto = "http://";
-        port = "8082";
-    } else {
-        proto = "https://";
-        port = "8445";
-    }
-
+    var proto = getWebProtocol();
+    var port = getHlsPort();
     var url = proto + window.location.hostname + ":" + port;
     return url;
 }
 
+/**
+ * Get default admin URL (used in Embed Player)
+ *
+ * @returns {string}
+ */
 function getAdminUrl() {
-
-    var proto;
+    var portsConfig = getPortsConfig();
+    var proto = getWebProtocol();
     var port;
     if (window.location.protocol == "http:") {
-        proto = "http://";
-        port = "9091";
+        port = portsConfig.legacy.http;
     } else {
-        proto = "https://";
-        port = "8888";
+        port = portsConfig.legacy.https;
     }
-
     var url = proto + window.location.hostname + ":" + port;
     return url;
 }
 
-// Detect IE
+/**
+ * Get REST API URL
+ *
+ * @param hostName host name to override the default one
+ * @param hostPort host port to override the default one
+ * @returns {string}
+ */
+function getRestUrl(hostName, hostPort) {
+    let proto = getWebProtocol();
+    let port = getWebPort();
+    if (!hostName) {
+        hostName = window.location.hostname;
+    }
+    if (hostPort) {
+        port = hostPort;
+    }
+
+    let url = proto + hostName + ":" + port;
+    return url;
+}
+
+/**
+ * Get Websocket URL
+ *
+ * @param hostName host name to override the default one
+ * @param hostPort host port to override the default one
+ * @returns {string}
+ */
+function getWebsocketUrl(hostName, hostPort) {
+    let proto = getWsProtocol();
+    let port = getWsPort();
+    if (!hostName) {
+        hostName = window.location.hostname;
+    }
+    if (hostPort) {
+        port = hostPort;
+    }
+
+    let url = proto + hostName + ":" + port;
+    return url;
+}
+
+/**
+ * Detect IE (for compatibility only)
+ *
+ * @returns {boolean}
+ */
 function detectIE() {
     var ua = window.navigator.userAgent;
     var msie = ua.indexOf('MSIE ');
@@ -94,7 +294,10 @@ function detectIE() {
     return false;
 }
 
-// Detect Flash
+/**
+ * Detect Flash (for compatibility only)
+ *
+ */
 function detectFlash() {
     var hasFlash = false;
     try {
@@ -133,7 +336,12 @@ $(function () {
     });
 });
 
-// Generate simple uuid
+/**
+ * Generate simple uuid
+ *
+ * @param length UUID length
+ * @returns {string}
+ */
 function createUUID(length) {
     var s = [];
     var hexDigits = "0123456789abcdef";
@@ -185,7 +393,15 @@ function resizeVideo(video, width, height) {
     console.log("Resize from " + video.videoWidth + "x" + video.videoHeight + " to " + display.offsetWidth + "x" + display.offsetHeight);
 }
 
-
+/**
+ * Helper function to resize video tag
+ *
+ * @param videoWidth
+ * @param videoHeight
+ * @param dstWidth
+ * @param dstHeight
+ * @returns {{w: number, h: number}}
+ */
 function downScaleToFitSize(videoWidth, videoHeight, dstWidth, dstHeight) {
     var newWidth, newHeight;
     var videoRatio = videoWidth / videoHeight;
@@ -203,6 +419,11 @@ function downScaleToFitSize(videoWidth, videoHeight, dstWidth, dstHeight) {
     };
 }
 
+/**
+ * Set Webkit fullscreen handler functions to video tag
+ *
+ * @param video
+ */
 function setWebkitFullscreenHandlers(video) {
     if (video) {
         let needRestart = false;
@@ -239,6 +460,12 @@ function setWebkitFullscreenHandlers(video) {
     }
 }
 
+/**
+ * Check if fullscreen mode is available in Webkit
+ *
+ * @param video
+ * @returns {boolean}
+ */
 function canWebkitFullScreen(video) {
     let canFullscreen = false;
     if (video) {

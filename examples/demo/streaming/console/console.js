@@ -146,18 +146,19 @@ $(function() {
 
 function createNode(id, ip) {
     let nodeIp = ip;
-    let port = 8081;
+    let port = getWebPort();
     if (ip.indexOf(':') !== -1) {
         port = ip.substring(ip.indexOf(":") + 1);
         nodeIp = ip.substring(0, ip.indexOf(":"));
     }
-    var api = FlashphonerRestApi.instance("http://"+nodeIp+":"+port, "http://"+nodeIp+":"+port);
+    let restUrl = getRestUrl(nodeIp, port);
+    let api = FlashphonerRestApi.instance(restUrl, restUrl);
     api.id = id;
     api.ip = nodeIp;
     api.port = port;
     api.tests = [];
-    var state = NODE_STATE.NEW;
-    var pollState = function(){
+    let state = NODE_STATE.NEW;
+    let pollState = function(){
         api.stat.poll().then(function(stat){
             api.setState(NODE_STATE.ALIVE, stat);
             setTimeout(pollState, REFRESH_NODE_STATE_INTERVAL);
@@ -269,7 +270,7 @@ function createNode(id, ip) {
         }
     };
     api.getTranscodingGroupStat = async function() {
-        const result = await fetch("http://" + nodeIp + ":" + port + "/?action=stat&format=json&groups=transcoding_stats")
+        const result = await fetch(restUrl + "/?action=stat&format=json&groups=transcoding_stats")
         const json = await result.json();
         return json;
     }
@@ -277,10 +278,7 @@ function createNode(id, ip) {
 }
 
 function addNode(ip) {
-    var id = ip.replace(/\./g, "");
-    if (ip.indexOf(':') !== -1) {
-        id = ip.substring(ip.indexOf(":") + 1).replace(/\./g, "");
-    }
+    var id = ip.replace(/[.:]/g, "");
     if (nodes[id]) {
         return;
     }
@@ -471,7 +469,7 @@ function pullStreamBatch() {
     var remoteName = $("#pullBatchRemoteName").val();
     var remote;
     if (proto == "ws") {
-        remote = "ws://" + $("#pullStreamBatchNodes").val() + ":8080/";
+        remote = getWebsocketUrl($("#pullStreamBatchNodes").val()) + "/";
     } else {
         remote = "rtmp://" + $("#pullStreamBatchNodes").val() + ":1935/live/" + remoteName;
     }
@@ -674,7 +672,7 @@ function doRego(node, testedNode, login, domain, password) {
         sipPassword: password,
         sipPort: "5060",
         sipRegisterRequired: true,
-        urlServer: "ws://"+testedNode+":8080/"
+        urlServer: getWebsocketUrl(testedNode) + "/"
     };
     return node.api.createSession(connection);
 }
@@ -954,7 +952,7 @@ function streamPlayStressTest() {
         return;
     }
 
-    var remote = "ws://" + $("#streamStressBatchNodes").val() + ":8080";
+    var remote = getWebsocketUrl($("#streamStressBatchNodes").val());
     var name = $("#streamStressBatchName").val();
     var start = parseInt($("#streamStressBatchStart").val());
     var end = parseInt($("#streamStressBatchEnd").val());
@@ -1323,7 +1321,7 @@ function streamPublishStressTest() {
         return false;
     }
     var node = getActiveNode();
-    var remote = "ws://" + $("#streamPublishStressBatchNodes").val() + ":8080";
+    var remote = getWebsocketUrl($("#streamPublishStressBatchNodes").val());
     var name = $("#streamPublishStressBatchName").val();
     var start = parseInt($("#streamPublishStressBatchStart").val());
     var end = parseInt($("#streamPublishStressBatchEnd").val());
@@ -1443,7 +1441,7 @@ function streamPlayStressTestRandom() {
     var node = getActiveNode();
     var streams = {};
     var remoteNode = getNode($("#streamStressBatchNodes").val());
-    var remote = "ws://" + $("#streamStressBatchNodes").val() + ":8080";
+    var remote = getWebsocketUrl($("#streamStressBatchNodes").val());
     var start = 0;
     var end = parseInt($("#streamStressMaxStreams").val());
     var rate = parseInt($("#streamStressBatchRate").val());
