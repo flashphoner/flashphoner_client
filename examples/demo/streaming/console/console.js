@@ -67,8 +67,14 @@ $(function() {
     $('#pullStreamBatchModal').on('show.bs.modal', function(e) {
         populateNodes($("#pullStreamBatchNodes"));
     });
+    $('#pushStreamBatchModal').on('show.bs.modal', function(e) {
+        populateNodes($("#pushStreamBatchNodes"));
+    });
     $("#pullBatchStream").on("click", function(e){
         pullStreamBatch();
+    });
+    $("#pushBatchStream").on("click", function(e){
+        pushStreamBatch();
     });
     $('#registerBatchModal').on('show.bs.modal', function(e) {
         populateNodes($("#registerBatchNodes"));
@@ -483,6 +489,37 @@ function pullStreamBatch() {
         }
     }, 200);
     $("#pullStreamBatchModal").modal('hide');
+}
+
+function pushStreamBatch() {
+    if (!$("#pushStreamBatchNodes").val()) {
+        $('#warningModal').modal();
+        return false;
+    }
+    var node = getActiveNode();
+    var proto = $("#pushStreamBatchProto").val();
+    var localName = $("#pushBatchLocalName").val();
+    var remoteName = $("#pushBatchRemoteName").val();
+    var remote;
+    if (proto == "ws") {
+        remote = getWebsocketUrl($("#pushStreamBatchNodes").val()) + "/";
+    } else {
+        remote = "rtmp://" + $("#pushStreamBatchNodes").val() + ":1935/live/";
+    }
+    var qty = parseInt($("#pushBatchQty").val());
+    var interval = setInterval(function(){
+        if (qty > 0) {
+            if (proto == "ws") {
+                node.pull.push(remote, localName, remoteName + qty).catch(function (e) {console.log(e)});
+            } else {
+                node.push.push(localName, remote + remoteName + qty, true);
+            }
+            qty--;
+        } else {
+            clearInterval(interval);
+        }
+    }, 200);
+    $("#pushStreamBatchModal").modal('hide');
 }
 
 function registerBatch() {

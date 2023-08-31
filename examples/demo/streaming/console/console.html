@@ -53,6 +53,7 @@
                     <button id="pullRtspStreamModalBtn" data-toggle='modal' data-target='#pullRtspModal' type="button" class="btn btn-default btn-success btn-block">Pull RTSP stream</button>
                     <hr>
                     <button id="pullStreamBatchModalBtn" data-toggle='modal' data-target='#pullStreamBatchModal' type="button" class="btn btn-default btn-success btn-block">Pull streams</button>
+                    <button id="pushStreamBatchModalBtn" data-toggle='modal' data-target='#pushStreamBatchModal' type="button" class="btn btn-default btn-success btn-block">Push streams</button>
                     <button id="registerBatchModalBtn" data-toggle='modal' data-target='#registerBatchModal' type="button" class="btn btn-default btn-success btn-block">Register</button>
                     <button id="unregisterBatchModalBtn" data-toggle='modal' data-target='#unregisterBatchModal' type="button" class="btn btn-default btn-success btn-block">Unregister</button>
                     <button id="callBatchModalBtn" data-toggle='modal' data-target='#callBatchModal' type="button" class="btn btn-default btn-success btn-block">Call</button>
@@ -200,7 +201,7 @@
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="pullStreamBatchNodes"><span class="glyphicon glyphicon-play-circle"></span> Proto pull</label>
+                                    <label for="pullStreamBatchProto"><span class="glyphicon glyphicon-play-circle"></span> Proto pull</label>
                                     <select class="custom-select" id="pullStreamBatchProto">
                                         <option value="ws" selected>WebRTC</option>
                                         <option value="rtmp">RTMP</option>
@@ -219,6 +220,48 @@
                                     <input type="text" class="form-control" id="pullBatchQty" placeholder="1">
                                 </div>
                                 <button id="pullBatchStream" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Pull</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="pushStreamBatchModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Push Streams</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="pushStreamBatchForm">
+                                <div class="form-group">
+                                    <label for="pushStreamBatchNodes"><span class="glyphicon glyphicon-globe"></span> Choose node</label>
+                                    <select class="custom-select" id="pushStreamBatchNodes">
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pushStreamBatchProto"><span class="glyphicon glyphicon-play-circle"></span> Proto push</label>
+                                    <select class="custom-select" id="pushStreamBatchProto">
+                                        <option value="ws" selected>WebRTC</option>
+                                        <option value="rtmp">RTMP</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="pushBatchLocalName"><span class="glyphicon glyphicon-play-circle"></span> Local stream name</label>
+                                    <input type="text" class="form-control" id="pushBatchLocalName" placeholder="my_local_stream">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pushBatchRemoteName"><span class="glyphicon glyphicon-play-circle"></span> Remote stream name</label>
+                                    <input type="text" class="form-control" id="pushBatchRemoteName" placeholder="my_remote_stream">
+                                </div>
+                                <div class="form-group">
+                                    <label for="pushBatchQty"><span class="glyphicon glyphicon-plus"></span> Qty</label>
+                                    <input type="text" class="form-control" id="pushBatchQty" placeholder="1">
+                                </div>
+                                <button id="pushBatchStream" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Push</button>
                             </form>
                         </div>
                         <div class="modal-footer">

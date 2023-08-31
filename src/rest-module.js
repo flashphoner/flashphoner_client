@@ -107,10 +107,11 @@ var instance = function (url, coreUrl) {
 
     var push = function() {
         var api = url + PUSH_PATH;
-        var push = function (streamName, rtmpUrl) {
+        var push = function (streamName, rtmpUrl, fullUrl = false) {
             return send(api + "/startup", {
                 streamName: streamName,
-                rtmpUrl: rtmpUrl
+                rtmpUrl: rtmpUrl,
+                rtmpTransponderFullUrl: fullUrl
             });
         };
         var find = function (streamName, rtmpUrl) {
