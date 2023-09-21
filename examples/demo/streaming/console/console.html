@@ -14,6 +14,7 @@
         <script type="text/javascript" src="../../dependencies/bootstrap/js/bootstrap.min.js"></script>
         <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
         <script type="text/javascript" src="../../../../flashphoner-rest-api.js"></script>
+        <script type="text/javascript" src="../../../../flashphoner.js"></script>
         <script type="text/javascript" charset="utf8" src="jquery.dataTables.js"></script>
         <script type="text/javascript" src="console.js"></script>
     </head>
@@ -38,6 +39,7 @@
                                 <th>MEM</th>
                                 <th>TH</th>
                                 <th>CONN</th>
+                                <th>WS</th>
                                 <th>IN</th>
                                 <th>OUT</th>
                             </tr>
@@ -49,6 +51,8 @@
             <hr>
             <div id="nodeControls" class="row vdivide hidden">
                 <div class="col-sm-2">
+                    <button id="wsSessionsBatchModalBtn" data-toggle='modal' data-target='#wsSessionsBatchModal' type="button" class="btn btn-default btn-success btn-block">Create sessions</button>
+                    <hr>
                     <button id="pullStreamModalBtn" data-toggle='modal' data-target='#pullModal' type="button" class="btn btn-default btn-success btn-block">Pull stream</button>
                     <button id="pullRtspStreamModalBtn" data-toggle='modal' data-target='#pullRtspModal' type="button" class="btn btn-default btn-success btn-block">Pull RTSP stream</button>
                     <hr>
@@ -262,6 +266,33 @@
                                     <input type="text" class="form-control" id="pushBatchQty" placeholder="1">
                                 </div>
                                 <button id="pushBatchStream" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Push</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="wsSessionsBatchModal" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4>Create sessions to the node</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form action="" id="wsSessionsBatchForm">
+                                <div class="form-group">
+                                    <label for="wsSessionsBatchNodes"><span class="glyphicon glyphicon-globe"></span> Choose node</label>
+                                    <select class="custom-select" id="wsSessionsBatchNodes">
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="wsSessionsBatchQty"><span class="glyphicon glyphicon-plus"></span> Qty</label>
+                                    <input type="text" class="form-control" id="wsSessionsBatchQty" placeholder="1">
+                                </div>
+                                <button id="wsSessionsBatchConnect" type="button" class="btn btn-default btn-success btn-block"><span class="glyphicon glyphicon-off"></span> Connect</button>
                             </form>
                         </div>
                         <div class="modal-footer">

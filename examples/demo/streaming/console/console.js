@@ -1,17 +1,17 @@
 
-var REFRESH_NODE_STATE_INTERVAL = 5000;
-var REFRESH_NODE_STATE_FAILED_INTERVAL = 10000;
-var REFRESH_NODE_DETAILS = 2000;
-var STRESS_TEST_INTERVAL = 1000;
-var STRESS_TEST_FAILED_INTERVAL = STRESS_TEST_INTERVAL * 2;
-var NODE_STATE = {
+const REFRESH_NODE_STATE_INTERVAL = 5000;
+const REFRESH_NODE_STATE_FAILED_INTERVAL = 10000;
+const REFRESH_NODE_DETAILS = 2000;
+const STRESS_TEST_INTERVAL = 1000;
+const STRESS_TEST_FAILED_INTERVAL = STRESS_TEST_INTERVAL * 2;
+const NODE_STATE = {
     NEW: "new",
     ALIVE: "alive",
     ACTIVE: "active",
     DEACTIVATE: "deactivate",
     FAILED: "failed"
 };
-var NODE_DETAILS_TYPE = {
+const NODE_DETAILS_TYPE = {
     ALL: "all",
     PULLED: "pulled",
     RTSP: "rtsp",
@@ -19,7 +19,7 @@ var NODE_DETAILS_TYPE = {
     TESTS: "tests"
 };
 
-var STRESS_TESTS = {
+const STRESS_TESTS = {
     REGISTER: { running: false},
     CALL: { running: false},
     PLAY_STREAM: { running: false},
@@ -28,7 +28,11 @@ var STRESS_TESTS = {
 
 var nodes = {};
 
+const SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
+
 $(function() {
+    Flashphoner.init();
+
     $("#addNodeFormSubmit").on("click", function(e){
         var ip = $("#nodeIp").val();
         if (ip && ip.length > 0) {
@@ -75,6 +79,12 @@ $(function() {
     });
     $("#pushBatchStream").on("click", function(e){
         pushStreamBatch();
+    });
+    $('#wsSessionsBatchModal').on('show.bs.modal', function(e) {
+        populateNodes($("#wsSessionsBatchNodes"));
+    });
+    $("#wsSessionsBatchConnect").on("click", function(e){
+        wsSessionsBatch();
     });
     $('#registerBatchModal').on('show.bs.modal', function(e) {
         populateNodes($("#registerBatchNodes"));
@@ -163,6 +173,7 @@ function createNode(id, ip) {
     api.ip = nodeIp;
     api.port = port;
     api.tests = [];
+    api.wsSessions = {};
     let state = NODE_STATE.NEW;
     let pollState = function(){
         api.stat.poll().then(function(stat){
@@ -280,6 +291,17 @@ function createNode(id, ip) {
         const json = await result.json();
         return json;
     }
+    api.createWsSession = function(wsUrl) {
+        Flashphoner.createSession({urlServer: wsUrl}).on(SESSION_STATUS.ESTABLISHED, function (session) {
+            api.wsSessions[session.id()] = session;
+        }).on(SESSION_STATUS.DISCONNECTED, function (session) {
+            console.log("Session with " + wsUrl + " (id: " + session.id() + ") disconnected");
+            delete api.wsSessions[session.id()];
+        }).on(SESSION_STATUS.FAILED, function (session) {
+            console.log("Session with " + wsUrl + " (id: " + session.id() + ") failed");
+            delete api.wsSessions[session.id()];
+        });
+    }
     return api;
 }
 
@@ -329,6 +351,7 @@ function updateNodeState(id, state) {
                     "<td id='"+id+"-state-mem'>"+(mem)+"</td>" +
                     "<td id='"+id+"-state-threads'>"+state.core.core_threads+"</td>" +
                     "<td id='"+id+"-state-conn'>"+state.connection.connections+"</td>" +
+                    "<td id='"+id+"-state-ws'>"+state.connection.connections_websocket+"</td>" +
                     "<td id='"+id+"-state-in'>"+(streamsIn)+"</td>" +
                     "<td id='"+id+"-state-out'>"+(streamsOut)+"</td>" +
                     "</tr>";
@@ -339,6 +362,7 @@ function updateNodeState(id, state) {
             $("#"+id+"-state-mem").text(mem);
             $("#"+id+"-state-threads").text(state.core.core_threads);
             $("#"+id+"-state-conn").text(state.connection.connections);
+            $("#"+id+"-state-ws").text(state.connection.connections_websocket);
             $("#"+id+"-state-in").text(streamsIn);
             $("#"+id+"-state-out").text(streamsOut);
         }
@@ -460,6 +484,25 @@ function pullRTSPStream() {
         //pull failed
     });
     $("#pullRtspModal").modal('hide');
+}
+
+function wsSessionsBatch() {
+    if (!$("#wsSessionsBatchNodes").val()) {
+        $('#warningModal').modal();
+        return false;
+    }
+    var node = getActiveNode();
+    var remote = getWebsocketUrl($("#wsSessionsBatchNodes").val()) + "/";
+    var qty = parseInt($("#wsSessionsBatchQty").val());
+    var interval = setInterval(function(){
+        if (qty > 0) {
+            node.createWsSession(remote);
+            qty--;
+        } else {
+            clearInterval(interval);
+        }
+    }, 200);
+    $("#wsSessionsBatchModal").modal('hide');
 }
 
 //pullBatchStream
