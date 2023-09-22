@@ -1,6 +1,8 @@
 var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS; 
 var CALL_STATUS = Flashphoner.constants.CALL_STATUS;
 var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
+// The object to check a browser version should not be missed #WCS-3914
+var Browser = Flashphoner.Browser;
 
 
 /////////////////////////////
