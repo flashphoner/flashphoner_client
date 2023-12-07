@@ -417,6 +417,7 @@ var createConnection = function (options) {
             }
             return true;
         };
+
         var muteVideo = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getVideoTracks().length > 0) {
                 localVideo.srcObject.getVideoTracks()[0].enabled = false;
@@ -427,15 +428,17 @@ var createConnection = function (options) {
                 localVideo.srcObject.getVideoTracks()[0].enabled = true;
             }
         };
+        
         var isVideoMuted = function () {
             if (localVideo && localVideo.srcObject && localVideo.srcObject.getVideoTracks().length > 0) {
                 return !localVideo.srcObject.getVideoTracks()[0].enabled;
             }
             return true;
         };
+
         var getStat = function (callbackFn, nativeStats) {
-            var browser = browserDetails.browser;
-            var result = {outboundStream: {}, inboundStream: {}, otherStats: []};
+            let browser = browserDetails.browser;
+            let result = {outboundStream: {}, inboundStream: {}, otherStats: []};
             if (connection && validBrowsers.includes(browser)) {
                 if (nativeStats) {
                     return connection.getStats(null);
@@ -444,18 +447,18 @@ var createConnection = function (options) {
                         if (stat) {
                             stat.forEach(function (report) {
                                 if (!report.isRemote) {
+                                    let mediaType = "";
                                     if (report.type == 'outbound-rtp') {
-                                        fillStatObject(result.outboundStream, report);
-                                        if (report.mediaType == 'video' && localVideo != undefined && localVideo != null) {
-                                            var vSettings = localVideo.srcObject.getVideoTracks()[0].getSettings();
-                                            result.outboundStream[report.mediaType].height = vSettings.height;
-                                            result.outboundStream[report.mediaType].width = vSettings.width;
+                                        mediaType = getReportMediaType(report);
+                                        fillStatObject(result.outboundStream, report, mediaType);
+                                        if (mediaType == 'video') {
+                                            getVideoSize(result.outboundStream[mediaType], report);
                                         }
                                     } else if (report.type == 'inbound-rtp') {
-                                        fillStatObject(result.inboundStream, report);
-                                        if (report.mediaType == 'video' && remoteVideo != undefined && remoteVideo != null) {
-                                            result.inboundStream[report.mediaType].height = remoteVideo.videoHeight;
-                                            result.inboundStream[report.mediaType].width = remoteVideo.videoWidth;
+                                        mediaType = getReportMediaType(report);
+                                        fillStatObject(result.inboundStream, report, mediaType);
+                                        if (mediaType == 'video') {
+                                            getVideoSize(result.inboundStream[mediaType], report);
                                         }
                                     }
                                 }
@@ -468,13 +471,47 @@ var createConnection = function (options) {
             }
         };
 
-        function fillStatObject(obj, report) {
-            var mediaType = report.mediaType;
+        var getReportMediaType = function (report) {
+            // Since Safari 17 report.mediaType is undefined #WCS-3922
+            if (report.mediaType !== undefined) {
+                return report.mediaType;
+            } else if (report.kind !== undefined) {
+                return report.kind;
+            }
+            logger.warn(LOG_PREFIX, "No media type provided in WebRTC statistics");
+            return "media";
+        };
+
+        var getVideoSize = function (obj, report) {
+            let videoSize = {};
+            if (report.type == 'outbound-rtp') {
+                if (localVideo !== undefined && localVideo != null) {
+                    videoSize = localVideo.srcObject.getVideoTracks()[0].getSettings();
+                }
+            } else if (report.type == 'inbound-rtp') {
+                if (remoteVideo !== undefined && remoteVideo != null) {
+                    videoSize.width = remoteVideo.videoWidth;
+                    videoSize.height = remoteVideo.videoHeight;
+                }
+            }
+            if (report.frameWidth !== undefined) {
+                obj.width = report.frameWidth;
+            } else if (videoSize.width !== undefined) {
+                obj.width = videoSize.width;
+            }
+            if (report.frameHeight !== undefined) {
+                obj.height = report.frameHeight;
+            } else if (videoSize.height !== undefined) {
+                obj.height = videoSize.height;
+            }
+        };
+
+        var fillStatObject = function (obj, report, mediaType) {
             obj[mediaType] = {};
             //WCS-1922, currentRemoteDescription - browser compatibilitySection: Chrome 70, FF 57, Safari 11
-            var description = connection.currentRemoteDescription != undefined ? connection.currentRemoteDescription : connection.remoteDescription;
+            let description = connection.currentRemoteDescription != undefined ? connection.currentRemoteDescription : connection.remoteDescription;
             // SDP may be null in Safari 12.1 and older, prevent TypeError here #WCS-3583
-            var sdp = "";
+            let sdp = "";
             if (description && description.sdp) {
                sdp = description.sdp;
             } else {
@@ -485,11 +522,15 @@ var createConnection = function (options) {
             obj[mediaType]["codecRate"] = codec.sampleRate;
             Object.keys(report).forEach(function (key) {
                 // Add audioLevel parameter parsing #WCS-3290
-                if (key.startsWith("bytes") || key.startsWith("packets") || key.indexOf("Count") != -1 || key.indexOf("audioLevel") != -1) {
+                if (key.startsWith("bytes") ||
+                    key.startsWith("packets") ||
+                    key.indexOf("Count") != -1 ||
+                    key.indexOf("audioLevel") != -1 ||
+                    key == "framesPerSecond") {
                     obj[mediaType][key] = report[key];
                 }
             });
-        }
+        };
 
         var fullScreen = function () {
             var video = document.getElementById(id);
