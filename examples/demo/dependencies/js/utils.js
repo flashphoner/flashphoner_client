@@ -317,25 +317,6 @@ function detectFlash() {
     }
 }
 
-$(function () {
-    function reposition() {
-        var modal = $(this),
-            dialog = modal.find('.modal-dialog');
-        modal.css('display', 'block');
-
-        // Dividing by two centers the modal exactly, but dividing by three
-        // or four works better for larger screens.
-        dialog.css("margin-top", Math.max(0, ($(window).height() - dialog.height()) / 2));
-    }
-
-    // Reposition when a modal is shown
-    $('.modal').on('show.bs.modal', reposition);
-    // Reposition when the window is resized
-    $(window).on('resize', function () {
-        $('.modal:visible').each(reposition);
-    });
-});
-
 /**
  * Generate simple uuid
  *
@@ -472,4 +453,82 @@ function canWebkitFullScreen(video) {
         canFullscreen = video.webkitSupportsFullscreen && !video.webkitDisplayingFullscreen;
     }
     return canFullscreen;
+}
+
+// Helper function to set item text
+const setText = function (id, text) {
+    let item = document.getElementById(id);
+    if (item) {
+        item.innerHTML = text;
+    }
+}
+
+// Helper functions to set/get an item value
+const setValue = function (id, value) {
+    let item = document.getElementById(id);
+    if (item) {
+        item.value = value;
+    }
+}
+
+const getValue = function (id) {
+    let item = document.getElementById(id);
+    if (item) {
+        return item.value;
+    }
+    return null;
+}
+
+// Helper functions to display/hide an item
+const showItem = function(id) {
+    let item = document.getElementById(id);
+    if (item) {
+        item.style.display = "block";
+    }
+}
+
+const hideItem = function(id) {
+    let item = document.getElementById(id);
+    if (item) {
+        item.style.display = "none";
+    }
+}
+
+// Helper functions to disable/enable an item
+const disableItem = function(id) {
+    let item = document.getElementById(id);
+    if (item) {
+        item.disabled = true;
+    }
+}
+
+const enableItem = function(id) {
+    let item = document.getElementById(id);
+    if (item) {
+        item.disabled = false;
+    }
+}
+
+// Set an event handler
+const setHandler = function (id, event, handler, previous = null) {
+    let item = document.getElementById(id);
+    if (item) {
+        if (previous) {
+            item.removeEventListener(event, previous)
+        }
+        item.addEventListener(event, handler);
+    }
+}
+
+// Find a closest item
+const closest = function (id, selector) {
+    let currentElement = document.getElementById(id);
+    let returnElement = null;
+
+    while (currentElement && currentElement.parentNode && !returnElement) {
+        currentElement = currentElement.parentNode;
+        returnElement = currentElement.querySelector(selector);
+    }
+
+    return returnElement;
 }
