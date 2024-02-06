@@ -173,6 +173,61 @@ const SDP = {
             }
         }
         return result;
+    },
+    setPublishingBitrate: function (sdp, minBitrate, maxBitrate) {
+        if(sdp && (minBitrate || maxBitrate)) {
+            let sdpArray = sdp.split("\n");
+            let i;
+            let rtpmap = -1, codec = "";
+            let matches;
+            let bitrateString = "";
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i].startsWith("a=rtpmap")) {
+                    matches = sdpArray[i].match("a=rtpmap:(.+) (.+)/.*");
+                    if (matches && matches.length > 2) {
+                        rtpmap = parseInt(matches[1], 10);
+                        codec = matches[2];
+                    }
+                } else {
+                    if (codec === "H264" || codec === "VP8") {
+                        if (sdpArray[i].startsWith("a=fmtp:" + rtpmap)) {
+                            bitrateString = this.getBitrateString(sdpArray[i], minBitrate, maxBitrate);
+                            if (bitrateString) {
+                                sdpArray[i] += ";" + bitrateString;
+                            }
+                        } else {
+                            bitrateString = this.getBitrateString("", minBitrate, maxBitrate);
+                            if (bitrateString) {
+                                sdpArray[i] = "a=fmtp:" + rtpmap + " " + bitrateString + "\r\n" + sdpArray[i];
+                            }
+                        }
+                        codec = "";
+                        rtpmap = -1;
+                    }
+                }
+            }
+            let newSDP = "";
+            for (i = 0; i < sdpArray.length; i++) {
+                if (sdpArray[i] != "") {
+                    newSDP += sdpArray[i] + "\n";
+                }
+            }
+            return newSDP;
+        }
+        return sdp;
+    },
+    getBitrateString: function (string, minBitrate, maxBitrate) {
+        let bitrateString = "";
+        if (minBitrate && string.indexOf("x-google-min-bitrate") == -1) {
+            bitrateString += "x-google-min-bitrate=" + minBitrate;
+        }
+        if (maxBitrate && string.indexOf("x-google-max-bitrate") == -1) {
+            if (bitrateString) {
+                bitrateString += ";";
+            }
+            bitrateString += "x-google-max-bitrate=" + maxBitrate;
+        }
+        return bitrateString;
     }
 };
 
@@ -422,6 +477,19 @@ const isPromise = function(object) {
     return false;
 };
 
+const setPublishingBitrate = function(sdp, mediaConnection, minBitrate, maxBitrate) {
+    if (minBitrate || maxBitrate) {
+        if (sdp && Browser.isChrome() || Browser.isSafariWebRTC()) {
+            // Set publishing bitrate constraints via remote SDP
+            sdp = SDP.setPublishingBitrate(sdp, minBitrate, maxBitrate);
+        } else if (mediaConnection) {
+            // Set publishing bitrate via sender encodings if SDP feature is not supported
+            mediaConnection.setPublishingBitrate(minBitrate, maxBitrate);
+        }
+    }
+    return sdp;
+};
+
 module.exports = {
     isEmptyObject,
     copyObjectToArray,
@@ -432,5 +500,6 @@ module.exports = {
     logger,
     stripCodecs,
     getCurrentCodecAndSampleRate,
-    isPromise
+    isPromise,
+    setPublishingBitrate
 };

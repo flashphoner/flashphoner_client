@@ -69,7 +69,7 @@ var createConnection = function (options) {
                 if (localVideo.srcObject) {
                     localVideo.id = id + "-local";
                     setContentHint(localVideo.srcObject, videoContentHint);
-                    connection.addStream(localVideo.srcObject);
+                    addStreamTracks(connection, localVideo.srcObject);
                 } else {
                     localVideo = null;
                 }
@@ -113,7 +113,7 @@ var createConnection = function (options) {
                     localVideo = cachedVideo;
                     localVideo.id = id;
                     setContentHint(localVideo.srcObject, videoContentHint);
-                    connection.addStream(localVideo.srcObject);
+                    addStreamTracks(connection, localVideo.srcObject);
                 }
             } else {
                 // There is a custom video element, get its id if set #WCS-3606
@@ -159,7 +159,12 @@ var createConnection = function (options) {
                     track.contentHint = hint;
                 }
             });
-        }      
+        }
+        function addStreamTracks(pc, stream) {
+            stream.getTracks().forEach((track) => {
+                pc.addTrack(track, stream);
+            });
+        }
         connection.ontrack = function (event) {
             if (remoteVideo) {
                 remoteVideo.srcObject = event.streams[0];
@@ -773,6 +778,21 @@ var createConnection = function (options) {
             screenShare = false;
         };
 
+        var setPublishingBitrate = function(minBitrate, maxBitrate) {
+            let senders = connection.getSenders();
+            senders.forEach((sender) => {
+                if (sender.track.kind == "video" && maxBitrate) {
+                    let parameters = sender.getParameters();
+                    for (let i = 0; i < parameters.encodings.length; i++) {
+                        if (!parameters.encodings[i].maxBitrate) {
+                            parameters.encodings[i].maxBitrate = maxBitrate * 1000;
+                        }
+                    }
+                    sender.setParameters(parameters).then(() => {});
+                }
+            });
+        };
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -799,6 +819,7 @@ var createConnection = function (options) {
         exports.switchMic = switchMic;
         exports.switchToScreen = switchToScreen;
         exports.switchToCam = switchToCam;
+        exports.setPublishingBitrate = setPublishingBitrate;
         connections[id] = exports;
         resolve(exports);
     });

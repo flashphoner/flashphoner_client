@@ -1,35 +1,46 @@
 'use strict';
 
 const { v1: uuid_v1 } = require('uuid');
-var constants = require("./constants");
-var util = require('./util');
-var LoggerObject = require('./util').logger;
+const constants = require("./constants");
+const util = require('./util');
+const LoggerObject = require('./util').logger;
+const Promise = require('promise-polyfill');
+const KalmanFilter = require('kalmanjs');
+const browserDetails = require('webrtc-adapter').default.browserDetails;
+const LOG_PREFIX = "core";
 var coreLogger;
 var loggerConf = {push: false, severity: "INFO"};
-var Promise = require('promise-polyfill');
-var KalmanFilter = require('kalmanjs');
-var browserDetails = require('webrtc-adapter').default.browserDetails;
-var LOG_PREFIX = "core";
 var isUsingTemasysPlugin = false;
 
 /**
  * @namespace Flashphoner
  */
 
-var SESSION_STATUS = constants.SESSION_STATUS;
-var STREAM_EVENT = constants.STREAM_EVENT;
-var STREAM_EVENT_TYPE = constants.STREAM_EVENT_TYPE;
-var STREAM_STATUS = constants.STREAM_STATUS;
-var CALL_STATUS = constants.CALL_STATUS;
-var TRANSPORT_TYPE = constants.TRANSPORT_TYPE;
-var CONNECTION_QUALITY = constants.CONNECTION_QUALITY;
-var ERROR_INFO = constants.ERROR_INFO;
-var VIDEO_RATE_GOOD_QUALITY_PERCENT_DIFFERENCE = 20;
-var VIDEO_RATE_BAD_QUALITY_PERCENT_DIFFERENCE = 50;
-var LOW_VIDEO_RATE_THRESHOLD_BAD_PERFECT = 50000;
-var LOW_VIDEO_RATE_BAD_QUALITY_PERCENT_DIFFERENCE = 150;
-var OUTBOUND_VIDEO_RATE = "outboundVideoRate";
-var INBOUND_VIDEO_RATE = "inboundVideoRate";
+const SESSION_STATUS = constants.SESSION_STATUS;
+const STREAM_EVENT = constants.STREAM_EVENT;
+const STREAM_EVENT_TYPE = constants.STREAM_EVENT_TYPE;
+const STREAM_STATUS = constants.STREAM_STATUS;
+const CALL_STATUS = constants.CALL_STATUS;
+const CONNECTION_QUALITY = constants.CONNECTION_QUALITY;
+const ERROR_INFO = constants.ERROR_INFO;
+const VIDEO_RATE_GOOD_QUALITY_PERCENT_DIFFERENCE = 20;
+const VIDEO_RATE_BAD_QUALITY_PERCENT_DIFFERENCE = 50;
+const LOW_VIDEO_RATE_THRESHOLD_BAD_PERFECT = 50000;
+const LOW_VIDEO_RATE_BAD_QUALITY_PERCENT_DIFFERENCE = 150;
+const OUTBOUND_VIDEO_RATE = "outboundVideoRate";
+const INBOUND_VIDEO_RATE = "inboundVideoRate";
+const CONSTRAINT_AUDIO = "audio";
+const CONSTRAINT_AUDIO_STEREO = "stereo";
+const CONSTRAINT_AUDIO_BITRATE = "bitrate";
+const CONSTRAINT_AUDIO_FEC = "fec";
+const CONSTRAINT_AUDIO_OUTPUT_ID = "outputId";
+const CONSTRAINT_VIDEO = "video";
+const CONSTRAINT_VIDEO_BITRATE = "video.bitrate";
+const CONSTRAINT_VIDEO_MIN_BITRATE = "video.minBitrate";
+const CONSTRAINT_VIDEO_MAX_BITRATE = "video.maxBitrate";
+const CONSTRAINT_VIDEO_QUALITY = "video.quality";
+const CONSTRAINT_VIDEO_WIDTH = "video.width";
+const CONSTRAINT_VIDEO_HEIGHT = "video.height";
 var MediaProvider = {};
 var sessions = {};
 var initialized = false;
@@ -866,9 +877,9 @@ var createSession = function (options) {
         }
 
         var audioOutputId;
-        var audioProperty = getConstraintsProperty(constraints, "audio", undefined);
+        var audioProperty = getConstraintsProperty(constraints, CONSTRAINT_AUDIO, undefined);
         if (typeof audioProperty === 'object') {
-            audioOutputId = getConstraintsProperty(audioProperty, "outputId", 0);
+            audioOutputId = getConstraintsProperty(audioProperty, CONSTRAINT_AUDIO_OUTPUT_ID, 0);
         }
 
         var stripCodecs = options.stripCodecs || [];
@@ -885,6 +896,10 @@ var createSession = function (options) {
         var sipHeaders = options.sipHeaders;
         var videoContentHint = options.videoContentHint;
         var useControls = options.useControls;
+
+        var minBitrate = getConstraintsProperty(constraints, CONSTRAINT_VIDEO_MIN_BITRATE, 0);
+        var maxBitrate = getConstraintsProperty(constraints, CONSTRAINT_VIDEO_MAX_BITRATE, 0);
+
         /**
          * Represents sip call.
          *
@@ -921,8 +936,9 @@ var createSession = function (options) {
             //set remote sdp
             if (sdp && sdp !== '') {
                 sdp = sdpHookHandler(sdp, sdpHook);
-                mediaConnection.setRemoteSdp(sdp, hasTransferredCall, id_).then(function () {
-                });
+                // Adjust publishing bitrate #WCS-4013
+                sdp = util.setPublishingBitrate(sdp, mediaConnection, minBitrate, maxBitrate);
+                mediaConnection.setRemoteSdp(sdp, hasTransferredCall, id_).then(function () {});
                 return;
             }
             var event = callInfo.status;
@@ -1084,6 +1100,8 @@ var createSession = function (options) {
             status_ = CALL_STATUS.PENDING;
             var sdp;
             var sdpHook = answerOptions.sdpHook;
+            var minBitrate = getConstraintsProperty(constraints, CONSTRAINT_VIDEO_MIN_BITRATE, 0);
+            var maxBitrate = getConstraintsProperty(constraints, CONSTRAINT_VIDEO_MAX_BITRATE, 0);
             sipSDP = answerOptions.sipSDP;
             sipHeaders = answerOptions.sipHeaders;
             if (!remoteSdpCache[id_]) {
@@ -1091,6 +1109,8 @@ var createSession = function (options) {
                 throw new Error("No remote sdp available");
             } else {
                 sdp = sdpHookHandler(remoteSdpCache[id_], sdpHook);
+                // Adjust publishing bitrate #WCS-4013
+                sdp = util.setPublishingBitrate(sdp, null, minBitrate, maxBitrate);
                 delete remoteSdpCache[id_];
             }
             if (util.SDP.matchPrefix(sdp, "m=video").length == 0) {
@@ -1124,6 +1144,8 @@ var createSession = function (options) {
                     useControls: useControls
                 }).then(function (newConnection) {
                     mediaConnection = newConnection;
+                    // Set publishing bitrate via sender encodings if SDP feature is not supported
+                    mediaConnection.setPublishingBitrate(minBitrate, maxBitrate);
                     return mediaConnection.setRemoteSdp(sdp);
                 }).then(function () {
                     return mediaConnection.createAnswer({
@@ -1651,15 +1673,15 @@ var createSession = function (options) {
         // Receive media
         var receiveAudio;
         var audioOutputId;
-        var audioProperty = getConstraintsProperty(constraints, "audio", undefined);
+        var audioProperty = getConstraintsProperty(constraints, CONSTRAINT_AUDIO, undefined);
         if (typeof audioProperty === 'boolean') {
             receiveAudio = audioProperty;
         } else if (typeof audioProperty === 'object') {
             receiveAudio = true;
-            var _stereo = getConstraintsProperty(audioProperty, "stereo", 0);
-            var _bitrate = getConstraintsProperty(audioProperty, "bitrate", 0);
-            var _fec = getConstraintsProperty(audioProperty, "fec", 0);
-            audioOutputId = getConstraintsProperty(audioProperty, "outputId", 0);
+            var _stereo = getConstraintsProperty(audioProperty, CONSTRAINT_AUDIO_STEREO, 0);
+            var _bitrate = getConstraintsProperty(audioProperty, CONSTRAINT_AUDIO_BITRATE, 0);
+            var _fec = getConstraintsProperty(audioProperty, CONSTRAINT_AUDIO_FEC, 0);
+            audioOutputId = getConstraintsProperty(audioProperty, CONSTRAINT_AUDIO_OUTPUT_ID, 0);
             var _codecOptions = "";
             if (_bitrate) _codecOptions += "maxaveragebitrate=" + _bitrate + ";";
             if (_stereo) _codecOptions += "stereo=1;sprop-stereo=1;";
@@ -1668,7 +1690,7 @@ var createSession = function (options) {
             receiveAudio = (typeof options.receiveAudio !== 'undefined') ? options.receiveAudio : true;
         }
         var receiveVideo;
-        var videoProperty = getConstraintsProperty(constraints, "video", undefined);
+        var videoProperty = getConstraintsProperty(constraints, CONSTRAINT_VIDEO, undefined);
         if (typeof videoProperty === 'boolean') {
             receiveVideo = videoProperty;
         } else if (typeof videoProperty === 'object') {
@@ -1677,16 +1699,16 @@ var createSession = function (options) {
             receiveVideo = (typeof options.receiveVideo !== 'undefined') ? options.receiveVideo : true;
         }
         // Bitrate
-        var bitrate = getConstraintsProperty(constraints, "video.bitrate", 0);
-        var minBitrate = getConstraintsProperty(constraints, "video.minBitrate", 0);
-        var maxBitrate = getConstraintsProperty(constraints, "video.maxBitrate", 0);
+        var bitrate = getConstraintsProperty(constraints, CONSTRAINT_VIDEO_BITRATE, 0);
+        var minBitrate = getConstraintsProperty(constraints, CONSTRAINT_VIDEO_MIN_BITRATE, 0);
+        var maxBitrate = getConstraintsProperty(constraints, CONSTRAINT_VIDEO_MAX_BITRATE, 0);
 
         // Quality
-        var quality = getConstraintsProperty(constraints, "video.quality", 0);
+        var quality = getConstraintsProperty(constraints, CONSTRAINT_VIDEO_QUALITY, 0);
         if (quality > 100) quality = 100;
         // Play resolution
-        var playWidth = (typeof options.playWidth !== 'undefined') ? options.playWidth : getConstraintsProperty(constraints, "video.width", 0);
-        var playHeight = (typeof options.playHeight !== 'undefined') ? options.playHeight : getConstraintsProperty(constraints, "video.height", 0);
+        var playWidth = (typeof options.playWidth !== 'undefined') ? options.playWidth : getConstraintsProperty(constraints, CONSTRAINT_VIDEO_WIDTH, 0);
+        var playHeight = (typeof options.playHeight !== 'undefined') ? options.playHeight : getConstraintsProperty(constraints, CONSTRAINT_VIDEO_HEIGHT, 0);
         var stripCodecs = options.stripCodecs || [];
         var resolution = {};
 
@@ -1747,8 +1769,9 @@ var createSession = function (options) {
                 var _sdp = sdp;
                 if (_codecOptions) _sdp = util.SDP.writeFmtp(sdp, _codecOptions, "opus");
                 _sdp = sdpHookHandler(_sdp, sdpHook);
-                mediaConnection.setRemoteSdp(_sdp).then(function () {
-                });
+                // Adjust publishing bitrate #WCS-4013
+                _sdp = util.setPublishingBitrate(_sdp, mediaConnection, minBitrate, maxBitrate);
+                mediaConnection.setRemoteSdp(_sdp).then(function () {});
                 return;
             }
 
