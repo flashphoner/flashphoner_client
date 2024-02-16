@@ -405,7 +405,7 @@ function downScaleToFitSize(videoWidth, videoHeight, dstWidth, dstHeight) {
  *
  * @param video
  */
-function setWebkitFullscreenHandlers(video) {
+function setWebkitFullscreenHandlers(video, startFullScreen = true) {
     if (video) {
         let needRestart = false;
         let wasFullscreen = false;
@@ -422,20 +422,22 @@ function setWebkitFullscreenHandlers(video) {
             wasFullscreen = true;
             video.play();
             needRestart = true;
-        });                
-        // Start playback in fullscreen if webkit-playsinline is set
-        video.addEventListener("playing", function () {
-            // Do not enter fullscreen again if we just left it #WCS-3860
-            if (canWebkitFullScreen(video) && !wasFullscreen) {
-                // We should catch if fullscreen mode is not available
-                try {
-                    video.webkitEnterFullscreen();
-                } catch (e) {
-                    console.log("Fullscreen is not allowed: " + e);
-                }
-            }
-            wasFullscreen = false;
         });
+        if (startFullScreen) {
+            // Start playback in fullscreen if webkit-playsinline is set
+            video.addEventListener("playing", function () {
+                // Do not enter fullscreen again if we just left it #WCS-3860
+                if (canWebkitFullScreen(video) && !wasFullscreen) {
+                    // We should catch if fullscreen mode is not available
+                    try {
+                        video.webkitEnterFullscreen();
+                    } catch (e) {
+                        console.log("Fullscreen is not allowed: " + e);
+                    }
+                }
+                wasFullscreen = false;
+            });
+        }
     } else {
         console.log("No video tag is passed, skip webkit fullscreen handlers setup");
     }

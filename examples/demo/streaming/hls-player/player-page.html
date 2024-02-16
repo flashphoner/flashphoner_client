@@ -44,13 +44,24 @@
                     </div>
                 </div>
                 <div class="row" style="margin-top: 20px">
-                    <div class="col-sm-6 text-left">
+                    <div class="col-sm-4 text-left">
                         <div id="llHlsMode" style="display: none;">
                             <input id="llHlsEnabled" class="form-check-input" type="checkbox" value="">
                             <label class="form-check-label" for="llHlsEnabled">Low latency HLS</label>
                         </div>
                     </div>
-                    <div class="col-sm-6 text-right">
+                    <div class="col-sm-5">
+                        <div id="backward" style="display: none;">
+                            <label class="form-check-label text-right" for="backBtnMax">&lt;&lt; seconds</label>
+                            <div class="input-group-btn">
+                                <button id="backBtnMax" type="button" class="btn btn-default">Max</button>
+                                <button id="backBtn30" type="button" class="btn btn-default">30</button>
+                                <button id="backBtn10" type="button" class="btn btn-default">10</button>
+                                <button id="liveBtn" type="button" class="btn btn-default">Live</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 text-right">
                         <button id="applyBtn" type="button" class="btn btn-default">Play</button>
                     </div>
                 </div>
