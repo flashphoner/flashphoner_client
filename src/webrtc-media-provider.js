@@ -61,6 +61,8 @@ var createConnection = function (options) {
         var unmutePlayOnStart = options.unmutePlayOnStart !== undefined ? options.unmutePlayOnStart : true;
         // Use a standard HTML5 video controls if needed (to enable fullscreen in Safari 16 for example) #WCS-3606
         var useControls = options.useControls || false;
+        // Stream event handler to rise an event #WCS-4097
+        var unmuteRequiredEvent = options.unmuteRequiredEvent ? options.unmuteRequiredEvent : null;
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
@@ -174,6 +176,9 @@ var createConnection = function (options) {
                             // Automatically unmute video if needed #WCS-2425
                             if (unmutePlayOnStart) {
                                 remoteVideo.muted = false;
+                            } else {
+                                // Fire UNMUTE_REQUIRED stream event #WCS-4097
+                                fireUnmuteEvent();
                             }
                         }).catch(function (e) {
                             if (validBrowsers.includes(browserDetails.browser)) {
@@ -182,6 +187,8 @@ var createConnection = function (options) {
                                 logger.info(LOG_PREFIX, "Autoplay detected! Trying to play a video with a muted sound...");
                                 remoteVideo.muted = true;
                                 remoteVideo.play();
+                                // Fire UNMUTE_REQUIRED stream event #WCS-4097
+                                fireUnmuteEvent();
                             } else {
                                 logger.error(LOG_PREFIX, e);
                             }
@@ -791,6 +798,12 @@ var createConnection = function (options) {
                     sender.setParameters(parameters).then(() => {});
                 }
             });
+        };
+
+        var fireUnmuteEvent = function() {
+            if (unmuteRequiredEvent && typeof unmuteRequiredEvent === 'function') {
+                unmuteRequiredEvent();
+            }
         };
 
         var exports = {};

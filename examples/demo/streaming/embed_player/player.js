@@ -167,6 +167,8 @@ function playStream(session) {
             console.log("Not enough bandwidth, consider using lower video resolution or bitrate. Bandwidth " + (Math.round(networkBandwidth / 1000)) + " bitrate " + (Math.round(remoteBitrate / 1000)));
         } else if (STREAM_EVENT_TYPE.RESIZE === streamEvent.type) {
             console.log("New video size: " + streamEvent.payload.streamerVideoWidth + "x" + streamEvent.payload.streamerVideoHeight);
+        } else if (STREAM_EVENT_TYPE.UNMUTE_REQUIRED === streamEvent.type) {
+            console.log("Stream is muted by autoplay policy, user action required to unmute");
         }
     });
     playingStream.play();

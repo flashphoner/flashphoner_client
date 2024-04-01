@@ -1790,18 +1790,25 @@ var createSession = function (options) {
 
             var event = streamInfo.status;
 
-            if (event == INBOUND_VIDEO_RATE || event == OUTBOUND_VIDEO_RATE) {
+            if (event === INBOUND_VIDEO_RATE || event === OUTBOUND_VIDEO_RATE) {
                 detectConnectionQuality(event, streamInfo);
                 return;
             }
 
-            //Depricated. WCS-3228: RESIZE, SNAPSHOT_COMPLETE and NOT_ENOUGH_BANDWIDTH moved to STREAM_EVENT
-            if (event == STREAM_STATUS.RESIZE) {
+            if (event === STREAM_EVENT) {
+                if (!streamInfo.mediaSessionId)
+                    streamInfo.mediaSessionId = id_;
+                streamEventRefreshHandlers[id_](streamInfo);
+                return;
+            }
+
+            //Deprecated. WCS-3228: RESIZE, SNAPSHOT_COMPLETE and NOT_ENOUGH_BANDWIDTH moved to STREAM_EVENT
+            if (event === STREAM_STATUS.RESIZE) {
                 resolution.width = streamInfo.streamerVideoWidth;
                 resolution.height = streamInfo.streamerVideoHeight;
-            } else if (event == STREAM_STATUS.SNAPSHOT_COMPLETE) {
+            } else if (event === STREAM_STATUS.SNAPSHOT_COMPLETE) {
 
-            } else if (event == STREAM_STATUS.NOT_ENOUGH_BANDWIDTH) {
+            } else if (event === STREAM_STATUS.NOT_ENOUGH_BANDWIDTH) {
                 var info = streamInfo.info.split("/");
                 remoteBitrate = info[0];
                 networkBandwidth = info[1];
@@ -1809,15 +1816,17 @@ var createSession = function (options) {
                 status_ = event;
             }
 
-            audioState_ = streamInfo.audioState;
-            videoState_ = streamInfo.videoState;
+            if (streamInfo.audioState)
+                audioState_ = streamInfo.audioState;
+            if (streamInfo.videoState)
+                videoState_ = streamInfo.videoState;
 
             if (streamInfo.info)
                 info_ = streamInfo.info;
 
             //release stream
-            if (event == STREAM_STATUS.FAILED || event == STREAM_STATUS.STOPPED ||
-                event == STREAM_STATUS.UNPUBLISHED) {
+            if (event === STREAM_STATUS.FAILED || event === STREAM_STATUS.STOPPED ||
+                event === STREAM_STATUS.UNPUBLISHED) {
 
                 delete streams[id_];
                 delete streamRefreshHandlers[id_];
@@ -1920,7 +1929,8 @@ var createSession = function (options) {
                 playoutDelay: playoutDelay,
                 unmutePlayOnStart: unmutePlayOnStart,
                 useControls: useControls,
-                logger: logger
+                logger: logger,
+                unmuteRequiredEvent: fireUnmuteEvent
             }, streamRefreshHandlers[id_]).then(function (newConnection) {
                 mediaConnection = newConnection;
                 try {
@@ -2597,6 +2607,14 @@ var createSession = function (options) {
          */
         var getLogger = function () {
             return streamLogger;
+        };
+
+        var fireUnmuteEvent = function() {
+            if (isRemoteAudioMuted()) {
+                if (streamRefreshHandlers[id_] && typeof streamRefreshHandlers[id_] === 'function') {
+                    streamRefreshHandlers[id_]({status: STREAM_EVENT, type: STREAM_EVENT_TYPE.UNMUTE_REQUIRED});
+                }
+            }
         };
 
         stream.play = play;

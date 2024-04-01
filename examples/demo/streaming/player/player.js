@@ -44,12 +44,8 @@ function init_page() {
         step: 10,
         animate: true,
         slide: function(event, ui) {
-            //WCS-2375. fixed autoplay in ios safari
-            if (stream.isRemoteAudioMuted()) {
-                stream.unmuteRemoteAudio();
-            }
             currentVolumeValue = ui.value;
-            stream.setVolume(currentVolumeValue);
+            setStreamVolume(stream, currentVolumeValue);
         }
     }).slider("disable");
     onStopped();
@@ -87,6 +83,8 @@ function onStopped() {
     $("#volumeControl").slider("disable");
     $("#fullScreenBtn").prop('disabled', true);
     $("#preloader").hide();
+    $("#unmuteBtn").off('click').click(unmuteBtnClick);
+    $("#unmute").hide();
 }
 
 function playBtnClick() {
@@ -106,6 +104,11 @@ function playBtnClick() {
         }
         start();
     }
+}
+
+function unmuteBtnClick() {
+    setStreamVolume(stream, currentVolumeValue)
+    $("#volumeControl").slider('value', currentVolumeValue);
 }
 
 function start() {
@@ -200,6 +203,14 @@ function playStream(session) {
             video.addEventListener("playing", function () {
                 $("#preloader").hide();
             });
+            // Hide unmute button
+            video.addEventListener("volumechange", function () {
+                if (video.muted) {
+                    $("#unmute").show();
+                } else {
+                    $("#unmute").hide();
+                }
+            });
         }
     }).on(STREAM_STATUS.PLAYING, function (stream) {
         // Android Firefox may pause stream playback via MSE even if video element is muted
@@ -225,8 +236,10 @@ function playStream(session) {
             console.log("Not enough bandwidth, consider using lower video resolution or bitrate. Bandwidth " + (Math.round(networkBandwidth / 1000)) + " bitrate " + (Math.round(remoteBitrate / 1000)));
         } else if (STREAM_EVENT_TYPE.RESIZE === streamEvent.type) {
             console.log("New video size: " + streamEvent.payload.streamerVideoWidth + "x" + streamEvent.payload.streamerVideoHeight);
+        } else if (STREAM_EVENT_TYPE.UNMUTE_REQUIRED === streamEvent.type) {
+            console.log("Stream is muted by autoplay policy, user action required to unmute");
+            $("#unmute").show();
         }
-
     });
     stream.play();
 }
@@ -246,6 +259,15 @@ function setStatus(status, stream) {
         if (stream) {
             infoField.text(stream.getInfo()).attr("class","text-muted");
         }
+    }
+}
+
+function setStreamVolume(stream, currentVolumeValue) {
+    if (stream) {
+        if (stream.isRemoteAudioMuted()) {
+            stream.unmuteRemoteAudio();
+        }
+        stream.setVolume(currentVolumeValue);
     }
 }
 
