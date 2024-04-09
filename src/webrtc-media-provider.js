@@ -56,7 +56,8 @@ var createConnection = function (options) {
         var screenShare = false;
         var playoutDelay = options.playoutDelay;
         // Set video track contentHint to `detail` by default to workaround Chromium 91 bug #WCS-3257
-        var videoContentHint = options.videoContentHint ? options.videoContentHint : 'detail';
+        // Set video track contentHint to `motion` by default to keep bitrate and fps for better camera stream quality #WCS-4109
+        var videoContentHint = options.videoContentHint ? options.videoContentHint : 'motion';
         // Pass the option to unmute automatically (true by default) #WCS-2425
         var unmutePlayOnStart = options.unmutePlayOnStart !== undefined ? options.unmutePlayOnStart : true;
         // Use a standard HTML5 video controls if needed (to enable fullscreen in Safari 16 for example) #WCS-3606

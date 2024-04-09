@@ -829,7 +829,7 @@ var createSession = function (options) {
      * @param {string=} options.stripCodecs Comma separated strings of codecs which should be stripped from WebRTC SDP (ex. "SILK,G722")
      * @param {Array<string>=} options.sipSDP Array of custom SDP params (ex. bandwidth (b=))
      * @param {Array<string>=} options.sipHeaders Array of custom SIP headers
-     * @param {string=} options.videoContentHint Video content hint for browser ('detail' by default to maintain resolution), {@link Flashphoner.constants.CONTENT_HINT_TYPE}
+     * @param {string=} options.videoContentHint Video content hint for browser ('motion' by default to maintain bitrate and fps), {@link Flashphoner.constants.CONTENT_HINT_TYPE}
      * @param {Boolean=} options.useControls Use a standard HTML5 video controls (play, pause, fullscreen). May be a workaround for fullscreen mode to work in Safari 16
      * @param {Object=} options.logger Call logger options
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
@@ -1619,7 +1619,7 @@ var createSession = function (options) {
      * @param {Boolean=} options.cvoExtension Enable rtp video orientation extension
      * @param {Integer=} options.playoutDelay Time delay between network reception of media and playout
      * @param {string=} options.useCanvasMediaStream EXPERIMENTAL: when publish bind browser's media stream to the canvas. It can be useful for image filtering
-     * @param {string=} options.videoContentHint Video content hint for browser ('detail' by default to maintain resolution), {@link Flashphoner.constants.CONTENT_HINT_TYPE}
+     * @param {string=} options.videoContentHint Video content hint for browser ('motion' by default to maintain bitrate and fps), {@link Flashphoner.constants.CONTENT_HINT_TYPE}
      * @param {Boolean=} options.unmutePlayOnStart Unmute playback on start. May be used after user gesture only, so set 'unmutePlayOnStart: false' for autoplay
      * @param {Boolean=} options.useControls Use a standard HTML5 video controls (play, pause, fullscreen). May be a workaround for fullscreen mode to work in Safari 16
      * @param {Object=} options.logger Stream logger options
