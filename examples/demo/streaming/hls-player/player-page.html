@@ -1,5 +1,5 @@
     <div class="row">
-        <div class="col-sm-12 text-center" style="max-width: 525px">
+        <div class="col-sm-12 text-center" style="max-width: 500px">
 
             <h2 id="header"></h2>
 
@@ -69,12 +69,42 @@
         </div>
     </div>
     <div class="row">
-        <div id="videoContainer" class="col-sm-12 text-center" style="margin-top: 20px; max-width: 852px">
-            <video id="remoteVideo" width="852" height="480"
+        <div id="videoContainer" class="col-sm-12 text-center" style="margin-top: 20px; max-width: 852px; width: available; max-height: 480px; height: 56.25vw">
+            <video id="remoteVideo"
+                   width="100%"
+                   height="100%"
                    controls="controls"
                    autoplay="autoplay"
                    playsinline="playsinline"
                    webkit-playsinline="webkit-playsinline"
                    type="application/vnd.apple.mpegurl"></video>
+        </div>
+    </div>
+    <div id="stats" class="row" style="display: none;">
+        <div class="col-sm-12">
+            <div class="row" style="margin-top: 20px">
+                <div class="col-sm-2">
+                    <label class="form-check-label" for="videoWidth">Video width</label>
+                </div>
+                <div class="col-sm-2" id="videoWidth"></div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-sm-2">
+                    <label class="form-check-label" for="videoHeight">Video height</label>
+                </div>
+                <div class="col-sm-2" id="videoHeight"></div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-sm-2">
+                    <label class="form-check-label" for="videoRate">Bitrate, bps</label>
+                </div>
+                <div class="col-sm-2" id="videoRate"></div>
+            </div>
+            <div class="row" style="margin-top: 10px">
+                <div class="col-sm-2">
+                    <label class="form-check-label" for="videoFps">Framerate</label>
+                </div>
+                <div class="col-sm-2" id="videoFps"></div>
+            </div>
         </div>
     </div>

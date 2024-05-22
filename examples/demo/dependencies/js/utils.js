@@ -457,7 +457,12 @@ function canWebkitFullScreen(video) {
     return canFullscreen;
 }
 
-// Helper function to set item text
+/**
+ * Helper function to set item text
+ *
+ * @param id
+ * @param text
+ */
 const setText = function (id, text) {
     let item = document.getElementById(id);
     if (item) {
@@ -465,7 +470,12 @@ const setText = function (id, text) {
     }
 }
 
-// Helper functions to set/get an item value
+/**
+ * Helper function to set an item value
+ *
+ * @param id
+ * @param value
+ */
 const setValue = function (id, value) {
     let item = document.getElementById(id);
     if (item) {
@@ -473,6 +483,12 @@ const setValue = function (id, value) {
     }
 }
 
+/**
+ * Helper function to get an item value
+ *
+ * @param id
+ * @returns value
+ */
 const getValue = function (id) {
     let item = document.getElementById(id);
     if (item) {
@@ -481,7 +497,39 @@ const getValue = function (id) {
     return null;
 }
 
-// Helper functions to display/hide an item
+/**
+ * Helper function to set/unset a checkbox
+ *
+ * @param id
+ * @param value
+ */
+const setCheckbox = function (id, value) {
+    let item = document.getElementById(id);
+    if (item) {
+        item.checked = value;
+    }
+}
+
+/**
+ * Helper function to get a checkbox state
+ *
+ * @param id
+ * @returns value
+ */
+const getCheckbox = function (id) {
+    let item = document.getElementById(id);
+    if (item) {
+        return item.checked;
+    }
+    return null;
+}
+
+
+/**
+ * Helper function to display an item
+ *
+ * @param id
+ */
 const showItem = function(id) {
     let item = document.getElementById(id);
     if (item) {
@@ -489,6 +537,11 @@ const showItem = function(id) {
     }
 }
 
+/**
+ * Helper function to hide an item
+ *
+ * @param id
+ */
 const hideItem = function(id) {
     let item = document.getElementById(id);
     if (item) {
@@ -496,7 +549,11 @@ const hideItem = function(id) {
     }
 }
 
-// Helper functions to disable/enable an item
+/**
+ * Helper function to disable an item
+ *
+ * @param id
+ */
 const disableItem = function(id) {
     let item = document.getElementById(id);
     if (item) {
@@ -504,6 +561,11 @@ const disableItem = function(id) {
     }
 }
 
+/**
+ * Helper function to enable an item
+ *
+ * @param id
+ */
 const enableItem = function(id) {
     let item = document.getElementById(id);
     if (item) {
@@ -511,7 +573,14 @@ const enableItem = function(id) {
     }
 }
 
-// Set an event handler
+/**
+ * Set an event handler
+ *
+ * @param id
+ * @param event
+ * @param handler
+ * @param previous
+ */
 const setHandler = function (id, event, handler, previous = null) {
     let item = document.getElementById(id);
     if (item) {
@@ -522,7 +591,13 @@ const setHandler = function (id, event, handler, previous = null) {
     }
 }
 
-// Find a closest item
+/**
+ * Find a closest item
+ *
+ * @param id
+ * @param selector
+ * @returns {null}
+ */
 const closest = function (id, selector) {
     let currentElement = document.getElementById(id);
     let returnElement = null;
@@ -533,4 +608,18 @@ const closest = function (id, selector) {
     }
 
     return returnElement;
+}
+
+/**
+ * Display object properties fro debugging purposes
+ *
+ * @param object
+ */
+const showProps = function (object) {
+    console.log("-------------------------------object begin");
+    for (const property in object) {
+        console.log(`${property}: ${object[property]}`);
+    }
+    console.log("-------------------------------object end");
+
 }

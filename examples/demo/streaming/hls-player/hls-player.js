@@ -6,9 +6,11 @@ const VIDEOJS_VERSION_TYPE = {
 const LIVE_THRESHOLD = 5;
 const LIVE_TOLERANCE = 5;
 const LIVE_UI_INTERVAL = 1000;
+const STATS_INTERVAL = 1000;
 let player = null;
 let liveUITimer = null;
 let videojsVersion = getUrlParam("version");
+let playbackStats = null;
 
 const loadPlayerPage = function() {
     if (videojsVersion) {
@@ -127,6 +129,7 @@ const initPage = function() {
     let remoteVideo = document.getElementById('remoteVideo');
     remoteVideo.className = "video-js vjs-default-skin";
     player = initVideoJsPlayer(remoteVideo);
+    playbackStats = PlaybackStats(STATS_INTERVAL);
 }
 
 const playBtnClick = function() {
@@ -234,6 +237,7 @@ const onStarted = function() {
     toggleBackButtons(true);
     setText("applyBtn", "Stop");
     setHandler("applyBtn", "click", stopBtnClick, playBtnClick);
+    playbackStats.start();
 }
 
 
@@ -243,6 +247,7 @@ const onStopped = function() {
     hideItem("backward");
     setText("applyBtn", "Play");
     setHandler("applyBtn", "click", playBtnClick, stopBtnClick);
+    playbackStats.stop();
     if(!document.getElementById('remoteVideo')) {
         createRemoteVideo(document.getElementById('videoContainer'));
     }
@@ -250,10 +255,8 @@ const onStopped = function() {
 
 
 const createRemoteVideo = function(parent) {
-    remoteVideo = document.createElement("video");
+    let remoteVideo = document.createElement("video");
     remoteVideo.id = "remoteVideo";
-    remoteVideo.width=852;
-    remoteVideo.height=480;
     remoteVideo.controls="controls";
     remoteVideo.autoplay="autoplay";
     remoteVideo.type="application/vnd.apple.mpegurl";
@@ -314,7 +317,8 @@ const initVideoJsPlayer = function(video) {
         liveTracker: {
             trackingThreshold: LIVE_THRESHOLD,
             liveTolerance: LIVE_TOLERANCE
-        }
+        },
+        fill: true
     });
     console.log("Using VideoJs " + videojs.VERSION);
     if (Browser.isSafariWebRTC() && Browser.isiOS()) {
@@ -361,4 +365,51 @@ const toggleInputs = function(enable) {
         disableItem("token");
         disableItem("player");
     }
+}
+
+const PlaybackStats = function(interval) {
+    const playbackStats = {
+        interval: interval || STATS_INTERVAL,
+        timer: null,
+        stats: null,
+        start: function() {
+            let video = getActualVideoTag();
+
+            playbackStats.stop();
+            stats = HTML5Stats(video);
+            playbackStats.timer = setInterval(playbackStats.displayStats, playbackStats.interval);
+            setText("videoWidth", "N/A");
+            setText("videoHeight", "N/A");
+            setText("videoRate", "N/A");
+            setText("videoFps", "N/A");
+            showItem("stats");
+        },
+        stop: function() {
+            if (playbackStats.timer) {
+                clearInterval(playbackStats.timer);
+                playbackStats.timer = null;
+            }
+            playbackStats.stats = null;
+            hideItem("stats");
+        },
+        displayStats: function() {
+            if (stats.collect()) {
+                let width = stats.getWidth();
+                let height = stats.getHeight();
+                let bitrate = stats.getBitrate();
+                let fps = stats.getFps();
+
+                setText("videoWidth", width);
+                setText("videoHeight", height);
+
+                if (bitrate !== undefined) {
+                    setText("videoRate", Math.round(bitrate));
+                }
+                if (fps !== undefined) {
+                    setText("videoFps", fps.toFixed(1));
+                }
+            }
+        }
+    };
+    return playbackStats;
 }
