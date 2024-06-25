@@ -10,13 +10,19 @@ const STATS_INTERVAL = 1000;
 let player = null;
 let liveUITimer = null;
 let videojsVersion = getUrlParam("version");
+let playSrc = getUrlParam("src");
+let autoplay = eval(getUrlParam("autoplay")) || false;
 let playbackStats = null;
 
 const loadPlayerPage = function() {
     if (videojsVersion) {
         hideItem("videojsInputForm");
-        loadVideoJS("videojs" + videojsVersion);
+        loadVideoJS(videojsVersion);
     } else {
+        if (autoplay) {
+            console.warn("No VideoJS version set, autoplay disabled");
+            autoplay = false;
+        }
         let videojsInput = document.getElementById("videojsInput");
         for (videojsType in VIDEOJS_VERSION_TYPE) {
             let option = document.createElement("option");
@@ -44,13 +50,14 @@ const onVideojsBtnClick = function () {
 
 const loadVideoJS = function (version) {
     if (version) {
+        videojsVersion = version;
         let playerPage = document.getElementById("playerPage");
         loadFile(version + "/video.js", "text/javascript").then( data  => {
             console.log("HLS library loaded successfully", data);
             loadFile(version + "/video-js.css", "stylesheet").then ( data => {
                 console.log("HLS library stylesheet loaded successfully", data);
                 hideItem("videojsInputForm");
-                loadPage("player-page.html", "playerPage", initPage );
+                loadPage("player-page.html", "playerPage", initPage);
             }).catch( err => {
                 playerPage.innerHTML = "Can't load VideoJS library stylesheet";
                 playerPage.setAttribute("class", "text-danger");
@@ -117,31 +124,37 @@ const loadPage = function(page, containerId, onLoad) {
 }
 
 const initPage = function() {
-    setText("header", "HLS VideoJS Player Minimal");
-    setValue("urlServer", getHLSUrl());
-    enableItem("applyBtn");
-    setText("applyBtn", "Play");
-    setHandler("applyBtn", "click", playBtnClick);
-    setHandler("backBtn10", "click", backBtnClick);
-    setHandler("backBtn30", "click", backBtnClick);
-    setHandler("backBtnMax", "click", backBtnClick);
-    setHandler("liveBtn", "click", liveBtnClick);
+    if (playSrc) {
+        setValue("fullLink", decodeURIComponent(playSrc));
+    } else if (autoplay) {
+        console.warn("No HLS URL set, autoplay disabled");
+        autoplay = false;
+    }
     let remoteVideo = document.getElementById('remoteVideo');
-    remoteVideo.className = "video-js vjs-default-skin";
-    player = initVideoJsPlayer(remoteVideo);
-    playbackStats = PlaybackStats(STATS_INTERVAL);
+    if (autoplay) {
+        // There should not be any visible item on the page unless player
+        hideAllToAutoplay();
+        // The player should use all available page width
+        setUpPlayerItem(true);
+        // The player should be muted to automatically start playback
+        player = initVideoJsPlayer(remoteVideo, true);
+        playBtnClick();
+    } else {
+        // No autoplay, all the forms and buttons should be visible
+        setText("header", "HLS VideoJS Player Minimal");
+        displayCommonItems();
+        setUpButtons();
+        enablePlaybackStats();
+        // The player should have a maximum fixed size
+        setUpPlayerItem(false);
+        // The player can be unmuted because user should click Play button
+        player = initVideoJsPlayer(remoteVideo, false);
+    }
 }
 
 const playBtnClick = function() {
-    if (validateForm()) {
-        let streamName = getValue('playStream');
-        streamName = encodeURIComponent(streamName);
-        let videoSrc = getValue("urlServer") + '/' + streamName + '/' + streamName + '.m3u8';
-        let key = getValue('key');
-        let token = getValue("token");
-        if (key.length > 0 && token.length > 0) {
-            videoSrc += "?" + key + "=" + token;
-        }
+    let videoSrc = getVideoSrc(getValue("fullLink"));
+    if (videoSrc) {
         player.on('loadedmetadata', function() {
             console.log("Play with VideoJs");
             player.play();
@@ -157,6 +170,7 @@ const playBtnClick = function() {
         });
         player.on('playing', function() {
             console.log("playing event fired");
+            displayPermalink(videoSrc);
             if (player.liveTracker) {
                 if (!player.liveTracker.isLive()) {
                     // A cratch to display live UI for the first subscriber
@@ -231,23 +245,27 @@ const liveBtnClick = function() {
 }
 
 const onStarted = function() {
-    toggleInputs(false);
-    enableItem("applyBtn");
-    showItem("backward");
-    toggleBackButtons(true);
-    setText("applyBtn", "Stop");
-    setHandler("applyBtn", "click", stopBtnClick, playBtnClick);
-    playbackStats.start();
+    if (!autoplay) {
+        toggleInputs(false);
+        enableItem("applyBtn");
+        hideItem("permalink");
+        showItem("backward");
+        setText("applyBtn", "Stop");
+        setHandler("applyBtn", "click", stopBtnClick, playBtnClick);
+        startPlaybackStats();
+    }
 }
 
 
 const onStopped = function() {
-    toggleInputs(true);
-    enableItem("applyBtn");
-    hideItem("backward");
-    setText("applyBtn", "Play");
-    setHandler("applyBtn", "click", playBtnClick, stopBtnClick);
-    playbackStats.stop();
+    if (!autoplay) {
+        toggleInputs(true);
+        enableItem("applyBtn");
+        hideItem("backward");
+        setText("applyBtn", "Play");
+        setHandler("applyBtn", "click", playBtnClick, stopBtnClick);
+        stopPlaybackStats();
+    }
     if(!document.getElementById('remoteVideo')) {
         createRemoteVideo(document.getElementById('videoContainer'));
     }
@@ -264,7 +282,7 @@ const createRemoteVideo = function(parent) {
     remoteVideo.setAttribute("playsinline","");
     remoteVideo.setAttribute("webkit-playsinline","");
     parent.appendChild(remoteVideo);
-    player = initVideoJsPlayer(remoteVideo);
+    player = initVideoJsPlayer(remoteVideo, autoplay);
 }
 
 
@@ -309,23 +327,28 @@ const removeHighlight = function(input) {
     }
 }
 
-const initVideoJsPlayer = function(video) {
-    let videoJsPlayer = videojs(video, {
-        playsinline: true,
-        playbackRates: [0.1, 0.25, 0.5, 1, 1.5, 2],
-        liveui: true,
-        liveTracker: {
-            trackingThreshold: LIVE_THRESHOLD,
-            liveTolerance: LIVE_TOLERANCE
-        },
-        fill: true
-    });
-    console.log("Using VideoJs " + videojs.VERSION);
-    if (Browser.isSafariWebRTC() && Browser.isiOS()) {
-        // iOS hack when using standard controls to leave fullscreen mode
-        let videoTag = getActualVideoTag();
-        if(videoTag) {
-            setWebkitFullscreenHandlers(videoTag, false);
+const initVideoJsPlayer = function(video, muted) {
+    let videoJsPlayer = null;
+    if (video) {
+        video.className = "video-js vjs-default-skin";
+        videoJsPlayer = videojs(video, {
+            playsinline: true,
+            playbackRates: [0.1, 0.25, 0.5, 1, 1.5, 2],
+            liveui: true,
+            liveTracker: {
+                trackingThreshold: LIVE_THRESHOLD,
+                liveTolerance: LIVE_TOLERANCE
+            },
+            fill: true,
+            muted: muted
+        });
+        console.log("Using VideoJs " + videojs.VERSION);
+        if (Browser.isSafariWebRTC() && Browser.isiOS()) {
+            // iOS hack when using standard controls to leave fullscreen mode
+            let videoTag = getActualVideoTag();
+            if(videoTag) {
+                setWebkitFullscreenHandlers(videoTag, false);
+            }
         }
     }
     return videoJsPlayer;
@@ -339,15 +362,25 @@ const getActualVideoTag = function() {
     return null;
 }
 
+const setUpButtons = function() {
+    setHandler("applyBtn", "click", playBtnClick);
+    setHandler("backBtn10", "click", backBtnClick);
+    setHandler("backBtn30", "click", backBtnClick);
+    setHandler("backBtnMax", "click", backBtnClick);
+    setHandler("liveBtn", "click", liveBtnClick);
+}
+
 const toggleBackButtons = function(enable) {
-    if (enable) {
-        enableItem("backBtn10");
-        enableItem("backBtn30");
-        enableItem("backBtnMax");
-    } else {
-        disableItem("backBtn10");
-        disableItem("backBtn30");
-        disableItem("backBtnMax");
+    if (!autoplay) {
+        if (enable) {
+            enableItem("backBtn10");
+            enableItem("backBtn30");
+            enableItem("backBtnMax");
+        } else {
+            disableItem("backBtn10");
+            disableItem("backBtn30");
+            disableItem("backBtnMax");
+        }
     }
 }
 
@@ -367,6 +400,82 @@ const toggleInputs = function(enable) {
     }
 }
 
+const getVideoSrc = function(src) {
+    let videoSrc = src;
+    if (validateForm()) {
+        let streamName = getValue('playStream');
+        streamName = encodeURIComponent(streamName);
+        videoSrc = getValue("urlServer") + '/' + streamName + '/' + streamName + '.m3u8';
+        let key = getValue('key');
+        let token = getValue("token");
+        if (key.length > 0 && token.length > 0) {
+            videoSrc += "?" + key + "=" + token;
+        }
+    }
+    setValue("fullLink", videoSrc);
+    return videoSrc;
+}
+
+const displayPermalink = function(src) {
+    if (!autoplay) {
+        const permalinkId = "permalink";
+        let videoSrc = encodeURIComponent(src);
+        let linkObject = document.getElementById(permalinkId);
+        let href = window.location.href.split("?")[0] + "?version=" + videojsVersion + "&src=" + videoSrc;
+        linkObject.href = href;
+        showItem(permalinkId);
+    }
+}
+
+const hideAllToAutoplay = function() {
+    hideItem("header");
+    hideItem("notifyFlash");
+    hideItem("fieldset");
+    hideItem("stats");
+}
+
+const displayCommonItems = function() {
+    setValue("urlServer", getHLSUrl());
+    hideItem("permalink");
+    enableItem("applyBtn");
+    setText("applyBtn", "Play");
+}
+
+const setUpPlayerItem = function(fillPage) {
+    let videoContainer = document.getElementById('videoContainer');
+    let playerPage = document.getElementById('playerPage');
+
+    if (fillPage) {
+        playerPage.classList.remove("container");
+        videoContainer.style.marginTop = "0px";
+        videoContainer.style.width = "100vw";
+        videoContainer.style.height = "100vh";
+        videoContainer.style.maxWidth = "available";
+        videoContainer.style.maxHeight = "available";
+    } else {
+        videoContainer.style.maxWidth = "852px";
+        videoContainer.style.maxHeight = "480px";
+    }
+}
+
+const enablePlaybackStats = function() {
+    if (!autoplay && !playbackStats) {
+        playbackStats = PlaybackStats(STATS_INTERVAL);
+    }
+}
+
+const startPlaybackStats = function() {
+    if (!autoplay && playbackStats) {
+        playbackStats.start();
+    }
+}
+
+const stopPlaybackStats = function() {
+    if (!autoplay && playbackStats) {
+        playbackStats.stop();
+    }
+}
+
 const PlaybackStats = function(interval) {
     const playbackStats = {
         interval: interval || STATS_INTERVAL,
@@ -374,7 +483,6 @@ const PlaybackStats = function(interval) {
         stats: null,
         start: function() {
             let video = getActualVideoTag();
-
             playbackStats.stop();
             stats = HTML5Stats(video);
             playbackStats.timer = setInterval(playbackStats.displayStats, playbackStats.interval);

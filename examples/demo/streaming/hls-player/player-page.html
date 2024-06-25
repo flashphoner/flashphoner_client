@@ -28,9 +28,9 @@
                 </div>
 
                 <div class="row" style="margin-top:10px">
-                    <div class="form-group">
+                    <div id="authForm" class="form-group">
                         <label class="control-label col-sm-1 fp-buttonVerticalAlign  text-left"
-                               for="playStream">Auth</label>
+                               for="key">Auth</label>
 
                         <div class="col-sm-12">
                             <div class="col-sm-4 nopadding">
@@ -43,6 +43,24 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div id="linkForm" class="form-group">
+                        <label class="control-label col-sm-12 fp-buttonVerticalAlign  text-left"
+                               for="fullLink">Or set a full HLS stream URL</label>
+
+                        <div class="col-sm-12">
+                            <input type="text" class="form-control" id="fullLink" placeholder="Full HLS link"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div class="col-sm-12 text-center">
+                        <a id="permalink" href="#">Permalink</a>
+                    </div>
+                </div>
+
                 <div class="row" style="margin-top: 20px">
                     <div class="col-sm-4 text-left">
                         <div id="llHlsMode" style="display: none;">
@@ -69,7 +87,7 @@
         </div>
     </div>
     <div class="row">
-        <div id="videoContainer" class="col-sm-12 text-center" style="margin-top: 20px; max-width: 852px; width: available; max-height: 480px; height: 56.25vw">
+        <div id="videoContainer" style="margin-top: 20px; width: available; height: 56.25vw">
             <video id="remoteVideo"
                    width="100%"
                    height="100%"

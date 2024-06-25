@@ -1,6 +1,8 @@
 const Browser = Flashphoner.Browser;
 const STATS_INTERVAL = 1000;
 let remoteVideo = null;
+let playSrc = getUrlParam("src");
+let autoplay = eval(getUrlParam("autoplay")) || false;
 let playbackStats = null;
 
 const loadPlayerPage = function() {
@@ -21,19 +23,33 @@ const loadPage = function(page, containerId, onLoad) {
 }
 
 const initPage = function() {
-    setText("header", "HLS Native Player Minimal");
-    setValue("urlServer", getHLSUrl());
-    setText("applyBtn", "Play");
-    setHandler("applyBtn", "click", playBtnClick);
-    remoteVideo = document.getElementById('remoteVideo');
-    remoteVideo.style ="background-color: lightgrey;";
-    if (Browser.isSafariWebRTC() && Browser.isiOS()) {
-        // iOS hack when using standard controls to leave fullscreen mode
-        setWebkitFullscreenHandlers(remoteVideo);
+    if (playSrc) {
+        setValue("fullLink", decodeURIComponent(playSrc));
+    } else if (autoplay) {
+        console.warn("No HLS URL set, autoplay disabled");
+        autoplay = false;
     }
+    remoteVideo = document.getElementById('remoteVideo');
     if (remoteVideo.canPlayType('application/vnd.apple.mpegurl') && Browser.isSafariWebRTC()) {
-        enableItem("applyBtn");
-        playbackStats = PlaybackStats(STATS_INTERVAL);
+        console.log("Using Native HLS player");
+        if (autoplay) {
+            // There should not be any visible item on the page unless player
+            hideAllToAutoplay();
+            // The player should use all available page width
+            setUpPlayerItem(true);
+            // The player should be muted to automatically start playback
+            initVideoPlayer(remoteVideo, true);
+            playBtnClick();
+        } else {
+            setText("header", "HLS Native Player Minimal");
+            displayCommonItems();
+            setUpButtons();
+            enablePlaybackStats();
+            // The player should have a maximum fixed size
+            setUpPlayerItem(false);
+            // The player can be unmuted because user should click Play button
+            initVideoPlayer(remoteVideo, false);
+        }
     } else {
         setText("notifyFlash", "Your browser doesn't support native HLS playback");
         disableItem("applyBtn");
@@ -42,21 +58,18 @@ const initPage = function() {
 }
 
 const playBtnClick = function() {
-    if (validateForm()) {
-        let streamName = getValue("playStream");
-        streamName = encodeURIComponent(streamName);
-        let videoSrc = getValue("urlServer") + '/' + streamName + '/' + streamName + '.m3u8';
-        let key = getValue('key');
-        let token = getValue("token");
-        if (key.length > 0 && token.length > 0) {
-            videoSrc += "?" + key + "=" + token;
-        }
-        remoteVideo.src = videoSrc;
-        remoteVideo.addEventListener('loadedmetadata', function() {
+    let videoSrc = getVideoSrc(getValue("fullLink"));
+    if (videoSrc) {
+        remoteVideo.onloadedmetadata = () => {
             console.log("Play native HLS");
             remoteVideo.play();
             onStarted();
-        });
+        };
+        remoteVideo.onplaying = () => {
+            console.log("playing event fired");
+            displayPermalink(videoSrc);
+        };
+        remoteVideo.src = videoSrc;
     }
 }
 
@@ -74,20 +87,25 @@ const stopBtnClick = function() {
 
 
 const onStarted = function() {
-    toggleInputs(false);
-    enableItem("applyBtn");
-    setText("applyBtn", "Stop");
-    setHandler("applyBtn", "click", stopBtnClick, playBtnClick);
-    playbackStats.start();
+    if (!autoplay) {
+        toggleInputs(false);
+        enableItem("applyBtn");
+        hideItem("permalink");
+        setText("applyBtn", "Stop");
+        setHandler("applyBtn", "click", stopBtnClick, playBtnClick);
+        startPlaybackStats();
+    }
 }
 
 
 const onStopped = function() {
-    toggleInputs(true);
-    enableItem("applyBtn");
-    setText("applyBtn", "Play");
-    setHandler("applyBtn", "click", playBtnClick, stopBtnClick);
-    playbackStats.stop();
+    if (!autoplay) {
+        toggleInputs(true);
+        enableItem("applyBtn");
+        setText("applyBtn", "Play");
+        setHandler("applyBtn", "click", playBtnClick, stopBtnClick);
+        stopPlaybackStats();
+    }
 }
 
 
@@ -132,6 +150,21 @@ const removeHighlight = function(input) {
     }
 }
 
+const initVideoPlayer = function(video, muted) {
+    if (video) {
+        video.style.backgroundColor = "black";
+        video.muted = muted;
+        if (Browser.isiOS()) {
+            // iOS hack when using standard controls to leave fullscreen mode
+            setWebkitFullscreenHandlers(video);
+        }
+    }
+}
+
+const setUpButtons = function() {
+    setHandler("applyBtn", "click", playBtnClick);
+}
+
 const toggleInputs = function(enable) {
     if (enable) {
         enableItem("urlServer");
@@ -145,6 +178,82 @@ const toggleInputs = function(enable) {
         disableItem("key");
         disableItem("token");
         disableItem("player");
+    }
+}
+
+const getVideoSrc = function(src) {
+    let videoSrc = src;
+    if (validateForm()) {
+        let streamName = getValue('playStream');
+        streamName = encodeURIComponent(streamName);
+        videoSrc = getValue("urlServer") + '/' + streamName + '/' + streamName + '.m3u8';
+        let key = getValue('key');
+        let token = getValue("token");
+        if (key.length > 0 && token.length > 0) {
+            videoSrc += "?" + key + "=" + token;
+        }
+    }
+    setValue("fullLink", videoSrc);
+    return videoSrc;
+}
+
+const displayPermalink = function(src) {
+    if (!autoplay) {
+        const permalinkId = "permalink";
+        let videoSrc = encodeURIComponent(src);
+        let linkObject = document.getElementById(permalinkId);
+        let href = window.location.href.split("?")[0] + "?src=" + videoSrc;
+        linkObject.href = href;
+        showItem(permalinkId);
+    }
+}
+
+const hideAllToAutoplay = function() {
+    hideItem("header");
+    hideItem("notifyFlash");
+    hideItem("fieldset");
+    hideItem("stats");
+}
+
+const displayCommonItems = function() {
+    setValue("urlServer", getHLSUrl());
+    hideItem("permalink");
+    enableItem("applyBtn");
+    setText("applyBtn", "Play");
+}
+
+const setUpPlayerItem = function(fillPage) {
+    let videoContainer = document.getElementById('videoContainer');
+    let playerPage = document.getElementById('playerPage');
+
+    if (fillPage) {
+        playerPage.classList.remove("container");
+        videoContainer.style.marginTop = "0px";
+        videoContainer.style.width = "100vw";
+        videoContainer.style.height = "100vh";
+        videoContainer.style.maxWidth = "available";
+        videoContainer.style.maxHeight = "available";
+    } else {
+        videoContainer.style.maxWidth = "852px";
+        videoContainer.style.maxHeight = "480px";
+    }
+}
+
+const enablePlaybackStats = function() {
+    if (!autoplay && !playbackStats) {
+        playbackStats = PlaybackStats(STATS_INTERVAL);
+    }
+}
+
+const startPlaybackStats = function() {
+    if (!autoplay && playbackStats) {
+        playbackStats.start();
+    }
+}
+
+const stopPlaybackStats = function() {
+    if (!autoplay && playbackStats) {
+        playbackStats.stop();
     }
 }
 
