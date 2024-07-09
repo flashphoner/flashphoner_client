@@ -55,22 +55,40 @@
                     </div>
                 </div>
 
-                <div class="row" style="margin-top:10px">
+                <div class="row" style="margin-top: 10px">
+                    <div class="col-sm-4 text-left" id="llHlsMode" style="display: none;">
+                        <input id="llHlsEnabled" class="form-check-input" type="checkbox" value="">
+                        <label class="form-check-label" for="llHlsEnabled">Low latency HLS</label>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 5px">
                     <div class="col-sm-12 text-center">
                         <a id="permalink" href="#">Permalink</a>
                     </div>
                 </div>
+                <div class="row" style="margin-top: 10px">
+                    <div class="col-sm-12 text-center">
+                        <button id="applyBtn" type="button" class="btn btn-default">Play</button>
+                    </div>
+                </div>
 
-                <div class="row" style="margin-top: 20px">
-                    <div class="col-sm-4 text-left">
-                        <div id="llHlsMode" style="display: none;">
-                            <input id="llHlsEnabled" class="form-check-input" type="checkbox" value="">
-                            <label class="form-check-label" for="llHlsEnabled">Low latency HLS</label>
+                <div class="row" style="margin-top: 10px">
+                    <div class="col-sm-12" id="quality" style="display: none;">
+                        <div class="col-sm-4 text-right">
+                            <label class="form-check-label" for="qualityBtns">Quality</label>
+                        </div>
+                        <div class="col-sm-8 text-center">
+                            <div class="input-group-btn" id="qualityBtns">
+                            </div>
                         </div>
                     </div>
-                    <div class="col-sm-5">
-                        <div id="backward" style="display: none;">
-                            <label class="form-check-label text-right" for="backBtnMax">&lt;&lt; seconds</label>
+                </div>
+                <div class="row" style="margin-top: 10px">
+                    <div class="col-sm-12" id="backward" style="display: none;">
+                        <div class="col-sm-4 text-right">
+                            <label class="form-check-label" for="backBtnMax">Rewind back</label>
+                        </div>
+                        <div class="col-sm-8 text-center">
                             <div class="input-group-btn">
                                 <button id="backBtnMax" type="button" class="btn btn-default">Max</button>
                                 <button id="backBtn30" type="button" class="btn btn-default">30</button>
@@ -78,9 +96,6 @@
                                 <button id="liveBtn" type="button" class="btn btn-default">Live</button>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-sm-3 text-right">
-                        <button id="applyBtn" type="button" class="btn btn-default">Play</button>
                     </div>
                 </div>
             </fieldset>

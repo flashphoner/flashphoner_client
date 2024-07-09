@@ -4,6 +4,7 @@ const { v1: uuid_v1 } = require('uuid');
 const constants = require("./constants");
 const util = require('./util');
 const LoggerObject = require('./util').logger;
+const clientInfo = require('./client-info');
 const Promise = require('promise-polyfill');
 const KalmanFilter = require('kalmanjs');
 const browserDetails = require('webrtc-adapter').default.browserDetails;
@@ -11,6 +12,7 @@ const LOG_PREFIX = "core";
 var coreLogger;
 var loggerConf = {push: false, severity: "INFO"};
 var isUsingTemasysPlugin = false;
+var clientUAData;
 
 /**
  * @namespace Flashphoner
@@ -62,7 +64,7 @@ var disableConnectionQualityCalculation;
  * @throws {Error} Error if none of MediaProviders available
  * @memberof Flashphoner
  */
-var init = function (options) {
+var init = async function (options) {
     if (!initialized) {
         if (!options) {
             options = {};
@@ -190,8 +192,12 @@ var init = function (options) {
         if (!waitingTemasys && options.mediaProvidersReadyCallback) {
             options.mediaProvidersReadyCallback(Object.keys(MediaProvider));
         }
+
         coreLogger.info(LOG_PREFIX, "Initialized");
         initialized = true;
+
+        clientUAData = await clientInfo.getClientInfo(window.navigator);
+        coreLogger.info(LOG_PREFIX, "Client system data: " + JSON.stringify(clientUAData));
     }
 };
 
@@ -572,13 +578,16 @@ var createSession = function (options) {
                 appKey: appKey,
                 mediaProviders: Object.keys(MediaProvider),
                 keepAlive: keepAlive,
-                authToken:authToken,
+                authToken: authToken,
                 clientVersion: "2.0",
                 clientOSVersion: window.navigator.appVersion,
                 clientBrowserVersion: window.navigator.userAgent,
                 msePacketizationVersion: 2,
                 custom: options.custom
             };
+            if (clientUAData) {
+                cConfig.clientInfo = clientUAData;
+            }
             if (sipConfig) {
                 util.copyObjectPropsToAnotherObject(sipConfig, cConfig);
             }
@@ -1009,6 +1018,8 @@ var createSession = function (options) {
                         stripCodecs: stripCodecs
                     });
                 }).then(function (offer) {
+                    // Get local media info to send in publishStream message
+                    let localMediaInfo = collectLocalMediaInfo(MediaProvider[mediaProvider], localDisplay);
                     send("call", {
                         callId: id_,
                         incoming: false,
@@ -1021,7 +1032,8 @@ var createSession = function (options) {
                         caller: login,
                         callee: callee_,
                         custom: options.custom,
-                        visibleName: visibleName_
+                        visibleName: visibleName_,
+                        localMediaInfo: localMediaInfo
                     });
                 });
             }).catch(function (error) {
@@ -1155,6 +1167,8 @@ var createSession = function (options) {
                     });
                 }).then(function (sdp) {
                     if (status_ != CALL_STATUS.FINISH && status_ != CALL_STATUS.FAILED) {
+                        // Get local media info to send in publishStream message
+                        let localMediaInfo = collectLocalMediaInfo(MediaProvider[mediaProvider], localDisplay);
                         send("answer", {
                             callId: id_,
                             incoming: true,
@@ -1166,7 +1180,8 @@ var createSession = function (options) {
                             sipSDP: sipSDP,
                             caller: cConfig.login,
                             callee: callee_,
-                            custom: options.custom
+                            custom: options.custom,
+                            localMediaInfo: localMediaInfo
                         });
                     } else {
                         hangup();
@@ -2006,6 +2021,7 @@ var createSession = function (options) {
                     }
                     return;
                 }
+
                 //create mediaProvider connection
                 MediaProvider[mediaProvider].createConnection({
                     id: id_,
@@ -2028,6 +2044,8 @@ var createSession = function (options) {
                     });
                 }).then(function (offer) {
                     logger.debug(LOG_PREFIX, "Offer SDP:\n" + offer.sdp);
+                    // Get local media info to send in publishStream message
+                    let localMediaInfo = collectLocalMediaInfo(MediaProvider[mediaProvider], display);
                     //publish stream with offer sdp to server
                     send("publishStream", {
                         mediaSessionId: id_,
@@ -2046,7 +2064,8 @@ var createSession = function (options) {
                         rtmpUrl: rtmpUrl,
                         constraints: constraints,
                         transport: transportType,
-                        cvoExtension: cvoExtension
+                        cvoExtension: cvoExtension,
+                        localMediaInfo: localMediaInfo
                     });
                 });
             }).catch(function (error) {
@@ -2855,6 +2874,65 @@ var createSession = function (options) {
     var getLogger = function () {
         return sessionLogger;
     };
+
+    const collectLocalMediaInfo = function (mediaProvider, display) {
+        // Get devices available
+        let videoCams = mediaProvider.videoCams || [];
+        let mics = mediaProvider.mics || [];
+
+        if (videoCams.length) {
+            logger.info(LOG_PREFIX, "Video inputs available: " + JSON.stringify(videoCams));
+        }
+        if (mics.length) {
+            logger.info(LOG_PREFIX, "Audio inputs available: " + JSON.stringify(mics));
+        }
+
+        // Get track labels to identify publishing device
+        let audioTracks = [];
+        let videoTracks = [];
+        let localVideo;
+        if (mediaProvider.getCacheInstance) {
+            localVideo = mediaProvider.getCacheInstance(display);
+        }
+        if (!localVideo && mediaProvider.getVideoElement) {
+            localVideo = mediaProvider.getVideoElement(display);
+        }
+        if (localVideo) {
+            localVideo.srcObject.getAudioTracks().forEach((track) => {
+                let device = track.label;
+                if (device === "MediaStreamAudioDestinationNode" && mediaProvider.getAudioSourceDevice) {
+                    device = mediaProvider.getAudioSourceDevice();
+                }
+                audioTracks.push({
+                    trackId: track.id,
+                    device: device
+                });
+            });
+            localVideo.srcObject.getVideoTracks().forEach((track) => {
+                videoTracks.push({
+                    trackId: track.id,
+                    device: track.label
+                });
+            });
+        }
+        if (videoTracks.length) {
+            logger.info(LOG_PREFIX, "Video tracks captured: " + JSON.stringify(videoTracks));
+        }
+        if (audioTracks.length) {
+            logger.info(LOG_PREFIX, "Audio tracks captured: " + JSON.stringify(audioTracks));
+        }
+
+        return {
+            devices: {
+                video: videoCams,
+                audio: mics
+            },
+            tracks: {
+                video: videoTracks,
+                audio: audioTracks
+            }
+        };
+    }
 
     //export Session
     session.id = id;

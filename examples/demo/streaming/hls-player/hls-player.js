@@ -7,12 +7,19 @@ const LIVE_THRESHOLD = 5;
 const LIVE_TOLERANCE = 5;
 const LIVE_UI_INTERVAL = 1000;
 const STATS_INTERVAL = 1000;
+const QUALITY_COLORS = {
+    NONE: "",
+    AVAILABLE: "black",
+    SELECTED: "blue"
+};
+const QUALITY_AUTO = "Auto";
 let player = null;
 let liveUITimer = null;
 let videojsVersion = getUrlParam("version");
 let playSrc = getUrlParam("src");
 let autoplay = eval(getUrlParam("autoplay")) || false;
 let playbackStats = null;
+let qualityLevels = [];
 
 const loadPlayerPage = function() {
     if (videojsVersion) {
@@ -44,27 +51,50 @@ const loadPlayerPage = function() {
     }
 }
 
-const onVideojsBtnClick = function () {
+const onVideojsBtnClick = function() {
     loadVideoJS(getValue("videojsInput"));
 }
 
-const loadVideoJS = function (version) {
+const loadVideoJS = function(version) {
     if (version) {
         videojsVersion = version;
         let playerPage = document.getElementById("playerPage");
         loadFile(version + "/video.js", "text/javascript").then( data  => {
             console.log("HLS library loaded successfully", data);
-            loadFile(version + "/video-js.css", "stylesheet").then ( data => {
-                console.log("HLS library stylesheet loaded successfully", data);
-                hideItem("videojsInputForm");
-                loadPage("player-page.html", "playerPage", initPage);
-            }).catch( err => {
-                playerPage.innerHTML = "Can't load VideoJS library stylesheet";
-                playerPage.setAttribute("class", "text-danger");
-                console.error(err);
-            })
+            loadStyles(version, playerPage);
         }).catch( err => {
             setText("videojsError", "Can't load VideoJS library");
+            console.error(err);
+        });
+    }
+}
+
+const loadStyles = function(version, playerPage) {
+    if (version) {
+        loadFile(version + "/video-js.css", "stylesheet").then ( data => {
+            console.log("HLS library stylesheet loaded successfully", data);
+            if (version === VIDEOJS_VERSION_TYPE.VIDEOJS7) {
+                loadQualityPlugin(version, playerPage);
+            } else {
+                hideItem("videojsInputForm");
+                loadPage("player-page.html", "playerPage", initPage);
+            }
+        }).catch( err => {
+            playerPage.innerHTML = "Can't load VideoJS library stylesheet";
+            playerPage.setAttribute("class", "text-danger");
+            console.error(err);
+        });
+    }
+}
+
+const loadQualityPlugin = function(version, playerPage) {
+    if (version) {
+        loadFile(version + "/videojs-contrib-quality-levels.js", "text/javascript").then( data => {
+            console.log("HLS quality levels plugin loaded successfully", data);
+            hideItem("videojsInputForm");
+            loadPage("player-page.html", "playerPage", initPage);
+        }).catch( err => {
+            setText("videojsError", "Can't load VideoJS quality levels plugin");
             console.error(err);
         });
     }
@@ -183,6 +213,8 @@ const playBtnClick = function() {
                     stopLiveUITimer();
                 }
             }
+            initQualityLevels(player);
+            displayQualitySwitch();
         });
         player.src({
             src: videoSrc,
@@ -253,6 +285,7 @@ const onStarted = function() {
         setText("applyBtn", "Stop");
         setHandler("applyBtn", "click", stopBtnClick, playBtnClick);
         startPlaybackStats();
+        hideItem("quality");
     }
 }
 
@@ -265,6 +298,8 @@ const onStopped = function() {
         setText("applyBtn", "Play");
         setHandler("applyBtn", "click", playBtnClick, stopBtnClick);
         stopPlaybackStats();
+        hideItem("quality");
+        disposeQualityLevels();
     }
     if(!document.getElementById('remoteVideo')) {
         createRemoteVideo(document.getElementById('videoContainer'));
@@ -340,7 +375,12 @@ const initVideoJsPlayer = function(video, muted) {
                 liveTolerance: LIVE_TOLERANCE
             },
             fill: true,
-            muted: muted
+            muted: muted,
+            html5: {
+                vhs: {
+                    limitRenditionByPlayerDimensions: false
+                }
+            }
         });
         console.log("Using VideoJs " + videojs.VERSION);
         if (Browser.isSafariWebRTC() && Browser.isiOS()) {
@@ -424,6 +464,12 @@ const displayPermalink = function(src) {
         let href = window.location.href.split("?")[0] + "?version=" + videojsVersion + "&src=" + videoSrc;
         linkObject.href = href;
         showItem(permalinkId);
+    }
+}
+
+const displayQualitySwitch = function() {
+    if (!autoplay && qualityLevels.length) {
+        showItem("quality")
     }
 }
 
@@ -520,4 +566,81 @@ const PlaybackStats = function(interval) {
         }
     };
     return playbackStats;
+}
+
+const initQualityLevels = function(player) {
+    if (player && !qualityLevels.length) {
+        let playerQualityLevels = player.qualityLevels();
+        if (playerQualityLevels) {
+            let qualityDiv = document.getElementById("qualityBtns");
+            let qualityLevel;
+            for (let i = 0; i < playerQualityLevels.length; i++) {
+                qualityLevel = QualityLevel(playerQualityLevels, playerQualityLevels[i].height, i, qualityDiv);
+                qualityLevels.push(qualityLevel);
+            }
+            if (qualityLevels.length) {
+                qualityLevel = QualityLevel(playerQualityLevels, QUALITY_AUTO, -1, qualityDiv);
+                qualityLevels.push(qualityLevel);
+            }
+        }
+    }
+}
+
+const disposeQualityLevels = function() {
+    qualityLevels.forEach(level => {
+        if (level.button) {
+            level.button.remove();
+        }
+    });
+    qualityLevels = [];
+}
+
+const qualityBtnClick = function(button, playerQualityLevels, index) {
+    if (playerQualityLevels && playerQualityLevels.length) {
+        let currentIndex = playerQualityLevels.selectedIndex_;
+        for (let i = 0; i < playerQualityLevels.length; i++) {
+            let qualityLevel = playerQualityLevels[i];
+            if (index === -1 || i === index) {
+                qualityLevel.enabled = true;
+            } else if (i === index) {
+                qualityLevel.enabled = true;
+                currentIndex = index;
+            } else {
+                qualityLevel.enabled = false;
+            }
+        }
+        playerQualityLevels.selectedIndex_ = currentIndex;
+        playerQualityLevels.trigger({ type: 'change', selectedIndex: currentIndex });
+    }
+    button.style.color = QUALITY_COLORS.SELECTED;
+    qualityLevels.forEach(item => {
+        if (item.button.id !== button.id) {
+            item.button.style.color = QUALITY_COLORS.AVAILABLE
+        }
+    });
+}
+
+const QualityLevel = function(object, levelId, index, btnParent) {
+    const btnId = "qualityBtn";
+    let button = document.createElement("button");
+    if (levelId === QUALITY_AUTO && index === -1) {
+        button.id = btnId + QUALITY_AUTO;
+        button.innerHTML = QUALITY_AUTO;
+    } else {
+        button.id = btnId + index;
+        button.innerHTML = levelId;
+    }
+    button.type = "button";
+    button.className = "btn btn-default";
+    button.style.color = QUALITY_COLORS.AVAILABLE;
+    button.onclick = (event) => {
+        qualityBtnClick(button, object, index);
+    };
+    btnParent.appendChild(button);
+    const qualityLevel = {
+        level: levelId,
+        index: index,
+        button: button
+    };
+    return qualityLevel;
 }

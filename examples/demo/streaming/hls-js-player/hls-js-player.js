@@ -1,11 +1,18 @@
 const Browser = Flashphoner.Browser;
 const STATS_INTERVAL = 1000;
+const QUALITY_COLORS = {
+    NONE: "",
+    AVAILABLE: "black",
+    SELECTED: "blue"
+};
+const QUALITY_AUTO = "Auto";
 let remoteVideo = null;
 let hlsPlayer = null;
 let playSrc = getUrlParam("src");
 let autoplay = eval(getUrlParam("autoplay")) || false;
 let llHlsEnabled = eval(getUrlParam("llhls")) || false;
 let playbackStats = null;
+let qualityLevels = [];
 
 const loadPlayerPage = function() {
     loadPage("../hls-player/player-page.html", "playerPage", initPage );
@@ -72,10 +79,12 @@ const playBtnClick = function() {
         hlsPlayer.on(Hls.Events.MANIFEST_PARSED, function() {
             console.log("Play with HLS.js");
             remoteVideo.play();
+            initQualityLevels(hlsPlayer);
         });
         remoteVideo.onplaying = () => {
             console.log("playing event fired");
             displayPermalink(videoSrc);
+            displayQualitySwitch();
         }
         hlsPlayer.loadSource(videoSrc);
         hlsPlayer.attachMedia(remoteVideo);
@@ -91,7 +100,7 @@ const getHlsConfig = function(llHlsEnabled) {
         backBufferLength: 90,
         manifestLoadingTimeOut: 15000
     };
-    console.log("Low Latency HLS: "+llHlsEnabled)
+    console.log("Low Latency HLS: " + llHlsEnabled)
     if(llHlsEnabled) {
         // Here we configure HLS.JS for lower latency
         config = {
@@ -146,6 +155,8 @@ function onStopped() {
         setText("applyBtn", "Play");
         setHandler("applyBtn", "click", playBtnClick, stopBtnClick);
         stopPlaybackStats();
+        hideItem("quality");
+        disposeQualityLevels();
     }
 }
 
@@ -248,6 +259,12 @@ const displayPermalink = function(src) {
     }
 }
 
+const displayQualitySwitch = function() {
+    if (!autoplay && qualityLevels.length) {
+        showItem("quality")
+    }
+}
+
 const hideAllToAutoplay = function() {
     hideItem("header");
     hideItem("notifyFlash");
@@ -342,4 +359,65 @@ const PlaybackStats = function(interval) {
         }
     };
     return playbackStats;
+}
+
+const initQualityLevels = function(player) {
+    if (player) {
+        let qualityDiv = document.getElementById("qualityBtns");
+        let qualityLevel;
+        for (let i = 0; i < player.levels.length; i++) {
+            qualityLevel = QualityLevel(player, player.levels[i].height, i, qualityDiv);
+            qualityLevels.push(qualityLevel);
+        }
+        if (qualityLevels.length) {
+            qualityLevel = QualityLevel(player, QUALITY_AUTO, -1, qualityDiv);
+            qualityLevels.push(qualityLevel);
+        }
+    }
+}
+
+const disposeQualityLevels = function() {
+    qualityLevels.forEach(level => {
+        if (level.button) {
+            level.button.remove();
+        }
+    });
+    qualityLevels = [];
+}
+
+const qualityBtnClick = function(button, player, index) {
+    if (player) {
+        player.currentLevel = index;
+    }
+    button.style.color = QUALITY_COLORS.SELECTED;
+    qualityLevels.forEach(item => {
+        if (item.button.id !== button.id) {
+            item.button.style.color = QUALITY_COLORS.AVAILABLE
+        }
+    });
+}
+
+const QualityLevel = function(object, levelId, index, btnParent) {
+    const btnId = "qualityBtn";
+    let button = document.createElement("button");
+    if (levelId === QUALITY_AUTO && index === -1) {
+        button.id = btnId + QUALITY_AUTO;
+        button.innerHTML = QUALITY_AUTO
+    } else {
+        button.id = btnId + index;
+        button.innerHTML = levelId;
+    }
+    button.type = "button";
+    button.className = "btn btn-default";
+    button.style.color = QUALITY_COLORS.AVAILABLE;
+    button.onclick = (event) => {
+        qualityBtnClick(button, object, index);
+    };
+    btnParent.appendChild(button);
+    const qualityLevel = {
+        level: levelId,
+        index: index,
+        button: button
+    };
+    return qualityLevel;
 }

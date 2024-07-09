@@ -19,6 +19,8 @@ var validBrowsers = ["firefox", "chrome", "safari"];
 var videoCams = [];
 // list of presented audio input devices
 var mics = [];
+// current audio source device label
+let audioSourceDevice = "";
 
 var createConnection = function (options) {
     return new Promise(function (resolve, reject) {
@@ -955,10 +957,14 @@ var getMediaAccess = function (constraints, display, disableConstraintsNormaliza
                 // WCS-2933, fix mobile streaming issues, gather info about available devices before streaming, but not during
                 listDevices(false).then((devices) => {
                     devices.video.forEach(function (device) {
-                        videoCams.push(device);
+                        if (!videoCams.find((cam) => device.id === cam.id)) {
+                            videoCams.push(device);
+                        }
                     })
                     devices.audio.forEach(function (device) {
-                        mics.push(device);
+                        if (!mics.find((mic) => device.id === mic.id)) {
+                            mics.push(device);
+                        }
                     })
                     navigator.getUserMedia(constraints, function (stream) {
                         loadVideo(display, stream, screenShare, requestAudioConstraints, resolve, constraints, useCanvas);
@@ -1188,6 +1194,7 @@ var createGainNode = function (stream) {
     source.connect(gainNode);
     gainNode.connect(destination);
     var sourceAudioTrack = stream.getAudioTracks()[0];
+    audioSourceDevice = sourceAudioTrack.label;
     gainNode.sourceAudioTrack = sourceAudioTrack;
     gainNode.release = function () {
         this.sourceAudioTrack.stop();
@@ -1197,6 +1204,10 @@ var createGainNode = function (stream) {
     stream.removeTrack(sourceAudioTrack);
     return gainNode;
 };
+
+const getAudioSourceDevice = function () {
+    return audioSourceDevice;
+}
 
 //Fix to set screen resolution for screen sharing in Firefox
 var setScreenResolution = function (video, stream, constraints) {
@@ -1312,6 +1323,22 @@ function getCacheInstance(display) {
             return display.children[i];
         }
     }
+}
+
+function getVideoElement(display) {
+    if (display) {
+        for (const child of display.children) {
+            if (child.tagName.toLowerCase() === "video") {
+                return child;
+            } else {
+                let grandchild = getVideoElement(child);
+                if (grandchild) {
+                    return grandchild;
+                }
+            }
+        }
+    }
+    return null;
 }
 
 function createVideoElement(useControls = false) {
@@ -1440,8 +1467,8 @@ var listDevices = function (labels, kind, deviceConstraints) {
                     return;
                 }
                 navigator.getUserMedia(constraints, function (stream) {
-                    navigator.mediaDevices.enumerateDevices().then(function (devicesWithLabales) {
-                        resolve(getList(devicesWithLabales));
+                    navigator.mediaDevices.enumerateDevices().then(function (devicesWithLabels) {
+                        resolve(getList(devicesWithLabels));
                         stream.getTracks().forEach(function (track) {
                             track.stop();
                         });
@@ -1581,5 +1608,10 @@ module.exports = {
         logger = configuration.logger;
         createMicGainNode = (typeof configuration.createMicGainNode !== 'undefined') ? configuration.createMicGainNode : true;
         logger.info(LOG_PREFIX, "Initialized");
-    }
+    },
+    videoCams: videoCams,
+    mics: mics,
+    getAudioSourceDevice: getAudioSourceDevice,
+    getCacheInstance: getCacheInstance,
+    getVideoElement: getVideoElement
 };
