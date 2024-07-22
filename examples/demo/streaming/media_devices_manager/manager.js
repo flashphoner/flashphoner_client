@@ -433,6 +433,7 @@ function publish() {
         stripCodecs: strippedCodecs,
         videoContentHint: contentHint
     }).on(STREAM_STATUS.PUBLISHING, function (stream) {
+        publishConnectionQualityStat.connectionQualityUpdateTimestamp = new Date().valueOf();
         $("#testBtn").prop('disabled', true);
         var video = document.getElementById(stream.id());
         //resize local if resolution is available
@@ -891,33 +892,39 @@ function readyControls() {
 function loadPublishStats() {
     if (publishStream) {
         publishStream.getStats(function (stats) {
-            if (stats && stats.outboundStream) {
-                if (stats.outboundStream.video) {
-                    showStat(stats.outboundStream.video, "outVideoStat");
-                    let vBitrate = (stats.outboundStream.video.bytesSent - videoBytesSent) * 8;
-                    if ($('#outVideoStatBitrate').length == 0) {
-                        let html = "<div>Bitrate: " + "<span id='outVideoStatBitrate' style='font-weight: normal'>" + vBitrate + "</span>" + "</div>";
-                        $("#outVideoStat").append(html);
-                    } else {
-                        $('#outVideoStatBitrate').text(vBitrate);
-                    }
-                    videoBytesSent = stats.outboundStream.video.bytesSent;
+            if (stats) {
+                if (stats.outboundStream) {
+                    if (stats.outboundStream.video) {
+                        showStat(stats.outboundStream.video, "outVideoStat");
+                        let vBitrate = (stats.outboundStream.video.bytesSent - videoBytesSent) * 8;
+                        if ($('#outVideoStatBitrate').length == 0) {
+                            let html = "<div>Bitrate: " + "<span id='outVideoStatBitrate' style='font-weight: normal'>" + vBitrate + "</span>" + "</div>";
+                            $("#outVideoStat").append(html);
+                        } else {
+                            $('#outVideoStatBitrate').text(vBitrate);
+                        }
+                        videoBytesSent = stats.outboundStream.video.bytesSent;
 
-                    if(new Date().valueOf() - CONNECTION_QUALITY_UPDATE_TIMEOUT_MS > publishConnectionQualityStat.connectionQualityUpdateTimestamp) {
-                        publishConnectionQualityStat.quality = CONNECTION_QUALITY.UNKNOWN;
+                        if(new Date().valueOf() - CONNECTION_QUALITY_UPDATE_TIMEOUT_MS > publishConnectionQualityStat.connectionQualityUpdateTimestamp) {
+                            publishConnectionQualityStat.quality = CONNECTION_QUALITY.UNKNOWN;
+                        }
                     }
+
+                    if (stats.outboundStream.audio) {
+                        showStat(stats.outboundStream.audio, "outAudioStat");
+                        let aBitrate = (stats.outboundStream.audio.bytesSent - audioBytesSent) * 8;
+                        if ($('#outAudioStatBitrate').length == 0) {
+                            let html = "<div>Bitrate: " + "<span id='outAudioStatBitrate' style='font-weight: normal'>" + aBitrate + "</span>" + "</div>";
+                            $("#outAudioStat").append(html);
+                        } else {
+                            $('#outAudioStatBitrate').text(aBitrate);
+                        }
+                        audioBytesSent = stats.outboundStream.audio.bytesSent;
+                    }
+
                 }
-
-                if (stats.outboundStream.audio) {
-                    showStat(stats.outboundStream.audio, "outAudioStat");
-                    let aBitrate = (stats.outboundStream.audio.bytesSent - audioBytesSent) * 8;
-                    if ($('#outAudioStatBitrate').length == 0) {
-                        let html = "<div>Bitrate: " + "<span id='outAudioStatBitrate' style='font-weight: normal'>" + aBitrate + "</span>" + "</div>";
-                        $("#outAudioStat").append(html);
-                    } else {
-                        $('#outAudioStatBitrate').text(aBitrate);
-                    }
-                    audioBytesSent = stats.outboundStream.audio.bytesSent;
+                if (stats.otherStats) {
+                    showStat(stats.otherStats, "outConnectionStat");
                 }
             }
             if (publishConnectionQualityStat.quality !== undefined) {
@@ -931,47 +938,52 @@ function loadPublishStats() {
 function loadPlayStats() {
     if (previewStream) {
         previewStream.getStats(function (stats) {
-            if (stats && stats.inboundStream) {
-                if (stats.inboundStream.video) {
-                    showStat(stats.inboundStream.video, "inVideoStat");
-                    let vBitrate = (stats.inboundStream.video.bytesReceived - videoBytesReceived) * 8;
-                    if ($('#inVideoStatBitrate').length == 0) {
-                        let html = "<div>Bitrate: " + "<span id='inVideoStatBitrate' style='font-weight: normal'>" + vBitrate + "</span>" + "</div>";
-                        $("#inVideoStat").append(html);
-                    } else {
-                        $('#inVideoStatBitrate').text(vBitrate);
-                    }
-                    videoBytesReceived = stats.inboundStream.video.bytesReceived;
+            if (stats) {
+                if (stats.inboundStream) {
+                    if (stats.inboundStream.video) {
+                        showStat(stats.inboundStream.video, "inVideoStat");
+                        let vBitrate = (stats.inboundStream.video.bytesReceived - videoBytesReceived) * 8;
+                        if ($('#inVideoStatBitrate').length == 0) {
+                            let html = "<div>Bitrate: " + "<span id='inVideoStatBitrate' style='font-weight: normal'>" + vBitrate + "</span>" + "</div>";
+                            $("#inVideoStat").append(html);
+                        } else {
+                            $('#inVideoStatBitrate').text(vBitrate);
+                        }
+                        videoBytesReceived = stats.inboundStream.video.bytesReceived;
 
-                    if(new Date().valueOf() - CONNECTION_QUALITY_UPDATE_TIMEOUT_MS > playConnectionQualityStat.connectionQualityUpdateTimestamp) {
-                        playConnectionQualityStat.quality = CONNECTION_QUALITY.UNKNOWN;
+                        if (new Date().valueOf() - CONNECTION_QUALITY_UPDATE_TIMEOUT_MS > playConnectionQualityStat.connectionQualityUpdateTimestamp) {
+                            playConnectionQualityStat.quality = CONNECTION_QUALITY.UNKNOWN;
+                        }
                     }
-                }
 
-                if (stats.inboundStream.audio) {
-                    if (stats.inboundStream.audio.audioLevel) {
-                        // Round audio level to 6 decimal places
-                        stats.inboundStream.audio.audioLevel = stats.inboundStream.audio.audioLevel.toFixed(6);
+                    if (stats.inboundStream.audio) {
+                        if (stats.inboundStream.audio.audioLevel) {
+                            // Round audio level to 6 decimal places
+                            stats.inboundStream.audio.audioLevel = stats.inboundStream.audio.audioLevel.toFixed(6);
+                        }
+                        showStat(stats.inboundStream.audio, "inAudioStat");
+                        let aBitrate = (stats.inboundStream.audio.bytesReceived - audioBytesReceived) * 8;
+                        if ($('#inAudioStatBitrate').length == 0) {
+                            let html = "<div style='font-weight: bold'>Bitrate: " + "<span id='inAudioStatBitrate' style='font-weight: normal'>" + aBitrate + "</span>" + "</div>";
+                            $("#inAudioStat").append(html);
+                        } else {
+                            $('#inAudioStatBitrate').text(aBitrate);
+                        }
+                        audioBytesReceived = stats.inboundStream.audio.bytesReceived;
                     }
-                    showStat(stats.inboundStream.audio, "inAudioStat");
-                    let aBitrate = (stats.inboundStream.audio.bytesReceived - audioBytesReceived) * 8;
-                    if ($('#inAudioStatBitrate').length == 0) {
-                        let html = "<div style='font-weight: bold'>Bitrate: " + "<span id='inAudioStatBitrate' style='font-weight: normal'>" + aBitrate + "</span>" + "</div>";
-                        $("#inAudioStat").append(html);
-                    } else {
-                        $('#inAudioStatBitrate').text(aBitrate);
-                    }
-                    audioBytesReceived = stats.inboundStream.audio.bytesReceived;
                 }
-                if (playConnectionQualityStat.quality !== undefined) {
-                    showStat({"quality": playConnectionQualityStat.quality}, "inConnectionStat");
+                if (stats.otherStats) {
+                    showStat(stats.otherStats, "inConnectionStat");
                 }
+            }
+            if (playConnectionQualityStat.quality !== undefined) {
+                showStat({"quality": playConnectionQualityStat.quality}, "inConnectionStat");
             }
         });
     }
 }
 
-// Helper funcltion to display stats
+// Helper function to display stats
 function showStat(stat, type) {
     Object.keys(stat).forEach(function(key) {
         if (typeof stat[key] !== 'object') {

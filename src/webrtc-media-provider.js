@@ -463,17 +463,24 @@ var createConnection = function (options) {
                             stat.forEach(function (report) {
                                 if (!report.isRemote) {
                                     let mediaType = "";
-                                    if (report.type == 'outbound-rtp') {
+                                    if (report.type === 'outbound-rtp') {
                                         mediaType = getReportMediaType(report);
                                         fillStatObject(result.outboundStream, report, mediaType);
-                                        if (mediaType == 'video') {
+                                        if (mediaType === 'video') {
                                             getVideoSize(result.outboundStream[mediaType], report);
                                         }
-                                    } else if (report.type == 'inbound-rtp') {
+                                    } else if (report.type === 'inbound-rtp') {
                                         mediaType = getReportMediaType(report);
                                         fillStatObject(result.inboundStream, report, mediaType);
-                                        if (mediaType == 'video') {
+                                        if (mediaType === 'video') {
                                             getVideoSize(result.inboundStream[mediaType], report);
+                                        }
+                                    } else if (report.type === 'candidate-pair' && report.state === 'succeeded' && report.nominated) {
+                                        if (report.availableIncomingBitrate) {
+                                            result.otherStats.availableIncomingBitrate = report.availableIncomingBitrate;
+                                        } else if (localVideo && report.availableOutgoingBitrate) {
+                                            // availableOutgoingBitrate is defined for incoming stream too #WCS-4175
+                                            result.otherStats.availableOutgoingBitrate = report.availableOutgoingBitrate;
                                         }
                                     }
                                 }
@@ -532,19 +539,27 @@ var createConnection = function (options) {
             } else {
                logger.debug(LOG_PREFIX, "Can't parse current SDP to detect codec and sampleRate");
             }
-            var codec = util.getCurrentCodecAndSampleRate(sdp, mediaType);
+            let codec = util.getCurrentCodecAndSampleRate(sdp, mediaType);
             obj[mediaType]["codec"] = codec.name;
             obj[mediaType]["codecRate"] = codec.sampleRate;
+            let qualityLimitationDurations;
             Object.keys(report).forEach(function (key) {
                 // Add audioLevel parameter parsing #WCS-3290
                 if (key.startsWith("bytes") ||
                     key.startsWith("packets") ||
                     key.indexOf("Count") != -1 ||
                     key.indexOf("audioLevel") != -1 ||
-                    key == "framesPerSecond") {
+                    key === "framesPerSecond" ||
+                    key === "qualityLimitationReason" ) {
                     obj[mediaType][key] = report[key];
                 }
+                if (key === "qualityLimitationDurations") {
+                    qualityLimitationDurations = report[key];
+                }
             });
+            if (qualityLimitationDurations) {
+                obj[mediaType]["qualityLimitationDurations"] = qualityLimitationDurations[obj[mediaType]["qualityLimitationReason"]];
+            }
         };
 
         var fullScreen = function () {

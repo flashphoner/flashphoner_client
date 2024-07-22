@@ -1,8 +1,11 @@
 const SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
 const STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
 const Browser = Flashphoner.Browser;
+const STAT_INTERVAL = 1000;
 let localVideoScreen;
 let localVideoCamera;
+let screenStats;
+let cameraStats;
 
 const init_page =  function() {
     //init api
@@ -61,6 +64,12 @@ const onStarted = function(cameraStream) {
 }
 
 const onStopped = function(session) {
+    if (cameraStats) {
+        cameraStats.stop();
+    }
+    if (screenStats) {
+        screenStats.stop();
+    }
     setPublishButton("Start", session, null);
     $("#connectBtn").prop('disabled', false);
 }
@@ -152,6 +161,7 @@ const startStreamingScreen = function(session) {
             resizeVideo(event.target);
         });
         setStatus("screen", STREAM_STATUS.PUBLISHING, screenStream);
+        screenStats = StreamStats("screen", screenStream, STAT_INTERVAL);
         startStreamingCamera(session, screenStream);
     }).on(STREAM_STATUS.UNPUBLISHED, function() {
         setStatus("screen", STREAM_STATUS.UNPUBLISHED);
@@ -175,6 +185,7 @@ const startStreamingCamera = function(session, screenStream) {
             resizeVideo(event.target);
         });
         setStatus("camera", STREAM_STATUS.PUBLISHING, cameraStream);
+        cameraStats = StreamStats("camera", cameraStream, STAT_INTERVAL);
         onStarted(cameraStream);
     }).on(STREAM_STATUS.UNPUBLISHED, function() {
         setStatus("camera", STREAM_STATUS.UNPUBLISHED);
@@ -188,7 +199,6 @@ const startStreamingCamera = function(session, screenStream) {
     }).publish();
 }
 
-//show connection or local stream status
 const setStatus = function(type, status, stream) {
     let nameField = $("#"+type+"Name");
     let statusField = $("#"+type+"Status");
@@ -209,6 +219,24 @@ const setStatus = function(type, status, stream) {
             infoField.text(stream.getInfo()).attr("class","text-muted");
         }
     }
+}
+
+const setBitrate = function(type, bitrate) {
+    let bitrateField = $("#" + type + "Bitrate");
+    let text = bitrate;
+    if (bitrate !== "") {
+        text = "Bitrate: " + bitrate;
+    }
+    bitrateField.text(text);
+}
+
+const setAvailableBitrate = function(type, bitrate) {
+    let bitrateField = $("#" + type + "AvailableBitrate");
+    let text = bitrate;
+    if (bitrate !== "") {
+        text = "Available bitrate: " + bitrate;
+    }
+    bitrateField.text(text);
 }
 
 const muteInputs = function() {
@@ -250,7 +278,7 @@ const removeHighlight = function(input) {
     input.closest('.form-group').removeClass("has-error");
 }
 
-function getStreamName(type, url) {
+const getStreamName = function(type, url) {
     let streamName = url.endsWith('/') === false ? url.split('/')[3] : "";
     if (streamName) {
         streamName += "-" + type;
@@ -262,4 +290,44 @@ function getStreamName(type, url) {
         }
     }
     return streamName;
+}
+
+const StreamStats = function(type, stream, interval) {
+    const streamStats = {
+        type: type,
+        timer: null,
+        stream: stream,
+        bytesSent: 0,
+        start: function(interval) {
+            if (!streamStats.timer) {
+                streamStats.timer = setInterval(streamStats.displayStats, interval);
+            }
+        },
+        stop: function() {
+            if (streamStats.timer) {
+                clearInterval(streamStats.timer);
+                streamStats.timer = null;
+            }
+            setBitrate(streamStats.type, "");
+            setAvailableBitrate(streamStats.type, "");
+        },
+        displayStats: function() {
+            if (streamStats.stream) {
+                streamStats.stream.getStats((stats) => {
+                    if (stats) {
+                        if (stats.outboundStream && stats.outboundStream.video) {
+                            let vBitrate = (stats.outboundStream.video.bytesSent - streamStats.bytesSent) * 8;
+                            setBitrate(streamStats.type, vBitrate);
+                            streamStats.bytesSent = stats.outboundStream.video.bytesSent;
+                        }
+                        if (stats.otherStats && stats.otherStats.availableOutgoingBitrate !== undefined) {
+                            setAvailableBitrate(streamStats.type, stats.otherStats.availableOutgoingBitrate);
+                        }
+                    }
+                });
+            }
+        }
+    };
+    streamStats.start(interval);
+    return streamStats;
 }
