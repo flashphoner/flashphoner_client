@@ -48,7 +48,7 @@ var createConnection = function (options) {
         var localVideo;
         //tweak for custom video players #WCS-1511
         var remoteVideo = options.remoteVideo;
-        var switchCamCount = 0;
+        var switchCamIndex = 0;
         var switchMicCount = 0;
         var customStream = options.customStream;
         var currentAudioTrack;
@@ -136,7 +136,7 @@ var createConnection = function (options) {
             if (videoTrack) {
                 videoCams.forEach((cam, index) => {
                    if (videoTrack.label === cam.label) {
-                       switchCamCount = index;
+                       switchCamIndex = index;
                    }
                 });
             }
@@ -615,12 +615,26 @@ var createConnection = function (options) {
                 if (localVideo && localVideo.srcObject && videoCams.length > 1 && !customStream && !screenShare) {
                     connection.getSenders().forEach(function (sender) {
                         if (sender.track.kind === 'audio') return;
-                        switchCamCount = (switchCamCount + 1) % videoCams.length;
                         sender.track.stop();
-                        var cam = (typeof deviceId !== "undefined") ? deviceId : videoCams[switchCamCount].id;
+                        var cameraId;
+                        if (typeof deviceId !== "undefined") {
+                            videoCams.forEach((cam, index) => {
+                                if (deviceId === cam.id) {
+                                    switchCamIndex = index;
+                                }
+                            });
+                            cameraId = deviceId;
+                        } else {
+                            switchCamIndex = (switchCamIndex + 1) % videoCams.length;
+                            cameraId = videoCams[switchCamIndex].id;
+                        }
+                        if (!cameraId) {
+                            logger.error(LOG_PREFIX, "Can't detect camera to switch to");
+                            reject(constants.ERROR_INFO.CAN_NOT_SWITCH_CAM);
+                        }
                         //use the settings that were set during connection initiation
                         var clonedConstraints = Object.assign({}, constraints);
-                        clonedConstraints.video.deviceId = {exact: cam};
+                        clonedConstraints.video.deviceId = {exact: cameraId};
                         clonedConstraints.audio = false;
                         navigator.mediaDevices.getUserMedia(clonedConstraints).then(function (newStream) {
                             var newVideoTrack = newStream.getVideoTracks()[0];
@@ -632,8 +646,8 @@ var createConnection = function (options) {
                             if (localVideo.srcObject.getAudioTracks().length == 0 && audioTrack) {
                                 localVideo.srcObject.addTrack(audioTrack);
                             }
-                            logger.info(LOG_PREFIX, "Switch camera to " + cam);
-                            resolve(cam);
+                            logger.info(LOG_PREFIX, "Switch camera to " + cameraId);
+                            resolve(cameraId);
                         }).catch(function (reason) {
                             logger.error(LOG_PREFIX, reason);
                             reject(reason);

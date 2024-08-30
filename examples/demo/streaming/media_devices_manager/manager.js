@@ -140,6 +140,12 @@ function init_page() {
         $("#notifyFlash").text("Failed to get media devices");
     });
 
+    if (Browser.isiOS() && Browser.isSafariWebRTC()) {
+        document.addEventListener('visibilitychange', () => {
+            onVisibilityChanged();
+        });
+    }
+
     $("#urlServer").val(setURL());
     var streamName = createUUID(4);
     $("#publishStream").val(streamName);
@@ -217,6 +223,7 @@ function onPublishing(stream) {
     }).prop('disabled', false);
     $("#switchBtn").text("Switch").off('click').click(function () {
         stream.switchCam().then(function(id) {
+            console.log("Switched by button to camera " + id);
             $('#videoInput option:selected').prop('selected', false);
             $("#videoInput option[value='"+ id +"']").prop('selected', true);
         }).catch(function(e) {
@@ -270,6 +277,21 @@ function onDisconnected() {
     $('#urlServer').prop('disabled', false);
     onUnpublished();
     onStopped();
+}
+
+function onVisibilityChanged() {
+    if (Browser.isiOS() && Browser.isSafariWebRTC() && document.hidden !== undefined) {
+        // iOS Safari may change camera when rising from the background, use chosen one explicitly
+        if (publishStream && !document.hidden) {
+            publishStream.switchCam($('#videoInput').val()).then(function(id) {
+                console.log("Switched explicitly to camera " + id);
+                $('#videoInput option:selected').prop('selected', false);
+                $("#videoInput option[value='"+ id +"']").prop('selected', true);
+            }).catch(function(e) {
+                console.log("Error " + e);
+            });
+        }
+    }
 }
 
 function connect() {
