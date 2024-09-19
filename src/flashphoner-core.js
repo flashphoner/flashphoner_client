@@ -2897,7 +2897,7 @@ var createSession = function (options) {
         if (!localVideo && mediaProvider.getVideoElement) {
             localVideo = mediaProvider.getVideoElement(display);
         }
-        if (localVideo) {
+        if (localVideo && localVideo.srcObject) {
             localVideo.srcObject.getAudioTracks().forEach((track) => {
                 let device = track.label;
                 if (device === "MediaStreamAudioDestinationNode" && mediaProvider.getAudioSourceDevice) {
