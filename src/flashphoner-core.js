@@ -61,6 +61,7 @@ var disableConnectionQualityCalculation;
  * @param {String=} options.screenSharingExtensionId Chrome screen sharing extension id
  * @param {Object=} options.constraints Default local media constraints
  * @param {Object=} options.logger Core logger options
+ * @param {Boolean=} options.collectClientInfo Collect client OS and system data available for debugging purposes
  * @throws {Error} Error if none of MediaProviders available
  * @memberof Flashphoner
  */
@@ -196,8 +197,10 @@ var init = async function (options) {
         coreLogger.info(LOG_PREFIX, "Initialized");
         initialized = true;
 
-        clientUAData = await clientInfo.getClientInfo(window.navigator);
-        coreLogger.info(LOG_PREFIX, "Client system data: " + JSON.stringify(clientUAData));
+        if (options.collectClientInfo === undefined || options.collectClientInfo) {
+            clientUAData = await clientInfo.getClientInfo(window.navigator);
+            coreLogger.info(LOG_PREFIX, "Client system data: " + JSON.stringify(clientUAData));
+        }
     }
 };
 
@@ -441,6 +444,7 @@ var createLogger = function(loggerOptions, parentLogger = coreLogger) {
  * @param {Integer=} options.receiveProbes A maximum subsequental pings received missing count [0]
  * @param {Integer=} options.probesInterval Interval to check subsequental pings received [0]
  * @param {Object=} options.logger Session logger options
+ * @param {Boolean=} options.sendClientInfo Send client system info for debugging purposes
  * @returns {Session} Created session
  * @throws {Error} Error if API is not initialized
  * @throws {TypeError} Error if options.urlServer is not specified
@@ -470,6 +474,7 @@ var createSession = function (options) {
     var mediaOptions = options.mediaOptions;
     var keepAlive = options.keepAlive;
     var timeout = options.timeout;
+    var sendClientInfo = options.sendClientInfo !== undefined ? options.sendClientInfo : true;
     var wsPingSender = new WSPingSender(options.pingInterval || 0);
     var wsPingReceiver = new WSPingReceiver(options.receiveProbes || 0, options.probesInterval || 0);
     var connectionTimeout;
@@ -585,7 +590,7 @@ var createSession = function (options) {
                 msePacketizationVersion: 2,
                 custom: options.custom
             };
-            if (clientUAData) {
+            if (sendClientInfo && clientUAData) {
                 cConfig.clientInfo = clientUAData;
             }
             if (sipConfig) {
@@ -841,6 +846,7 @@ var createSession = function (options) {
      * @param {string=} options.videoContentHint Video content hint for browser ('motion' by default to maintain bitrate and fps), {@link Flashphoner.constants.CONTENT_HINT_TYPE}
      * @param {Boolean=} options.useControls Use a standard HTML5 video controls (play, pause, fullscreen). May be a workaround for fullscreen mode to work in Safari 16
      * @param {Object=} options.logger Call logger options
+     * @param {Boolean=} options.collectDeviceInfo Collect a media devices info when publishing a WebRTC stream
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Call} Call
      * @throws {TypeError} Error if no options provided
@@ -905,6 +911,7 @@ var createSession = function (options) {
         var sipHeaders = options.sipHeaders;
         var videoContentHint = options.videoContentHint;
         var useControls = options.useControls;
+        var collectDeviceInfo = options.collectDeviceInfo !== undefined ? options.collectDeviceInfo : true;
 
         var minBitrate = getConstraintsProperty(constraints, CONSTRAINT_VIDEO_MIN_BITRATE, 0);
         var maxBitrate = getConstraintsProperty(constraints, CONSTRAINT_VIDEO_MAX_BITRATE, 0);
@@ -1018,9 +1025,7 @@ var createSession = function (options) {
                         stripCodecs: stripCodecs
                     });
                 }).then(function (offer) {
-                    // Get local media info to send in publishStream message
-                    let localMediaInfo = collectLocalMediaInfo(MediaProvider[mediaProvider], localDisplay);
-                    send("call", {
+                    let callData = {
                         callId: id_,
                         incoming: false,
                         hasVideo: offer.hasVideo,
@@ -1032,9 +1037,13 @@ var createSession = function (options) {
                         caller: login,
                         callee: callee_,
                         custom: options.custom,
-                        visibleName: visibleName_,
-                        localMediaInfo: localMediaInfo
-                    });
+                        visibleName: visibleName_
+                    };
+                    // Get local media info to send in publishStream message
+                    if (collectDeviceInfo) {
+                        callData.localMediaInfo = collectLocalMediaInfo(MediaProvider[mediaProvider], localDisplay);
+                    }
+                    send("call", callData);
                 });
             }).catch(function (error) {
                 logger.error(LOG_PREFIX, error);
@@ -1167,9 +1176,7 @@ var createSession = function (options) {
                     });
                 }).then(function (sdp) {
                     if (status_ != CALL_STATUS.FINISH && status_ != CALL_STATUS.FAILED) {
-                        // Get local media info to send in publishStream message
-                        let localMediaInfo = collectLocalMediaInfo(MediaProvider[mediaProvider], localDisplay);
-                        send("answer", {
+                        let callData = {
                             callId: id_,
                             incoming: true,
                             hasVideo: true,
@@ -1180,9 +1187,13 @@ var createSession = function (options) {
                             sipSDP: sipSDP,
                             caller: cConfig.login,
                             callee: callee_,
-                            custom: options.custom,
-                            localMediaInfo: localMediaInfo
-                        });
+                            custom: options.custom
+                        };
+                        // Get local media info to send in publishStream message
+                        if (collectDeviceInfo) {
+                            callData.localMediaInfo = collectLocalMediaInfo(MediaProvider[mediaProvider], localDisplay);
+                        }
+                        send("answer", callData);
                     } else {
                         hangup();
                     }
@@ -1638,6 +1649,7 @@ var createSession = function (options) {
      * @param {Boolean=} options.unmutePlayOnStart Unmute playback on start. May be used after user gesture only, so set 'unmutePlayOnStart: false' for autoplay
      * @param {Boolean=} options.useControls Use a standard HTML5 video controls (play, pause, fullscreen). May be a workaround for fullscreen mode to work in Safari 16
      * @param {Object=} options.logger Stream logger options
+     * @param {Boolean=} options.collectDeviceInfo Collect a media devices info when publishing a WebRTC stream
      * @param {sdpHook} sdpHook The callback that handles sdp from the server
      * @returns {Stream} Stream
      * @throws {TypeError} Error if no options provided
@@ -1748,6 +1760,7 @@ var createSession = function (options) {
         var videoContentHint = options.videoContentHint;
         var unmutePlayOnStart = options.unmutePlayOnStart;
         var useControls = options.useControls;
+        var collectDeviceInfo = options.collectDeviceInfo !== undefined ? options.collectDeviceInfo : true;
 
         var audioState_;
         var videoState_;
@@ -2044,10 +2057,7 @@ var createSession = function (options) {
                     });
                 }).then(function (offer) {
                     logger.debug(LOG_PREFIX, "Offer SDP:\n" + offer.sdp);
-                    // Get local media info to send in publishStream message
-                    let localMediaInfo = collectLocalMediaInfo(MediaProvider[mediaProvider], display);
-                    //publish stream with offer sdp to server
-                    send("publishStream", {
+                    let publishStreamData = {
                         mediaSessionId: id_,
                         name: name_,
                         published: published_,
@@ -2064,9 +2074,14 @@ var createSession = function (options) {
                         rtmpUrl: rtmpUrl,
                         constraints: constraints,
                         transport: transportType,
-                        cvoExtension: cvoExtension,
-                        localMediaInfo: localMediaInfo
-                    });
+                        cvoExtension: cvoExtension
+                    };
+                    // Get local media info to send in publishStream message
+                    if (collectDeviceInfo) {
+                        publishStreamData.localMediaInfo = collectLocalMediaInfo(MediaProvider[mediaProvider], display);
+                    }
+                    //publish stream with offer sdp to server
+                    send("publishStream", publishStreamData);
                 });
             }).catch(function (error) {
                 logger.warn(LOG_PREFIX, error);
@@ -2877,8 +2892,28 @@ var createSession = function (options) {
 
     const collectLocalMediaInfo = function (mediaProvider, display) {
         // Get devices available
-        let videoCams = mediaProvider.videoCams || [];
-        let mics = mediaProvider.mics || [];
+        let videoCams = [];
+        let mics = [];
+
+        if (mediaProvider.videoCams) {
+            mediaProvider.videoCams.forEach((device) => {
+                videoCams.push({
+                    id: device.id,
+                    label: encodeURI(device.label),
+                    type: device.type
+                });
+            });
+        }
+
+        if (mediaProvider.mics) {
+            mediaProvider.mics.forEach((device) => {
+                mics.push({
+                    id: device.id,
+                    label: encodeURI(device.label),
+                    type: device.type
+                });
+            });
+        }
 
         if (videoCams.length) {
             logger.info(LOG_PREFIX, "Video inputs available: " + JSON.stringify(videoCams));
@@ -2906,13 +2941,13 @@ var createSession = function (options) {
                 }
                 audioTracks.push({
                     trackId: track.id,
-                    device: device
+                    device: encodeURI(device)
                 });
             });
             localVideo.srcObject.getVideoTracks().forEach((track) => {
                 videoTracks.push({
                     trackId: track.id,
-                    device: track.label
+                    device: encodeURI(track.label)
                 });
             });
         }

@@ -93,7 +93,6 @@ function getPortsConfig() {
         console.log("Use custom server ports");
     } catch(e) {
         console.log("Use default server ports");
-        console.log(e.stack);
     }
     return portsConfig;
 }
