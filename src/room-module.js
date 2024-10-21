@@ -21,6 +21,10 @@ var Flashphoner = require('./flashphoner-core');
  * @param {String} options.username Username to login with
  * @param {String} options.token JWT Token
  * @param {String} options.appKey Application Key
+ * @param {Integer=} options.timeout Connection timeout in milliseconds [0]
+ * @param {Integer=} options.pingInterval Server ping interval in milliseconds [0]
+ * @param {Integer=} options.receiveProbes A maximum subsequental pings received missing count [0]
+ * @param {Integer=} options.probesInterval Interval to check subsequental pings received [0]
  * @returns {roomApi.RoomSession}
  * @memberof roomApi
  * @method connect
@@ -43,7 +47,11 @@ var appSession = function (options) {
         custom: {
             login: options.username,
             token: options.token
-        }
+        },
+        timeout: options.timeout || 0,
+        pingInterval: options.pingInterval || 0,
+        receiveProbes: options.receiveProbes || 0,
+        probesInterval: options.probesInterval || 0
     }).on(SESSION_STATUS.ESTABLISHED, function (session) {
         if (callbacks[session.status()]) {
             callbacks[session.status()](exports);

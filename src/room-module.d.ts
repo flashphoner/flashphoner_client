@@ -11,6 +11,10 @@
  * @param {String} options.username Username to login with
  * @param {String} options.token JWT token
  * @param {String} options.appKey Application key
+ * @param {Integer=} options.timeout Connection timeout in milliseconds [0]
+ * @param {Integer=} options.pingInterval Server ping interval in milliseconds [0]
+ * @param {Integer=} options.receiveProbes A maximum subsequental pings received missing count [0]
+ * @param {Integer=} options.probesInterval Interval to check subsequental pings received [0]
  * @returns {roomApi.RoomSession}
  * @memberof roomApi
  * @method connect
@@ -21,6 +25,10 @@ declare function appSession(options: {
     username: string;
     token?: string;
     appKey?: string;
+    timeout?: number | undefined;
+    pingInterval?: number | undefined;
+    receiveProbes?: number | undefined;
+    probesInterval?: number | undefined;
 }): RoomSession;
 export declare class RoomSession extends Flashphoner.Session {
     getRooms: () => Room[];
