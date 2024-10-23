@@ -94,25 +94,77 @@ const playBtnClick = function() {
 
 
 const getHlsConfig = function(llHlsEnabled) {
+    // Timings for manifest download
+    let manifestLoadPolicy = {
+        default: {
+            maxTimeToFirstByteMs: Infinity,
+            maxLoadTimeMs: 20000,
+            timeoutRetry: {
+                maxNumRetry: 2,
+                retryDelayMs: 0,
+                maxRetryDelayMs: 0,
+            },
+            errorRetry: {
+                maxNumRetry: 1,
+                retryDelayMs: 1000,
+                maxRetryDelayMs: 8000,
+            },
+        }
+    };
+    // Timings for playlist download
+    let playlistLoadPolicy = {
+        default: {
+            maxTimeToFirstByteMs: Infinity,
+            maxLoadTimeMs: 20000,
+            timeoutRetry: {
+                maxNumRetry: 2,
+                retryDelayMs: 0,
+                maxRetryDelayMs: 0,
+            },
+            errorRetry: {
+                maxNumRetry: 2,
+                retryDelayMs: 1000,
+                maxRetryDelayMs: 8000,
+            },
+        }
+    };
+    // Timings for segment download
+    let fragLoadPolicy = {
+        default: {
+            maxTimeToFirstByteMs: Infinity,
+            maxLoadTimeMs: 20000,
+            timeoutRetry: {
+                maxNumRetry: 4,
+                retryDelayMs: 0,
+                maxRetryDelayMs: 0,
+            },
+            errorRetry: {
+                maxNumRetry: 6,
+                retryDelayMs: 1000,
+                maxRetryDelayMs: 8000,
+            },
+        }
+    };
     let config = {
         lowLatencyMode: false,
         enableWorker: true,
-        backBufferLength: 90,
-        manifestLoadingTimeOut: 15000
+        manifestLoadPolicy: manifestLoadPolicy,
+        playlistLoadPolicy: playlistLoadPolicy,
+        fragLoadPolicy: fragLoadPolicy
     };
     console.log("Low Latency HLS: " + llHlsEnabled)
     if(llHlsEnabled) {
         // Here we configure HLS.JS for lower latency
         config = {
-           lowLatencyMode: llHlsEnabled,
-           enableWorker: true,
-           backBufferLength: 90,
-           liveBackBufferLength: 0,
-           liveSyncDuration: 0.5,
-           liveMaxLatencyDuration: 5,
-           liveDurationInfinity: true,
-           highBufferWatchdogPeriod: 1,
-           manifestLoadingTimeOut: 15000
+            lowLatencyMode: llHlsEnabled,
+            enableWorker: true,
+            liveSyncDuration: 0.5,
+            liveMaxLatencyDuration: 5,
+            liveDurationInfinity: true,
+            highBufferWatchdogPeriod: 1,
+            manifestLoadPolicy: manifestLoadPolicy,
+            playlistLoadPolicy: playlistLoadPolicy,
+            fragLoadPolicy: fragLoadPolicy
         };
     }
     return config;
