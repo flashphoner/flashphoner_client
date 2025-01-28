@@ -155,7 +155,18 @@ module.exports = function(grunt) {
                         standalone: 'RoomApi'
                     }
                 }
-            }
+            },
+            flashphonerGlobalObjectRoomApiWebRTCOnly: {
+                src: ['./src/room-module.js'],
+                dest: './flashphoner-room-api-webrtc-only.js',
+                options: {
+                    ignore: ['./src/temasys-media-provider.js', 'adapterjs', './src/websocket-media-provider.js', './src/flash-media-provider.js', './src/media-source-media-provider.js'],
+                    transform: [['babelify', {presets: ["@babel/preset-env", { "sourceType": "unambiguous" }], global: true}]],
+                    browserifyOptions: {
+                        standalone: 'RoomApi'
+                    }
+                }
+            },
         },
         //used for resolve https://github.com/Temasys/AdapterJS/issues/238
         concat: {
@@ -180,6 +191,7 @@ module.exports = function(grunt) {
                   './flashphoner-temasys-flash-websocket.min.js':['./flashphoner-temasys-flash-websocket.js'],
                   './flashphoner-webrtc-only.min.js' : ['./flashphoner-webrtc-only.js'],
                   './flashphoner-room-api.min.js' : ['./flashphoner-room-api.js'],
+                  './flashphoner-room-api-webrtc-only.min.js' : ['./flashphoner-room-api-webrtc-only.js'],
               }
           }
         },
@@ -212,6 +224,7 @@ module.exports = function(grunt) {
                             'flashphoner-webrtc-only.min.js',
                             'flashphoner-rest-api.js',
                             'flashphoner-room-api.js',
+                            'flashphoner-room-api-webrtc-only.js',
                             'media-provider.swf'
                         ],
                         dest: 'release/<%= pkg.name %>-<%= pkg.version %>'
@@ -287,7 +300,7 @@ module.exports = function(grunt) {
         'string-replace:disable_flash',
         'browserify:flashphonerGlobalObjectWebRTCOnly',
         'browserify:flashphonerGlobalObjectRestApi',
-        'browserify:flashphonerGlobalObjectRoomApi',
+        'browserify:flashphonerGlobalObjectRoomApiWebRTCOnly',
         'minify',
         'jsdoc',
         'copy'
