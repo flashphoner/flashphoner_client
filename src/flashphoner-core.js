@@ -614,8 +614,9 @@ var createSession = function (options) {
             }
             switch (data.message) {
                 case 'ping':
+                    logger.debug(LOG_PREFIX, "<<< ping");
                     send("pong", null);
-                    wsPingReceiver.success();
+                    logger.debug(LOG_PREFIX, ">>> pong");
                     break;
                 case 'getUserData':
                     authToken = obj.authToken;
@@ -725,8 +726,11 @@ var createSession = function (options) {
                     }
                     break;
                 default:
-                //logger.info(LOG_PREFIX, "Unknown server message " + data.message);
+                    logger.info(LOG_PREFIX, "Unknown server message " + data.message);
             }
+            // Reset missing pings counter on any message received successfully #WCS-4343
+            logger.debug(LOG_PREFIX, "Reset missing pings counter by " + data.message + " message");
+            wsPingReceiver.success();
         };
     }
 
