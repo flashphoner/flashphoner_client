@@ -140,13 +140,21 @@ function playBtnClick() {
 function publishStream() {
     var session = Flashphoner.getSessions()[0];
     var streamName = $('#publishStream').val();
-    session.createStream({
+
+     var options = {
         name: streamName,
         display: localVideo,
         cacheLocalResources: true,
         receiveVideo: false,
         receiveAudio: false
-    }).on(STREAM_STATUS.PUBLISHING, function (stream) {
+    };
+
+    if ($("#forceRelay").is(':checked')) {
+        options.transport = "UDP";
+    }
+
+    session.createStream(options)
+    .on(STREAM_STATUS.PUBLISHING, function (stream) {
         setStatus("#publishStatus", STREAM_STATUS.PUBLISHING);
         onPublishing(stream);
     }).on(STREAM_STATUS.UNPUBLISHED, function () {
@@ -161,10 +169,18 @@ function publishStream() {
 function playStream() {
     var session = Flashphoner.getSessions()[0];
     var streamName = $('#playStream').val();
-    session.createStream({
+
+    var options = {
         name: streamName,
-        display: remoteVideo
-    }).on(STREAM_STATUS.PLAYING, function (stream) {
+        display: remoteVideo,
+    };
+
+    if ($("#forceRelay").is(':checked')) {
+        options.transport = "UDP";
+    }
+
+    session.createStream(options)
+    .on(STREAM_STATUS.PLAYING, function (stream) {
         document.getElementById(stream.id()).addEventListener('resize', function (event) {
             resizeVideo(event.target);
         });
