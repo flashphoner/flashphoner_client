@@ -39,45 +39,45 @@
     <div id="row">
         <h2 id="notifyFlash" class="text-danger"></h2>
         <div class="col-sm-10 text-center">
-            <div class="col-sm-6 text-center">
+            <div class="col-sm-6 text-center" style="margin-bottom: 20px">
+                <div class="text-center text-muted" style="margin-bottom: 10px">My Screen</div>
                 <div class="col-sm-12 text-center">
                     <div class="col-sm-4">
-                        <div class="form-group" id="fpsForm">
+                        <div class="form-group" id="screenFpsForm">
                             <span class="text-muted">FPS</span>
-                            <input type="text" class="form-control" id="fps" value="15"/>
+                            <input type="text" class="form-control" id="screenFps" value="5"/>
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="form-group" id="widthForm">
+                        <div class="form-group" id="screenWidthForm">
                             <span class="text-muted">Width</span>
-                            <input type="text" class="form-control" id="width" value="640"/>
+                            <input type="text" class="form-control" id="screenWidth" value="1280"/>
                         </div>
                     </div>
                     <div class="col-sm-4">
-                        <div class="form-group" id="heightForm">
+                        <div class="form-group" id="screenHeightForm">
                             <span class="text-muted">Height</span>
-                            <input type="text" class="form-control" id="height" value="480"/>
+                            <input type="text" class="form-control" id="screenHeight" value="720"/>
                         </div>
                     </div>
                 </div>
                 <div class="col-sm-12 text-center">
-                    <div class="col-sm-5">
+                    <div class="col-sm-6 text-center">
                         <div class="form-group" id="mixer">
                             <span class="text-muted">Add to Mixer?</span>
                             <input type="checkbox" class="checkbox" style="margin: 10px auto" id="useMixer"/>
                         </div>
                     </div>
-                    <div class="col-sm-5">
+                    <div class="col-sm-6 text-center">
                         <div class="form-group" id="mixerInput">
                             <span class="text-muted">Mixer</span>
                             <input type="text" class="form-control" id="mixerName" placeholder="Mixer name"/>
                         </div>
                     </div>
                 </div>
-                <div class="fp-localVideo" style="margin-top: 140px">
+                <div class="fp-localVideo" style="margin-top: 150px">
                      <div id="localVideoScreen" class="display"></div>
                 </div>
-                <div class="text-center text-muted">My Screen</div>
                 <div class="row row-space">
                     <div id="screenName"></div>
                     <div id="screenStatus"></div>
@@ -87,10 +87,46 @@
                 </div>
             </div>
             <div class="col-sm-6 text-center">
-                <div class="fp-localVideo" style="margin-top: 140px">
+                <div class="text-center text-muted" style="margin-bottom: 10px">My Camera</div>
+                <div class="col-sm-12 text-center">
+                    <div class="col-sm-4">
+                        <div class="form-group" id="cameraFpsForm">
+                            <span class="text-muted">FPS</span>
+                            <input type="text" class="form-control" id="cameraFps" value="24"/>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group" id="cameraWidthForm">
+                            <span class="text-muted">Width</span>
+                            <input type="text" class="form-control" id="cameraWidth" value="640"/>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group" id="cameraHeightForm">
+                            <span class="text-muted">Height</span>
+                            <input type="text" class="form-control" id="cameraHeight" value="480"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 text-center">
+                    <div class="col-sm-6 text-center">
+                        <div class="form-group" id="audioInputForm">
+                            <span class="text-muted">Mic</span>
+                            <select class="form-control" id="audioInput">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 text-center">
+                        <div class="form-group" id="videoInputForm">
+                            <span class="text-muted">Camera</span>
+                            <select class="form-control" id="videoInput">
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="fp-localVideo" style="margin-top: 150px">
                     <div id="localVideoCamera" class="display"></div>
                 </div>
-                <div class="text-center text-muted">My Camera</div>
                 <div class="row row-space">
                     <div id="cameraName"></div>
                     <div id="cameraStatus"></div>
@@ -99,8 +135,7 @@
                     <div id="cameraAvailableBitrate"></div>
                 </div>
             </div>
-            <div class="row row-space text-center" style="margin-top: 20px">
-                <!--<div class="col-sm-10 text-center">-->
+            <div class="row row-space text-center" style="margin-top: 30px">
                 <div class="col-sm-7">
                     <div class="form-group" id="urlForm">
                         <input type="text" class="form-control" id="url" placeholder="Enter url with stream name"/>
@@ -112,7 +147,6 @@
                 <div class="col-sm-2 text-left">
                     <button id="publishBtn" type="button" class="btn btn-default">Start</button>
                 </div>
-                <!--</div>-->
             </div>
         </div>
 

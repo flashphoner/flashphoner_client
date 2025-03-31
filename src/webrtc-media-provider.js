@@ -1540,10 +1540,14 @@ function normalizeConstraints(constraints) {
 
             //WCS-1972. fixed "TypeError"
             // Set default FPS value
-            var frameRate = (!constraints.video.frameRate || constraints.video.frameRate == 0) ? 30 : constraints.video.frameRate;
-            constraints.video.frameRate = {
-                ideal: frameRate
-            };
+            if (browserDetails.browser === "chrome" && browserDetails.version >= 134) {
+                // Do not normalize framerate in Chrome 134 #WCS-4360
+            } else {
+                var frameRate = (!constraints.video.frameRate || constraints.video.frameRate == 0) ? 30 : constraints.video.frameRate;
+                constraints.video.frameRate = {
+                    ideal: frameRate
+                };
+            }
         }
     }
 

@@ -25,8 +25,40 @@ const init_page =  function() {
     localVideoCamera = document.getElementById("localVideoCamera");
     $("#url").val(setURL() + "/" + createUUID(8));
     $("#mixerName").val("mixer");
+
+    Flashphoner.getMediaDevices(null, true).then(function (list) {
+        addDeviceToSelect(list.audio, "audioInput");
+        addDeviceToSelect(list.video, "videoInput");
+    });
     onDisconnected();
 
+}
+
+const addDeviceToSelect = function (devices, selectId) {
+    devices.forEach(function (device) {
+        var select = document.getElementById(selectId);
+        var deviceInList = false;
+        for (var i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === device.id) {
+                deviceInList = true;
+                break;
+            }
+        }
+        if (!deviceInList) {
+            var option = document.createElement("option");
+            option.text = device.label || device.id;
+            option.value = device.id;
+            if (selectId === "videoInput") {
+                if (option.text.toLowerCase().indexOf("back") >= 0 && select.children.length > 0) {
+                    select.insertBefore(option, select.children[0]);
+                } else {
+                    select.appendChild(option);
+                }
+            } else if (selectId === "audioInput") {
+                select.appendChild(option);
+            }
+        }
+    });
 }
 
 const isSafariMacOS = function() {
@@ -131,9 +163,9 @@ const startStreamingScreen = function(session) {
     let streamName = getStreamName("screen", field("url"));
     let constraints = {
         video: {
-            width: parseInt($('#width').val()),
-            height: parseInt($('#height').val()),
-            frameRate: parseInt($('#fps').val()),
+            width: parseInt($('#screenWidth').val()),
+            height: parseInt($('#screenHeight').val()),
+            frameRate: parseInt($('#screenFps').val()),
             type: "screen",
             withoutExtension: true
         }
@@ -178,7 +210,18 @@ const startStreamingCamera = function(session, screenStream) {
     let streamName = getStreamName("camera", field("url"));
     let options = {
         name: streamName,
-        display: localVideoCamera
+        display: localVideoCamera,
+        constraints: {
+            video: {
+                deviceId: $('#videoInput').val(),
+                width: parseInt($('#cameraWidth').val()),
+                height: parseInt($('#cameraHeight').val()),
+                frameRate: parseInt($('#cameraFps').val()),
+            },
+            audio: {
+                deviceId: $('#audioInput').val()
+            }
+        }
     }
     session.createStream(options).on(STREAM_STATUS.PUBLISHING, function(cameraStream) {
         document.getElementById(cameraStream.id()).addEventListener('resize', function(event){
