@@ -640,6 +640,12 @@ export const ERROR_INFO: Readonly<{
      */
     CAN_NOT_SWITCH_MIC: string;
     /**
+     * Error if cannot set a new resolution to the published track
+     * @event CAN_NOT_SET_RESOLUTION
+     * @memberOf Flashphoner.constants.ERROR_INFO
+     */
+    CAN_NOT_SET_RESOLUTION: string;
+    /**
      * Local browser error detected
      * @event LOCAL_ERROR
      * @memberOf Flashphoner.constants.ERROR_INFO

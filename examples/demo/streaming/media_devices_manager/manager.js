@@ -202,6 +202,9 @@ function onUnpublished() {
         publishStatsIntervalID = null;
     }
     enablePublishToggles(false);
+    $("#resolutionBtn").prop('disabled', true);
+    $("#fpsBtn").prop('disabled', true);
+    $("#bitrateBtn").prop('disabled', true);
 }
 
 function publishBtnClick() {
@@ -239,6 +242,46 @@ function onPublishing(stream) {
         });
     }).prop('disabled', !($('#sendAudio').is(':checked')));
     stream.setVolume(currentVolumeValue);
+    $("#resolutionBtn").off('click').click(function () {
+        onResolutionClick(stream);
+    }).prop('disabled', false);
+    $("#fpsBtn").off('click').click(function () {
+        onFpsClick(stream);
+    }).prop('disabled', false);
+    $("#bitrateBtn").off('click').click(function () {
+        onBitrateClick(stream);
+    }).prop('disabled', false);
+}
+
+function onResolutionClick(stream) {
+    stream.updateVideoResolution({
+        width: parseInt($('#sendWidth').val()),
+        height: parseInt($('#sendHeight').val())
+    }).then(function(constraints) {
+        console.log("Publishing video constraints changed to " + JSON.stringify(constraints));
+    }).catch(function(e) {
+        console.error("Error " + e);
+    });
+}
+
+function onBitrateClick(stream) {
+    stream.updateVideoSettings({
+        maxBitrate: parseInt($('#sendVideoMaxBitrate').val())
+    }).then(function(encodings) {
+        console.log("Publishing video encoder parameters changed to " + JSON.stringify(encodings));
+    }).catch(function(e) {
+        console.error("Error " + e);
+    });
+}
+
+function onFpsClick(stream) {
+    stream.updateVideoSettings({
+        frameRate: parseInt($('#fps').val())
+    }).then(function(encodings) {
+        console.log("Publishing video encoder parameters changed to " + JSON.stringify(encodings));
+    }).catch(function(e) {
+        console.error("Error " + e);
+    });
 }
 
 function onPlaying(stream) {
@@ -552,7 +595,12 @@ function setStatus(selector, status, stream) {
 
 function muteInputs(selector) {
     $('[class*=group][id^=' + selector + ']').find('input').each(function () {
-        if ($(this).attr('id') !== 'audioOutput') {
+        if ($(this).attr('id') !== 'audioOutput' &&
+            $(this).attr('id') !== 'sendWidth' &&
+            $(this).attr('id') !== 'sendHeight' &&
+            $(this).attr('id') !== 'fps' &&
+            $(this).attr('id') !== 'sendVideoMinBitrate' &&
+            $(this).attr('id') !== 'sendVideoMaxBitrate') {
             $(this).prop('disabled', true);
         }
     });
@@ -579,8 +627,7 @@ function unmuteInputs(selector) {
 
 
 function resizeLocalVideo(event) {
-    var requested = constraints.video;
-    if (requested.width != event.target.videoWidth || requested.height != event.target.videoHeight) {
+    if (parseInt($('#sendWidth').val()) != event.target.videoWidth || parseInt($('#sendHeight').val()) != event.target.videoHeight) {
         console.warn("Camera does not support requested resolution, actual resolution is " + event.target.videoWidth + "x" + event.target.videoHeight);
     }
     $("#publishResolution").text(event.target.videoWidth + "x" + event.target.videoHeight);

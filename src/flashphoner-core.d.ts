@@ -78,6 +78,8 @@ export declare class Stream {
     switchToCam: () => void;
     sendData: (payload: any) => void;
     getLogger: () => any;
+    updateVideoSettings: (settings: any) => any;
+    updateVideoResolution: (resolution: any) => any
 }
 
 export declare class CreateStreamOptions {

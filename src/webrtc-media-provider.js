@@ -657,7 +657,6 @@ var createConnection = function (options) {
                     reject(constants.ERROR_INFO.CAN_NOT_SWITCH_CAM);
                 }
             });
-
         };
 
         var switchMic = function (deviceId) {
@@ -818,16 +817,75 @@ var createConnection = function (options) {
         };
 
         var setPublishingBitrate = function(minBitrate, maxBitrate) {
-            let senders = connection.getSenders();
-            senders.forEach((sender) => {
-                if (sender.track.kind == "video" && maxBitrate) {
-                    let parameters = sender.getParameters();
-                    for (let i = 0; i < parameters.encodings.length; i++) {
-                        if (!parameters.encodings[i].maxBitrate) {
-                            parameters.encodings[i].maxBitrate = maxBitrate * 1000;
+            updateVideoSettings({maxBitrate: maxBitrate});
+        };
+
+        var updateVideoSettings = function(settings) {
+            return new Promise(function (resolve, reject) {
+                if (connection && settings) {
+                    connection.getSenders().forEach((sender) => {
+                        if (sender.track.kind == "video") {
+                            let parameters = sender.getParameters();
+                            for (let i = 0; i < parameters.encodings.length; i++) {
+                                if (settings.maxBitrate) {
+                                    parameters.encodings[i].maxBitrate = settings.maxBitrate * 1000;
+                                } else if (parameters.encodings[i].maxBitrate) {
+                                    delete parameters.encodings[i].maxBitrate;
+                                }
+                                if (settings.frameRate) {
+                                    parameters.encodings[i].maxFramerate = settings.frameRate;
+                                }
+                                if (settings.scaleResolutionDownBy) {
+                                    parameters.encodings[i].scaleResolutionDownBy = settings.scaleResolutionDownBy;
+                                }
+                            }
+                            sender.setParameters(parameters).then(() => {
+                                logger.info(LOG_PREFIX, "Set video encoder parameters to " + JSON.stringify(parameters.encodings));
+                                resolve(parameters.encodings);
+                            }).catch(function (reason) {
+                                logger.error(LOG_PREFIX, reason);
+                                reject(reason);
+                            });
                         }
-                    }
-                    sender.setParameters(parameters).then(() => {});
+                    });
+                }
+            });
+        };
+
+        var updateVideoResolution = function (resolution) {
+            return new Promise(function (resolve, reject) {
+                if (connection && localVideo && localVideo.srcObject && !customStream && resolution) {
+                    connection.getSenders().forEach(function (sender) {
+                        if (sender.track.kind === 'audio') return;
+                        sender.track.stop();
+                        //use the settings that were set during connection initiation
+                        var clonedConstraints = Object.assign({}, constraints);
+                        if (resolution.width) {
+                            clonedConstraints.video.width = {ideal: resolution.width};
+                        }
+                        if (resolution.height) {
+                            clonedConstraints.video.height = {ideal: resolution.height};
+                        }
+                        clonedConstraints.audio = false;
+                        navigator.mediaDevices.getUserMedia(clonedConstraints).then(function (newStream) {
+                            var newVideoTrack = newStream.getVideoTracks()[0];
+                            newVideoTrack.enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
+                            var audioTrack = localVideo.srcObject.getAudioTracks()[0];
+                            sender.replaceTrack(newVideoTrack);
+                            localVideo.srcObject = newStream;
+                            // On Safari mobile _newStream_ doesn't contain audio track, so we need to add track from previous stream
+                            if (localVideo.srcObject.getAudioTracks().length == 0 && audioTrack) {
+                                localVideo.srcObject.addTrack(audioTrack);
+                            }
+                            logger.info(LOG_PREFIX, "Set video constraints to " + JSON.stringify(clonedConstraints.video));
+                            resolve(clonedConstraints.video);
+                        }).catch(function (reason) {
+                            logger.error(LOG_PREFIX, reason);
+                            reject(reason);
+                        });
+                    });
+                } else {
+                    reject(constants.ERROR_INFO.CAN_NOT_SET_RESOLUTION);
                 }
             });
         };
@@ -865,6 +923,8 @@ var createConnection = function (options) {
         exports.switchToScreen = switchToScreen;
         exports.switchToCam = switchToCam;
         exports.setPublishingBitrate = setPublishingBitrate;
+        exports.updateVideoSettings = updateVideoSettings;
+        exports.updateVideoResolution = updateVideoResolution;
         connections[id] = exports;
         resolve(exports);
     });

@@ -2655,6 +2655,36 @@ var createSession = function (options) {
             }
         };
 
+        /**
+         * Update video publishing settings on the fly
+         *
+         * @param {Object} stream video settings: {maxBitrate, frameRate, scaleResolutionDownBy)}
+         * @return {Promice} encodings object applied
+         * @memberof Stream
+         */
+        var updateVideoSettings = function(settings) {
+            if (published() && mediaConnection) {
+                return mediaConnection.updateVideoSettings(settings);
+            } else {
+                throw new Error("This function available for publishing stream only");
+            }
+        };
+
+        /**
+         * Update video publishing resolution on the fly
+         *
+         * @param {Object} stream video resolution: {width, height)}
+         * @return {Promice} video constaints object applied
+         * @memberof Stream
+         */
+        var updateVideoResolution = function(resolution) {
+            if (published() && mediaConnection) {
+                return mediaConnection.updateVideoResolution(resolution);
+            } else {
+                throw new Error("This function available for publishing stream only");
+            }
+        };
+
         stream.play = play;
         stream.publish = publish;
         stream.stop = stop;
@@ -2694,6 +2724,8 @@ var createSession = function (options) {
         stream.switchToCam = switchToCam;
         stream.sendData = sendData;
         stream.getLogger = getLogger;
+        stream.updateVideoSettings = updateVideoSettings;
+        stream.updateVideoResolution = updateVideoResolution;
 
         streams[id_] = stream;
         return stream;

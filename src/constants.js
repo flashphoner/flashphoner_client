@@ -649,6 +649,12 @@ const ERROR_INFO = Object.freeze({
      */
     CAN_NOT_SWITCH_MIC: 'Number of mics is less than 2 or microphone is already used by other application',
     /**
+     * Error if cannot set a new resolution to the published track
+     * @event CAN_NOT_SET_RESOLUTION
+     * @memberOf Flashphoner.constants.ERROR_INFO
+     */
+    CAN_NOT_SET_RESOLUTION: 'Cannot switch a published stream resolution',
+    /**
      * Local browser error detected
      * @event LOCAL_ERROR
      * @memberOf Flashphoner.constants.ERROR_INFO
