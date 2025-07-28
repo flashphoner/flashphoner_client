@@ -8,12 +8,9 @@
     <link rel="stylesheet" href="canvas_streaming.css">
     <title>Canvas Streaming</title>
     <script type="text/javascript" src="../../../../flashphoner.js"></script>
-    <script type="text/javascript" src="../../dependencies/jquery/jquery-1.12.0.js"></script>
     <script type="text/javascript" src="../../dependencies/js/utils.js"></script>
 
     <script type="text/javascript" src="canvas_streaming.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="../../dependencies/bootstrap/js/bootstrap.js"></script>
 </head>
 <body onload="init_page()">
 <div class="container">
@@ -21,18 +18,23 @@
 
         <h2 id="notifyFlash" class="text-danger"></h2>
 
+
         <div class="col-sm-9 text-center">
 
             <h2 class="text-center">Canvas Streaming</h2>
 
-            <div class="col-sm-6">
-                <div class="text-center text-muted">Canvas</div>
-            	<div class="fp-canvas">
-                    <canvas width="320" height="176" id="canvas">Your browser does not support the HTML5 canvas tag.</canvas>
+            <div class="form-group text-center col-sm-5" id="settingsForm">
+                <div class="input-group" style="margin: 10px">
+                    <input type="checkbox" id="mirror">
+                    <label style="text-align: left;" class="control-label" for="mirror">Mirror</label>
                 </div>
                 <div class="input-group" style="margin: 10px">
-                    <input type="checkbox" id="usedAnimFrame" checked>
-                    <label style="text-align: left;" class="control-label" for="usedAnimFrame">Use requestAnimationFrame API</label>
+                    <input type="checkbox" id="useWebGl">
+                    <label style="text-align: left;" class="control-label" for="useWebGl">Use WebGL</label>
+                </div>
+                <div class="input-group" style="margin: 10px">
+                    <input type="checkbox" id="useAnimFrame" checked>
+                    <label style="text-align: left;" class="control-label" for="useAnimFrame">Use requestAnimationFrame API</label>
                 </div>
                 <div class="input-group" style="margin: 10px">
                     <input type="checkbox" id="sendVideo" checked>
@@ -42,25 +44,21 @@
                     <input type="checkbox" id="sendAudio" checked>
                     <label style="text-align: left" class="control-label" for="sendAudio">Send Audio</label>
                 </div>
-                <div class="text-center" style="margin-top: 20px">
-                    <div id="publishStatus"></div>
-                    <div id="publishInfo"></div>
-                </div>
             </div>
-            <div class="col-sm-6">
-                <div class="text-center text-muted">Player</div>
-                <div class="fp-Video">
-                    <div id="remoteVideo" class="display"></div>
+            <div class="form-group col-sm-4" id="sizeForm">
+                <div>
+                    <label style="text-align: left;" class="control-label" for="width">Width</label>
+                    <input type="text" class="form-control" id="width" value="640">
                 </div>
-                <div class="text-center" style="margin-top: 20px">
-                    <div id="playStatus"></div>
-                    <div id="playInfo"></div>
+                <div>
+                    <label style="text-align: left;" class="control-label" for="height">Height</label>
+                    <input type="text" class="form-control" id="height" value="480">
                 </div>
             </div>
         </div>
     </div>
     <div class="row row-space">
-        <div class="col-sm-5 col-sm-offset-2">
+        <div class="col-sm-5 col-sm-offset-2 text-center">
             <div id="connectionForm" class="input-group">
                 <input class="form-control" id="urlServer" type="text">
                 <div class="input-group-btn">
@@ -69,6 +67,33 @@
             </div>
             <div class="text-center">
                 <div id="connectStatus"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row row-space">
+        <div class="col-sm-9 text-center" style="margin-top: 10px">
+            <div class="text-center text-muted">Canvas</div>
+            <div class="fp-canvas text-center" id="canvasContainer" style="display:none;">
+            </div>
+        </div>
+    </div>
+    <div class="row row-space">
+        <div class="col-sm-9 text-center">
+            <div class="text-center" style="margin-top: 20px">
+                <div id="publishStatus"></div>
+                <div id="publishInfo"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row row-space">
+        <div class="col-sm-9 text-center">
+            <div class="text-center text-muted">Player</div>
+            <div class="fp-Video" style="display:none;">
+                <div id="remoteVideo" class="display"></div>
+            </div>
+            <div class="text-center" style="margin-top: 20px">
+                <div id="playStatus"></div>
+                <div id="playInfo"></div>
             </div>
         </div>
     </div>

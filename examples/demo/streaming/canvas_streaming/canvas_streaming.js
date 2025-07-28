@@ -1,139 +1,168 @@
-var SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
-var STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
-var STREAM_STATUS_INFO = Flashphoner.constants.STREAM_STATUS_INFO;
-var PRELOADER_URL = "../../dependencies/media/preloader.mp4";
-var Browser = Flashphoner.Browser;
-var localVideo;
-var remoteVideo;
-var canvas;
-var previewStream;
-var publishStream;
-var canvStream;
+const SESSION_STATUS = Flashphoner.constants.SESSION_STATUS;
+const STREAM_STATUS = Flashphoner.constants.STREAM_STATUS;
+const STREAM_STATUS_INFO = Flashphoner.constants.STREAM_STATUS_INFO;
+const Browser = Flashphoner.Browser;
+const CANVAS_TYPE = {
+    CANVAS_2D: "2d",
+    CANVAS_WEBGL: "webgl"
+};
+let remoteVideo;
+let canvas;
+let mockVideo;
+let currentSession;
+let previewStream;
+let publishStream;
 
 //////////////////////////////////
 /////////////// Init /////////////
 
-function init_page() {
+const init_page = function() {
     //init api
     try {
         Flashphoner.init();
     } catch (e) {
-        $("#notifyFlash").text("Your browser doesn't support WebRTC technology needed for this example");
+        setText("notifyFlash", "Your browser doesn't support WebRTC technology needed for this example");
         return;
     }
 
     //local and remote displays
     localVideo = document.createElement("localVideo");
     remoteVideo = document.getElementById("remoteVideo");
-    canvas = document.getElementById("canvas");
 
-    $("#urlServer").val(setURL() + "/" + createUUID(4));
+    setValue("urlServer", setURL() + "/" + createUUID(4));
     onDisconnected();
 }
 
-function connect() {
-    canvStream = createCanvasStream();
-    var url = $('#urlServer').val();
+const connect = function() {
+    let url = getValue('urlServer');
 
     //create session
     console.log("Create new session with url " + url);
     Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function (session) {
-        setStatus("#connectStatus", session.status());
+        currentSession = session;
+        setStatus("connectStatus", session.status());
         startStreaming();
     }).on(SESSION_STATUS.DISCONNECTED, function () {
-        setStatus("#connectStatus", SESSION_STATUS.DISCONNECTED);
+        setStatus("connectStatus", SESSION_STATUS.DISCONNECTED);
         onDisconnected();
     }).on(SESSION_STATUS.FAILED, function () {
-        setStatus("#connectStatus", SESSION_STATUS.FAILED);
+        setStatus("connectStatus", SESSION_STATUS.FAILED);
         onDisconnected();
     });
 }
 
-function disconnect() {
-    Flashphoner.getSessions()[0].disconnect();
+const disconnect = function() {
+    if (currentSession) {
+        currentSession.disconnect();
+    }
 }
 
-function onConnected() {
-    $("#startBtn").text("Stop").off('click').click(function () {
-        $(this).prop('disabled', true);
-        stopStreaming();
-    }).prop('disabled', false);
+const onConnected = function() {
+    enableItem('startBtn');
+    setText('startBtn', "Stop");
+    setHandler("startBtn", "click", stopBtnClick, startBtnClick);
 }
 
-function onDisconnected() {
-    $("#startBtn").text("Start").off('click').click(function () {
-        if (validateForm("connectionForm")) {
-            $('#urlServer').prop('disabled', true);
-            $(this).prop('disabled', true);
-            $('#usedAnimFrame').prop('disabled', true);
-            $('#sendAudio').prop('disabled', true);
-            $('#sendVideo').prop('disabled', true);
-            connect();
-        }
-    }).prop('disabled', false);
-    $('#urlServer').prop('disabled', false);
-    $('#usedAnimFrame').prop('disabled', false);
-    $('#sendAudio').prop('disabled', false);
-    $('#sendVideo').prop('disabled', false);
+const onDisconnected = function() {
+    stopStreaming();
+    toggleInputs(true);
+    setText('startBtn', "Start");
+    setHandler("startBtn", "click", startBtnClick, stopBtnClick);
 }
 
-function onPublishing(stream) {
-    $("#publishInfo").text("");
+const onPublishing = function(stream) {
+    setText("publishInfo", "");
     publishStream = stream;
 }
 
-function onPlaying(stream) {
-    $("#playInfo").text("");
+const onPlaying = function(stream) {
+    setText("playInfo", "");
     previewStream = stream;
     onConnected();
 }
 
-function startStreaming() {
-    var session = Flashphoner.getSessions()[0];
-    var streamName = field("urlServer").split('/')[3];
-    var constraints = getConstraints();
+const onStopped = function() {
+    previewStream = null;
+    remoteVideo.parentNode.style.display = "none";
+    if (publishStream != null && publishStream.published()) {
+        publishStream.stop();
+    }
+}
+
+const onUnpublished = function() {
+    publishStream = null;
+    stopCanvasStream();
+}
+
+const startBtnClick = function() {
+    if (validate()) {
+        toggleInputs(false);
+        setDisplaySize(remoteVideo, getValue("width"), getValue("height"));
+        connect();
+    }
+}
+
+const stopBtnClick = function() {
+    disableItem('startBtn');
+    if (previewStream != null) {
+        previewStream.stop();
+        previewStream = null;
+    }
+}
+
+const setDisplaySize = function(display, width, height) {
+    if (display) {
+        display.style.width = width + "px";
+        display.style.height = height + "px";
+        display.style.display = "block";
+    }
+}
+
+const startStreaming = function() {
+    let session = currentSession;
+    let streamName = getValue("urlServer").split('/')[3];
+    let canvasStream = createCanvasStream();
 
     session.createStream({
         name: streamName,
         display: localVideo,
-        constraints: constraints
-    }).on(STREAM_STATUS.PUBLISHING, function (stream) {
-        setStatus("#publishStatus", STREAM_STATUS.PUBLISHING);
-        if (Flashphoner.getMediaProviders()[0] === "WSPlayer") {
-            Flashphoner.playFirstSound();
+        constraints: {
+            audio: false,
+            video: false,
+            customStream: canvasStream
         }
+    }).on(STREAM_STATUS.PUBLISHING, function (stream) {
+        setStatus("publishStatus", STREAM_STATUS.PUBLISHING);
         playStream();
         onPublishing(stream);
     }).on(STREAM_STATUS.UNPUBLISHED, function () {
-        setStatus("#publishStatus", STREAM_STATUS.UNPUBLISHED);
+        setStatus("publishStatus", STREAM_STATUS.UNPUBLISHED);
+        onUnpublished();
         disconnect();
     }).on(STREAM_STATUS.FAILED, function () {
-        setStatus("#publishStatus", STREAM_STATUS.FAILED);
+        setStatus("publishStatus", STREAM_STATUS.FAILED);
+        onUnpublished();
         disconnect();
     }).publish();
 }
 
-function stopStreaming() {
-    if (previewStream != null) {
-        previewStream.stop();
-    }
-    if (publishStream != null && publishStream.published()) {
-        publishStream.stop();
-    }
-    stopCanvasStream();
-}
+const playStream = function() {
+    let session = currentSession;
+    let streamName = getValue("urlServer").split('/')[3];
+    let width = getValue("width");
+    let height = getValue("height");
 
-function playStream() {
-    var session = Flashphoner.getSessions()[0];
-    var streamName = field("urlServer").split('/')[3];
-    var constraints = {audio: !Browser.isiOS()};
+    setDisplaySize(remoteVideo.parentNode, width, height);
 
     session.createStream({
         name: streamName,
         display: remoteVideo,
-        constraints: constraints
+        constraints: {
+            audio: !Browser.isiOS(),
+            video: true
+        }
     }).on(STREAM_STATUS.PENDING, function (stream) {
-        var video = document.getElementById(stream.id());
+        let video = document.getElementById(stream.id());
         if (!video.hasListeners) {
             video.hasListeners = true;
             video.addEventListener('resize', function (event) {
@@ -141,158 +170,430 @@ function playStream() {
             });
         }
     }).on(STREAM_STATUS.PLAYING, function (stream) {
-        setStatus("#playStatus", stream.status());
+        setStatus("playStatus", stream.status());
         onPlaying(stream);
     }).on(STREAM_STATUS.STOPPED, function () {
-        setStatus("#playStatus", STREAM_STATUS.STOPPED);
+        setStatus("playStatus", STREAM_STATUS.STOPPED);
+        onStopped();
     }).on(STREAM_STATUS.FAILED, function (stream) {
-        setStatus("#playStatus", STREAM_STATUS.FAILED, stream);
+        setStatus("playStatus", STREAM_STATUS.FAILED, stream);
+        onStopped();
         disconnect();
     }).play();
 }
 
+const stopStreaming = function() {
+    onStopped();
+    onUnpublished();
+}
+
 //show connection, or local, or remote stream status
-function setStatus(selector, status, stream) {
-    var statusField = $(selector);
-    statusField.text(status).removeClass();
-    if (status == "PLAYING" || status == "ESTABLISHED" || status == "PUBLISHING") {
-        statusField.attr("class", "text-success");
-    } else if (status == "DISCONNECTED" || status == "UNPUBLISHED" || status == "STOPPED") {
-        statusField.attr("class", "text-muted");
-    } else if (status == "FAILED") {
-        if (stream) {
+const setStatus = function(id, status, stream) {
+    setText(id, status);
+    setAttribute(id, "class", "");
+    if (status === "PLAYING" || status === "ESTABLISHED" || status === "PUBLISHING") {
+        setAttribute(id, "class", "text-success");
+    } else if (status === "DISCONNECTED" || status === "UNPUBLISHED" || status === "STOPPED") {
+        setAttribute(id, "class", "text-muted");
+    } else if (status === "FAILED") {
+        if (stream && stream.getInfo()) {
             if (stream.published()) {
-                switch(stream.getInfo()){
-                    case STREAM_STATUS_INFO.STREAM_NAME_ALREADY_IN_USE:
-                        $("#publishInfo").text("Server already has a publish stream with the same name, try using different one").attr("class", "text-muted");
-                        break;
-                    default:
-                        $("#publishInfo").text("Other: "+stream.getInfo()).attr("class", "text-muted");
-                        break;
-                }
+                setText("publishInfo", stream.getInfo());
+                setAttribute("publishInfo", "class", "text-muted");
             } else {
-                switch(stream.getInfo()){
-                    case STREAM_STATUS_INFO.SESSION_DOES_NOT_EXIST:
-                        $("#playInfo").text("Actual session does not exist").attr("class", "text-muted");
-                        break;
-                    case STREAM_STATUS_INFO.STOPPED_BY_PUBLISHER_STOP:
-                        $("#playInfo").text("Related publisher stopped its stream or lost connection").attr("class", "text-muted");
-                        break;
-                    case STREAM_STATUS_INFO.SESSION_NOT_READY:
-                        $("#playInfo").text("Session is not initialized or terminated on play ordinary stream").attr("class", "text-muted");
-                        break;
-                    case STREAM_STATUS_INFO.RTSP_STREAM_NOT_FOUND:
-                        $("#playInfo").text("Rtsp stream not found where agent received '404-Not Found'").attr("class", "text-muted");
-                        break;
-                    case STREAM_STATUS_INFO.FAILED_TO_CONNECT_TO_RTSP_STREAM:
-                        $("#playInfo").text("Failed to connect to rtsp stream").attr("class", "text-muted");
-                        break;
-                    case STREAM_STATUS_INFO.FILE_NOT_FOUND:
-                        $("#playInfo").text("File does not exist, check filename").attr("class", "text-muted");
-                        break;
-                    case STREAM_STATUS_INFO.FILE_HAS_WRONG_FORMAT:
-                        $("#playInfo").text("File has wrong format on play vod, this format is not supported").attr("class", "text-muted");
-                        break;
-                    case STREAM_STATUS_INFO.TRANSCODING_REQUIRED_BUT_DISABLED:
-                        $("#playInfo").text("Transcoding required, but disabled in settings").attr("class", "text-muted");
-                        break;
-                    default:
-                        $("#playInfo").text("Other: "+stream.getInfo()).attr("class", "text-muted");
-                        break;
-                }
+                setText("playInfo", stream.getInfo);
+                setAttribute("playInfo", "class", "text-muted");
             }
         }
-        statusField.attr("class", "text-danger");
+        setAttribute(id, "class", "text-danger");
     }
 }
 
-function validateForm(formId) {
-    var valid = true;
-    if (!$("#sendVideo").is(':checked') && !$("#sendAudio").is(':checked')) {
-        highlightInput($("#sendVideo"));
-        highlightInput($("#sendAudio"));
-        valid = false;
-        return valid;
+const validate = function() {
+    if (!getCheckbox("sendVideo") && !getCheckbox("sendAudio")) {
+        highlightInput("sendVideo");
+        highlightInput("sendAudio");
+        return false;
     } else {
-        removeHighlight($("#sendVideo"));
-        removeHighlight($("#sendAudio"));
+        removeHighlight("sendVideo");
+        removeHighlight("sendAudio");
     }
-    $('#' + formId + ' :text').each(function () {
-        if (!$(this).val()) {
-            highlightInput($(this));
-            valid = false;
-        } else {
-            removeHighlight($(this));
-        }
-    });
+    return validateInput("urlServer") && validateInput("width") && validateInput("height");
+}
+
+const validateInput = function(id) {
+    let value = getValue(id);
+    let valid = true;
+    if (!value || !value.length) {
+        highlightInput(id);
+        valid = false;
+    } else {
+        removeHighlight(id);
+    }
     return valid;
+}
 
-    function highlightInput(input) {
-        input.closest('.input-group').addClass("has-error");
-    }
-
-    function removeHighlight(input) {
-        input.closest('.input-group').removeClass("has-error");
+const highlightInput = function(input) {
+    let item = document.getElementById(input);
+    if (item) {
+        let parent = closest(input,'.form-group');
+        if (parent) {
+            parent.classList.add("has-error");
+        }
     }
 }
 
-function getConstraints() {
-    var constraints;
-    var stream = canvStream;
-    constraints = {
-        audio: false,
-        video: false,
-        customStream: stream
-    };
-    return constraints;
+const removeHighlight = function(input) {
+    let item = document.getElementById(input);
+    if (item) {
+        let parent = closest(input,'.form-group');
+        if (parent) {
+            parent.classList.remove("has-error");
+        }
+    }
 }
 
-function createCanvasStream() {
-    var canvasContext = canvas.getContext("2d");
-    var canvasStream = canvas.captureStream(30);
-    mockVideoElement = document.createElement("video");
-    mockVideoElement.setAttribute("playsinline", "");
-    mockVideoElement.setAttribute("webkit-playsinline", "");
-    mockVideoElement.src = '../../dependencies/media/test_movie.mp4';
-    mockVideoElement.loop = true;
-    mockVideoElement.muted = true;
-    var useRequestAnimationFrame = $("#usedAnimFrame").is(':checked');
-    mockVideoElement.addEventListener("play", function () {
-        var $this = this;
-        (function loop() {
-            if (!$this.paused && !$this.ended) {
-                canvasContext.drawImage($this, 0, 0);
-                if (useRequestAnimationFrame) {
-                    requestAnimationFrame(loop);
+const toggleInputs = function(enable) {
+    if (enable) {
+        enableItem('urlServer');
+        enableItem('startBtn');
+        enableItem('width');
+        enableItem('height');
+        enableItem('mirror');
+        enableItem('useWebGl');
+        enableItem('useAnimFrame');
+        enableItem('sendAudio');
+        enableItem('sendVideo');
+    } else {
+        disableItem('urlServer');
+        disableItem('startBtn');
+        disableItem('width');
+        disableItem('height');
+        disableItem('useWebGl');
+        disableItem('mirror');
+        disableItem('useAnimFrame');
+        disableItem('sendAudio');
+        disableItem('sendVideo');
+    }
+}
+
+const createCanvasStream = function() {
+    let type = getCheckbox("webGl") ? CANVAS_TYPE.CANVAS_WEBGL : CANVAS_TYPE.CANVAS_2D;
+    let width = getValue("width");
+    let height = getValue("height");
+    let constraints = {};
+    canvas = Canvas("canvasContainer", width, height, type,
+        getCheckbox("mirror"), getCheckbox("useAnimFrame"));
+    mockVideo = Video(canvas);
+    if (!getCheckbox("sendVideo")) {
+        constraints.video = false;
+    } else {
+        constraints.video = {
+            width: width,
+            height: height
+        };
+    }
+    constraints.audio = getCheckbox("sendAudio");
+    mockVideo.start(constraints);
+    return canvas.canvasStream();
+}
+
+const stopCanvasStream = function() {
+    if (mockVideo) {
+        mockVideo.stop();
+    }
+    if (canvas) {
+        canvas.close();
+    }
+}
+
+const Canvas = function(parentId, width, height, type, mirror, useRequestAnimationFrame) {
+    const canvasObject = {
+        canvas: null,
+        useRequestAnimationFrame: false,
+        context: null,
+        stream: null,
+        init: function(parentId, width, height, type, mirror, useRequestAnimationFrame) {
+            let parent = document.getElementById(parentId);
+            if (parent) {
+                canvasObject.canvas = document.createElement("canvas");
+                canvasObject.canvas.width = width;
+                canvasObject.canvas.height = height;
+                parent.appendChild(canvasObject.canvas);
+                setDisplaySize(parent, width, height);
+                canvasObject.mirror = mirror;
+                canvasObject.useRequestAnimationFrame = useRequestAnimationFrame;
+                if (type === CANVAS_TYPE.CANVAS_2D) {
+                    canvasObject.context = Canvas2d(canvasObject.canvas, mirror);
+                } else if (type === CANVAS_TYPE.CANVAS_WEBGL) {
+                    canvasObject.context = CanvasWebGl(canvasObject.canvas, mirror);
+                }
+                stream = canvasObject.canvas.captureStream(30);
+            }
+        },
+        close: function() {
+            if (canvasObject.canvas) {
+                canvasObject.canvas.parentNode.style.display = "none";
+                canvasObject.canvas.remove();
+                canvasObject.canvas = null;
+                canvasObject.stream = null;
+            }
+            canvasObject.useRequestAnimationFrame = false;
+            canvasObject.context = null;
+        },
+        drawFrame: function(source) {
+            if (source && canvasObject.context) {
+                canvasObject.context.drawFrame(source);
+            }
+        },
+        loop: function(video) {
+            if (!video.paused && !video.ended) {
+                canvasObject.drawFrame(video);
+                if (canvasObject.useRequestAnimationFrame) {
+                    requestAnimationFrame(() => {
+                        canvasObject.loop(video);
+                    });
                 } else {
-                    setTimeout(loop, 1000 / 30); // drawing at 30fps
+                    setTimeout(() => {
+                        canvasObject.loop(video);
+                    }, 1000 / 30); // drawing at 30fps
                 }
             }
-        })();
-    }, 0);
-    if (!$("#sendVideo").is(':checked')) {
-        canvasStream.removeTrack(canvasStream.getVideoTracks()[0]);
-    }
-    mockVideoElement.play();
-    if ($("#sendAudio").is(':checked')) {
-        mockVideoElement.muted = false;
-        try {
-            var audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        } catch (e) {
-            console.warn("Failed to create audio context");
+        },
+        canvasStream: function() {
+            return stream;
         }
-        var source = audioContext.createMediaElementSource(mockVideoElement);
-        var destination = audioContext.createMediaStreamDestination();
-        source.connect(destination);
-        canvasStream.addTrack(destination.stream.getAudioTracks()[0]);
-    }
-    return canvasStream;
+    };
+    canvasObject.init(parentId, width, height, type, mirror, useRequestAnimationFrame);
+    return canvasObject;
 }
 
-function stopCanvasStream() {
-    if(mockVideoElement) {
-        mockVideoElement.pause();
-        mockVideoElement.removeEventListener('play', null);
-        mockVideoElement = null;
-    }
+const Canvas2d = function(canvas, mirror) {
+    const canvas2d = {
+        canvas: null,
+        api: null,
+        init: function(canvas, mirror) {
+            if (canvas) {
+                canvas2d.canvas = canvas;
+                let context = canvas2d.canvas.getContext(CANVAS_TYPE.CANVAS_2D);
+                if (mirror) {
+                    context.translate(canvas2d.canvas.width, 0);
+                    context.scale(-1, 1);
+                    context.save();
+                }
+                canvas2d.api = {
+                    context: context
+                }
+            }
+        },
+        close: function() {
+            canvas2d.canvas = null;
+            canvas2d.api = null;
+        },
+        drawFrame: function(source) {
+            if (source && canvas2d.api && canvas2d.api.context) {
+                canvas2d.api.context.drawImage(source, 0, 0);
+            }
+        }
+    };
+    canvas2d.init(canvas, mirror);
+    return canvas2d;
+}
+
+const CanvasWebGl = function(canvas, mirror) {
+    const canvasWebGl = {
+        canvas: null,
+        api: null,
+        init: function(canvas, mirror) {
+            if (canvas) {
+                canvasWebGl.canvas = canvas;
+                let context = canvasWebGl.canvas.getContext(CANVAS_TYPE.CANVAS_WEBGL);
+                let vertexShaderSource = `
+              attribute vec2 a_position;
+              attribute vec2 a_texCoord;
+              varying vec2 v_texCoord;
+              void main() {
+                gl_Position = vec4(a_position, 0, 1);
+                v_texCoord = vec2(a_texCoord.x, a_texCoord.y);
+              }
+            `;
+                if (mirror) {
+                    vertexShaderSource = `
+                  attribute vec2 a_position;
+                  attribute vec2 a_texCoord;
+                  varying vec2 v_texCoord;
+                  void main() {
+                    gl_Position = vec4(a_position, 0, 1);
+                    v_texCoord = vec2(1.0 - a_texCoord.x, a_texCoord.y); // X axis mirroring
+                  }
+                `;
+                }
+
+                const fragmentShaderSource = `
+              precision mediump float;
+              varying vec2 v_texCoord;
+              uniform sampler2D u_texture;
+              void main() {
+                gl_FragColor = texture2D(u_texture, v_texCoord);
+              }
+            `;
+
+                function createShader(context, type, source) {
+                    const shader = context.createShader(type);
+                    context.shaderSource(shader, source);
+                    context.compileShader(shader);
+                    return shader;
+                }
+
+                function createProgram(context, vertex, fragment) {
+                    const program = context.createProgram();
+                    context.attachShader(program, vertex);
+                    context.attachShader(program, fragment);
+                    context.linkProgram(program);
+                    return program;
+                }
+
+                const vertexShader = createShader(context, context.VERTEX_SHADER, vertexShaderSource);
+                const fragmentShader = createShader(context, context.FRAGMENT_SHADER, fragmentShaderSource);
+                const program = createProgram(context, vertexShader, fragmentShader);
+
+                const positionBuffer = context.createBuffer();
+                context.bindBuffer(context.ARRAY_BUFFER, positionBuffer);
+                context.bufferData(context.ARRAY_BUFFER, new Float32Array([
+                    -1, -1, 1, -1, -1, 1,
+                    -1, 1, 1, -1, 1, 1
+                ]), context.STATIC_DRAW);
+
+                const texCoordBuffer = context.createBuffer();
+                context.bindBuffer(context.ARRAY_BUFFER, texCoordBuffer);
+                context.bufferData(context.ARRAY_BUFFER, new Float32Array([
+                    0, 0, 1, 0, 0, 1,
+                    0, 1, 1, 0, 1, 1
+                ]), gl.STATIC_DRAW);
+
+                const texture = context.createTexture();
+                context.bindTexture(context.TEXTURE_2D, texture);
+                context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, context.LINEAR);
+                context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_S, context.CLAMP_TO_EDGE);
+                context.texParameteri(context.TEXTURE_2D, context.TEXTURE_WRAP_T, context.CLAMP_TO_EDGE);
+                context.pixelStorei(context.UNPACK_FLIP_Y_WEBGL, true);
+
+                const posLoc = context.getAttribLocation(program, "a_position");
+                const texLoc = context.getAttribLocation(program, "a_texCoord");
+                const uTexLoc = context.getUniformLocation(program, "u_texture");
+
+                canvasWebGl.api = {
+                    context: context,
+                    program: program,
+                    positionBuffer: positionBuffer,
+                    posLoc: posLoc,
+                    texCoordBuffer: texCoordBuffer,
+                    texLoc: texLoc,
+                    texture: texture,
+                    uTexLoc: uTexLoc
+                };
+            }
+        },
+        close: function() {
+            canvasWebGl.canvas = null;
+            canvasWebGl.api = null;
+        },
+        drawFrame: function(source) {
+            if (source && canvasWebGl.api && canvasWebGl.api.context) {
+                let context = canvasWebGl.api.context;
+                context.viewport(0, 0, canvasWebGl.canvas.width, canvasWebGl.canvas.height);
+                context.clear(context.COLOR_BUFFER_BIT);
+
+                context.useProgram(canvasWebGl.api.program);
+
+                // Position
+                context.bindBuffer(context.ARRAY_BUFFER, canvasWebGl.api.positionBuffer);
+                context.enableVertexAttribArray(canvasWebGl.api.posLoc);
+                context.vertexAttribPointer(canvasWebGl.api.posLoc, 2, context.FLOAT, false, 0, 0);
+
+                // Texture coordinates
+                context.bindBuffer(context.ARRAY_BUFFER, canvasWebGl.api.texCoordBuffer);
+                context.enableVertexAttribArray(canvasWebGl.api.texLoc);
+                context.vertexAttribPointer(canvasWebGl.api.texLoc, 2, context.FLOAT, false, 0, 0);
+
+                // Renew texture from source
+                context.bindTexture(context.TEXTURE_2D, canvasWebGl.api.texture);
+                context.texImage2D(
+                    context.TEXTURE_2D, 0, context.RGBA, context.RGBA,
+                    context.UNSIGNED_BYTE, source
+                );
+                context.uniform1i(canvasWebGl.api.uTexLoc, 0);
+
+                context.drawArrays(context.TRIANGLES, 0, 6);
+            }
+        }
+    };
+    canvasWebGl.init(canvas, mirror);
+    return canvasWebGl;
+}
+
+
+const Video = function(canvas) {
+    const videoObject = {
+        canvas: null,
+        video: null,
+        init: function(canvas) {
+            videoObject.canvas = canvas;
+            videoObject.video = document.createElement("video");
+            videoObject.video.setAttribute("playsinline", "");
+            videoObject.video.setAttribute("webkit-playsinline", "");
+            videoObject.video.muted = true;
+            videoObject.video.addEventListener("play", () => {
+                videoObject.canvas.loop(videoObject.video);
+            }, 0);
+        },
+        start: function(constraints) {
+            let hasVideo = false;
+            let hasAudio = false;
+            let canvasStream = videoObject.canvas.canvasStream();
+            if (constraints.video) {
+                hasVideo = true;
+            }
+            if (constraints.audio) {
+                hasAudio = true;
+            }
+            navigator.mediaDevices.getUserMedia(constraints)
+                .then((stream) => {
+                    videoObject.video.srcObject = stream;
+                    videoObject.video.onloadedmetadata = () => {
+                        if (!hasVideo) {
+                            canvasStream.removeTrack(canvasStream.getVideoTracks()[0]);
+                        }
+                        if (hasAudio) {
+                            videoObject.video.muted = false;
+                            try {
+                                let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                                let source = audioContext.createMediaElementSource(videoObject.video);
+                                let destination = audioContext.createMediaStreamDestination();
+                                source.connect(destination);
+                                canvasStream.addTrack(destination.stream.getAudioTracks()[0]);
+                            } catch (e) {
+                                console.warn("Failed to create audio context");
+                            }
+                        }
+                    };
+                    videoObject.video.play();
+                });
+        },
+        stop: function() {
+            if (videoObject.video) {
+                videoObject.video.pause();
+                videoObject.video.removeEventListener('play', null);
+                let tracks = videoObject.video.srcObject.getTracks();
+                for (let i = 0; i < tracks.length; i++) {
+                    tracks[i].stop();
+                }
+                videoObject.video.srcObject = null;
+                videoObject.video = null;
+                videoObject.canvas = null;
+            }
+        }
+    };
+    videoObject.init(canvas);
+    return videoObject;
 }

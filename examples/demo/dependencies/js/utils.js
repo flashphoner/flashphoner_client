@@ -497,6 +497,35 @@ const getValue = function (id) {
 }
 
 /**
+ * Helper function to set an item attribute
+ *
+ * @param id
+ * @param attribute
+ * @param value
+ */
+const setAttribute = function (id, attribute, value) {
+    let item = document.getElementById(id);
+    if (item) {
+        item.setAttribute(attribute, value);
+    }
+}
+
+/**
+ * Helper function to get an item attribute
+ *
+ * @param id
+ * @param attribute
+ * @returns string
+ */
+const getAttribute = function (id, attribute) {
+    let item = document.getElementById(id);
+    if (item) {
+        return item.getAttribute(attribute);
+    }
+    return null;
+}
+
+/**
  * Helper function to set/unset a checkbox
  *
  * @param id

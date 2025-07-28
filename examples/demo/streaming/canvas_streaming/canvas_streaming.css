@@ -1,18 +1,11 @@
 .fp-Video {
-    border: 1px double black;
-    width: 322px;
-    height: 242px;
     text-align: center;
     background: #c0c0c0;
     margin: 0 auto 0 auto;
 }
 
 .fp-canvas {
-    border: 1px double black;
-    width: 322px;
-    height: 242px;
-    display: table-cell;
-    vertical-align: middle;
+    text-align: center;
     background: #c0c0c0;
     margin: 0 auto 0 auto;
 }
