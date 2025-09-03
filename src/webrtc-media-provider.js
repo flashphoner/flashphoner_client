@@ -66,6 +66,8 @@ var createConnection = function (options) {
         var useControls = options.useControls || false;
         // Stream event handler to rise an event #WCS-4097
         var unmuteRequiredEvent = options.unmuteRequiredEvent ? options.unmuteRequiredEvent : null;
+        // Current video capturer zoom #WCS-4579
+        let zoom = null;
 
         if (bidirectional) {
             localVideo = getCacheInstance(localDisplay);
@@ -896,6 +898,56 @@ var createConnection = function (options) {
             }
         };
 
+        const getZoomCapabilities = function() {
+            if (localVideo && localVideo.srcObject) {
+                if (constraints.video && constraints.video.zoom) {
+                    const [track] = localVideo.srcObject.getVideoTracks();
+                    const capabilities = track.getCapabilities();
+                    const settings = track.getSettings();
+
+                    if (!('zoom' in settings)) {
+                        logger.info(LOG_PREFIX, "Zoom is not supported by " + track.label);
+                        zoom = null;
+                    } else {
+                        zoom = {
+                            min: capabilities.zoom.min,
+                            max: capabilities.zoom.max,
+                            step: capabilities.zoom.step,
+                            value: settings.zoom
+                        }
+                    }
+                } else {
+                    zoom = null;
+                }
+            }
+            return zoom;
+        };
+
+        const setZoom = async function(value) {
+            if (zoom) {
+                if (value >= zoom.min && value <= zoom.max) {
+                    if (localVideo && localVideo.srcObject) {
+                        const [track] = localVideo.srcObject.getVideoTracks();
+                        await track.applyConstraints({advanced: [{zoom: value}]});
+                        zoom.value = value;
+                    } else {
+                        logger.warn(LOG_PREFIX, "Can't set zoom value: no local video");
+                    }
+                } else {
+                    logger.info(LOG_PREFIX, "Zoom value " + value + "is out of range: " + zoom.min + "-" + zoom.max);
+                }
+            } else {
+                logger.info(LOG_PREFIX, "Zoom is not supported or zoom capabilities unknown yet");
+            }
+        }
+
+        const getZoom = function() {
+            if (zoom) {
+                return zoom.value;
+            }
+            return -1;
+        }
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -925,6 +977,9 @@ var createConnection = function (options) {
         exports.setPublishingBitrate = setPublishingBitrate;
         exports.updateVideoSettings = updateVideoSettings;
         exports.updateVideoResolution = updateVideoResolution;
+        exports.getZoomCapabilities = getZoomCapabilities;
+        exports.setZoom = setZoom;
+        exports.getZoom = getZoom;
         connections[id] = exports;
         resolve(exports);
     });

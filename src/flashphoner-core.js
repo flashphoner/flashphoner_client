@@ -2685,6 +2685,48 @@ var createSession = function (options) {
             }
         };
 
+        /**
+         * Get camera zoom capabilities
+         *
+         * @return {Object} zoom capabilities object: max, min, step or null if zoom is not supported
+         * @memberof Stream
+         */
+        const getZoomCapabilities = function() {
+            if (published() && mediaConnection) {
+                return mediaConnection.getZoomCapabilities();
+            } else {
+                throw new Error("This function available for publishing stream only");
+            }
+        }
+
+        /**
+         * Get current camera zoom value if supported
+         *
+         * @return {number} current camera zoom value
+         * @memberof Stream
+         */
+        const getZoom = function() {
+            if (published() && mediaConnection) {
+                return mediaConnection.getZoom();
+            } else {
+                throw new Error("This function available for publishing stream only");
+            }
+        }
+
+        /**
+         * Set camera zoom value if supported
+         *
+         * @param {number} desired camera zoom value
+         * @memberof Stream
+         */
+        const setZoom = async function(value) {
+            if (published() && mediaConnection) {
+                return await mediaConnection.setZoom(value);
+            } else {
+                throw new Error("This function available for publishing stream only");
+            }
+        }
+
         stream.play = play;
         stream.publish = publish;
         stream.stop = stop;
@@ -2726,6 +2768,9 @@ var createSession = function (options) {
         stream.getLogger = getLogger;
         stream.updateVideoSettings = updateVideoSettings;
         stream.updateVideoResolution = updateVideoResolution;
+        stream.getZoomCapabilities = getZoomCapabilities;
+        stream.getZoom = getZoom;
+        stream.setZoom = setZoom;
 
         streams[id_] = stream;
         return stream;
