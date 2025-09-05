@@ -490,6 +490,64 @@ const setPublishingBitrate = function(sdp, mediaConnection, minBitrate, maxBitra
     return sdp;
 };
 
+const addFieldToCsvString = function(csvString, field, separator) {
+    if (field !== "" && field.indexOf(separator) >= 0 ) {
+        field = '"' + field + '"';
+    }
+    if (csvString === "" && field !== "") {
+        csvString = field;
+    } else {
+        csvString = csvString + separator + field;
+    }
+    return csvString;
+}
+
+const compress = async function(compression, data, base64) {
+    // Throw exception if CompessionStream is not available
+    if (typeof CompressionStream === "undefined") {
+        throw new Error("Compression is not available");
+    }
+
+    // Convert incoming string to a stream
+    let stream;
+    if(typeof data == "string") {
+        stream = new Blob([data], {
+            type: 'text/plain',
+        }).stream();
+    } else {
+        // Assume blog
+        stream = data.stream();
+    }
+
+    // gzip stream
+    const compressedReadableStream = stream.pipeThrough(
+        new CompressionStream(compression)
+    );
+
+    // create Response
+    const compressedResponse = await new Response(compressedReadableStream);
+
+    // Get response Blob
+    const blob = await compressedResponse.blob();
+
+    if(base64) {
+        // Get the ArrayBuffer
+        const buffer = await blob.arrayBuffer();
+
+        // convert ArrayBuffer to base64 encoded string
+        const compressedBase64 = btoa(
+            String.fromCharCode(
+                ...new Uint8Array(buffer)
+            )
+        );
+
+        return compressedBase64;
+
+    } else {
+        return blob;
+    }
+}
+
 module.exports = {
     isEmptyObject,
     copyObjectToArray,
@@ -501,5 +559,7 @@ module.exports = {
     stripCodecs,
     getCurrentCodecAndSampleRate,
     isPromise,
-    setPublishingBitrate
+    setPublishingBitrate,
+    addFieldToCsvString,
+    compress
 };

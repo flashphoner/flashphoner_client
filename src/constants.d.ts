@@ -646,6 +646,12 @@ export const ERROR_INFO: Readonly<{
      */
     CAN_NOT_SET_RESOLUTION: string;
     /**
+     * Error if cannot get peer connection stats
+     * @event CAN_NOT_GET_STATS
+     * @memberOf Flashphoner.constants.ERROR_INFO
+     */
+    CAN_NOT_GET_STATS: string;
+    /**
      * Local browser error detected
      * @event LOCAL_ERROR
      * @memberOf Flashphoner.constants.ERROR_INFO

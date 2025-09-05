@@ -5,6 +5,7 @@ const constants = require("./constants");
 const util = require('./util');
 const LoggerObject = require('./util').logger;
 const clientInfo = require('./client-info');
+const StatsCollector = require('./stats-collector');
 const Promise = require('promise-polyfill');
 const KalmanFilter = require('kalmanjs');
 const browserDetails = require('webrtc-adapter').default.browserDetails;
@@ -519,6 +520,9 @@ var createSession = function (options) {
 
     var wsConnection;
 
+    // WebRTC metrics sending description
+    let webRTCMetricsServerDescription;
+
     if (lbUrl) {
         requestURL(lbUrl);
     } else {
@@ -621,6 +625,7 @@ var createSession = function (options) {
                 case 'getUserData':
                     authToken = obj.authToken;
                     cConfig = obj;
+                    webRTCMetricsServerDescription = obj.webRTCMetricsServerDescription;
                     onSessionStatusChange(SESSION_STATUS.ESTABLISHED, obj);
                     break;
                 case 'setRemoteSDP':
@@ -725,6 +730,34 @@ var createSession = function (options) {
                         streamRefreshHandlers[obj.mediaSessionId](obj);
                     }
                     break;
+                case `webRTCMetricsDescriptionUpdate`:
+                    if (obj.ids) {
+                        obj.ids.forEach((id) => {
+                            if (streamRefreshHandlers[id]) {
+                                streamRefreshHandlers[id](obj);
+                            }
+                        });
+                    } else {
+                        if (obj.compression) {
+                            webRTCMetricsServerDescription.compression = obj.compression;
+                        }
+                        if (obj.batchSize) {
+                            webRTCMetricsServerDescription.batchSize = obj.batchSize;
+                        }
+                        if (obj.sampling) {
+                            webRTCMetricsServerDescription.sampling = obj.sampling;
+                        }
+                        if (obj.types) {
+                            webRTCMetricsServerDescription.types = obj.types;
+                        }
+                        if (obj.collect) {
+                            webRTCMetricsServerDescription.collect = obj.collect;
+                        }
+                        for (const [id, handler] of Object.entries(streamRefreshHandlers)) {
+                            handler(obj);
+                        }
+                    }
+                    break;
                 default:
                     logger.info(LOG_PREFIX, "Unknown server message " + data.message);
             }
@@ -736,10 +769,12 @@ var createSession = function (options) {
 
     //WebSocket send helper
     function send(message, data) {
-        wsConnection.send(JSON.stringify({
-            message: message,
-            data: [data]
-        }));
+        if (wsConnection.readyState === WebSocket.OPEN) {
+            wsConnection.send(JSON.stringify({
+                message: message,
+                data: [data]
+            }));
+        }
     }
 
     //Session status update helper
@@ -1773,6 +1808,8 @@ var createSession = function (options) {
 
         var videoBytes = 0;
 
+        var statsCollector = null;
+
         /**
          * Represents media stream.
          *
@@ -1807,7 +1844,7 @@ var createSession = function (options) {
                 return;
             }
 
-            if (streamInfo.available != undefined) {
+            if (streamInfo.available !== undefined) {
                 for (var i = 0; i < availableCallbacks.length; i++) {
                     info_ = streamInfo.reason;
                     if (streamInfo.available == "true") {
@@ -1866,10 +1903,28 @@ var createSession = function (options) {
                 if (mediaConnection) {
                     mediaConnection.close(cacheLocalResources);
                 }
+                if (statsCollector) {
+                    statsCollector.stop();
+                    statsCollector = null;
+                }
             }
             if (record_ && typeof streamInfo.recordName !== 'undefined') {
                 recordFileName = streamInfo.recordName;
             }
+
+            // Set up metrics collection
+            if (event === STREAM_STATUS.PUBLISHING || event === STREAM_STATUS.PLAYING) {
+                if (webRTCMetricsServerDescription && !statsCollector) {
+                    statsCollector = StatsCollector.StreamStatsCollector(webRTCMetricsServerDescription, id_, mediaConnection, wsConnection, logger);
+                    statsCollector.start();
+                }
+            }
+
+            // Pause or resume metrics collection
+            if (!streamInfo.status && streamInfo.collect !== undefined && statsCollector) {
+                statsCollector.update(streamInfo);
+            }
+
             //fire stream event
             if (callbacks[event]) {
                 callbacks[event](stream);

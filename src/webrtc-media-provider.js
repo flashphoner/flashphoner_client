@@ -453,66 +453,53 @@ var createConnection = function (options) {
             return true;
         };
 
-        var getStat = function (callbackFn, nativeStats) {
-            let browser = browserDetails.browser;
+        var getStat = async function (callbackFn, nativeStats) {
             let result = {outboundStream: {}, inboundStream: {}, otherStats: []};
-            if (connection && validBrowsers.includes(browser)) {
-                if (nativeStats) {
-                    return connection.getStats(null);
-                } else {
-                    connection.getStats(null).then(function (stat) {
-                        if (stat) {
-                            stat.forEach(function (report) {
-                                if (!report.isRemote) {
-                                    let mediaType = "";
-                                    if (report.type === 'outbound-rtp') {
-                                        mediaType = getReportMediaType(report);
-                                        fillStatObject(result.outboundStream, report, mediaType);
-                                        if (mediaType === 'video') {
-                                            getVideoSize(result.outboundStream[mediaType], report);
-                                        }
-                                    } else if (report.type === 'inbound-rtp') {
-                                        mediaType = getReportMediaType(report);
-                                        fillStatObject(result.inboundStream, report, mediaType);
-                                        if (mediaType === 'video') {
-                                            getVideoSize(result.inboundStream[mediaType], report);
-                                        }
-                                    } else if (report.type === 'candidate-pair' && report.state === 'succeeded' && report.nominated) {
-                                        if (report.availableIncomingBitrate) {
-                                            result.otherStats.availableIncomingBitrate = report.availableIncomingBitrate;
-                                        } else if (localVideo && report.availableOutgoingBitrate) {
-                                            // availableOutgoingBitrate is defined for incoming stream too #WCS-4175
-                                            result.otherStats.availableOutgoingBitrate = report.availableOutgoingBitrate;
-                                        }
-                                    }
-                                }
-                            });
+            let rawStat = await getWebRTCStats();
 
+            if (nativeStats) {
+                callbackFn(rawStat);
+            }
+            else {
+                if (rawStat["candidate-pair"]) {
+                    rawStat["candidate-pair"].forEach((report) => {
+                        if (report.state === 'succeeded' && report.nominated) {
+                            if (report.availableIncomingBitrate) {
+                                result.otherStats.availableIncomingBitrate = report.availableIncomingBitrate;
+                            } else if (localVideo && report.availableOutgoingBitrate) {
+                                // availableOutgoingBitrate is defined for incoming stream too #WCS-4175
+                                result.otherStats.availableOutgoingBitrate = report.availableOutgoingBitrate;
+                            }
                         }
-                        callbackFn(result);
                     });
                 }
+                if (rawStat["outbound-rtp"]) {
+                    rawStat["outbound-rtp"].forEach((report) => {
+                        fillStatObject(result.outboundStream, report, report.kind);
+                        if (report.kind === "video") {
+                            getVideoSize(result.outboundStream[report.kind], report.type, report);
+                        }
+                    });
+                }
+                if (rawStat["inbound-rtp"]) {
+                    rawStat["inbound-rtp"].forEach((report) => {
+                        fillStatObject(result.inboundStream, report, report.kind);
+                        if (report.kind === "video") {
+                            getVideoSize(result.inboundStream["video"], report.type, report);
+                        }
+                    });
+                }
+                callbackFn(result);
             }
         };
 
-        var getReportMediaType = function (report) {
-            // Since Safari 17 report.mediaType is undefined #WCS-3922
-            if (report.mediaType !== undefined) {
-                return report.mediaType;
-            } else if (report.kind !== undefined) {
-                return report.kind;
-            }
-            logger.warn(LOG_PREFIX, "No media type provided in WebRTC statistics");
-            return "media";
-        };
-
-        var getVideoSize = function (obj, report) {
+        var getVideoSize = function (obj, type, report) {
             let videoSize = {};
-            if (report.type == 'outbound-rtp') {
+            if (type === 'outbound-rtp') {
                 if (localVideo !== undefined && localVideo != null) {
                     videoSize = localVideo.srcObject.getVideoTracks()[0].getSettings();
                 }
-            } else if (report.type == 'inbound-rtp') {
+            } else if (type === 'inbound-rtp') {
                 if (remoteVideo !== undefined && remoteVideo != null) {
                     videoSize.width = remoteVideo.videoWidth;
                     videoSize.height = remoteVideo.videoHeight;
@@ -553,6 +540,7 @@ var createConnection = function (options) {
                     key.indexOf("audioLevel") != -1 ||
                     key === "framesPerSecond" ||
                     key === "qualityLimitationReason" ) {
+
                     obj[mediaType][key] = report[key];
                 }
                 if (key === "qualityLimitationDurations") {
@@ -948,6 +936,33 @@ var createConnection = function (options) {
             return -1;
         }
 
+        var getWebRTCStats = function() {
+            return new Promise(function (resolve, reject) {
+                let browser = browserDetails.browser;
+                if (connection && validBrowsers.includes(browser)) {
+                    connection.getStats(null).then((stats) => {
+                        let statObject = {};
+                        if (stats) {
+                            stats.forEach((report) => {
+                                if (report) {
+                                    if (statObject[report.type] === undefined) {
+                                        statObject[report.type] = [];
+                                    }
+                                    statObject[report.type].push(report);
+                                }
+                            });
+                        }
+                        resolve(statObject);
+                    }).catch((reason) => {
+                        logger.error(LOG_PREFIX, reason);
+                        reject(reason);
+                    });
+                } else {
+                    reject(constants.ERROR_INFO.CAN_NOT_GET_STATS);
+                }
+            });
+        };
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -980,6 +995,7 @@ var createConnection = function (options) {
         exports.getZoomCapabilities = getZoomCapabilities;
         exports.setZoom = setZoom;
         exports.getZoom = getZoom;
+        exports.getWebRTCStats = getWebRTCStats;
         connections[id] = exports;
         resolve(exports);
     });

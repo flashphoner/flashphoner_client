@@ -655,6 +655,12 @@ const ERROR_INFO = Object.freeze({
      */
     CAN_NOT_SET_RESOLUTION: 'Cannot switch a published stream resolution',
     /**
+     * Error if cannot get peer connection stats
+     * @event CAN_NOT_GET_STATS
+     * @memberOf Flashphoner.constants.ERROR_INFO
+     */
+    CAN_NOT_GET_STATS: 'Cannot get PeerConnection stats',
+    /**
      * Local browser error detected
      * @event LOCAL_ERROR
      * @memberOf Flashphoner.constants.ERROR_INFO
