@@ -16,6 +16,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
         metricsBatch: null,
         timer: null,
         batchCount: 0,
+        timerBusy: false,
         start: async function() {
             let error = "Can't collect WebRTC stats to send: ";
             if (!statCollector.description.types) {
@@ -55,7 +56,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
         update: async function(description) {
             if (!description) {
                 if (statCollector.logger) {
-                    statCollector.logger.error(LOG_PREFIX, "Can't update WebRTC metrics sending: no parameters passed");
+                    statCollector.logger.error(LOG_PREFIX + "-" + statCollector.id, "Can't update WebRTC metrics sending: no parameters passed");
                     return;
                 }
             }
@@ -91,8 +92,12 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                     break;
             }
         },
-        updateHeaders: async function() {
-            let stats = await statCollector.mediaConnection.getWebRTCStats();
+        updateHeaders: async function(stats = null) {
+            let currentHeaders = "";
+            let headersChanged = false;
+            if (!stats) {
+                stats = await statCollector.mediaConnection.getWebRTCStats();
+            }
             Object.keys(statCollector.description.types).forEach((type) => {
                 let typeDescriptor = statCollector.description.types[type];
                 let metricsString = "";
@@ -105,15 +110,15 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 }
                 if (stats[type]) {
                     stats[type].forEach((report) => {
-                        statCollector.logger.debug(LOG_PREFIX, type + " report: " + JSON.stringify(report));
+                        statCollector.logger.debug(LOG_PREFIX + "-" + statCollector.id, type + " report: " + JSON.stringify(report));
                         if (contentFilters) {
                             let filtersMatched = true;
                             for (const filter in contentFilters) {
-                                statCollector.logger.debug(LOG_PREFIX, type + " filter by " + filter + ": " + JSON.stringify(contentFilters[filter]));
+                                statCollector.logger.debug(LOG_PREFIX + "-" + statCollector.id, type + " filter by " + filter + ": " + JSON.stringify(contentFilters[filter]));
                                 let filterMatched = false;
                                 if (report[filter]) {
                                     for (const value of contentFilters[filter]) {
-                                        statCollector.logger.debug(LOG_PREFIX, filter + ": " + value + " <>  " + report[filter]);
+                                        statCollector.logger.debug(LOG_PREFIX + "-" + statCollector.id, filter + ": " + value + " <>  " + report[filter]);
                                         if (report[filter] === value) {
                                             filterMatched = true;
                                             break;
@@ -126,34 +131,44 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                                 }
                             }
                             if (filtersMatched) {
-                                statCollector.addHeaders(report, metricsString);
+                                currentHeaders = statCollector.addHeaders(currentHeaders, report, metricsString);
                             }
                         } else {
-                            statCollector.addHeaders(report, metricsString);
+                            currentHeaders = statCollector.addHeaders(currentHeaders, report, metricsString);
                         }
                     });
                 } else {
-                    statCollector.logger.warn(LOG_PREFIX, "No report type found in RTC stats: '" + type + "'");
+                    statCollector.logger.debug(LOG_PREFIX + "-" + statCollector.id, "No report type found in RTC stats: '" + type + "'");
                 }
             });
+            if (currentHeaders !== statCollector.headers) {
+                headersChanged = true;
+                let newMetrics = [];
+                currentHeaders.split(",").forEach((header) => {
+                    if (statCollector.headers.indexOf(header) === -1) {
+                        newMetrics.push(header);
+                    }
+                });
+                if (newMetrics.length) {
+                    statCollector.logger.info(LOG_PREFIX + "-" + statCollector.id, "RTC metrics to be collected: " + newMetrics.toString());
+                }
+                statCollector.headers = currentHeaders;
+            }
+            return headersChanged;
         },
-        addHeaders: function(report, metricsString) {
+        addHeaders: function(currentHeaders, report, metricsString) {
             if (metricsString) {
                 let metrics = metricsString.split(",");
                 metrics.forEach((metric) => {
-                    let metricFound = false;
                     for (const key of Object.keys(report)) {
                         if (metric === key) {
-                            statCollector.headers = util.addFieldToCsvString(statCollector.headers, report.type + "." + report.id + "." + metric, ",");
-                            metricFound = true;
+                            currentHeaders = util.addFieldToCsvString(currentHeaders, report.type + "." + report.id + "." + metric, ",");
                             break;
                         }
                     }
-                    if (!metricFound) {
-                        statCollector.logger.warn(LOG_PREFIX, "No metric found in RTC stats report '" + report.type + "': '" + metric + "'");
-                    }
                 });
             }
+            return currentHeaders;
         },
         updateCompression: async function() {
             if (statCollector.description.compression) {
@@ -169,7 +184,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 await util.compress(compression, "test", false);
                 statCollector.compression = compression;
             } catch (e) {
-                statCollector.logger.warn(LOG_PREFIX, "Can't compress metrics data using " + compression + ": " + e);
+                statCollector.logger.warn(LOG_PREFIX + "-" + statCollector.id, "Can't compress metrics data using " + compression + ": " + e);
                 statCollector.compression = "none";
             }
         },
@@ -182,7 +197,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
             statCollector.send("webRTCMetricsClientDescription", data);
         },
         send: function(message, data) {
-            statCollector.logger.debug(LOG_PREFIX, data);
+            statCollector.logger.debug(LOG_PREFIX + "-" + statCollector.id, data);
             if (statCollector.wsConnection.readyState === WebSocket.OPEN) {
                 statCollector.wsConnection.send(JSON.stringify({
                     message: message,
@@ -204,7 +219,10 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
             }
         },
         collectMetrics: async function() {
-            if (statCollector.timer) {
+            if (statCollector.timer && !statCollector.timerBusy) {
+                // Unfortunately there are no real atomics in JS unless SharedArrayBuffer is used
+                // So we guard the timer callback with a dumb boolean
+                statCollector.timerBusy = true;
                 let stats = await statCollector.mediaConnection.getWebRTCStats();
 
                 if (!statCollector.metricsBatch) {
@@ -212,6 +230,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 }
 
                 let metrics = [];
+                let lostMetrics = [];
                 statCollector.headers.split(",").forEach((header) => {
                     let components = header.split(".");
                     let descriptor = {
@@ -219,7 +238,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                         id: components[1],
                         name: components[2]
                     }
-                    let value = "undefined";
+                    let value = "NO";
 
                     if (stats[descriptor.type]) {
                         for (const report of stats[descriptor.type]) {
@@ -230,12 +249,25 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                         }
                     }
                     metrics.push(value);
+                    if (value == "NO") {
+                        lostMetrics.push(descriptor);
+                    }
                 });
+                if (lostMetrics.length) {
+                    statCollector.logger.info(LOG_PREFIX + "-" + statCollector.id, "Missing metrics: " + JSON.stringify(lostMetrics));
+                }
                 statCollector.metricsBatch.push(metrics);
                 statCollector.batchCount--;
                 if (statCollector.batchCount === 0) {
                     await statCollector.sendMetrics();
                 }
+                // Check if metrics list changed and send a new headers if needed #WCS-4619
+                if (await statCollector.updateHeaders(stats)) {
+                    statCollector.logger.info(LOG_PREFIX + "-" + statCollector.id, "RTC metrics list has changed, sending a new metrics description");
+                    await statCollector.sendMetrics();
+                    statCollector.sendHeaders();
+                }
+                statCollector.timerBusy = false;
             }
         },
         sendMetrics: async function() {
@@ -267,7 +299,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 try {
                     metricsData = await util.compress(statCollector.compression, JSON.stringify(metricsToSend), true);
                 } catch(e) {
-                    statCollector.logger.warn(LOG_PREFIX, "Can't send metrics data using" + statCollector.compression + ": " + e);
+                    statCollector.logger.warn(LOG_PREFIX + "-" + statCollector.id, "Can't send metrics data using" + statCollector.compression + ": " + e);
                     metricsData = null;
                 }
             } else {
