@@ -490,14 +490,14 @@ const setPublishingBitrate = function(sdp, mediaConnection, minBitrate, maxBitra
     return sdp;
 };
 
-const addFieldToCsvString = function(csvString, field, separator) {
-    if (field !== "" && field.indexOf(separator) >= 0 ) {
+const addFieldToCsvString = function(csvString, field, delimiter) {
+    if (field !== "" && field.indexOf(delimiter) >= 0 ) {
         field = '"' + field + '"';
     }
-    if (csvString === "" && field !== "") {
+    if (csvString === "") {
         csvString = field;
     } else {
-        csvString = csvString + separator + field;
+        csvString = csvString + delimiter + field;
     }
     return csvString;
 }

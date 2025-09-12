@@ -248,14 +248,17 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 for (let j = 0; j < statCollector.metricsBatch[i].length; j++) {
                     let valueString = valueToString(statCollector.metricsBatch[i][j]);
                     let previousString = "";
-                    let separator = ";";
+                    let delimiter = ";";
                     if (previous) {
                         previousString = valueToString(previous[j]);
                     }
                     if (valueString === previousString) {
                         valueString = "";
                     }
-                    metricsString = util.addFieldToCsvString(metricsString, valueString, separator);
+                    metricsString = util.addFieldToCsvString(metricsString, valueString, delimiter);
+                    if (j > 0 && metricsString === "") {
+                        metricsString = delimiter;
+                    }
                 }
                 previous = statCollector.metricsBatch[i];
                 metricsToSend.push(metricsString);
