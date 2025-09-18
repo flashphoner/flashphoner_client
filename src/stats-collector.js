@@ -225,9 +225,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 statCollector.timerBusy = true;
                 let stats = await statCollector.mediaConnection.getWebRTCStats();
 
-                if (!statCollector.metricsBatch) {
-                    statCollector.metricsBatch = [];
-                }
+                statCollector.startNewBatch();
 
                 let metrics = [];
                 let lostMetrics = [];
@@ -238,7 +236,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                         id: components[1],
                         name: components[2]
                     }
-                    let value = "NO";
+                    let value = null;
 
                     if (stats[descriptor.type]) {
                         for (const report of stats[descriptor.type]) {
@@ -248,23 +246,29 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                             }
                         }
                     }
-                    metrics.push(value);
-                    if (value == "NO") {
+                    if (value === null) {
                         lostMetrics.push(descriptor);
+                    } else {
+                        metrics.push(value);
                     }
                 });
+                // Metrics list may change if some metrics are added or some metrics are lost #WCS-4627
+                let headersUpdated = await statCollector.updateHeaders(stats);
                 if (lostMetrics.length) {
                     statCollector.logger.info(LOG_PREFIX + "-" + statCollector.id, "Missing metrics: " + JSON.stringify(lostMetrics));
-                }
-                statCollector.metricsBatch.push(metrics);
-                statCollector.batchCount--;
-                if (statCollector.batchCount === 0) {
+                    // Send metrics already collected and start a new batch with current metrics array to send them later #WCS-4627
                     await statCollector.sendMetrics();
+                    statCollector.startNewBatch(metrics);
+                } else {
+                    statCollector.metricsBatch.push(metrics);
+                    statCollector.batchCount--;
+                    if (statCollector.batchCount === 0 || headersUpdated) {
+                        await statCollector.sendMetrics();
+                    }
                 }
                 // Check if metrics list changed and send a new headers if needed #WCS-4619
-                if (await statCollector.updateHeaders(stats)) {
+                if (headersUpdated) {
                     statCollector.logger.info(LOG_PREFIX + "-" + statCollector.id, "RTC metrics list has changed, sending a new metrics description");
-                    await statCollector.sendMetrics();
                     statCollector.sendHeaders();
                 }
                 statCollector.timerBusy = false;
@@ -275,7 +279,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
             let metricsToSend = [];
             let metricsData;
 
-            for (let i = 0; i < statCollector.metricsBatch.length; i++) {
+            for (let i = 0; statCollector.metricsBatch && i < statCollector.metricsBatch.length; i++) {
                 let metricsString = "";
                 for (let j = 0; j < statCollector.metricsBatch[i].length; j++) {
                     let valueString = valueToString(statCollector.metricsBatch[i][j]);
@@ -312,8 +316,21 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 };
                 statCollector.send("webRTCMetricsBatch", data);
             }
-            statCollector.metricsBatch = null;
-            statCollector.batchCount = statCollector.description.batchSize;
+            statCollector.cleanBatch();
+        },
+        startNewBatch: function(metrics) {
+            if (!statCollector.metricsBatch) {
+                statCollector.metricsBatch = [];
+                if (metrics) {
+                    statCollector.metricsBatch.push(metrics);
+                }
+            }
+        },
+        cleanBatch: function() {
+            if (statCollector.metricsBatch) {
+                statCollector.metricsBatch = null;
+                statCollector.batchCount = statCollector.description.batchSize;
+            }
         }
     }
     return statCollector;
