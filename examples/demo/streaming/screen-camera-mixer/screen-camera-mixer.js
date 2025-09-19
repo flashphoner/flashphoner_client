@@ -213,7 +213,7 @@ const startStreamingCamera = function(session, screenStream) {
         display: localVideoCamera,
         constraints: {
             video: {
-                deviceId: $('#videoInput').val(),
+                deviceId: {exact: $('#videoInput').val()},
                 width: parseInt($('#cameraWidth').val()),
                 height: parseInt($('#cameraHeight').val()),
                 frameRate: parseInt($('#cameraFps').val()),

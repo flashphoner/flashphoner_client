@@ -550,13 +550,10 @@ function getConstraints() {
 
     if (constraints.video) {
         constraints.video = {
-            deviceId: $('#videoInput').val(),
+            deviceId: {exact: $('#videoInput').val()},
             width: parseInt($('#sendWidth').val()),
             height: parseInt($('#sendHeight').val())
         };
-        if (Browser.isSafariWebRTC() && Browser.isiOS() && Flashphoner.getMediaProviders()[0] === "WebRTC") {
-            constraints.video.deviceId = {exact: $('#videoInput').val()};
-        }
         if (parseInt($('#sendVideoMinBitrate').val()) > 0)
             constraints.video.minBitrate = parseInt($('#sendVideoMinBitrate').val());
         if (parseInt($('#sendVideoMaxBitrate').val()) > 0)
