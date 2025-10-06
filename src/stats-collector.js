@@ -2,14 +2,25 @@
 
 const util = require('./util');
 const LOG_PREFIX = "stats-collector";
+const CONNECTION_TYPE = {
+    WEBSOCKET: "ws",
+    HTTP: "http"
+}
+const MAX_SEND_ERRORS = 3;
+const CONNECTION_STATUS = {
+    INIT: 0,
+    OK: 200,
+    BAD_REQUEST: 400,
+    INTERNAL_SERVER_ERROR: 500
+};
 
 // Collect and send WebRTC statistics periodically
-const StreamStatsCollector = function(description, id, mediaConnection, wsConnection, logger) {
+const StreamStatsCollector = function(description, id, mediaConnection, wsConnection, logger, maxErrors) {
     let statCollector = {
         description: description,
         id: id,
         mediaConnection: mediaConnection,
-        wsConnection: wsConnection,
+        connection: Connection(wsConnection, maxErrors),
         logger: getLogger(logger),
         headers: "",
         compression: "none",
@@ -31,19 +42,27 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
             if (!statCollector.mediaConnection) {
                 throw new Error(error + "no media connection available");
             }
-            if (!statCollector.wsConnection) {
-                throw new Error(error + "no websocket connection available");
+
+            statCollector.logger.debug(LOG_PREFIX, "RTCMetricsServerDescription: " + JSON.stringify(statCollector.description));
+            if (statCollector.description.ingestPoint) {
+                let authHeader = null;
+                if (statCollector.description.authorization) {
+                    authHeader = {
+                        Authorization: statCollector.description.authorization
+                    }
+                }
+                statCollector.connection.setUp(statCollector.description.ingestPoint, authHeader);
             }
 
             await statCollector.updateHeaders();
             await statCollector.updateCompression();
-            statCollector.sendHeaders();
+            await statCollector.sendHeaders();
             if (statCollector.description.collect === "on") {
                 statCollector.collect(true);
             }
         },
         collect: function(enable) {
-            if (enable) {
+            if (enable && statCollector.connection.status === CONNECTION_STATUS.OK) {
                 statCollector.startTimer();
             } else {
                 statCollector.stopTimer();
@@ -55,11 +74,10 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
         },
         update: async function(description) {
             if (!description) {
-                if (statCollector.logger) {
-                    statCollector.logger.error(LOG_PREFIX + "-" + statCollector.id, "Can't update WebRTC metrics sending: no parameters passed");
-                    return;
-                }
+                statCollector.logger.error(LOG_PREFIX + "-" + statCollector.id, "Can't update WebRTC metrics sending: no parameters passed");
+                return;
             }
+            statCollector.logger.debug(LOG_PREFIX, "New RTCMetricsServerDescription: " + JSON.stringify(description));
             if (description.types || description.compression) {
                 statCollector.stop();
                 if (description.types) {
@@ -70,7 +88,10 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                     statCollector.description.compression = description.compression;
                     await statCollector.updateCompression();
                 }
-                statCollector.sendHeaders();
+                await statCollector.sendHeaders();
+                if (statCollector.connection.status !== CONNECTION_STATUS.OK) {
+                    return;
+                }
             } else {
                 statCollector.collect(false);
             }
@@ -188,21 +209,22 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 statCollector.compression = "none";
             }
         },
-        sendHeaders: function() {
+        sendHeaders: async function() {
             let data = {
                 mediaSessionId: statCollector.id,
                 compression: statCollector.compression,
                 headers: statCollector.headers
             };
-            statCollector.send("webRTCMetricsClientDescription", data);
+            await statCollector.send("webRTCMetricsClientDescription", data);
         },
-        send: function(message, data) {
-            statCollector.logger.debug(LOG_PREFIX + "-" + statCollector.id, data);
-            if (statCollector.wsConnection.readyState === WebSocket.OPEN) {
-                statCollector.wsConnection.send(JSON.stringify({
-                    message: message,
-                    data: [data]
-                }));
+        send: async function(message, data) {
+            if (statCollector.connection.status === CONNECTION_STATUS.INIT || statCollector.connection.status === CONNECTION_STATUS.OK) {
+                statCollector.logger.debug(LOG_PREFIX + "-" + statCollector.id, data);
+                await statCollector.connection.send(message, data);
+                if (statCollector.connection.status !== CONNECTION_STATUS.OK) {
+                    statCollector.logger.error(LOG_PREFIX + "-" + statCollector.id, "Error " + statCollector.connection.status + " sending RTC metrics to the server, stop sending");
+                    statCollector.stop();
+                }
             }
         },
         startTimer: function() {
@@ -269,7 +291,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 // Check if metrics list changed and send a new headers if needed #WCS-4619
                 if (headersUpdated) {
                     statCollector.logger.info(LOG_PREFIX + "-" + statCollector.id, "RTC metrics list has changed, sending a new metrics description");
-                    statCollector.sendHeaders();
+                    await statCollector.sendHeaders();
                 }
                 statCollector.timerBusy = false;
             }
@@ -314,7 +336,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                     mediaSessionId: statCollector.id,
                     metrics: metricsData
                 };
-                statCollector.send("webRTCMetricsBatch", data);
+                await statCollector.send("webRTCMetricsBatch", data);
             }
             statCollector.cleanBatch();
         },
@@ -334,6 +356,117 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
         }
     }
     return statCollector;
+}
+
+// Wrapper to send metrics via Websocket or HTTP POST
+const Connection = function(existingConnection = null, maxErrors = MAX_SEND_ERRORS) {
+    const connection = {
+        type: "",
+        websocket: null,
+        http: null,
+        maxErrors: maxErrors,
+        errorsCount: 0,
+        status: CONNECTION_STATUS.INIT,
+        setUp: function(url, headers = null, existingConnection = null) {
+            if (url.startsWith(CONNECTION_TYPE.WEBSOCKET)) {
+                connection.type = CONNECTION_TYPE.WEBSOCKET;
+                // ToDo: create a new Websocket connection
+            } else if (url.startsWith(CONNECTION_TYPE.HTTP)) {
+                connection.type = CONNECTION_TYPE.HTTP
+                connection.http = HttpConnection(url, headers);
+            } else if (existingConnection) {
+                connection.type = CONNECTION_TYPE.WEBSOCKET;
+                connection.websocket = WebsocketConnection(existingConnection);
+            }
+            connection.errorsCount = 0;
+            connection.status = CONNECTION_STATUS.INIT;
+        },
+        send: async function(message, data) {
+            let code = CONNECTION_STATUS.BAD_REQUEST;
+            switch(connection.type) {
+                case CONNECTION_TYPE.WEBSOCKET:
+                    if (connection.websocket) {
+                        code = connection.websocket.send(message, data);
+                    }
+                    break;
+                case CONNECTION_TYPE.HTTP:
+                    if (connection.http) {
+                        code = await connection.http.send(message, data);
+                    }
+                    break;
+            }
+            connection.status = code;
+            if (connection.status === CONNECTION_STATUS.OK) {
+                connection.errorsCount = 0;
+            }
+            else {
+                if (message === "webRTCMetricsBatch") {
+                    connection.errorsCount++;
+                    if (connection.errorsCount < connection.maxErrors) {
+                        connection.status = CONNECTION_STATUS.OK;
+                    }
+                }
+            }
+        }
+    };
+    connection.setUp("", null, existingConnection);
+    return connection;
+}
+
+// Websocket connection (using existing one)
+const WebsocketConnection = function(wsConnection) {
+    const connection = {
+        websocket: wsConnection,
+        send: function(message, data) {
+            let code = CONNECTION_STATUS.BAD_REQUEST;
+            if (connection.websocket) {
+                console.log(connection.websocket);
+                if (connection.websocket.readyState === WebSocket.OPEN) {
+                    connection.websocket.send(JSON.stringify({
+                        message: message,
+                        data: [data]
+                    }));
+                }
+                code = CONNECTION_STATUS.OK;
+            }
+            return code;
+        }
+    }
+    return connection;
+}
+
+// HTTP connection using Fetch API
+const HttpConnection = function(url, headers) {
+    const connection = {
+        url: addSlash(url),
+        headers: headers,
+        send: async function(message, data) {
+            let code = CONNECTION_STATUS.BAD_REQUEST;
+            if (connection.url) {
+                try {
+                    const httpHeaders = new Headers();
+                    httpHeaders.append("Content-Type", "application/json");
+
+                    if (connection.headers) {
+                        for (const [header, value] of Object.entries(connection.headers)) {
+                            httpHeaders.append(header, value);
+                        }
+                    }
+                    let response = await fetch(connection.url + message,{
+                        method: "POST",
+                        headers: httpHeaders,
+                        mode: "cors",
+                        body: JSON.stringify(data)
+                    });
+                    code = response.status;
+                } catch (e) {
+                    code = CONNECTION_STATUS.INTERNAL_SERVER_ERROR;
+                }
+            }
+            return code;
+        }
+    }
+    return connection;
 }
 
 // Helper function to stringify a value
@@ -363,6 +496,15 @@ const getLogger = function(logger) {
         error: function() {},
         debug: function() {}
     };
+}
+
+// Helper function to add slash to endpoint
+const addSlash = function(value) {
+    let endpoint = value;
+    if (endpoint && !endpoint.endsWith("/")) {
+        endpoint = endpoint + "/";
+    }
+    return endpoint;
 }
 
 module.exports = {
