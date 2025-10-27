@@ -219,7 +219,7 @@ const startStreamingCamera = function(session, screenStream) {
                 frameRate: parseInt($('#cameraFps').val()),
             },
             audio: {
-                deviceId: $('#audioInput').val()
+                deviceId: {exact: $('#audioInput').val()}
             }
         }
     }

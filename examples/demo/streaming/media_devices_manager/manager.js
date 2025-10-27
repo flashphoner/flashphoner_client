@@ -538,7 +538,7 @@ function getConstraints() {
 
     if (constraints.audio) {
         constraints.audio = {
-            deviceId: $('#audioInput').val()
+            deviceId: {exact: $('#audioInput').val()}
         };
         if ($("#fec").is(':checked'))
             constraints.audio.fec = $("#fec").is(':checked');
