@@ -2293,6 +2293,10 @@ var createSession = function (options) {
          */
         var stop = function () {
             logger.debug(LOG_PREFIX, "Stop stream " + name_);
+            if (statsCollector) {
+                statsCollector.stop();
+                statsCollector = null;
+            }
             if (status_ == STREAM_STATUS.NEW) {
                 //trigger FAILED status
                 streamRefreshHandlers[id_]({status: STREAM_STATUS.FAILED});

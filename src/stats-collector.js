@@ -116,7 +116,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
         updateHeaders: async function(stats = null) {
             let currentHeaders = "";
             let headersChanged = false;
-            if (!stats) {
+            if (stats === null) {
                 stats = await statCollector.mediaConnection.getWebRTCStats();
             }
             Object.keys(statCollector.description.types).forEach((type) => {
@@ -228,7 +228,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
             }
         },
         startTimer: function() {
-            if (!statCollector.timer && statCollector.headers) {
+            if (!statCollector.timer) {
                 statCollector.batchCount = statCollector.description.batchSize;
                 statCollector.timer = setInterval(statCollector.collectMetrics, statCollector.description.sampling);
             }
@@ -251,29 +251,33 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
 
                 let metrics = [];
                 let lostMetrics = [];
-                statCollector.headers.split(",").forEach((header) => {
-                    let components = header.split(".");
-                    let descriptor = {
-                        type: components[0],
-                        id: components[1],
-                        name: components[2]
-                    }
-                    let value = null;
+                if (statCollector.headers) {
+                    statCollector.headers.split(",").forEach((header) => {
+                        let components = header.split(".");
+                        let descriptor = {
+                            type: components[0],
+                            id: components[1],
+                            name: components[2]
+                        }
+                        let value = null;
 
-                    if (stats[descriptor.type]) {
-                        for (const report of stats[descriptor.type]) {
-                            if (report.id === descriptor.id) {
-                                value = report[descriptor.name];
-                                break;
+                        if (stats[descriptor.type]) {
+                            for (const report of stats[descriptor.type]) {
+                                if (report.id === descriptor.id) {
+                                    value = report[descriptor.name];
+                                    break;
+                                }
                             }
                         }
-                    }
-                    if (value === null) {
-                        lostMetrics.push(descriptor);
-                    } else {
-                        metrics.push(value);
-                    }
-                });
+                        if (value === null) {
+                            lostMetrics.push(descriptor);
+                        } else {
+                            metrics.push(value);
+                        }
+                    });
+                } else {
+                    statCollector.logger.info(LOG_PREFIX + "-" + statCollector.id, "No RTC metrics to collect, trying to update metrics available list");
+                }
                 // Metrics list may change if some metrics are added or some metrics are lost #WCS-4627
                 let headersUpdated = await statCollector.updateHeaders(stats);
                 if (lostMetrics.length) {
@@ -281,7 +285,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                     // Send metrics already collected and start a new batch with current metrics array to send them later #WCS-4627
                     await statCollector.sendMetrics();
                     statCollector.startNewBatch(metrics);
-                } else {
+                } else if (metrics.length) {
                     statCollector.metricsBatch.push(metrics);
                     statCollector.batchCount--;
                     if (statCollector.batchCount === 0 || headersUpdated) {
@@ -420,7 +424,6 @@ const WebsocketConnection = function(wsConnection) {
         send: function(message, data) {
             let code = CONNECTION_STATUS.BAD_REQUEST;
             if (connection.websocket) {
-                console.log(connection.websocket);
                 if (connection.websocket.readyState === WebSocket.OPEN) {
                     connection.websocket.send(JSON.stringify({
                         message: message,
@@ -472,10 +475,12 @@ const HttpConnection = function(url, headers) {
 // Helper function to stringify a value
 const valueToString = function(value) {
     let valueString = "undefined";
-    if (typeof value === "object") {
-        valueString = JSON.stringify(value);
-    } else {
-        valueString = value.toString();
+    if (value) {
+        if (typeof value === "object") {
+            valueString = JSON.stringify(value);
+        } else {
+            valueString = value.toString();
+        }
     }
     return valueString;
 }
