@@ -202,7 +202,7 @@ function startStreaming(session) {
     };
     if ($("#useMic").prop('checked')) {
         constraints.audio = {
-            deviceId: $('#audioInput').val()
+            deviceId: {exact: $('#audioInput').val()}
         };
     }
     constraints.video.type = "screen";
