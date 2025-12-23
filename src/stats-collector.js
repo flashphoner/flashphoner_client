@@ -182,7 +182,7 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 let metrics = metricsString.split(",");
                 metrics.forEach((metric) => {
                     for (const key of Object.keys(report)) {
-                        if (metric === key) {
+                        if (metric === key && report[key]) {
                             currentHeaders = util.addFieldToCsvString(currentHeaders, report.type + "." + report.id + "." + metric, ",");
                             break;
                         }
@@ -240,6 +240,9 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 statCollector.metricsBatch = null;
             }
         },
+        isMetricValid: function(value) {
+            return value != null && value !== "" && value !== "undefined" && value !== "null";
+        },
         collectMetrics: async function() {
             if (statCollector.timer && !statCollector.timerBusy) {
                 // Unfortunately there are no real atomics in JS unless SharedArrayBuffer is used
@@ -269,10 +272,10 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                                 }
                             }
                         }
-                        if (value === null) {
-                            lostMetrics.push(descriptor);
-                        } else {
+                        if (statCollector.isMetricValid(value)) {
                             metrics.push(value);
+                        } else {
+                            lostMetrics.push(descriptor);
                         }
                     });
                 } else {
