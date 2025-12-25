@@ -200,6 +200,11 @@ const StreamStatsCollector = function(description, id, mediaConnection, wsConnec
                 }
             }
         },
+        updateHttpConnection: function(url, authorization) {
+            if (url.startsWith(CONNECTION_TYPE.HTTP) && authorization) {
+                statCollector.connection.http.setAuthorization(authorization);
+            }
+        },
         checkForCompression: async function(compression) {
             try {
                 await util.compress(compression, "test", false);
@@ -446,6 +451,9 @@ const HttpConnection = function(url, headers) {
     const connection = {
         url: addSlash(url),
         headers: headers,
+        setAuthorization(token) {
+            this.headers.Authorization = token;
+        },
         send: async function(message, data) {
             let code = CONNECTION_STATUS.BAD_REQUEST;
             if (connection.url) {

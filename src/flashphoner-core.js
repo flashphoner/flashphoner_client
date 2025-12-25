@@ -730,33 +730,19 @@ var createSession = function (options) {
                         streamRefreshHandlers[obj.mediaSessionId](obj);
                     }
                     break;
-                case `webRTCMetricsDescriptionUpdate`:
-                    if (obj.ids) {
-                        obj.ids.forEach((id) => {
-                            if (streamRefreshHandlers[id]) {
-                                streamRefreshHandlers[id](obj);
-                            }
-                        });
-                    } else {
-                        if (obj.compression) {
-                            webRTCMetricsServerDescription.compression = obj.compression;
-                        }
-                        if (obj.batchSize) {
-                            webRTCMetricsServerDescription.batchSize = obj.batchSize;
-                        }
-                        if (obj.sampling) {
-                            webRTCMetricsServerDescription.sampling = obj.sampling;
-                        }
-                        if (obj.types) {
-                            webRTCMetricsServerDescription.types = obj.types;
-                        }
-                        if (obj.collect) {
-                            webRTCMetricsServerDescription.collect = obj.collect;
-                        }
-                        for (const [id, handler] of Object.entries(streamRefreshHandlers)) {
-                            handler(obj);
-                        }
-                    }
+                case 'webRTCMetricsDescriptionUpdate':
+                    handleWebRTCMetricsUpdate(obj, {
+                        compression: "compression",
+                        batchSize: "batchSize",
+                        sampling: "sampling",
+                        types: "types",
+                        collect: "collect"
+                    });
+                    break;
+                case 'webRTCMetricsTokenRefresh':
+                    handleWebRTCMetricsUpdate(obj, {
+                        authorization: "authorization"
+                    });
                     break;
                 default:
                     logger.info(LOG_PREFIX, "Unknown server message " + data.message);
@@ -765,6 +751,26 @@ var createSession = function (options) {
             logger.debug(LOG_PREFIX, "Reset missing pings counter by " + data.message + " message");
             wsPingReceiver.success();
         };
+    }
+
+    function handleWebRTCMetricsUpdate(obj, updateFields = {}) {
+        if (obj.ids) {
+            obj.ids.forEach((id) => {
+                if (streamRefreshHandlers[id]) {
+                    streamRefreshHandlers[id](obj);
+                }
+            });
+        } else {
+            Object.entries(updateFields).forEach(([key, value]) => {
+                if (obj[value] !== undefined) {
+                    webRTCMetricsServerDescription[key] = obj[value];
+                }
+            });
+
+            for (const [id, handler] of Object.entries(streamRefreshHandlers)) {
+                handler(obj);
+            }
+        }
     }
 
     //WebSocket send helper
@@ -1918,6 +1924,11 @@ var createSession = function (options) {
                     statsCollector = StatsCollector.StreamStatsCollector(webRTCMetricsServerDescription, id_, mediaConnection, wsConnection, logger);
                     statsCollector.start();
                 }
+            }
+
+            if (streamInfo.authorization && statsCollector && statsCollector.description.ingestPoint) {
+                statsCollector.description.authorization = streamInfo.authorization;
+                statsCollector.updateHttpConnection(statsCollector.description.ingestPoint, statsCollector.description.authorization);
             }
 
             // Pause or resume metrics collection
