@@ -294,6 +294,34 @@ var getMediaDevices = function (mediaProvider, labels, kind, deviceConstraints) 
 };
 
 /**
+ * Get mobile local media devices
+ *
+ * @param {String=} mediaProvider Media provider that will be asked for device list
+ * @param {Flashphoner.constants.MEDIA_DEVICE_KIND} kind Media devices kind to access:
+ * MEDIA_DEVICE_KIND.INPUT (default) get access to input devices only (camera, mic).
+ * MEDIA_DEVICE_KIND.OUTPUT get access to output devices only (speaker, headphone).
+ * MEDIA_DEVICE_KIND.ALL get access to all devices (cam, mic, speaker, headphone).
+ * @param {Object=} deviceConstraints
+ * If {audio: true, video: false}, then access to the camera will not be requested.
+ * If {audio: false, video: true}, then access to the microphone will not be requested.
+ * @returns {Promise.<Flashphoner.MediaDeviceList>} Promise with media device list on fulfill
+ * @throws {Error} Error if API is not initialized
+ * @memberof Flashphoner
+ */
+var getMobileDevices = function (mediaProvider, kind, deviceConstraints) {
+    if (!initialized) {
+        throw new Error("Flashphoner API is not initialized");
+    }
+    if (!mediaProvider) {
+        mediaProvider = getMediaProviders()[0];
+    }
+    if (MediaProvider[mediaProvider].getMobileDevices) {
+        return MediaProvider[mediaProvider].getMobileDevices(kind, deviceConstraints);
+    }
+    return [];
+};
+
+/**
  * Get access to local media
  *
  * @param {Object} constraints Media constraints
@@ -3151,6 +3179,7 @@ module.exports = {
     isUsingTemasys: isUsingTemasys,
     getMediaProviders: getMediaProviders,
     getMediaDevices: getMediaDevices,
+    getMobileDevices: getMobileDevices,
     getMediaAccess: getMediaAccess,
     releaseLocalMedia: releaseLocalMedia,
     getSessions: getSessions,

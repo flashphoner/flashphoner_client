@@ -1552,6 +1552,63 @@ var available = function () {
     return ('getUserMedia' in navigator && 'RTCPeerConnection' in window);
 };
 
+/**
+ * Helper function to get media devices list in id, label, type form
+ *
+ * @param devices
+ * @param kind
+ * @param videoFilter
+ * @returns {{audio: *[], video: *[]}}
+ */
+const getList = function (devices, kind, videoFilter = null) {
+    var list = {
+        audio: [],
+        video: []
+    };
+
+    var micCount = 0;
+    var outputCount = 0;
+    var camCount = 0;
+    for (var i = 0; i < devices.length; i++) {
+        var device = devices[i];
+        var ret = {
+            id: device.deviceId,
+            label: device.label
+        };
+        if (device.kind.indexOf("audio" + kind) === 0 && device.deviceId !== "communications") {
+            ret.type = (device.kind === "audioinput") ? "mic" : "speaker";
+            if (ret.type === "mic" && ret.label === "") {
+                ret.label = 'microphone' + ++micCount;
+            }
+            if (ret.type === "speaker" && ret.label === "") {
+                ret.label = 'speaker' + ++outputCount;
+            }
+            list.audio.push(ret);
+        } else if (device.kind.indexOf("video" + kind) === 0) {
+            if (!videoFilter || videoFilter.find((id) => id === device.deviceId)) {
+                if (ret.label === "") {
+                    ret.label = 'camera' + ++camCount;
+                }
+                ret.type = "camera";
+                list.video.push(ret);
+            } else {
+                logger.debug(LOG_PREFIX, "Video device " + device.deviceId + "does not conform the filter " + JSON.stringify(videoFilter));
+            }
+        } else {
+            logger.debug(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
+        }
+    }
+    return list;
+}
+
+/**
+ * Get media devices list
+ *
+ * @param labels
+ * @param kind
+ * @param deviceConstraints
+ * @returns {Promise<{audio: [], video: []}>}
+ */
 var listDevices = function (labels, kind, deviceConstraints) {
     //WCS-1963. added deviceConstraints.
     if (!deviceConstraints) {
@@ -1562,7 +1619,7 @@ var listDevices = function (labels, kind, deviceConstraints) {
     }
     if (!kind) {
         kind = constants.MEDIA_DEVICE_KIND.INPUT;
-    } else if (kind == "all") {
+    } else if (kind === constants.MEDIA_DEVICE_KIND.ALL) {
         kind = "";
     }
     var getConstraints = function (devices) {
@@ -1570,51 +1627,14 @@ var listDevices = function (labels, kind, deviceConstraints) {
         for (var i = 0; i < devices.length; i++) {
             var device = devices[i];
             if (device.kind.indexOf("audio" + kind) === 0 && deviceConstraints.audio) {
-                constraints.audio = true;
+                constraints.audio = deviceConstraints.audio;
             } else if (device.kind.indexOf("video" + kind) === 0 && deviceConstraints.video) {
-                constraints.video = true;
+                constraints.video = deviceConstraints.video;
             } else {
                 logger.debug(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
             }
         }
         return constraints;
-    };
-
-    var getList = function (devices) {
-        var list = {
-            audio: [],
-            video: []
-        };
-
-        var micCount = 0;
-        var outputCount = 0;
-        var camCount = 0;
-        for (var i = 0; i < devices.length; i++) {
-            var device = devices[i];
-            var ret = {
-                id: device.deviceId,
-                label: device.label
-            };
-            if (device.kind.indexOf("audio" + kind) === 0 && device.deviceId != "communications") {
-                ret.type = (device.kind == "audioinput") ? "mic" : "speaker";
-                if (ret.type == "mic" && ret.label == "") {
-                    ret.label = 'microphone' + ++micCount;
-                }
-                if (ret.type == "speaker" && ret.label == "") {
-                    ret.label = 'speaker' + ++outputCount;
-                }
-                list.audio.push(ret);
-            } else if (device.kind.indexOf("video" + kind) === 0) {
-                if (ret.label == "") {
-                    ret.label = 'camera' + ++camCount;
-                }
-                ret.type = "camera";
-                list.video.push(ret);
-            } else {
-                logger.debug(LOG_PREFIX, "unknown device " + device.kind + " id " + device.deviceId);
-            }
-        }
-        return list;
     };
 
     return new Promise(function (resolve, reject) {
@@ -1628,19 +1648,96 @@ var listDevices = function (labels, kind, deviceConstraints) {
                 }
                 navigator.getUserMedia(constraints, function (stream) {
                     navigator.mediaDevices.enumerateDevices().then(function (devicesWithLabels) {
-                        resolve(getList(devicesWithLabels));
+                        resolve(getList(devicesWithLabels, kind));
                         stream.getTracks().forEach(function (track) {
                             track.stop();
                         });
                     }, reject);
                 }, reject);
             } else {
-                resolve(getList(devices));
+                resolve(getList(devices, kind));
             }
         }, reject);
-
     });
-};
+}
+
+const getMobileDevices = async function (kind, deviceConstraints = null) {
+    let constraints = {};
+    let videoFilter = [];
+    let list = null;
+    if (!kind) {
+        kind = constants.MEDIA_DEVICE_KIND.INPUT;
+    } else if (kind === constants.MEDIA_DEVICE_KIND.ALL) {
+        kind = "";
+    }
+    if (deviceConstraints && deviceConstraints.audio) {
+        constraints.audio = deviceConstraints.audio;
+    } else {
+        constraints.audio = true;
+    }
+    if (deviceConstraints && deviceConstraints.video) {
+        if (typeof deviceConstraints.video === 'object') {
+            constraints.video = deviceConstraints.video;
+        }
+        else {
+            constraints.video = {};
+        }
+    } else {
+        constraints.video = {};
+    }
+
+    const getCamera = async function (constraints, facingMode) {
+        let deviceId = null;
+        let mediaConstraints = {
+            audio: false,
+            video: constraints.video
+        };
+        mediaConstraints.video.facingMode = facingMode;
+        try {
+            stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+            if (stream) {
+                if (stream.getVideoTracks().length > 0) {
+                    deviceId = stream.getVideoTracks()[0].getSettings().deviceId;
+                }
+                stream.getTracks().forEach((track) =>  {
+                    track.stop();
+                });
+            }
+        } catch (error) {
+            logger.error(LOG_PREFIX, "Can't get device access with video constraints " + JSON.stringify(constraints.video) + ", error " + error);
+        }
+        return deviceId;
+    }
+
+    let front = await getCamera(constraints, { ideal: 'user' });
+    if (front && front !== "") {
+        logger.debug(LOG_PREFIX, "Front camera id: " + front);
+        videoFilter.push(front);
+    }
+    let back = await getCamera(constraints, { ideal: 'environment' });
+    if (back && back !== "") {
+        logger.debug(LOG_PREFIX, "Back camera id: " + back);
+        videoFilter.push(back);
+    }
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        if (stream) {
+            const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+            if (mediaDevices) {
+                logger.debug(LOG_PREFIX, "mediaDevices: " + JSON.stringify(mediaDevices));
+                list = getList(mediaDevices, kind, videoFilter);
+            }
+            stream.getTracks().forEach(function (track) {
+                track.stop();
+            });
+        }
+    } catch (error) {
+        logger.error(LOG_PREFIX, "Can't get device access with constraints " + JSON.stringify(constraints) + ", error " + error);
+    }
+
+    return list;
+}
 
 function normalizeConstraints(constraints) {
     //WCS-2010. fixed TypeError after publish->stop->publish
@@ -1762,6 +1859,7 @@ module.exports = {
     getMediaAccess: getMediaAccess,
     releaseMedia: releaseMedia,
     listDevices: listDevices,
+    getMobileDevices: getMobileDevices,
     playFirstSound: playFirstSound,
     playFirstVideo: playFirstVideo,
     available: available,

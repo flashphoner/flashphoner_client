@@ -34,6 +34,7 @@ var statSpeechDetector = {
     threshold: 0.010,
     latency: 750
 };
+var switchCamEnabled = true;
 
 try {
     var audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -65,79 +66,41 @@ function init_page() {
 
     if(Browser.isAndroid() || Browser.isiOS()) {
         $('#screenShareForm').hide();
+        if (Browser.isFirefox()) {
+            // Use camera selection by name in mobile Firefox browser
+            Flashphoner.getMediaDevices(null, true).then(function (list) {
+                setSwitchableControls(list.video, "videoInput", "sendVideo");
+                setSwitchableControls(list.audio, "audioInput", "sendAudio");
+            }).catch(function (error) {
+                $("#notifyFlash").text("Failed to get media devices: " + error.message);
+            });
+        } else {
+            // Use camera selection by facingMode constraint on mobile devices in Chrome and Safari
+            Flashphoner.getMobileDevices(null, MEDIA_DEVICE_KIND.INPUT).then((list) => {
+                setSwitchableControls(list.video, "videoInput", "sendVideo");
+                setSwitchableControls(list.audio, "audioInput", "sendAudio");
+                switchCamEnabled = false;
+            }).catch(function (error) {
+                $("#notifyFlash").text("Failed to get media devices: " + error.message);
+            });
+        }
+    } else {
+        // List all the connected devices on desktop
+        Flashphoner.getMediaDevices(null, true).then(function (list) {
+            setSwitchableControls(list.video, "videoInput", "sendVideo");
+            setSwitchableControls(list.audio, "audioInput", "sendAudio");
+        }).catch(function (error) {
+            $("#notifyFlash").text("Failed to get media devices: " + error.message);
+        });
     }
 
     Flashphoner.getMediaDevices(null, true, MEDIA_DEVICE_KIND.OUTPUT).then(function (list) {
-        list.audio.forEach(function (device) {
-            var audio = document.getElementById("audioOutput");
-            var deviceInList = false;
-            for (var i = 0; i < audio.options.length; i++) {
-                if (audio.options[i].value === device.id) {
-                    deviceInList = true;
-                    break;
-                }
-            }
-            if (!deviceInList) {
-                var option = document.createElement("option");
-                option.text = device.label || device.id;
-                option.value = device.id;
-                audio.appendChild(option);
-            }
-        });
+        if (list.audio) {
+            addDeviceToSelect(list.audio, "audioOutput");
+        }
     }).catch(function (error) {
         console.error(error);
         $('#audioOutputForm').remove();
-    });
-
-    Flashphoner.getMediaDevices(null, true).then(function (list) {
-        list.audio.forEach(function (device) {
-            var audio = document.getElementById("audioInput");
-            var deviceInList = false;
-            for (var i = 0; i < audio.options.length; i++) {
-                if (audio.options[i].value === device.id) {
-                    deviceInList = true;
-                    break;
-                }
-            }
-            if (!deviceInList) {
-                var option = document.createElement("option");
-                option.text = device.label || device.id;
-                option.value = device.id;
-                audio.appendChild(option);
-            }
-        });
-        list.video.forEach(function (device) {
-            console.log(device);
-            var video = document.getElementById("videoInput");
-            var deviceInList = false;
-            for (var i = 0; i < video.options.length; i++) {
-                if (video.options[i].value === device.id) {
-                    deviceInList = true;
-                    break;
-                }
-            }
-            if (!deviceInList) {
-                var option = document.createElement("option");
-                option.text = device.label || device.id;
-                option.value = device.id;
-                if (option.text.toLowerCase().indexOf("back") >= 0 && video.children.length > 0) {
-                    video.insertBefore(option, video.children[0]);
-                } else {
-                    video.appendChild(option);
-                }
-            }
-        });
-        $("#url").val(setURL() + "/" + createUUID(8));
-        //set initial button callback
-        onDisconnected();
-        if (list.audio.length === 0) {
-            $("#sendAudio").prop('checked', false).prop('disabled', true);
-        }
-        if (list.video.length === 0) {
-            $("#sendVideo").prop('checked', false).prop('disabled', true);
-        }
-    }).catch(function (error) {
-        $("#notifyFlash").text("Failed to get media devices");
     });
 
     if (Browser.isiOS() && Browser.isSafariWebRTC()) {
@@ -150,8 +113,43 @@ function init_page() {
     var streamName = createUUID(4);
     $("#publishStream").val(streamName);
     $("#playStream").val(streamName);
-
     readyControls();
+    onDisconnected();
+}
+
+const addDeviceToSelect = function (devices, selectId) {
+    devices.forEach(function (device) {
+        let select = document.getElementById(selectId);
+        let deviceInList = false;
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === device.id) {
+                deviceInList = true;
+                break;
+            }
+        }
+        if (!deviceInList) {
+            let option = document.createElement("option");
+            option.text = device.label || device.id;
+            option.value = device.id;
+            if (selectId === "videoInput") {
+                if (option.text.toLowerCase().indexOf("back") >= 0 && select.children.length > 0) {
+                    select.insertBefore(option, select.children[0]);
+                } else {
+                    select.appendChild(option);
+                }
+            } else if (selectId.startsWith("audio")) {
+                select.appendChild(option);
+            }
+        }
+    });
+}
+
+const setSwitchableControls = function (devices, inputId, sendId) {
+    if (devices && devices.length > 0) {
+        addDeviceToSelect(devices, inputId);
+    } else {
+        $("#" + sendId).prop('checked', false).prop('disabled', true);
+    }
 }
 
 function onStopped() {
@@ -224,15 +222,17 @@ function onPublishing(stream) {
         $(this).prop('disabled', true);
         stream.stop();
     }).prop('disabled', false);
-    $("#switchBtn").text("Switch").off('click').click(function () {
-        stream.switchCam().then(function(id) {
-            console.log("Switched by button to camera " + id);
-            $('#videoInput option:selected').prop('selected', false);
-            $("#videoInput option[value='"+ id +"']").prop('selected', true);
-        }).catch(function(e) {
-            console.log("Error " + e);
-        });
-    })
+    if(switchCamEnabled) {
+        $("#switchBtn").text("Switch").off('click').click(function () {
+            stream.switchCam().then(function(id) {
+                console.log("Switched by button to camera " + id);
+                $('#videoInput option:selected').prop('selected', false);
+                $("#videoInput option[value='"+ id +"']").prop('selected', true);
+            }).catch(function(e) {
+                console.log("Error " + e);
+            });
+        })
+    }
     $("#switchMicBtn").click(function (){
         stream.switchMic().then(function(id) {
             $('#audioInput option:selected').prop('selected', false);
@@ -489,7 +489,6 @@ function publish() {
     publishStream = session.createStream({
         name: streamName,
         display: localVideo,
-        cacheLocalResources: true,
         constraints: constraints,
         mediaConnectionConstraints: mediaConnectionConstraints,
         sdpHook: rewriteSdp,
@@ -710,7 +709,9 @@ function switchToScreen() {
         $('#videoInput').prop('disabled', true);
         publishStream.switchToScreen($('#mediaSource').val(), true).catch(function () {
             $("#screenShareToggle").removeAttr("checked");
-            $('#switchBtn').prop('disabled', false);
+            if (switchCamEnabled) {
+                $('#switchBtn').prop('disabled', false);
+            }
             $('#videoInput').prop('disabled', false);
         });
     }
@@ -719,7 +720,9 @@ function switchToScreen() {
 function switchToCam() {
     if (publishStream) {
         publishStream.switchToCam();
-        $('#switchBtn').prop('disabled', false);
+        if (switchCamEnabled) {
+            $('#switchBtn').prop('disabled', false);
+        }
         $('#videoInput').prop('disabled', false);
     }
 }
