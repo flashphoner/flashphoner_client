@@ -963,6 +963,10 @@ var createConnection = function (options) {
             });
         };
 
+        var getRTCPeerConnection = function() {
+            return connection;
+        }
+
         var exports = {};
         exports.state = state;
         exports.createOffer = createOffer;
@@ -996,6 +1000,7 @@ var createConnection = function (options) {
         exports.setZoom = setZoom;
         exports.getZoom = getZoom;
         exports.getWebRTCStats = getWebRTCStats;
+        exports.getRTCPeerConnection = getRTCPeerConnection;
         connections[id] = exports;
         resolve(exports);
     });

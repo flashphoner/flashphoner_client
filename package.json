@@ -5,6 +5,7 @@
   "main": "./src/flashphoner-core.js",
   "types": "./src/flashphoner-core.d.ts",
   "dependencies": {
+    "@flashphoner/web-sdk-metrics": "^1.0.0",
     "adapterjs": "0.15.5",
     "es6-promise": "4.0.5",
     "kalmanjs": "^1.1.0",

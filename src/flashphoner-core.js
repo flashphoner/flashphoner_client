@@ -1,11 +1,13 @@
 'use strict';
 
-const { v1: uuid_v1 } = require('uuid');
+const {
+    RTCMetricsCollectorBuilder, RTCMetricsCollectType, RTCMetricsHttpSender
+} = require("@flashphoner/web-sdk-metrics");
+const {v1: uuid_v1} = require('uuid');
 const constants = require("./constants");
 const util = require('./util');
 const LoggerObject = require('./util').logger;
 const clientInfo = require('./client-info');
-const StatsCollector = require('./stats-collector');
 const Promise = require('promise-polyfill');
 const KalmanFilter = require('kalmanjs');
 const browserDetails = require('webrtc-adapter').default.browserDetails;
@@ -30,6 +32,8 @@ const VIDEO_RATE_GOOD_QUALITY_PERCENT_DIFFERENCE = 20;
 const VIDEO_RATE_BAD_QUALITY_PERCENT_DIFFERENCE = 50;
 const LOW_VIDEO_RATE_THRESHOLD_BAD_PERFECT = 50000;
 const LOW_VIDEO_RATE_BAD_QUALITY_PERCENT_DIFFERENCE = 150;
+const WEBRTC_METRICS_DESCRIPTION_UPDATE = "webRTCMetricsDescriptionUpdate";
+const WEBRTC_METRICS_TOKEN_REFRESH = "webRTCMetricsTokenRefresh";
 const OUTBOUND_VIDEO_RATE = "outboundVideoRate";
 const INBOUND_VIDEO_RATE = "inboundVideoRate";
 const CONSTRAINT_AUDIO = "audio";
@@ -758,19 +762,38 @@ var createSession = function (options) {
                         streamRefreshHandlers[obj.mediaSessionId](obj);
                     }
                     break;
-                case 'webRTCMetricsDescriptionUpdate':
-                    handleWebRTCMetricsUpdate(obj, {
-                        compression: "compression",
-                        batchSize: "batchSize",
-                        sampling: "sampling",
-                        types: "types",
-                        collect: "collect"
-                    });
+                case WEBRTC_METRICS_TOKEN_REFRESH:
+                    for (const [_, handler] of Object.entries(streamRefreshHandlers)) {
+                        handler(obj);
+                    }
                     break;
-                case 'webRTCMetricsTokenRefresh':
-                    handleWebRTCMetricsUpdate(obj, {
-                        authorization: "authorization"
-                    });
+                case WEBRTC_METRICS_DESCRIPTION_UPDATE:
+                    if (obj.ids) {
+                        obj.ids.forEach((id) => {
+                            if (streamRefreshHandlers[id]) {
+                                streamRefreshHandlers[id](obj);
+                            }
+                        });
+                    } else {
+                        if (obj.compression) {
+                            webRTCMetricsServerDescription.compression = obj.compression;
+                        }
+                        if (obj.batchSize) {
+                            webRTCMetricsServerDescription.batchSize = obj.batchSize;
+                        }
+                        if (obj.sampling) {
+                            webRTCMetricsServerDescription.sampling = obj.sampling;
+                        }
+                        if (obj.types) {
+                            webRTCMetricsServerDescription.types = obj.types;
+                        }
+                        if (obj.collect) {
+                            webRTCMetricsServerDescription.collect = obj.collect;
+                        }
+                        for (const [id, handler] of Object.entries(streamRefreshHandlers)) {
+                            handler(obj);
+                        }
+                    }
                     break;
                 default:
                     logger.info(LOG_PREFIX, "Unknown server message " + data.message);
@@ -779,26 +802,6 @@ var createSession = function (options) {
             logger.debug(LOG_PREFIX, "Reset missing pings counter by " + data.message + " message");
             wsPingReceiver.success();
         };
-    }
-
-    function handleWebRTCMetricsUpdate(obj, updateFields = {}) {
-        if (obj.ids) {
-            obj.ids.forEach((id) => {
-                if (streamRefreshHandlers[id]) {
-                    streamRefreshHandlers[id](obj);
-                }
-            });
-        } else {
-            Object.entries(updateFields).forEach(([key, value]) => {
-                if (obj[value] !== undefined) {
-                    webRTCMetricsServerDescription[key] = obj[value];
-                }
-            });
-
-            for (const [id, handler] of Object.entries(streamRefreshHandlers)) {
-                handler(obj);
-            }
-        }
     }
 
     //WebSocket send helper
@@ -1843,6 +1846,7 @@ var createSession = function (options) {
         var videoBytes = 0;
 
         var statsCollector = null;
+        var httpStatsSender = null;
 
         /**
          * Represents media stream.
@@ -1949,20 +1953,40 @@ var createSession = function (options) {
             // Set up metrics collection
             if (event === STREAM_STATUS.PUBLISHING || event === STREAM_STATUS.PLAYING) {
                 if (webRTCMetricsServerDescription && !statsCollector) {
-                    statsCollector = StatsCollector.StreamStatsCollector(webRTCMetricsServerDescription, id_, mediaConnection, wsConnection, logger);
+                    const builder  = new RTCMetricsCollectorBuilder()
+                        .id(id_)
+                        .description(webRTCMetricsServerDescription)
+                        .peerConnection(mediaConnection.getRTCPeerConnection())
+                        .logger(logger)
+                        .websocket(wsConnection)
+                    if(webRTCMetricsServerDescription.ingestPoint != null && webRTCMetricsServerDescription.ingestPoint.startsWith("http")) {
+                        httpStatsSender = new RTCMetricsHttpSender(webRTCMetricsServerDescription.ingestPoint, {
+                            Authorization: webRTCMetricsServerDescription.authorization,
+                        })
+                        builder.httpSender(httpStatsSender)
+                    }
+                    statsCollector = builder.build();
                     statsCollector.start();
                 }
             }
 
-            if (streamInfo.authorization && statsCollector && statsCollector.description.ingestPoint) {
-                statsCollector.description.authorization = streamInfo.authorization;
-                statsCollector.updateHttpConnection(statsCollector.description.ingestPoint, statsCollector.description.authorization);
+            // Refresh authorization token if defined sender for ingestPoint
+            if(!streamInfo.status && streamInfo.authorization != null && httpStatsSender) {
+                httpStatsSender.headers = {
+                    ...httpStatsSender.headers,
+                    Authorization: streamInfo.authorization,
+                }
             }
 
             // Pause or resume metrics collection
             if (!streamInfo.status && streamInfo.collect !== undefined && statsCollector) {
-                statsCollector.update(streamInfo);
+                if(streamInfo.collect === RTCMetricsCollectType.on){
+                    statsCollector.collect(true);
+                }else{
+                    statsCollector.collect(false);
+                }
             }
+
 
             //fire stream event
             if (callbacks[event]) {
