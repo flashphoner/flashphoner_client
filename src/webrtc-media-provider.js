@@ -601,6 +601,14 @@ var createConnection = function (options) {
         };
 
         var switchCam = function (deviceId) {
+            const releaseCam = function(stream) {
+                if (stream) {
+                    stream.getTracks().forEach(function (track) {
+                        track.stop();
+                        stream.removeTrack(track);
+                    });
+                }
+            };
             return new Promise(function (resolve, reject) {
                 if (localVideo && localVideo.srcObject && videoCams.length > 1 && !customStream && !screenShare) {
                     connection.getSenders().forEach(function (sender) {
@@ -627,17 +635,22 @@ var createConnection = function (options) {
                         clonedConstraints.video.deviceId = {exact: cameraId};
                         clonedConstraints.audio = false;
                         navigator.mediaDevices.getUserMedia(clonedConstraints).then(function (newStream) {
-                            var newVideoTrack = newStream.getVideoTracks()[0];
-                            newVideoTrack.enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
-                            var audioTrack = localVideo.srcObject.getAudioTracks()[0];
-                            sender.replaceTrack(newVideoTrack);
-                            localVideo.srcObject = newStream;
-                            // On Safari mobile _newStream_ doesn't contain audio track, so we need to add track from previous stream
-                            if (localVideo.srcObject.getAudioTracks().length == 0 && audioTrack) {
-                                localVideo.srcObject.addTrack(audioTrack);
+                            if (localVideo && localVideo.srcObject) {
+                                var newVideoTrack = newStream.getVideoTracks()[0];
+                                newVideoTrack.enabled = localVideo.srcObject.getVideoTracks()[0].enabled;
+                                var audioTrack = localVideo.srcObject.getAudioTracks()[0];
+                                sender.replaceTrack(newVideoTrack);
+                                localVideo.srcObject = newStream;
+                                // On Safari mobile _newStream_ doesn't contain audio track, so we need to add track from previous stream
+                                if (localVideo.srcObject.getAudioTracks().length == 0 && audioTrack) {
+                                    localVideo.srcObject.addTrack(audioTrack);
+                                }
+                                logger.info(LOG_PREFIX, "Switch camera to " + cameraId);
+                                resolve(cameraId);
+                            } else {
+                                releaseCam(newStream);
+                                reject("Can't switch camera to " + cameraId + ", video renderer is already closed");
                             }
-                            logger.info(LOG_PREFIX, "Switch camera to " + cameraId);
-                            resolve(cameraId);
                         }).catch(function (reason) {
                             logger.error(LOG_PREFIX, reason);
                             reject(reason);
