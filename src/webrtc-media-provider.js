@@ -1707,7 +1707,7 @@ const getMobileDevices = async function (kind, deviceConstraints = null) {
     const getCamera = async function (constraints, facingMode) {
         let deviceId = null;
         let mediaConstraints = {
-            audio: false,
+            audio: constraints.audio,
             video: constraints.video
         };
         mediaConstraints.video.facingMode = facingMode;
