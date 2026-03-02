@@ -22,6 +22,7 @@ var clientUAData;
  */
 
 const SESSION_STATUS = constants.SESSION_STATUS;
+const SERVER_INFO = constants.SERVER_INFO;
 const STREAM_EVENT = constants.STREAM_EVENT;
 const STREAM_EVENT_TYPE = constants.STREAM_EVENT_TYPE;
 const STREAM_STATUS = constants.STREAM_STATUS;
@@ -511,6 +512,7 @@ var createSession = function (options) {
     var wsPingSender = new WSPingSender(options.pingInterval || 0);
     var wsPingReceiver = new WSPingReceiver(options.receiveProbes || 0, options.probesInterval || 0);
     var connectionTimeout;
+    var serverVersion;
 
     var cConfig;
     //SIP config
@@ -659,6 +661,11 @@ var createSession = function (options) {
                     cConfig = obj;
                     webRTCMetricsServerDescription = obj.webRTCMetricsServerDescription;
                     onSessionStatusChange(SESSION_STATUS.ESTABLISHED, obj);
+                    break;
+                case 'getVersion':
+                    serverVersion = obj;
+                    logger.info(LOG_PREFIX, "server version: " + serverVersion);
+                    callbacks[SERVER_INFO.SERVER_VERSION](session);
                     break;
                 case 'setRemoteSDP':
                     var mediaSessionId = data.data[0];
@@ -2945,6 +2952,17 @@ var createSession = function (options) {
     };
 
     /**
+     * Get server version
+     *
+     * @returns {string} serverVersion Server version
+     * @memberof Session
+     * @inner
+     */
+    var getServerVersion = function () {
+        return serverVersion;
+    };
+
+    /**
      * Get stream by id.
      *
      * @param {string} streamId Stream id
@@ -3188,6 +3206,7 @@ var createSession = function (options) {
     session.stopDebug = stopDebug;
     session.on = on;
     session.getLogger = getLogger;
+    session.getServerVersion = getServerVersion;
 
     //save interface to global map
     sessions[id_] = session;

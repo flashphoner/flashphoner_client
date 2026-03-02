@@ -842,6 +842,19 @@ const CONTENT_HINT_TYPE = Object.freeze({
     TEXT: 'text'
 });
 
+/**
+ * Server information constants
+ * @namespace Flashphoner.constants.SERVER_INFO
+ */
+const SERVER_INFO = Object.freeze({
+    /**
+     * The version of the WCS that the current session is connected to
+     * @see Session
+     * @memberOf Flashphoner.constants.SERVER_INFO
+     */
+    SERVER_VERSION: 'serverVersion'
+});
+
 module.exports = {
     SESSION_STATUS,
     STREAM_STATUS,
@@ -854,5 +867,6 @@ module.exports = {
     CONNECTION_QUALITY,
     STREAM_EVENT,
     STREAM_EVENT_TYPE,
-    CONTENT_HINT_TYPE
+    CONTENT_HINT_TYPE,
+    SERVER_INFO
 };

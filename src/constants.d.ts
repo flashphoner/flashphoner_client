@@ -802,3 +802,16 @@ export const CONTENT_HINT_TYPE: Readonly<{
      */
     TEXT: string;
 }>;
+
+/**
+ * Server information constants
+ * @namespace Flashphoner.constants.SERVER_INFO
+ */
+export const SERVER_INFO: Readonly<{
+    /**
+     * The version of the WCS that the current session is connected to
+     * @see Session
+     * @memberOf Flashphoner.constants.SERVER_INFO
+     */
+    SERVER_VERSION: string;
+}>;

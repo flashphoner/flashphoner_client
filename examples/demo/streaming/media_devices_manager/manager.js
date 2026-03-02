@@ -6,6 +6,7 @@ var CONNECTION_QUALITY = Flashphoner.constants.CONNECTION_QUALITY;
 var MEDIA_DEVICE_KIND = Flashphoner.constants.MEDIA_DEVICE_KIND;
 var TRANSPORT_TYPE = Flashphoner.constants.TRANSPORT_TYPE;
 var CONTENT_HINT_TYPE = Flashphoner.constants.CONTENT_HINT_TYPE;
+var SERVER_INFO = Flashphoner.constants.SERVER_INFO;
 var CONNECTION_QUALITY_UPDATE_TIMEOUT_MS = 10000;
 var preloaderUrl = "../../dependencies/media/preloader.mp4";
 var Browser = Flashphoner.Browser;
@@ -171,6 +172,7 @@ function onStopped() {
         speechIntervalID = null;
         $("#talking").css('background-color', 'red');
     }
+    updateServerVersion( '');
     enablePlayToggles(false);
 }
 
@@ -346,6 +348,8 @@ function connect() {
     Flashphoner.createSession({urlServer: url, timeout: tm}).on(SESSION_STATUS.ESTABLISHED, function (session) {
         setStatus("#connectStatus", session.status());
         onConnected(session);
+    }).on(SERVER_INFO.SERVER_VERSION, function(session) {
+        updateServerVersion(session.getServerVersion());
     }).on(SESSION_STATUS.DISCONNECTED, function () {
         setStatus("#connectStatus", SESSION_STATUS.DISCONNECTED);
         onDisconnected();
@@ -586,6 +590,22 @@ function setStatus(selector, status, stream) {
         statusField.attr("class", "text-muted");
     } else if (status == "FAILED") {
         statusField.attr("class", "text-danger");
+    }
+}
+
+function updateServerVersion(version) {
+    const $field = $("#serverVersion");
+    const $container = $("#wcsVersion");
+
+    if (version && version.trim() !== '') {
+        $field
+            .text(version)
+            .removeClass()
+            .attr("class", "text-success");
+        $container.show();
+    } else {
+        $field.text('');
+        $container.hide();
     }
 }
 
