@@ -172,7 +172,6 @@ function onStopped() {
         speechIntervalID = null;
         $("#talking").css('background-color', 'red');
     }
-    updateServerVersion( '');
     enablePlayToggles(false);
 }
 
@@ -322,6 +321,7 @@ function onDisconnected() {
     $('#urlServer').prop('disabled', false);
     onUnpublished();
     onStopped();
+    updateServerVersion('');
 }
 
 function onVisibilityChanged() {
