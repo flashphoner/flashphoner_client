@@ -1717,12 +1717,13 @@ const getMobileDevices = async function (kind, deviceConstraints = null) {
                 if (stream.getVideoTracks().length > 0) {
                     deviceId = stream.getVideoTracks()[0].getSettings().deviceId;
                 }
-                stream.getTracks().forEach((track) =>  {
+                stream.getTracks().forEach((track) => {
                     track.stop();
                 });
             }
         } catch (error) {
             logger.error(LOG_PREFIX, "Can't get device access with video constraints " + JSON.stringify(constraints.video) + ", error " + error);
+            throw error;
         }
         return deviceId;
     }
@@ -1752,6 +1753,11 @@ const getMobileDevices = async function (kind, deviceConstraints = null) {
         }
     } catch (error) {
         logger.error(LOG_PREFIX, "Can't get device access with constraints " + JSON.stringify(constraints) + ", error " + error);
+        throw error;
+    }
+
+    if (!list) {
+        throw new Error("No media devices found");
     }
 
     return list;
