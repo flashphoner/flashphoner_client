@@ -1717,7 +1717,7 @@ const getMobileDevices = async function (kind, deviceConstraints = null) {
                 if (stream.getVideoTracks().length > 0) {
                     deviceId = stream.getVideoTracks()[0].getSettings().deviceId;
                 }
-                stream.getTracks().forEach((track) =>  {
+                stream.getTracks().forEach((track) => {
                     track.stop();
                 });
             }
@@ -1738,20 +1738,26 @@ const getMobileDevices = async function (kind, deviceConstraints = null) {
         videoFilter.push(back);
     }
 
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        if (stream) {
-            const mediaDevices = await navigator.mediaDevices.enumerateDevices();
-            if (mediaDevices) {
-                logger.debug(LOG_PREFIX, "mediaDevices: " + JSON.stringify(mediaDevices));
-                list = getList(mediaDevices, kind, videoFilter);
+    if (videoFilter.length) {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(constraints);
+            if (stream) {
+                const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+                if (mediaDevices) {
+                    logger.debug(LOG_PREFIX, "mediaDevices: " + JSON.stringify(mediaDevices));
+                    list = getList(mediaDevices, kind, videoFilter);
+                }
+                stream.getTracks().forEach(function (track) {
+                    track.stop();
+                });
             }
-            stream.getTracks().forEach(function (track) {
-                track.stop();
-            });
+        } catch (error) {
+            logger.error(LOG_PREFIX, "Can't get device access with constraints " + JSON.stringify(constraints) + ", error " + error);
+            throw error;
         }
-    } catch (error) {
-        logger.error(LOG_PREFIX, "Can't get device access with constraints " + JSON.stringify(constraints) + ", error " + error);
+    } else {
+        logger.error(LOG_PREFIX, "Failed to get any video device");
+        throw new Error("Failed to get any video device");
     }
 
     return list;
