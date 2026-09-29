@@ -665,7 +665,9 @@ var createSession = function (options) {
                 case 'getVersion':
                     serverVersion = obj;
                     logger.info(LOG_PREFIX, "server version: " + serverVersion);
-                    callbacks[SERVER_INFO.SERVER_VERSION](session);
+                    if (callbacks[SERVER_INFO.SERVER_VERSION]) {
+                      callbacks[SERVER_INFO.SERVER_VERSION](session);
+                    }
                     break;
                 case 'setRemoteSDP':
                     var mediaSessionId = data.data[0];
@@ -770,6 +772,11 @@ var createSession = function (options) {
                     }
                     break;
                 case WEBRTC_METRICS_TOKEN_REFRESH:
+                    // Keep the stored description current: a stream started later on this connection
+                    // builds its sender from it, and would otherwise post the token issued at connect
+                    if (webRTCMetricsServerDescription && obj.authorization) {
+                        webRTCMetricsServerDescription.authorization = obj.authorization;
+                    }
                     for (const [_, handler] of Object.entries(streamRefreshHandlers)) {
                         handler(obj);
                     }
@@ -782,20 +789,23 @@ var createSession = function (options) {
                             }
                         });
                     } else {
-                        if (obj.compression) {
-                            webRTCMetricsServerDescription.compression = obj.compression;
-                        }
-                        if (obj.batchSize) {
-                            webRTCMetricsServerDescription.batchSize = obj.batchSize;
-                        }
-                        if (obj.sampling) {
-                            webRTCMetricsServerDescription.sampling = obj.sampling;
-                        }
-                        if (obj.types) {
-                            webRTCMetricsServerDescription.types = obj.types;
-                        }
-                        if (obj.collect) {
-                            webRTCMetricsServerDescription.collect = obj.collect;
+                        // Undefined when RTC metrics were off at connect
+                        if (webRTCMetricsServerDescription) {
+                            if (obj.compression) {
+                                webRTCMetricsServerDescription.compression = obj.compression;
+                            }
+                            if (obj.batchSize) {
+                                webRTCMetricsServerDescription.batchSize = obj.batchSize;
+                            }
+                            if (obj.sampling) {
+                                webRTCMetricsServerDescription.sampling = obj.sampling;
+                            }
+                            if (obj.types) {
+                                webRTCMetricsServerDescription.types = obj.types;
+                            }
+                            if (obj.collect) {
+                                webRTCMetricsServerDescription.collect = obj.collect;
+                            }
                         }
                         for (const [id, handler] of Object.entries(streamRefreshHandlers)) {
                             handler(obj);
