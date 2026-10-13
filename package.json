@@ -4,6 +4,9 @@
   "description": "Official Flashphoner WebCallServer WebSDK package",
   "main": "./src/flashphoner-core.js",
   "types": "./src/flashphoner-core.d.ts",
+  "scripts": {
+    "test:examples": "node test/run-examples.cjs"
+  },
   "dependencies": {
     "@flashphoner/web-sdk-metrics": "^1.0.0",
     "adapterjs": "0.15.5",

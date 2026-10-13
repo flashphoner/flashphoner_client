@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="manager.css">
+    <title>Media Devices</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="media-device-manager.js"></script>
+</head>
+<body>
+<main class="page-shell media-devices">
+    <header class="page-heading">
+        <h1>Media Devices</h1>
+    </header>
+
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+
+    <section class="preview-section" aria-label="Stream preview">
+        <div class="preview-grid">
+            <div class="preview-column">
+                <article class="preview-card">
+                    <div class="preview-frame">
+                        <h2 class="preview-caption">Publisher</h2>
+                        <div class="fp-remoteVideo">
+                            <div id="localVideo" class="display"></div>
+                        </div>
+                    </div>
+                    <div class="preview-resolution text-muted text-center" id="publishResolution"></div>
+                    <div id="senderForm" class="control-group preview-action">
+                        <input class="control" type="text" id="publishStream" placeholder="Stream Name">
+                        <div class="control-group-action">
+                            <button id="publishBtn" type="button" class="button button-primary">Publish</button>
+                        </div>
+                    </div>
+                    <div class="preview-status" data-empty="true" role="status" aria-live="polite" aria-label="Publishing status"><span class="status-prefix">Status:</span> <span id="publishStatus"></span></div>
+                    <div id="publishError" class="status-error preview-error" role="alert" hidden></div>
+                </article>
+            </div>
+
+            <div class="preview-column">
+                <article class="preview-card">
+                    <div class="preview-frame">
+                        <h2 class="preview-caption">Player</h2>
+                        <div class="fp-remoteVideo">
+                            <div id="remoteVideo" class="display"></div>
+                        </div>
+                    </div>
+                    <div class="preview-resolution text-muted text-center" id="playResolution"></div>
+                    <div id="playerForm" class="control-group preview-action">
+                        <input class="control" type="text" id="playStream" placeholder="Stream Name">
+                        <div class="control-group-action">
+                            <button id="playBtn" type="button" class="button button-primary">Play</button>
+                        </div>
+                    </div>
+                    <div class="preview-status" data-empty="true" role="status" aria-live="polite" aria-label="Playback status"><span class="status-prefix">Status:</span> <span id="playStatus"></span></div>
+                    <div id="playError" class="status-error preview-error" role="alert" hidden></div>
+                </article>
+            </div>
+        </div>
+        <section class="connection-panel" aria-label="Connection">
+            <div class="connection-main">
+                <div class="connection-fields">
+                    <div id="connectionForm" class="control-group">
+                        <input class="control" id="urlServer" type="text" aria-label="WebSocket server URL">
+                        <div class="control-group-action">
+                            <button id="connectBtn" type="button" class="button button-primary">Connect</button>
+                        </div>
+                    </div>
+                    <div class="timeout-field">
+                        <label for="timeout">Timeout</label>
+                        <div class="control-group">
+                            <input type="text" class="control" id="timeout" value="1000">
+                            <span class="control-addon unit-addon">msec</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="connection-status">
+                    <div class="connection-status-line" data-empty="true" role="status" aria-live="polite">
+                        <span class="status-prefix">Status:</span>
+                        <span id="connectStatus"></span>
+                    </div>
+                    <div id="wcsVersion" class="wcs-version" hidden>
+                        <span class="prefix">WCS version: </span><span id="serverVersion"></span>
+                    </div>
+                </div>
+                <div id="connectError" class="status-error connection-error" role="alert" hidden></div>
+            </div>
+        </section>
+    </section>
+
+    <details class="statistics-panel">
+        <summary>
+            <span class="section-heading">Stream statistics</span>
+            <span class="statistics-toggle"><span class="statistics-show">Show</span><span class="statistics-hide">Hide</span></span>
+        </summary>
+        <div class="statistics-content">
+            <p class="statistics-note"><span class="stat-missing">No data</span>: no measurement yet. <span class="stat-not-applicable">N/A</span>: not applicable to this side. Use ? for metric details.</p>
+            <table id="streamStats" class="statistics-table">
+                <caption class="visually-hidden">Stream statistics: publisher and player</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Parameter</th>
+                        <th scope="col">Publisher</th>
+                        <th scope="col">Player</th>
+                    </tr>
+                </thead>
+                <tbody data-stat-group="Video"><tr class="statistics-group-heading"><th colspan="3" scope="rowgroup">Video</th></tr></tbody>
+                <tbody data-stat-group="Audio"><tr class="statistics-group-heading"><th colspan="3" scope="rowgroup">Audio</th></tr></tbody>
+                <tbody data-stat-group="Connection"><tr class="statistics-group-heading"><th colspan="3" scope="rowgroup">Connection</th></tr></tbody>
+            </table>
+        </div>
+    </details>
+
+    <form id="form" class="settings-form" role="form">
+        <div class="settings-grid">
+            <section class="settings-panel" aria-labelledby="publishingHeading">
+                <div class="settings-heading">
+                    <h2 id="publishingHeading" class="section-heading">Publishing settings</h2>
+                    <button type="button" class="button" id="testBtn">Test</button>
+                </div>
+                <div class="settings-group" id="sendAudioGroup">
+                    <h3 class="settings-subheading">Audio</h3>
+                    <div class="field-row boolean-field">
+                        <label class="field-label" for="sendAudio">Send audio</label>
+                        <div class="field-control">
+                            <input type="checkbox" class="checkbox-control" checked id="sendAudio" value="true">
+                        </div>
+                    </div>
+                    <div class="field-row" id="audioInputForm">
+                        <label class="field-label" for="audioInput">Microphone</label>
+                        <div class="field-content">
+                            <div class="control-group">
+                                <select class="control" id="audioInput"></select>
+                                <span id="micLevel" class="control-addon mic-level">0</span>
+                            </div>
+                            <button type="button" class="button control field-action" id="switchMicBtn">Switch</button>
+                        </div>
+                    </div>
+                    <div class="field-row" id="micGainForm">
+                        <label class="field-label" for="micGainControl">Mic gain</label>
+                        <div class="slider-field">
+                            <input id="micGainControl" type="range" min="0" max="100" step="10" value="50">
+                        </div>
+                    </div>
+                    <div class="field-row boolean-field" id="sendStereoForm">
+                        <div class="field-label"><label for="sendStereoAudio">Stereo</label>
+                            <span class="help"><button type="button" class="help-marker" aria-label="Help: Stereo" aria-describedby="help-sendStereoAudio" aria-expanded="false">?</button><span class="help-tooltip" role="tooltip" id="help-sendStereoAudio">Enable stereo for Opus audio.</span></span>
+                        </div>
+                        <div class="field-control">
+                            <input type="checkbox" class="checkbox-control" id="sendStereoAudio" value="true">
+                        </div>
+                    </div>
+                    <div class="field-row boolean-field">
+                        <label class="field-label" for="publishChartToggle">Bitrate chart</label>
+                        <div class="field-control">
+                            <input id="publishChartToggle" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="chart-row">
+                        <canvas id="publishBitrateChart" width="400" height="300"></canvas>
+                    </div>
+                    <h4 class="settings-note">Additional audio settings</h4>
+                    <div class="field-row" id="sendAudioBitrateForm">
+                        <div class="field-label"><label for="sendAudioBitrate">Bitrate</label>
+                            <span class="help"><button type="button" class="help-marker" aria-label="Help: Bitrate" aria-describedby="help-sendAudioBitrate" aria-expanded="false">?</button><span class="help-tooltip" role="tooltip" id="help-sendAudioBitrate">Target Opus audio bitrate in bits per second. 0 uses the default.</span></span>
+                        </div>
+                        <div class="field-content">
+                            <div class="control-group">
+                                <input type="text" class="control" id="sendAudioBitrate" value="0">
+                                <span class="control-addon unit-addon">bps</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field-row boolean-field" id="fecForm">
+                        <div class="field-label"><label for="fec">FEC</label>
+                            <span class="help"><button type="button" class="help-marker" aria-label="Help: FEC" aria-describedby="help-fec" aria-expanded="false">?</button><span class="help-tooltip" role="tooltip" id="help-fec">Forward error correction for Opus audio.</span></span>
+                        </div>
+                        <div class="field-control">
+                            <input type="checkbox" class="checkbox-control" id="fec" value="true">
+                        </div>
+                    </div>
+                    <div class="field-row boolean-field">
+                        <label class="field-label" for="muteAudioToggle">Mute</label>
+                        <div class="field-control">
+                            <input id="muteAudioToggle" type="checkbox">
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-group" id="sendVideoGroup">
+                    <h3 class="settings-subheading">Video</h3>
+                    <div class="field-row boolean-field">
+                        <label class="field-label" for="sendVideo">Send video</label>
+                        <div class="field-control">
+                            <input type="checkbox" class="checkbox-control" checked id="sendVideo" value="true">
+                        </div>
+                    </div>
+                    <div class="field-row" id="videoInputForm">
+                        <label class="field-label" for="videoInput">Camera</label>
+                        <div class="field-content">
+                            <select class="control" id="videoInput"></select>
+                            <button type="button" class="button control field-action" id="switchBtn">Switch</button>
+                        </div>
+                    </div>
+                    <div class="field-row tall-field" id="sendSizeForm">
+                        <label class="field-label">Size</label>
+                        <div class="field-content">
+                            <div class="two-field-grid">
+                                <label for="sendWidth"><span>Width</span><input type="text" class="control" id="sendWidth" value="640"></label>
+                                <label for="sendHeight"><span>Height</span><input type="text" class="control" id="sendHeight" value="480"></label>
+                            </div>
+                            <button type="button" class="button control field-action" id="resolutionBtn">Apply</button>
+                        </div>
+                    </div>
+                    <div class="field-row tall-field" id="sendBitrateForm">
+                        <label class="field-label">Bitrate</label>
+                        <div class="field-content">
+                            <div class="two-field-grid">
+                                <label for="sendVideoMinBitrate"><span>Min</span><input type="text" class="control" id="sendVideoMinBitrate" value="0"></label>
+                                <label for="sendVideoMaxBitrate"><span>Max</span><input type="text" class="control" id="sendVideoMaxBitrate" value="0"></label>
+                            </div>
+                            <button type="button" class="button control field-action" id="bitrateBtn">Apply</button>
+                        </div>
+                    </div>
+                    <div class="field-row" id="transportInputForm">
+                        <label class="field-label" for="transportInput">Transport</label>
+                        <div class="field-content"><select class="control" id="transportInput"></select></div>
+                    </div>
+                    <div class="field-row" id="stripPublishCodecsForm">
+                        <label class="field-label" for="stripPublishCodecs">Strip codecs</label>
+                        <div class="field-content">
+                            <input type="text" class="control" id="stripPublishCodecs" placeholder="H264,VP8,OPUS,G722,ALAW,ULAW">
+                        </div>
+                    </div>
+                    <h4 class="settings-note">Additional video settings</h4>
+                    <div class="field-row" id="fpsForm">
+                        <label class="field-label" for="fps">FPS</label>
+                        <div class="field-content">
+                            <div class="control-group">
+                                <input type="text" class="control" id="fps" value="30">
+                                <span class="control-group-action"><button type="button" class="button" id="fpsBtn">Apply</button></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field-row boolean-field" id="screenShareForm">
+                        <label class="field-label" for="screenShareToggle">Screen share</label>
+                        <div class="field-control">
+                            <input id="screenShareToggle" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="field-row boolean-field" id="cpuOveruseDetectionForm">
+                        <div class="field-label"><label for="cpuOveruseDetection">COD</label>
+                            <span class="help"><button type="button" class="help-marker" aria-label="Help: COD" aria-describedby="help-cpuOveruseDetection" aria-expanded="false">?</button><span class="help-tooltip" role="tooltip" id="help-cpuOveruseDetection">CPU overuse detection. Turn off when testing WebRTC HD.</span></span>
+                        </div>
+                        <div class="field-control">
+                            <input type="checkbox" class="checkbox-control" id="cpuOveruseDetection" value="true" checked>
+                        </div>
+                    </div>
+                    <div class="field-row boolean-field" id="cvoForm">
+                        <div class="field-label"><label for="cvo">CVO</label>
+                            <span class="help"><button type="button" class="help-marker" aria-label="Help: CVO" aria-describedby="help-cvo" aria-expanded="false">?</button><span class="help-tooltip" role="tooltip" id="help-cvo">Coordinate video orientation between sender and receiver.</span></span>
+                        </div>
+                        <div class="field-control">
+                            <input type="checkbox" class="checkbox-control" id="cvo" value="false">
+                        </div>
+                    </div>
+                    <div class="field-row" id="contentHintInputForm">
+                        <label class="field-label" for="contentHintInput">Content hint</label>
+                        <div class="field-content"><select class="control" id="contentHintInput"></select></div>
+                    </div>
+                    <div class="field-row boolean-field">
+                        <label class="field-label" for="muteVideoToggle">Mute</label>
+                        <div class="field-control">
+                            <input id="muteVideoToggle" type="checkbox">
+                        </div>
+                    </div>
+                    <div class="field-row" id="sdpForm">
+                        <label class="field-label">SDP replace</label>
+                        <div class="inline-field-grid">
+                            <input type="text" class="control" id="sdpStringFind" value="0" aria-label="SDP text to find">
+                            <span>with</span>
+                            <input type="text" class="control" id="sdpStringReplace" value="0" aria-label="SDP replacement text">
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="settings-panel" aria-labelledby="playbackHeading">
+                <div class="settings-heading">
+                    <h2 id="playbackHeading" class="section-heading">Playback settings</h2>
+                </div>
+                <div id="playGroup" class="play-group">
+                    <div class="settings-group" id="playAudioGroup">
+                        <h3 class="settings-subheading">Audio</h3>
+                        <div class="field-row boolean-field">
+                            <label class="field-label" for="playAudio">Play audio</label>
+                            <div class="field-control">
+                                <input type="checkbox" class="checkbox-control" checked id="playAudio" value="true">
+                            </div>
+                        </div>
+                        <div class="field-row" id="audioOutputForm">
+                            <label class="field-label" for="audioOutput">Output</label>
+                            <div class="field-content"><select class="control" id="audioOutput"></select></div>
+                        </div>
+                        <div id="volume" class="field-row">
+                            <label class="field-label" for="volumeControl">Volume</label>
+                            <div class="slider-field">
+                                <input id="volumeControl" type="range" min="0" max="100" step="10" value="50" disabled>
+                            </div>
+                        </div>
+                        <div class="field-row boolean-field" id="playStereoForm">
+                            <div class="field-label"><label for="playStereoAudio">Stereo</label>
+                                <span class="help"><button type="button" class="help-marker" aria-label="Help: Stereo" aria-describedby="help-playStereoAudio" aria-expanded="false">?</button><span class="help-tooltip" role="tooltip" id="help-playStereoAudio">Enable stereo playback for Opus audio.</span></span>
+                            </div>
+                            <div class="field-control">
+                                <input type="checkbox" class="checkbox-control" id="playStereoAudio" value="true">
+                            </div>
+                        </div>
+                        <div class="field-row boolean-field">
+                            <label class="field-label" for="playChartToggle">Bitrate chart</label>
+                            <div class="field-control">
+                                <input id="playChartToggle" type="checkbox">
+                            </div>
+                        </div>
+                        <div class="chart-row">
+                            <canvas id="playBitrateChart" width="400" height="300"></canvas>
+                        </div>
+                        <h4 class="settings-note">Audio stream state</h4>
+                        <div class="field-row">
+                            <label class="field-label">Talking</label>
+                            <div class="field-content"><div class="talking" id="talking"></div></div>
+                        </div>
+                        <div class="field-row stream-state" aria-label="Audio stream state">
+                            <span class="stream-state-heading">Stream state</span>
+                            <dl>
+                                <div>
+                                    <dt>Muted</dt>
+                                    <dd class="state-value state-boolean" id="audioMuted">false</dd>
+                                </div>
+                                <div>
+                                    <dt>Stream</dt>
+                                    <dd class="state-value" id="audioMutedStream"></dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="settings-group" id="playVideoGroup">
+                        <h3 class="settings-subheading">Video</h3>
+                        <div class="field-row boolean-field">
+                            <label class="field-label" for="playVideo">Play video</label>
+                            <div class="field-control">
+                                <input type="checkbox" class="checkbox-control" checked id="playVideo" value="true">
+                            </div>
+                        </div>
+                        <div class="field-row" id="qualityForm">
+                            <label class="field-label" for="quality">Quality</label>
+                            <div class="receive-field">
+                                <input type="text" class="control" id="quality" value="0" maxlength="3" disabled>
+                                <label class="default-field" for="receiveDefaultQuality"><input type="checkbox" class="checkbox-control" checked id="receiveDefaultQuality" value="true"> Default</label>
+                            </div>
+                        </div>
+                        <div class="field-row tall-field" id="receiveSizeForm">
+                            <label class="field-label">Size</label>
+                            <div class="receive-size-grid">
+                                <label for="receiveWidth"><span class="field-caption">Width</span><input type="text" class="control" id="receiveWidth" value="0" disabled aria-label="Receive width"></label>
+                                <label for="receiveHeight"><span class="field-caption">Height</span><input type="text" class="control" id="receiveHeight" value="0" disabled aria-label="Receive height"></label>
+                                <label class="default-field" for="receiveDefaultSize"><input type="checkbox" class="checkbox-control" checked id="receiveDefaultSize" value="true"> Default</label>
+                            </div>
+                        </div>
+                        <div class="field-row tall-field" id="receiveBitrateForm">
+                            <label class="field-label" for="receiveBitrate">Bitrate</label>
+                            <div class="receive-field">
+                                <div class="control-group">
+                                    <input type="text" class="control" id="receiveBitrate" value="0" disabled>
+                                    <span class="control-addon unit-addon">kbps</span>
+                                </div>
+                                <label class="default-field" for="receiveDefaultBitrate"><input type="checkbox" class="checkbox-control" checked id="receiveDefaultBitrate" value="true"> Default</label>
+                            </div>
+                        </div>
+                        <div class="field-row" id="transportOutputForm">
+                            <label class="field-label" for="transportOutput">Transport</label>
+                            <div class="field-content"><select class="control" id="transportOutput"></select></div>
+                        </div>
+                        <div class="field-row" id="stripPlayCodecsForm">
+                            <label class="field-label" for="stripPlayCodecs">Strip codecs</label>
+                            <div class="field-content">
+                                <input type="text" class="control" id="stripPlayCodecs" placeholder="H264,VP8,OPUS,G722,ALAW,ULAW">
+                            </div>
+                        </div>
+                        <h4 class="settings-note">Video stream state</h4>
+                        <div class="field-row stream-state" aria-label="Video stream state">
+                            <span class="stream-state-heading">Stream state</span>
+                            <dl>
+                                <div>
+                                    <dt>Muted</dt>
+                                    <dd class="state-value state-boolean" id="videoMuted">false</dd>
+                                </div>
+                                <div>
+                                    <dt>Stream</dt>
+                                    <dd class="state-value" id="videoMutedStream"></dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </form>
+
+</main>
+</body>
+</html>
