@@ -1969,7 +1969,7 @@ var createSession = function (options) {
 
             // Set up metrics collection
             if (event === STREAM_STATUS.PUBLISHING || event === STREAM_STATUS.PLAYING) {
-                if (webRTCMetricsServerDescription && !statsCollector) {
+                if (mediaProvider === 'WebRTC' && webRTCMetricsServerDescription && !statsCollector) {
                     const builder  = new RTCMetricsCollectorBuilder()
                         .id(id_)
                         .description(webRTCMetricsServerDescription)
