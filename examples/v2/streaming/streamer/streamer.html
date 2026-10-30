@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <title>Streamer</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="streamer.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example">
+    <header class="page-heading"><h1>Streamer</h1></header>
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+
+    <section class="preview-section" aria-label="Stream preview">
+        <div class="preview-grid">
+            <article class="preview-card">
+                <div class="preview-frame">
+                    <h2 class="preview-caption">Local</h2>
+                    <div class="fp-remoteVideo"><div id="localVideo" class="display"></div></div>
+                </div>
+            </article>
+            <article class="preview-card">
+                <div class="preview-frame">
+                    <h2 class="preview-caption">Server preview</h2>
+                    <div class="fp-remoteVideo"><div id="remoteVideo" class="display"></div></div>
+                </div>
+            </article>
+        </div>
+        <section class="connection-panel" aria-label="Publishing">
+            <div class="connection-main">
+                <div class="connection-fields">
+                    <div class="control-group">
+                        <input id="url" class="control" type="text" placeholder="wss://server:8443/stream" aria-label="WebSocket URL and stream name" aria-describedby="urlHelp">
+                        <div class="control-group-action"><button id="publishBtn" type="button" class="button button-primary" disabled>Start</button></div>
+                    </div>
+                </div>
+                <p id="urlHelp" class="stream-note text-center">Start connects, publishes your camera and plays the server preview.</p>
+                <div class="connection-status">
+                    <div role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="status" class="stream-status">DISCONNECTED</span></div>
+                </div>
+                <div id="info" class="status-error connection-error" role="alert" hidden></div>
+            </div>
+        </section>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <title>Firewall Streaming</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="firewall-traversal-streaming.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example">
+    <header class="page-heading"><h1>Firewall Streaming</h1></header>
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+
+    <section class="preview-section" aria-label="Stream previews">
+        <div class="preview-grid">
+            <div class="preview-column">
+                <article class="preview-card">
+                    <div class="preview-frame">
+                        <h2 class="preview-caption">Publisher</h2>
+                        <div class="fp-remoteVideo"><div id="localVideo" class="display"></div></div>
+                    </div>
+                    <div class="control-group preview-action">
+                        <input id="publishStream" class="control" type="text" placeholder="Stream Name" aria-label="Publishing stream name" disabled>
+                        <div class="control-group-action"><button id="publishBtn" type="button" class="button button-primary" disabled>Publish</button></div>
+                    </div>
+                    <div class="preview-status" data-empty="true" role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="publishStatus"></span></div>
+                    <div id="publishError" class="status-error preview-error" role="alert" hidden></div>
+                </article>
+            </div>
+            <div class="preview-column">
+                <article class="preview-card">
+                    <div class="preview-frame">
+                        <h2 class="preview-caption">Player</h2>
+                        <div class="fp-remoteVideo"><div id="remoteVideo" class="display"></div></div>
+                    </div>
+                    <div class="control-group preview-action">
+                        <input id="playStream" class="control" type="text" placeholder="Stream Name" aria-label="Playback stream name" disabled>
+                        <div class="control-group-action"><button id="playBtn" type="button" class="button button-primary" disabled>Play</button></div>
+                    </div>
+                    <div class="preview-status" data-empty="true" role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="playStatus"></span></div>
+                    <div id="playError" class="status-error preview-error" role="alert" hidden></div>
+                </article>
+            </div>
+        </div>
+        <section class="connection-panel" aria-label="Connection">
+            <div class="connection-main">
+                <div class="connection-fields">
+                    <div class="control-group">
+                        <input id="urlServer" class="control" type="text" aria-label="WebSocket server URL">
+                        <div class="control-group-action"><button id="connectBtn" type="button" class="button button-primary" disabled>Connect</button></div>
+                    </div>
+                </div>
+                <div class="connection-status"><div class="connection-status-line" role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="connectStatus"></span></div></div>
+                <div id="connectError" class="status-error connection-error" role="alert" hidden></div>
+            </div>
+        </section>
+    </section>
+
+    <section class="settings-card settings-section" aria-labelledby="turnHeading">
+        <h2 id="turnHeading" class="section-heading">TURN server</h2>
+        <div class="field-row">
+            <label for="urlTurnServer" class="field-label">TURN URL</label>
+            <div class="field-content"><input id="urlTurnServer" class="control" type="text" value="turn:turn.flashphoner.com:443?transport=tcp"></div>
+        </div>
+        <div class="field-row">
+            <label for="usernameTurnServer" class="field-label">Username</label>
+            <div class="field-content"><input id="usernameTurnServer" class="control" type="text" value="flashphoner" autocomplete="off"></div>
+        </div>
+        <div class="field-row">
+            <label for="credentialTurnServer" class="field-label">Credential</label>
+            <div class="field-content"><input id="credentialTurnServer" class="control" type="password" value="coM77EMrV7Cwhyan" autocomplete="off"></div>
+        </div>
+        <div class="field-row boolean-field">
+            <label for="forceRelay" class="field-label">Force relay</label>
+            <div class="field-control"><input id="forceRelay" type="checkbox" checked></div>
+        </div>
+        <p class="stream-note">Force relay routes both streams through the TURN server.</p>
+    </section>
+</main>
+</body>
+</html>

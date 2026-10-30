@@ -7,7 +7,12 @@ const {spawnSync} = require("child_process");
 const result = spawnSync(process.execPath, [
     "--experimental-vm-modules",
     "--test",
-    require.resolve("./examples-v2.test.cjs")
+    require.resolve("./examples-v2.test.cjs"),
+    require.resolve("./streaming-shared.test.cjs"),
+    require.resolve("./streaming-two-way.test.cjs"),
+    require.resolve("./streaming-playback.test.cjs"),
+    require.resolve("./streaming-publishing.test.cjs"),
+    require.resolve("./streaming-assets.test.cjs")
 ], {stdio: "inherit"});
 
 if (result.error) {

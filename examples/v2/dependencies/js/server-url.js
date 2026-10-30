@@ -33,10 +33,34 @@ function getWebProtocol() {
     return window.location.protocol === "http:" ? "http" : "https";
 }
 
-export function getWebsocketUrl(hostName = window.location.hostname, hostPort, ports = configuredServerPorts()) {
+export function readStreamAddress(value) {
+    try {
+        const address = new URL(value.trim());
+        const name = decodeURIComponent(address.pathname.slice(1));
+        if (!["ws:", "wss:"].includes(address.protocol) || !name || name.includes("/") || address.search || address.hash || address.username || address.password) {
+            return null;
+        }
+        return {server: `${address.protocol}//${address.host}`, name};
+    } catch {
+        return null;
+    }
+}
+
+export function getWebsocketUrl(hostName, hostPort, ports = configuredServerPorts()) {
+    if (hostName === undefined && hostPort === undefined && window.WCS_SERVER_URL !== undefined) {
+        if (typeof window.WCS_SERVER_URL !== "string") {
+            throw new Error("Invalid embedded WebSocket server URL");
+        }
+        const address = new URL(window.WCS_SERVER_URL);
+        if (!["ws:", "wss:"].includes(address.protocol) || address.pathname !== "/"
+                || address.search || address.hash || address.username || address.password) {
+            throw new Error("Invalid embedded WebSocket server URL");
+        }
+        return address.origin;
+    }
     const protocol = window.location.protocol === "http:" ? "ws" : "wss";
     const port = hostPort ?? getPortsConfig(ports)[protocol];
-    return `${protocol}://${hostName}:${port}`;
+    return `${protocol}://${hostName ?? window.location.hostname}:${port}`;
 }
 
 export function getHLSUrl(hostName = window.location.hostname, hostPort, ports = configuredServerPorts()) {

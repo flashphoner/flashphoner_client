@@ -47,10 +47,13 @@ test("the manual npm runner enforces Node support and preserves exit codes", asy
                 require: Object.assign(() => ({spawnSync(cmd, args, options) {
                     called = true;
                     assert.equal(cmd, "/test/node");
-                    assert.deepEqual([...args], ["--experimental-vm-modules", "--test", "/test/examples-v2.test.cjs"]);
+                    assert.deepEqual([...args], ["--experimental-vm-modules", "--test",
+                        "/test/examples-v2.test.cjs", "/test/streaming-shared.test.cjs",
+                        "/test/streaming-two-way.test.cjs", "/test/streaming-playback.test.cjs",
+                        "/test/streaming-publishing.test.cjs", "/test/streaming-assets.test.cjs"]);
                     assert.equal(options.stdio, "inherit");
                     return childResult;
-                }}), {resolve: () => "/test/examples-v2.test.cjs"})
+                }}), {resolve: (filename) => "/test/" + path.basename(filename)})
             });
         } catch (error) {
             if (error !== stopped) throw error;
@@ -202,7 +205,7 @@ test("Media Devices attaches captions to video frames and keeps statistics compa
     assert.doesNotMatch(html, /<th scope="col">Unit<\/th>/);
     assert.match(html, /No data<\/span>: no measurement yet/);
     assert.match(html, /N\/A<\/span>: not applicable to this side/);
-    const css = await fs.readFile(path.join(root, "streaming/media_devices_manager/manager.css"), "utf8");
+    const css = await fs.readFile(path.join(root, "dependencies/css/examples.css"), "utf8");
     assert.match(css, /\.preview-column\s*\{\s*min-width:\s*0;/);
 });
 
@@ -354,6 +357,76 @@ test("server URLs select all protocol defaults when configuration is absent", as
             window: {location: {protocol, hostname: "wcs.example"}}
         });
         assert.deepEqual([urls.getWebsocketUrl(), urls.getHLSUrl(), urls.getRestUrl(), urls.getAdminUrl()], expected);
+    }
+});
+
+test("embedded examples use the selected WCS endpoint independently of the panel address", async () => {
+    for (const [protocol, endpoint] of [
+        ["http:", "wss://wcs.example:9443"],
+        ["http:", "ws://192.0.2.10:9080"],
+        ["https:", "wss://192.0.2.11:8443/"]
+    ]) {
+        const window = {location: {protocol, hostname: "localhost"}, WCS_SERVER_URL: endpoint};
+        const {getWebsocketUrl} = await loadModule(shared + "server-url.js", {URL, window});
+        assert.equal(getWebsocketUrl(), endpoint.replace(/\/$/, ""));
+        window.WCS_SERVER_URL = "wss://other-wcs.example:10443";
+        assert.equal(getWebsocketUrl(), "wss://other-wcs.example:10443");
+    }
+});
+
+test("explicit server arguments override the embedded WCS without changing other URL helpers", async () => {
+    const ports = {wss: 9443};
+    const urls = await loadModule(shared + "server-url.js", {URL,
+        window: {location: {protocol: "https:", hostname: "panel.example"},
+            WCS_SERVER_URL: "wss://wcs.example:8443"}, SERVER_PORTS: ports
+    });
+    assert.equal(urls.getWebsocketUrl("other.example"), "wss://other.example:9443");
+    assert.equal(urls.getWebsocketUrl(undefined, 10443), "wss://panel.example:10443");
+    assert.deepEqual([urls.getHLSUrl(), urls.getRestUrl(), urls.getAdminUrl()],
+        ["https://panel.example:8445", "https://panel.example:8444", "https://panel.example:8888"]);
+});
+
+test("invalid embedded WCS endpoints fail instead of dialing the panel host", async () => {
+    for (const endpoint of [null, 8080, {}, "", "localhost:8080", "https://wcs.example:8443",
+        "wss://user:password@wcs.example:8443", "wss://wcs.example:8443/stream",
+        "wss://wcs.example:8443?token=value", "wss://wcs.example:8443#fragment"]) {
+        const {getWebsocketUrl} = await loadModule(shared + "server-url.js", {URL,
+            window: {location: {protocol: "http:", hostname: "localhost"}, WCS_SERVER_URL: endpoint}
+        });
+        assert.throws(() => getWebsocketUrl(), undefined, String(endpoint));
+    }
+});
+
+test("combined streaming addresses preserve decoded stream names", async () => {
+    const {readStreamAddress} = await loadModule(shared + "server-url.js", {URL});
+    for (const [value, server, name] of [
+        ["ws://localhost:8080/s 3", "ws://localhost:8080", "s 3"],
+        ["wss://wcs.example:8443/s%203", "wss://wcs.example:8443", "s 3"],
+        ["wss://wcs.example:8443/поток", "wss://wcs.example:8443", "поток"],
+        ["wss://wcs.example:8443/%D0%BF%D0%BE%D1%82%D0%BE%D0%BA", "wss://wcs.example:8443", "поток"],
+        [" ws://[::1]:8080/test ", "ws://[::1]:8080", "test"],
+        ["ws://localhost:8080/name%23%3F%26", "ws://localhost:8080", "name#?&"],
+        ["ws://localhost:8080/100%25", "ws://localhost:8080", "100%"],
+        ["ws://localhost:8080/s%2520", "ws://localhost:8080", "s%20"],
+        ["ws://localhost:8080/s%252F", "ws://localhost:8080", "s%2F"]
+    ]) {
+        const result = readStreamAddress(value);
+        assert.ok(result, value);
+        assert.equal(result.server, server, value);
+        assert.equal(result.name, name, value);
+    }
+});
+
+test("combined streaming addresses reject invalid URLs, escaped paths and malformed escapes", async () => {
+    const {readStreamAddress} = await loadModule(shared + "server-url.js", {URL});
+    for (const value of [
+        "", "localhost:8080/stream", "https://localhost:8080/stream",
+        "ws://localhost:8080", "ws://localhost:8080/", "ws://localhost:8080/a/b",
+        "ws://localhost:8080/a%2Fb", "ws://localhost:8080/a?x=1", "ws://localhost:8080/a#fragment",
+        "ws://user:password@localhost:8080/a", "ws://localhost:bad/a",
+        "ws://localhost:8080/100%", "ws://localhost:8080/%ZZ", "ws://localhost:8080/%D0"
+    ]) {
+        assert.equal(readStreamAddress(value), null, value);
     }
 });
 
@@ -944,7 +1017,7 @@ test("stream errors expose ICE reasons and local details without changing the se
 
 test("Connection controls stay compact and centered without preview separators", async () => {
     const html = await fs.readFile(path.join(root, "streaming/media_devices_manager/media_device_manager.html"), "utf8");
-    const css = await fs.readFile(path.join(root, "streaming/media_devices_manager/manager.css"), "utf8");
+    const css = await fs.readFile(path.join(root, "dependencies/css/examples.css"), "utf8");
     assert.match(html, /class="connection-panel" aria-label="Connection"/);
     assert.doesNotMatch(html, /id="connectionHeading"/);
     assert.match(css.match(/\.connection-fields\s*\{[^}]+\}/)[0], /grid-template-columns: minmax\(0, 360px\)/);
@@ -1106,7 +1179,7 @@ test("status rows explicitly follow text updates without WebKit :has(:empty) inv
         setStatus(id, active);
         assert.equal(field.parentElement.dataset.empty, "false");
     }
-    const css = await fs.readFile(path.join(root, "streaming/media_devices_manager/manager.css"), "utf8");
+    const css = await fs.readFile(path.join(root, "dependencies/css/examples.css"), "utf8");
     assert.doesNotMatch(css, /:has\([^)]*Status:empty\)/);
 });
 

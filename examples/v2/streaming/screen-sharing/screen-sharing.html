@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <title>Screen Sharing</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="screen-sharing.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example">
+    <header class="page-heading"><h1>Screen Sharing</h1></header>
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+
+    <section class="preview-section" aria-label="Screen sharing preview">
+        <div class="preview-grid">
+            <article class="preview-card">
+                <div class="preview-frame">
+                    <h2 class="preview-caption">My screen</h2>
+                    <div class="fp-remoteVideo"><div id="localVideo" class="display"></div></div>
+                </div>
+            </article>
+            <article class="preview-card">
+                <div class="preview-frame">
+                    <h2 class="preview-caption">Server preview</h2>
+                    <div class="fp-remoteVideo"><div id="remoteVideo" class="display"></div></div>
+                </div>
+            </article>
+        </div>
+        <section class="connection-panel" aria-label="Connection">
+            <div class="connection-main">
+                <div class="connection-fields">
+                    <div class="control-group">
+                        <input id="url" class="control" type="text" placeholder="wss://server:8443/stream" aria-label="WebSocket URL and stream name">
+                        <div class="control-group-action"><button id="connectBtn" type="button" class="button button-primary" disabled>Connect</button></div>
+                    </div>
+                    <div class="action-row"><button id="publishBtn" type="button" class="button button-primary" disabled>Start sharing</button></div>
+                </div>
+                <div class="connection-status">
+                    <div role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="status" class="stream-status">DISCONNECTED</span></div>
+                </div>
+                <div id="info" class="status-error connection-error" role="alert" hidden></div>
+            </div>
+        </section>
+    </section>
+
+    <section class="settings-panel settings-card settings-section" aria-labelledby="captureHeading">
+        <h2 id="captureHeading" class="section-heading">Capture settings</h2>
+        <div class="field-row">
+            <label class="field-label" for="fps">Frame rate</label>
+            <div class="field-content"><div class="control-group"><input id="fps" type="number" class="control" value="30" min="1" step="1"><span class="control-addon unit-addon">fps</span></div></div>
+        </div>
+        <div class="field-row">
+            <label class="field-label" for="width">Width</label>
+            <div class="field-content"><div class="control-group"><input id="width" type="number" class="control" value="640" min="1" step="1"><span class="control-addon unit-addon">px</span></div></div>
+        </div>
+        <div class="field-row">
+            <label class="field-label" for="height">Height</label>
+            <div class="field-content"><div class="control-group"><input id="height" type="number" class="control" value="480" min="1" step="1"><span class="control-addon unit-addon">px</span></div></div>
+        </div>
+        <div id="chromeExtension" class="field-row boolean-field" hidden>
+            <label class="field-label" for="woChromeExtension">Without extension</label>
+            <div class="field-control"><input id="woChromeExtension" type="checkbox" class="checkbox-control"></div>
+        </div>
+        <div id="mic" class="field-row boolean-field">
+            <label class="field-label" for="useMic">Use microphone</label>
+            <div class="field-control"><input id="useMic" type="checkbox" class="checkbox-control"></div>
+        </div>
+        <div id="micInput" class="field-row">
+            <label class="field-label" for="audioInput">Microphone</label>
+            <div class="field-content"><select id="audioInput" class="control" disabled><option value="">Default microphone</option></select></div>
+        </div>
+        <p class="stream-note">Screen sharing requires a desktop browser. The browser may adjust the requested capture size and frame rate.</p>
+        <div id="extension" class="stream-note" hidden>
+            <p id="extensionInfo"></p>
+            <button id="installExtensionButton" type="button" class="button" hidden>Install extension</button>
+            <a id="installFromMarket" href="https://chrome.google.com/webstore/detail/flashphoner-screen-sharin/nlbaajplpmleofphigmgaifhoikjmbkg" target="_blank" rel="noopener noreferrer" hidden>Install Chrome extension</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

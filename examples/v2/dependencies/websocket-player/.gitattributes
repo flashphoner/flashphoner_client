@@ -1,0 +1,3 @@
+# Preserve the generated SDK worker files byte for byte, including their CRLF header.
+WSReceiver2.js -text whitespace=cr-at-eol
+video-worker2.js -text whitespace=cr-at-eol

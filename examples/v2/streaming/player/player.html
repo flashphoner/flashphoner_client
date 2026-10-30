@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <title>Player</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="player.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example">
+    <header class="page-heading"><h1>Player</h1></header>
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+
+    <section class="preview-section" aria-label="Stream playback">
+        <div class="preview-grid single-preview">
+            <div class="preview-column">
+                <article class="preview-card">
+                    <div class="preview-frame">
+                        <h2 class="preview-caption">Player</h2>
+                        <div class="fp-remoteVideo"><div id="remoteVideo" class="display"></div></div>
+                        <span id="preloader" class="stream-preloader" role="status" hidden>Loading…</span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <section class="connection-panel" aria-label="Connection">
+            <div class="connection-main">
+                <div class="connection-fields">
+                    <div class="control-group"><input id="url" class="control" type="text" aria-label="WebSocket server URL"></div>
+                    <div class="control-group">
+                        <input id="streamName" class="control" type="text" placeholder="Stream Name" aria-label="Stream name">
+                        <div class="control-group-action"><button id="playBtn" class="button button-primary" type="button" disabled>Start</button></div>
+                    </div>
+                </div>
+                <p class="stream-note">Start connects to the server and plays the named stream.</p>
+                <div class="preview-status text-center" data-empty="true" role="status" aria-live="polite" aria-label="Playback status"><span class="status-prefix">Stream:</span> <span id="status"></span></div>
+                <div id="info" class="status-error connection-error" role="alert" hidden></div>
+                <p id="bandwidthWarning" class="stream-note" role="status" hidden></p>
+                <div class="connection-status">
+                    <div class="connection-status-line" data-empty="true" role="status" aria-live="polite"><span class="status-prefix">Connection:</span> <span id="connectStatus"></span></div>
+                </div>
+                <div id="connectError" class="status-error connection-error" role="alert" hidden></div>
+            </div>
+        </section>
+    </section>
+
+    <section class="settings-card settings-section" aria-label="Playback controls">
+        <div id="volume" class="field-row">
+            <label class="field-label" for="volumeControl">Volume</label>
+            <div class="slider-field"><input id="volumeControl" type="range" min="0" max="100" step="10" value="50" disabled></div>
+        </div>
+        <div class="action-row">
+            <span id="fullScreen"><button id="fullScreenBtn" class="button" type="button" disabled>Full screen</button></span>
+            <span id="unmute" hidden><button id="unmuteBtn" class="button" type="button">Unmute</button></span>
+        </div>
+    </section>
+</main>
+</body>
+</html>
