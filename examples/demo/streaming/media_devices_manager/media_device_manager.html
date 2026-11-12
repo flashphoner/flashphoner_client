@@ -91,6 +91,36 @@
                     <span style="min-width: 65px; text-align: right;" class="input-group-addon">msec</span>
                 </div>
             </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="useTurn">Use TURN</label>
+                <div class="input-group col-sm-8">
+                    <input type="checkbox" class="checkbox" id="useTurn">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="urlTurnServer">TURN Server</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" id="urlTurnServer" type="text" value="turn:turn.flashphoner.com:443?transport=tcp" disabled>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="usernameTurnServer">Username</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" id="usernameTurnServer" type="text" value="flashphoner" disabled>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="credentialTurnServer">Credential</label>
+                <div class="input-group col-sm-8">
+                    <input class="form-control" id="credentialTurnServer" type="password" value="coM77EMrV7Cwhyan" disabled>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="forceRelay">Force relay</label>
+                <div class="input-group col-sm-8">
+                    <input type="checkbox" class="checkbox" id="forceRelay" checked disabled>
+                </div>
+            </div>
             <div class="text-center">
                 <div id="connectStatus"></div>
                 <div id="wcsVersion" style="display: none;">

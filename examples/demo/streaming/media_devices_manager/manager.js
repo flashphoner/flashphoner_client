@@ -114,6 +114,10 @@ function init_page() {
     var streamName = createUUID(4);
     $("#publishStream").val(streamName);
     $("#playStream").val(streamName);
+    $("#useTurn").change(function () {
+        $("#urlTurnServer, #usernameTurnServer, #credentialTurnServer, #forceRelay").prop('disabled', !$(this).is(':checked'));
+        $("#urlTurnServer, #usernameTurnServer, #credentialTurnServer").closest('.form-group').removeClass("has-error");
+    });
     readyControls();
     onDisconnected();
 }
@@ -314,11 +318,25 @@ function onConnected(session) {
 
 function onDisconnected() {
     $("#connectBtn").text("Connect").off('click').click(function () {
+        if ($("#useTurn").is(':checked')) {
+            var valid = true;
+            $("#urlTurnServer, #usernameTurnServer, #credentialTurnServer").each(function () {
+                var empty = !$(this).val();
+                $(this).closest('.form-group').toggleClass("has-error", empty);
+                valid = valid && !empty;
+            });
+            if (!valid) {
+                return;
+            }
+        }
         $('#urlServer').prop('disabled', true);
+        $("#useTurn, #urlTurnServer, #usernameTurnServer, #credentialTurnServer, #forceRelay").prop('disabled', true);
         $(this).prop('disabled', true);
         connect();
     }).prop('disabled', false);
     $('#urlServer').prop('disabled', false);
+    $("#useTurn").prop('disabled', false);
+    $("#urlTurnServer, #usernameTurnServer, #credentialTurnServer, #forceRelay").prop('disabled', !$("#useTurn").is(':checked'));
     onUnpublished();
     onStopped();
     updateServerVersion('');
@@ -345,7 +363,20 @@ function connect() {
 
     //create session
     console.log("Create new session with url " + url);
-    Flashphoner.createSession({urlServer: url, timeout: tm}).on(SESSION_STATUS.ESTABLISHED, function (session) {
+    var options = {urlServer: url, timeout: tm};
+    if ($("#useTurn").is(':checked')) {
+        options.mediaOptions = {
+            iceServers: [{
+                url: $('#urlTurnServer').val(),
+                username: $('#usernameTurnServer').val(),
+                credential: $('#credentialTurnServer').val()
+            }]
+        };
+        if ($("#forceRelay").is(':checked')) {
+            options.mediaOptions.iceTransportPolicy = "relay";
+        }
+    }
+    Flashphoner.createSession(options).on(SESSION_STATUS.ESTABLISHED, function (session) {
         setStatus("#connectStatus", session.status());
         onConnected(session);
     }).on(SERVER_INFO.SERVER_VERSION, function(session) {
@@ -363,6 +394,9 @@ function play() {
     var streamName = $('#playStream').val();
     var session = Flashphoner.getSessions()[0];
     var transportOutput = $('#transportOutput').val();
+    if ($("#useTurn").is(':checked') && $("#forceRelay").is(':checked')) {
+        transportOutput = "UDP";
+    }
     var mutedName="";
     var constraints = {
         audio: $("#playAudio").is(':checked'),
@@ -476,6 +510,9 @@ function publish() {
     var mediaConnectionConstraints;
     var session = Flashphoner.getSessions()[0];
     var transportInput = $('#transportInput').val();
+    if ($("#useTurn").is(':checked') && $("#forceRelay").is(':checked')) {
+        transportInput = "UDP";
+    }
     var contentHint = $('#contentHintInput').val();
     var cvo = $("#cvo").is(':checked');
     var strippedCodecs = $("#stripPublishCodecs").val();

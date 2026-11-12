@@ -148,6 +148,28 @@
                     <button id="publishBtn" type="button" class="btn btn-default">Start</button>
                 </div>
             </div>
+            <div class="row row-space text-left">
+                <div id="turnSettings" class="col-sm-7" style="float: none; margin: 0 auto;">
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="useTurn">Use TURN</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="urlTurnServer">TURN Server</label>
+                        <input class="form-control" id="urlTurnServer" type="text" value="turn:turn.flashphoner.com:443?transport=tcp" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="usernameTurnServer">TURN Username</label>
+                        <input class="form-control" id="usernameTurnServer" type="text" value="flashphoner" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="credentialTurnServer">TURN Credential</label>
+                        <input class="form-control" id="credentialTurnServer" type="password" value="coM77EMrV7Cwhyan" disabled>
+                    </div>
+                    <div class="checkbox">
+                        <label><input type="checkbox" id="forceRelay" checked disabled>Force relay</label>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>

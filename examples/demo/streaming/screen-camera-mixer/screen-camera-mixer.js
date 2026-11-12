@@ -25,6 +25,12 @@ const init_page =  function() {
     localVideoCamera = document.getElementById("localVideoCamera");
     $("#url").val(setURL() + "/" + createUUID(8));
     $("#mixerName").val("mixer");
+    $("#useTurn").change(function() {
+        $("#urlTurnServer, #usernameTurnServer, #credentialTurnServer, #forceRelay").prop('disabled', !$(this).is(':checked'));
+        if (!$(this).is(':checked')) {
+            $("#turnSettings .form-group").removeClass("has-error");
+        }
+    });
 
     Flashphoner.getMediaDevices(null, true).then(function (list) {
         addDeviceToSelect(list.audio, "audioInput");
@@ -113,6 +119,7 @@ const onConnected = function(session) {
 
 const onDisconnected = function() {
     unmuteInputs();
+    $("#useTurn").trigger('change');
     $("#publishBtn").prop('disabled', true);
     setConnectButton("Connect", null);
 }
@@ -134,7 +141,20 @@ const connect = function() {
     }
 
     console.log("Create new session with url " + url);
-    Flashphoner.createSession({urlServer: url}).on(SESSION_STATUS.ESTABLISHED, function(session){
+    let options = {urlServer: url};
+    if ($("#useTurn").is(':checked')) {
+        options.mediaOptions = {
+            iceServers: [{
+                url: $('#urlTurnServer').val(),
+                username: $('#usernameTurnServer').val(),
+                credential: $('#credentialTurnServer').val()
+            }]
+        };
+        if ($("#forceRelay").is(':checked')) {
+            options.mediaOptions.iceTransportPolicy = "relay";
+        }
+    }
+    Flashphoner.createSession(options).on(SESSION_STATUS.ESTABLISHED, function(session){
         //session connected, start streaming
         setStatus("screen", SESSION_STATUS.ESTABLISHED);
         setStatus("camera", SESSION_STATUS.ESTABLISHED);
@@ -181,6 +201,9 @@ const startStreamingScreen = function(session) {
     if (isSafariMacOS()) {
         options.disableConstraintsNormalization = true;
     }
+    if ($("#useTurn").is(':checked') && $("#forceRelay").is(':checked')) {
+        options.transport = "UDP";
+    }
     session.createStream(options).on(STREAM_STATUS.PUBLISHING, function(screenStream) {
         /*
          * User can stop sharing screen capture using Chrome "stop" button.
@@ -222,6 +245,9 @@ const startStreamingCamera = function(session, screenStream) {
                 deviceId: {exact: $('#audioInput').val()}
             }
         }
+    }
+    if ($("#useTurn").is(':checked') && $("#forceRelay").is(':checked')) {
+        options.transport = "UDP";
     }
     session.createStream(options).on(STREAM_STATUS.PUBLISHING, function(cameraStream) {
         document.getElementById(cameraStream.id()).addEventListener('resize', function(event){
@@ -296,7 +322,11 @@ const unmuteInputs =  function() {
 
 const validateForm = function() {
     let valid = true;
-    $(':text').each(function(){
+    $(':text, #credentialTurnServer').each(function(){
+        if ($(this).closest('#turnSettings').length && !$("#useTurn").is(':checked')) {
+            removeHighlight($(this));
+            return;
+        }
         if (!$(this).val()) {
             highlightInput($(this));
             valid = false;
@@ -322,7 +352,7 @@ const removeHighlight = function(input) {
 }
 
 const getStreamName = function(type, url) {
-    let streamName = url.endsWith('/') === false ? url.split('/')[3] : "";
+    let streamName = url.endsWith('/') === false ? url.split('/').slice(3).pop() : "";
     if (streamName) {
         streamName += "-" + type;
         if ($("#useMixer").prop('checked')) {
