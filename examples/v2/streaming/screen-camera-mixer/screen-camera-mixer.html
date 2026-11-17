@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <title>Screen and Camera Mixer</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="screen-camera-mixer.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example">
+    <header class="page-heading"><h1>Screen and Camera Mixer</h1></header>
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+    <section class="preview-section" aria-label="Screen and camera previews">
+        <div class="preview-grid">
+            <article class="preview-card">
+                <div class="preview-frame"><h2 class="preview-caption">My screen</h2><div class="fp-remoteVideo"><div id="localVideoScreen" class="display"></div></div></div>
+                <div class="preview-status" role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="screenStatus"></span></div>
+                <p id="screenName" class="stream-note"></p>
+                <p id="screenBitrate" class="stream-note"></p>
+                <p id="screenAvailableBitrate" class="stream-note"></p>
+                <div id="screenInfo" class="status-error" role="alert" hidden></div>
+            </article>
+            <article class="preview-card">
+                <div class="preview-frame"><h2 class="preview-caption">My camera</h2><div class="fp-remoteVideo"><div id="localVideoCamera" class="display"></div></div></div>
+                <div class="preview-status" role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="cameraStatus"></span></div>
+                <p id="cameraName" class="stream-note"></p>
+                <p id="cameraBitrate" class="stream-note"></p>
+                <p id="cameraAvailableBitrate" class="stream-note"></p>
+                <div id="cameraInfo" class="status-error" role="alert" hidden></div>
+            </article>
+        </div>
+        <section class="connection-panel" aria-label="Connection">
+            <div class="connection-main">
+                <div class="connection-fields">
+                    <div class="control-group">
+                        <input id="url" class="control" type="text" placeholder="wss://server:8443/stream" aria-label="WebSocket URL and stream name">
+                        <div class="control-group-action"><button id="connectBtn" type="button" class="button button-primary" disabled>Connect</button></div>
+                    </div>
+                    <div class="action-row"><button id="publishBtn" type="button" class="button button-primary" disabled>Start</button></div>
+                </div>
+                <div class="connection-status" role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="status"></span></div>
+                <div id="info" class="status-error connection-error" role="alert" hidden></div>
+            </div>
+        </section>
+    </section>
+    <div class="settings-columns settings-section">
+        <section class="settings-card" aria-labelledby="screenHeading">
+            <h2 id="screenHeading" class="section-heading">Screen capture</h2>
+            <div class="field-row"><label class="field-label" for="screenFps">Frame rate</label><div class="field-content"><div class="control-group"><input id="screenFps" class="control" type="number" min="1" step="1" value="5"><span class="control-addon unit-addon">fps</span></div></div></div>
+            <div class="field-row"><label class="field-label" for="screenWidth">Width</label><div class="field-content"><div class="control-group"><input id="screenWidth" class="control" type="number" min="1" step="1" value="1280"><span class="control-addon unit-addon">px</span></div></div></div>
+            <div class="field-row"><label class="field-label" for="screenHeight">Height</label><div class="field-content"><div class="control-group"><input id="screenHeight" class="control" type="number" min="1" step="1" value="720"><span class="control-addon unit-addon">px</span></div></div></div>
+            <div class="field-row boolean-field"><label class="field-label" for="useMixer">Add to mixer</label><div class="field-control"><input id="useMixer" class="checkbox-control" type="checkbox"></div></div>
+            <div class="field-row"><label class="field-label" for="mixerName">Mixer name</label><div class="field-content"><input id="mixerName" class="control" type="text" value="mixer" disabled></div></div>
+            <p class="stream-note">Screen capture requires a desktop browser. Configure server mixing to combine both published streams.</p>
+        </section>
+        <section class="settings-card" aria-labelledby="cameraHeading">
+            <h2 id="cameraHeading" class="section-heading">Camera and microphone</h2>
+            <div class="field-row"><label class="field-label" for="cameraFps">Frame rate</label><div class="field-content"><div class="control-group"><input id="cameraFps" class="control" type="number" min="1" step="1" value="24"><span class="control-addon unit-addon">fps</span></div></div></div>
+            <div class="field-row"><label class="field-label" for="cameraWidth">Width</label><div class="field-content"><div class="control-group"><input id="cameraWidth" class="control" type="number" min="1" step="1" value="640"><span class="control-addon unit-addon">px</span></div></div></div>
+            <div class="field-row"><label class="field-label" for="cameraHeight">Height</label><div class="field-content"><div class="control-group"><input id="cameraHeight" class="control" type="number" min="1" step="1" value="480"><span class="control-addon unit-addon">px</span></div></div></div>
+            <div class="field-row"><label class="field-label" for="videoInput">Camera</label><div class="field-content"><select id="videoInput" class="control"><option value="">Default camera</option></select></div></div>
+            <div class="field-row"><label class="field-label" for="audioInput">Microphone</label><div class="field-content"><select id="audioInput" class="control"><option value="">Default microphone</option></select></div></div>
+            <div id="deviceError" class="status-error" role="alert" hidden></div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

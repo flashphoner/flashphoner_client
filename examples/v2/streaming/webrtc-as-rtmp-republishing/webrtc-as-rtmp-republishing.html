@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <title>WebRTC as RTMP</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="webrtc-as-rtmp-republishing.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example">
+    <header class="page-heading"><h1>WebRTC as RTMP</h1></header>
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+    <section class="preview-section" aria-label="Stream publishing">
+        <div class="preview-grid single-preview">
+            <article class="preview-card"><div class="preview-frame">
+                <h2 class="preview-caption">Local</h2>
+                <div class="fp-remoteVideo"><div id="localVideo" class="display"></div></div>
+            </div></article>
+        </div>
+        <section class="connection-panel" aria-label="Connection">
+            <div class="connection-main">
+                <div class="connection-fields"><div class="control-group">
+                    <input id="url" class="control" type="text" aria-label="WebSocket server URL">
+                    <div class="control-group-action"><button id="publishBtn" type="button" class="button button-primary" disabled>Start</button></div>
+                </div></div>
+                <div class="connection-status"><div role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="status" class="stream-status">DISCONNECTED</span></div></div>
+                <div id="info" class="status-error connection-error" role="alert" hidden></div>
+            </div>
+        </section>
+    </section>
+    <section class="settings-section settings-card" aria-labelledby="rtmpHeading">
+        <h2 id="rtmpHeading" class="section-heading">RTMP destination</h2>
+        <div class="field-row"><label class="field-label" for="rtmpUrl">RTMP URL</label><input id="rtmpUrl" class="control" type="text" value="rtmp://localhost:1935/live"></div>
+        <div class="field-row"><label class="field-label" for="streamName">Stream</label><input id="streamName" class="control" type="text"></div>
+        <div id="playback" hidden><h3 class="settings-subheading">RTMP playback URL</h3><p id="player" class="stream-note" aria-live="polite"></p><p class="stream-note">Open this URL in an RTMP player such as VLC or ffplay.</p></div>
+    </section>
+</main>
+</body>
+</html>

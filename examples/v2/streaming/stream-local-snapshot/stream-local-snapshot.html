@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <link rel="stylesheet" href="stream-local-snapshot.css">
+    <title>Stream Client Snapshot</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="stream-local-snapshot.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example">
+    <header class="page-heading"><h1>Stream Client Snapshot</h1></header>
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+    <section class="preview-section" aria-label="Stream and snapshot previews">
+        <div class="preview-grid">
+            <article class="preview-card">
+                <div class="preview-frame">
+                    <h2 class="preview-caption">Publisher</h2>
+                    <div class="fp-remoteVideo"><div id="localVideo" class="display"></div></div>
+                </div>
+            </article>
+            <article class="preview-card">
+                <div class="preview-frame">
+                    <h2 class="preview-caption">Snapshot</h2>
+                    <div class="fp-remoteVideo"><img id="snapshotImg" class="snapshot-image" alt="Snapshot of the published stream" hidden></div>
+                </div>
+                <div class="action-row snapshot-action"><button id="snapshotBtn" type="button" class="button" disabled>Take a snapshot</button></div>
+                <div class="preview-status" data-empty="true" role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="snapshotStatus"></span></div>
+                <div id="snapshotError" class="status-error preview-error" role="alert" hidden></div>
+            </article>
+        </div>
+        <section class="connection-panel" aria-label="Publishing">
+            <div class="connection-main">
+                <div class="connection-fields"><div class="control-group">
+                    <input id="url" class="control" type="text" placeholder="wss://server:8443/stream" aria-label="WebSocket URL and stream name">
+                    <div class="control-group-action"><button id="publishBtn" type="button" class="button button-primary" disabled>Start</button></div>
+                </div></div>
+                <p class="stream-note text-center">Start publishes your camera. Take a snapshot captures the local video at its full resolution.</p>
+                <div class="connection-status"><div role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="status" class="stream-status">DISCONNECTED</span></div></div>
+                <div id="info" class="status-error connection-error" role="alert" hidden></div>
+            </div>
+        </section>
+    </section>
+    <canvas id="snapshotCanvas" hidden></canvas>
+</main>
+</body>
+</html>

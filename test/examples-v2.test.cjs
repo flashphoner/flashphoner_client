@@ -50,7 +50,9 @@ test("the manual npm runner enforces Node support and preserves exit codes", asy
                     assert.deepEqual([...args], ["--experimental-vm-modules", "--test",
                         "/test/examples-v2.test.cjs", "/test/streaming-shared.test.cjs",
                         "/test/streaming-two-way.test.cjs", "/test/streaming-playback.test.cjs",
-                        "/test/streaming-publishing.test.cjs", "/test/streaming-assets.test.cjs"]);
+                        "/test/streaming-publishing.test.cjs", "/test/streaming-assets.test.cjs",
+                        "/test/processing-recording.test.cjs", "/test/recording-url.test.cjs", "/test/processing-snapshots-filter.test.cjs",
+                        "/test/processing-mixer-mcu-zoom.test.cjs"]);
                     assert.equal(options.stdio, "inherit");
                     return childResult;
                 }}), {resolve: (filename) => "/test/" + path.basename(filename)})
@@ -395,6 +397,45 @@ test("invalid embedded WCS endpoints fail instead of dialing the panel host", as
         });
         assert.throws(() => getWebsocketUrl(), undefined, String(endpoint));
     }
+});
+
+test("recording web origin uses the selected WCS web port and follows an explicitly changed server", async () => {
+    const window = {location: {protocol: "https:", hostname: "panel.example", origin: "https://panel.example"},
+        WCS_SERVER_URL: "wss://wcs.example:8443", WCS_WEB_URL: "https://wcs.example:9444"};
+    const {getWebOrigin} = await loadModule(shared + "server-url.js", {URL, window, SERVER_PORTS: {https: 10444}});
+    assert.equal(getWebOrigin(), "https://wcs.example:9444");
+    assert.equal(getWebOrigin("wss://other-wcs.example:8443"), "https://other-wcs.example:10444");
+    assert.equal(getWebOrigin("ws://192.0.2.7:9080"), "http://192.0.2.7:8081");
+});
+
+test("recording uses the configured web origin with a standard WebSocket port", async () => {
+    for (const [web, ws, port, webPort] of [["http", "ws", 80, 8081], ["https", "wss", 443, 8444]]) {
+        const window = {location: {protocol: `${web}:`, hostname: "panel.example", origin: `${web}://panel.example`},
+            WCS_WEB_URL: `${web}://wcs.example:9444`};
+        const {getWebOrigin} = await loadModule(shared + "server-url.js", {URL, window, SERVER_PORTS: {[ws]: port}});
+        assert.equal(getWebOrigin(), window.WCS_WEB_URL);
+        assert.equal(getWebOrigin(`${ws}://panel.example`), window.WCS_WEB_URL);
+        assert.equal(getWebOrigin(`${ws}://remote.example:${port}`), `${web}://remote.example:${webPort}`);
+    }
+});
+
+test("standalone recording keeps its WCS page origin including a custom web port", async () => {
+    const window = {location: {protocol: "https:", hostname: "wcs.example", origin: "https://wcs.example:9444"}};
+    const {getWebOrigin} = await loadModule(shared + "server-url.js", {URL, window});
+    assert.equal(getWebOrigin("wss://wcs.example:8443"), "https://wcs.example:9444");
+    assert.equal(getWebOrigin("ws://wcs.example:8080"), "http://wcs.example:8081");
+});
+
+test("recording rejects invalid embedded web origins and signaling addresses", async () => {
+    for (const origin of [null, 8444, "", "ws://wcs.example:8443", "https://user:password@wcs.example",
+        "https://wcs.example/client/records", "https://wcs.example?token=value", "https://wcs.example#fragment"]) {
+        const window = {location: {}, WCS_SERVER_URL: "wss://wcs.example:8443", WCS_WEB_URL: origin};
+        const {getWebOrigin} = await loadModule(shared + "server-url.js", {URL, window});
+        assert.throws(() => getWebOrigin(), undefined, String(origin));
+    }
+    const {getWebOrigin} = await loadModule(shared + "server-url.js", {URL, window: {location: {}}});
+    for (const endpoint of ["https://wcs.example", "wss://user:password@wcs.example", "wss://wcs.example/stream"])
+        assert.throws(() => getWebOrigin(endpoint));
 });
 
 test("combined streaming addresses preserve decoded stream names", async () => {

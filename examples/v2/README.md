@@ -56,6 +56,46 @@ placeholders, buttons, status messages, focus rings and disabled controls.
 Embedding styles should leave those controls and their semantic colors intact.
 The original `examples/demo` pages do not opt into this theme contract.
 
+## Stream processing examples
+
+These pages use the same layout, theme contract and server address helpers as
+the Streaming examples. Each page keeps its session and stream logic in its own
+ES module; the original `examples/demo` pages remain available.
+
+| Example | Page under `examples/v2/streaming` | Controls |
+|---|---|---|
+| WebRTC as RTMP | `webrtc-as-rtmp-republishing/webrtc-as-rtmp-republishing.html` | Publish to an RTMP destination and show the resulting playback URL. |
+| Stream Recording | `stream_recording/recording.html` | Record one stream, finish the file, play it and download it. |
+| Several Streams Recording | `several_streams_recording/several_streams_recording.html` | Choose a stream count, start/stop the group and inspect each stream's status log. |
+| Stream Server Snapshot | `stream-snapshot/stream-snapshot.html` | Publish and request a PNG snapshot from WCS. |
+| Stream Client Snapshot | `stream-local-snapshot/stream-local-snapshot.html` | Publish and capture a PNG from the local video at its native resolution. |
+| Screen and Camera Mixer | `screen-camera-mixer/screen-camera-mixer.html` | Publish screen and camera, configure capture and devices, and optionally add both to a named server mixer. |
+| MCU Client | `mcu_client/mcu_client.html` | Join/leave a room, enable audio, adjust conference volume and enter fullscreen. |
+| Stream Filter | `stream_filter/stream_filter.html` | Publish with None/Sepia/Threshold/Invert, play independently and check stream availability. |
+| Stream Client with Zoom | `stream-zoom/stream-zoom.html` | Publish with server preview and use camera zoom when supported. |
+
+An embedding panel can set `window.WCS_WEB_URL` to the selected WCS HTTP(S)
+origin, including its web port. Stream Recording uses it for `/client/records/`
+when the signaling field still points to `window.WCS_SERVER_URL`. Explicitly
+changing the signaling server switches record links to that server's configured
+HTTP(S) port. Standalone pages served by WCS retain their page origin, including
+a nonstandard web port. Both embedded addresses must be origins without
+credentials, paths, queries or fragments.
+
+Stream Recording uses `stream.getRecordUrl()` when WCS supplies a temporary,
+file-specific recording link, so playback and download also work when the
+`demo` account is disabled. `getRecordInfo()` still returns the filename.
+Older servers fall back to the public recording path, which requires an active
+`demo` account. Recording links are resolved against the selected WCS web
+origin and must refer to that stream's recorded filename.
+The download link adds `download=true` so WCS returns an attachment even when
+the example is embedded on a different origin; the video keeps its playback URL.
+
+Real media checks require an RTMP destination, WCS recording support and server
+mixing configuration as appropriate. Zoom depends on camera capabilities;
+screen capture requires a supported desktop browser. The automated checks use
+substitute SDK/browser objects and do not prove live media behavior.
+
 ## Media Devices
 
 Serve the SDK directory over HTTP or HTTPS with the built `flashphoner.js` at

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <title>MCU Client</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="mcu_client.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example">
+    <header class="page-heading"><h1>MCU Client</h1></header>
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+    <section class="preview-section" aria-label="Conference preview">
+        <div class="preview-grid single-preview">
+            <article class="preview-card"><div class="preview-frame">
+                <h2 class="preview-caption">Conference</h2>
+                <div class="fp-remoteVideo"><div id="remoteVideo" class="display"></div></div>
+                <div id="preloader" class="stream-preloader" role="status" hidden>Opening conference…</div>
+            </div></article>
+        </div>
+        <div id="localVideoContainer" hidden><div id="localVideo" class="display"></div></div>
+        <section class="connection-panel" aria-label="Connection">
+            <div class="connection-main">
+                <div class="connection-fields"><div class="control-group">
+                    <input id="url" class="control" type="text" aria-label="WebSocket server URL">
+                    <div class="control-group-action"><button id="joinBtn" type="button" class="button button-primary" disabled>Join</button></div>
+                </div></div>
+                <div class="connection-status" role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="status"></span></div>
+                <div id="info" class="status-error connection-error" role="alert" hidden></div>
+            </div>
+        </section>
+    </section>
+    <div class="settings-columns settings-section">
+        <section class="settings-card" aria-labelledby="conferenceHeading">
+            <h2 id="conferenceHeading" class="section-heading">Conference settings</h2>
+            <div class="field-row"><label class="field-label" for="login">Login</label><div class="field-content"><input id="login" class="control" type="text" placeholder="Your name" autocomplete="off"></div></div>
+            <div class="field-row"><label class="field-label" for="room">Room</label><div class="field-content"><input id="room" class="control" type="text" placeholder="Room name" autocomplete="off"></div></div>
+            <div class="field-row boolean-field"><label class="field-label" for="hasAudio">Audio</label><div class="field-control"><input id="hasAudio" class="checkbox-control" type="checkbox" checked></div></div>
+            <p class="stream-note">Configure MCU mixing on the server before joining. <a href="https://docs.flashphoner.com/static/WebSDK2/WebSDK_streaming_video_examples/MCU_client/" target="_blank" rel="noopener noreferrer">MCU setup</a></p>
+        </section>
+        <section class="settings-card" aria-labelledby="playbackHeading">
+            <h2 id="playbackHeading" class="section-heading">Conference playback</h2>
+            <div class="field-row"><label class="field-label" for="volume">Volume</label><div class="field-content slider-field"><input id="volume" type="range" min="0" max="100" step="10" value="50" disabled></div></div>
+            <div class="action-row"><button id="fullScreenBtn" type="button" class="button" disabled>Full screen</button></div>
+            <div id="playbackError" class="status-error" role="alert" hidden></div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

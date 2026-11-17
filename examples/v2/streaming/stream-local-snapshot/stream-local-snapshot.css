@@ -1,0 +1,14 @@
+.snapshot-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.snapshot-image[hidden] {
+    display: none;
+}
+
+.snapshot-action {
+    justify-content: center;
+}

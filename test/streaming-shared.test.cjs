@@ -6,7 +6,11 @@ const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "../examples/v2");
 const examples = ["streamer/streamer", "player/player", "two_way_streaming/two_way_streaming",
-    "firewall-traversal-streaming/firewall-traversal-streaming", "screen-sharing/screen-sharing", "2players/2players"];
+    "firewall-traversal-streaming/firewall-traversal-streaming", "screen-sharing/screen-sharing", "2players/2players",
+    "webrtc-as-rtmp-republishing/webrtc-as-rtmp-republishing", "stream_recording/recording",
+    "several_streams_recording/several_streams_recording", "stream-snapshot/stream-snapshot",
+    "stream-local-snapshot/stream-local-snapshot", "screen-camera-mixer/screen-camera-mixer",
+    "mcu_client/mcu_client", "stream_filter/stream_filter", "stream-zoom/stream-zoom"];
 
 async function loadHelpers(globals) {
     const context = vm.createContext({console: {error() {}}, URLSearchParams, ...globals});

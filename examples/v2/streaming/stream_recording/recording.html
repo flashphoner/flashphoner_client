@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <title>Stream Recording</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="recording.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example">
+    <header class="page-heading"><h1>Stream Recording</h1></header>
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+    <section class="preview-section" aria-label="Stream recording">
+        <div class="preview-grid">
+            <article class="preview-card"><div class="preview-frame">
+                <h2 class="preview-caption">Local</h2>
+                <div class="fp-remoteVideo"><div id="localVideo" class="display"></div></div>
+            </div></article>
+            <article class="preview-card"><div class="preview-frame">
+                <h2 class="preview-caption">Recorded video</h2>
+                <div class="fp-remoteVideo"><div class="display"><video id="recVideo" controls playsinline aria-label="Recorded stream playback" hidden></video></div></div>
+            </div></article>
+        </div>
+        <section class="connection-panel" aria-label="Recording controls">
+            <div class="connection-main">
+                <div class="connection-fields"><div class="control-group">
+                    <input id="url" class="control" type="text" placeholder="wss://server:8443/stream" aria-label="WebSocket URL and stream name">
+                    <div class="control-group-action"><button id="publishBtn" type="button" class="button button-primary" disabled>Start</button></div>
+                </div></div>
+                <p class="stream-note">Start publishes and records your camera. Stop finishes the recording for playback and download.</p>
+                <div class="connection-status"><div role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="status" class="stream-status">DISCONNECTED</span></div></div>
+                <div id="info" class="status-error connection-error" role="alert" hidden></div>
+                <p id="downloadDiv" class="stream-note" hidden><a id="link" download>Download recorded stream</a></p>
+            </div>
+        </section>
+    </section>
+</main>
+</body>
+</html>

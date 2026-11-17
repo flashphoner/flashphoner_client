@@ -12,7 +12,11 @@ const result = spawnSync(process.execPath, [
     require.resolve("./streaming-two-way.test.cjs"),
     require.resolve("./streaming-playback.test.cjs"),
     require.resolve("./streaming-publishing.test.cjs"),
-    require.resolve("./streaming-assets.test.cjs")
+    require.resolve("./streaming-assets.test.cjs"),
+    require.resolve("./processing-recording.test.cjs"),
+    require.resolve("./recording-url.test.cjs"),
+    require.resolve("./processing-snapshots-filter.test.cjs"),
+    require.resolve("./processing-mixer-mcu-zoom.test.cjs")
 ], {stdio: "inherit"});
 
 if (result.error) {

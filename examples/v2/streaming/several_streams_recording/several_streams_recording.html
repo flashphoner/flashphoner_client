@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <title>Several Streams Recording</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="several_streams_recording.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example">
+    <header class="page-heading"><h1>Several Streams Recording</h1></header>
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+    <section class="preview-section" aria-label="Stream recording">
+        <div class="preview-grid single-preview">
+            <article class="preview-card"><div class="preview-frame">
+                <h2 class="preview-caption">Local</h2>
+                <div class="fp-remoteVideo"><div id="localVideo" class="display"></div></div>
+            </div></article>
+        </div>
+        <div id="localTestVideo" hidden></div>
+        <section class="connection-panel" aria-label="Recording controls">
+            <div class="connection-main">
+                <div class="connection-fields"><div class="control-group">
+                    <input id="url" class="control" type="text" aria-label="WebSocket server URL">
+                    <div class="control-group-action"><button id="publishBtn" type="button" class="button button-primary" disabled>Start</button></div>
+                </div></div>
+                <p class="stream-note">Publish and record several local streams. Stop finishes every active recording.</p>
+                <div class="connection-status"><div role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="status" class="stream-status">DISCONNECTED</span></div></div>
+                <div id="info" class="status-error connection-error" role="alert" hidden></div>
+            </div>
+        </section>
+    </section>
+    <section class="settings-section settings-card" aria-labelledby="recordingHeading">
+        <h2 id="recordingHeading" class="section-heading">Recording settings</h2>
+        <div class="field-row"><label class="field-label" for="countStreams">Local streams</label><input id="countStreams" class="control" type="number" min="1" step="1" value="5"></div>
+        <label class="field-label" for="statusLog">Session and stream log</label>
+        <textarea id="statusLog" class="control data-log" rows="8" readonly aria-label="Session and stream log"></textarea>
+    </section>
+</main>
+</body>
+</html>

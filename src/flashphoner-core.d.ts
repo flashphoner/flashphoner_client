@@ -47,6 +47,7 @@ export declare class Stream {
     name: () => string;
     published: () => boolean;
     getRecordInfo: () => string;
+    getRecordUrl: () => string | null;
     getInfo: () => string;
     getErrorInfo: () => string;
     videoResolution: () => any;

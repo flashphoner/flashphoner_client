@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <title>Stream Filter</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="stream_filter.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example">
+    <header class="page-heading"><h1>Stream Filter</h1></header>
+    <div id="notifyFatal" class="notification text-danger" role="alert"></div>
+
+    <section class="preview-section" aria-label="Stream previews">
+        <div class="preview-grid">
+            <div class="preview-column">
+                <article class="preview-card">
+                    <div class="preview-frame">
+                        <h2 class="preview-caption">Publisher</h2>
+                        <div class="fp-remoteVideo"><div id="localVideo" class="display"></div></div>
+                    </div>
+                    <div class="control-group preview-action">
+                        <input id="publishStream" class="control" type="text" placeholder="Stream Name" aria-label="Publishing stream name" disabled>
+                        <div class="control-group-action"><button id="publishBtn" type="button" class="button button-primary" disabled>Publish</button></div>
+                    </div>
+                    <div class="preview-status" data-empty="true" role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="publishStatus"></span></div>
+                    <div id="publishError" class="status-error preview-error" role="alert" hidden></div>
+                </article>
+            </div>
+            <div class="preview-column">
+                <article class="preview-card">
+                    <div class="preview-frame">
+                        <h2 class="preview-caption">Player</h2>
+                        <div class="fp-remoteVideo"><div id="remoteVideo" class="display"></div></div>
+                    </div>
+                    <div class="control-group preview-action">
+                        <input id="playStream" class="control" type="text" placeholder="Stream Name" aria-label="Playback stream name" disabled>
+                        <div class="control-group-action"><button id="playBtn" type="button" class="button button-primary" disabled>Play</button></div>
+                    </div>
+                    <div class="preview-status" data-empty="true" role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="playStatus"></span></div>
+                    <div id="playError" class="status-error preview-error" role="alert" hidden></div>
+                </article>
+            </div>
+        </div>
+        <section class="connection-panel" aria-label="Connection">
+            <div class="connection-main">
+                <div class="connection-fields">
+                    <div class="control-group">
+                        <input id="urlServer" class="control" type="text" aria-label="WebSocket server URL">
+                        <div class="control-group-action"><button id="connectBtn" type="button" class="button button-primary" disabled>Connect</button></div>
+                    </div>
+                </div>
+                <div class="connection-status"><div class="connection-status-line" role="status" aria-live="polite"><span class="status-prefix">Status:</span> <span id="connectStatus"></span></div></div>
+                <div id="connectError" class="status-error connection-error" role="alert" hidden></div>
+            </div>
+        </section>
+    </section>
+
+    <div class="settings-columns settings-section">
+        <section class="settings-card" aria-labelledby="filterHeading">
+            <h2 id="filterHeading" class="section-heading">Publishing filter</h2>
+            <div class="field-row">
+                <label for="filter" class="field-label">Filter</label>
+                <select id="filter" class="control">
+                    <option value="0">None</option>
+                    <option value="1">Sepia</option>
+                    <option value="2">Threshold</option>
+                    <option value="3">Invert</option>
+                </select>
+            </div>
+            <p class="stream-note">The selected filter is applied to the published video. You can change it while publishing.</p>
+        </section>
+        <section class="settings-card" aria-labelledby="availabilityHeading">
+            <h2 id="availabilityHeading" class="section-heading">Stream availability</h2>
+            <p class="stream-note">Check whether the stream entered above the player is available.</p>
+            <div class="action-row">
+                <button id="availableBtn" type="button" class="button" disabled>Available</button>
+                <span id="availableStatus" class="stream-status" role="status" aria-live="polite"></span>
+            </div>
+            <div id="availableError" class="status-error" role="alert" hidden></div>
+        </section>
+    </div>
+</main>
+</body>
+</html>

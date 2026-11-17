@@ -27,6 +27,20 @@ test("Grunt packages every Streaming runtime asset when only examples/v2 is pres
     const standalone = path.join(release, "v2");
     await assert.rejects(fs.access(path.join(release, "demo")), {code: "ENOENT"});
 
+    for (const entry of ["webrtc-as-rtmp-republishing/webrtc-as-rtmp-republishing", "stream_recording/recording",
+        "several_streams_recording/several_streams_recording", "stream-snapshot/stream-snapshot",
+        "stream-local-snapshot/stream-local-snapshot", "screen-camera-mixer/screen-camera-mixer",
+        "mcu_client/mcu_client", "stream_filter/stream_filter", "stream-zoom/stream-zoom"]) {
+        const page = path.join(standalone, "streaming", `${entry}.html`);
+        const html = await fs.readFile(page, "utf8");
+        for (const [, reference] of html.matchAll(/(?:href|src)="([^"#]+)"/g)) {
+            if (/^https?:|flashphoner\.js$/.test(reference)) continue;
+            const asset = path.resolve(path.dirname(page), reference);
+            assert.equal(path.relative(standalone, asset).startsWith(".."), false, `${entry}: ${reference} leaves v2`);
+            await fs.access(asset);
+        }
+    }
+
     const assets = new Map();
     for (const entry of ["player/player", "2players/2players", "screen-sharing/screen-sharing"]) {
         const script = path.join(standalone, "streaming", `${entry}.js`);

@@ -1835,6 +1835,7 @@ var createSession = function (options) {
         var published_ = false;
         var record_ = options.record || false;
         var recordFileName = null;
+        var recordFileUrl = null;
         var cacheLocalResources = options.cacheLocalResources;
         var status_ = STREAM_STATUS.NEW;
         var rtmpUrl = options.rtmpUrl;
@@ -1965,6 +1966,9 @@ var createSession = function (options) {
             }
             if (record_ && typeof streamInfo.recordName !== 'undefined') {
                 recordFileName = streamInfo.recordName;
+            }
+            if (record_ && typeof streamInfo.recordUrl !== 'undefined') {
+                recordFileUrl = streamInfo.recordUrl;
             }
 
             // Set up metrics collection
@@ -2488,6 +2492,16 @@ var createSession = function (options) {
         };
 
         /**
+         * Get the temporary recording URL path supplied by WCS.
+         * @returns {string|null} Recording URL path, or null when unavailable
+         * @memberof Stream
+         * @inner
+         */
+        var getRecordUrl = function () {
+            return recordFileUrl;
+        };
+
+        /**
          * Get stream info
          * @returns {string} Info
          * @memberof Stream
@@ -2874,6 +2888,7 @@ var createSession = function (options) {
         stream.name = name;
         stream.published = published;
         stream.getRecordInfo = getRecordInfo;
+        stream.getRecordUrl = getRecordUrl;
         stream.getInfo = getInfo;
         stream.getErrorInfo = getErrorInfo;
         stream.videoResolution = videoResolution;
