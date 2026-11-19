@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <link rel="stylesheet" href="../../dependencies/css/hls.css">
+    <link rel="stylesheet" href="hls-player.css">
+    <title>HLS VideoJS Player</title>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="hls-player.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example hls-example hls-videojs">
+    <header id="header" class="page-heading"><h1>HLS VideoJS Player</h1></header>
+    <section id="videojsInputForm" class="settings-card" aria-label="VideoJS version">
+        <div class="field-row">
+            <label class="field-label" for="videojsInput">VideoJS version</label>
+            <select id="videojsInput" class="control"><option value="videojs7">videojs7</option><option value="videojs8">videojs8</option></select>
+        </div>
+        <div class="action-row"><button id="videojsBtn" class="button button-primary" type="button">Run</button></div>
+    </section>
+    <div id="videojsError" class="notification text-danger" role="alert"></div>
+    <section id="playerPage" class="preview-section" aria-label="HLS playback" hidden>
+        <div class="preview-grid single-preview">
+            <article class="preview-card">
+                <div class="preview-frame">
+                    <h2 id="playerCaption" class="preview-caption">Player</h2>
+                    <div id="videoContainer" class="hls-video-container"></div>
+                </div>
+            </article>
+        </div>
+        <section id="fieldset" class="connection-panel" aria-label="Stream source">
+            <div class="connection-main">
+                <div class="connection-fields">
+                    <div class="field-row"><label class="field-label" for="urlServer">WCS URL</label><input id="urlServer" class="control" type="text" placeholder="WCS server URL"></div>
+                    <div class="field-row"><label class="field-label" for="playStream">Stream name</label><input id="playStream" class="control" type="text" placeholder="Stream name"></div>
+                    <div class="field-row"><label class="field-label" for="key">Auth</label><div class="hls-auth-fields"><input id="key" class="control" type="text" placeholder="Key" aria-label="Authentication key"><input id="token" class="control" type="text" placeholder="Value" aria-label="Authentication value"></div></div>
+                    <div class="field-row"><label class="field-label" for="fullLink">Or full HLS URL</label><input id="fullLink" class="control" type="text" placeholder="Full HLS URL"></div>
+                    <div class="action-row"><button id="applyBtn" class="button button-primary" type="button" disabled>Play</button></div>
+                </div>
+                <div class="preview-status text-center" role="status" aria-live="polite"><span class="status-prefix">Stream:</span> <span id="status">STOPPED</span></div>
+                <div id="info" class="status-error connection-error" role="alert" hidden></div>
+                <p class="stream-note text-center"><a id="permalink" href="#" hidden>Permalink</a></p>
+            </div>
+        </section>
+    </section>
+    <section id="playbackControls" class="settings-card settings-section" aria-label="Playback controls" hidden>
+        <div id="quality" class="field-row" hidden><span class="field-label">Quality</span><div id="qualityBtns" class="hls-quality-buttons" role="group" aria-label="Quality"></div></div>
+        <div id="backward" class="field-row" hidden>
+            <span class="field-label">Rewind back</span>
+            <div class="hls-seek-buttons" role="group" aria-label="Rewind playback">
+                <button id="backBtnMax" class="button" type="button" disabled>Max</button>
+                <button id="backBtn30" class="button" type="button" disabled>30 sec</button>
+                <button id="backBtn10" class="button" type="button" disabled>10 sec</button>
+                <button id="liveBtn" class="button" type="button" disabled>Live</button>
+            </div>
+        </div>
+    </section>
+    <section id="stats" class="settings-card settings-section" aria-label="Playback statistics" hidden>
+        <h2 class="section-heading">Playback statistics</h2>
+        <table class="hls-stats-table"><tbody>
+            <tr><th scope="row">Video width</th><td id="videoWidth">N/A</td></tr>
+            <tr><th scope="row">Video height</th><td id="videoHeight">N/A</td></tr>
+            <tr><th scope="row">Bitrate, bps</th><td id="videoRate">N/A</td></tr>
+            <tr><th scope="row">Framerate</th><td id="videoFps">N/A</td></tr>
+        </tbody></table>
+    </section>
+</main>
+</body>
+</html>

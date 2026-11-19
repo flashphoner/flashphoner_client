@@ -96,6 +96,35 @@ mixing configuration as appropriate. Zoom depends on camera capabilities;
 screen capture requires a supported desktop browser. The automated checks use
 substitute SDK/browser objects and do not prove live media behavior.
 
+## HLS examples
+
+The SDK distribution includes three HLS pages under `examples/v2/streaming`:
+
+| Example | Page | Controls |
+|---|---|---|
+| HLS Video.js Player | `hls-player/hls-player.html` | Video.js 7/8, quality, rewind Max/30/10 seconds and Live. |
+| HLS.js Player | `hls-js-player/hls-js-player.html` | Low latency HLS and automatic/manual quality. |
+| HLS Native Player | `hls-native/hls-native.html` | Native Safari HLS playback. |
+
+All three retain Play/Stop, playback statistics, authentication key/value,
+full HLS URL, and a permalink displayed after playback starts. A populated WCS
+URL and stream name take precedence over the full URL; clear the stream name to
+use the full URL. Stream names and authentication values are URL encoded.
+The `src` parameter sets the full URL. `autoplay=true` enables muted playback
+with video filling the page; `autoplay=false` keeps the normal controls.
+Video.js also accepts `version=videojs7|videojs8`; autoplay requires a version.
+HLS.js accepts `llhls=true|false`. Native playback requires browser support;
+unsupported browsers display a notice.
+
+The pages keep their playback logic in separate modules. `dependencies/js/hls.js`
+contains form, URL, statistics and iOS fullscreen helpers. The HLS.js and
+Video.js libraries live next to their v2 pages and are included by the standard
+Grunt `copy:main` examples rule. Build the distribution before serving it.
+
+LLcast already supplies the selected WCS HLS origin via `window.getHLSUrl()`.
+The v2 URL helper honors this override when called without explicit hostname or
+port. Standalone pages use their own hostname, protocol and `SERVER_PORTS.hls`.
+
 ## Media Devices
 
 Serve the SDK directory over HTTP or HTTPS with the built `flashphoner.js` at
@@ -163,7 +192,7 @@ required only on the machine running the checks, not on the build agents.
 
 These checks use mocked browser objects and the existing Grunt copy task in a
 temporary directory to verify that v2 runtime assets ship without `examples/demo`. They cover
-Media Devices and all six streaming examples without accessing a camera,
+Media Devices, all six streaming examples, and the three HLS players without accessing a camera,
 microphone, or WCS. Real-browser media checks remain separate: exercise
 publish/play and repeated Stop/Start, both players independently, JSON sendData,
 TURN with relay enabled/disabled, screen capture cancellation and its native

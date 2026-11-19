@@ -85,10 +85,18 @@ export function getWebOrigin(serverUrl = getWebsocketUrl(), ports = configuredSe
     return `${protocol}://${server.hostname}:${getPortsConfig(ports)[protocol]}`;
 }
 
-export function getHLSUrl(hostName = window.location.hostname, hostPort, ports = configuredServerPorts()) {
+export function getHLSUrl(hostName, hostPort, ports = configuredServerPorts()) {
+    if (hostName === undefined && hostPort === undefined && typeof window.getHLSUrl === "function") {
+        const address = new URL(window.getHLSUrl());
+        if (!["http:", "https:"].includes(address.protocol) || address.pathname !== "/"
+                || address.search || address.hash || address.username || address.password) {
+            throw new Error("Invalid embedded HLS server URL");
+        }
+        return address.origin;
+    }
     const protocol = getWebProtocol();
     const port = hostPort ?? getPortsConfig(ports).hls[protocol];
-    return `${protocol}://${hostName}:${port}`;
+    return `${protocol}://${hostName ?? window.location.hostname}:${port}`;
 }
 
 export function getRestUrl(hostName = window.location.hostname, hostPort, ports = configuredServerPorts()) {

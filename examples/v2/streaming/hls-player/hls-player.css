@@ -1,0 +1,18 @@
+.hls-videojs .video-js {
+    width: 100%;
+    height: 100%;
+}
+
+.hls-videojs .hls-quality-buttons .button[aria-pressed="true"] {
+    border-color: var(--text);
+    font-weight: 650;
+}
+
+.hls-videojs #videojsInputForm {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.hls-videojs #videojsInputForm .action-row {
+    justify-content: center;
+}

@@ -16,7 +16,10 @@ const result = spawnSync(process.execPath, [
     require.resolve("./processing-recording.test.cjs"),
     require.resolve("./recording-url.test.cjs"),
     require.resolve("./processing-snapshots-filter.test.cjs"),
-    require.resolve("./processing-mixer-mcu-zoom.test.cjs")
+    require.resolve("./processing-mixer-mcu-zoom.test.cjs"),
+    require.resolve("./hls-shared.test.cjs"),
+    require.resolve("./hls-playback.test.cjs"),
+    require.resolve("./hls-videojs.test.cjs")
 ], {stdio: "inherit"});
 
 if (result.error) {

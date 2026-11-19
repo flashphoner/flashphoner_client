@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/streaming.css">
+    <link rel="stylesheet" href="../../dependencies/css/hls.css">
+    <title>HLS Native Player</title>
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="hls-native.js"></script>
+</head>
+<body>
+<main class="page-shell streaming-example hls-example">
+    <header class="page-heading"><h1>HLS Native Player</h1></header>
+    <section class="preview-section" aria-label="HLS playback">
+        <div class="preview-grid single-preview">
+            <article class="preview-card">
+                <div class="preview-frame">
+                    <h2 class="preview-caption">Player</h2>
+                    <div id="videoContainer" class="hls-video-container">
+                        <video id="remoteVideo" controls playsinline webkit-playsinline aria-label="HLS video"></video>
+                    </div>
+                </div>
+            </article>
+        </div>
+        <section class="connection-panel" aria-label="Playback controls">
+            <div class="connection-main">
+                <div class="connection-fields hls-connection-fields">
+                    <div class="field-row">
+                        <label class="field-label" for="urlServer">WCS URL</label>
+                        <input id="urlServer" class="control" type="text" placeholder="https://server:8445" spellcheck="false">
+                    </div>
+                    <div class="field-row">
+                        <label class="field-label" for="playStream">Stream name</label>
+                        <input id="playStream" class="control" type="text" placeholder="Stream name" spellcheck="false">
+                    </div>
+                    <div class="field-row">
+                        <label class="field-label" for="key">Auth</label>
+                        <div class="hls-auth-fields">
+                            <input id="key" class="control" type="text" placeholder="Key" aria-label="Authentication key" spellcheck="false">
+                            <input id="token" class="control" type="text" placeholder="Value" aria-label="Authentication value" spellcheck="false">
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <label class="field-label" for="fullLink">Full HLS URL</label>
+                        <input id="fullLink" class="control" type="text" placeholder="https://server:8445/stream/stream.m3u8" spellcheck="false">
+                    </div>
+                    <p class="stream-note">WCS URL and stream name take priority. Clear the stream name to use a full HLS URL.</p>
+                    <div class="action-row"><button id="applyBtn" class="button button-primary" type="button">Play</button></div>
+                </div>
+                <div class="preview-status text-center" role="status" aria-live="polite"><span class="status-prefix">Stream:</span> <span id="status"></span></div>
+                <div id="info" class="status-error connection-error" role="alert" hidden></div>
+                <p class="stream-note text-center"><a id="permalink" href="#" hidden>Permalink</a></p>
+            </div>
+        </section>
+    </section>
+    <section id="stats" class="settings-card settings-section" aria-label="Playback statistics" hidden>
+        <h2 class="section-heading">Playback statistics</h2>
+        <table class="hls-stats-table">
+            <tbody>
+            <tr><th scope="row">Video width, px</th><td id="videoWidth">N/A</td></tr>
+            <tr><th scope="row">Video height, px</th><td id="videoHeight">N/A</td></tr>
+            <tr><th scope="row">Bitrate, bps</th><td id="videoRate">N/A</td></tr>
+            <tr><th scope="row">Framerate, fps</th><td id="videoFps">N/A</td></tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

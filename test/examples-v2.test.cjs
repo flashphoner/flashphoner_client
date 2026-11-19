@@ -52,7 +52,8 @@ test("the manual npm runner enforces Node support and preserves exit codes", asy
                         "/test/streaming-two-way.test.cjs", "/test/streaming-playback.test.cjs",
                         "/test/streaming-publishing.test.cjs", "/test/streaming-assets.test.cjs",
                         "/test/processing-recording.test.cjs", "/test/recording-url.test.cjs", "/test/processing-snapshots-filter.test.cjs",
-                        "/test/processing-mixer-mcu-zoom.test.cjs"]);
+                        "/test/processing-mixer-mcu-zoom.test.cjs",
+                        "/test/hls-shared.test.cjs", "/test/hls-playback.test.cjs", "/test/hls-videojs.test.cjs"]);
                     assert.equal(options.stdio, "inherit");
                     return childResult;
                 }}), {resolve: (filename) => "/test/" + path.basename(filename)})

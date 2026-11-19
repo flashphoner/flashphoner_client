@@ -1,0 +1,118 @@
+.hls-video-container {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    overflow: hidden;
+    background: #000;
+}
+
+.hls-video-container > video,
+.hls-video-container > .video-js {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.hls-example .connection-fields {
+    width: 100%;
+    max-width: 640px;
+    grid-template-columns: minmax(0, 1fr);
+    margin-inline: auto;
+}
+
+.hls-example .field-row {
+    width: 100%;
+    min-width: 0;
+}
+
+.hls-example .field-row > .control {
+    min-width: 0;
+    width: 100%;
+}
+
+.hls-auth-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.hls-example .action-row {
+    justify-content: center;
+}
+
+.hls-example #permalink {
+    color: var(--text);
+    text-underline-offset: 3px;
+}
+
+.hls-example #status[data-state="FAILED"] { color: var(--danger); }
+.hls-example #status[data-state="PLAYING"] { color: var(--success); }
+
+.hls-stats-table {
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+}
+
+.hls-stats-table th,
+.hls-stats-table td {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--border);
+}
+
+.hls-stats-table th {
+    width: 50%;
+    font-weight: 500;
+}
+
+.hls-stats-table td { overflow-wrap: anywhere; }
+.hls-stats-table tr:last-child > * { border-bottom: 0; }
+
+.hls-quality-buttons,
+.hls-seek-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: var(--space-2);
+}
+
+.hls-example button[aria-pressed="true"] {
+    background: var(--primary);
+    color: var(--primary-text);
+    border-color: var(--primary);
+}
+
+body.hls-autoplay .page-shell {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+}
+
+body.hls-autoplay .page-heading,
+body.hls-autoplay .connection-panel,
+body.hls-autoplay .settings-section,
+body.hls-autoplay .preview-caption,
+body.hls-autoplay .hls-controls,
+body.hls-autoplay #stats {
+    display: none;
+}
+
+body.hls-autoplay .preview-frame {
+    border: 0;
+    border-radius: 0;
+}
+
+body.hls-autoplay .hls-video-container {
+    width: 100vw;
+    height: 100vh;
+    aspect-ratio: auto;
+}
+
+@media (max-width: 600px) {
+    .hls-auth-fields { grid-template-columns: minmax(0, 1fr); }
+    .hls-example .field-row { grid-template-columns: minmax(0, 1fr); }
+}
