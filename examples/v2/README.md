@@ -125,6 +125,28 @@ LLcast already supplies the selected WCS HLS origin via `window.getHLSUrl()`.
 The v2 URL helper honors this override when called without explicit hostname or
 port. Standalone pages use their own hostname, protocol and `SERVER_PORTS.hls`.
 
+## SIP examples
+
+| Example | Page under `examples/v2/sip` | Scenario |
+|---|---|---|
+| Phone | `phone/phone.html` | SIP registration, inbound and outbound audio calls, and call controls. |
+| Phone Video | `phone-video/phone-video.html` | SIP video calls, local and remote video, media controls and statistics. |
+| ClickToCall | `click-to-call/click-to-call.html` | An outbound audio call with a single Call control and separate SIP settings. |
+| SIP as RTMP 3 | `sip-as-rtmp-3/sip-as-rtmp-3.html` | SIP call, RTMP pull and republishing, audio mixing and injection into the call. |
+
+Use a SIP server and test accounts for call scenarios. The browser needs
+permission to use the microphone and, for Phone Video, the camera. Phone, Phone
+Video and ClickToCall use `window.WCS_SERVER_URL` when embedded.
+
+SIP as RTMP 3 uses the selected WCS HTTP(S) origin from `window.WCS_WEB_URL`
+when embedded and the configured REST port when opened directly. Use an HTTPS
+REST endpoint for authentication. If the example and the REST API have different
+origins and the WCS requires REST authorization, allow the `Authorization`
+header in the WCS `rest_access_control_allow_headers` setting. The SIP account
+and REST API credentials are configured separately.
+
+The **Play sample music** control uses `sample.wav` from the WCS `media_dir`.
+
 ## Media Devices
 
 Serve the SDK directory over HTTP or HTTPS with the built `flashphoner.js` at

@@ -2,10 +2,29 @@ import * as dom from "../../dependencies/js/dom.js";
 import {getWebsocketUrl, readStreamAddress} from "../../dependencies/js/server-url.js";
 import {createStreamName} from "../../dependencies/js/identifiers.js";
 import {initializeSDK, setStatus, setError, setInvalid, validateRequired, bindResize} from "../../dependencies/js/streaming.js";
+import {createTurnSettings} from "../../dependencies/js/turn-settings.js";
+
+function readMixerAddress(value) {
+    const streamAddress = readStreamAddress(value);
+    if (streamAddress) return streamAddress;
+
+    // The legacy mixer accepts a WebSocket endpoint with a nested path and takes its last segment as the stream name.
+    try {
+        const server = value.trim();
+        const url = new URL(server);
+        if (!["ws:", "wss:"].includes(url.protocol) || url.username || url.password || /[?#]/.test(server)) return null;
+        const segments = url.pathname.slice(1).split("/").map(decodeURIComponent);
+        if (segments.length < 2 || segments.some((segment) => !segment || segment.includes("/"))) return null;
+        return {server, name: segments.pop()};
+    } catch {
+        return null;
+    }
+}
 
 initializeSDK((api) => {
     const {SESSION_STATUS, STREAM_STATUS} = api.constants;
     const settings = ["screenWidth", "screenHeight", "screenFps", "cameraWidth", "cameraHeight", "cameraFps", "videoInput", "audioInput", "useMixer"];
+    const turn = createTurnSettings("info");
     let session;
     let screen;
     let camera;
@@ -15,6 +34,7 @@ initializeSDK((api) => {
     let run = 0;
     let connectionRun = 0;
     let address;
+    let forceRelay = false;
     const timers = new Set();
 
     dom.setValue("url", `${getWebsocketUrl()}/${createStreamName(8)}`);
@@ -32,7 +52,9 @@ initializeSDK((api) => {
     function connected() { return session?.status() === SESSION_STATUS.ESTABLISHED; }
 
     function updateControls() {
-        dom.setDisabled("url", connecting || Boolean(session));
+        const connectionLocked = connecting || Boolean(session);
+        dom.setDisabled("url", connectionLocked);
+        turn.setLocked(connectionLocked);
         dom.setDisabled("connectBtn", connecting);
         dom.setText("connectBtn", connected() ? "Disconnect" : "Connect");
         dom.setDisabled("publishBtn", !connected() || stopping);
@@ -69,19 +91,24 @@ initializeSDK((api) => {
             catch (error) { setError("info", error.message); }
             return;
         }
-        address = readStreamAddress(dom.value("url"));
+        address = readMixerAddress(dom.value("url"));
         setInvalid("url", !address);
         if (!address) {
             setError("info", "Enter a URL such as wss://server:8443/stream.");
             return;
         }
+        const turnOptions = turn.read();
+        if (!turnOptions) return;
+        const options = {urlServer: address.server};
+        if (turnOptions.mediaOptions) options.mediaOptions = turnOptions.mediaOptions;
+        forceRelay = turnOptions.forceRelay;
         const connection = ++connectionRun;
         connecting = true;
         setStatus("status", "CONNECTING");
         setError("info", "");
         updateControls();
         try {
-            session = api.createSession({urlServer: address.server})
+            session = api.createSession(options)
                 .on(SESSION_STATUS.ESTABLISHED, (established) => {
                     if (connection !== connectionRun) return;
                     session = established;
@@ -101,6 +128,7 @@ initializeSDK((api) => {
         ++connectionRun;
         session = undefined;
         connecting = false;
+        forceRelay = false;
         ++run;
         active = stopping = false;
         screen = camera = undefined;
@@ -141,6 +169,7 @@ initializeSDK((api) => {
             receiveAudio: false, receiveVideo: false, constraints: {video}
         };
         if (api.Browser.isSafari()) options.disableConstraintsNormalization = true;
+        if (forceRelay) options.transport = "UDP";
         try {
             screen = session.createStream(options)
                 .on(STREAM_STATUS.PUBLISHING, (stream) => {
@@ -169,11 +198,13 @@ initializeSDK((api) => {
         };
         if (dom.value("videoInput")) video.deviceId = {exact: dom.value("videoInput")};
         const audio = dom.value("audioInput") ? {deviceId: {exact: dom.value("audioInput")}} : true;
+        const options = {
+            name: streamName("camera"), display: dom.byId("localVideoCamera"),
+            receiveAudio: false, receiveVideo: false, constraints: {video, audio}
+        };
+        if (forceRelay) options.transport = "UDP";
         try {
-            camera = session.createStream({
-                name: streamName("camera"), display: dom.byId("localVideoCamera"),
-                receiveAudio: false, receiveVideo: false, constraints: {video, audio}
-            }).on(STREAM_STATUS.PUBLISHING, (stream) => {
+            camera = session.createStream(options).on(STREAM_STATUS.PUBLISHING, (stream) => {
                 if (attempt !== run) return;
                 setStatus("cameraStatus", STREAM_STATUS.PUBLISHING);
                 dom.setText("cameraName", stream.name());

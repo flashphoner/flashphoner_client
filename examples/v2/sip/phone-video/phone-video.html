@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Phone Video</title>
+    <link rel="stylesheet" href="../../dependencies/css/sip-call.css">
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="phone-video.js"></script>
+</head>
+<body>
+<main class="page-shell sip-example">
+    <header class="page-heading"><h1>Phone Video</h1></header>
+    <div class="notification" id="notifyFatal" role="alert" hidden></div>
+    <div class="preview-grid sip-previews">
+        <article class="preview-frame">
+            <h2 class="preview-caption">Local video</h2>
+            <div class="fp-remoteVideo"><div id="localDisplay" class="display"></div></div>
+        </article>
+        <article class="preview-frame">
+            <h2 class="preview-caption">Remote video</h2>
+            <div class="fp-remoteVideo"><div id="remoteDisplay" class="display"></div></div>
+        </article>
+    </div>
+    <div class="settings-columns">
+        <section class="settings-card">
+            <h2 class="section-heading">Connection</h2>
+            <div class="field-row">
+                <label class="field-label" for="urlServer">WCS URL</label>
+                <input class="control" id="urlServer" type="text" required>
+            </div>
+            <fieldset class="sip-fieldset" id="sipFields">
+                <div class="field-row">
+                    <label class="field-label" for="sipLogin">SIP login</label>
+                    <input class="control" id="sipLogin" type="text" required autocomplete="username">
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="sipAuthenticationName">SIP auth name</label>
+                    <input class="control" id="sipAuthenticationName" type="text" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="sipPassword">SIP password</label>
+                    <input class="control" id="sipPassword" type="password" required autocomplete="current-password">
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="sipDomain">SIP domain</label>
+                    <input class="control" id="sipDomain" type="text" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="sipOutboundProxy">SIP outbound proxy</label>
+                    <input class="control" id="sipOutboundProxy" type="text" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="sipPort">SIP port</label>
+                    <input class="control" id="sipPort" type="number" required min="1" max="65535" value="5060">
+                </div>
+                <label class="sip-checkbox"><input id="sipRegisterRequired" type="checkbox" checked>Register required</label>
+            </fieldset>
+            <div class="action-row">
+                <button class="button button-primary" type="button" id="connectBtn" disabled>Connect</button>
+            </div>
+            <p class="stream-note sip-status" role="status" data-empty="true">Connection: <span id="regStatus"></span></p>
+            <div class="status-error" role="alert" id="connectionError" hidden></div>
+        </section>
+        <div class="sip-stack">
+            <section class="settings-card">
+                <h2 class="section-heading">Call</h2>
+                <div class="field-row">
+                    <label class="field-label" for="callee">Callee</label>
+                    <input class="control" id="callee" type="text" required placeholder="SIP username" disabled>
+                </div>
+                <p class="stream-note" id="incomingCallAlert" role="status" hidden></p>
+                <div class="action-row">
+                    <button class="button button-primary" type="button" id="callBtn" disabled>Call</button>
+                    <button class="button button-primary" type="button" id="answerBtn" hidden disabled>Answer</button>
+                    <button class="button" type="button" id="hangupBtn" hidden disabled>Hang up</button>
+                    <button class="button" type="button" id="holdBtn" disabled>Hold</button>
+                </div>
+                <div class="action-row">
+                    <label class="sip-checkbox"><input id="muteAudioToggle" type="checkbox" disabled>Mute audio</label>
+                    <label class="sip-checkbox"><input id="muteVideoToggle" type="checkbox" disabled>Mute video</label>
+                </div>
+                <p class="stream-note sip-status" role="status" data-empty="true">Call: <span id="callStatus"></span></p>
+                <div class="status-error" role="alert" id="callError" hidden></div>
+            </section>
+            <section class="settings-card">
+                <h2 class="section-heading">Outbound statistics</h2>
+                <table class="statistics-table">
+                    <thead><tr><th scope="col">Media</th><th scope="col">Bytes sent</th><th scope="col">Packets sent</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">Video</th><td id="videoBytes">—</td><td id="videoPackets">—</td></tr>
+                        <tr><th scope="row">Audio</th><td id="audioBytes">—</td><td id="audioPackets">—</td></tr>
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+    <section class="settings-card sip-media-settings">
+        <h2 class="section-heading">Media settings</h2>
+        <div class="field-row">
+            <label class="field-label" for="cameraList">Camera</label>
+            <div class="control-group">
+                <select class="control" id="cameraList"><option value="">Default</option></select>
+                <div class="control-group-action"><button class="button" type="button" id="switchCamBtn" disabled>Next</button></div>
+            </div>
+        </div>
+        <div class="field-row">
+            <label class="field-label" for="micList">Microphone</label>
+            <div class="control-group">
+                <select class="control" id="micList"><option value="">Default</option></select>
+                <div class="control-group-action"><button class="button" type="button" id="switchMicBtn" disabled>Next</button></div>
+            </div>
+        </div>
+        <div class="field-row" id="speakerForm" hidden>
+            <label class="field-label" for="speakerList">Speaker</label>
+            <select class="control" id="speakerList"><option value="">Default</option></select>
+        </div>
+        <label class="sip-checkbox"><input id="screenSharingToggle" type="checkbox" disabled>Share screen</label>
+        <div class="field-row">
+            <label class="field-label" for="sendWidth">Send width</label>
+            <input class="control" id="sendWidth" type="number" required min="1" value="320">
+        </div>
+        <div class="field-row">
+            <label class="field-label" for="sendHeight">Send height</label>
+            <input class="control" id="sendHeight" type="number" required min="1" value="240">
+        </div>
+        <div class="field-row">
+            <label class="field-label" for="sendFramerate">Send frame rate</label>
+            <input class="control" id="sendFramerate" type="number" required min="1" value="30">
+        </div>
+        <div class="field-row">
+            <label class="field-label" for="sdpStringFind">SDP find</label>
+            <input class="control" id="sdpStringFind" type="text">
+        </div>
+        <div class="field-row">
+            <label class="field-label" for="sdpStringReplace">SDP replace</label>
+            <input class="control" id="sdpStringReplace" type="text">
+        </div>
+        <div class="status-error" role="alert" id="mediaError" hidden></div>
+    </section>
+</main>
+</body>
+</html>

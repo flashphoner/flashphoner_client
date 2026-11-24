@@ -1,0 +1,124 @@
+.sip-rtmp-example {
+    --page-width: 1120px;
+}
+
+.sip-rtmp-columns,
+.sip-rtmp-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2) var(--space-3);
+}
+
+.sip-rtmp-columns {
+    margin-top: var(--space-3);
+}
+
+.sip-rtmp-column {
+    min-width: 0;
+}
+
+.sip-rtmp-panel {
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.sip-rtmp-panel + .sip-rtmp-panel {
+    margin-top: var(--space-3);
+}
+
+.sip-rtmp-panel .section-heading {
+    margin-bottom: var(--space-2);
+}
+
+.sip-rtmp-panel form + form {
+    margin-top: var(--space-2);
+}
+
+.sip-rtmp-panel .field-label {
+    min-height: 0;
+    margin-bottom: var(--space-1);
+}
+
+.sip-rtmp-panel input.control + .field-label {
+    margin-top: var(--space-2);
+}
+
+.sip-rtmp-panel fieldset {
+    min-width: 0;
+    padding: 0;
+    margin: 0 0 var(--space-2);
+    border: 0;
+}
+
+.sip-rtmp-field {
+    min-width: 0;
+}
+
+.sip-rtmp-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    margin-top: var(--space-2);
+}
+
+.sip-rtmp-fields .sip-rtmp-options {
+    grid-column: 1 / -1;
+    margin-top: 0;
+}
+
+.sip-rtmp-options label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: var(--space-5);
+}
+
+.sip-rtmp-status,
+.sip-rtmp-error {
+    margin: var(--space-1) 0 0;
+    overflow-wrap: anywhere;
+}
+
+.sip-rtmp-status {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.sip-rtmp-error {
+    color: var(--danger);
+}
+
+.sip-rtmp-status:empty,
+.sip-rtmp-error:empty {
+    display: none;
+}
+
+.sip-rtmp-panel #playback {
+    margin-top: var(--space-2);
+}
+
+@media (max-width: 760px) {
+    .sip-rtmp-columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sip-rtmp-panel {
+        padding: var(--space-3);
+    }
+}
+
+@media (max-width: 420px) {
+    .sip-rtmp-panel > .sip-rtmp-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 350px) {
+    .sip-rtmp-fields {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Phone Min</title>
+    <link rel="stylesheet" href="../../dependencies/css/sip-call.css">
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="phone.js"></script>
+</head>
+<body>
+<main class="page-shell sip-example">
+    <header class="page-heading"><h1>Phone Min</h1></header>
+    <div class="notification" id="notifyFatal" role="alert" hidden></div>
+    <div class="settings-columns">
+        <section class="settings-card">
+            <h2 class="section-heading">Connection</h2>
+            <div class="field-row">
+                <label class="field-label" for="urlServer">WCS URL</label>
+                <input class="control" id="urlServer" type="text" required>
+            </div>
+            <fieldset class="sip-fieldset" id="sipFields">
+                <div class="field-row">
+                    <label class="field-label" for="sipLogin">SIP login</label>
+                    <input class="control" id="sipLogin" type="text" required autocomplete="username">
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="sipAuthenticationName">SIP auth name</label>
+                    <input class="control" id="sipAuthenticationName" type="text" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="sipPassword">SIP password</label>
+                    <input class="control" id="sipPassword" type="password" required autocomplete="current-password">
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="sipDomain">SIP domain</label>
+                    <input class="control" id="sipDomain" type="text" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="sipOutboundProxy">SIP outbound proxy</label>
+                    <input class="control" id="sipOutboundProxy" type="text" required>
+                </div>
+                <div class="field-row">
+                    <label class="field-label" for="sipPort">SIP port</label>
+                    <input class="control" id="sipPort" type="number" required min="1" max="65535" value="5060">
+                </div>
+                <label class="sip-checkbox"><input id="sipRegisterRequired" type="checkbox" checked>Register required</label>
+            </fieldset>
+            <div class="action-row">
+                <button class="button button-primary" type="button" id="connectBtn" disabled>Connect</button>
+            </div>
+            <div class="sip-token">
+                <div class="field-row">
+                    <label class="field-label" for="authToken">Auth token</label>
+                    <input class="control" id="authToken" type="password" autocomplete="off">
+                </div>
+                <div class="action-row">
+                    <button class="button" type="button" id="connectTokenBtn" disabled>Connect with token</button>
+                </div>
+            </div>
+            <p class="stream-note sip-status" role="status" data-empty="true">Connection: <span id="regStatus"></span></p>
+            <div class="status-error" role="alert" id="connectionError" hidden></div>
+        </section>
+        <section class="settings-card">
+            <h2 class="section-heading">Call</h2>
+            <div class="field-row">
+                <label class="field-label" for="callee">Callee</label>
+                <input class="control" id="callee" type="text" required placeholder="SIP username" disabled>
+            </div>
+            <p class="stream-note" id="incomingCallAlert" role="status" hidden></p>
+            <div class="action-row">
+                <button class="button button-primary" type="button" id="callBtn" disabled>Call</button>
+                <button class="button button-primary" type="button" id="answerBtn" hidden disabled>Answer</button>
+                <button class="button" type="button" id="hangupBtn" hidden disabled>Hang up</button>
+                <button class="button" type="button" id="holdBtn" disabled>Hold</button>
+            </div>
+            <div class="action-row">
+                <label class="sip-checkbox"><input id="muteAudioToggle" type="checkbox" disabled>Mute audio</label>
+            </div>
+            <p class="stream-note sip-status" role="status" data-empty="true">Call: <span id="callStatus"></span></p>
+            <div class="status-error" role="alert" id="callError" hidden></div>
+        </section>
+    </div>
+    <div class="sip-audio" aria-hidden="true">
+        <div id="localDisplay"></div>
+        <div id="remoteDisplay"></div>
+    </div>
+</main>
+</body>
+</html>

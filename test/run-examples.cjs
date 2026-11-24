@@ -12,6 +12,7 @@ const result = spawnSync(process.execPath, [
     require.resolve("./streaming-two-way.test.cjs"),
     require.resolve("./streaming-playback.test.cjs"),
     require.resolve("./streaming-publishing.test.cjs"),
+    require.resolve("./sip-phone-examples.test.cjs"),
     require.resolve("./streaming-assets.test.cjs"),
     require.resolve("./processing-recording.test.cjs"),
     require.resolve("./recording-url.test.cjs"),

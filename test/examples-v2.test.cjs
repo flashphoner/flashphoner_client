@@ -50,7 +50,8 @@ test("the manual npm runner enforces Node support and preserves exit codes", asy
                     assert.deepEqual([...args], ["--experimental-vm-modules", "--test",
                         "/test/examples-v2.test.cjs", "/test/streaming-shared.test.cjs",
                         "/test/streaming-two-way.test.cjs", "/test/streaming-playback.test.cjs",
-                        "/test/streaming-publishing.test.cjs", "/test/streaming-assets.test.cjs",
+                        "/test/streaming-publishing.test.cjs", "/test/sip-phone-examples.test.cjs",
+                        "/test/streaming-assets.test.cjs",
                         "/test/processing-recording.test.cjs", "/test/recording-url.test.cjs", "/test/processing-snapshots-filter.test.cjs",
                         "/test/processing-mixer-mcu-zoom.test.cjs",
                         "/test/hls-shared.test.cjs", "/test/hls-playback.test.cjs", "/test/hls-videojs.test.cjs"]);
@@ -907,13 +908,14 @@ async function playbackFixture({chrome = true, outputFailure = false, processorF
         clearInterval(id) { intervals.delete(id); }
     };
     element("media").srcObject = {};
+    element("forceRelay").checked = true;
     Object.assign(element("media"), {tagName: "VIDEO", videoWidth: 640, videoHeight: 480,
         parentElement: {style: {}, parentElement: {clientWidth: 400, clientHeight: 300}}});
     const module = await loadModule(manager, {window: fakeWindow, Event, URL, ResizeObserver: fakeWindow.ResizeObserver,
         document: {readyState: "loading", addEventListener() {}, getElementById: (id) => id === "audioOutput" ? elements[id] : element(id),
             querySelectorAll: (selector) => selector.includes('id^="send"') ? [element("micGainControl"), element("sendAudio")] : []},
         console: {log() {}, warn() {}, error() {}}
-    }, "\nexport {play, publish, onStopped, onUnpublished, onDisconnected, loadOutputDevices, muteInputs, bindControls, validateForm};\nexport function setupTest(context) { audioContext = context; localVideo = {}; remoteVideo = {}; statistics = {clear(){}}; }\nexport function setTestStream(stream) { publishStream = stream; }\n");
+    }, "\nexport {play, publish, onStopped, onUnpublished, onDisconnected, loadOutputDevices, muteInputs, bindControls, validateForm};\nexport function setupTest(context) { audioContext = context; localVideo = {}; remoteVideo = {}; statistics = {clear(){}}; turn = createTurnSettings('connectError'); }\nexport function setTestStream(stream) { publishStream = stream; }\n");
     element("audioOutput");
     module.setupTest(audioContext);
     return {module, elements, element, stream, session, sessionCallbacks, callbacks, fakeWindow, observers, nodes, pendingTimeouts, intervals,
@@ -959,6 +961,121 @@ test("invalid server URLs restore Connect controls without creating a session", 
         assert.equal(fixture.elements.playBtn.disabled, true);
     }
     assert.equal(attempts, 0);
+});
+
+test("Media Devices applies optional TURN and uses UDP for both streams only with forced relay", async () => {
+    for (const example of ["media_devices_manager/media_device_manager.html", "screen-camera-mixer/screen-camera-mixer.html"]) {
+        const legacy = await fs.readFile(path.join(root, "../demo/streaming", example), "utf8");
+        const current = await fs.readFile(path.join(root, "streaming", example), "utf8");
+        for (const id of ["urlTurnServer", "usernameTurnServer", "credentialTurnServer"]) {
+            const inputPattern = new RegExp('<input\\b[^>]*\\bid="' + id + '"[^>]*>');
+            const legacyInput = legacy.match(inputPattern)[0];
+            const currentInput = current.match(inputPattern)[0];
+            assert.equal(currentInput.match(/\bvalue="([^"]*)"/)?.[1],
+                legacyInput.match(/\bvalue="([^"]*)"/)[1], example + " " + id);
+        }
+    }
+    const fixture = await playbackFixture();
+    const {element, fakeWindow: {Flashphoner}, session, sessionCallbacks} = fixture;
+    const turnFields = ["urlTurnServer", "usernameTurnServer", "credentialTurnServer", "forceRelay"];
+    let sessionOptions;
+    Flashphoner.createSession = (options) => { sessionOptions = structuredClone(options); return session; };
+    fixture.module.onDisconnected();
+    element("urlServer").value = "wss://wcs.example:8443";
+    element("timeout").value = "1000";
+    element("sendAudio").checked = true;
+    element("transportInput").value = "TCP";
+    element("transportOutput").value = "TCP";
+    assert.equal(element("useTurn").checked, false);
+    assert.equal(element("forceRelay").checked, true);
+    assert.ok(turnFields.every((id) => element(id).disabled));
+
+    const iceServer = {url: "turn:relay.example:443?transport=tcp", username: "test-user", credential: "test-password"};
+    for (const [useTurn, forceRelay] of [[false, true], [true, false], [true, true], [false, true]]) {
+        element("useTurn").checked = useTurn;
+        element("useTurn").onchange();
+        assert.ok(turnFields.every((id) => element(id).disabled === !useTurn));
+        element("forceRelay").checked = forceRelay;
+        element("urlTurnServer").value = ` ${iceServer.url} `;
+        element("usernameTurnServer").value = iceServer.username;
+        element("credentialTurnServer").value = iceServer.credential;
+        element("connectBtn").onclick();
+        const relayActive = useTurn && forceRelay;
+        const expectedOptions = {urlServer: "wss://wcs.example:8443", timeout: 1000};
+        if (useTurn) {
+            expectedOptions.mediaOptions = {iceServers: [iceServer]};
+            if (relayActive) expectedOptions.mediaOptions.iceTransportPolicy = "relay";
+        }
+        assert.deepEqual(sessionOptions, expectedOptions);
+        assert.equal(element("useTurn").disabled, true);
+        assert.ok(turnFields.every((id) => element(id).disabled));
+
+        sessionCallbacks.get("ESTABLISHED")(session);
+        assert.equal(element("useTurn").disabled, true);
+        assert.equal(element("transportInput").disabled, relayActive);
+        assert.equal(element("transportOutput").disabled, relayActive);
+        element("publishBtn").onclick();
+        assert.equal(fixture.streamOptions.transport, relayActive ? "UDP" : "TCP");
+        element("playBtn").onclick();
+        assert.equal(fixture.streamOptions.transport, relayActive ? "UDP" : "TCP");
+        sessionCallbacks.get("DISCONNECTED")();
+        assert.equal(element("useTurn").disabled, false);
+        assert.ok(turnFields.every((id) => element(id).disabled === !useTurn));
+        assert.equal(element("transportInput").disabled, false);
+        assert.equal(element("transportOutput").disabled, false);
+        assert.equal(element("transportInput").value, "TCP");
+        assert.equal(element("transportOutput").value, "TCP");
+    }
+});
+
+test("Media Devices allows editing TURN after invalid settings and failed connection attempts", async () => {
+    const fixture = await playbackFixture();
+    const {element, fakeWindow: {Flashphoner}, session, sessionCallbacks} = fixture;
+    const requiredFields = ["urlTurnServer", "usernameTurnServer", "credentialTurnServer"];
+    let attempts = 0;
+    Flashphoner.getSessions = () => [];
+    Flashphoner.createSession = () => {
+        if (++attempts === 1) throw new Error("SDK connection failed");
+        return session;
+    };
+    fixture.module.onDisconnected();
+    element("urlServer").value = "ws://127.0.0.1:8080";
+    function setUseTurn(enabled) {
+        const checkbox = element("useTurn");
+        checkbox.checked = enabled;
+        checkbox.onchange();
+    }
+
+    setUseTurn(true);
+    element("connectBtn").onclick();
+    assert.equal(attempts, 0);
+    assert.equal(element("connectBtn").disabled, false);
+    assert.equal(element("useTurn").disabled, false);
+    assert.match(element("connectError").textContent, /Enter the TURN URL/);
+    assert.ok(requiredFields.every((id) => element(id)["aria-invalid"] === "true"));
+    setUseTurn(false);
+    assert.equal(element("connectError").hidden, true);
+    assert.ok(requiredFields.every((id) => element(id)["aria-invalid"] === "false"));
+
+    setUseTurn(true);
+    element("urlTurnServer").value = "turn:relay.example:3478";
+    element("usernameTurnServer").value = "test-user";
+    element("credentialTurnServer").value = "test-password";
+    element("connectBtn").onclick();
+    assert.equal(attempts, 1);
+    assert.equal(element("useTurn").disabled, false);
+    assert.ok(requiredFields.every((id) => !element(id).disabled));
+    assert.match(element("connectError").textContent, /SDK connection failed/);
+    element("connectBtn").onclick();
+    assert.equal(attempts, 2);
+    assert.equal(element("useTurn").disabled, true);
+    assert.equal(element("connectError").hidden, true);
+    sessionCallbacks.get("FAILED")();
+    assert.equal(element("useTurn").disabled, false);
+    assert.ok(requiredFields.every((id) => !element(id).disabled));
+    assert.equal(element("connectBtn").disabled, false);
+    assert.equal(element("transportInput").disabled, false);
+    assert.equal(element("transportOutput").disabled, false);
 });
 
 test("synchronous SDK errors allow a successful retry and normal session events", async () => {

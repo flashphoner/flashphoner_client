@@ -45,6 +45,29 @@
                 <div id="info" class="status-error connection-error" role="alert" hidden></div>
             </div>
         </section>
+        <section class="turn-settings" aria-labelledby="turnHeading">
+            <h2 id="turnHeading" class="section-heading">TURN server</h2>
+            <div class="field-row boolean-field">
+                <label for="useTurn" class="field-label">Use TURN</label>
+                <div class="field-control"><input id="useTurn" class="checkbox-control" type="checkbox"></div>
+            </div>
+            <div class="field-row">
+                <label for="urlTurnServer" class="field-label">TURN URL</label>
+                <div class="field-content"><input id="urlTurnServer" class="control" type="text" value="turn:turn.flashphoner.com:443?transport=tcp" disabled></div>
+            </div>
+            <div class="field-row">
+                <label for="usernameTurnServer" class="field-label">Username</label>
+                <div class="field-content"><input id="usernameTurnServer" class="control" type="text" autocomplete="off" value="flashphoner" disabled></div>
+            </div>
+            <div class="field-row">
+                <label for="credentialTurnServer" class="field-label">Credential</label>
+                <div class="field-content"><input id="credentialTurnServer" class="control" type="password" autocomplete="off" value="coM77EMrV7Cwhyan" disabled></div>
+            </div>
+            <div class="field-row boolean-field">
+                <label for="forceRelay" class="field-label">Force relay</label>
+                <div class="field-control"><input id="forceRelay" class="checkbox-control" type="checkbox" checked disabled></div>
+            </div>
+        </section>
     </section>
     <div class="settings-columns settings-section">
         <section class="settings-card" aria-labelledby="screenHeading">

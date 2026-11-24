@@ -474,6 +474,30 @@ object {
     min-width: 0;
 }
 
+.turn-settings {
+    width: 100%;
+    max-width: 520px;
+    margin: var(--space-3) auto 0;
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+}
+
+.turn-settings > .section-heading {
+    margin-bottom: var(--space-2);
+}
+
+.turn-settings .field-row:last-of-type {
+    margin-bottom: 0;
+}
+
+.turn-note {
+    margin: var(--space-2) 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
 .connection-fields {
     display: grid;
     grid-template-columns: minmax(0, 360px);

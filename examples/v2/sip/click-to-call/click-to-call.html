@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Click to Call</title>
+    <link rel="stylesheet" href="../../dependencies/css/sip-call.css">
+    <script src="../../../../flashphoner.js"></script>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="click-to-call.js"></script>
+</head>
+<body>
+<main class="page-shell sip-example">
+    <header class="page-heading"><h1>Click to Call</h1></header>
+    <div class="notification" id="notifyFatal" role="alert" hidden></div>
+    <section class="settings-card sip-click">
+        <h2 class="section-heading">Call</h2>
+        <div class="field-row">
+            <label class="field-label" for="urlServer">WCS URL</label>
+            <input class="control" id="urlServer" type="text" required>
+        </div>
+        <div class="field-row">
+            <label class="field-label" for="callee">Callee</label>
+            <input class="control" id="callee" type="text" required placeholder="SIP username">
+        </div>
+        <div class="action-row">
+            <button class="button button-primary" type="button" id="callBtn" disabled>Call</button>
+            <button class="button" type="button" id="sipCredentialsBtn" aria-controls="sipFields" aria-expanded="false" disabled>SIP credentials</button>
+        </div>
+        <p class="stream-note sip-status" role="status" data-empty="true">Connection: <span id="regStatus"></span></p>
+        <p class="stream-note sip-status" role="status" data-empty="true">Call: <span id="callStatus"></span></p>
+        <div class="status-error" role="alert" id="callError" hidden></div>
+        <fieldset class="sip-fieldset sip-token" id="sipFields" hidden>
+            <legend class="settings-subheading">SIP credentials</legend>
+            <div class="field-row">
+                <label class="field-label" for="sipLogin">SIP login</label>
+                <input class="control" id="sipLogin" type="text" required autocomplete="username">
+            </div>
+            <div class="field-row">
+                <label class="field-label" for="sipAuthenticationName">SIP auth name</label>
+                <input class="control" id="sipAuthenticationName" type="text" required>
+            </div>
+            <div class="field-row">
+                <label class="field-label" for="sipPassword">SIP password</label>
+                <input class="control" id="sipPassword" type="password" required autocomplete="current-password">
+            </div>
+            <div class="field-row">
+                <label class="field-label" for="sipDomain">SIP domain</label>
+                <input class="control" id="sipDomain" type="text" required>
+            </div>
+            <div class="field-row">
+                <label class="field-label" for="sipOutboundProxy">SIP outbound proxy</label>
+                <input class="control" id="sipOutboundProxy" type="text" required>
+            </div>
+            <div class="field-row">
+                <label class="field-label" for="sipPort">SIP port</label>
+                <input class="control" id="sipPort" type="number" required min="1" max="65535" value="5060">
+            </div>
+        </fieldset>
+    </section>
+    <div class="sip-audio" aria-hidden="true">
+        <div id="localDisplay"></div>
+        <div id="remoteDisplay"></div>
+    </div>
+</main>
+</body>
+</html>

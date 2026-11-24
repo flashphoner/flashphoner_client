@@ -123,15 +123,17 @@ async function example(stem, options = {}) {
         document: {readyState: "complete", getElementById: (id) => nodes.get(id), createElement: () => ({})}
     });
     const modules = new Map();
-    async function moduleAt(filename) {
+    function moduleAt(filename) {
         if (!modules.has(filename)) {
-            const module = new vm.SourceTextModule(await fs.readFile(filename, "utf8"), {context, identifier: filename});
-            modules.set(filename, module);
-            await module.link((specifier, importer) => moduleAt(path.resolve(path.dirname(importer.identifier), specifier)));
+            modules.set(filename, fs.readFile(filename, "utf8").then((source) =>
+                new vm.SourceTextModule(source, {context, identifier: filename})
+            ));
         }
         return modules.get(filename);
     }
-    await (await moduleAt(path.join(directory, `${stem}.js`))).evaluate();
+    const entry = await moduleAt(path.join(directory, `${stem}.js`));
+    await entry.link((specifier, importer) => moduleAt(path.resolve(path.dirname(importer.identifier), specifier)));
+    await entry.evaluate();
     await new Promise((resolve) => setImmediate(resolve));
     return {
         node: (id) => nodes.get(id), streams, sessions, timers, deviceRequests,
@@ -270,6 +272,11 @@ test("MCU playback failure frees the publisher and restores join controls", asyn
 
 test("Mixer publishes screen then camera with mixer names and original capture constraints", async () => {
     const page = await example("screen-camera-mixer");
+    assert.equal(page.node("useTurn").checked, false);
+    assert.equal(page.node("forceRelay").checked, true);
+    for (const id of ["urlTurnServer", "usernameTurnServer", "credentialTurnServer", "forceRelay"]) {
+        assert.equal(page.node(id).disabled, true, id);
+    }
     page.node("url").value = "wss://selected-wcs.example:9443/s%203";
     page.node("useMixer").checked = true;
     page.node("mixerName").value = "mix7";
@@ -280,6 +287,8 @@ test("Mixer publishes screen then camera with mixer names and original capture c
     const screen = page.streams[0];
     assert.equal(screen.settings.name, "s 3-screen#mix7");
     assert.equal(page.sessions[0].settings.urlServer, "wss://selected-wcs.example:9443");
+    assert.equal(Object.hasOwn(page.sessions[0].settings, "mediaOptions"), false);
+    assert.equal(Object.hasOwn(screen.settings, "transport"), false);
     assert.equal(screen.settings.constraints.video.type, "screen");
     assert.equal(screen.settings.constraints.video.withoutExtension, true);
     assert.equal(screen.settings.constraints.video.width, 1280);
@@ -289,6 +298,7 @@ test("Mixer publishes screen then camera with mixer names and original capture c
     screen.emit("PUBLISHING");
     const camera = page.streams[1];
     assert.equal(camera.settings.name, "s 3-camera#mix7");
+    assert.equal(Object.hasOwn(camera.settings, "transport"), false);
     assert.equal(camera.settings.constraints.video.width, 640);
     assert.equal(camera.settings.constraints.video.frameRate, 24);
     assert.equal(camera.settings.constraints.video.deviceId.exact, "camera-1");
@@ -301,6 +311,104 @@ test("Mixer publishes screen then camera with mixer names and original capture c
     assert.equal(camera.stopCount, 1);
     assert.equal(page.timers.size, 0);
     assert.equal(page.node("publishBtn").textContent, "Start");
+});
+
+test("Mixer uses the complete nested WebSocket URL and publishes both streams over forced relay", async () => {
+    const page = await example("screen-camera-mixer");
+    const endpoint = "wss://proxy.example/fp03/conference%20user";
+    page.node("url").value = endpoint;
+    page.node("useTurn").checked = true;
+    page.node("useTurn").onchange();
+    page.node("urlTurnServer").value = "turn:turn.example:443?transport=tcp";
+    page.node("usernameTurnServer").value = "alice";
+    page.node("credentialTurnServer").value = "temporary-password";
+    const turnFields = ["useTurn", "urlTurnServer", "usernameTurnServer", "credentialTurnServer", "forceRelay"];
+    for (const id of turnFields) assert.equal(page.node(id).disabled, false, id);
+
+    page.node("connectBtn").click();
+    const [session] = page.sessions;
+    assert.equal(session.settings.urlServer, endpoint);
+    assert.equal(session.settings.mediaOptions.iceTransportPolicy, "relay");
+    assert.deepEqual({...session.settings.mediaOptions.iceServers[0]}, {
+        url: "turn:turn.example:443?transport=tcp", username: "alice", credential: "temporary-password"
+    });
+    for (const id of turnFields) assert.equal(page.node(id).disabled, true, id);
+    session.emit("ESTABLISHED");
+    for (const id of turnFields) assert.equal(page.node(id).disabled, true, id);
+
+    page.node("publishBtn").click();
+    page.streams[0].emit("PUBLISHING");
+    const [screen, camera] = page.streams;
+    assert.equal(screen.settings.name, "conference user-screen");
+    assert.equal(camera.settings.name, "conference user-camera");
+    assert.equal(screen.settings.transport, "UDP");
+    assert.equal(camera.settings.transport, "UDP");
+
+    page.node("connectBtn").click();
+    for (const id of turnFields) assert.equal(page.node(id).disabled, false, id);
+    assert.equal(page.node("urlTurnServer").value, "turn:turn.example:443?transport=tcp");
+});
+
+test("Mixer can use a TURN server without forcing relay and restores its settings after a session failure", async () => {
+    const page = await example("screen-camera-mixer");
+    page.node("useTurn").checked = true;
+    page.node("useTurn").onchange();
+    page.node("forceRelay").checked = false;
+    page.node("urlTurnServer").value = "turn:turn.example:3478";
+    page.node("usernameTurnServer").value = "alice";
+    page.node("credentialTurnServer").value = "temporary-password";
+    page.connect();
+    const [session] = page.sessions;
+    assert.equal(session.settings.mediaOptions.iceServers[0].url, "turn:turn.example:3478");
+    assert.equal(Object.hasOwn(session.settings.mediaOptions, "iceTransportPolicy"), false);
+    page.node("publishBtn").click();
+    page.streams[0].emit("PUBLISHING");
+    assert.equal(page.streams.length, 2);
+    for (const stream of page.streams) assert.equal(Object.hasOwn(stream.settings, "transport"), false);
+
+    session.emit("FAILED");
+    assert.equal(page.node("useTurn").disabled, false);
+    assert.equal(page.node("urlTurnServer").disabled, false);
+    assert.equal(page.node("forceRelay").disabled, false);
+    assert.equal(page.node("forceRelay").checked, false);
+});
+
+test("Mixer requires TURN fields only while Use TURN is checked", async () => {
+    const page = await example("screen-camera-mixer");
+    const required = ["urlTurnServer", "usernameTurnServer", "credentialTurnServer"];
+    for (const id of required) page.node(id).value = "";
+    const useTurn = page.node("useTurn");
+    useTurn.checked = true;
+    useTurn.onchange();
+    page.node("connectBtn").click();
+    assert.equal(page.sessions.length, 0);
+    assert.match(page.node("info").textContent, /Enter the TURN URL/);
+    for (const id of required) assert.equal(page.node(id).attributes["aria-invalid"], "true", id);
+
+    useTurn.checked = false;
+    useTurn.onchange();
+    for (const id of required) {
+        assert.equal(page.node(id).disabled, true, id);
+        assert.equal(page.node(id).attributes["aria-invalid"], "false", id);
+    }
+    page.node("connectBtn").click();
+    assert.equal(page.sessions.length, 1);
+    assert.equal(Object.hasOwn(page.sessions[0].settings, "mediaOptions"), false);
+    assert.equal(page.node("info").hidden, true);
+});
+
+test("Mixer rejects nested URLs with missing names, malformed segments or ambiguous WebSocket targets", async () => {
+    const page = await example("screen-camera-mixer");
+    for (const value of [
+        "wss://proxy.example/fp03/", "wss://proxy.example//stream", "wss://proxy.example/fp03/stream%2Fother",
+        "wss://proxy.example/fp03/%ZZ", "wss://proxy.example/fp03/stream?", "wss://proxy.example/fp03/stream#",
+        "wss://alice:password@proxy.example/fp03/stream", "https://proxy.example/fp03/stream"
+    ]) {
+        page.node("url").value = value;
+        page.node("connectBtn").click();
+        assert.equal(page.sessions.length, 0, value);
+        assert.equal(page.node("url").attributes["aria-invalid"], "true", value);
+    }
 });
 
 for (const browser of ["Firefox", "Safari"]) {

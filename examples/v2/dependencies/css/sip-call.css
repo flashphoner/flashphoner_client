@@ -1,0 +1,73 @@
+@import url("streaming.css");
+
+.sip-example {
+    --page-width: 1080px;
+}
+
+.sip-example .settings-columns {
+    align-items: start;
+}
+
+.sip-example .sip-fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.sip-example .sip-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--control-height);
+    color: var(--text);
+}
+
+.sip-example .sip-checkbox input {
+    margin: 0;
+}
+
+.sip-example .sip-token {
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+}
+
+.sip-example .sip-status[data-empty="true"] {
+    display: none;
+}
+
+.sip-example .sip-audio {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+
+.sip-example .sip-click {
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.sip-example .sip-previews {
+    --preview-gap: var(--space-3);
+    margin-bottom: var(--space-3);
+}
+
+.sip-example .sip-stack {
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+}
+
+.sip-example .sip-media-settings {
+    max-width: 720px;
+    margin-top: var(--space-3);
+}
+
+@media (max-width: 540px) {
+    .sip-example .sip-previews {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

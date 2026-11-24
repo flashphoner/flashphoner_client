@@ -5,6 +5,7 @@ import * as dom from "../../dependencies/js/dom.js";
 import {createStreamName} from "../../dependencies/js/identifiers.js";
 import {observeVideoSize} from "../../dependencies/js/media.js";
 import {getWebsocketUrl} from "../../dependencies/js/server-url.js";
+import {createTurnSettings} from "../../dependencies/js/turn-settings.js";
 
 const FlashphonerApi = window.Flashphoner;
 const constants = FlashphonerApi?.constants ?? {};
@@ -47,6 +48,8 @@ const MUTABLE_WHILE_STREAMING = new Set([
 let statistics;
 let localVideo;
 let remoteVideo;
+let turn;
+let forceRelay = false;
 let publishStream;
 let previewStream;
 let stopLocalVideoResize;
@@ -119,6 +122,7 @@ async function initPage() {
         return;
     }
 
+    turn = createTurnSettings("connectError");
     bindControls();
     populateEnumSelect("transportInput", TRANSPORT_TYPE);
     populateEnumSelect("transportOutput", TRANSPORT_TYPE);
@@ -219,20 +223,23 @@ function onConnected(session) {
 
 function onDisconnected() {
     setError("connectError", "");
-    dom.setButton("connectBtn", "Connect", () => {
-        dom.setDisabled("urlServer", true);
-        dom.setDisabled("connectBtn", true);
-        connect();
-    });
+    dom.setButton("connectBtn", "Connect", connect);
     dom.setDisabled("urlServer", false);
+    turn.setLocked(false);
+    setForceRelay(false);
     onUnpublished();
     onStopped();
     updateServerVersion("");
 }
 
 function connect() {
+    const turnOptions = turn.read();
+    if (!turnOptions) return;
     const urlServer = dom.value("urlServer").trim();
     const timeout = dom.numberValue("timeout");
+    dom.setDisabled("urlServer", true);
+    dom.setDisabled("connectBtn", true);
+    turn.setLocked(true);
     setError("connectError", "");
     let established = false;
     console.log(`Create new session with url ${urlServer}`);
@@ -242,7 +249,12 @@ function connect() {
         if (serverUrl.protocol !== "ws:" && serverUrl.protocol !== "wss:") {
             throw new Error("Server URL must use ws:// or wss://.");
         }
-        FlashphonerApi.createSession({urlServer, timeout})
+        const options = {urlServer, timeout};
+        if (turnOptions.mediaOptions) {
+            options.mediaOptions = turnOptions.mediaOptions;
+        }
+        setForceRelay(turnOptions.forceRelay);
+        FlashphonerApi.createSession(options)
             .on(SESSION_STATUS.CONNECTED, (session) => {
                 setStatus("connectStatus", session.status());
             })
@@ -275,6 +287,12 @@ function connect() {
         onDisconnected();
         setError("connectError", `Can't connect to server: ${error?.message ?? String(error)}`);
     }
+}
+
+function setForceRelay(enabled) {
+    forceRelay = enabled;
+    dom.setDisabled("transportInput", enabled);
+    dom.setDisabled("transportOutput", enabled);
 }
 
 function onPublishing(stream) {
@@ -365,7 +383,7 @@ function publish() {
         constraints: getConstraints(),
         mediaConnectionConstraints,
         sdpHook: rewriteSdp,
-        transport: dom.value("transportInput"),
+        transport: forceRelay ? "UDP" : dom.value("transportInput"),
         cvoExtension: dom.checked("cvo"),
         stripCodecs: dom.value("stripPublishCodecs"),
         videoContentHint: dom.value("contentHintInput")
@@ -501,7 +519,7 @@ function play() {
         name: dom.value("playStream"),
         display: remoteVideo,
         constraints: streamConstraints,
-        transport: dom.value("transportOutput"),
+        transport: forceRelay ? "UDP" : dom.value("transportOutput"),
         stripCodecs: dom.value("stripPlayCodecs")
     })
         .on(STREAM_STATUS.PLAYING, (stream) => {

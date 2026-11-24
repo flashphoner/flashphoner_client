@@ -8,7 +8,7 @@ const vm = require("node:vm");
 
 const repository = path.resolve(__dirname, "..");
 
-test("Grunt packages every Streaming runtime asset when only examples/v2 is present", async (context) => {
+test("Grunt packages Streaming and SIP runtime assets with only examples/v2 present", async (context) => {
     const stage = await fs.mkdtemp(path.join(os.tmpdir(), "wcs5155-v2-assets-"));
     context.after(() => fs.rm(stage, {recursive: true, force: true}));
     await fs.copyFile(path.join(repository, "package.json"), path.join(stage, "package.json"));
@@ -38,6 +38,21 @@ test("Grunt packages every Streaming runtime asset when only examples/v2 is pres
             const asset = path.resolve(path.dirname(page), reference);
             assert.equal(path.relative(standalone, asset).startsWith(".."), false, `${entry}: ${reference} leaves v2`);
             await fs.access(asset);
+        }
+    }
+
+    for (const entry of ["phone", "phone-video", "click-to-call", "sip-as-rtmp-3"]) {
+        const page = path.join(standalone, "sip", entry, `${entry}.html`);
+        const html = await fs.readFile(page, "utf8");
+        const references = html.matchAll(/<(?:script|link)\b[^>]*?\b(?:src|href)="([^"]+)"/g);
+        const dependencies = [...references].map(([, relative]) => path.resolve(path.dirname(page), relative));
+        assert.ok(dependencies.includes(path.join(path.dirname(page), `${entry}.js`)), `${entry}: page module is missing`);
+        for (const dependency of dependencies) {
+            if (dependency === path.resolve(release, "../flashphoner.js")) {
+                continue;
+            }
+            assert.equal(path.relative(standalone, dependency).startsWith(".."), false, `${entry}: ${dependency} leaves v2`);
+            assert.ok((await fs.stat(dependency)).size > 0, `${entry}: ${dependency} is empty`);
         }
     }
 

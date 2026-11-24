@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" data-wcs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../dependencies/css/examples.css">
+    <link rel="stylesheet" href="sip-as-rtmp-3.css">
+    <title>SIP as RTMP 3</title>
+    <script src="../../dependencies/ports.js"></script>
+    <script type="module" src="sip-as-rtmp-3.js"></script>
+</head>
+<body>
+<main class="page-shell sip-rtmp-example">
+    <header class="page-heading"><h1>SIP as RTMP 3</h1></header>
+    <p id="endpointError" class="notification" role="alert"></p>
+
+    <section class="sip-rtmp-panel" aria-label="WCS REST API">
+        <div class="sip-rtmp-fields">
+            <label class="sip-rtmp-field" for="restUrl">
+                <span class="field-label">REST API URL</span>
+                <input class="control" id="restUrl" type="url" autocomplete="off" spellcheck="false">
+            </label>
+            <label class="sip-rtmp-field" for="restAuthorization">
+                <span class="field-label">REST authorization (optional)</span>
+                <input class="control" id="restAuthorization" type="password" autocomplete="off"
+                       placeholder="Basic … or Bearer …">
+            </label>
+        </div>
+    </section>
+
+    <div class="sip-rtmp-columns">
+        <div class="sip-rtmp-column">
+            <section class="sip-rtmp-panel" aria-labelledby="sipHeading">
+                <h2 class="section-heading" id="sipHeading">SIP call</h2>
+                <form id="callForm" autocomplete="off">
+                    <fieldset id="sipCredentials" class="sip-rtmp-fields" aria-label="SIP credentials">
+                        <label class="sip-rtmp-field" for="sipLogin">
+                            <span class="field-label">Login</span>
+                            <input class="control" id="sipLogin" type="text" required spellcheck="false">
+                        </label>
+                        <label class="sip-rtmp-field" for="sipAuthenticationName">
+                            <span class="field-label">SIP auth name</span>
+                            <input class="control" id="sipAuthenticationName" type="text" spellcheck="false">
+                        </label>
+                        <label class="sip-rtmp-field" for="sipPassword">
+                            <span class="field-label">SIP password</span>
+                            <input class="control" id="sipPassword" type="password" autocomplete="off">
+                        </label>
+                        <label class="sip-rtmp-field" for="sipDomain">
+                            <span class="field-label">Domain</span>
+                            <input class="control" id="sipDomain" type="text" required spellcheck="false">
+                        </label>
+                        <label class="sip-rtmp-field" for="sipOutboundProxy">
+                            <span class="field-label">Outbound proxy</span>
+                            <input class="control" id="sipOutboundProxy" type="text" spellcheck="false">
+                        </label>
+                        <label class="sip-rtmp-field" for="sipPort">
+                            <span class="field-label">Port</span>
+                            <input class="control" id="sipPort" type="number" min="1" max="65535" value="5060" required>
+                        </label>
+                        <label class="sip-rtmp-field" for="appKey">
+                            <span class="field-label">App key</span>
+                            <input class="control" id="appKey" type="text" value="defaultApp" required spellcheck="false">
+                        </label>
+                        <label class="sip-rtmp-field" for="rtmpStream">
+                            <span class="field-label">WCS stream name</span>
+                            <input class="control" id="rtmpStream" type="text" placeholder="stream1" required spellcheck="false">
+                        </label>
+                        <div class="sip-rtmp-options">
+                            <label><input id="sipRegisterRequired" type="checkbox"> Register</label>
+                            <label><input id="hasAudio" type="checkbox" checked> Audio</label>
+                            <label><input id="hasVideo" type="checkbox"> Video</label>
+                        </div>
+                    </fieldset>
+                    <label class="field-label" for="callee">Callee</label>
+                    <div class="control-group">
+                        <input class="control" id="callee" type="text" required spellcheck="false">
+                        <div class="control-group-action"><button class="button button-primary" id="callBtn">Call</button></div>
+                    </div>
+                    <p class="sip-rtmp-status" id="callStatus" role="status">IDLE</p>
+                    <p class="sip-rtmp-error" id="callError" role="alert"></p>
+                </form>
+                <form id="dtmfForm" autocomplete="off">
+                    <label class="field-label" for="dtmf">DTMF</label>
+                    <div class="control-group">
+                        <input class="control" id="dtmf" type="text" placeholder="12345#" required disabled>
+                        <div class="control-group-action"><button class="button" id="dtmfBtn" disabled>Send DTMF</button></div>
+                    </div>
+                    <p class="sip-rtmp-status" id="dtmfStatus" role="status"></p>
+                    <p class="sip-rtmp-error" id="dtmfError" role="alert"></p>
+                </form>
+            </section>
+
+            <section class="sip-rtmp-panel" aria-labelledby="pushHeading">
+                <h2 class="section-heading" id="pushHeading">RTMP broadcast</h2>
+                <form id="pushForm" autocomplete="off">
+                    <label class="field-label" for="rtmpUrl">RTMP target URL</label>
+                    <div class="control-group">
+                        <input class="control" id="rtmpUrl" type="url" placeholder="rtmp://localhost:1935/live" required>
+                        <div class="control-group-action"><button class="button button-primary" id="pushBtn" disabled>Start</button></div>
+                    </div>
+                    <div class="sip-rtmp-options">
+                        <label><input id="mute" type="checkbox"> Mute</label>
+                        <label><input id="music" type="checkbox"> Play sample music</label>
+                    </div>
+                    <p class="sip-rtmp-status" id="pushStatus" role="status">IDLE</p>
+                    <p class="sip-rtmp-error" id="pushError" role="alert"></p>
+                    <div id="playback" hidden>
+                        <label class="field-label" for="playbackUrl">RTMP playback URL</label>
+                        <div class="control-group">
+                            <input class="control" id="playbackUrl" type="text" readonly>
+                            <div class="control-group-action"><button class="button" id="copyPlaybackBtn" type="button">Copy</button></div>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        <div class="sip-rtmp-column">
+            <section class="sip-rtmp-panel" aria-labelledby="pullHeading">
+                <h2 class="section-heading" id="pullHeading">RTMP sources</h2>
+                <form id="pullForm1" autocomplete="off">
+                    <label class="field-label" for="pullUrl1">Source 1 URL</label>
+                    <div class="control-group">
+                        <input class="control" id="pullUrl1" type="url" placeholder="rtmp://host:1935/live/stream1" required>
+                        <div class="control-group-action"><button class="button" id="pullBtn1">Pull</button></div>
+                    </div>
+                    <p class="sip-rtmp-status" id="pullStatus1" role="status">IDLE</p>
+                    <p class="sip-rtmp-error" id="pullError1" role="alert"></p>
+                </form>
+                <form id="pullForm2" autocomplete="off">
+                    <label class="field-label" for="pullUrl2">Source 2 URL</label>
+                    <div class="control-group">
+                        <input class="control" id="pullUrl2" type="url" placeholder="rtmp://host:1935/live/stream2" required>
+                        <div class="control-group-action"><button class="button" id="pullBtn2">Pull</button></div>
+                    </div>
+                    <p class="sip-rtmp-status" id="pullStatus2" role="status">IDLE</p>
+                    <p class="sip-rtmp-error" id="pullError2" role="alert"></p>
+                </form>
+                <form id="pullForm3" autocomplete="off">
+                    <label class="field-label" for="pullUrl3">Source 3 URL</label>
+                    <div class="control-group">
+                        <input class="control" id="pullUrl3" type="url" placeholder="rtmp://host:1935/live/stream3" required>
+                        <div class="control-group-action"><button class="button" id="pullBtn3">Pull</button></div>
+                    </div>
+                    <p class="sip-rtmp-status" id="pullStatus3" role="status">IDLE</p>
+                    <p class="sip-rtmp-error" id="pullError3" role="alert"></p>
+                </form>
+            </section>
+
+            <section class="sip-rtmp-panel" aria-labelledby="mixerHeading">
+                <h2 class="section-heading" id="mixerHeading">Audio mixer</h2>
+                <form id="mixerForm" autocomplete="off">
+                    <label class="field-label" for="mixerStream">Mixer stream name</label>
+                    <div class="control-group">
+                        <input class="control" id="mixerStream" type="text" placeholder="stream4" required spellcheck="false">
+                        <div class="control-group-action"><button class="button" id="mixerBtn">Start mixer</button></div>
+                    </div>
+                    <div class="sip-rtmp-options">
+                        <label><input id="mixSource1" type="checkbox" disabled> Source 1</label>
+                        <label><input id="mixSource2" type="checkbox" disabled> Source 2</label>
+                        <label><input id="mixSource3" type="checkbox" disabled> Source 3</label>
+                    </div>
+                    <p class="sip-rtmp-status" id="mixerStatus" role="status">IDLE</p>
+                    <p class="sip-rtmp-error" id="mixerError" role="alert"></p>
+                </form>
+            </section>
+
+            <section class="sip-rtmp-panel" aria-labelledby="injectHeading">
+                <h2 class="section-heading" id="injectHeading">Stream injection</h2>
+                <form id="injectForm" autocomplete="off">
+                    <label class="field-label" for="injectCallId">SIP call ID</label>
+                    <input class="control" id="injectCallId" type="text" required spellcheck="false">
+                    <label class="field-label" for="injectStream">WCS stream name</label>
+                    <div class="control-group">
+                        <input class="control" id="injectStream" type="text" placeholder="stream4" required spellcheck="false">
+                        <div class="control-group-action"><button class="button" id="injectBtn">Inject</button></div>
+                    </div>
+                    <p class="sip-rtmp-status" id="injectStatus" role="status">IDLE</p>
+                    <p class="sip-rtmp-error" id="injectError" role="alert"></p>
+                </form>
+            </section>
+        </div>
+    </div>
+</main>
+</body>
+</html>

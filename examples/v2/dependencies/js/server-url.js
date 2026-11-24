@@ -33,6 +33,10 @@ function getWebProtocol() {
     return window.location.protocol === "http:" ? "http" : "https";
 }
 
+export function isLoopbackHost(hostname) {
+    return ["localhost", "127.0.0.1", "[::1]"].includes(hostname);
+}
+
 export function readStreamAddress(value) {
     try {
         const address = new URL(value.trim());
